@@ -8,68 +8,69 @@ image: "/assets/img/fsharp_eval2.png"
 
 ---
 
-The F# compiler is a free and open source tool which is available for Windows, Mac and Linux (via Mono).
-Find out more about F# and how to install it at the [F# Foundation](http://fsharp.org/).
+F# コンパイラは無料でオープンソースのツールで、Windows、Mac、Linux (Mono 経由) で利用できます。
+F# の詳細とインストール方法については、[F# Foundation](http://fsharp.org/) をご覧ください。
 
-You can use it with an IDE (Visual Studio, MonoDevelop), or with your favorite editor (VS Code and Atom have especially good F# support using [Ionide](http://ionide.io/)),
-or simply as a standalone command line compiler.  
+IDE (Visual Studio、MonoDevelop) や好きなエディタ (特に Visual Studio Code と Atom は、[Ionide](http://ionide.io/) を使用することで F# を強力にサポートしています) で利用したり、スタンドアロンのコマンドラインコンパイラとしても使用できます。
 
-If you don't want to install anything, you can try the [.NET Fiddle](https://dotnetfiddle.net/) site, which is an interactive environment
-where you can explore F# in your web browser. You should be able to run most of the code on this site there.
+何もインストールしたくない場合は、ウェブブラウザ上で F# を試せるインタラクティブな環境である [.NET Fiddle](https://dotnetfiddle.net/) サイトを利用できます。このサイトの大部分のコードを実行できるはずです。
 
-## Working with the code examples ##
+## コードサンプルの使用方法
 
-Once you have F# installed and running, you can follow along with the code samples.  
+F# をインストールして実行したら、コードサンプルを利用できます。
 
-The best way to run the code examples on this site is to type the code into an `.FSX` script file, which you can then send to the F# interactive window for evaluation.
-Alternatively you can type the examples directly into the F# interactive console window. I would recommend the script file approach for anything other than one or two lines.
+コードサンプルを実行する最良の方法は、コードを `.FSX` スクリプトファイルに入力し、F# 対話型ウィンドウに送信して評価することです。
+あるいは、コードを直接 F# 対話型コンソールウィンドウに入力することもできます。1、2行以外のコードの場合は、スクリプトファイル方式をお勧めします。
 
-For the longer examples, the code is downloadable from this website -- the links will be in the post. 
+長いコードサンプルについては、このウェブサイトからダウンロードできます (リンクは記事内にあります)。
 
-Finally, I would encourage you to play with and modify the examples. If you then get compiler errors,
-do check out the ["troubleshooting F#"](../troubleshooting-fsharp/index.md) page, which explains the most common problems, and how to fix them.
-
+最後に、コードサンプルを自由に試したり変更したりすることをお勧めします。コンパイラエラーが発生した場合は、よくある問題とその解決方法を説明している「[F# のトラブルシューティング](../troubleshooting-fsharp/index.md)」ページを参照してください。
 
 <a id="projects-solutions" ></a>   
-## Projects and Solutions ##
+## プロジェクトとソリューション
 
-F# uses exactly the same "projects" and "solutions" model that C# does, so if you are familiar with that, you should be able to create an F# executable quite easily.  
+F# は C# とまったく同じ「プロジェクト」と「ソリューション」のモデルを使用しているため、C# に慣れ親しんでいるのであれば、F# の実行ファイルを簡単に作成できるはずです。
 
-To make a file that will be compiled as part of the project, rather than a script file, use the `.fs` extension. `.fsx` files will not be compiled.
+プロジェクトの一部としてコンパイルされるファイルを作成するには、 `.fs` 拡張子を使用します。 `.fsx` ファイルはコンパイルされません。
 
-An F# project does have some major differences from C# though:
+ただし、F# プロジェクトには C# と大きく違うところがいくつかあります。
 
-* The F# files are organized *linearly*, not in a hierarchy of folders and subfolders.
-  In fact, there is no "add new folder" option in an F# project! This is not generally a problem, because, unlike C#,
-  an F# file contains more than one class.  What might be a whole folder of classes in C# might easily be a single file in F#.
-* The *order of the files in the project is very important*: a "later" F# file can use the public types defined in an "earlier" F# file,
-  but not the other way around. Consequently, you cannot have any circular dependencies between files.
-* You can change the order of the files by right-clicking and doing "Move Up" or "Move Down".
-  Similarly, when creating a new file, you can choose to "Add Above" or "Add Below" an existing file.
+* F# ファイルは、フォルダとサブフォルダの階層ではなく、*直線的に* 整理されます。 
+  実際、F# プロジェクトには「新しいフォルダーを追加」オプションがありません。これは一般的には問題になりません。
+  C# とは異なり、 1 つの F# ファイルには複数のクラスが格納されるためです。
+  C# でクラスが格納される可能性のあるフォルダー全体が、F# では 1 つのファイルになる可能性があります。
+* プロジェクト内のファイルの順序は非常に重要です。
+  後の F# ファイルは、前の F# ファイルで定義された公開型を使用できますが、逆はできません。
+  そのため、ファイル間に循環した依存関係を持たせることはできません。
+* ファイルの順序は、右クリックして「上に移動」または「下に移動」を行うことで変更できます。
+  同様に、新しいファイルを作成するときに、既存のファイルの「上に追加する」か「下に追加する」ことを選択できます。
 
 <a id="shell-scripts" ></a>   
-## Shell scripts in F# ##
+## F# でのシェルスクリプト
 
-You can also use F# as a scripting language, rather than having to compile code into an EXE.  This is done by using the FSI program, which is not only a console but can also be used to run scripts in the same way that you might use Python or Powershell. 
+F# は、コードを EXE にコンパイルするだけでなく、スクリプト言語としても使用できます。 
+これは FSI プログラムを使用して行います。FSI プログラムはコンソールだけでなく、Python や PowerShell を使用するのと同様の方法でスクリプトを実行することもできます。
 
-This is very convenient when you want to quickly create some code without compiling it into a full blown application. The F# build automation system ["FAKE"](https://github.com/fsharp/FAKE) is an example of how useful this can be.
+これは、コードを単体で実行できるアプリケーションにコンパイルせずに、すぐにコードを作成したい場合に非常に便利です。
+F# ビルド自動化システムである「[FAKE](https://github.com/fsharp/FAKE)」はこのようなことがいかに便利かを示す例です。
 
-To see how you can do this yourself, here is a little example script that downloads a web page to a local file. First create an FSX script file -- call it "`ShellScriptExample.fsx`" -- and paste in the following code. 
+自分で試してみる方法として、次の例では、Web ページをローカルファイルにダウンロードする小さなスクリプトを紹介します。
+まず、FSX スクリプト ファイルを作成し、`ShellScriptExample.fsx` という名前を付け、次のコードを貼り付けてください。
 
 ```
 // ================================
-// Description: 
-//    downloads the given url and stores it as a file with a timestamp
+// 説明:
+//   指定された URL をダウンロードし、タイムスタンプ付きのファイルとして保存します
 //
-// Example command line: 
+// コマンドラインの例: 
 //    fsi ShellScriptExample.fsx http://google.com google
 // ================================
 
-// "open" brings a .NET namespace into visibility
+// "open" は .NET 名前空間を可視状態にします
 open System.Net
 open System
 
-// download the contents of a web page
+// Web ページの内容をダウンロードします
 let downloadUriToFile url targetfile =        
     let req = WebRequest.Create(Uri(url)) 
     use resp = req.GetResponse() 
@@ -81,7 +82,7 @@ let downloadUriToFile url targetfile =
     writer.Write(reader.ReadToEnd())
     printfn "finished downloading %s to %s" url path
 
-// Running from FSI, the script name is first, and other args after
+// FSI で実行するときは、スクリプト名が最初に来て、その後ろに他の引数が続きます
 match fsi.CommandLineArgs with
     | [| scriptName; url; targetfile |] ->
         printfn "running script: %s" scriptName
@@ -90,13 +91,13 @@ match fsi.CommandLineArgs with
         printfn "USAGE: [url] [targetfile]"
 ```
 
-Don't worry about how the code works right now. It's pretty crude anyway, and a better example would add error handling, and so on.
+今はコードの仕組みを気にする必要はありません。これは簡単な例なので、より完全な例では、エラー処理などが追加されているでしょう。
 
-To run this script, open a command window in the same directory and type:
+このスクリプトを実行するには、同じディレクトリでコマンド プロンプトを開き、次のように入力します。
 
 ```
 fsi ShellScriptExample.fsx http://google.com google_homepage
 ```
 
-As you play with the code on this site, you might want to experiment with creating some scripts at the same time.
+このサイトのコードを触ってみて、そのついでに簡単なスクリプトをいくつか作成してみるのも面白いでしょう。
 
