@@ -1,9 +1,9 @@
 # Summary
 
 
-### 学習の始め方
+### スタートガイド
 
-* [序章](README.md)
+* [はじめに](README.md)
 * [本の内容](site-contents/index.md) 
 * [「F# を使う理由」を1ページで解説](why-use-fsharp/index.md) 
 * [F# のインストールと使い方](installing-and-using/index.md)
@@ -54,7 +54,7 @@
 ### 関数型思考
 
 * [「関数型思考」 シリーズ](series/thinking-functionally.md) 
-  * [関数型思考: 序章](posts/thinking-functionally-intro.md)
+  * [関数型思考: はじめに](posts/thinking-functionally-intro.md)
   * [数学関数](posts/mathematical-functions.md)
   * [関数値と単純値](posts/function-values-and-simple-values.md)
   * [型と関数のしくみ](posts/how-types-work-with-functions.md)
@@ -70,7 +70,7 @@
 ### F# を理解する ###
 
 * [「式と構文」 シリーズ](series/expressions-and-syntax.md)        
-  * [式と構文: 序章](posts/expressions-intro.md)
+  * [式と構文: はじめに](posts/expressions-intro.md)
   * [式 vs. ステートメント](posts/expressions-vs-statements.md)
   * [F# 式の概要](posts/understanding-fsharp-expressions.md)
   * let, use, do によるバインド](posts/let-use-do.md)
@@ -83,7 +83,7 @@
   * [実践例: コマンドライン引数の解析](posts/pattern-matching-command-line.md)
   * [実践例: ローマ数字](posts/roman-numerals.md)
 * [「F# の型を理解する」 シリーズ](series/understanding-fsharp-types.md)            
-  * [F# の型を理解する: 序章](posts/types-intro.md)
+  * [F# の型を理解する: はじめに](posts/types-intro.md)
   * [F# の型概要](posts/overview-of-types-in-fsharp.md)
   * [型省略](posts/type-abbreviations.md)
   * [タプル](posts/tuples.md)
@@ -96,13 +96,13 @@
   * [型推論を理解する](posts/type-inference.md)
 * [コレクション関数の選択](posts/list-module-functions.md)        
 * [「F# でのオブジェクト指向プログラミング」 シリーズ](series/object-oriented-programming-in-fsharp.md)    
-  * [F# でのオブジェクト指向プログラミング: 序章](posts/object-oriented-intro.md)
+  * [F# でのオブジェクト指向プログラミング: はじめに](posts/object-oriented-intro.md)
   * [クラス](posts/classes.md)
   * [継承と抽象クラス](posts/inheritance.md)
   * [インターフェイス](posts/interfaces.md)
   * [オブジェクト式](posts/object-expressions.md)
 * [「コンピュテーション式」 シリーズ](series/computation-expressions.md)    
-  * [コンピュテーション式: 序章](posts/computation-expressions-intro.md)
+  * [コンピュテーション式: はじめに](posts/computation-expressions-intro.md)
   * [継続の理解](posts/computation-expressions-continuations.md)
   * [bind の紹介](posts/computation-expressions-bind.md)
   * [コンピュテーション式とラッパー型](posts/computation-expressions-wrapper-types.md)
@@ -119,13 +119,13 @@
   * [循環依存関係を排除するためのリファクタリング](posts/removing-cyclic-dependencies.md)
   * [実世界の循環とモジュール性](posts/cycles-and-modularity-in-the-wild.md)
 * [「C# からの移植」 シリーズ](series/porting-from-csharp.md)    
-  * [C# から F# への移植: 序章](posts/porting-to-csharp-intro.md)
+  * [C# から F# への移植: はじめに](posts/porting-to-csharp-intro.md)
   * [直接移植の始め方](posts/porting-to-csharp-getting-started.md)
 
 ### 関数型設計 ###
 
 * [「型を使って設計する」 シリーズ](series/designing-with-types.md)           
-  * [型を使って設計する: 序章](posts/designing-with-types-intro.md)
+  * [型を使って設計する: はじめに](posts/designing-with-types-intro.md)
   * [シングルケース共用体型](posts/designing-with-types-single-case-dus.md)
   * [不正な状態を表現できないようにする](posts/designing-with-types-making-illegal-states-unrepresentable.md)
   * [新しい概念を発見する](posts/designing-with-types-discovering-the-domain.md)
@@ -165,7 +165,7 @@
   * [Reader モナドの再発明](posts/elevated-world-6.md)
   * [Map, Bind, Apply まとめ](posts/elevated-world-7.md)
 * [「再帰型と Fold」 シリーズ](series/recursive-types-and-folds.md)       
-  * [再帰型の序章](posts/recursive-types-and-folds.md)
+  * [再帰型のはじめに](posts/recursive-types-and-folds.md)
   * [カタモーフィズムの例](posts/recursive-types-and-folds-1b.md)
   * [Fold の紹介](posts/recursive-types-and-folds-2.md)
   * [Fold を理解する](posts/recursive-types-and-folds-2b.md)
@@ -178,7 +178,7 @@
 
 ### テスト
 
-* [プロパティベースドテストの序章](posts/property-based-testing.md)
+* [プロパティベースドテストのはじめに](posts/property-based-testing.md)
 * [プロパティベースドテストのプロパティ選択](posts/property-based-testing-2.md)
 
 ### 例とチュートリアル

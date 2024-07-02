@@ -8,7 +8,7 @@ hasNoCode: 1
 ---
 
 
-## 学習の始め方
+## スタートガイド
 
 * [F# のインストールと使い方](../installing-and-using/index.md) を最初に読むとよいでしょう。
 * [F# を使う理由](../why-use-fsharp/index.md) F# のインタラクティブツアー
