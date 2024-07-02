@@ -33,7 +33,7 @@
   * [ビルディングブロックとしての関数を使う](posts/conciseness-functions-as-building-blocks.md) 
   * [簡潔さのためのパターンマッチング](posts/conciseness-pattern-matching.md) 
   * [便利さ](posts/convenience-intro.md) 
-  * [型のための既成動作](posts/convenience-types.md) 
+  * [型に関する既定のふるまい](posts/convenience-types.md) 
   * [インターフェースとしての関数](posts/convenience-functions-as-interfaces.md) 
   * [部分適用](posts/convenience-partial-application.md) 
   * [アクティブパターン](posts/convenience-active-patterns.md)

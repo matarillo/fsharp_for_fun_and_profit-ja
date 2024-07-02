@@ -7,157 +7,152 @@ hasIcons: 1
 image: "/assets/img/four-concepts2.png"
 ---
 
-Although F# is great for specialist areas such as scientific or data analysis, it is also an excellent choice for enterprise development. 
-Here are five good reasons why you should consider using F# for  your next project. 
+F#は科学や数値解析といった専門分野で優れていますが、企業向けの開発にも最適な選択肢です。
+次回のプロジェクトではF#を使うべきだと思える理由を5つ紹介します。
 
-## ![](../assets/img/glyphicons/glyphicons_030_pencil.png) Conciseness
+## ![](../assets/img/glyphicons/glyphicons_030_pencil.png) 簡潔さ
 
-F# is not cluttered up with [coding "noise"](../posts/fvsc-sum-of-squares.md) such as curly brackets, semicolons and so on. 
+F#には波かっこやセミコロンなどの、[コーディング上の「ノイズ」](../posts/fvsc-sum-of-squares.md)がありません。
 
-You almost never have to specify the type of an object, thanks to a powerful [type inference system](../posts/conciseness-type-inference.md).
+強力な[型推論システム](../posts/conciseness-type-inference.md)のおかげで、オブジェクトの型をほとんど指定する必要がありません。
 
-And, compared with C#, it generally takes [fewer lines of code](../posts/fvsc-download.md) to solve the same problem.
-
+また、C#と比べて、同じ問題を解決するのに[より少ないコード行数](../posts/fvsc-download.md)で済みます。
 
 ```
-// one-liners
+// ワンライナー
 [1..100] |> List.sum |> printfn "sum=%d"
 
-// no curly braces, semicolons or parentheses
+// 波かっこも、セミコロンも、丸かっこも不要
 let square x = x * x
 let sq = square 42 
 
-// simple types in one line
+// 単純な型は１行で書ける
 type Person = {First:string; Last:string}
 
-// complex types in a few lines
+// 複合的な型も数行で書ける
 type Employee = 
   | Worker of Person
   | Manager of Employee list
 
-// type inference
+// 型推論
 let jdoe = {First="John";Last="Doe"}
 let worker = Worker jdoe
 ```
 
-## ![](../assets/img/glyphicons/glyphicons_343_thumbs_up.png) Convenience
+## ![](../assets/img/glyphicons/glyphicons_343_thumbs_up.png) 便利さ
 
 
-Many common programming tasks are much simpler in F#.  This includes things like creating and using
- [complex type definitions](../posts/conciseness-type-definitions.md), doing [list processing](../posts/conciseness-extracting-boilerplate.md),
- [comparison and equality](../posts/convenience-types.md), [state machines](../posts/designing-with-types-representing-states.md), and much more. 
+F#では多くの一般的なプログラミング作業がより簡単です。
+これには、[複雑な型定義](../posts/conciseness-type-definitions.md)の作成と使用、[リスト処理](../posts/conciseness-extracting-boilerplate.md)、[比較と等価性](../posts/convenience-types.md)、[状態機械](../posts/designing-with-types-representing-states.md)などが含まれます。
 
-And because functions are first class objects, it is very easy to create powerful and reusable code by creating functions
-that have [other functions as parameters](../posts/conciseness-extracting-boilerplate.md),
-or that [combine existing functions](../posts/conciseness-functions-as-building-blocks.md) to create new functionality. 
+
+また、関数が第一級オブジェクトであるため、[他の関数をパラメータとして受け取る](../posts/conciseness-extracting-boilerplate.md)関数や、[既存の関数を組み合わせて](../posts/conciseness-functions-as-building-blocks.md)新しい関数を作る関数を作成することで、強力で再利用可能なコードを簡単に作れます。
 
 ```
-// automatic equality and comparison
+// 自動的な等値判定と比較
 type Person = {First:string; Last:string}
 let person1 = {First="john"; Last="Doe"}
 let person2 = {First="john"; Last="Doe"}
 printfn "Equal? %A"  (person1 = person2)
 
-// easy IDisposable logic with "use" keyword
+// "use" キーワードでIDisposableのロジックが簡単
 use reader = new StreamReader(..)
 
-// easy composition of functions
+// 関数の合成が簡単
 let add2times3 = (+) 2 >> (*) 3
 let result = add2times3 5
 ```
 
-## ![](../assets/img/glyphicons/glyphicons_150_check.png) Correctness
+## ![](../assets/img/glyphicons/glyphicons_150_check.png) 正確性
 
 
-F# has a [powerful type system](../posts/correctness-type-checking.md) which prevents many common errors such
-as [null reference exceptions](../posts/the-option-type.md#option-is-not-null).
+F#には[強力な型システム](../posts/correctness-type-checking.md)があり、[null参照例外](../posts/the-option-type.md#option-is-not-null)などの一般的なエラーを防ぎます。
 
-Values are [immutable by default](../posts/correctness-immutability.md), which prevents a large class of errors.
+値は[デフォルトで不変](../posts/correctness-immutability.md)なので、多くの種類のエラーを防げます。
 
-In addition, you can often encode business logic using the [type system](../posts/correctness-exhaustive-pattern-matching.md) itself in such a way 
-that it is actually [impossible to write incorrect code](../posts/designing-for-correctness.md)
-or mix up [units of measure](../posts/units-of-measure.md), greatly reducing the need for unit tests.   
+さらに、[型システム](../posts/correctness-exhaustive-pattern-matching.md)を使ってビジネスロジックを表現することで、
+[間違ったコードを書くことが不可能](../posts/designing-for-correctness.md)になったり、
+[単位の混乱](../posts/units-of-measure.md)を避けられたりするため、ユニットテストの必要性が大幅に減ります。
 
 
 ```
-// strict type checking
-printfn "print string %s" 123 //compile error
+// 厳密な型チェック
+printfn "print string %s" 123 //コンパイルエラー
 
-// all values immutable by default
-person1.First <- "new name"  //assignment error 
+// すべての値はデフォルトで不変
+person1.First <- "new name"  //割り当てエラー
 
-// never have to check for nulls
+// nullチェックは完全に不要
 let makeNewString str = 
-   //str can always be appended to safely
+   //strは常に安全に追加可能
    let newString = str + " new!"
    newString
 
-// embed business logic into types
-emptyShoppingCart.remove   // compile error!
+// ビジネスロジックを型に埋め込む
+emptyShoppingCart.remove   // コンパイルエラー!
 
-// units of measure
-let distance = 10<m> + 10<ft> // error!
+// 測定単位
+let distance = 10<m> + 10<ft> // エラー!
 ```
 
-## ![](../assets/img/glyphicons/glyphicons_054_clock.png) Concurrency 
+## ![](../assets/img/glyphicons/glyphicons_054_clock.png) 並行処理 
 
 
-F# has a number of built-in libraries to help when more than one thing at a time is happening.
-Asynchronous programming is [very easy](../posts/concurrency-async-and-parallel.md), as is parallelism.
+F#には、複数の処理を同時に行う際に役立つ組み込みライブラリがいくつかあります。
+非同期プログラミングや並列処理が[とても簡単](../posts/concurrency-async-and-parallel.md)にできます。
 
-F# also has a built-in [actor model](../posts/concurrency-actor-model.md), and excellent support for event handling
-and [functional reactive programming](../posts/concurrency-reactive.md). 
+F#には組み込みの[アクターモデル](../posts/concurrency-actor-model.md)もあり、イベント処理や[関数型リアクティブプログラミング](../posts/concurrency-reactive.md)のサポートも優れています。
 
-And of course, because data structures are immutable by default, sharing state and avoiding locks is much easier.
+そして、データ構造がデフォルトで不変なので、状態の共有やロックの回避がずっと簡単です。
 
 ```
-// easy async logic with "async" keyword
+// "async" キーワードで非同期ロジックが簡単
 let! result = async {something}
 
-// easy parallelism
+// 並列処理が簡単
 Async.Parallel [ for i in 0..40 -> 
       async { return fib(i) } ]
 
-// message queues
+// メッセージキュー
 MailboxProcessor.Start(fun inbox-> async{
 	let! msg = inbox.Receive()
 	printfn "message is: %s" msg
 	})
 ```
 
-## ![](../assets/img/glyphicons/glyphicons_280_settings.png) Completeness
+## ![](../assets/img/glyphicons/glyphicons_280_settings.png) 完全性
+
+F#は基本的に関数型言語ですが、100% 純粋ではない他のスタイルもサポートしています。
+これにより、Webサイト、データベース、他のアプリケーションなど、純粋でない世界とのやり取りがずっと簡単になります。
+
+特に、F#は関数型とオブジェクト指向のハイブリッド言語として設計されているため、[C#でできることはほぼすべてできます](../posts/completeness-anything-csharp-can-do.md)。
 
 
-Although it is a functional language at heart, F# does support other styles which are not 100% pure,
-which makes it much easier to interact with the non-pure world of web sites, databases, other applications, and so on.
-
-In particular, F# is designed as a hybrid functional/OO language, so it can do [virtually everything that C# can do](../posts/completeness-anything-csharp-can-do.md).  
+F#は[.NETエコシステムの一部](../posts/completeness-seamless-dotnet-interop.md)ですから、すべてのサードパーティの.NETライブラリやツールにスムーズにアクセスできます。
+（Monoや新しい .NET Coreを通じて）Linuxやスマートフォンなどのほとんどのプラットフォームで動作します。
 
 
-Of course, F# is [part of the .NET ecosystem](../posts/completeness-seamless-dotnet-interop.md), which gives you seamless access to all the third party .NET libraries and tools.
-It runs on most platforms, including Linux and smart phones (via Mono and the new .NET Core).
-
-
-Finally, it is well integrated with Visual Studio (Windows) and Xamarin (Mac), which means you get a great IDE with IntelliSense support, a debugger,
-and many plug-ins for unit tests, source control, and other development tasks. Or on Linux, you can use the MonoDevelop IDE instead.
+さらに、Visual Studio（Windows用）やXamarin（Mac用）とよく統合されているため、IntelliSenseサポート、デバッガー、
+ユニットテスト、ソース管理、その他の開発タスク用の多くのプラグインを備えた優れたIDEが使えます。
+Linuxでは、代わりにMonoDevelop IDEを使用できます。
 
 ```
-// impure code when needed
+// 必要であれば非純粋なコードも書ける
 let mutable counter = 0
 
-// create C# compatible classes and interfaces
+// C#互換のクラスやインターフェースを作成できる
 type IEnumerator<'a> = 
     abstract member Current : 'a
     abstract MoveNext : unit -> bool 
 
-// extension methods
+// 拡張メソッドが書ける
 type System.Int32 with
     member this.IsEven = this % 2 = 0
 
 let i=20
 if i.IsEven then printfn "'%i' is even" i
 	
-// UI code
+// UIコードが書ける
 open System.Windows.Forms 
 let form = new Form(Width= 400, Height = 300, 
    Visible = true, Text = "Hello World") 
@@ -166,37 +161,37 @@ form.Click.Add (fun args-> printfn "clicked!")
 form.Show()
 ```
 
-## The "Why Use F#?" series
+## 「なぜF#を使うのか？」シリーズ
 
-The following series of posts demonstrates each of these F# benefits, using standalone snippets of F# code (and often with C# code for comparison).  
+以下のシリーズでは、F#単独のコードスニペット（しばしばC#コードとの比較も）を使って、F#のそれぞれの利点を紹介します。
 
-* [Introduction to the 'Why use F#' series](../posts/why-use-fsharp-intro.md). An overview of the benefits of F#
-* [F# syntax in 60 seconds](../posts/fsharp-in-60-seconds.md). A very quick overview on how to read F# code
-* [Comparing F# with C#: A simple sum](../posts/fvsc-sum-of-squares.md). In which we attempt to sum the squares from 1 to N without using a loop
-* [Comparing F# with C#: Sorting](../posts/fvsc-quicksort.md). In which we see that F# is more declarative than C#, and we are introduced to pattern matching.
-* [Comparing F# with C#: Downloading a web page](../posts/fvsc-download.md). In which we see that F# excels at callbacks, and we are introduced to the 'use' keyword
-* [Four Key Concepts](../posts/key-concepts.md). The concepts that differentiate F# from a standard imperative language
-* [Conciseness](../posts/conciseness-intro.md). Why is conciseness important?
-* [Type inference](../posts/conciseness-type-inference.md). How to avoid getting distracted by complex type syntax
-* [Low overhead type definitions](../posts/conciseness-type-definitions.md). No penalty for making new types
-* [Using functions to extract boilerplate code](../posts/conciseness-extracting-boilerplate.md). The functional approach to the DRY principle
-* [Using functions as building blocks](../posts/conciseness-functions-as-building-blocks.md). Function composition and mini-languages make code more readable
-* [Pattern matching for conciseness](../posts/conciseness-pattern-matching.md). Pattern matching can match and bind in a single step
-* [Convenience](../posts/convenience-intro.md). Features that reduce programming drudgery and boilerplate code
-* [Out-of-the-box behavior for types](../posts/convenience-types.md). Immutability and built-in equality with no coding
-* [Functions as interfaces](../posts/convenience-functions-as-interfaces.md). OO design patterns can be trivial when functions are used
-* [Partial Application](../posts/convenience-partial-application.md). How to fix some of a function's parameters
-* [Active patterns](../posts/convenience-active-patterns.md). Dynamic patterns for powerful matching
-* [Correctness](../posts/correctness-intro.md). How to write 'compile time unit tests'
-* [Immutability](../posts/correctness-immutability.md). Making your code predictable
-* [Exhaustive pattern matching](../posts/correctness-exhaustive-pattern-matching.md). A powerful technique to ensure correctness
-* [Using the type system to ensure correct code](../posts/correctness-type-checking.md). In F# the type system is your friend, not your enemy
-* [Worked example: Designing for correctness](../posts/designing-for-correctness.md). How to make illegal states unrepresentable
-* [Concurrency](../posts/concurrency-intro.md). The next major revolution in how we write software?
-* [Asynchronous programming](../posts/concurrency-async-and-parallel.md). Encapsulating a background task with the Async class
-* [Messages and Agents](../posts/concurrency-actor-model.md). Making it easier to think about concurrency
-* [Functional Reactive Programming](../posts/concurrency-reactive.md). Turning events into streams
-* [Completeness](../posts/completeness-intro.md). F# is part of the whole .NET ecosystem
-* [Seamless interoperation with .NET libraries](../posts/completeness-seamless-dotnet-interop.md). Some convenient features for working with .NET libraries
-* [Anything C# can do...](../posts/completeness-anything-csharp-can-do.md). A whirlwind tour of object-oriented code in F#
-* [Why use F#: Conclusion](../posts/why-use-fsharp-conclusion.md). 
+* [「なぜF#を使うのか」シリーズの紹介](../posts/why-use-fsharp-intro.md)。F#の利点の概要
+* [60秒でわかるF#の文法](../posts/fsharp-in-60-seconds.md)。F#コードの読み方の超簡単な概要
+* [F#とC#の比較：簡単な合計](../posts/fvsc-sum-of-squares.md)。ループを使わずに1からNまでの二乗の合計を求めてみる
+* [F#とC#の比較：ソート](../posts/fvsc-quicksort.md)。F#がC#よりも宣言的であること、そしてパターンマッチングの紹介
+* [F#とC#の比較：ウェブページのダウンロード](../posts/fvsc-download.md)。F#がコールバックに優れていること、そして'use'キーワードの紹介
+* [4つの重要な概念](../posts/key-concepts.md)。F#を標準的な命令型言語と区別する概念
+* [簡潔さ](../posts/conciseness-intro.md)。なぜ簡潔さが重要なのか？
+* [型推論](../posts/conciseness-type-inference.md)。複雑な型構文に気を取られないようにする方法
+* [低オーバーヘッドの型定義](../posts/conciseness-type-definitions.md)。新しい型を作るのにペナルティがない
+* [関数を使ってボイラープレートコードを抽出する](../posts/conciseness-extracting-boilerplate.md)。DRY原則への関数型アプローチ
+* [関数をビルディングブロックとして使用する](../posts/conciseness-functions-as-building-blocks.md)。関数合成とミニ言語でコードをより読みやすくする
+* [簡潔さのためのパターンマッチング](../posts/conciseness-pattern-matching.md)。パターンマッチングで一度にマッチングと束縛ができる
+* [利便性](../posts/convenience-intro.md)。プログラミングの退屈な作業とボイラープレートコードを減らす機能
+* [型に関する既定のふるまい](../posts/convenience-types.md)。コーディング不要の不変性と組み込み等価性
+* [インターフェースとしての関数](../posts/convenience-functions-as-interfaces.md)。関数を使えばOOデザインパターンが簡単になる
+* [部分適用](../posts/convenience-partial-application.md)。関数のパラメータの一部を固定する方法
+* [アクティブパターン](../posts/convenience-active-patterns.md)。強力なマッチングのための動的パターン
+* [正確性](../posts/correctness-intro.md)。「コンパイル時ユニットテスト」の書き方
+* [不変性](../posts/correctness-immutability.md)。コードを予測可能にする
+* [網羅的パターンマッチング](../posts/correctness-exhaustive-pattern-matching.md)。正確性を確保するための強力な技術
+* [型システムを使って正しいコードを確保する](../posts/correctness-type-checking.md)。F#では型システムは敵ではなく味方
+* [実践例：正確性のための設計](../posts/designing-for-correctness.md)。不正な状態を表現不可能にする方法
+* [並行性](../posts/concurrency-intro.md)。ソフトウェア開発の次の大革命？
+* [非同期プログラミング](../posts/concurrency-async-and-parallel.md)。Asyncクラスでバックグラウンドタスクをカプセル化する
+* [メッセージとエージェント](../posts/concurrency-actor-model.md)。並行性について考えやすくする
+* [関数型リアクティブプログラミング](../posts/concurrency-reactive.md)。イベントをストリームに変換する
+* [完全性](../posts/completeness-intro.md)。F#は.NETエコシステム全体の一部
+* [.NETライブラリとのシームレスな相互運用](../posts/completeness-seamless-dotnet-interop.md)。.NETライブラリを扱うための便利な機能
+* [C#でできることは何でも...](../posts/completeness-anything-csharp-can-do.md)。F#でのオブジェクト指向コードの駆け足ツアー
+* [なぜF#を使うのか：結論](../posts/why-use-fsharp-conclusion.md)。
