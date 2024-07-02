@@ -1,0 +1,15 @@
+{
+  "name": "fsharpforfunandprofit.gitbook",
+  "version": "1.0.0",
+  "description": "This is eBook version of my site [fsharpforfunandprofit.com](http://fsharpforfunandprofit.com), created by popular request for people who want to read it offline on their kindle or phone. Special thanks to Roman Provaznik for the final nag.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "honkit": "^5.1.4"
+  }
+}

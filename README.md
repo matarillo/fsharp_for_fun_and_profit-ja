@@ -1,34 +1,34 @@
 # F# for Fun and Profit eBook
 
-This is eBook version of my site [fsharpforfunandprofit.com](http://fsharpforfunandprofit.com), created by popular request for
-people who want to read it offline on their kindle or phone. Special thanks to Roman Provaznik for the final nag.
+この電子書籍は、[fsharpforfunandprofit.com](fsharpforfunandprofit.com) サイトのコンテンツをまとめたものです。
+Kindle やスマホを使ってオフラインで読みたいという要望に応えて制作されました。
+最後の一押しをしてくれた Roman Provaznik 氏に感謝します。
 
-The site (and this book) aims to introduce you to F# and show you ways that F# can help in day-to-day development of mainstream commercial business software.
-On the way, I hope to open your mind to the joys of functional programming - it really is fun!
+このサイト (および本書) は、F# を紹介し、F# が主流の商用ビジネスソフトウェアの日常的な開発にどのように役立つのかを示すことを目的としています。
+その過程で、関数型プログラミングの楽しさを知ってもらえればと思っています。
+本当に楽しいですよ！
 
-Many of the posts were not really designed to be in a book, but I have arranged them so that beginner posts come first, and more advanced posts later.
+ブログ記事の中には、もともと書籍向けに書かれていないものもありますが、初心者向けのものが最初に来るように、より高度なものになるほど後ろに来るように構成しました。
 
+## F#について ##
 
-## About F# ##
+F# に全く馴染みがない方のために説明すると、F# は汎用的な関数型/ハイブリッドプログラミング言語であり、ほとんどあらゆる種類のソフトウェア課題に取り組むのに適しています。
 
-If you are completely new to F#, F# is a general purpose functional/hybrid programming language which is great for tackling almost any kind of software challenge.
+F# は無料かつオープンソースで、Linux、Mac、Windows などで動作します。 F# をダウンロードしてインストールする方法や詳細については、[F# Foundation サイト (fsharp.org)](http://fsharp.org) を参照してください。
 
-F# is free and open source, and runs on Linux, Mac, Windows and more. To download and install F#, or to find out more, go to [F# Foundation site at fsharp.org](http://fsharp.org).
+## はじめに
 
+まず、記事をランダムに読む前に、["F# を使う理由とは？](./why-use-fsharp/index.md)" ページと、["F# を使う理由" シリーズ](series/why-use-fsharp.md) 全体を読むことをお勧めします。
+その後は、["サイトの内容"](./site-contents/index.md) ページで、関数や型などについてのさらなる学習のためのリソースが紹介されています。
 
-## Getting started
+[F# を学ぶ](./learning-fsharp/index.md) ためのアドバイスのページもありますし、コードのコンパイルに問題がある場合は、[F# のトラブルシューティング](./troubleshooting-fsharp/index.md) ページが役に立つかもしれません。
 
-Next, before randomly dipping into the posts, you should read the ["why use F#?"](./why-use-fsharp/index.md) page and then the whole ["why use F#" series](series/why-use-fsharp.md).
-After that the ["site contents"](./site-contents/index.md) page provides suggestions for further reading on functions, types and more.
+読者はプログラミングの基本的な知識を持っており、C#、Java、または類似の C 系言語に慣れていることを前提としています。
+Mono/.NET ライブラリに慣れがあるとさらに理解が深まるでしょう。
 
-There is a page with some advice on [learning F#](./learning-fsharp/index.md),
-and if you have problems trying to get your code to compile, the [troubleshooting F#](./troubleshooting-fsharp/index.md) page might be helpful.
+一方、数学やコンピュータサイエンスのバックグラウンドがなくても大丈夫なように配慮しています。
+数学記号は使わず、「関手」「圏論」「アナモルフィズム」などの難解な概念も登場しません。
+Haskell や ML にすでに慣れ親しんでいる方にとっては、おそらく本書は適していないでしょう。
 
-I will assume that you do not need instruction in the basics of programming and that you are familiar with C#, Java, or a similar C-like language.
-It will also be helpful if you are familiar with the Mono/.NET library.
-
-On the other hand, I will not assume that you have a mathematical or computer science background.
-There will be no mathematical notation, and no mysterious concepts like "functor", "category theory" and "anamorphism". If you are already familiar with Haskell or ML, this is probably not the place for you!
-
-Also, I will not attempt to cover highly technical or mathematical applications.
-F# is an excellent tool for these domains, but it requires an approach that is different from business software.
+また、高度に技術的・数学的なアプリケーションについても取り上げるつもりはありません。
+F# はこれらの分野に最適なツールですが、ビジネスソフトウェアとは異なるアプローチが必要です。
