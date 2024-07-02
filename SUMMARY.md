@@ -41,7 +41,7 @@
   * [不変性](posts/correctness-immutability.md) 
   * [網羅的なパターンマッチング](posts/correctness-exhaustive-pattern-matching.md)
   * [型システムを使用した正しいコードの確保](posts/correctness-type-checking.md) 
-  * [動作例: 正確性のための設計](posts/designing-for-correctness.md) 
+  * [実践例: 正確性のための設計](posts/designing-for-correctness.md) 
   * [並行処理](posts/concurrency-intro.md) 
   * [非同期プログラミング](posts/concurrency-async-and-parallel.md) 
   * [メッセージとエージェント](posts/concurrency-actor-model.md) 
@@ -65,7 +65,7 @@
   * [関数シグネチャ](posts/function-signatures.md)
   * [関数の整理](posts/organizing-functions.md)
   * [型への関数のアタッチ](posts/type-extensions.md)
-  * [動作例: スタックベースの電卓](posts/stack-based-calculator.md)
+  * [実践例: スタックベースの電卓](posts/stack-based-calculator.md)
 
 ### F# を理解する ###
 
@@ -80,8 +80,8 @@
   * [例外](posts/exceptions.md)
   * [マッチ式](posts/match-expression.md)
   * [printf によるフォーマット済みテキスト](posts/printf.md)
-  * [動作例: コマンドライン引数の解析](posts/pattern-matching-command-line.md)
-  * [動作例: ローマ数字](posts/roman-numerals.md)
+  * [実践例: コマンドライン引数の解析](posts/pattern-matching-command-line.md)
+  * [実践例: ローマ数字](posts/roman-numerals.md)
 * [「F# の型を理解する」 シリーズ](series/understanding-fsharp-types.md)            
   * [F# の型を理解する: 序章](posts/types-intro.md)
   * [F# の型概要](posts/overview-of-types-in-fsharp.md)
@@ -183,10 +183,10 @@
 
 ### 例とチュートリアル
 
-* [動作例: 正しさのための設計](posts/designing-for-correctness.md) 
-* [動作例: スタックベースの電卓](posts/stack-based-calculator.md)
-* [動作例: コマンドライン引数の解析](posts/pattern-matching-command-line.md)
-* [動作例: ローマ数字](posts/roman-numerals.md)
+* [実践例: 正しさのための設計](posts/designing-for-correctness.md) 
+* [実践例: スタックベースの電卓](posts/stack-based-calculator.md)
+* [実践例: コマンドライン引数の解析](posts/pattern-matching-command-line.md)
+* [実践例: ローマ数字](posts/roman-numerals.md)
 * [「解説付きローマ数字カタ」の解説](posts/roman-numeral-kata.md)
 * [電卓チュートリアル: パート1](posts/calculator-design.md)
   * [電卓チュートリアル: パート2](posts/calculator-implementation.md)
@@ -201,6 +201,6 @@
 * [静的型付け関数型プログラミング言語を使わない10の理由](posts/ten-reasons-not-to-use-a-functional-programming-language.md)
 * [なぜモナドチュートリアルを書かないのか](posts/why-i-wont-be-writing-a-monad-tutorial.md)
 * [あなたのプログラミング言語は非常識ですか？](posts/is-your-language-unreasonable.md)
-* [くだらない UML 図はいらない](posts/no-uml-diagrams.md)
+* [くだらない UML 図なんか要らない](posts/no-uml-diagrams.md)
 * [内向型と外向型プログラミング言語](posts/introvert-vs-extrovert.md)
 * [コンパイラ指令で型安全性を犠牲にして高速化](posts/typesafe-performance-with-compiler-directives.md)
