@@ -6,150 +6,152 @@ nav: troubleshooting-fsharp
 hasComments: 1
 ---
 
-As the saying goes, "if it compiles, it's correct", but it can be extremely frustrating just trying to get the code to compile at all!  So this page is devoted to helping you troubleshoot your F# code.  
+「コンパイルできれば正しい」という言葉がありますが、コードをコンパイルすること自体が非常に困難な場合があります！そこで、このページではF#コードのトラブルシューティングを支援することに焦点を当てています。
 
-I will first present some general advice on troubleshooting and some of the most common errors that beginners make. After that, I will describe each of the common error messages in detail, and give examples of how they can occur and how to correct them.
+まず、トラブルシューティングに関する一般的なアドバイスと、初心者がよく犯す最も一般的なエラーについて説明します。その後、一般的なエラーメッセージそれぞれについて詳しく説明し、それらがどのように発生するか、そしてどのように修正するかの例を示します。
 
-[(Jump to the error numbers)](#NumericErrors)
+[(エラー番号へジャンプ)](#NumericErrors)
 
-## General guidelines for troubleshooting ##
+## トラブルシューティングの一般的なガイドライン ##
 
-By far the most important thing you can do is to take the time and effort to understand exactly how F# works, especially the core concepts involving functions and the type system.  So please read and reread the series ["thinking functionally"](../series/thinking-functionally.md) and ["understanding F# types"](../series/understanding-fsharp-types.md), play with the examples, and get comfortable with the ideas before you try to start doing serious coding. If you don't understand how functions and types work, then the compiler errors will not make any sense.
+最も重要なことは、F#がどのように機能するかを正確に理解するために時間と労力を費やすことです。特に、関数と型システムに関わる中核的な概念について理解することが大切です。ですので、「[関数型思考](../series/thinking-functionally.md)」と「[F#の型を理解する](../series/understanding-fsharp-types.md)」のシリーズを何度も読み返し、例を試し、本格的なコーディングを始める前にこれらのアイデアに慣れてください。関数と型の仕組みを理解していないと、コンパイラエラーが全く意味をなさないものになってしまいます。
 
-If you are coming from an imperative language such as C#, you may have developed some bad habits by relying on the debugger to find and fix incorrect code.   In F#, you will probably not get that far, because the compiler is so much stricter in many ways.  And of course, there is no tool to "debug" the compiler and step through its processing.  The best tool for debugging compiler errors is your brain, and F# forces you to use it! 
+C#のような命令型言語から来た場合、デバッガーに頼って不正確なコードを見つけて修正するという悪習慣を身につけている可能性があります。F#では、コンパイラがより厳格であるため、そこまで到達しないかもしれません。もちろん、コンパイラを「デバッグ」してその処理をステップ実行するツールはありません。コンパイラエラーをデバッグするための最良のツールは頭脳であり、F#はそれを使うことを強制します！
 
-Nevertheless, there are a number of extremely common errors that beginners make, and I will quickly go through them.
+それでも、初心者がよく犯す一連の非常に一般的なエラーがあります。ここでそれらを簡単に説明します。
 
-### Don't use parentheses when calling a function ###
+### 関数を呼び出す際に括弧を使用しない ###
 
-In F#, whitespace is the standard separator for function parameters. You will rarely need to use parentheses, and in particular, do not use parentheses when calling a function.
+F#では、空白文字が関数パラメータの標準的な区切り文字です。括弧を使用する必要はほとんどなく、特に関数を呼び出す際には括弧を使用しないでください。
 
 ```
 let add x y = x + y
-let result = add (1 2)  //wrong
-    // error FS0003: This value is not a function and cannot be applied
-let result = add 1 2    //correct
+let result = add (1 2)  //間違い
+    // error FS0003: この値は関数ではないため、適用できません
+let result = add 1 2    //正しい
 ```
 
-### Don't mix up tuples with multiple parameters ###
+### タプルと複数のパラメータを混同しない ###
 
-If it has a comma, it is a tuple. And a tuple is one object not two. So you will get errors about passing the wrong type of parameter, or too few parameters.
-
-```
-addTwoParams (1,2)  // trying to pass a single tuple rather than two args
-   // error FS0001: This expression was expected to have type
-   //               int but here has type 'a * 'b    
-```
-
-The compiler treats `(1,2)` as a generic tuple, which it attempts to pass to "`addTwoParams`". Then it complains that the first parameter of `addTwoParams` is an int, and we're trying to pass a tuple.
-
-If you attempt to pass *two* arguments to a function expecting *one* tuple, you will get another obscure error.
+カンマがある場合、それはタプルです。そして、タプルは2つのオブジェクトではなく1つのオブジェクトです。そのため、間違った型のパラメータを渡している、あるいはパラメータが少なすぎるというエラーが発生します。
 
 ```
-addTuple 1 2   // trying to pass two args rather than one tuple
-  // error FS0003: This value is not a function and cannot be applied
+addTwoParams (1,2)  // 2つの引数の代わりに1つのタプルを渡そうとしている
+   // error FS0001: この式に必要な型は 'int' ですが、
+   //               ここでは次の型が指定されています 'int * int' 
+```
+
+コンパイラは`(1,2)`をタプルとして扱い、それを `addTwoParams` に渡そうとします。そして、`addTwoParams`の最初のパラメータがint型であるのに対し、タプルを渡そうとしているとクレームをつけます。
+
+*1つの*タプルを期待する関数に*2つの*引数を渡そうとすると、別の分かりにくいエラーが発生します。
+
+```
+addTuple 1 2   // 1つのタプルの代わりに2つの引数を渡そうとしている
+  // error FS0003: この値は関数ではないため、適用できません。
 ```
   
-### Watch out for too few or too many arguments ###
+### 引数が少なすぎたり多すぎたりしないよう注意する ###
 
-The F# compiler will not complain if you pass too few arguments to a function (in fact "partial application" is an important feature), but if you don't understand what is going on, you will often get strange "type mismatch" errors later.  
+F#コンパイラは、関数に渡す引数が少なすぎても文句を言いません（実際、「部分適用」は重要な機能です）。しかし、何が起こっているのか理解していないと、後で奇妙な「型の不一致」エラーがよく発生します。
 
-Similarly the error for having too many arguments is typically "This value is not a function" rather than a more straightforward error.
+同様に、引数が多すぎる場合のエラーは、通常、より直接的なエラーではなく「この値は関数ではありません」となります。
 
-The "printf" family of functions is very strict in this respect. The argument count must be exact.
+"printf" ファミリーの関数は、この点で非常に厳格です。引数の数は正確でなければなりません。
 
-This is a very important topic ? it is critical that you understand how partial application works. See the series ["thinking functionally"](../series/thinking-functionally.md) for a more detailed discussion.
+これは非常に重要なトピックです。部分適用がどのように機能するかを理解することが重要です。詳細な議論については、「[関数型思考](../series/thinking-functionally.md)」シリーズを参照してください。
 
-### Use semicolons for list separators ###
+### リストの区切り文字にはセミコロンを使用する ###
 
-In the few places where F# needs an explicit separator character, such as lists and records, the semicolon is used.  Commas are never used. (Like a broken record, I will remind you that commas are for tuples).
+F#が明示的な区切り文字を必要とする数少ない場所（リストやレコードなど）では、セミコロンが使用されます。カンマは決して使用されません。（繰り返しになりますが、カンマはタプル用であることを思い出してください）。
 
 ```
-let list1 = [1,2,3]    // wrong! This is a ONE-element list containing 
-                       // a three-element tuple
-let list1 = [1;2;3]    // correct
+let list1 = [1,2,3]    // 間違い！ これは3要素のタプルを含む
+                       // 1要素のリストです
+let list1 = [1;2;3]    // 正しい
 
-type Customer = {Name:string, Address: string}  // wrong
-type Customer = {Name:string; Address: string}  // correct
+type Customer = {Name:string, Address: string}  // 間違い
+type Customer = {Name:string; Address: string}  // 正しい
 ```
 
-### Don't use ! for not or != for not-equal ###
+### !をNOTとして、!=を不等号として使用しない ###
 
-The exclamation point symbol is not the "NOT" operator. It is the deferencing operator for mutable references. If you use it by mistake, you will get the following error:
+感嘆符記号は "NOT" 演算子ではありません。可変参照の参照解除演算子です。誤って使用すると、次のエラーが発生します：
 
 ```
 let y = true
 let z = !y
-// => error FS0001: This expression was expected to have 
-//    type 'a ref but here has type bool    
+// error FS0001: この式に必要な型は ''a ref' ですが、
+//               ここでは次の型が指定されています 'bool'
+//               '!' 演算子は ref セルの逆参照に使用されます。
+//               ここに 'not expr' を使用することをご検討ください。
 ```
 
-The correct construction is to use the "not" keyword. Think SQL or VB syntax rather than C syntax.
+正しい構文は、 "not" キーワードを使用することです。C構文ではなく、SQLやVB構文を思い浮かべてください。
 
 ```
 let y = true
-let z = not y       //correct
+let z = not y       //正しい
 ```
 
-And for "not equal", use "<>", again like SQL or VB.
+そして、「等しくない」には、SQLやVBと同様に "<>" を使用します。
 
 ```
-let z = 1 <> 2      //correct
+let z = 1 <> 2      //正しい
 ```
 
-### Don't use = for assignment ###
+### 代入に = を使用しない ###
 
-If you are using mutable values, the assignment operation is written "`<-`".  If you use the equals symbol you might not even get an error, just an unexpected result.
+可変値を使用する場合、代入操作は `<-` と記述します。等号記号を使用すると、エラーが発生しないかもしれませんが、予期しない結果になる可能性があります。
 
 ```
 let mutable x = 1
-x = x + 1          // returns false. x is not equal to x+1 
-x <- x + 1         // assigns x+1 to x 
+x = x + 1          // falseを返します。xはx+1と等しくありません
+x <- x + 1         // x+1をxに代入します
 ```
 
-### Watch out for hidden tab characters ###
+### 隠れたタブ文字に注意する ###
 
-The indenting rules are very straightforward, and it is easy to get the hang of them. But you are not allowed to use tabs, only spaces.
+インデントのルールは非常に簡単で、すぐに慣れることができます。ただし、タブは使用できず、スペースのみを使用する必要があります。
 
 ```
 let add x y = 	
-{tab}x + y   
-// => error FS1161: TABs are not allowed in F# code 
+{tab}	x + y   
+// => error FS1161: F# コードにタブを使用するには、#indent "off" オプションを使用する必要があります
 ```
 
-Be sure to set your editor to convert tabs to spaces. And watch out if you are pasting code in from elsewhere. If you do run into persistent problems with a bit of code, try removing the whitespace and re-adding it.
+エディタでタブをスペースに変換するように設定してください。また、他の場所からコードを貼り付ける場合は注意が必要です。コードの一部で執拗に問題が発生し続ける場合は、空白を削除して再度追加してみてください。
 
-### Don't mistake simple values for function values ###
+### 単純な値を関数値と間違えない ###
 
-If you are trying to create a function pointer or delegate, watch out that you don't accidentally create a simple value that has already been evaluated.
+関数ポインタやデリゲートを作成しようとしている場合、既に評価済みの単純な値を誤って作成しないように注意してください。
 
-If you want a parameterless function that you can reuse, you will need to explicitly pass a unit parameter, or define it as a lambda.
+再利用可能なパラメータなしの関数が必要な場合は、明示的にunitパラメータを渡すか、ラムダとして定義する必要があります。
 
 ```
 let reader = new System.IO.StringReader("hello")
-let nextLineFn   =  reader.ReadLine()  //wrong
-let nextLineFn() =  reader.ReadLine()  //correct
-let nextLineFn   =  fun() -> reader.ReadLine()  //correct
+let nextLineFn   =  reader.ReadLine()  //間違い
+let nextLineFn() =  reader.ReadLine()  //正しい
+let nextLineFn   =  fun() -> reader.ReadLine()  //正しい
 
 let r = new System.Random()
-let randomFn   =  r.Next()  //wrong
-let randomFn() =  r.Next()  //correct
-let randomFn   =  fun () -> r.Next()  //correct
+let randomFn   =  r.Next()  //間違い
+let randomFn() =  r.Next()  //正しい
+let randomFn   =  fun () -> r.Next()  //正しい
 ```
 
-See the series ["thinking functionally"](../series/thinking-functionally.md) for more discussion of parameterless functions.
+パラメータなしの関数についての詳細な議論は、「[関数型思考](../series/thinking-functionally.md)」シリーズを参照してください。
 
-### Tips for troubleshooting "not enough information" errors ###
+### 「情報が不足している」エラーのトラブルシューティングのヒント ###
 
-The F# compiler is currently a one-pass left-to-right compiler, and so type information later in the program is unavailable to the compiler if it hasn't been parsed yet. 
+F#コンパイラは現在、左から右への1パスコンパイラであるため、まだ解析されていないプログラムの後半にある型情報はコンパイラにとって利用できません。
 
-A number of errors can be caused by this, such as ["FS0072: Lookup on object of indeterminate type"](#FS0072) and ["FS0041: A unique overload for could not be determined"](#FS0041). The suggested fixes for each of these specific cases are described below, but there are some general principles that can help if the compiler is complaining about missing types or not enough information. These guidelines are:
+これにより、「[FS0072: 不確定な型のオブジェクトの検索](#FS0072)」や「[FS0041: 一意のオーバーロードを決定できませんでした](#FS0041)」などの多くのエラーが発生する可能性があります。これらの特定のケースに対する推奨される修正方法は以下で説明されていますが、コンパイラが型の不足や情報不足を訴えている場合に役立つ一般的な原則がいくつかあります。これらのガイドラインは以下の通りです：
 
-* Define things before they are used (this includes making sure the files are compiled in the right order)
-* Put the things that have "known types" earlier than things that have "unknown types". In particular, you might be able reorder pipes and similar chained functions so that the typed objects come first.
-* Annotate as needed. One common trick is to add annotations until everything works, and then take them away one by one until you have the minimum needed. 
+* 使用する前に定義する（これには、ファイルが正しい順序でコンパイルされていることを確認することも含まれます）
+* 「既知の型」を持つものを「未知の型」を持つものより先に配置する。特に、パイプや類似の連鎖関数を、型付けされたオブジェクトが先に来るように並べ替えることができるかもしれません。
+* 必要に応じて型注釈を行う。一般的なテクニックとして、すべてが機能するまで型注釈を追加し、その後、必要最小限になるまで1つずつ取り除いていくというものがあります。
 
-Do try to avoid annotating if possible. Not only is it not aesthetically pleasing, but it makes the code more brittle. It is a lot easier to change types if there are no explicit dependencies on them.
+可能であれば、型注釈を避けるようにしてください。見た目が良くないだけでなく、コードをより脆弱にします。明示的な依存関係がない方が、型の変更がはるかに容易になります。
 
 <a id="NumericErrors"></a>
 <div class="page-header">
@@ -176,7 +178,7 @@ I will continue to add to the list in the future, and I welcome any suggestions 
 * [FS0072: Lookup on object of indeterminate type](#FS0072)
 * [FS0588: Block following this 'let' is unfinished](#FS0588)
 	
-<a id="FS0001"></a>
+<a 「d="FS0001"></a>
 ## FS0001: The type 'X' does not match the type 'Y' ##
 
 This is probably the most common error you will run into. It can manifest itself in a wide variety of contexts, so I have grouped the most common problems together with examples and fixes. Do pay attention to the error message, as it is normally quite explicit about what the problem is.
