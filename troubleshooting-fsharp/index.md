@@ -216,35 +216,35 @@ F#コンパイラは現在、左から右への1パスコンパイラである�
 	<td><a href="#FS0001C">C. 関数に引数を渡しすぎている</a></td>
   </tr>
   <tr>
-	<td>This expression was expected to have (simple type) but here has (function type)</td>
-	<td><a href="#FS0001D">D. Passing too few arguments to a function.</a></td>
+	<td>この式に必要な型は (単純な型) ですが、ここでは次の型が指定されています (関数型)</td>
+	<td><a href="#FS0001D">D. 関数への引数が足りない</a></td>
   </tr>
   <tr>
-	<td>This expression was expected to have (type) but here has (other type)</td>
-	<td><a href="#FS0001E">E. Straightforward type mismatch.</a><br>
-	<a href="#FS0001F">F. Inconsistent returns in branches or matches.</a><br>
-	<a href="#FS0001G">G. Watch out for type inference effects buried in a function.</a><br>
+	<td>この式に必要な型は (型) ですが、ここでは次の型が指定されています (別の型)</td>
+	<td><a href="#FS0001E">E. 単純な型の不一致</a><br>
+	<a href="#FS0001F">F. 分岐やマッチでの返り値の型の不一致</a><br>
+	<a href="#FS0001G">G. 関数内で起こる型推論の影響に注意</a><br>
 	</td>
   </tr>
   <tr>
-	<td>Type mismatch. Expecting a (simple type) but given a (tuple type). Note: tuple types have a star in them, like <code>'a * 'b</code>.</td>
-	<td><a href="#FS0001H">H. Have you used a comma instead of space or semicolon?</a></td>
+	<td>型が一致しません。 (単純な型) という指定が必要ですが、(タプル型) が指定されました。 注意: タプル型には星が含まれており、例えば <code>'a * 'b</code> のような形式になります。</td>
+	<td><a href="#FS0001H">H. スペースやセミコロンではなくカンマを使ってしまっていませんか？</a></td>
   </tr>
   <tr>
-	<td>Type mismatch. Expecting a (tuple type) but given a (different tuple type). </td>
-	<td><a href="#FS0001I">I. Tuples must be the same type to be compared.</a></td>
+	<td>型が一致しません。 (タプル型) という指定が必要ですが、(別のタプル型) が指定されました。</td>
+	<td><a href="#FS0001I">I. タプルの比較やパターンマッチングには同じ型が必要</a></td>
   </tr>
   <tr>
-	<td>This expression was expected to have type 'a ref but here has type X</td>
-	<td><a href="#FS0001J">J. Don't use ! as the "not" operator.</a></td>
+	<td>この式に必要な型は ''a ref' ですが、ここでは次の型が指定されています 'X'</td>
+	<td><a href="#FS0001J">J. "not" 演算子として ! を使用しない</a></td>
   </tr>
   <tr>
-	<td>The type (type) does not match the type (other type)</td>
-	<td><a href="#FS0001K">K. Operator precedence (especially functions and pipes).</a></td>
+	<td>型 (型) は型 (別の型) と一致しません</td>
+	<td><a href="#FS0001K">K. 演算子の優先順位（特に関数とパイプ）</a></td>
   </tr>
   <tr>
-	<td>This expression was expected to have type (monadic type) but here has type 'b * 'c</td>
-	<td><a href="#FS0001L">L. let! error in computation expressions.</a></td>
+	<td>この式に必要な型は (モナド型) ですが、ここでは次の型が指定されています ''b * 'c''</td>
+	<td><a href="#FS0001L">L. コンピュテーション式における let! エラー</a></td>
   </tr>
 </tbody>
 </table>
@@ -327,32 +327,34 @@ printfn "hello %i %i" 42 43 44
 ```
 
 <a id="FS0001D"></a>
-### D. Passing too few arguments to a function ###
+### D. 関数への引数が足りない ###
 
-If you do not pass enough arguments to a function, you will get a partial application. When you later use it, you get an error because it is not a simple type.
+関数を呼び出すときに、必要な引数が足りないと、部分適用と呼ばれる状態になります。
+この部分適用を後で使うと、単純な型ではないためエラーが発生します。
 
 ```
 let reader = new System.IO.StringReader("hello");
 
-let line = reader.ReadLine        //間違い but compiler doesn't complain
-printfn "The line is %s" line     //compiler error here!
+let line = reader.ReadLine        //間違いだが、コンパイラーは文句を言わない
+printfn "The line is %s" line     //ここでコンパイラー・エラー!
 // ==> error FS0001: この式に必要な型は 'string'
 //                   ですが、ここでは次の型が指定されています 'unit -> string'
 ```
 
-This is particularly common for some .NET library functions that expect a unit parameter, such as `ReadLine` above.
+これは、上で見た `ReadLine` のような、`unit` パラメータを必要とする一部の .NET ライブラリ関数でよく発生します。
 
-The fix is to pass the correct number of parameters. Check the type of the result value to make sure that it is indeed a simple type.  In the `ReadLine` case, the fix is to pass a `()` argument.
+解決方法は、正しい数の引数を渡すことです。結果の値の型が実際に単純な型であることを確認するために、型を確認してください。
+`ReadLine` の場合は、`()` という引数を渡すことで解決します。
 
 ```
 let line = reader.ReadLine()      //正しい
-printfn "The line is %s" line     //no compiler error 
+printfn "The line is %s" line     //コンパイラー・エラーなし 
 ```
 
 <a id="FS0001E"></a>
-### E. Straightforward type mismatch ###
+### E. 単純な型の不一致 ###
 
-The simplest case is that you have the wrong type, or you are using the wrong type in a print format string.
+最も単純なケースは、型が間違っているか、print のフォーマット文字列で間違った型を使っていることです。
 
 ```
 printfn "hello %s" 1.0
@@ -361,9 +363,9 @@ printfn "hello %s" 1.0
 ```
 
 <a id="FS0001F"></a>
-### F. Inconsistent return types in branches or matches ###
+### F. 分岐やマッチでの返り値の型の不一致 ###
 
-A common mistake is that if you have a branch or match expression, then every branch MUST return the same type.  If not, you will get a type error.
+よくある間違いとして、分岐やマッチ式がある場合、各分岐は必ず同じ型を返さなければなりません。そうでないと、型エラーが発生します。
 
 ```
 let f x = 
@@ -382,7 +384,7 @@ let g x =
 //               に暗黙的に変換可能な値を返す必要があります。このブランチが返す値の型は 'int' です。
 ```
 
-Obviously, the straightforward fix is to make each branch return the same type. 
+当然、最も簡単な解決方法は、各分岐が同じ型を返すようにすることです。
 
 ```
 let f x = 
@@ -395,7 +397,7 @@ let g x =
   | _ -> "42"
 ```
 
-Remember that if an "else" branch is missing, it is assumed to return unit, so the "true" branch must also return unit.
+"else" ブランチがない場合、`unit` を返すものとみなされるので、"true" ブランチも `unit` を返すようにする必要があります。
 
 ```
 let f x = 
@@ -405,54 +407,56 @@ let f x =
 //               同じ型の値を返す 'else' ブランチを追加してください。
 ```
 
-If both branches cannot return the same type, you may need to create a new union type that can contain both types.
+両方の分岐が同じ型を返せない場合は、両方の型を保持できる新しい共用体型を作成する必要があるかもしれません。
 
 ```
-type StringOrInt = | S of string | I of int  // new union type
+type StringOrInt = | S of string | I of int  // 新しい共用体型
 let f x = 
   if x > 1 then S "hello"
   else I 42
 ```
 
 <a id="FS0001G"></a>  
-### G. Watch out for type inference effects buried in a function ###
+### G. 関数内で起こる型推論の影響に注意
 
-A function may cause an unexpected type inference that ripples around your code. For example, in the following, the innocent print format string accidentally causes `doSomething` to expect a string.
+ある関数が、コード全体に波及する予期しない型推論を引き起こすことがあります。 
+例えば、以下のコードでは、一見無害な print のフォーマット文字列によって、 `doSomething` 関数が文字列を受け取ると型推論させてしまっています。
 
 ```
 let doSomething x = 
-   // do something
+   // 何らかの処理を行う
    printfn "x is %s" x
-   // do something more
+   // さらに何らかの処理を行う
 
 doSomething 1
 // => error FS0001: この式に必要な型は 'string' 
 //    ですが、ここでは次の型が指定されています 'int'
 ```
 
-The fix is to check the function signatures and drill down until you find the guilty party.  Also, use the most generic types possible, and avoid type annotations if possible.
+修正方法は、関数シグネチャを確認して、問題の根源を見つけるまで掘り下げることです。また、可能な限り汎用的な型を使い、型注釈は必要なければ避けるようにしましょう。
 
 <a id="FS0001H"></a>  
-### H. Have you used a comma instead of space or semicolon? ###
+### H. スペースやセミコロンではなくカンマを使ってしまっていませんか？ ###
 
-If you are new to F#, you might accidentally use a comma instead of spaces to separate function arguments:
+F# 初心者によくあるミスとして、関数引数を区切る際に、スペースやセミコロンの代わりにカンマを誤って使ってしまうことが挙げられます。
 
 ```
-// define a two parameter function
+// 2つの引数を取る関数定義
 let add x y = x + 1
 
 add(x,y)   // FS0001: この式に必要な型は 'int'
            // ですが、ここでは次の型が指定されています ''a * 'b'
 ```
 
-The fix is: don't use a comma!
+修正方法: カンマを使わないようにしましょう！
 
 ```
 add x y    // OK
 ```
 
-One area where commas *are* used is when calling .NET library functions. 
-These all take tuples as arguments, so the comma form is correct. In fact, these calls look just the same as they would from C#:  
+ただし、カンマが使用されるケースが 1 つあります。それは .NET ライブラリ関数を呼ぶときです。
+これらの関数はすべてタプルを引数として取るため、カンマを使う形式が正しいのです。
+実際、C# から呼び出す場合と同じ見た目になります。
 
 ```
 // 正しい
@@ -464,9 +468,9 @@ System.String.Compare "a" "b"
 
   
 <a id="FS0001I"></a>  
-### I. Tuples must be the same type to be compared or pattern matched ###
+### I. タプルの比較やパターンマッチングには同じ型が必要 ###
 
-Tuples with different types cannot be compared. Trying to compare a tuple of type `int * int`, with a tuple of type `int * string` results in an error:
+異なる型のタプルは比較できません。 `int * int` 型のタプルと `int * string` 型のタプルを比較しようとすると、エラーが発生します。
 
 ```
 let  t1 = (0, 1)
@@ -477,7 +481,7 @@ t1 = t2
 //    が指定されました。型 'int' は型 'string' と一致しません
 ```
 
-And the length must be the same:
+また、長さも同じである必要があります。
 
 ```
 let  t1 = (0, 1)
@@ -487,7 +491,7 @@ t1 = t2
 //    ただし、型の長さ 3 のタプルが指定された場合 int * int * string
 ```
 
-You can get the same issue when pattern matching tuples during binding:
+バインディングにおけるタプルのパターンマッチングでも同様の問題が発生する可能性があります。
 
 ```
 let x,y = 1,2,3
@@ -505,9 +509,9 @@ let result = f z
 
 
 <a id="FS0001J"></a>  
-### J. Don't use ! as the "not" operator ###
+### J. "not" 演算子として ! を使用しない ###
 
-If you use `!` as a "not" operator, you will get a type error mentioning the word "ref".
+`!` を "not" 演算子として使用すると、 "ref" という単語を含む型エラーが発生します。
 
 ```
 let y = true
@@ -516,7 +520,7 @@ let z = !y     //間違い
 //    '!' 演算子は ref セルの逆参照に使用されます。ここに 'not expr' を使用することをご検討ください。 
 ```
 
-The fix is to use the "not" keyword instead.
+解決策は、代わりに "not" キーワードを使用することです。
 
 ```
 let y = true
@@ -525,35 +529,35 @@ let z = not y   //正しい
 
 
 <a id="FS0001K"></a>  
-### K. Operator precedence (especially functions and pipes) ###
+### K. 演算子の優先順位（特に関数とパイプ） ###
 
-If you mix up operator precedence, you may get type errors.  Generally, function application is highest precedence compared to other operators, so you get an error in the case below:
+演算子の優先順位を間違えると、型エラーが発生する可能性があります。一般に、関数適用は他の演算子と比較して最も優先順位が高いため、以下のようなケースでエラーが発生します。
 
 ```
 String.length "hello" + "world"
    // => error FS0001:  型 'string' は型 'int' と一致しません
 
-// what is really happening
+// 実際に起こっていること
 (String.length "hello") + "world"  
 ```
 
-The fix is to use parentheses.
+解決策はかっこを使用することです。
 
 ```
 String.length ("hello" + "world")  // 訂正された
 ```
 
-Conversely, the pipe operator is low precedence compared to other operators.
+逆に、パイプ演算子は他の演算子と比較して優先順位が低くなります。
 
 ```
 let result = 42 + [1..10] |> List.sum
  // => => error FS0001:  型 ''a list' は型 'int' と一致しません
 
-// what is really happening
+// 実際に起こっていること
 let result = (42 + [1..10]) |> List.sum  
 ```
 
-Again, the fix is to use parentheses.
+ここでも、解決策はかっこを使用することです。
 
 ```
 let result = 42 + ([1..10] |> List.sum)
@@ -561,9 +565,9 @@ let result = 42 + ([1..10] |> List.sum)
 
 
 <a id="FS0001L"></a>  
-### L. let! error in computation expressions (monads) ###
+### L. コンピュテーション式（モナド）における let! エラー ###
 
-Here is a simple computation expression:
+以下は簡単なコンピュテーション式です。
 
 ```
 type Wrapper<'a> = Wrapped of 'a
@@ -579,11 +583,11 @@ type wrapBuilder() =
 let wrap = new wrapBuilder()
 ```
 
-However, if you try to use it, you get an error.
+しかし、これを使用しようとするとエラーが発生します。
 
 ```
 wrap {
-    let! x1 = Wrapped(1)   // <== error here
+    let! x1 = Wrapped(1)   // <== ここでエラー
     let! y1 = Wrapped(2)
     let z1 = x + y
     return z
@@ -592,9 +596,9 @@ wrap {
 //               'Wrapper<int> * ('b -> ('c -> Wrapper<'d>) -> Wrapper<'d>)'
 ```
 
-The reason is that "`Bind`" expects a tuple `(wrapper,func)`, not two parameters.  (Check the signature for bind in the F# documentation).
+理由は、 `Bind` が2つのパラメータではなく、タプル `(wrapper,func)` を期待しているためです。（F#のドキュメントでbindのシグネチャを確認してください）。
 
-The fix is to change the bind function to accept a tuple as its (single) parameter.
+解決策は、 bind 関数を変更して、（単一の）パラメータとしてタプルを受け取るようにすることです。
 
 ```
 type wrapBuilder() = 
