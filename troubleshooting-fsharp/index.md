@@ -155,16 +155,16 @@ F#コンパイラは現在、左から右への1パスコンパイラである�
 
 <a id="NumericErrors"></a>
 <div class="page-header">
-	<h1>F# compiler errors</h1>
-	<p class="subtitle">A listing of common errors, ordered by error number</p>
+	<h1>F# コンパイラエラー</h1>
+	<p class="subtitle">よくあるエラーの一覧 (エラー番号順)</p>
 </div>
 
-Here is a list of the major errors that seem to me worth documenting. I have not documented any errors that are self explanatory, only those that seem obscure to beginners.
+これは、文書化に値すると思われる主要なエラーの一覧です。明らかなエラーは文書化せず、初心者にとってはわかりにくいと思われるものだけを扱います。
 
-I will continue to add to the list in the future, and I welcome any suggestions for additions.
+今後もリストに追加していく予定であり、追加すべき項目についての提案を歓迎します。
 
-* [FS0001: The type 'X' does not match the type 'Y'](#FS0001)
-* [FS0003: This value is not a function and cannot be applied](#FS0003)
+* [FS0001: この式に必要な型は 'X' ですが、ここでは次の型が指定されています 'Y'](#FS0001)
+* [FS0003: この値は関数ではないため、適用できません。](#FS0003)
 * [FS0008: This runtime coercion or type test involves an indeterminate type](#FS0008)
 * [FS0010: Unexpected identifier in binding](#FS0010a)
 * [FS0010: Incomplete structured construct](#FS0010b)
@@ -179,41 +179,41 @@ I will continue to add to the list in the future, and I welcome any suggestions 
 * [FS0588: Block following this 'let' is unfinished](#FS0588)
 	
 <a 「d="FS0001"></a>
-## FS0001: The type 'X' does not match the type 'Y' ##
+## FS0001: この式に必要な型は 'X' ですが、ここでは次の型が指定されています 'Y' ##
 
-This is probably the most common error you will run into. It can manifest itself in a wide variety of contexts, so I have grouped the most common problems together with examples and fixes. Do pay attention to the error message, as it is normally quite explicit about what the problem is.
+これはおそらく最も遭遇するエラーでしょう。さまざまな状況で発生するため、最も一般的な問題を例と解決方法と共にまとめています。エラーメッセージには通常、問題が何であるかが明示的に記載されているため、注意してください。
 
 <table class="table table-striped table-bordered table-condensed">
 <thead>
   <tr>
-	<th>Error message</th>
-	<th>Possible causes</th>
+	<th>エラーメッセージ</th>
+	<th>考えられる原因</th>
   </tr>
 </thead>
 <tbody>
   <tr>
-	<td>The type 'float' does not match the type 'int'</td>
-	<td><a href="#FS0001A">A. Can't mix floats and ints</a></td>
+	<td>この式に必要な型は 'float' ですが、ここでは次の型が指定されています 'int'</td>
+	<td><a href="#FS0001A">A. int と float は混合できない</a></td>
   </tr>
   <tr>
-	<td>The type 'int' does not support any operators named 'DivideByInt'</td>
-	<td><a href="#FS0001A">A. Can't mix floats and ints.</a></td>
+	<td>型 'int' には必要な (実数または組み込み) メンバー 'DivideByInt' がないため、'X' ではサポートされません</td>
+	<td><a href="#FS0001A">A. int と float は混合できない</a></td>
   </tr>
   <tr>
-	<td>The type 'X' is not compatible with any of the types</td>
-	<td><a href="#FS0001B">B. Using the wrong numeric type.</a></td>
+	<td>型 'X' は、型 byte,int16,int32, ... のいずれとも互換性がありません</td>
+	<td><a href="#FS0001B">B. 間違った数値型を使用している</a></td>
   </tr>
   <tr>
-	<td>This type (function type) does not match the type (simple type). Note: function types have a arrow in them, like <code>'a -> 'b</code>.</td>
-	<td><a href="#FS0001C">C. Passing too many arguments to a function.</a></td>
+	<td>型 (関数型) は型 (単純な型) と一致しません 注意: 関数型には矢印が含まれており、例えば <code>'a -> 'b</code> のような形式になります。</td>
+	<td><a href="#FS0001C">C. 関数に引数を渡しすぎている</a></td>
   </tr>
   <tr>
-	<td>This expression was expected to have (function type) but here has (simple type)</td>
-	<td><a href="#FS0001C">C. Passing too many arguments to a function.</a></td>
+	<td>この式に必要な型は (関数型) ですが、ここでは次の型が指定されています (単純な型)</td>
+	<td><a href="#FS0001C">C. 関数に引数を渡しすぎている</a></td>
   </tr>
   <tr>
-	<td>This expression was expected to have (N part function) but here has (N-1 part function)</td>
-	<td><a href="#FS0001C">C. Passing too many arguments to a function.</a></td>
+	<td>型が一致しません。 (N項の関数) という指定が必要ですが、(N-1項の関数) が指定されました。</td>
+	<td><a href="#FS0001C">C. 関数に引数を渡しすぎている</a></td>
   </tr>
   <tr>
 	<td>This expression was expected to have (simple type) but here has (function type)</td>
@@ -250,80 +250,80 @@ This is probably the most common error you will run into. It can manifest itself
 </table>
 
 <a id="FS0001A"></a>
-### A. Can't mix ints and floats ###
+### A. int と float は混合できない ###
 
-Unlike C# and most imperative languages, ints and floats cannot be mixed in expressions. You will get a type error if you attempt this:
+C# やほとんどの命令型言語とは異なり、F# では int と float を式の中で混用できません。次のようにしようとすると、型エラーが発生します。
 
 ```
-1 + 2.0  //wrong
-   // => error FS0001: The type 'float' does not match the type 'int'
+1 + 2.0  //間違い
+   // => error FS0001: この式に必要な型は 'float' ですが、ここでは次の型が指定されています 'int'
 ```
    
-The fix is to cast the int into a `float` first:
+解決方法は、まず int を `float` にキャストすることです。
 
 ```
-float 1 + 2.0  //correct
+float 1 + 2.0  //正しい
 ```
 
-This issue can also manifest itself in library functions and other places. For example, you cannot do "`average`" on a list of ints.
+この問題は、ライブラリ関数や他の場所でも発生する可能性があります。たとえば、int のリストに対して `average` を適用することはできません。
 
 ```
-[1..10] |> List.average   // wrong
-   // => error FS0001: The type 'int' does not support any 
-   //    operators named 'DivideByInt'
+[1..10] |> List.average   // 間違い
+   // => error FS0001: 型 'int' には必要な (実数または組み込み) メンバー 'DivideByInt' がないため、
+   //    'List.average' ではサポートされません
 ```
    
-You must cast each int to a float first, as shown below:
+以下のように、最初に各 int を float にキャストする必要があります。
 
 ```
-[1..10] |> List.map float |> List.average  //correct 
-[1..10] |> List.averageBy float  //correct (uses averageBy)
+[1..10] |> List.map float |> List.average  //正しい 
+[1..10] |> List.averageBy float  //正しい (averageByを使う)
 ```
 
 <a id="FS0001B"></a>
-### B. Using the wrong numeric type ###
+### B. 間違った数値型を使用している ###
 
-You will get a "not compatible" error when a numeric cast failed.
+数値キャストが失敗すると、「互換性がありません」というエラーが発生します。
 
 ```
-printfn "hello %i" 1.0  // should be a int not a float
-  // error FS0001: The type 'float' is not compatible 
-  //               with any of the types byte,int16,int32...
+printfn "hello %i" 1.0  // float ではなく int でなければならない
+  // error FS0001: 型 'float' は、printf 形式の書式指定文字列の使用によって生じる型 
+  //               byte,int16,int32,... のいずれとも互換性がありません
 ```
 
-One possible fix is to cast it if appropriate.
+もし問題なければ、キャストするという方法が考えられます。
 
 ```
 printfn "hello %i" (int 1.0)
 ```
 
 <a id="FS0001C"></a>
-### C. Passing too many arguments to a function ###
+### C. 関数に引数を渡しすぎている ###
 
 ```
 let add x y = x + y
 let result = add 1 2 3
-// ==> error FS0001: The type ''a -> 'b' does not match the type 'int'
+// ==> error FS0001: 型 ''a -> 'b' は型 'int' と一致しません
 ```
 
-The clue is in the error. 
+エラーメッセージにヒントが隠れています。
 
-The fix is to remove one of the arguments!
+解決方法は、引数を 1 つ削除することです!
 
-Similar errors are caused by passing too many arguments to `printf`.
+`printf` に引数を渡しすぎることでも同様のエラーが発生します。
 
 ```
 printfn "hello" 42
-// ==> error FS0001: This expression was expected to have type 'a -> 'b    
-//                   but here has type unit    
+// ==> error FS0001: この式に必要な型は ''a -> 'b' 
+//                   ですが、ここでは次の型が指定されています 'unit'
 
 printfn "hello %i" 42 43
-// ==> Error FS0001: Type mismatch. Expecting a 'a -> 'b -> 'c    
-//                   but given a 'a -> unit    
+// ==> Error FS0001: 型が一致しません。 ''a -> 'b -> 'c' という指定が必要ですが、
+//                   ''a -> unit' が指定されました。型 ''a -> 'b' は型 'unit' と一致しません
 
 printfn "hello %i %i" 42 43 44
-// ==> Error FS0001: Type mismatch. Expecting a  'a -> 'b -> 'c -> 'd    
-//                   but given a 'a -> 'b -> unit   
+// ==> Error FS0001: 型が一致しません。 ''a -> 'b -> 'c -> 'd' という指定が必要ですが、
+//                   ''a -> 'b -> unit' が指定されました。型 ''a -> 'b' は型 'unit' と一致しません
 ```
 
 <a id="FS0001D"></a>
@@ -334,10 +334,10 @@ If you do not pass enough arguments to a function, you will get a partial applic
 ```
 let reader = new System.IO.StringReader("hello");
 
-let line = reader.ReadLine        //wrong but compiler doesn't complain
+let line = reader.ReadLine        //間違い but compiler doesn't complain
 printfn "The line is %s" line     //compiler error here!
-// ==> error FS0001: This expression was expected to have type string    
-//                   but here has type unit -> string    
+// ==> error FS0001: この式に必要な型は 'string'
+//                   ですが、ここでは次の型が指定されています 'unit -> string'
 ```
 
 This is particularly common for some .NET library functions that expect a unit parameter, such as `ReadLine` above.
@@ -345,7 +345,7 @@ This is particularly common for some .NET library functions that expect a unit p
 The fix is to pass the correct number of parameters. Check the type of the result value to make sure that it is indeed a simple type.  In the `ReadLine` case, the fix is to pass a `()` argument.
 
 ```
-let line = reader.ReadLine()      //correct
+let line = reader.ReadLine()      //正しい
 printfn "The line is %s" line     //no compiler error 
 ```
 
@@ -356,8 +356,8 @@ The simplest case is that you have the wrong type, or you are using the wrong ty
 
 ```
 printfn "hello %s" 1.0
-// => error FS0001: This expression was expected to have type string    
-//                  but here has type float    
+// => error FS0001: この式に必要な型は 'string'
+//                  ですが、ここでは次の型が指定されています 'float'
 ```
 
 <a id="FS0001F"></a>
@@ -369,8 +369,8 @@ A common mistake is that if you have a branch or match expression, then every br
 let f x = 
   if x > 1 then "hello"
   else 42
-// => error FS0001: This expression was expected to have type string    
-//                  but here has type int
+// => error FS0001: if' 式のすべてのブランチは、最初のブランチの型 (ここでは 'string') 
+//                  に暗黙的に変換可能な値を返す必要があります。このブランチの返す値の型は 'int' です。
 ```
 
 ```
@@ -378,8 +378,8 @@ let g x =
   match x with
   | 1 -> "hello"
   | _ -> 42
-// error FS0001: This expression was expected to have type
-//               string but here has type int
+// error FS0001: パターン マッチ式のすべてのブランチは、最初のブランチの型 (ここでは 'string') 
+//               に暗黙的に変換可能な値を返す必要があります。このブランチが返す値の型は 'int' です。
 ```
 
 Obviously, the straightforward fix is to make each branch return the same type. 
@@ -400,8 +400,9 @@ Remember that if an "else" branch is missing, it is assumed to return unit, so t
 ```
 let f x = 
   if x > 1 then "hello"
-// error FS0001: This expression was expected to have type
-//               unit but here has type string    
+// error FS0001: 'if' 式に 'else' ブランチがありません。'then' ブランチは型 'string' です。
+//               'if' はステートメ ントではなく式であるため、
+//               同じ型の値を返す 'else' ブランチを追加してください。
 ```
 
 If both branches cannot return the same type, you may need to create a new union type that can contain both types.
@@ -425,8 +426,8 @@ let doSomething x =
    // do something more
 
 doSomething 1
-// => error FS0001: This expression was expected to have type string    
-//    but here has type int    
+// => error FS0001: この式に必要な型は 'string' 
+//    ですが、ここでは次の型が指定されています 'int'
 ```
 
 The fix is to check the function signatures and drill down until you find the guilty party.  Also, use the most generic types possible, and avoid type annotations if possible.
@@ -440,8 +441,8 @@ If you are new to F#, you might accidentally use a comma instead of spaces to se
 // define a two parameter function
 let add x y = x + 1
 
-add(x,y)   // FS0001: This expression was expected to have 
-           // type int but here has type  'a * 'b   
+add(x,y)   // FS0001: この式に必要な型は 'int'
+           // ですが、ここでは次の型が指定されています ''a * 'b'
 ```
 
 The fix is: don't use a comma!
@@ -454,10 +455,10 @@ One area where commas *are* used is when calling .NET library functions.
 These all take tuples as arguments, so the comma form is correct. In fact, these calls look just the same as they would from C#:  
 
 ```
-// correct
+// 正しい
 System.String.Compare("a","b")
 
-// incorrect
+// 正しくない
 System.String.Compare "a" "b"
 ```
 
@@ -471,9 +472,9 @@ Tuples with different types cannot be compared. Trying to compare a tuple of typ
 let  t1 = (0, 1)
 let  t2 = (0, "hello")
 t1 = t2
-// => error FS0001: Type mismatch. Expecting a int * int    
-//    but given a int * string    
-//    The type 'int' does not match the type 'string'
+// => error FS0001: 型が一致しません。 'int * int'
+//    という指定が必要ですが、 'int * string'
+//    が指定されました。型 'int' は型 'string' と一致しません
 ```
 
 And the length must be the same:
@@ -482,25 +483,23 @@ And the length must be the same:
 let  t1 = (0, 1)
 let  t2 = (0, 1, "hello")
 t1 = t2
-// => error FS0001: Type mismatch. Expecting a int * int    
-//    but given a int * int * string    
-//    The tuples have differing lengths of 2 and 3
+// => error FS0001: 型が一致しません。型の長さ 2 のタプルが必要です int * int
+//    ただし、型の長さ 3 のタプルが指定された場合 int * int * string
 ```
 
 You can get the same issue when pattern matching tuples during binding:
 
 ```
 let x,y = 1,2,3
-// => error FS0001: Type mismatch. Expecting a 'a * 'b    
-//                  but given a 'a * 'b * 'c    
-//                  The tuples have differing lengths of 2 and 3
+// => error FS0001: 型が一致しません。型の長さ 2 のタプルが必要です 'a * 'b  
+//                  ただし、型の長さ 3 のタプルが指定された場合 int * int * int
 
 let f (x,y) = x + y
 let z = (1,"hello")
 let result = f z
-// => error FS0001: Type mismatch. Expecting a int * int    
-//                  but given a int * string    
-//                  The type 'int' does not match the type 'string'
+// => error FS0001: 型が一致しません。 'int * int'
+//                  という指定が必要ですが、'int * string'
+//                  が指定されました。型 'int' は型 'string' と一致しません
 ```
 
 
@@ -512,16 +511,16 @@ If you use `!` as a "not" operator, you will get a type error mentioning the wor
 
 ```
 let y = true
-let z = !y     //wrong
-// => error FS0001: This expression was expected to have 
-//    type 'a ref but here has type bool    
+let z = !y     //間違い
+// => error FS0001: この式に必要な型は ''a ref' ですが、ここでは次の型が指定されています 'bool'
+//    '!' 演算子は ref セルの逆参照に使用されます。ここに 'not expr' を使用することをご検討ください。 
 ```
 
 The fix is to use the "not" keyword instead.
 
 ```
 let y = true
-let z = not y   //correct
+let z = not y   //正しい
 ```
 
 
@@ -532,7 +531,7 @@ If you mix up operator precedence, you may get type errors.  Generally, function
 
 ```
 String.length "hello" + "world"
-   // => error FS0001:  The type 'string' does not match the type 'int'
+   // => error FS0001:  型 'string' は型 'int' と一致しません
 
 // what is really happening
 (String.length "hello") + "world"  
@@ -541,14 +540,14 @@ String.length "hello" + "world"
 The fix is to use parentheses.
 
 ```
-String.length ("hello" + "world")  // corrected
+String.length ("hello" + "world")  // 訂正された
 ```
 
 Conversely, the pipe operator is low precedence compared to other operators.
 
 ```
 let result = 42 + [1..10] |> List.sum
- // => => error FS0001:  The type ''a list' does not match the type 'int'
+ // => => error FS0001:  型 ''a list' は型 'int' と一致しません
 
 // what is really happening
 let result = (42 + [1..10]) |> List.sum  
@@ -589,8 +588,8 @@ wrap {
     let z1 = x + y
     return z
     }
-// error FS0001: This expression was expected to have type Wrapper<'a>
-//               but here has type 'b * 'c    
+// error FS0001: この式に必要な型は 'Wrapper<'a>' ですが、ここでは次の型が指定されています
+//               'Wrapper<int> * ('b -> ('c -> Wrapper<'d>) -> Wrapper<'d>)'
 ```
 
 The reason is that "`Bind`" expects a tuple `(wrapper,func)`, not two parameters.  (Check the signature for bind in the F# documentation).
@@ -605,14 +604,14 @@ type wrapBuilder() =
 ```
 
 <a id="FS0003"></a>
-## FS0003: This value is not a function and cannot be applied ##
+## FS0003: この値は関数ではないため、適用できません。 ##
 
 This error typically occurs when passing too many arguments to a function.
 
 ```
 let add1 x = x + 1
 let x = add1 2 3
-// ==>   error FS0003: This value is not a function and cannot be applied
+// ==>   error FS0003: この値は関数ではないため、適用できません。
 ```
 
 It can also occur when you do operator overloading, but the operators cannot be used as prefix or infix.
@@ -621,7 +620,7 @@ It can also occur when you do operator overloading, but the operators cannot be 
 let (!!) x y = x + y
 (!!) 1 2              // ok
 1 !! 2                // failed !! cannot be used as an infix operator
-// error FS0003: This value is not a function and cannot be applied
+// error FS0003: この値は関数ではないため、適用できません。
 ```
 
 <a id="FS0008"></a>
@@ -746,7 +745,7 @@ let something =
 This also occurs if you think you writing C# and you accidentally use semicolons to separate expressions:
 
 ```
-// wrong
+// 間違い
 let result = 2+2; "hello";
 
 // fixed
