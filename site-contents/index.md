@@ -17,7 +17,7 @@ hasNoCode: 1
 
 さらに以下のことも試すことができます。
 
-* [実務で F# を使う低リスクな 26 の方法](../posts/low-risk-ways-to-use-fsharp-at-work.md)。 今すぐ始めることができます - 許可は必要ありません!
+* [仕事で F# を使う低リスクな 26 の方法](../posts/low-risk-ways-to-use-fsharp-at-work.md)。 今すぐ始めることができます - 許可は必要ありません!
 
 ## チュートリアル
 

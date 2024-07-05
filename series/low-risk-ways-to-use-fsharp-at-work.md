@@ -4,33 +4,28 @@ title: "Low-risk ways to use F# at work"
 seriesIndexId: "Low-risk ways to use F# at work"
 ---
 
-So you're all excited about functional programming, and you've been learning F# in your spare time,
-and you're annoying your co-workers by ranting about how great it is, and you're itching to use it for serious stuff at work...
+関数型プログラミングにすっかり夢中になり、空き時間に F# を学び、その素晴らしさを同僚に熱弁して迷惑がられ、仕事で本格的に使いたくてうずうずしている...
 
-But then you hit a brick wall. 
+そんなあなたが、突然壁にぶつかります。
 
-Your workplace has a "C# only" policy and won't let you use F#. 
+職場には「 C# のみ」というポリシーがあり、F#の使用が認められないのです。
 
-If you work in a typical enterprise environment, getting a new language approved will be a long drawn out process,
-involving persuading your teammates, the QA guys, the ops guys, your boss, your boss's boss, and the [mysterious bloke down the hall](http://www.joelonsoftware.com/articles/fog0000000018.html) who you've never talked to.
-I would encourage you to start that process (a [helpful link for your manager](http://fpbridge.co.uk/why-fsharp.html)), but still, you're impatient and thinking "what can I do now?"
+典型的な企業環境で働いているなら、新しい言語の承認を得るのは長い道のりになるでしょう。チームメイト、 QA 担当者、運用担当者、上司、上司の上司、そして[廊下の奥にいる謎の人物](http://www.joelonsoftware.com/articles/fog0000000018.html)（今まで話したことのない人）を説得する必要があります。
+そのプロセスを始めることをお勧めします（[マネージャーに役立つリンク](http://fpbridge.co.uk/why-fsharp.html)）が、それでもあなたは焦れて「今すぐに何ができるだろう？」と考えているはずです。
 
-On the other hand, perhaps you work in a flexible, easy going place, where you can do what you like.
+一方で、柔軟で自由な職場環境で、好きなことができる立場にいるかもしれません。
 
-But you're conscientious, and don't want to be one of those people who re-write some mission critical system in APL, and then vanish without trace, leaving
-your replacement some mind-bendingly cryptic code to maintain.
-No, you want to make sure that you are not doing anything that will affect your team's [bus factor](https://en.wikipedia.org/wiki/Bus_factor).
+しかし、あなたは良心的なので、ミッションクリティカルなシステムを APL で書き直して姿を消し、後任に頭の痛む暗号のようなコードを残していく、そんな人になりたくはありません。
+決して、チームの[バス係数](https://en.wikipedia.org/wiki/Bus_factor)に影響を与えるようなことはしたくないのです。
 
-So in both these scenarios, you want to use F# at work, but you can't (or don't want to) use it for core application code.
+つまり、これらのシナリオでは、仕事で F# を使いたいけれど、コアとなるアプリケーションコードには使えない（または使いたくない）という状況です。
 
-What can you do? 
+何ができるでしょうか？
 
-Well, don't worry! This series will suggest a number of ways you can get your hands dirty with F# in a low-risk, incremental way, without affecting any mission critical code.
+心配いりません！このシリーズでは、ミッションクリティカルなコードに影響を与えることなく、低リスクで段階的にF#を実践できる方法をいくつか提案します。
 
-
-
-* [Twenty six low-risk ways to use F# at work](../posts/low-risk-ways-to-use-fsharp-at-work.md). You can start right now -- no permission needed.
-* [Using F# for development and devops scripts](../posts/low-risk-ways-to-use-fsharp-at-work-2.md). Twenty six low-risk ways to use F# at work (part 2).
-* [Using F# for testing](../posts/low-risk-ways-to-use-fsharp-at-work-3.md). Twenty six low-risk ways to use F# at work (part 3).
-* [Using F# for database related tasks](../posts/low-risk-ways-to-use-fsharp-at-work-4.md). Twenty six low-risk ways to use F# at work (part 4).
-* [Other interesting ways of using F# at work](../posts/low-risk-ways-to-use-fsharp-at-work-5.md). Twenty six low-risk ways to use F# at work (part 5).
+* [仕事で F# を使う 26 の低リスクな方法](../posts/low-risk-ways-to-use-fsharp-at-work.md)。今すぐ始められます - 許可は必要ありません。
+* [開発と DevOps スクリプトに F# を使う](../posts/low-risk-ways-to-use-fsharp-at-work-2.md)。仕事で F# を使う 26 の低リスクな方法（パート2）。
+* [テストに F# を使う](../posts/low-risk-ways-to-use-fsharp-at-work-3.md)。仕事で F# を使う26の低リスクな方法（パート3）。
+* [データベース関連タスクに F #を使う](../posts/low-risk-ways-to-use-fsharp-at-work-4.md)。仕事で F# を使う 26 の低リスクな方法（パート4）。
+* [仕事で F# を使うその他の興味深い方法](../posts/low-risk-ways-to-use-fsharp-at-work-5.md)。仕事で F# を使う 2 6の低リスクな方法（パート5）。

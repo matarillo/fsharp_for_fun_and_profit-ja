@@ -10,12 +10,12 @@
 * [60 秒でわかる F# シンタックス](posts/fsharp-in-60-seconds.md) 
 * [F# を学ぶ](learning-fsharp/index.md)
 * [F# のトラブルシューティング](troubleshooting-fsharp/index.md)
-* [F# を実務で使う低リスクな方法](series/low-risk-ways-to-use-fsharp-at-work.md) 
-  * [F# を実務で使う 26 の低リスクな方法](posts/low-risk-ways-to-use-fsharp-at-work.md)
+* [仕事で F# を使う低リスクな方法](series/low-risk-ways-to-use-fsharp-at-work.md) 
+  * [仕事で F# を使う 26 の低リスクな方法](posts/low-risk-ways-to-use-fsharp-at-work.md)
   * [開発と Devops スクリプトに F# を使う](posts/low-risk-ways-to-use-fsharp-at-work-2.md)
   * [テストに F# を使う](posts/low-risk-ways-to-use-fsharp-at-work-3.md)
   * [データベース関連タスクに F# を使う](posts/low-risk-ways-to-use-fsharp-at-work-4.md)
-  * [実務で F# を使うその他の興味深い方法](posts/low-risk-ways-to-use-fsharp-at-work-5.md)
+  * [仕事で F# を使うその他の興味深い方法](posts/low-risk-ways-to-use-fsharp-at-work-5.md)
 
 ### F# を使う理由
 
@@ -161,7 +161,7 @@
   * [bind を理解する](posts/elevated-world-2.md)
   * [コア関数の実際的な使い方](posts/elevated-world-3.md)
   * [traverse と sequence を理解する](posts/elevated-world-4.md)
-  * [map, apply, bind, sequence を実務で使う](posts/elevated-world-5.md)
+  * [map, apply, bind, sequence を仕事で使う](posts/elevated-world-5.md)
   * [Reader モナドの再発明](posts/elevated-world-6.md)
   * [Map, Bind, Apply まとめ](posts/elevated-world-7.md)
 * [「再帰型と Fold」 シリーズ](series/recursive-types-and-folds.md)       
