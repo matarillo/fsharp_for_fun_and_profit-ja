@@ -165,18 +165,18 @@ F#コンパイラは現在、左から右への1パスコンパイラである�
 
 * [FS0001: この式に必要な型は 'X' ですが、ここでは次の型が指定されています 'Y'](#FS0001)
 * [FS0003: この値は関数ではないため、適用できません。](#FS0003)
-* [FS0008: This runtime coercion or type test involves an indeterminate type](#FS0008)
-* [FS0010: Unexpected identifier in binding](#FS0010a)
-* [FS0010: Incomplete structured construct](#FS0010b)
-* [FS0013: The static coercion from type X to Y involves an indeterminate type](#FS0013)
-* [FS0020: This expression should have type 'unit'](#FS0020)
-* [FS0030: Value restriction](#FS0030)
-* [FS0035: This construct is deprecated](#FS0035)
-* [FS0039: The field, constructor or member X is not defined](#FS0039)
-* [FS0041: A unique overload for could not be determined](#FS0041)
-* [FS0049: Uppercase variable identifiers should not generally be used in patterns](#FS0049)
-* [FS0072: Lookup on object of indeterminate type](#FS0072)
-* [FS0588: Block following this 'let' is unfinished](#FS0588)
+* [FS0008: このランタイム型変換またはランタイム型テストには、不確定の型が使用されています](#FS0008)
+* [FS0010: 予期しない 識別子 です 束縛内](#FS0010a)
+* [FS0010: 構造化コンストラクトが不完全です](#FS0010b)
+* [FS0013: 型 X から型 Y の静的型変換には、不確定の型が使用されています](#FS0013)
+* [FS0020: この式の結果の型は 'X' で、暗黙的に無視されます](#FS0020)
+* [FS0030: 値の制限](#FS0030)
+* [FS0035: このコンストラクトは使用されなくなりました](#FS0035)
+* [FS0039: フィールド、コンストラクター、またはメンバー 'X' を定義していません](#FS0039)
+* [FS0041: 固有のオーバーロードを決定することができませんでした](#FS0041)
+* [FS0049: 通常、大文字の変数識別子はパターンに使用できません](#FS0049)
+* [FS0072: 不確定の型のオブジェクトに対する参照です](#FS0072)
+* [FS0588: この 'let' に続くブロックが完了していません](#FS0588)
 	
 <a 「d="FS0001"></a>
 ## FS0001: この式に必要な型は 'X' ですが、ここでは次の型が指定されています 'Y' ##
@@ -610,7 +610,7 @@ type wrapBuilder() =
 <a id="FS0003"></a>
 ## FS0003: この値は関数ではないため、適用できません。 ##
 
-This error typically occurs when passing too many arguments to a function.
+このエラーは通常、関数に多すぎる引数を渡した時に発生します。
 
 ```
 let add1 x = x + 1
@@ -618,127 +618,134 @@ let x = add1 2 3
 // ==>   error FS0003: この値は関数ではないため、適用できません。
 ```
 
-It can also occur when you do operator overloading, but the operators cannot be used as prefix or infix.
+また、演算子のオーバーロードを行う際に、その演算子を前置または中置演算子として使用できない場合にも発生することがあります。
 
 ```
 let (!!) x y = x + y
 (!!) 1 2              // ok
-1 !! 2                // failed !! cannot be used as an infix operator
+1 !! 2                // 失敗 !! 中置演算子として使用できない
 // error FS0003: この値は関数ではないため、適用できません。
 ```
 
 <a id="FS0008"></a>
-## FS0008: This runtime coercion or type test involves an indeterminate type ##
+## FS0008: このランタイム型変換またはランタイム型テストには、不確定の型が使用されています ##
 
-You will often see this when attempting to use "`:?`" operator to match on a type.
+これは多くの場合、 `:?` 演算子を使用して型のマッチングを試みる際に見られます。
 
 ```
 let detectType v =
     match v with
         | :? int -> printfn "this is an int"
         | _ -> printfn "something else"
-// error FS0008: This runtime coercion or type test from type 'a to int    
-// involves an indeterminate type based on information prior to this program point. 
-// Runtime type tests are not allowed on some types. Further type annotations are needed.
+// error FS0008: この型 'a から型 int へのランタイム型変換またはランタイム型テストには、
+// このプログラムの場所の前方にある情報に基づく不確定の型が使用されています。
+// ランタイム型テストが許可されていない型もあります。型の注釈を増やしてください。
 ```
 
-The message tells you the problem: "runtime type tests are not allowed on some types".  
+メッセージが問題を示しています。「ランタイム型テストが許可されていない型もあります。」
 
-The answer is to "box" the value which forces it into a reference type, and then you can type check it:
+解決策は値を "box" 化することです。これにより参照型に強制され、その後型チェックを行うことができます。
 
 ```
 let detectTypeBoxed v =
-    match box v with      // used "box v" 
+    match box v with      // "box v"を使用
         | :? int -> printfn "this is an int"
         | _ -> printfn "something else"
 
-//test
+//テスト
 detectTypeBoxed 1
 detectTypeBoxed 3.14
 ```
 
 <a id="FS0010a"></a>
-## FS0010: Unexpected identifier in binding ##
+## FS0010: 予期しない 識別子 です 束縛内 ##
 
-Typically caused by breaking the "offside" rule for aligning expressions in a block.
+通常、ブロック内の式の整列に関する「オフサイド」ルールを破ることによって引き起こされます。
 
 ```
 //3456789
 let f = 
-  let x=1     // offside line is at column 3 
-   x+1        // oops! don't start at column 4
-              // error FS0010: Unexpected identifier in binding
+  let x=1     // オフサイドラインは列3 
+   x+1        // おっと! 列4から始めないでください
+              // error FS0010: 予期しない 識別子 です 束縛内。
+              // このポイントまたはその前にある構造化コンストラクトが不完全です
+              // または他のトークンを指定してください。
 ```
          
-The fix is to align the code correctly!
+修正方法はコードを正しく整列させることです!
 
-See also [FS0588: Block following this 'let' is unfinished](#FS0588) for another issue caused by alignment.
+整列によって引き起こされる別の問題については、「[FS0588: この 'let' に続くブロックが完了していません](#FS0588)」も参照してください。
  
 <a id="FS0010b"></a>
-## FS0010: Incomplete structured construct ##
+## FS0010: 構造化コンストラクトが不完全です ##
 
-Often occurs if you are missing parentheses from a class constructor:
+クラスコンストラクタからかっこが抜けている場合によく発生します。
 
 ```
 type Something() =
    let field = ()
 
-let x1 = new Something     // Error FS0010 
+let x1 = new Something     // error FS0010:
+                           // この場所またはその前にある構造化コンストラクトが不完全です 
 let x2 = new Something()   // OK!
 ```
 
-Can also occur if you forgot to put parentheses around an operator:
+演算子をかっこで囲むのを忘れた場合にも発生する可能性があります。
 
 ```
-// define new operator
+// 新しい演算子を定義
 let (|+) a = -a
 
-|+ 1    // error FS0010: 
-        // Unexpected infix operator
+|+ 1    // error FS0010:
+        // 予期しない 挿入演算子 です
 
-(|+) 1  // with parentheses -- OK!
+(|+) 1  // かっこ付き -- OK!
 ```
 
-Can also occur if you are missing one side of an infix operator:
+中置演算子の一方が欠けている場合にも発生する可能性があります。
 
 ```
-|| true  // error FS0010: Unexpected symbol '||'
+|| true  // error FS0010:
+         // 予期しない シンボル '||' です
 false || true  // OK
 ```
 
-Can also occur if you attempt to send a namespace definition to F# interactive. The interactive console does not allow namespaces.
+F#インタラクティブに名前空間定義を送ろうとした場合にも発生する可能性があります。インタラクティブコンソールは名前空間を許可しません。
 
 ```
-namespace Customer  // FS0010: Incomplete structured construct 
+namespace Customer  // error FS0010:
+                    // この場所またはその前にある構造化コンストラクトが不完全です
 
-// declare a type
+// 型を宣言
 type Person= {First:string; Last:string}
 ```
 
 <a id="FS0013"></a>
-## FS0013: The static coercion from type X to Y involves an indeterminate type ##
+## FS0013: 型 X から型 Y の静的型変換には、不確定の型が使用されています ##
 
 This is generally caused by implic
 
 <a id="FS0020"></a>
-## FS0020: This expression should have type 'unit' ##
+## FS0020: この式の結果の型は 'X' で、暗黙的に無視されます ##
 
-This error is commonly found in two situations:
+このエラーは一般的に2つの状況で見られます。
 
-* Expressions that are not the last expression in the block
-* Using wrong assignment operator
+* ブロック内の最後の式ではない式
+* 間違った代入演算子の使用
 
-### FS0020 with expressions that are not the last expression in the block ###
+### ブロック内の最後の式ではない式における FS0020 ###
 
-Only the last expression in a block can return a value. All others must return unit. So this typically occurs when you have a function in a place that is not the last function. 
+ブロック内で値を返すことができるのは最後の式のみです。それ以外はすべて unit を返す必要があります。そのため、これは通常、最後の関数ではない場所に関数がある場合に発生します。
 
 ```
 let something = 
-  2+2               // => FS0020: This expression should have type 'unit'
+  2+2   // => FS0020: この式の結果の型は 'int' で、暗黙的に無視されます。
+        //            'ignore' を使用してこの値を明示的に破棄してください (例: 'expr |> ignore')。
+        //            または 'let' を使用して結果を名前にバインドします (例: 'let result = expr')。
   "hello"
 ```
 
-The easy fix is use `ignore`.  But ask yourself why you are using a function and then throwing away the answer ? it might be a bug.
+簡単な修正方法は `ignore` を使用することです。しかし、なぜ関数を使用してその結果を捨てているのか自問してみてください。バグかもしれません。
 
 ```
 let something = 
@@ -746,36 +753,39 @@ let something =
   "hello"
 ```
 
-This also occurs if you think you writing C# and you accidentally use semicolons to separate expressions:
+これはまた、C#を書いていると思い込んで、誤ってセミコロンを使って式を区切ろうとした場合にも発生します。
 
 ```
 // 間違い
 let result = 2+2; "hello";
 
-// fixed
+// 修正
 let result = 2+2 |> ignore; "hello";
 ```
 
-### FS0020 with assignment ###
+### 代入演算子における FS0020 ###
 
-Another variant of this error occurs when assigning to a property.
+このエラーの別のバリエーションは、プロパティに代入する際に発生します。
 
-    This expression should have type 'unit', but has type 'Y'. 
+    この等式の結果の型は 'bool' で、暗黙的に破棄されます。
+    'let' を使用して結果を名前にバインドすることを検討してください。
+    たとえば、'let result = expression' などとします。
+    意図的に値を変更する場合、'<-' 演算子を 'x <- expression' などと使用します。
 
-With this error, chances are you have confused the assignment operator "`<-`" for mutable values, with the equality comparison operator "`=`".
+このエラーが発生した場合、可変値に対する代入演算子 `<-` と等価比較演算子 `=` を混同している可能性が高いです。
 
 ```
-// '=' versus '<-'
+// '=' と '<-'
 let add() =
     let mutable x = 1
     x = x + 1          // warning FS0020
     printfn "%d" x    
 ```
 
-The fix is to use the proper assignment operator.
+修正方法は適切な代入演算子を使用することです。
 
 ```
-// fixed
+// 修正
 let add() =
     let mutable x = 1
     x <- x + 1
@@ -783,11 +793,11 @@ let add() =
 ```
 
 <a id="FS0030"></a>	
-## FS0030: Value restriction ##
+## FS0030: 値の制限 ##
 
-This is related to F#'s automatic generalization to generic types whenever possible. 
+これは、F# が可能な限り自動でジェネリック型へ一般化しようとする機能に関連しています。
 
-For example, given :
+例えば、次のようなコードがあった場合、
 
 ```
 let id x = x
@@ -795,7 +805,7 @@ let compose f g x = g (f x)
 let opt = None
 ```
 
-F#'s type inference will cleverly figure out the generic types.
+F# の型推論は巧妙にジェネリック型を推測してくれます。
 
 ```
 val id : 'a -> 'a
@@ -803,51 +813,51 @@ val compose : ('a -> 'b) -> ('b -> 'c) -> 'a -> 'c
 val opt : 'a option
 ```
 
-However in some cases, the F# compiler feels that the code is ambiguous, and, even though it looks like it is guessing the type correctly, it needs you to be more specific:
+しかし、場合によっては F# コンパイラはコードが曖昧だと判断し、型を正しく推測できそうに見えても、より詳細な指定を要求することがあります。
 
 ```
 let idMap = List.map id             // error FS0030
 let blankConcat = String.concat ""  // error FS0030
 ```
 
-Almost always this will be caused by trying to define a partially applied function, and almost always, the easiest fix is to explicitly add the missing parameter: 
+ほとんどの場合、これは部分適用関数を定義しようとしたことが原因であり、最も簡単な修正方法は、欠けている引数を明示的に追加することです。
 
 ```
 let idMap list = List.map id list             // OK
 let blankConcat list = String.concat "" list  // OK
 ```
 
-For more details see the MSDN article on ["automatic generalization"](http://msdn.microsoft.com/en-us/library/dd233183%28v=VS.100%29.aspx).
+詳細は、「[自動ジェネリック化](https://learn.microsoft.com/ja-jp/dotnet/fsharp/language-reference/generics/automatic-generalization)」に関する Microsoft Learn 記事を参照してください。
 
 <a id="FS0035"></a>	
-## FS0035: This construct is deprecated ##
+## FS0035: このコンストラクトは使用されなくなりました ##
 
-F# syntax has been cleaned up over the last few years, so if you are using examples from an older F# book or webpage, you may run into this.  See the MSDN documentation for the correct syntax.
+F# の構文はここ数年で改善されており、古い F# の書籍やウェブページからのサンプルを使用していると、このエラーが発生するかもしれません。正しい構文については、Microsoft Learn ドキュメントを参照してください。
 
 ```
 let x = 10
-let rnd1 = System.Random x         // Good
-let rnd2 = new System.Random(x)    // Good
+let rnd1 = System.Random x         // よい
+let rnd2 = new System.Random(x)    // よい
 let rnd3 = new System.Random x     // error FS0035
 ```
 
 <a id="FS0039"></a>	
-## FS0039: The field, constructor or member X is not defined ##
+## FS0039: フィールド、コンストラクター、またはメンバー 'X' を定義していません ##
 
-This error is commonly found in four situations:
+このエラーは一般的に以下の4つの状況で見られます。
 
-* The obvious case where something really isn't defined! And make sure that you don't have a typo or case mismatch either.
-* Interfaces
-* Recursion
-* Extension methods
+* 明らかに、何かが実際に定義されていないケース! また、タイプミスや大文字小文字の不一致がないことも確認してください。
+* インターフェース
+* 再帰
+* 拡張メソッド
 
-### FS0039 with interfaces ###
+### インターフェースにおける FS0039 ###
 
-In F# all interfaces are "explicit" implementations rather than "implicit". (Read the C# documentation on ["explicit interface implementation"](http://msdn.microsoft.com/en-us/library/aa288461%28v=vs.71%29.aspx) for an explanation of the difference). 
+F#ではすべてのインターフェースが「明示的」実装であり、「暗黙的」ではありません（「明示的インターフェース実装」の違いについての説明は、C#の「[明示的なインターフェイスの実装](https://learn.microsoft.com/ja-jp/dotnet/csharp/programming-guide/interfaces/explicit-interface-implementation)」ドキュメントを参照してください）。
 
-The key point is that when a interface member is explicitly implemented, it cannot be accessed through a normal class instance, but only through an instance of the interface, so you have to cast to the interface type by using the `:>` operator.
+重要なポイントは、インターフェースメンバーが明示的に実装されている場合、通常のクラスインスタンスを通じてアクセスできず、インターフェースのインスタンスを通じてのみアクセスできるため、 `:>` 演算子を使用してインターフェース型にキャストする必要があるということです。
 
-Here's an example of a class that implements an interface:
+以下は、インターフェースを実装するクラスの例です。
 
 ```
 type MyResource() = 
@@ -855,18 +865,18 @@ type MyResource() =
        member this.Dispose() = printfn "disposed"
 ```
 
-This doesn't work:
+これは機能しません。
 
 ```
 let x = new MyResource()
-x.Dispose()  // error FS0039: The field, constructor 
-             // or member 'Dispose' is not defined
+x.Dispose()  // error FS0039: 型 'MyResource' は、フィールド、コンストラクター、
+             // またはメンバー 'Dispose' を定義していません。
 ```
 
-The fix is to cast the object to the interface, as below:
+修正方法は、以下のようにオブジェクトをインターフェースにキャストすることです。
 
 ```
-// fixed by casting to System.IDisposable 
+// System.IDisposableにキャストすることで修正
 (x :> System.IDisposable).Dispose()   // OK
 
 let y =  new MyResource() :> System.IDisposable 
@@ -874,9 +884,9 @@ y.Dispose()   // OK
 ```
 
 
-### FS0039 with recursion ###
+### 再帰における FS0039 ###
 
-Here's a standard Fibonacci implementation: 
+以下は標準的なフィボナッチ実装です。
 
 ```
 let fib i = 
@@ -886,13 +896,13 @@ let fib i =
    | n -> fib(n-1) + fib(n-2)
 ```
 
-Unfortunately, this will not compile: 
+残念ながら、これはコンパイルされません。
 
-    Error FS0039: The value or constructor 'fib' is not defined
+    error FS0039: 値またはコンストラクター 'fib' が定義されていません。
 
-The reason is that when the compiler sees 'fib' in the body, it doesn't know about the function because it hasn't finished compiling it yet!
+理由は、コンパイラが関数本体の中で「fib」という名前を見つけても、その時点ではまだ関数全体のコンパイルが終わっていないため、その関数のことを知らないからです!
 
-The fix is to use the "`rec`" keyword.
+修正方法は、 `rec` キーワードを使用することです。
 
 ```
 let rec fib i = 
@@ -902,7 +912,7 @@ let rec fib i =
    | n -> fib(n-1) + fib(n-2)
 ```
 
-Note that this only applies to "`let`" functions. Member functions do not need this, because the scope rules are slightly different.
+これは `let` 関数にのみ適用されることに注意してください。メンバー関数はこれを必要としません。なぜなら、スコープルールが少し異なるためです。
 
 ```
 type FibHelper() =
@@ -913,11 +923,11 @@ type FibHelper() =
        | n -> fib(n-1) + fib(n-2)
 ```
 
-### FS0039 with extension methods ###
+### 拡張メソッドにおける FS0039 ###
 
-If you have defined an extension method, you won't be able to use it unless the module is in scope.
+拡張メソッドを定義している場合、モジュールがスコープ内にないと使用できません。
 
-Here's a simple extension to demonstrate:
+これを示すための簡単な拡張メソッドを以下に示します。
 
 ```
 module IntExtensions = 
@@ -925,45 +935,45 @@ module IntExtensions =
         member this.IsEven = this % 2 = 0
 ```
 
-If you try to use it the extension, you get the FS0039 error:
+拡張メソッドを使用しようとすると、FS0039エラーが発生します。
 
 ```
 let i = 2
 let result = i.IsEven  
-    // FS0039: The field, constructor or 
-    // member 'IsEven' is not defined
+    // error FS0039: 型 'Int32' は、フィールド、コンストラクター、
+    // またはメンバー 'IsEven' を定義していません。
 ```
     
-The fix is just to open the `IntExtensions` module.
+修正方法は、単に `IntExtensions` モジュールを開くことです。
     
 ```
-open IntExtensions // bring module into scope
+open IntExtensions // モジュールをスコープに入れる
 let i = 2
-let result = i.IsEven  // fixed!
+let result = i.IsEven  // 修正された!
 ```
 
 <a id="FS0041"></a>	
-## FS0041: A unique overload for could not be determined ##
+## FS0041: 固有のオーバーロードを決定することができませんでした ##
 
-This can be caused when calling a .NET library function that has multiple overloads:
+これは、複数のオーバーロードを持つ.NETライブラリ関数を呼び出す際に発生することがあります。
 
 ```
 let streamReader filename = new System.IO.StreamReader(filename) // FS0041
 ```
 
-There a number of ways to fix this. One way is to use an explicit type annotation:
+この問題を解決するには複数の方法があります。一つの方法は、明示的な型注釈を使用することです。
 
 ```
 let streamReader filename = new System.IO.StreamReader(filename:string) // OK
 ```
 
-You can sometimes use a named parameter to avoid the type annotation:
+場合によっては、型注釈を避けるために名前付きパラメータを使用できます。
 
 ```
 let streamReader filename = new System.IO.StreamReader(path=filename) // OK
 ```
 
-Or you can try to create intermediate objects that help the type inference, again without needing type annotations:
+または、型推論を助ける中間オブジェクトを作成することで、型注釈を必要とせずに解決できる場合もあります。
 
 ```
 let streamReader filename = 
@@ -972,22 +982,22 @@ let streamReader filename =
 ```
 	
 <a id="FS0049"></a>	
-## FS0049: Uppercase variable identifiers should not generally be used in patterns ##
+## FS0049: 通常、大文字の変数識別子はパターンに使用できません ##
 
-When pattern matching, be aware of a subtle difference between the pure F# union types which consist of a tag only, and a .NET Enum type.
+パターンマッチングを行う際、タグのみで構成される純粋な F# の判別共用体と .NET の列挙型の間には微妙な違いがあることに注意してください。
 
-Pure F# union type:
+純粋な F# の判別共用体:
 
 ```
 type ColorUnion = Red | Yellow 
 let redUnion = Red  
 
 match redUnion with
-| Red -> printfn "red"     // no problem
+| Red -> printfn "red"     // 問題なし
 | _ -> printfn "something else" 
 ```
 
-But with .NET enums you must fully qualify them:
+しかし、 .NET の列挙型では完全修飾名を使用する必要があります。
 
 ```
 type ColorEnum = Green=0 | Blue=1      // enum 
@@ -998,7 +1008,7 @@ match blueEnum with
 | _ -> printfn "something else" 
 ```
 
-The fixed version:
+修正後のバージョン:
 
 ```
 match blueEnum with
@@ -1007,60 +1017,62 @@ match blueEnum with
 ```
 
 <a id="FS0072"></a>	
-## FS0072: Lookup on object of indeterminate type ##
+## FS0072: 不確定の型のオブジェクトに対する参照です ##
 
-This occurs when "dotting into" an object whose type is unknown.
+これは、型が不明なオブジェクトに対して「ドット演算子を使用して」アクセスしようとした場合に発生します。
 
-Consider the following example:
+以下の例を考えてみましょう。
 
 ```
 let stringLength x = x.Length // Error FS0072
 ```
 
-The compiler does not know what type "x" is, and therefore does not know if "`Length`" is a valid method. 
+コンパイラは "x" の型を知らないため、 `Length` が有効なメソッドかどうかわかりません。
 
-There a number of ways to fix this. The crudest way is to provide an explicit type annotation:
+この問題を解決するには複数の方法があります。最も単純な方法は、明示的な型注釈を提供することです。
 
 ```
 let stringLength (x:string) = x.Length  // OK
 ```
 
-In some cases though, judicious rearrangement of the code can help. For example, the example below looks like it should work. It's obvious to a human that the `List.map` function is being applied to a list of strings, so why does `x.Length` cause an error?
+しかし、場合によっては、コードの適切な再配置が役立つこともあります。例えば、以下の例は動作するように見えます。人間から見れば、 `List.map` 関数が文字列のリストに適用されていることは明らかですが、なぜ `x.Length` がエラーを引き起こすのでしょうか？
 
 ```
 List.map (fun x -> x.Length) ["hello"; "world"] // Error FS0072      
 ```
 
-The reason is that the F# compiler is currently a one-pass compiler, and so type information present later in the program cannot be used if it hasn't been parsed yet. 
+理由は、F#コンパイラが現在1パス・コンパイラであるため、プログラムの後半に存在する型情報は、まだ解析されていない場合は使用できないからです。
 
-Yes, you can always explicitly annotate:
+もちろん、常に明示的に注釈をつけることはできます。
 
 ```
 List.map (fun x:string -> x.Length) ["hello"; "world"] // OK
 ```
 
-But another, more elegant way that will often fix the problem is to rearrange things so the known types come first, and the compiler can digest them before it moves to the next clause.
+しかし、より優雅な方法として、既知の型が先に来るように配置を変更し、コンパイラが次の句に移る前にそれらを処理できるようにする方法があります。多くの場合、この方法でも問題を解決できます。
 
 ```
 ["hello"; "world"] |> List.map (fun x -> x.Length)   // OK
 ```
 
-It's good practice to avoid explicit type annotations, so this approach is best, if it is feasible.
+明示的な型注釈を避けるのが良い習慣なので、可能であればこのアプローチが最適です。
 
 <a id="FS0588"></a>	
-## FS0588: Block following this 'let' is unfinished ##
+## FS0588: この 'let' に続くブロックが完了していません ##
 
-Caused by outdenting an expression in a block, and thus breaking the "offside rule".
+ブロック内の式をインデント解除することで「オフサイドルール」を破った場合に発生します。
 
 ```
 //3456789
 let f = 
-  let x=1    // offside line is at column 3 
- x+1         // offside! You are ahead of the ball!
-             // error FS0588: Block following this 
-             // 'let' is unfinished
+  let x=1    // オフサイドラインは列3 
+ x+1         // オフサイド! ボールより前に出た!
+             // error FS0588: この 'let' に続くブロックが完了していません。
+             // すべてのコード ブロックは式であり、結果を持つ必要があります。
+             // 'let' をブロック内の最後のコード要素にすることはできません。
+             // このブロックに明示的な結果を指定することを検討してください。
 ```
 
-The fix is to align the code correctly.
+修正方法は、コードを正しく整列させることです。
 
-See also [FS0010: Unexpected identifier in binding](#FS0010a) for another issue caused by alignment.
+整列によって引き起こされる別の問題については、「[FS0010: 予期しない識別子です 束縛内](#FS0010a)」も参照してください。
