@@ -1,147 +1,146 @@
 ---
 layout: post
-title: "Using F# for development and devops scripts"
-description: "Twenty six low-risk ways to use F# at work (part 2)"
+title: "開発と DevOps スクリプトに F# を使う"
+description: "仕事で F# を使う 26 の低リスクな方法（パート2）"
 categories: []
-seriesId: "Low-risk ways to use F# at work"
+seriesId: "仕事で F# を使う 26 の低リスクな方法"
 seriesOrder: 2
 
 ---
 
-This post is a continuation of the series on [low-risk ways to use F# at work](../posts/low-risk-ways-to-use-fsharp-at-work.md).
-I've been suggesting a number of ways you can get your hands dirty with F# in a low-risk, incremental way, without affecting any mission critical code.
+この投稿は、[仕事で F#を低リスクで使う方法](../posts/low-risk-ways-to-use-fsharp-at-work.md)のシリーズの続きです。
+ミッションクリティカルなコードに影響を与えることなく、低リスクで段階的にF#を実践できる方法をいくつか提案してきました。
 
-In this one, we'll talk about using F# for builds and other development and devops scripts.
+今回は、ビルドやその他の開発・DevOpsスクリプトにF#を使う方法について説明します。
 
-If you're new to F#, you might want to read the sections on [getting started](../posts/low-risk-ways-to-use-fsharp-at-work.md#getting-started) and
-[working with NuGet](../posts/low-risk-ways-to-use-fsharp-at-work.md#working-with-nuget) in the previous post.
+F#が初めての方は、前回の投稿の[はじめに](../posts/low-risk-ways-to-use-fsharp-at-work.md#getting-started)と
+[NuGetの使用](../posts/low-risk-ways-to-use-fsharp-at-work.md#working-with-nuget)のセクションを読むとよいでしょう。
 
-## Series contents
+## シリーズの内容
 
-Here's a list of shortcuts to the twenty six ways:
+26の方法へのショートカットリストは以下の通りです：
 
-**Part 1 - Using F# to explore and develop interactively**
+**パート1 - F#を使って対話的に探索し開発する**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-net-interactively">1. Use F# to explore the .NET framework interactively</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-own-code-interactively">2. Use F# to test your own code interactively</a> <br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-webservices-interactively">3. Use F# to play with webservices interactively</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-winforms-interactively">4. Use F# to play with UI's interactively</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-net-interactively">1. F#を使って.NETフレームワークを対話的に探索する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-own-code-interactively">2. F#を使って自分のコードを対話的にテストする</a> <br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-webservices-interactively">3. F#を使ってWebサービスを対話的に操作する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-winforms-interactively">4. F#を使ってUIを対話的に操作する</a><br />
 
-**Part 2 - Using F# for development and devops scripts**
+**パート2 - 開発およびDevOpsスクリプトにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#fake">5. Use FAKE for build and CI scripts</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-website-responding">6. An F# script to check that a website is responding</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-rss-to-csv">7. An F# script to convert an RSS feed into CSV</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-wmi-stats">8. An F# script that uses WMI to check the stats of a process</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-cloud">9. Use F# for configuring and managing the cloud</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#fake">5. ビルドとCIスクリプトにFAKEを使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-website-responding">6. Webサイトの応答をチェックするF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-rss-to-csv">7. RSSフィードをCSVに変換するF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-wmi-stats">8. WMIを使ってプロセスの統計をチェックするF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-cloud">9. クラウドの設定と管理にF#を使う</a><br />
 
-**Part 3 - Using F# for testing**
+**パート3 - テストにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-nunit">10. Use F# to write unit tests with readable names</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-runner">11. Use F# to run unit tests programmatically</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-other">12. Use F# to learn to write unit tests in other ways</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-fscheck">13. Use FsCheck to write better unit tests</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-dummy">14. Use FsCheck to create random dummy data</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-mock">15. Use F# to create mocks</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-canopy">16. Use F# to do automated browser testing</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-bdd">17. Use F# for Behaviour Driven Development</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-nunit">10. 読みやすい名前の単体テストをF#で書く</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-runner">11. F#を使ってプログラムで単体テストを実行する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-other">12. F#を使って他の方法で単体テストを書くことを学ぶ</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-fscheck">13. FsCheckを使ってより良い単体テストを書く</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-dummy">14. FsCheckを使ってランダムなダミーデータを作成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-mock">15. F#を使ってモックを作成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-canopy">16. F#を使って自動化されたブラウザテストを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-bdd">17. 振る舞い駆動開発にF#を使う</a><br />
 
-**Part 4. Using F# for database related tasks**
+**パート4. データベース関連のタスクにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-linqpad">18. Use F# to replace LINQpad</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-testprocs">19. Use F# to unit test stored procedures</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-randomdata">20. Use FsCheck to generate random database records</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-etl">21. Use F# to do simple ETL</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-sqlagent">22. Use F# to generate SQL Agent scripts</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-linqpad">18. F#を使ってLINQpadを置き換える</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-testprocs">19. F#を使ってストアドプロシージャの単体テストを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-randomdata">20. FsCheckを使ってランダムなデータベースレコードを生成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-etl">21. F#を使って簡単なETLを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-sqlagent">22. F#を使ってSQL Agentスクリプトを生成する</a><br />
 
-**Part 5: Other interesting ways of using F# **
+**パート5: F#を使うその他の興味深い方法**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-parsers">23. Use F# for parsing</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-diagramming">24. Use F# for diagramming and visualization</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-data-access">25. Use F# for accessing web-based data stores</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-data-science">26. Use F# for data science and machine learning</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-balance-power">(BONUS) 27: Balance the generation schedule for the UK power station fleet</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-parsers">23. パーシングにF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-diagramming">24. ダイアグラムと可視化にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-data-access">25. WebベースのデータストアへのアクセスにF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-data-science">26. データサイエンスと機械学習にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-balance-power">（ボーナス）27: イギリスの発電所群の発電スケジュールをバランスさせる</a><br />
 
 
 ----------
 
-## Part 2: Using F# for development and devops scripts
+## パート2: 開発とDevOpsスクリプトにF#を使う
 
-The next set of suggestions relates to using F# for the various scripts that revolve around development activities: builds, continuous integration, deployment, etc.
+次の提案は、開発活動に関連するさまざまなスクリプト（ビルド、継続的インテグレーション、デプロイメントなど）にF#を使うことに関するものです。
 
-For these kinds of small tasks, you need a good scripting language with a REPL.
-You could use PowerShell, or [ScriptCS](http://scriptcs.net/), or even Python. But why not give F# a go?
+このような小規模なタスクには、REPLを備えた優れたスクリプト言語が必要です。
+PowerShellや[ScriptCS](http://scriptcs.net/)、あるいはPythonを使うこともできますが、F#を試してみてはいかがでしょうか？
 
-* F# feels lightweight like Python (few or no type declarations).
-* F# can access .NET libraries, both the core ones and those downloaded via NuGet. 
-* F# has type providers (a big advantage over PowerShell and ScriptCS) that let you easily access a wide range of data sources.
-* All this in a concise, type-safe manner, with intellisense too!
+* F#はPythonのように軽量です（型宣言がほとんどまたは全くありません）。
+* F#は.NETライブラリ（コアライブラリとNuGetでダウンロードしたライブラリの両方）にアクセスできます。
+* F#には型プロバイダー（PowerShellやScriptCSに対する大きな利点）があり、幅広いデータソースに簡単にアクセスできます。
+* これらすべてが簡潔で型安全な方法で、インテリセンスも利用できます！
 
-Using F# in this way will allow you and your fellow developers to use F# code to solve practical problems.
-There shouldn't be any resistance from managers for this low-risk approach -- in the worse case you can easily switch to using a different tool.
+このようにF#を使うことで、あなたとあなたの同僚の開発者は、F#コードを使って実践的な問題を解決することができます。
+このような低リスクなアプローチに対して、マネージャーからの抵抗はないはずです - 最悪の場合でも、別のツールに簡単に切り替えることができます。
 
-A hidden agenda, of course, is that once your fellow developers get a chance to play with F#, they'll be hooked,
-and you'll be one step closer to using [F# end to end](http://colinbul.wordpress.com/2013/02/23/f-end-to-end/)!
+もちろん、隠れた目的として、同僚の開発者がF#を使う機会を得れば、彼らはF#にはまり、
+[F#をエンドツーエンドで使う](http://colinbul.wordpress.com/2013/02/23/f-end-to-end/)一歩近づくことができるでしょう！
 
-### What can you do with F# scripts?
+### F#スクリプトで何ができますか？
 
-In the next few sections we'll see three examples of F# scripts:
+次のいくつかのセクションでは、F#スクリプトの3つの例を見ていきます：
 
-* <a href="#dev-website-responding">An F# script to check that a website is responding</a><br />
-* <a href="#dev-rss-to-csv">An F# script to convert an RSS feed into CSV</a><br />
-* <a href="#dev-wmi-stats">An F# script that uses WMI to check the stats of a process</a><br />
+* <a href="#dev-website-responding">Webサイトの応答をチェックするF#スクリプト</a><br />
+* <a href="#dev-rss-to-csv">RSSフィードをCSVに変換するF#スクリプト</a><br />
+* <a href="#dev-wmi-stats">WMIを使ってプロセスの統計をチェックするF#スクリプト</a><br />
 
-But of course, you can integrate F# scripts with almost any .NET library. Here are other suggestions for utilities that can be scripted:
+しかし、もちろん、F#スクリプトはほとんどすべての.NETライブラリと統合できます。以下は、スクリプト化できるその他のユーティリティの提案です：
 
-* Simple file copying, directory traversal, and archiving (e.g. of log files).
-  If you're using .NET 4.5, you can use the new [System.IO.Compression.ZipArchive](http://msdn.microsoft.com/en-us/library/vstudio/hh485720.aspx)
-  class to do zipping and unzipping without needing a third party library.
-* Doing things with JSON, either with a known format
-  (using the [JSON Type Provider](http://fsharp.github.io/FSharp.Data/library/JsonProvider.html))
-  or unknown format (using the [JSON parser](http://fsharp.github.io/FSharp.Data/library/JsonValue.html)).
-* Interacting with GitHub using [Octokit](http://www.nuget.org/packages/Octokit/).
-* Extracting data from, or manipulating data in, Excel. F# supports COM for doing Office automation, or you can use one of the type providers or libraries.
-* Doing numerics with [Math.NET](http://numerics.mathdotnet.com/).
-* Web crawling, link checking, and screenscraping. The built-in async workflows and agents make this kind of "multithreaded" code very easy to write.
-* Scheduling things with [Quartz.NET](http://www.quartz-scheduler.net/).
+* 簡単なファイルコピー、ディレクトリ走査、アーカイブ（例：ログファイルの）。
+  .NET 4.5を使っている場合は、新しい[System.IO.Compression.ZipArchive](http://msdn.microsoft.com/en-us/library/vstudio/hh485720.aspx)
+  クラスを使って、サードパーティのライブラリを必要とせずにZIP圧縮と解凍を行うことができます。
+* JSONを扱う作業。既知の形式
+  （[JSON Type Provider](http://fsharp.github.io/FSharp.Data/library/JsonProvider.html)を使用）
+  または未知の形式（[JSONパーサー](http://fsharp.github.io/FSharp.Data/library/JsonValue.html)を使用）。
+* [Octokit](http://www.nuget.org/packages/Octokit/)を使ってGitHubと対話する。
+* Excelからデータを抽出したり、Excelのデータを操作したりする。F#はOffice自動化用のCOMをサポートしています。または、型プロバイダーやライブラリを使うこともできます。
+* [Math.NET](http://numerics.mathdotnet.com/)を使って数値計算を行う。
+* Webクローリング、リンクチェック、スクリーンスクレイピング。組み込みの非同期ワークフローとエージェントにより、この種の「マルチスレッド」コードを非常に簡単に書くことができます。
+* [Quartz.NET](http://www.quartz-scheduler.net/)を使ってスケジューリングを行う。
 
-If these suggestions whet your interest, and you want to use more F#, then check out the [F# community projects](http://fsharp.org/community/projects/) page.
-It's a great source of useful libraries being written for F#, and most of them will work well with F# scripting.
+これらの提案があなたの興味を刺激し、F#をもっと使いたいと思ったら、[F#コミュニティプロジェクト](http://fsharp.org/community/projects/)のページをチェックしてください。
+F#用に書かれている有用なライブラリの優れた情報源であり、そのほとんどがF#スクリプティングでうまく機能します。
 
-### Debugging F# scripts
+### F#スクリプトのデバッグ
 
-A great thing about using F# scripts is that you don't need to create a whole project, nor launch Visual Studio.
+F#スクリプトを使う大きな利点は、プロジェクト全体を作成したり、Visual Studioを起動したりする必要がないことです。
 
-But if you need to debug a script, and you're not in Visual Studio, what can you do? Here are some tips:
+しかし、Visual Studioを使っていない場合にスクリプトをデバッグする必要がある場合、どうすればよいでしょうか？以下にいくつかのヒントを示します：
 
-* First, you can just use tried and true printing to the console using `printfn`.
-  I generally wrap this in a simple `log` function so that I can turn logging on or off with a flag.
-* You can use the [FsEye](http://code.google.com/p/fseye/) tool to inspect and watch variables in an interactive session.
-* Finally, you can still use the Visual Studio debugger. The trick is to [attach the debugger](http://stackoverflow.com/a/9337016/1136133) to the 
-  fsi.exe process, and then you can use [`Debugger.Break`](http://msdn.microsoft.com/en-us/library/vstudio/system.diagnostics.debugger.break)
-  to halt at a certain point.
+* まず、`printfn`を使ってコンソールに出力する従来の方法を使えます。
+  通常、これを簡単な`log`関数でラップし、フラグでログ出力のオン/オフを切り替えられるようにします。
+* [FsEye](http://code.google.com/p/fseye/)ツールを使って、対話セッションで変数を検査し、監視できます。
+* 最後に、Visual Studioのデバッガーを使うこともできます。コツは、[デバッガーをアタッチする](http://stackoverflow.com/a/9337016/1136133)ことです。
+  fsi.exeプロセスに対して行い、その後[`Debugger.Break`](http://msdn.microsoft.com/en-us/library/vstudio/system.diagnostics.debugger.break)
+  を使って特定のポイントで停止できます。
 
 <a name="fake"></a>
 
-## 5. Use FAKE for build and CI scripts
+## 5. ビルドとCIスクリプトにFAKEを使う
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/fake.fsx).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/fake.fsx)です。*
 
-Let's start with [FAKE](http://fsharp.github.io/FAKE/), which is a cross platform build automation tool written in F#, analogous to Ruby's [Rake](http://rake.rubyforge.org/).
+まずは[FAKE](http://fsharp.github.io/FAKE/)から始めましょう。FAKEはF#で書かれたクロスプラットフォームのビルド自動化ツールで、Rubyの[Rake](http://rake.rubyforge.org/)に相当するものです。
 
-FAKE has built-in support for git, NuGet, unit tests, Octopus Deploy, Xamarin and more, and makes it easy to develop complex scripts with dependencies.
+FAKEには、git、NuGet、単体テスト、Octopus Deploy、Xamarinなどの組み込みサポートがあり、依存関係のある複雑なスクリプトを簡単に開発できます。
 
-You can even use it with [TFS to avoid using XAML](http://blog.ctaggart.com/2014/01/code-your-tfs-builds-in-f-instead-of.html).
+[TFSでXAMLの使用を避ける](http://blog.ctaggart.com/2014/01/code-your-tfs-builds-in-f-instead-of.html)ためにも使えます。
 
-One reason to use FAKE rather than something like Rake is that you can standardize on .NET code throughout your tool chain.
-In theory, you could use [NAnt](http://en.wikipedia.org/wiki/NAnt) instead, but in practice, no thanks, because XML.
-[PSake](http://github.com/psake/psake) is also a possibility, but more complicated than FAKE, I think. 
+FAKEをRakeのようなものではなく使う理由の1つは、ツールチェーン全体で.NETコードを標準化できることです。
+理論的には[NAnt](http://en.wikipedia.org/wiki/NAnt)を代わりに使えますが、実際には、XMLのためにお勧めしません。
+[PSake](http://github.com/psake/psake)も可能性はありますが、FAKEよりも複雑だと思います。
 
-You can also use FAKE to remove dependencies on a particular build server. For example, rather than using TeamCity's integration to run tests and other tasks,
-you might consider [doing them in FAKE](http://www.jamescrowley.co.uk/2014/04/22/code-coverage-using-dotcover-and-f-make/) instead, which means you can run full builds
-without having TeamCity installed.
+また、FAKEを使って特定のビルドサーバーへの依存を取り除くこともできます。例えば、TeamCityの統合を使ってテストやその他のタスクを実行する代わりに、
+[FAKEで実行する](http://www.jamescrowley.co.uk/2014/04/22/code-coverage-using-dotcover-and-f-make/)ことを検討できます。これにより、TeamCityをインストールせずに完全なビルドを実行できます。
 
-Here's an example of a very simple FAKE script, taken from [a more detailed example on the FAKE site](http://fsharp.github.io/FAKE/gettingstarted.html).
+以下は、非常に簡単なFAKEスクリプトの例で、[FAKEサイトのより詳細な例](http://fsharp.github.io/FAKE/gettingstarted.html)から取られています。
 
 ```fsharp
 // Include Fake lib
@@ -169,22 +168,22 @@ Target "Default" (fun _ ->
 RunTargetOrDefault "Default"
 ```
 
-The syntax takes a little getting used to, but that effort is well spent.
+構文に慣れるまで少し時間がかかりますが、その努力は十分に価値があります。
 
-Some further reading on FAKE:
+FAKEに関するさらなる読み物：
 
-* [Migrating to FAKE](http://bugsquash.blogspot.co.uk/2010/11/migrating-to-fake.html).
-* [Hanselman on FAKE](http://www.hanselman.com/blog/ExploringFAKEAnFBuildSystemForAllOfNET.aspx). Many of the comments are from people who are using FAKE actively.
-* [A NAnt user tries out FAKE](http://putridparrot.com/blog/trying-fake-out/).
+* [FAKEへの移行](http://bugsquash.blogspot.co.uk/2010/11/migrating-to-fake.html)
+* [HanselmanのFAKEについて](http://www.hanselman.com/blog/ExploringFAKEAnFBuildSystemForAllOfNET.aspx)。多くのコメントは実際にFAKEを使っている人々からのものです。
+* [NAntユーザーがFAKEを試す](http://putridparrot.com/blog/trying-fake-out/)
 
 <a name="dev-website-responding"></a>
 
-## 6. An F# script to check that a website is responding
+## 6. Webサイトの応答をチェックするF#スクリプト
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/dev-website-responding.fsx).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/dev-website-responding.fsx)です。*
 
-This script checks that a website is responding with a 200.
-This might be useful as the basis for a post-deployment smoke test, for example.
+このスクリプトは、Webサイトが200で応答しているかをチェックします。
+これは、例えばデプロイメント後のスモークテストの基礎として役立つかもしれません。
 
 ```fsharp
 // Requires FSharp.Data under script directory 
@@ -220,27 +219,27 @@ let bad = "http://example.bad", []
 |> List.iter checkServer 
 ```
 
-The result is:
+結果は次のようになります：
 
 ```text
 Response for http://google.com is 200
 Error for http://example.bad. Message=No response
 ```
 
-Note that I'm using the Http utilities code in `Fsharp.Data`, which provides a nice wrapper around `HttpClient`.
-[More on HttpUtilities here](http://fsharp.github.io/FSharp.Data/library/Http.html).
+ここでは`Fsharp.Data`のHttp utilitiesコードを使っていますが、これは`HttpClient`の便利なラッパーを提供しています。
+[HttpUtilitiesの詳細はこちら](http://fsharp.github.io/FSharp.Data/library/Http.html)。
 
 <a name="dev-rss-to-csv"></a>
 
-## 7. An F# script to convert an RSS feed into CSV
+## 7. RSSフィードをCSVに変換するF#スクリプト
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/dev-rss-to-csv.fsx).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/dev-rss-to-csv.fsx)です。*
 
-Here's a little script that uses the Xml type provider to parse an RSS feed (in this case, [F# questions on StackOverflow](https://stackoverflow.com/questions/tagged/f%23?sort=newest&pageSize=10))
-and convert it to a CSV file for later analysis.
+これは、Xml型プロバイダーを使ってRSSフィード（この場合は[StackOverflowのF#質問](https://stackoverflow.com/questions/tagged/f%23?sort=newest&pageSize=10)）を解析し、
+後で分析するためにCSVファイルに変換する小さなスクリプトです。
  
-Note that the RSS parsing code is just one line of code! Most of the code is concerned with writing the CSV.
-Yes, I could have used a CSV library (there are lots on NuGet) but I thought I'd leave it as is to show you how simple it is.
+RSS解析コードはたった1行であることに注目してください！コードの大部分はCSVの書き込みに関するものです。
+はい、CSVライブラリを使うこともできました（NuGetにはたくさんあります）が、どれほど簡単かを示すためにそのままにしておきました。
  
 ```fsharp
 // sets the current directory to be same as the script directory
@@ -283,11 +282,11 @@ do
     // writer will be closed automatically at the end of this scope
 ```
     
-Note that the type provider generates intellisense (shown below) to show you the available properties based on the actual contents of the feed. That's very cool.
+型プロバイダーが、フィードの実際の内容に基づいて利用可能なプロパティを示すインテリセンス（以下に示す）を生成することに注目してください。これはとてもクールです。
 
 ![](../assets/img/fsharp-xml-dropdown.png)    
 
-The result is something like this:
+結果は以下のようになります：
 
 ```text
 "Optimising F# answer for Euler #4","DropTheTable","18/04/2014"
@@ -297,19 +296,19 @@ The result is something like this:
 "How does function [x] -> ... work","egerhard","19/04/2014"
 ```
 
-For more on the XML type provider, [see the FSharp.Data pages](http://fsharp.github.io/FSharp.Data/library/XmlProvider.html).
+XML型プロバイダーの詳細については、[FSharp.Dataのページ](http://fsharp.github.io/FSharp.Data/library/XmlProvider.html)を参照してください。
     
 <a name="dev-wmi-stats"></a>
     
-## 8. An F# script that uses WMI to check the stats of a process
+## 8. WMIを使ってプロセスの統計をチェックするF#スクリプト
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/dev-wmi-stats.fsx).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/dev-wmi-stats.fsx)です。*
 
-If you use Windows, being able to access WMI is very useful.
-Luckily there is an F# type provider for WMI that makes using it easy. 
+Windowsを使っている場合、WMIにアクセスできることは非常に便利です。
+幸いなことに、WMI用のF#型プロバイダーがあり、使いやすくなっています。
 
-In this example, we'll get the system time and also check some stats for a process.
-This could be useful during and after a load test, for example. 
+この例では、システム時間を取得し、プロセスのいくつかの統計もチェックします。
+これは、例えば負荷テスト中や後に役立つかもしれません。
 
 ```fsharp
 // sets the current directory to be same as the script directory
@@ -346,7 +345,7 @@ printfn "WorkingSetPeak=%O" explorerProc.WorkingSetPeak
 printfn "PageFileBytesPeak=%O" explorerProc.PageFileBytesPeak
 ```
 
-The output is something like this:
+出力は以下のようになります：
 
 ```text
 Time=2014-4-20 14:2:35
@@ -358,29 +357,29 @@ WorkingSetPeak=168607744
 PageFileBytesPeak=312565760
 ```
 
-Again, using a type provider means that you get intellisense (shown below). Very useful for the hundreds of WMI options.
+ここでも、型プロバイダーを使うことでインテリセンス（以下に示す）が得られます。何百ものWMIオプションに対して非常に便利です。
 
 ![](../assets/img/fsharp-wmi-dropdown.png)
 
-[More on the WMI type provider here](http://fsprojects.github.io/FSharp.Management/WMIProvider.html).
+[WMI型プロバイダーの詳細はこちら](http://fsprojects.github.io/FSharp.Management/WMIProvider.html)。
 
 
 <a name="dev-cloud"></a>
 
-## 9. Use F# for configuring and managing the cloud
+## 9. クラウドの設定と管理にF#を使う
 
-One area which deserves special mention is using F# for configuring and managing cloud services.
-The [cloud page](http://fsharp.org/cloud/) at fsharp.org has many helpful links.
+特に言及に値する領域の1つは、クラウドサービスの設定と管理にF#を使うことです。
+fsharp.orgの[クラウドページ](http://fsharp.org/cloud/)には多くの役立つリンクがあります。
 
-For simple scripting, [Fog](http://dmohl.github.io/Fog/) is a nice wrapper for Azure. 
+簡単なスクリプティングには、[Fog](http://dmohl.github.io/Fog/)がAzure用の素晴らしいラッパーです。
 
-So for example, to upload a blob, the code is as simple as this:
+例えば、blobをアップロードするコードは以下のように簡単です：
 
 ```fsharp
 UploadBlob "testcontainer" "testblob" "This is a test" |> ignore
 ```
 
-or to add and receive messages:
+またはメッセージを追加して受信する場合：
 
 ```fsharp
 AddMessage "testqueue" "This is a test message" |> ignore
@@ -390,11 +389,11 @@ for m in result do
     DeleteMessage "testqueue" m
 ```
 
-What's especially nice about using F# for this is that you can do it in micro scripts -- you don't need any heavy tooling.
+これにF#を使う特に素晴らしい点は、マイクロスクリプトで行えることです - 重いツールは必要ありません。
 
    
-## Summary
+## まとめ
    
-I hope you found these suggestions useful. Let me know in the comments if you apply them in practice.
+これらの提案が役立つと思っていただけたら幸いです。実際に適用してみた場合は、コメントで教えてください。
 
-Next up: using F# for testing.
+次は：テストにF#を使うことについてです。

@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "職場でF#を使う26の低リスクな方法"
+title: "仕事で F# を使う 26 の低リスクな方法"
 description: "今すぐ始められます - 許可は必要ありません"
 categories: []
-seriesId: "職場でF#を低リスクで使う方法"
+seriesId: "仕事で F# を使う 26 の低リスクな方法"
 seriesOrder: 1
 
 ---
@@ -35,45 +35,45 @@ seriesOrder: 1
 
 **パート1 - F#を使って対話的に探索し開発する**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-net-interactively">1. F#を使って.NETフレームワークを対話的に探索する</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-own-code-interactively">2. F#を使って自分のコードを対話的にテストする</a> <br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-webservices-interactively">3. F#を使ってWebサービスを対話的に操作する</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-winforms-interactively">4. F#を使ってUIを対話的に操作する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-net-interactively">1. F#を使って.NETフレームワークを対話的に探索する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-own-code-interactively">2. F#を使って自分のコードを対話的にテストする</a> <br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-webservices-interactively">3. F#を使ってWebサービスを対話的に操作する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-winforms-interactively">4. F#を使ってUIを対話的に操作する</a><br />
 
 **パート2 - 開発およびDevOpsスクリプトにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#fake">5. ビルドとCIスクリプトにFAKEを使う</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-website-responding">6. Webサイトの応答をチェックするF#スクリプト</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-rss-to-csv">7. RSSフィードをCSVに変換するF#スクリプト</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-wmi-stats">8. WMIを使ってプロセスの統計をチェックするF#スクリプト</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-cloud">9. クラウドの設定と管理にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#fake">5. ビルドとCIスクリプトにFAKEを使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-website-responding">6. Webサイトの応答をチェックするF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-rss-to-csv">7. RSSフィードをCSVに変換するF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-wmi-stats">8. WMIを使ってプロセスの統計をチェックするF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-cloud">9. クラウドの設定と管理にF#を使う</a><br />
 
 **パート3 - テストにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-nunit">10. 読みやすい名前の単体テストをF#で書く</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-runner">11. F#を使ってプログラムで単体テストを実行する</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-other">12. F#を使って他の方法で単体テストを書くことを学ぶ</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-fscheck">13. FsCheckを使ってより良い単体テストを書く</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-dummy">14. FsCheckを使ってランダムなダミーデータを作成する</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-mock">15. F#を使ってモックを作成する</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-canopy">16. F#を使って自動化されたブラウザテストを行う</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-bdd">17. 振る舞い駆動開発にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-nunit">10. 読みやすい名前の単体テストをF#で書く</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-runner">11. F#を使ってプログラムで単体テストを実行する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-other">12. F#を使って他の方法で単体テストを書くことを学ぶ</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-fscheck">13. FsCheckを使ってより良い単体テストを書く</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-dummy">14. FsCheckを使ってランダムなダミーデータを作成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-mock">15. F#を使ってモックを作成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-canopy">16. F#を使って自動化されたブラウザテストを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-bdd">17. 振る舞い駆動開発にF#を使う</a><br />
 
 **パート4. データベース関連のタスクにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-linqpad">18. F#を使ってLINQpadを置き換える</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-testprocs">19. F#を使ってストアドプロシージャの単体テストを行う</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-randomdata">20. FsCheckを使ってランダムなデータベースレコードを生成する</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-etl">21. F#を使って簡単なETLを行う</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-sqlagent">22. F#を使ってSQL Agentスクリプトを生成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-linqpad">18. F#を使ってLINQpadを置き換える</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-testprocs">19. F#を使ってストアドプロシージャの単体テストを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-randomdata">20. FsCheckを使ってランダムなデータベースレコードを生成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-etl">21. F#を使って簡単なETLを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-sqlagent">22. F#を使ってSQL Agentスクリプトを生成する</a><br />
 
 **パート5: F#を使うその他の興味深い方法**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-parsers">23. パーシングにF#を使う</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-diagramming">24. ダイアグラムと可視化にF#を使う</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-data-access">25. WebベースのデータストアへのアクセスにF#を使う</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-data-science">26. データサイエンスと機械学習にF#を使う</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-balance-power">（ボーナス）27: イギリスの発電所群の発電スケジュールをバランスさせる</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-parsers">23. パーシングにF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-diagramming">24. ダイアグラムと可視化にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-data-access">25. WebベースのデータストアへのアクセスにF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-data-science">26. データサイエンスと機械学習にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-balance-power">（ボーナス）27: イギリスの発電所群の発電スケジュールをバランスさせる</a><br />
 
 <a name="getting-started"></a>
 ## はじめに
@@ -147,7 +147,7 @@ F#が価値を発揮する最初の領域は、.NETライブラリを対話的�
 
 ### カスタムのDateTime形式文字列は正しいですか？
 
-カスタム形式で24時間表記を使用したいと思います。"h"であることは知っていますが、大文字の"H"か小文字の"h"のどちらでしょうか？
+カスタム形式で24時間表記を使いたいと思います。"h"であることは知っていますが、大文字の"H"か小文字の"h"のどちらでしょうか？
 
 ```fsharp
 open System
@@ -194,7 +194,7 @@ testSerialization d
 </DateSerTest>
 ```
 
-このように、UTC時間には"Z"が使用されていることがわかります。
+このように、UTC時間には"Z"が使われていることがわかります。
 
 ### GetEnvironmentVariableは大文字小文字を区別しますか？
 
@@ -242,7 +242,7 @@ MyApp.DoSomething()
 
 *このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-webservices-interactively.fsx)です。*
 
-WebAPIとOwinライブラリを使用したい場合、実行可能ファイルを作成する必要はありません - スクリプトだけで実行できます！
+WebAPIとOwinライブラリを使いたい場合、実行可能ファイルを作成する必要はありません - スクリプトだけで実行できます！
 
 これを動作させるには、いくつかのライブラリDLLが必要なので、少しセットアップが必要です。
 
@@ -422,7 +422,7 @@ StatusCode: 200, ReasonPhrase: 'OK', Version: 1.1, Content: System.Net.Http.Stre
 "id is 42"
 ```
 
-この例は、OWINとWebApiライブラリを「そのまま」使用できることを示すためのものです。
+この例は、OWINとWebApiライブラリを「そのまま」使えることを示すためのものです。
 
 F#にさらにフレンドリーなWebフレームワークについては、[Suave](http://suave.io/)や[WebSharper](http://www.websharper.com)をご覧ください。
 [fsharp.orgにはさらに多くのWeb関連の情報](http://fsharp.org/webstacks/)があります。

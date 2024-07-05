@@ -1,7 +1,7 @@
 ---
 layout: series_index
-title: "Low-risk ways to use F# at work"
-seriesIndexId: "Low-risk ways to use F# at work"
+title: "仕事で F# を使う 26 の低リスクな方法"
+seriesIndexId: "仕事で F# を使う 26 の低リスクな方法"
 ---
 
 関数型プログラミングにすっかり夢中になり、空き時間に F# を学び、その素晴らしさを同僚に熱弁して迷惑がられ、仕事で本格的に使いたくてうずうずしている...
@@ -26,6 +26,6 @@ seriesIndexId: "Low-risk ways to use F# at work"
 
 * [仕事で F# を使う 26 の低リスクな方法](../posts/low-risk-ways-to-use-fsharp-at-work.md)。今すぐ始められます - 許可は必要ありません。
 * [開発と DevOps スクリプトに F# を使う](../posts/low-risk-ways-to-use-fsharp-at-work-2.md)。仕事で F# を使う 26 の低リスクな方法（パート2）。
-* [テストに F# を使う](../posts/low-risk-ways-to-use-fsharp-at-work-3.md)。仕事で F# を使う26の低リスクな方法（パート3）。
+* [テストに F# を使う](../posts/low-risk-ways-to-use-fsharp-at-work-3.md)。仕事で F# を使う 26 の低リスクな方法（パート3）。
 * [データベース関連タスクに F #を使う](../posts/low-risk-ways-to-use-fsharp-at-work-4.md)。仕事で F# を使う 26 の低リスクな方法（パート4）。
-* [仕事で F# を使うその他の興味深い方法](../posts/low-risk-ways-to-use-fsharp-at-work-5.md)。仕事で F# を使う 2 6の低リスクな方法（パート5）。
+* [仕事で F# を使うその他の興味深い方法](../posts/low-risk-ways-to-use-fsharp-at-work-5.md)。仕事で F# を使う 26 の低リスクな方法（パート5）。

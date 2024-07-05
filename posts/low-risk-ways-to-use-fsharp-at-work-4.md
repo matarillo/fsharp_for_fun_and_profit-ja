@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Using F# for database related tasks"
-description: "Twenty six low-risk ways to use F# at work (part 4)"
+title: "データベース関連タスクに F #を使う"
+description: "仕事で F# を使う 26 の低リスクな方法（パート4）"
 categories: []
-seriesId: "Low-risk ways to use F# at work"
+seriesId: "仕事で F# を使う 26 の低リスクな方法"
 seriesOrder: 4
 
 ---
@@ -19,45 +19,45 @@ Before moving on to the content of the post, here's the full list of the twenty 
 
 **Part 1 - Using F# to explore and develop interactively**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-net-interactively">1. Use F# to explore the .NET framework interactively</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-own-code-interactively">2. Use F# to test your own code interactively</a> <br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-webservices-interactively">3. Use F# to play with webservices interactively</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-winforms-interactively">4. Use F# to play with UI's interactively</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-net-interactively">1. Use F# to explore the .NET framework interactively</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-own-code-interactively">2. Use F# to test your own code interactively</a> <br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-webservices-interactively">3. Use F# to play with webservices interactively</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-winforms-interactively">4. Use F# to play with UI's interactively</a><br />
 
 **Part 2 - Using F# for development and devops scripts**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#fake">5. Use FAKE for build and CI scripts</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-website-responding">6. An F# script to check that a website is responding</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-rss-to-csv">7. An F# script to convert an RSS feed into CSV</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-wmi-stats">8. An F# script that uses WMI to check the stats of a process</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-cloud">9. Use F# for configuring and managing the cloud</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#fake">5. Use FAKE for build and CI scripts</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-website-responding">6. An F# script to check that a website is responding</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-rss-to-csv">7. An F# script to convert an RSS feed into CSV</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-wmi-stats">8. An F# script that uses WMI to check the stats of a process</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-cloud">9. Use F# for configuring and managing the cloud</a><br />
 
 **Part 3 - Using F# for testing**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-nunit">10. Use F# to write unit tests with readable names</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-runner">11. Use F# to run unit tests programmatically</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-other">12. Use F# to learn to write unit tests in other ways</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-fscheck">13. Use FsCheck to write better unit tests</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-dummy">14. Use FsCheck to create random dummy data</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-mock">15. Use F# to create mocks</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-canopy">16. Use F# to do automated browser testing</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-bdd">17. Use F# for Behaviour Driven Development</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-nunit">10. Use F# to write unit tests with readable names</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-runner">11. Use F# to run unit tests programmatically</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-other">12. Use F# to learn to write unit tests in other ways</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-fscheck">13. Use FsCheck to write better unit tests</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-dummy">14. Use FsCheck to create random dummy data</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-mock">15. Use F# to create mocks</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-canopy">16. Use F# to do automated browser testing</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-bdd">17. Use F# for Behaviour Driven Development</a><br />
 
 **Part 4. Using F# for database related tasks**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-linqpad">18. Use F# to replace LINQpad</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-testprocs">19. Use F# to unit test stored procedures</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-randomdata">20. Use FsCheck to generate random database records</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-etl">21. Use F# to do simple ETL</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-sqlagent">22. Use F# to generate SQL Agent scripts</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-linqpad">18. Use F# to replace LINQpad</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-testprocs">19. Use F# to unit test stored procedures</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-randomdata">20. Use FsCheck to generate random database records</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-etl">21. Use F# to do simple ETL</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-sqlagent">22. Use F# to generate SQL Agent scripts</a><br />
 
 **Part 5: Other interesting ways of using F# **
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-parsers">23. Use F# for parsing</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-diagramming">24. Use F# for diagramming and visualization</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-data-access">25. Use F# for accessing web-based data stores</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-data-science">26. Use F# for data science and machine learning</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-balance-power">(BONUS) 27: Balance the generation schedule for the UK power station fleet</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-parsers">23. Use F# for parsing</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-diagramming">24. Use F# for diagramming and visualization</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-data-access">25. Use F# for accessing web-based data stores</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-data-science">26. Use F# for data science and machine learning</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-balance-power">(BONUS) 27: Balance the generation schedule for the UK power station fleet</a><br />
 
 ----------
 
