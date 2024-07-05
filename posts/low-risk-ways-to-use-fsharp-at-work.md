@@ -1,97 +1,95 @@
 ---
 layout: post
-title: "Twenty six low-risk ways to use F# at work"
-description: "You can start right now -- no permission needed"
+title: "職場でF#を使う26の低リスクな方法"
+description: "今すぐ始められます - 許可は必要ありません"
 categories: []
-seriesId: "Low-risk ways to use F# at work"
+seriesId: "職場でF#を低リスクで使う方法"
 seriesOrder: 1
 
 ---
 
-So you're all excited about functional programming, and you've been learning F# in your spare time,
-and you're annoying your co-workers by ranting about how great it is, and you're itching to use it for serious stuff at work...
+関数型プログラミングにすっかり夢中になり、空き時間にF#を学び、その素晴らしさを同僚に熱弁して迷惑がられ、仕事で本格的に使いたくてうずうずしている...
 
-But then you hit a brick wall. 
+そんなあなたが、突然壁にぶつかります。
 
-Your workplace has a "C# only" policy and won't let you use F#. 
+職場には「C#のみ」というポリシーがあり、F#の使用が認められないのです。
 
-If you work in a typical enterprise environment, getting a new language approved will be a long drawn out process,
-involving persuading your teammates, the QA guys, the ops guys, your boss, your boss's boss, and the [mysterious bloke down the hall](http://www.joelonsoftware.com/articles/fog0000000018.html) who you've never talked to.
-I would encourage you to start that process (a [helpful link for your manager](http://fpbridge.co.uk/why-fsharp.html)), but still, you're impatient and thinking "what can I do now?"
+典型的な企業環境で働いているなら、新しい言語の承認を得るのは長い道のりになるでしょう。
+チームメイト、QA担当者、運用担当者、上司、上司の上司、そして[廊下の奥にいる謎の人物](http://www.joelonsoftware.com/articles/fog0000000018.html)（今まで話したことのない人）を説得する必要があります。
+その過程を始めることをお勧めします（[マネージャーに役立つリンク](http://fpbridge.co.uk/why-fsharp.html)）が、それでもあなたは焦れて「今すぐに何ができるだろう？」と考えているはずです。
 
-On the other hand, perhaps you work in a flexible, easy going place, where you can do what you like.
+一方で、柔軟で自由な職場環境で、好きなことができる立場にいるかもしれません。
 
-But you're conscientious, and don't want to be one of those people who re-write some mission critical system in APL, and then vanish without trace, leaving
-your replacement some mind-bendingly cryptic code to maintain.
-No, you want to make sure that you are not doing anything that will affect your team's [bus factor](http://en.wikipedia.org/wiki/Bus_factor).
+しかし、あなたは良心的なので、ミッションクリティカルなシステムをAPLで書き直して姿を消し、後任に頭の痛む暗号のようなコードを残していく、そんな人になりたくはありません。
+決して、チームの[バス係数](http://en.wikipedia.org/wiki/Bus_factor)に影響を与えるようなことはしたくないのです。
 
-So in both these scenarios, you want to use F# at work, but you can't (or don't want to) use it for core application code.
+つまり、これらのシナリオでは、仕事でF#を使いたいけれど、コアとなるアプリケーションコードには使えない（または使いたくない）という状況です。
 
-What can you do? 
+何ができるでしょうか？
 
-Well, don't worry! This series of articles will suggest a number of ways you can get your hands dirty with F# in a low-risk, incremental way, without affecting any critical code.
+心配いりません！この一連の記事では、重要なコードに影響を与えることなく、低リスクで段階的にF#を実践できる方法をいくつか提案します。
 
-## Series contents
+## シリーズの内容
 
-Here's a list of the twenty six ways so that you can go straight to any one that you find particularly interesting.
+26の方法のリストを以下に示します。特に興味のあるものに直接アクセスできます。
 
-**Part 1 - Using F# to explore and develop interactively**
+**パート1 - F#を使って対話的に探索し開発する**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-net-interactively">1. Use F# to explore the .NET framework interactively</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-own-code-interactively">2. Use F# to test your own code interactively</a> <br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-webservices-interactively">3. Use F# to play with webservices interactively</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-winforms-interactively">4. Use F# to play with UI's interactively</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-net-interactively">1. F#を使って.NETフレームワークを対話的に探索する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-own-code-interactively">2. F#を使って自分のコードを対話的にテストする</a> <br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-webservices-interactively">3. F#を使ってWebサービスを対話的に操作する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work/#explore-winforms-interactively">4. F#を使ってUIを対話的に操作する</a><br />
 
-**Part 2 - Using F# for development and devops scripts**
+**パート2 - 開発およびDevOpsスクリプトにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#fake">5. Use FAKE for build and CI scripts</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-website-responding">6. An F# script to check that a website is responding</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-rss-to-csv">7. An F# script to convert an RSS feed into CSV</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-wmi-stats">8. An F# script that uses WMI to check the stats of a process</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-cloud">9. Use F# for configuring and managing the cloud</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#fake">5. ビルドとCIスクリプトにFAKEを使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-website-responding">6. Webサイトの応答をチェックするF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-rss-to-csv">7. RSSフィードをCSVに変換するF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-wmi-stats">8. WMIを使ってプロセスの統計をチェックするF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2/#dev-cloud">9. クラウドの設定と管理にF#を使う</a><br />
 
-**Part 3 - Using F# for testing**
+**パート3 - テストにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-nunit">10. Use F# to write unit tests with readable names</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-runner">11. Use F# to run unit tests programmatically</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-other">12. Use F# to learn to write unit tests in other ways</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-fscheck">13. Use FsCheck to write better unit tests</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-dummy">14. Use FsCheck to create random dummy data</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-mock">15. Use F# to create mocks</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-canopy">16. Use F# to do automated browser testing</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-bdd">17. Use F# for Behaviour Driven Development</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-nunit">10. 読みやすい名前の単体テストをF#で書く</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-runner">11. F#を使ってプログラムで単体テストを実行する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-other">12. F#を使って他の方法で単体テストを書くことを学ぶ</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-fscheck">13. FsCheckを使ってより良い単体テストを書く</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-dummy">14. FsCheckを使ってランダムなダミーデータを作成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-mock">15. F#を使ってモックを作成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-canopy">16. F#を使って自動化されたブラウザテストを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3/#test-bdd">17. 振る舞い駆動開発にF#を使う</a><br />
 
-**Part 4. Using F# for database related tasks**
+**パート4. データベース関連のタスクにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-linqpad">18. Use F# to replace LINQpad</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-testprocs">19. Use F# to unit test stored procedures</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-randomdata">20. Use FsCheck to generate random database records</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-etl">21. Use F# to do simple ETL</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-sqlagent">22. Use F# to generate SQL Agent scripts</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-linqpad">18. F#を使ってLINQpadを置き換える</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-testprocs">19. F#を使ってストアドプロシージャの単体テストを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-randomdata">20. FsCheckを使ってランダムなデータベースレコードを生成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-etl">21. F#を使って簡単なETLを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4/#sql-sqlagent">22. F#を使ってSQL Agentスクリプトを生成する</a><br />
 
-**Part 5: Other interesting ways of using F# **
+**パート5: F#を使うその他の興味深い方法**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-parsers">23. Use F# for parsing</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-diagramming">24. Use F# for diagramming and visualization</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-data-access">25. Use F# for accessing web-based data stores</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-data-science">26. Use F# for data science and machine learning</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-balance-power">(BONUS) 27: Balance the generation schedule for the UK power station fleet</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-parsers">23. パーシングにF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-diagramming">24. ダイアグラムと可視化にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-data-access">25. WebベースのデータストアへのアクセスにF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-data-science">26. データサイエンスと機械学習にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5/#other-balance-power">（ボーナス）27: イギリスの発電所群の発電スケジュールをバランスさせる</a><br />
 
 <a name="getting-started"></a>
-## Getting started
+## はじめに
 
-If you're using Visual Studio, you've already got F# installed, so you're ready to go! No need to ask anyone's permission.
+Visual Studioを使っている場合、F#はすでにインストールされているので、すぐに始められます！誰かの許可を得る必要はありません。
 
-If you're on a Mac or Linux, you will have to a bit of work, alas (instructions for [Mac](http://fsharp.org/use/mac/) and [Linux](http://fsharp.org/use/linux/)).
+MacまたはLinuxを使っている場合は、残念ながら少し作業が必要です（[Mac](http://fsharp.org/use/mac/)と[Linux](http://fsharp.org/use/linux/)の手順）。
 
-There are two ways to use F# interactively: (1) typing in the F# interactive window directly, or (2) creating a F# script file (.FSX) and then evaluating code snippets.
+F#を対話的に使う方法は2つあります：(1) F#対話ウィンドウに直接入力する、または (2) F#スクリプトファイル（.FSX）を作成し、コードスニペットを評価する。
 
-To use the F# interactive window in Visual Studio:
+Visual StudioでF#対話ウィンドウを使うには：
 
-1. Show the window with `Menu > View > Other Windows > F# Interactive`
-1. Type an expression, and use double semicolon (`;;`) to tell the interpreter you're finished.
+1. `メニュー > 表示 > その他のウィンドウ > F# インタラクティブ` でウィンドウを表示します。
+2. 式を入力し、二重セミコロン（`;;`）を使って入力が終わったことをインタープリターに伝えます。
 
-For example:
+例えば：
 
 ```fsharp
 let x = 1
@@ -99,58 +97,57 @@ let y = 2
 x + y;;
 ```
 
-Personally, I prefer to create a script file (`File > New > File` then pick "F# script") and type code there, because you get auto-complete and intellisense.
+個人的には、スクリプトファイルを作成する方法（`ファイル > 新規作成 > ファイル`を選択し、"F#スクリプト"を選択）を好みます。自動補完とインテリセンスが利用できるからです。
 
 ![](../assets/img/fsharp-script-intellisense.jpg)
 
-To run a bit of code, just highlight and right click, or simply do `Alt+Enter`.
+コードの一部を実行するには、選択してマウス右クリックするか、単に`Alt+Enter`を押します。
 
 ![](../assets/img/fsharp-script-evaluate.jpg)
 
 <a name="working-with-nuget"></a>
-## Working with external libraries and NuGet 
+## 外部ライブラリとNuGetの使用
 
-Most of the code samples reference external libraries which are expected to be under the script directory. 
+ほとんどのコードサンプルは、スクリプトディレクトリ下にあることが想定される外部ライブラリを参照しています。
 
-You could download or compile these DLLs explicitly, but I think using NuGet from the command line is simpler.
+これらのDLLを明示的にダウンロードまたはコンパイルすることもできますが、コマンドラインからNuGetを使う方が簡単だと思います。
 
-1. First, you need to install Chocolately (from [chocolatey.org](http://chocolatey.org/))
-1. Next install the NuGet command line using 
-   `cinst nuget.commandline`
-1. Finally, go to your script directory, and install the NuGet package from the command line. <br/>
-   For example, `nuget install FSharp.Data -o Packages -ExcludeVersion` <br/>
-   As you see, I prefer to exclude versions from Nuget packages when using them from scripts so that I can update later without breaking existing code.
+1. まず、Chocolately（[chocolatey.org](http://chocolatey.org/)から）をインストールする必要があります。
+2. 次に、`cinst nuget.commandline`を使ってNuGetコマンドラインをインストールします。
+3. 最後に、スクリプトディレクトリに移動し、コマンドラインからNuGetパッケージをインストールします。
+   例：`nuget install FSharp.Data -o Packages -ExcludeVersion`
+   ご覧の通り、スクリプトから使う際にNuGetパッケージのバージョンを除外することを好みます。これにより、後で更新しても既存のコードが壊れません。
 
 ----------
    
-## Part 1: Using F# to explore and develop interactively
+## パート1：F#を使って対話的に探索し開発する
 
-The first area where F# is valuable is as a tool to interactively explore .NET libraries. 
+F#が価値を発揮する最初の領域は、.NETライブラリを対話的に探索するツールとしてです。
 
-Before, in order to do this, you might have created unit tests and then stepped through them with a debugger to understand what is happening. 
-But with F#, you don't need to do that, you can run the code directly. 
+以前は、これを行うために単体テストを作成し、デバッガーでステップ実行して何が起こっているかを理解する必要があったかもしれません。
+しかし、F#を使えば、そうする必要はありません。コードを直接実行できます。
 
-Let's look at some examples.
+いくつかの例を見てみましょう。
 
 <a name="explore-net-interactively"></a>
 
-## 1. Use F# to explore the .NET framework interactively
+## 1. F#を使って.NETフレームワークを対話的に探索する
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-net-interactively.fsx).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-net-interactively.fsx)です。*
 
-When I'm coding, I often have little questions about how the .NET library works. 
+コーディングをしていると、.NETライブラリの動作について小さな疑問がよく生じます。
 
-For example, here are some questions that I have had recently that I answered by using F# interactively:
+例えば、最近私が遭遇し、F#を対話的に使って答えた質問をいくつか紹介します：
 
-* Have I got a custom DateTime format string correct? 
-* How does XML serialization handle local DateTimes vs. UTC DateTimes? 
-* Is `GetEnvironmentVariable` case-sensitive?
+* カスタムのDateTime形式文字列は正しいですか？
+* XMLシリアル化はローカルのDateTimeとUTCのDateTimeをどのように扱いますか？
+* `GetEnvironmentVariable`は大文字小文字を区別しますか？
 
-All these questions can be found in the MSDN documentation, of course, but can also answered in seconds by running some simple F# snippets, shown below.
+これらの質問はもちろんMSDNのドキュメントで見つけることができますが、以下に示す簡単なF#スニペットを実行することで数秒で答えることもできます。
 
-### Have I got a custom DateTime format string correct?
+### カスタムのDateTime形式文字列は正しいですか？
 
-I want to use 24 hour clock in a custom format. I know that it's "h", but is it upper or lowercase "h"?
+カスタム形式で24時間表記を使用したいと思います。"h"であることは知っていますが、大文字の"H"か小文字の"h"のどちらでしょうか？
 
 ```fsharp
 open System
@@ -158,12 +155,12 @@ DateTime.Now.ToString("yyyy-MM-dd hh:mm")  // "2014-04-18 01:08"
 DateTime.Now.ToString("yyyy-MM-dd HH:mm")  // "2014-04-18 13:09"
 ```
 
-### How does XML serialization handle local DateTimes vs. UTC DateTimes?
+### XMLシリアル化はローカルのDateTimeとUTCのDateTimeをどのように扱いますか？
 
-How exactly, does XML serialization work with dates? Let's find out!
+日付に関して、XMLシリアル化はどのように機能するのでしょうか？確認してみましょう！
 
 ```fsharp
-// TIP: sets the current directory to be same as the script directory
+// ヒント: 現在のディレクトリをスクリプトディレクトリと同じに設定します
 System.IO.Directory.SetCurrentDirectory (__SOURCE_DIRECTORY__)
 
 open System
@@ -188,7 +185,7 @@ let d = {
 testSerialization d
 ```
 
-The output is:
+出力は以下の通りです：
 
 ```text
 <DateSerTest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -197,69 +194,69 @@ The output is:
 </DateSerTest>
 ```
 
-So I can see it uses "Z" for UTC times.
+このように、UTC時間には"Z"が使用されていることがわかります。
 
-### Is GetEnvironmentVariable case-sensitive?
+### GetEnvironmentVariableは大文字小文字を区別しますか？
 
-This can be answered with a simple snippet:
+これは簡単なスニペットで答えることができます：
 
 ```fsharp
 Environment.GetEnvironmentVariable "ProgramFiles" = 
     Environment.GetEnvironmentVariable "PROGRAMFILES"
-// answer => true 
+// 答え => true 
 ```
 
-The answer is therefore "not case-sensitive".
+したがって、答えは「大文字小文字を区別しない」です。
 
 <a name="explore-own-code-interactively"></a>
 
-## 2. Use F# to test your own code interactively
+## 2. F#を使って自分のコードを対話的にテストする
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-own-code-interactively.fsx).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-own-code-interactively.fsx)です。*
 
-You are not restricted to playing with the .NET libraries, of course. Sometimes it can be quite useful to test your own code.
+もちろん、.NETライブラリだけでなく、自分のコードをテストすることもできます。時には自分のコードをテストするのが非常に役立つことがあります。
 
-To do this, just reference the DLL and then open the namespace as shown below.
+これを行うには、以下に示すようにDLLを参照し、名前空間を開くだけです。
 
 ```fsharp
 
-// set the current directory to be same as the script directory
+// 現在のディレクトリをスクリプトディレクトリと同じに設定
 System.IO.Directory.SetCurrentDirectory (__SOURCE_DIRECTORY__)
 
-// pass in the relative path to the DLL
+// DLLへの相対パスを渡す
 #r @"bin\debug\myapp.dll"
 
-// open the namespace
+// 名前空間を開く
 open MyApp
 
-// do something
+// 何かを実行
 MyApp.DoSomething()
 ```
 
-WARNING: in older versions of F#, opening a reference to your DLL will lock it so that you can't compile it! In which case, before recompiling, be sure to reset the interactive session to release the lock.
-In newer versions of F#, [the DLL is shadow-copied](https://visualfsharp.codeplex.com/SourceControl/changeset/4c10b32c4f417701f4e6c3284b0a8dadab5a9b98), and there is no lock.
+警告：古いバージョンのF#では、DLLへの参照を開くとロックされてコンパイルできなくなります！その場合、再コンパイル前に対話セッションをリセットしてロックを解除してください。
+新しいバージョンのF#では、[DLLはシャドウコピーされる](https://visualfsharp.codeplex.com/SourceControl/changeset/4c10b32c4f417701f4e6c3284b0a8dadab5a9b98)ため、ロックはありません。
 
 <a name="explore-webservices-interactively"></a>
 
-## 3. Use F# to play with webservices interactively
+## 3. F#を使ってWebサービスを対話的に操作する
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-webservices-interactively.fsx).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-webservices-interactively.fsx)です。*
 
-If you want to play with the WebAPI and Owin libraries, you don't need to create an executable -- you can do it through script alone!
+WebAPIとOwinライブラリを使用したい場合、実行可能ファイルを作成する必要はありません - スクリプトだけで実行できます！
 
-There is a little bit of setup involved, as you will need a number of library DLLs to make this work.
+これを動作させるには、いくつかのライブラリDLLが必要なので、少しセットアップが必要です。
 
-So, assuming you have got the NuGet command line set up (see above), go to your script directory, and install the self hosting libraries
-via `nuget install Microsoft.AspNet.WebApi.OwinSelfHost -o Packages -ExcludeVersion`
+NuGetコマンドラインのセットアップが完了していると仮定して（上記参照）、スクリプトディレクトリに移動し、以下のコマンドでセルフホスティングライブラリをインストールします。
+`nuget install Microsoft.AspNet.WebApi.OwinSelfHost -o Packages -ExcludeVersion`
 
-Once these libraries are in place, you can use the code below as a skeleton for a simple WebAPI app.
+これらのライブラリが配置されたら、以下のコードを簡単なWebAPIアプリのスケルトンとして使用できます。
 
 ```fsharp
-// sets the current directory to be same as the script directory
+// 現在のディレクトリをスクリプトディレクトリと同じに設定
 System.IO.Directory.SetCurrentDirectory (__SOURCE_DIRECTORY__)
 
-// assumes nuget install Microsoft.AspNet.WebApi.OwinSelfHost has been run 
-// so that assemblies are available under the current directory
+// nuget install Microsoft.AspNet.WebApi.OwinSelfHostが実行されていることを前提とし、
+// アセンブリが現在のディレクトリの下で利用可能
 #r @"Packages\Owin\lib\net40\Owin.dll"
 #r @"Packages\Microsoft.Owin\lib\net40\Microsoft.Owin.dll"
 #r @"Packages\Microsoft.Owin.Host.HttpListener\lib\net40\Microsoft.Owin.Host.HttpListener.dll"
@@ -279,11 +276,11 @@ open System.Net.Http.Formatting
 
 module OwinSelfhostSample =
 
-    /// a record to return
+    /// 返すレコード
     [<CLIMutable>]
     type Greeting = { Text : string }
 
-    /// A simple Controller
+    /// 簡単なコントローラー
     type GreetingController() =
         inherit ApiController()
 
@@ -291,7 +288,7 @@ module OwinSelfhostSample =
         member this.Get()  =
             {Text="Hello!"}
 
-    /// Another Controller that parses URIs
+    /// URIをパースする別のコントローラー
     type ValuesController() =
         inherit ApiController()
 
@@ -315,12 +312,12 @@ module OwinSelfhostSample =
         member this.Delete(id:int) =
             () 
 
-    /// A helper class to store routes, etc.
+    /// ルートなどを保存するヘルパークラス
     type ApiRoute = { id : RouteParameter }
 
-    /// IMPORTANT: When running interactively, the controllers will not be found with error:
+    /// 重要: 対話的に実行する場合、コントローラーが見つからずエラーが発生します:
     /// "No type was found that matches the controller named 'XXX'."
-    /// The fix is to override the ControllerResolver to use the current assembly
+    /// 解決策は、現在のアセンブリを使うようにControllerResolverをオーバーライドすることです
     type ControllerResolver() =
         inherit DefaultHttpControllerTypeResolver()
 
@@ -330,7 +327,7 @@ module OwinSelfhostSample =
             |> Array.filter t.IsAssignableFrom
             :> Collections.Generic.ICollection<Type>    
 
-    /// A class to manage the configuration
+    /// 設定を管理するクラス
     type MyHttpConfiguration() as this =
         inherit HttpConfiguration()
 
@@ -347,7 +344,7 @@ module OwinSelfhostSample =
             jsonSettings.ContractResolver <- 
                 Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
 
-        // Here is where the controllers are resolved
+        // ここでコントローラーが解決されます
         let configureServices() = 
             this.Services.Replace(
                 typeof<IHttpControllerTypeResolver>, 
@@ -357,24 +354,24 @@ module OwinSelfhostSample =
         do configureJsonSerialization()
         do configureServices()
 
-    /// Create a startup class using the configuration    
+    /// 設定を使ってスタートアップクラスを作成    
     type Startup() = 
 
-        // This code configures Web API. The Startup class is specified as a type
-        // parameter in the WebApp.Start method.
+        // このコードはWeb APIを設定します。Startupクラスは
+        // WebApp.Startメソッドの型パラメーターとして指定されます。
         member this.Configuration (appBuilder:IAppBuilder) = 
-            // Configure Web API for self-host. 
+            // セルフホスト用にWeb APIを設定 
             let config = new MyHttpConfiguration() 
             appBuilder.UseWebApi(config) |> ignore
     
 
-// Start OWIN host 
+// OWINホストを開始 
 do 
-    // Create server
+    // サーバーを作成
     let baseAddress = "http://localhost:9000/" 
     use app = Microsoft.Owin.Hosting.WebApp.Start<OwinSelfhostSample.Startup>(url=baseAddress) 
 
-    // Create client and make some requests to the api
+    // クライアントを作成し、APIにいくつかのリクエストを行う
     use client = new System.Net.Http.HttpClient() 
 
     let showResponse query = 
@@ -386,12 +383,12 @@ do
     showResponse "api/values"
     showResponse "api/values/42"
 
-    // for standalone scripts, pause so that you can test via your browser as well
+    // スタンドアロンスクリプトの場合、ブラウザでもテストできるように一時停止
     Console.ReadLine() |> ignore
 
 ```
 
-Here's the output:
+出力は以下の通りです：
 
 ```text
 StatusCode: 200, ReasonPhrase: 'OK', Version: 1.1, Content: System.Net.Http.StreamContent, Headers:
@@ -425,20 +422,20 @@ StatusCode: 200, ReasonPhrase: 'OK', Version: 1.1, Content: System.Net.Http.Stre
 "id is 42"
 ```
 
-This example is just to demonstrate that you can use the OWIN and WebApi libraries "out-of-the-box".
+この例は、OWINとWebApiライブラリを「そのまま」使用できることを示すためのものです。
 
-For a more F# friendly web framework, have a look at [Suave](http://suave.io/) or [WebSharper](http://www.websharper.com).
-There is a lot [more webby stuff at fsharp.org](http://fsharp.org/webstacks/).
+F#にさらにフレンドリーなWebフレームワークについては、[Suave](http://suave.io/)や[WebSharper](http://www.websharper.com)をご覧ください。
+[fsharp.orgにはさらに多くのWeb関連の情報](http://fsharp.org/webstacks/)があります。
 
 <a name="explore-winforms-interactively"></a>
 
-## 4. Use F# to play with UI's interactively
+## 4. F#を使ってUIを対話的に操作する
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-winforms-interactively.fsx).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-winforms-interactively.fsx)です。*
 
-Another use for F# interactive is to play with UI's while they are running -- live!
+F#インタラクティブのもう一つの使用法は、UIを実行中に - ライブで - 操作することです！
 
-Here's an example of developing a WinForms screen interactively.
+以下は、WinFormsの画面を対話的に開発する例です。
 
 ```fsharp
 open System.Windows.Forms 
@@ -451,15 +448,15 @@ form.Click.Add (fun _ ->
 form.Show()
 ```
 
-Here's the window:
+ウィンドウは以下のようになります：
 
 ![](../assets/img/fsharp-interactive-ui1.png)
 
-And here's the window after clicking, with the title bar changed:
+クリック後、タイトルバーが変更されたウィンドウは以下のようになります：
 
 ![](../assets/img/fsharp-interactive-ui2.png)
 
-Now let's add a FlowLayoutPanel and a button.
+次に、FlowLayoutPanelとボタンを追加しましょう。
 
 ```fsharp
 let panel = new FlowLayoutPanel()
@@ -473,21 +470,21 @@ greenButton.Click.Add (fun _-> form.BackColor <- Color.LightGreen)
 panel.Controls.Add(greenButton) 
 ```
 
-Here's the window now:
+現在のウィンドウは以下のようになります：
 
 ![](../assets/img/fsharp-interactive-ui3.png)
 
-But the button is too small -- we need to set `AutoSize` to be true.
+しかし、ボタンが小さすぎます -- `AutoSize`をtrueに設定する必要があります。
 
 ```fsharp
 greenButton.AutoSize <- true
 ```
 
-That's better!
+これでよくなりました！
 
 ![](../assets/img/fsharp-interactive-ui4.png)
 
-Let's add a yellow button too:
+黄色のボタンも追加してみましょう：
 
 ```fsharp
 let yellowButton = new Button()
@@ -499,7 +496,7 @@ panel.Controls.Add(yellowButton)
 
 ![](../assets/img/fsharp-interactive-ui5.png)
 
-But the button is cut off, so let's change the flow direction:
+しかし、ボタンが切れてしまっているので、フローの方向を変更しましょう：
 
 ```fsharp
 panel.FlowDirection <- FlowDirection.TopDown
@@ -507,7 +504,7 @@ panel.FlowDirection <- FlowDirection.TopDown
 
 ![](../assets/img/fsharp-interactive-ui6.png)
 
-But now the yellow button is not the same width as the green button, which we can fix with `Dock`:
+しかし今度は、黄色のボタンが緑のボタンと同じ幅になっていません。これは`Dock`で修正できます：
 
 ```fsharp
 yellowButton.Dock <- DockStyle.Fill
@@ -515,13 +512,13 @@ yellowButton.Dock <- DockStyle.Fill
 
 ![](../assets/img/fsharp-interactive-ui7.png)
 
-As you can see, it is really easy to play around with layouts interactively this way.
-Once you're happy with the layout logic, you can convert the code back to C# for your real application.
+ご覧の通り、このように対話的にレイアウトを操作するのは非常に簡単です。
+レイアウトのロジックに満足したら、実際のアプリケーション用にコードをC#に変換し直すことができます。
 
-This example is WinForms specific. For other UI frameworks the logic would be different, of course. 
+この例はWinForms固有のものです。他のUIフレームワークでは、もちろんロジックは異なります。
 
 ----------
 
-So that's the first four suggestions. We're not done yet!
-The next post will cover using F# for development and devops scripts.
+以上が最初の4つの提案です。まだ終わりではありません！
+次の投稿では、開発と DevOps スクリプトに F# を使う方法について説明します。
 
