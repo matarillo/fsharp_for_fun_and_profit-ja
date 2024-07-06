@@ -101,10 +101,10 @@ module FixupText =
 
     let fixupSmartQuotes text = 
         text
-        |> replace "ì" "\""
-        |> replace "î" "\""
-        |> replace "í" "'"
-        |> replace "ñ" "--"
+        |> replace "ÔøΩ" "\""
+        |> replace "ÔøΩ" "\""
+        |> replace "ÔøΩ" "'"
+        |> replace "ÔøΩ" "--"
 
     let fixupText text = 
         text
@@ -203,7 +203,7 @@ module Series =
             """title: "Comparing F# with C#: A simple sum" """
             """description: "In which we attempt to sum the squares from 1 to N without using a loop" """
             """nav: why-use-fsharp"""
-            """seriesId: "Why use F#?" """
+            """seriesId: "F# „Çí‰Ωø„ÅÜÁêÜÁî±" """
             """seriesOrder: 3"""
             """categories: [F# vs C#]"""
             ]

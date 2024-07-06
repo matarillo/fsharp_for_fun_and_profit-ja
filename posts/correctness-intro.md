@@ -3,7 +3,7 @@ layout: post
 title: "Correctness"
 description: "How to write 'compile time unit tests'"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 18
 categories: [Correctness]
 ---

@@ -3,7 +3,7 @@ layout: post
 title: "F# syntax in 60 seconds"
 description: "A very quick overview on how to read F# code"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 2
 ---
 

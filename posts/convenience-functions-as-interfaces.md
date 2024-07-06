@@ -3,7 +3,7 @@ layout: post
 title: "Functions as interfaces"
 description: "OO design patterns can be trivial when functions are used"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 15
 categories: [Convenience, Functions]
 ---

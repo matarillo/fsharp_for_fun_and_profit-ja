@@ -239,7 +239,7 @@ Error for http://example.bad. Message=No response
 後で分析するためにCSVファイルに変換する小さなスクリプトです。
  
 RSS解析コードはたった1行であることに注目してください！コードの大部分はCSVの書き込みに関するものです。
-はい、CSVライブラリを使うこともできました（NuGetにはたくさんあります）が、どれほど簡単かを示すためにそのままにしておきました。
+もちろん、CSVライブラリを使うこともできました（NuGetにはたくさんあります）が、どれほど簡単かを示すためにそのままにしておきました。
  
 ```fsharp
 // sets the current directory to be same as the script directory

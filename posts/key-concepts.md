@@ -3,7 +3,7 @@ layout: post
 title: "Four Key Concepts"
 description: "The concepts that differentiate F# from a standard imperative language"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 6
 categories: 
 image: "/assets/img/four-concepts2.png"

@@ -3,7 +3,7 @@ layout: post
 title: "Type inference"
 description: "How to avoid getting distracted by complex type syntax"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 8
 categories: [Conciseness,Types]
 ---

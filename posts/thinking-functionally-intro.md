@@ -7,7 +7,7 @@ seriesId: "Thinking functionally"
 seriesOrder: 1
 ---
 
-Now that you have seen some of the power of F# in the ["why use F#"](../series/why-use-fsharp.md) series, we're going to step back and look at the fundamentals of functional  programming -- what does it really mean to "program functionally", and how this approach is different from object oriented or imperative programming.
+Now that you have seen some of the power of F# in the ["F# を使う理由"](../series/why-use-fsharp.md) series, we're going to step back and look at the fundamentals of functional  programming -- what does it really mean to "program functionally", and how this approach is different from object oriented or imperative programming.
 
 ### Changing the way you think ###
 

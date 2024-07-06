@@ -389,7 +389,7 @@ When you see `let!`, `use!` and `do!` (that is, with exclamation marks) and they
 The most common type of computation expression you will run into are *asynchronous workflows*, indicated by a `async{..}` block.
 In this context, it means they are being used to wait for an async operation to finish, and only then bind to the result value.
 
-Here are some examples we saw earlier in [a post from the "why use F#?" series](../posts/concurrency-async-and-parallel):
+Here are some examples we saw earlier in [a post from the "F# を使う理由" series](../posts/concurrency-async-and-parallel):
 
 ```fsharp
 //This simple workflow just sleeps for 2 seconds.

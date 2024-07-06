@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Why use F#?"
+title: "F# を使う理由"
 description: "Why you should consider using F# for your next project"
 nav: why-use-fsharp
 hasIcons: 1
@@ -161,15 +161,15 @@ form.Click.Add (fun args-> printfn "clicked!")
 form.Show()
 ```
 
-## 「なぜF#を使うのか？」シリーズ
+## 「F# を使う理由」シリーズ
 
 以下のシリーズでは、F#単独のコードスニペット（しばしばC#コードとの比較も）を使って、F#のそれぞれの利点を紹介します。
 
-* [「なぜF#を使うのか」シリーズの紹介](../posts/why-use-fsharp-intro.md)。F#の利点の概要
+* [「F# を使う理由」シリーズの紹介](../posts/why-use-fsharp-intro.md)。F#の利点の概要
 * [60秒でわかるF#の文法](../posts/fsharp-in-60-seconds.md)。F#コードの読み方の超簡単な概要
 * [F#とC#の比較：簡単な合計](../posts/fvsc-sum-of-squares.md)。ループを使わずに1からNまでの二乗の合計を求めてみる
 * [F#とC#の比較：ソート](../posts/fvsc-quicksort.md)。F#がC#よりも宣言的であること、そしてパターンマッチングの紹介
-* [F#とC#の比較：ウェブページのダウンロード](../posts/fvsc-download.md)。F#がコールバックに優れていること、そして'use'キーワードの紹介
+* [F#とC#の比較：Webページのダウンロード](../posts/fvsc-download.md)。F#がコールバックに優れていること、そして'use'キーワードの紹介
 * [4つの重要な概念](../posts/key-concepts.md)。F#を標準的な命令型言語と区別する概念
 * [簡潔さ](../posts/conciseness-intro.md)。なぜ簡潔さが重要なのか？
 * [型推論](../posts/conciseness-type-inference.md)。複雑な型構文に気を取られないようにする方法
@@ -194,4 +194,4 @@ form.Show()
 * [完全性](../posts/completeness-intro.md)。F#は.NETエコシステム全体の一部
 * [.NETライブラリとのシームレスな相互運用](../posts/completeness-seamless-dotnet-interop.md)。.NETライブラリを扱うための便利な機能
 * [C#でできることは何でも...](../posts/completeness-anything-csharp-can-do.md)。F#でのオブジェクト指向コードの駆け足ツアー
-* [なぜF#を使うのか：結論](../posts/why-use-fsharp-conclusion.md)。
+* [F# を使う理由：結論](../posts/why-use-fsharp-conclusion.md)。

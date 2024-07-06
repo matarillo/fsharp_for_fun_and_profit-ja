@@ -3,7 +3,7 @@ layout: post
 title: "Active patterns"
 description: "Dynamic patterns for powerful matching"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 17
 categories: [Convenience, Patterns]
 ---

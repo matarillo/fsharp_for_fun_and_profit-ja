@@ -3,7 +3,7 @@ layout: post
 title: "Concurrency"
 description: "The next major revolution in how we write software?"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 23
 categories: [Concurrency]
 ---

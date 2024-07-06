@@ -3,7 +3,7 @@ layout: post
 title: "Using functions as building blocks"
 description: "Function composition and mini-languages make code more readable"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 11
 categories: [Conciseness, Functions]
 ---

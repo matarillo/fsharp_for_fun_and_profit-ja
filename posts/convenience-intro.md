@@ -3,7 +3,7 @@ layout: post
 title: "Convenience"
 description: "Features that reduce programming drudgery and boilerplate code"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 13
 categories: [Convenience]
 ---

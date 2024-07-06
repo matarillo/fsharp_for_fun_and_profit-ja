@@ -3,7 +3,7 @@ layout: post
 title: "Using functions to extract boilerplate code"
 description: "The functional approach to the DRY principle"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 10
 categories: [Conciseness, Functions, Folds]
 ---

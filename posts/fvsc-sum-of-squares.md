@@ -1,38 +1,37 @@
 ---
 layout: post
-title: "Comparing F# with C#: A simple sum"
-description: "In which we attempt to sum the squares from 1 to N without using a loop"
+title: "F#とC#の比較：単純な合計"
+description: "ループを使わずに1からNまでの二乗の合計を求めてみる"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F#を使う理由"
 seriesOrder: 3
 categories: [F# vs C#]
 ---
 
+実際のF#コードがどのように見えるか確認するために、簡単な問題から始めましょう：「1からNまでの二乗の合計を求める」。
 
-To see what some real F# code looks like, let's start with a simple problem:  "sum the squares from 1 to N". 
-
-We'll compare an F# implementation with a C# implementation. First, the F# code:
+F#の実装とC#の実装を比較してみます。まず、F#のコードです：
 
 ```fsharp
-// define the square function
+// square関数を定義
 let square x = x * x
 
-// define the sumOfSquares function
+// sumOfSquares関数を定義
 let sumOfSquares n = 
    [1..n] |> List.map square |> List.sum
 
-// try it
+// 試してみる
 sumOfSquares 100
 ```
 
-The mysterious looking `|>` is called the pipe operator. It just pipes the output of one expression into the input of the next. So the code for `sumOfSquares` reads as:
+謎めいた `|>` はパイプ演算子と呼ばれます。これは単に一つの式の出力を次の式の入力にパイプします。つまり、`sumOfSquares` のコードは以下のように読めます：
 
-1. Create a list of 1 to n (square brackets construct a list).
-1. Pipe the list into the library function called `List.map`, transforming the input list into an output list using the "square" function we just defined.
-1. Pipe the resulting list of squares into the library function called `List.sum`. Can you guess what it does?
-1. There is no explicit "return" statement. The output of `List.sum` is the overall result of the function.
+1. 1からnまでのリストを作成（角かっこはリストを構築します）。
+2. そのリストを `List.map` というライブラリ関数にパイプし、先ほど定義した「square」関数を使って入力リストを出力リストに変換します。
+3. 結果の二乗のリストを `List.sum` というライブラリ関数にパイプします。何をするか想像できますか？
+4. 明示的な「return」文はありません。`List.sum` の出力が関数全体の結果となります。
 
-Next, here's a C# implementation using the classic (non-functional) style of a C-based language. (A more functional version using LINQ is discussed later.)
+次に、C言語ベースの言語の古典的な（非関数型の）スタイルを使ったC#の実装を示します（LINQを使った、もっと関数型のバージョンは後で説明します）。
 
 ```csharp
 public static class SumOfSquaresHelper
@@ -54,21 +53,21 @@ public static class SumOfSquaresHelper
 }
 ```
 
-What are the differences?
+どのような違いがありますか？
 
-* The F# code is more compact
-* The F# code didn't have any type declarations
-* F# can be developed interactively
+* F#のコードはより簡潔です
+* F#のコードには型宣言がありません
+* F#は対話的に開発できます
 
-Let's take each of these in turn.
+これらを順番に見ていきましょう。
 
-### Less code
+### コードが少ない
 
-The most obvious difference is that there is a lot more C# code. 13 C# lines compared with 3 F# lines (ignoring comments). The C# code has lots of "noise", things like curly braces, semicolons, etc. And in C# the functions cannot stand alone, but need to be added to some class ("SumOfSquaresHelper"). F# uses whitespace instead of parentheses, needs no line terminator, and the functions can stand alone. 
+最も明白な違いは、C#のコードがはるかに多いことです。C#は13行に対し、F#は3行です（コメントを除く）。C#のコードにはかっこ、セミコロンなど、多くの「ノイズ」があります。また、C#では関数は単独では存在できず、何らかのクラス（「SumOfSquaresHelper」）に追加する必要があります。F#はかっこの代わりに空白を使い、行終端子も必要なく、関数は単独で存在できます。
 
-In F# it is common for entire functions to be written on one line, as the "square" function is. The `sumOfSquares` function could also have been written on one line. In C# this is normally frowned upon as bad practice.
+F#では、「square」関数のように、関数全体を1行で書くのが一般的です。`sumOfSquares` 関数も1行で書くことができました。C#では通常、これは悪い習慣として避けられます。
 
-When a function does have multiple lines, F# uses indentation to indicate a block of code, which eliminates the need for braces. (If you have ever used Python, this is the same idea). So the `sumOfSquares` function could also have been written this way:
+関数が複数行ある場合、F#はインデントを使ってコードブロックを示すため、かっこが不要になります。（Pythonを使ったことがある人なら、同じアイデアです）。つまり、`sumOfSquares` 関数は次のようにも書けます：
 
 ```fsharp
 let sumOfSquares n = 
@@ -77,69 +76,69 @@ let sumOfSquares n =
    |> List.sum
 ```
 
-The only drawback is that you have to indent your code carefully. Personally, I think it is worth the trade-off. 
+唯一の欠点は、コードを慎重にインデントする必要があることです。個人的には、そのトレードオフは価値があると思います。
 
-### No type declarations
+### 型宣言がない
 
-The next difference is that the C# code has to explicitly declare all the types used. For example, the `int i` parameter and `int SumOfSquares` return type.
-Yes, C# does allow you to use the "var" keyword in many places, but not for parameters and return types of functions.
+次の違いは、C#のコードではすべての使用する型を明示的に宣言する必要があることです。例えば、`int i` パラメータや `int SumOfSquares` 戻り値の型などです。
+もちろん、C#では多くの場所で「var」キーワードを使えますが、関数のパラメータと戻り値の型には使えません。
 
-In the F# code we didn't declare any types at all. This is an important point: F# looks like an untyped language,
-but it is actually just as type-safe as C#, in fact, even more so!
-F# uses a technique called "type inference" to infer the types you are using from their context. It works amazingly very well most of the time, and reduces the code complexity immensely.
+F#のコードでは、型を全く宣言していません。これは重要なポイントです：F#は型なし言語のように見えますが、
+実際にはC#と同じくらい型安全です。というより、さらに型安全です！
+F#は「型推論」という技術を使って、コンテキストから使用している型を推論します。ほとんどの場合、驚くほどうまく機能し、コードの複雑さを大幅に減らします。
 
-In this case, the type inference algorithm notes that we started with a list of integers. That in turn implies that the square function and the sum function must be taking ints as well, and that the final value must be an int. You can see what the inferred types are by looking at the result of the compilation in the interactive window. You'll see something like:
+この場合、型推論アルゴリズムは整数のリストから始まったことに注目します。これは、square関数とsum関数も整数を扱っていることを意味し、最終的な値も整数でなければならないことを意味します。対話ウィンドウのコンパイル結果を見ると、推論された型を確認できます。次のようなものが表示されるでしょう：
 
 ```fsharp
 val square : int -> int
 ```
 
-which means that the "square" function takes an int and returns an int.
+これは、"square"関数が整数を受け取り、整数を返すことを意味します。
 
-If the original list had used floats instead, the type inference system would have deduced that the square function used floats instead. Try it and see:
+元のリストが浮動小数点数を使っていた場合、型推論システムはsquare関数が代わりに浮動小数点数を使っていると推論したでしょう。試してみてください：
 
 ```fsharp
-// define the square function
+// square関数を定義
 let squareF x = x * x
 
-// define the sumOfSquares function
+// sumOfSquares関数を定義
 let sumOfSquaresF n = 
-   [1.0 .. n] |> List.map squareF |> List.sum  // "1.0" is a float
+   [1.0 .. n] |> List.map squareF |> List.sum  // "1.0"は浮動小数点数です
 
 sumOfSquaresF 100.0
 ```
 
-The type checking is very strict! If you try using a list of floats (`[1.0..n]`) in the original `sumOfSquares` example, or a list of ints (`[1 ..n]`) in the `sumOfSquaresF` example, you will get a type error from the compiler.
+型チェックは非常に厳密です！元の `sumOfSquares` 例で浮動小数点数のリスト（`[1.0..n]`）を使おうとしたり、`sumOfSquaresF` 例で整数のリスト（`[1 ..n]`）を使おうとすると、コンパイラから型エラーが出ます。
 
-### Interactive development
+### 対話的な開発
 
-Finally, F# has an interactive window where you can test the code immediately and play around with it. In C# there is no easy way to do this. 
+最後に、F#には対話ウィンドウがあり、そこですぐにコードをテストし、遊ぶことができます。C#にはこれを簡単に行う方法がありません。
 
-For example, I can write my square function and immediately test it:
+例えば、square関数を書いてすぐにテストできます：
 
 ```fsharp
-// define the square function
+// square関数を定義
 let square x = x * x
 
-// test
+// テスト
 let s2 = square 2
 let s3 = square 3
 let s4 = square 4
 ```
 
-When I am satisfied that it works, I can move on to the next bit of code.
+うまく動作することを確認できたら、次のコードに進めます。
 
-This kind of interactivity encourages an incremental approach to coding that can become addictive!
+こうした対話性は、段階的にコーディングするアプローチを後押しします。魅力にはまってしまうかもしれませんね！
 
-Furthermore, many people claim that designing code interactively enforces good design practices such as decoupling and explicit dependencies,
-and therefore, code that is suitable for interactive evaluation will also be code that is easy to test. Conversely, code that cannot be
-tested interactively will probably be hard to test as well.
+さらに、多くの人が、対話的にコードを設計することで、分離や明示的な依存関係などの良い設計プラクティスが強制され、
+したがって、対話的な評価に適したコードは、テストも容易になると主張しています。逆に、対話的にテストできないコードは、
+おそらくテストも難しいでしょう。
 
-### The C# code revisited
+### C#コードの再考
 
-My original example was written using "old-style" C#.  C# has incorporated a lot of functional features, and it is possible to rewrite the example in a more compact way using the LINQ extensions. 
+私の元の例は「旧スタイル」のC#で書かれていました。C#は関数型の機能を多く取り入れているので、LINQの拡張を使ってより簡潔に例を書き直すことができます。
 
-So here is another C# version -- a line-for-line translation of the F# code.
+そこで、F#コードを1行ずつ翻訳した別のC#バージョンを紹介します。
 
 ```csharp
 public static class FunctionalSumOfSquaresHelper
@@ -153,9 +152,9 @@ public static class FunctionalSumOfSquaresHelper
 }
 ```
 
-However, in addition to the noise of the curly braces and periods and semicolons, the C# version needs to declare the parameter and return types, unlike the F# version. 
+しかし、かっこやピリオド、セミコロンのノイズに加えて、C#バージョンではF#バージョンとは異なり、パラメータと戻り値の型を宣言する必要があります。
 
-Many C# developers may find this a trivial example, but still resort back to loops when the logic becomes more complicated. In F# though, you will almost never see explicit loops like this.
-See for example, [this post on eliminating boilerplate from more complicated loops](http://fsharpforfunandprofit.com/posts/conciseness-extracting-boilerplate/).
+多くのC#開発者はこれを些細な例と考えるかもしれませんが、ロジックがより複雑になるとループに戻ってしまうかもしれません。しかし、F#ではこのような明示的なループはほとんど見ることがありません。
+例えば、[より複雑なループからボイラープレートを排除する方法についてのこの投稿](http://fsharpforfunandprofit.com/posts/conciseness-extracting-boilerplate/)を参照してください。
 
 

@@ -3,7 +3,7 @@ layout: post
 title: "Conciseness"
 description: "Why is conciseness important?"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 7
 categories: [Conciseness]
 ---

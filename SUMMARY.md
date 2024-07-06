@@ -24,7 +24,7 @@
   * [60 秒でわかる F# シンタックス](posts/fsharp-in-60-seconds.md) 
   * [C# と F# の比較: 簡単な合計](posts/fvsc-sum-of-squares.md) 
   * [C# と F# の比較: ソート](posts/fvsc-quicksort.md) 
-  * [C# と F# の比較: ウェブページのダウンロード](posts/fvsc-download.md)
+  * [C# と F# の比較: Webページのダウンロード](posts/fvsc-download.md)
   * [F# の 4 つの重要概念](posts/key-concepts.md) 
   * [簡潔さ](posts/conciseness-intro.md) 
   * [型推論](posts/conciseness-type-inference.md) 

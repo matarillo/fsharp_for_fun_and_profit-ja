@@ -97,7 +97,7 @@ The kinds of functions which have repeatable results and no side effects are cal
 
 So you can see that if we can create pure functions in a programming language, we immediately gain a lot of powerful techniques. And indeed you can do all these things in F#:
 
-* You have already seen an example of parallelism in the ["why use F#?"](../series/why-use-fsharp.md) series. 
+* You have already seen an example of parallelism in the ["F# を使う理由"](../series/why-use-fsharp.md) series. 
 * Evaluating functions lazily will be discussed in the ["optimization"](../series/optimization.md) series.
 * Caching the results of functions is called "memoization" and will also be discussed in the ["optimization"](../series/optimization.md) series.
 * Not caring about the order of evaluation makes concurrent programming much easier, and doesn't introduce bugs when functions are reordered or refactored. 

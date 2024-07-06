@@ -194,7 +194,7 @@ The compiler has caught a case we have overlooked -- what happens if the stack i
 
 So now we have to decide how to handle this. 
 
-* Option 1: Return a special "Success" or "Error" state, as we did in a [post from the "why use F#?" series](../posts/correctness-exhaustive-pattern-matching.md).
+* Option 1: Return a special "Success" or "Error" state, as we did in a [post from the "F# を使う理由" series](../posts/correctness-exhaustive-pattern-matching.md).
 * Option 2: Throw an exception.
 
 Generally, I prefer to use error cases, but in this case, we'll use an exception. So here's the `pop` code changed to handle the empty case:

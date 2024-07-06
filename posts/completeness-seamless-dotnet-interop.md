@@ -3,7 +3,7 @@ layout: post
 title: "Seamless interoperation with .NET libraries"
 description: "Some convenient features for working with .NET libraries"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 28
 categories: [Completeness]
 ---

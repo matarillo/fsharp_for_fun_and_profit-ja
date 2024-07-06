@@ -3,7 +3,7 @@ layout: post
 title: "Using the type system to ensure correct code"
 description: "In F# the type system is your friend, not your enemy"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 21
 categories: [Correctness, Types]
 ---

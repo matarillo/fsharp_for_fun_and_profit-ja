@@ -1,24 +1,24 @@
 ---
 layout: post
-title: "Comparing F# with C#: Downloading a web page"
-description: "In which we see that F# excels at callbacks, and we are introduced to the 'use' keyword"
+title: "F#とC#の比較：Webページのダウンロード"
+description: "F#がコールバックに優れていることと、'use'キーワードの紹介"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F#を使う理由"
 seriesOrder: 5
 categories: [F# vs C#]
 ---
 
-In this example, we will compare the F# and C# code for downloading a web page, with a callback to process the text stream.
+この例では、テキストストリームを処理するコールバック付きでWebページをダウンロードするF#とC#のコードを比較します。
 
-We'll start with a straightforward F# implementation. 
+まずは、シンプルなF#の実装から見てみましょう。
 
 ```fsharp
-// "open" brings a .NET namespace into visibility
+// "open"で.NET名前空間を可視化
 open System.Net
 open System
 open System.IO
 
-// Fetch the contents of a web page
+// Webページの内容を取得
 let fetchUrl callback url =        
     let req = WebRequest.Create(Uri(url)) 
     use resp = req.GetResponse() 
@@ -27,18 +27,18 @@ let fetchUrl callback url =
     callback reader url
 ```
 
-Let's go through this code:
+このコードを詳しく見ていきましょう：
 
-* The use of "open" at the top allows us to write "WebRequest" rather than "System.Net.WebRequest". It is similar to a "`using System.Net`" header in C#.
-* Next, we define the `fetchUrl` function, which takes two arguments, a callback to process the stream, and the url to fetch. 
-* We next wrap the url string in a Uri. F# has strict type-checking, so if instead we had written:
+* 冒頭の "open" を使うことで、"System.Net.WebRequest" ではなく "WebRequest" と書けます。これはC#の `using System.Net` に似ています。
+* 次に、`fetchUrl`関数を定義します。これは2つの引数を取ります。ストリームを処理するコールバックと、取得するURLです。
+* URLの文字列をUriでラップしています。F#は厳密な型チェックを行うので、もし単に以下のように書いていたら：
 `let req = WebRequest.Create(url)`
-the compiler would have complained that it didn't know which version of `WebRequest.Create` to use.
-* When declaring the `response`, `stream` and `reader` values, the "`use`" keyword is used instead of "`let`". This can only be used in conjunction with classes that implement `IDisposable`.
-  It tells the compiler to automatically dispose of the resource when it goes out of scope. This is equivalent to the C# "`using`" keyword.
-* The last line calls the callback function with the StreamReader and url as parameters.  Note that the type of the callback does not have to be specified anywhere.
+コンパイラは`WebRequest.Create`のどのバージョンを使うべきか分からないと文句を言うでしょう。
+* `response`、`stream`、`reader`の値を宣言する際、 `let` の代わりに `use` キーワードを使っています。これは`IDisposable`を実装するクラスとの組み合わせでのみ使えます。
+  これはスコープ外になったときにリソースを自動的に破棄するようコンパイラに指示します。C#の `using` キーワードと同じ役割です。
+* 最後の行は、StreamReaderとURLをパラメータとしてコールバック関数を呼び出します。コールバックの型をどこかで指定する必要がないのがポイントです。
 
-Now here is the equivalent C# implementation. 
+次に、同等のC#の実装を見てみましょう。
 
 ```csharp
 class WebPageDownloader
@@ -62,54 +62,54 @@ class WebPageDownloader
 }
 ```
 
-As usual, the C# version has more 'noise'. 
+いつものように、C#バージョンには余計な「ノイズ」があります。
 
-* There are ten lines just for curly braces, and there is the visual complexity of 5 levels of nesting*
-* All the parameter types have to be explicitly declared, and the generic `TResult` type has to be repeated three times.
+- かっこだけで10行あり、5段階のネストで見た目も複雑になっています。 *
+- すべてのパラメータ型を明示的に宣言する必要があり、ジェネリックの`TResult`型を3回も繰り返さなければなりません。
 
-<sub>* It's true that in this particular example, when all the `using` statements are adjacent, the [extra braces and indenting can be removed](https://stackoverflow.com/questions/1329739/nested-using-statements-in-c-sharp),
-but in the more general case they are needed.</sub>
+<sub>* 確かに、この特定の例では、すべての `using` ステートメントが隣接している場合、[余分なかっことインデントを省略できます](https://stackoverflow.com/questions/1329739/nested-using-statements-in-c-sharp)が、
+より一般的なケースでは必要になります。</sub>
 
-## Testing the code
+## コードのテスト
 
-Back in F# land, we can now test the code interactively:
+F#に戻って、対話的にコードをテストできます：
 
 ```fsharp
 let myCallback (reader:IO.StreamReader) url = 
     let html = reader.ReadToEnd()
     let html1000 = html.Substring(0,1000)
     printfn "Downloaded %s. First 1000 is %s" url html1000
-    html      // return all the html
+    html      // すべてのhtmlを返す
 
-//test
+//テスト
 let google = fetchUrl myCallback "http://google.com"
 ```
 
-Finally, we have to resort to a type declaration for the reader parameter (`reader:IO.StreamReader`). This is required because the F# compiler cannot determine the type of the "reader" parameter automatically. 
+最後に、readerパラメータの型宣言（`reader:IO.StreamReader`）が必要になります。これはF#コンパイラが "reader" パラメータの型を自動的に判断できないためです。
 
-A very useful feature of F# is that you can "bake in" parameters in a function so that they don't have to be passed in every time. This is why the `url` parameter was placed *last* rather than first, as in the C# version.
-The callback can be setup once, while the url varies from call to call.
+F#の非常に便利な機能の1つは、関数のパラメータを「焼き付ける」ことができ、毎回渡す必要がないことです。これが、C#バージョンとは違って `url` パラメータが*最後*に配置された理由です。
+コールバックを一度設定し、URLは呼び出しごとに変更できるのです。
 
 ```fsharp
-// build a function with the callback "baked in"
+// コールバックを「焼き付けた」関数を構築
 let fetchUrl2 = fetchUrl myCallback 
 
-// test
+// テスト
 let google = fetchUrl2 "http://www.google.com"
 let bbc    = fetchUrl2 "http://news.bbc.co.uk"
 
-// test with a list of sites
+// サイトのリストでテスト
 let sites = ["http://www.bing.com";
              "http://www.google.com";
              "http://www.yahoo.com"]
 
-// process each site in the list
+// リスト内の各サイトを処理
 sites |> List.map fetchUrl2 
 ```
 
-The last line (using `List.map`) shows how the new function can be easily used in conjunction with list processing functions to download a whole list at once. 
+最後の行（`List.map`を使用）は、新しい関数をリスト処理関数と簡単に組み合わせて、一度にリスト全体をダウンロードできることを示しています。
 
-Here is the equivalent C# test code:
+以下は同等のC#テストコードです：
 
 ```csharp
 [Test]
@@ -129,15 +129,15 @@ public void TestFetchUrlWithCallback()
     var google = downloader.FetchUrl("http://www.google.com",
                                       myCallback);
             
-    // test with a list of sites
+    // サイトのリストでテスト
     var sites = new List<string> {
         "http://www.bing.com",
         "http://www.google.com",
         "http://www.yahoo.com"};
 
-    // process each site in the list
+    // リスト内の各サイトを処理
     sites.ForEach(site => downloader.FetchUrl(site, myCallback));
 }
 ```
 
-Again, the code is a bit noisier than the F# code, with many explicit type references. More importantly, the C# code doesn't easily allow you to bake in some of the parameters in a function, so the callback must be explicitly referenced every time.
+ここでも、コードはF#コードよりも少しノイジーで、明示的な型参照が多くなっています。さらに重要なのは、C#コードでは関数のパラメータを簡単に焼き付けることができないため、コールバックを毎回明示的に参照しなければならないことです。

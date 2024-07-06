@@ -3,7 +3,7 @@ layout: post
 title: "Pattern matching for conciseness"
 description: "Pattern matching can match and bind in a single step"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 12
 categories: [Conciseness, Patterns]
 ---

@@ -3,7 +3,7 @@ layout: post
 title: "Immutability"
 description: "Making your code predictable"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 19
 categories: [Correctness, Immutability]
 ---

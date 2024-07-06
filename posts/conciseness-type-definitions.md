@@ -3,7 +3,7 @@ layout: post
 title: "Low overhead type definitions"
 description: "No penalty for making new types"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 9
 categories: [Conciseness,Types]
 ---

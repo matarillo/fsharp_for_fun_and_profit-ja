@@ -3,7 +3,7 @@ layout: post
 title: "Functional Reactive Programming"
 description: "Turning events into streams"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 26
 categories: [Concurrency]
 ---

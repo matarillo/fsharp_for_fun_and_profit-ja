@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Why use F#: Conclusion"
+title: "F# を使う理由: Conclusion"
 description: ""
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 30
 categories: []
 ---

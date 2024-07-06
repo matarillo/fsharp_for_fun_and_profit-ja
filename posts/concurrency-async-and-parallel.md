@@ -3,7 +3,7 @@ layout: post
 title: "Asynchronous programming"
 description: "Encapsulating a background task with the Async class"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 24
 categories: [Concurrency]
 ---

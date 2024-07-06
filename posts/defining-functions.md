@@ -430,7 +430,7 @@ Indeed, there is a well-known theorem that states that any computable function w
 
 A combinator library is a code library that exports a set of combinator functions that are designed to work together. The user of the library can then easily combine simple functions together to make bigger and more complex functions, like building with Lego.  
 
-A well designed combinator library allows you to focus on the high level operations, and push the low level "noise" to the background. We've already seen some examples of this power in the examples in ["why use F#"](../series/why-use-fsharp.md) series, and the `List` module is full of them -- the "`fold`" and "`map`" functions are also combinators, if you think about it.
+A well designed combinator library allows you to focus on the high level operations, and push the low level "noise" to the background. We've already seen some examples of this power in the examples in ["F# を使う理由"](../series/why-use-fsharp.md) series, and the `List` module is full of them -- the "`fold`" and "`map`" functions are also combinators, if you think about it.
 
 Another advantage of combinators is that they are the safest type of function. As they have no dependency on the outside world they cannot change if the global environment changes.  A function that reads a global value or uses a library function can break or alter between calls if the context is different. This can never happen with combinators. 
 

@@ -3,7 +3,7 @@ layout: post
 title: "Exhaustive pattern matching"
 description: "A powerful technique to ensure correctness"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 20
 categories: [Correctness, Patterns]
 ---

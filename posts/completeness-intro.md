@@ -3,7 +3,7 @@ layout: post
 title: "Completeness"
 description: "F# is part of the whole .NET ecosystem"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 27
 categories: [Completeness]
 ---

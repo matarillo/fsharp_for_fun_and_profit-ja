@@ -1,34 +1,34 @@
 ---
 layout: post
-title: "Introduction to the 'Why use F#' series"
-description: "An overview of the benefits of F#"
+title: "「なぜF#を使うのか」シリーズの紹介"
+description: "F#の利点の概要"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F#を使う理由"
 seriesOrder: 1
 ---
 
-This series of posts will give you a guided tour through the main features of F# and then show you ways that F# can help you in your day-to-day development.  
+この一連の投稿では、F#の主要な機能について案内し、F#が日々の開発にどのように役立つかを紹介します。
 
-### Key benefits of F# compared with C# ###
+### C#と比較したF#の主な利点 ###
 
-If you are already familiar with C# or Java, you might be wondering why it would be worth learning yet another language. F# has some major benefits which I have grouped under the following themes:
+すでにC#やJavaに慣れている方は、なぜまた別の言語を学ぶ価値があるのか疑問に思うかもしれません。F#には大きな強みがいくつかあります。これらを以下のテーマに分類してみました：
 
-* **Conciseness**. F# is not cluttered up with coding "noise" such as curly brackets, semicolons and so on. You almost never have to specify the type of an object, thanks to a powerful type inference system. And it generally takes less lines of code to solve the same problem. 
-* **Convenience**. Many common programming tasks are much simpler in F#.  This includes things like creating and using complex type definitions, doing list processing, comparison and equality, state machines, and much more.  And because functions are first class objects, it is very easy to create powerful and reusable code by creating functions that have other functions as parameters, or that combine existing functions to create new functionality. 
-* **Correctness**. F# has a very powerful type system which prevents many common errors such as null reference exceptions. And in addition, you can often encode business logic using the type system itself, so that it is actually impossible to write incorrect code, because it is caught at compile time as a type error.
-* **Concurrency**. F# has a number of built-in tools and libraries to help with programming systems when more than one thing at a time is happening. Asynchronous programming is directly supported, as is parallelism. F# also has a message queuing system, and excellent support for event handling and reactive programming. And because data structures are immutable by default, sharing state and avoiding locks is much easier.
-* **Completeness**.  Although F# is a functional language at heart, it does support other styles which are not 100% pure, which makes it much easier to interact with the non-pure world of web sites, databases, other applications, and so on. In particular, F# is designed as a hybrid functional/OO language, so it can do almost everything that C# can do as well.  Of course, F# integrates seamlessly with the .NET ecosystem, which gives you access to all the third party .NET libraries and tools. Finally, it is part of Visual Studio, which means you get a good editor with IntelliSense support, a debugger, and many plug-ins for unit tests, source control, and other development tasks. 
+* **簡潔さ**。F#はかっこやセミコロンなどのコーディングの「ノイズ」で煩わされません。強力な型推論システムのおかげで、オブジェクトの型をほとんど指定する必要がありません。また、一般的に同じ問題を解決するのに必要なコード行数が少なくなります。
+* **利便性**。多くの一般的なプログラミングタスクがF#ではより簡単です。これには、複雑な型定義の作成と使用、リスト処理、比較と等価性、状態マシンなどが含まれます。また、関数がファーストクラスオブジェクトであるため、他の関数をパラメータとして持つ関数を作成したり、既存の関数を組み合わせて新しい機能を作成したりすることで、強力で再利用可能なコードを簡単に作成できます。
+* **正確性**。F#には非常に強力な型システムがあり、nullリファレンス例外など多くの一般的なエラーを防ぎます。さらに、ビジネスロジックを型システム自体を使ってエンコードできることが多く、コンパイル時に型エラーとして捕捉されるため、実際に不正確なコードを書くことが不可能になります。
+* **並行性**。F#には、一度に複数のことが起こるシステムのプログラミングを支援するための多くの組み込みツールとライブラリがあります。非同期プログラミングは直接サポートされており、並列処理も同様です。F#にはメッセージキューイングシステムもあり、イベント処理とリアクティブプログラミングのサポートも優れています。また、データ構造はデフォルトで不変であるため、状態の共有とロックの回避がはるかに簡単です。
+* **完全性**。F#は本質的に関数型言語ですが、100%純粋ではない他のスタイルもサポートしており、Webサイト、データベース、他のアプリケーションなどの純粋でない世界との相互作用がはるかに簡単になります。特に、F#はハイブリッドな関数型/OO言語として設計されているため、C#ができることのほとんどすべてを行うことができます。もちろん、F#は.NETエコシステムとシームレスに統合されており、すべてのサードパーティの.NETライブラリとツールにアクセスできます。最後に、Visual Studioの一部であるため、IntelliSenseサポート付きの優れたエディタ、デバッガ、単体テスト、ソース管理、その他の開発タスク用の多くのプラグインを利用できます。
 
-In the rest of this series of posts, I will try to demonstrate each of these F# benefits, using standalone snippets of F# code (and often with C# code for comparison).  I'll briefly cover all the major features of F#, including pattern matching, function composition, and concurrent programming.  By the time you have finished this series, I hope that you will have been impressed with the power and elegance of F#, and you will be encouraged to use it for your next project!
+この一連の投稿の残りの部分では、F#コードのスタンドアロンスニペット（しばしばC#コードとの比較も）を使用して、これらのF#の利点のそれぞれを実証しようと思います。パターンマッチング、関数合成、並行プログラミングを含む、F#の主要な機能をすべて簡単に説明します。このシリーズを読み終えるまでに、F#のパワーとエレガンスに感銘を受け、次のプロジェクトでF#を使うよう励まされることを願っています！
 
-### How to read and use the example code ###
+### サンプルコードの読み方と使い方 ###
 
-All the code snippets in these posts have been designed to be run interactively. I strongly recommend that you evaluate the snippets as you read each post. The source for any large code files will be linked to from the post.
+これらの投稿のすべてのコードスニペットは、対話的に実行できるように設計されています。各投稿を読みながらスニペットを評価することを強くお勧めします。大きなコードファイルのソースは、投稿からリンクされています。
 
-This series is not a tutorial, so I will not go too much into *why* the code works.  Don't worry if you cannot understand some of the details; the goal of the series is just to introduce you to F# and whet your appetitite for learning it more deeply.
+このシリーズはチュートリアルではないので、コードが*なぜ*動作するかについては深く説明しません。詳細の一部が理解できなくても心配しないでください。このシリーズの目的は、F#を紹介し、より深く学ぶ意欲を刺激することだけです。
 
-If you have experience in languages such as C# and Java, you have probably found that you can get a pretty good understanding of source code written in other similar languages, even if you aren't familiar with the keywords or the libraries. You might ask "how do I assign a variable?" or "how do I do a loop?", and with these answers be able to do some basic programming quite quickly.
+C#やJavaなどの言語の経験がある場合、キーワードやライブラリに馴染みがなくても、他の類似した言語で書かれたソースコードをかなり良く理解できることに気づいたでしょう。「変数をどう割り当てるのか？」や「ループをどうするのか？」と尋ね、これらの答えを得て、基本的なプログラミングをすぐに行えるかもしれません。
 
-This approach will not work for F#, because in its pure form there are no variables, no loops, and no objects.  Don't be frustrated - it will eventually make sense! If you want to learn F# in more depth, there are some helpful tips on the ["learning F#"](../learning-fsharp/index.md) page.
+このアプローチはF#では通用しません。なぜなら、純粋な形式では変数もループもオブジェクトもないからです。挫折しないでください - 最終的には理解できるようになります！F#をより深く学びたい場合は、「[F#を学ぶ](../learning-fsharp/index.md)」ページに役立つヒントがあります。
 
 

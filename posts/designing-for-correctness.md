@@ -3,7 +3,7 @@ layout: post
 title: "Worked example: Designing for correctness"
 description: "How to make illegal states unrepresentable"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 22
 categories: [Correctness, Types, Worked Examples]
 ---

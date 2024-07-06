@@ -414,8 +414,8 @@ int []            // Array type e.g. [|1;2;3|]
 int option        // Some(1)
 ```
 
-* **The discriminated union type**. These are built from a set of choices of other types. We saw some examples of this in the ["why use F#?"](../series/why-use-fsharp.md) series. In function signatures, they are referred to by the name of the type, so there is no special keyword.
-* **The record type**. These are like structures or database rows, a list of named slots. We saw some examples of this in the ["why use F#?"](../series/why-use-fsharp.md) series as well. In function signatures, they are referred to by the name of the type, so again there is no special keyword.
+* **The discriminated union type**. These are built from a set of choices of other types. We saw some examples of this in the ["F# を使う理由"](../series/why-use-fsharp.md) series. In function signatures, they are referred to by the name of the type, so there is no special keyword.
+* **The record type**. These are like structures or database rows, a list of named slots. We saw some examples of this in the ["F# を使う理由"](../series/why-use-fsharp.md) series as well. In function signatures, they are referred to by the name of the type, so again there is no special keyword.
 
 ## Test your understanding of types ##
 

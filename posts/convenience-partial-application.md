@@ -3,7 +3,7 @@ layout: post
 title: "Partial Application"
 description: "How to fix some of a function's parameters"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 16
 categories: [Convenience, Functions, Partial Application]
 ---

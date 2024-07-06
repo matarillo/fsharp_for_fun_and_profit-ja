@@ -3,7 +3,7 @@ layout: post
 title: "Messages and Agents"
 description: "Making it easier to think about concurrency"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 25
 categories: [Concurrency]
 ---

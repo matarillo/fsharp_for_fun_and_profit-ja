@@ -57,7 +57,7 @@ The second option might seem clumsy, but for real code it will probably be both 
 At this final level, not only is the code functional, but the design itself has been changed to exploit the power of algebraic data types (especially union types). 
 
 The domain will have been [encoded into types](../posts/designing-with-types-single-case-dus.md) such that [illegal states are not even representable](../posts/designing-with-types-making-illegal-states-unrepresentable.md), and [correctness is enforced at compile time](../posts/correctness-type-checking.md).
-For a concrete demonstration of the power of this approach, see the [shopping cart example](../posts/designing-for-correctness) in the ["why use F#" series](../series/why-use-fsharp.md) and the whole ["Designing with types" series](../series/designing-with-types.md).
+For a concrete demonstration of the power of this approach, see the [shopping cart example](../posts/designing-for-correctness) in the ["F# を使う理由" series](../series/why-use-fsharp.md) and the whole ["Designing with types" series](../series/designing-with-types.md).
 
 This level can only be done in F#, and is not really practical in C#. 
 

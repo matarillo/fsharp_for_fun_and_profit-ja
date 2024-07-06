@@ -10,7 +10,7 @@ categories: [Patterns,Folds]
 
 Pattern matching is ubiquitous in F#. It is used for binding values to expressions with `let`, and in function parameters, and for branching using the `match..with` syntax.
 
-We have briefly covered binding values to expressions in a [post in the "why use F#?" series](../posts/conciseness-pattern-matching), and it will be covered many times as we [investigate types](../posts/overview-of-types-in-fsharp). 
+We have briefly covered binding values to expressions in a [post in the "F# を使う理由" series](../posts/conciseness-pattern-matching), and it will be covered many times as we [investigate types](../posts/overview-of-types-in-fsharp). 
 
 So in this post, we'll cover the `match..with` syntax and its use for control flow.
 

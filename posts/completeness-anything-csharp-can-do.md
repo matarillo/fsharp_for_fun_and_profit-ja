@@ -3,7 +3,7 @@ layout: post
 title: "Anything C# can do..."
 description: "A whirlwind tour of object-oriented code in F#"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 29
 categories: [Completeness]
 ---

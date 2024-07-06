@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 'Out-of-the-box behavior for types'
+title: '型に関する既定のふるまい'
 description: "Immutability and built-in equality with no coding"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F# を使う理由"
 seriesOrder: 14
 categories: [Convenience, Types]
 ---

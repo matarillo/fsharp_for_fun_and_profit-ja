@@ -1,80 +1,80 @@
 ---
 layout: post
-title: "Comparing F# with C#: Sorting"
-description: "In which we see that F# is more declarative than C#, and we are introduced to pattern matching."
+title: "F#とC#の比較：ソート"
+description: "F#がC#よりも宣言的であることがわかり、パターンマッチングが紹介されます。"
 nav: why-use-fsharp
-seriesId: "Why use F#?"
+seriesId: "F#を使う理由"
 seriesOrder: 4
 categories: [F# vs C#]
 ---
 
-In this next example, we will implement a quicksort-like algorithm for sorting lists and compare an F# implementation to a C# implementation. 
+次の例では、リストをソートするためのクイックソート風のアルゴリズムを実装し、F#の実装とC#の実装を比較します。
 
-Here is the logic for a simplified quicksort-like algorithm:
+簡略化されたクイックソート風アルゴリズムのロジックは以下の通りです：
 
 <pre>
-If the list is empty, there is nothing to do.
-Otherwise: 
-  1. Take the first element of the list
-  2. Find all elements in the rest of the list that 
-      are less than the first element, and sort them. 
-  3. Find all elements in the rest of the list that 
-      are >= than the first element, and sort them
-  4. Combine the three parts together to get the final result: 
-      (sorted smaller elements + firstElement + 
-       sorted larger elements)
+リストが空の場合、何もする必要はありません。
+そうでない場合：
+  1. リストの最初の要素を取り出す
+  2. リストの残りの要素から、最初の要素より小さい
+     要素をすべて見つけ、ソートする
+  3. リストの残りの要素から、最初の要素以上の
+     要素をすべてｓ見つけ、ソートする
+  4. 3つの部分を組み合わせて最終結果を得る：
+     (ソートされた小さい要素 + 最初の要素 + 
+      ソートされた大きい要素)
 </pre>	   
 
-Note that this is a simplified algorithm and is not optimized (and it does not sort in place, like a true quicksort); we want to focus on clarity for now.
+これは簡略化されたアルゴリズムであり、最適化されていないことに注意してください（また、真のクイックソートのようにその場でソートしません）。今は明確さに焦点を当てたいと思います。
 
-Here is the code in F#:
+F#でのコードは以下の通りです：
 
 ```fsharp
 let rec quicksort list =
    match list with
-   | [] ->                            // If the list is empty
-        []                            // return an empty list
-   | firstElem::otherElements ->      // If the list is not empty     
-        let smallerElements =         // extract the smaller ones    
+   | [] ->                            // リストが空の場合
+        []                            // 空のリストを返す
+   | firstElem::otherElements ->      // リストが空でない場合     
+        let smallerElements =         // 小さい要素を抽出    
             otherElements             
             |> List.filter (fun e -> e < firstElem) 
-            |> quicksort              // and sort them
-        let largerElements =          // extract the large ones
+            |> quicksort              // そしてソート
+        let largerElements =          // 大きい要素を抽出
             otherElements 
             |> List.filter (fun e -> e >= firstElem)
-            |> quicksort              // and sort them
-        // Combine the 3 parts into a new list and return it
+            |> quicksort              // そしてソート
+        // 3つの部分を新しいリストに結合して返す
         List.concat [smallerElements; [firstElem]; largerElements]
 
-//test
+//テスト
 printfn "%A" (quicksort [1;5;23;18;9;1;3])
 ```
 
-Again note that this is not an optimized implementation, but is designed to mirror the algorithm closely.
+繰り返しになりますが、これは最適化された実装ではなく、アルゴリズムに忠実に設計されています。
 
-Let's go through this code:
+このコードを詳しく見ていきましょう：
 
-* There are no type declarations anywhere. This function will work on any list that has comparable items (which is almost all F# types, because they automatically have a default comparison function).
-* The whole function is recursive -- this is signaled to the compiler using the `rec` keyword in "`let rec quicksort list =`".
-* The `match..with` is sort of like a switch/case statement. Each branch to test is signaled with a vertical bar, like so:
+* どこにも型宣言がありません。この関数は比較可能な項目を持つあらゆるリストで動作します（ほとんどすべてのF#の型がデフォルトの比較関数を自動的に持っているため、これはほとんどすべてのF#の型に当てはまります）。
+* 関数全体が再帰的です - これは"`let rec quicksort list =`"の`rec`キーワードを使ってコンパイラに伝えられています。
+* `match..with`は一種のswitch/case文のようなものです。テストする各分岐は縦棒で示されます。例えば：
 
 ```fsharp
 match x with
 | caseA -> something
 | caseB -> somethingElse
 ```
-* The "`match`" with `[]` matches an empty list, and returns an empty list. 
-* The "`match`" with `firstElem::otherElements` does two things. 
-  * First, it only matches a non-empty list. 
-  * Second, it creates two new values automatically. One for the first element called "`firstElem`", and one for the rest of the list, called "`otherElements`".
-    In C# terms, this is like having a "switch" statement that not only branches, but does variable declaration and assignment *at the same time*.
-* The `->` is sort of like a lambda (`=>`) in C#. The equivalent C# lambda would look something like `(firstElem, otherElements) => do something`.
-* The "`smallerElements`" section takes the rest of the list, filters it against the first element using an inline lambda expression with the "`<`" operator and then pipes the result into the quicksort function recursively.
-* The "`largerElements`" line does the same thing, except using the "`>=`" operator 
-* Finally the resulting list is constructed using the list concatenation function "`List.concat`". For this to work, the first element needs to be put into a list, which is what the square brackets are for. 
-* Again note there is no "return" keyword; the last value will be returned. In the "`[]`" branch the return value is the empty list, and in the main branch, it is the newly constructed list.
+* `[]`との"`match`"は空のリストにマッチし、空のリストを返します。
+* `firstElem::otherElements`との"`match`"は2つのことを行います。
+  * まず、空でないリストにのみマッチします。
+  * 次に、自動的に2つの新しい値を作成します。1つは最初の要素用の"`firstElem`"、もう1つはリストの残りの部分用の"`otherElements`"です。
+    C#の用語で言えば、これは分岐するだけでなく、*同時に*変数宣言と割り当ても行う"switch"文のようなものです。
+* `->`はC#のラムダ（`=>`）のようなものです。同等のC#のラムダは`(firstElem, otherElements) => do something`のようになります。
+* "`smallerElements`"セクションは、リストの残りの部分を取り、"`<`"演算子を使ったインラインのラムダ式で最初の要素に対してフィルタリングし、その結果を再帰的にquicksort関数にパイプします。
+* "`largerElements`"行も同じことを行いますが、"`>=`"演算子を使用します。
+* 最後に、結果のリストはリスト連結関数"`List.concat`"を使って構築されます。これを機能させるには、最初の要素をリストに入れる必要があり、それが角かっこの役割です。
+* 繰り返しになりますが、"return"キーワードはありません。最後の値が返されます。"`[]`"分岐では戻り値は空のリストで、メイン分岐では新しく構築されたリストです。
 
-For comparison here is an old-style C# implementation (without using LINQ).
+比較のため、以下は古いスタイルのC#実装です（LINQを使用していません）。
 
 ```csharp
 public class QuickSortHelper
@@ -87,14 +87,14 @@ public class QuickSortHelper
          return new List<T>();
       }
 
-      //get the first element
+      //最初の要素を取得
       T firstElement = values[0];
 
-      //get the smaller and larger elements
+      //小さい要素と大きい要素を取得
       var smallerElements = new List<T>();
       var largerElements = new List<T>();
-      for (int i = 1; i < values.Count; i++)  // i starts at 1
-      {                                       // not 0!
+      for (int i = 1; i < values.Count; i++)  // iは1から
+      {                                       // 0ではない！
          var elem = values[i];
          if (elem.CompareTo(firstElement) < 0)
          {
@@ -106,7 +106,7 @@ public class QuickSortHelper
          }
       }
 
-      //return the result
+      //結果を返す
       var result = new List<T>();
       result.AddRange(QuickSort(smallerElements.ToList()));
       result.Add(firstElement);
@@ -116,20 +116,20 @@ public class QuickSortHelper
 }
 ```
 
-Comparing the two sets of code, again we can see that the F# code is much more compact, with less noise and no need for type declarations. 
+2つのコードセットを比較すると、F#のコードがはるかにコンパクトで、ノイズが少なく、型宣言が不要であることがわかります。
 
-Furthermore, the F# code reads almost exactly like the actual algorithm, unlike the C# code.  This is another key advantage of F# -- the code is generally more declarative ("what to do") and less imperative ("how to do it") than C#, and is therefore much more self-documenting. 
+さらに、F#のコードはC#のコードとは異なり、実際のアルゴリズムとほぼ同じように読めます。これはF#のもう一つの重要な利点です - F#のコードは一般的にC#よりも宣言的（「何をするか」）で命令的（「どのようにするか」）ではないため、より自己文書化されています。
 
  
-## A functional implementation in C# ##
+## C#での関数型実装 ##
 
-Here's a more modern "functional-style" implementation using LINQ and an extension method:
+以下は、LINQと拡張メソッドを使用したより現代的な「関数型スタイル」の実装です：
 
 ```csharp
 public static class QuickSortExtension
 {
     /// <summary>
-    /// Implement as an extension method for IEnumerable
+    /// IEnumerableの拡張メソッドとして実装
     /// </summary>
     public static IEnumerable<T> QuickSort<T>(
         this IEnumerable<T> values) where T : IComparable
@@ -139,11 +139,11 @@ public static class QuickSortExtension
             return new List<T>();
         }
 
-        //split the list into the first element and the rest
+        //リストを最初の要素と残りに分割
         var firstElement = values.First();
         var rest = values.Skip(1);
 
-        //get the smaller and larger elements
+        //小さい要素と大きい要素を取得
         var smallerElements = rest
                 .Where(i => i.CompareTo(firstElement) < 0)
                 .QuickSort();
@@ -152,7 +152,7 @@ public static class QuickSortExtension
                 .Where(i => i.CompareTo(firstElement) >= 0)
                 .QuickSort();
 
-        //return the result
+        //結果を返す
         return smallerElements
             .Concat(new List<T>{firstElement})
             .Concat(largerElements);
@@ -160,43 +160,43 @@ public static class QuickSortExtension
 }
 ```
 
-This is much cleaner, and reads almost the same as the F# version.  But unfortunately there is no way of avoiding the extra noise in the function signature.
+これははるかに清潔で、F#バージョンとほぼ同じように読めます。しかし残念ながら、関数シグネチャの余分なノイズを避ける方法はありません。
 
-## Correctness
+## 正確性
 
-Finally, a beneficial side-effect of this compactness is that F# code often works the first time, while the C# code may require more debugging. 
+最後に、このコンパクトさの有益な副作用として、F#のコードは多くの場合最初から正しく動作しますが、C#のコードはより多くのデバッグが必要かもしれません。
 
-Indeed, when coding these samples, the old-style C# code was incorrect initially, and required some debugging to get it right. Particularly tricky areas were the `for` loop (starting at 1 not zero) and the `CompareTo` comparison (which I got the wrong way round), and it would also be very easy to accidentally modify the inbound list. The functional style in the second C# example is not only cleaner but was easier to code correctly.
+実際、これらのサンプルをコーディングする際、古いスタイルのC#コードは最初は不正確で、正しくするためにいくつかのデバッグが必要でした。特に厄介な部分は`for`ループ（0ではなく1から始まる）と`CompareTo`比較（私は逆にしてしまいました）でした。また、誤って入力リストを変更してしまう可能性も非常に高いです。2番目のC#例の関数型スタイルは、より清潔であるだけでなく、正しくコーディングするのも容易でした。
 
-But even the functional C# version has drawbacks compared to the F# version. For example, because F# uses pattern matching, it is not possible to branch to the "non-empty list" case with an empty list. On the other hand, in the C# code, if we forgot the test:
+しかし、関数型のC#バージョンでさえ、F#バージョンと比べると欠点があります。例えば、F#はパターンマッチングを使用するため、空のリストで「空でないリスト」のケースに分岐することは不可能です。一方、C#のコードでは、以下のテストを忘れた場合：
 
 ```csharp
 if (values == null || !values.Any()) ...
 ```
 
-then the extraction of the first element:
+最初の要素の抽出：
 
 ```csharp
 var firstElement = values.First();
 ```
 
-would fail with an exception. The compiler cannot enforce this for you.  In your own code, how often have you used `FirstOrDefault` rather than `First` because you are writing "defensive" code. Here is an example of a code pattern that is very common in C# but is rare in F#:
+は例外で失敗します。コンパイラはこれを強制できません。自分のコードで、「防御的な」コードを書いているために`First`ではなく`FirstOrDefault`を使用したことはどれくらいありますか？以下は、C#では非常に一般的だがF#ではまれなコードパターンの例です：
 
 ```csharp
-var item = values.FirstOrDefault();  // instead of .First()
+var item = values.FirstOrDefault();  // .First()の代わり
 if (item != null) 
 { 
-   // do something if item is valid 
+   // itemが有効な場合に何かを行う 
 }
 ```
 
-The one-step "pattern match and branch" in F# allows you to avoid this in many cases.
+F#の1ステップの「パターンマッチと分岐」により、多くの場合これを避けることができます。
 
-## Postscript
+## 追記
 
-The example implementation in F# above is actually pretty verbose by F# standards!  
+上記のF#の実装例は、F#の基準からすると実際にはかなり冗長です！
 
-For fun, here is what a more typically concise version would look like:
+楽しみのために、より典型的な簡潔なバージョンがどのように見えるか示します：
 
 ```fsharp
 let rec quicksort2 = function
@@ -205,8 +205,8 @@ let rec quicksort2 = function
         let smaller,larger = List.partition ((>=) first) rest 
         List.concat [quicksort2 smaller; [first]; quicksort2 larger]
         
-// test code        
+// テストコード        
 printfn "%A" (quicksort2 [1;5;23;18;9;1;3])
 ```
 
-Not bad for 4 lines of code, and when you get used to the syntax, still quite readable.
+たった4行のコードでこれだけのことができるのは悪くありませんね。構文に慣れれば、十分に理解しやすいコードです。
