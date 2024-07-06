@@ -1,117 +1,116 @@
 ---
 layout: post
-title: "データベース関連タスクに F #を使う"
-description: "仕事で F# を使う 26 の低リスクな方法（パート4）"
+title: "データベース関連タスクにF#を使う"
+description: "仕事でF#を使う26の低リスクな方法（パート4）"
 categories: []
-seriesId: "仕事で F# を使う 26 の低リスクな方法"
+seriesId: "仕事でF#を低リスクで使う方法"
 seriesOrder: 4
 
 ---
 
+この投稿は、[仕事でF#を低リスクかつ段階的に使う方法](../posts/low-risk-ways-to-use-fsharp-at-work.md)に関する前回のシリーズの続きです。
 
-This post is a continuation of the previous series on [low-risk and incremental ways to use F# at work](../posts/low-risk-ways-to-use-fsharp-at-work.md).
+今回は、データベース関連のタスクにおいてF#が予想外に役立つ方法を見ていきます。
 
-In this one, we'll see how F# can be unexpectedly helpful when it comes to database related tasks.
+## シリーズの内容
 
-## Series contents
+本題に入る前に、26の方法の完全なリストを示します：
 
-Before moving on to the content of the post, here's the full list of the twenty six ways:
+**パート1 - F#を使って対話的に探索し開発する**
 
-**Part 1 - Using F# to explore and develop interactively**
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html#explore-net-interactively">1. F#を使って.NETフレームワークを対話的に探索する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html#explore-own-code-interactively">2. F#を使って自分のコードを対話的にテストする</a> <br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html#explore-webservices-interactively">3. F#を使ってWebサービスを対話的に操作する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html#explore-winforms-interactively">4. F#を使ってUIを対話的に操作する</a><br />
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-net-interactively">1. Use F# to explore the .NET framework interactively</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-own-code-interactively">2. Use F# to test your own code interactively</a> <br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-webservices-interactively">3. Use F# to play with webservices interactively</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-winforms-interactively">4. Use F# to play with UI's interactively</a><br />
+**パート2 - 開発およびDevOpsスクリプトにF#を使う**
 
-**Part 2 - Using F# for development and devops scripts**
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#fake">5. ビルドとCIスクリプトにFAKEを使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#dev-website-responding">6. Webサイトの応答をチェックするF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#dev-rss-to-csv">7. RSSフィードをCSVに変換するF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#dev-wmi-stats">8. WMIを使ってプロセスの統計をチェックするF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#dev-cloud">9. クラウドの設定と管理にF#を使う</a><br />
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#fake">5. Use FAKE for build and CI scripts</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-website-responding">6. An F# script to check that a website is responding</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-rss-to-csv">7. An F# script to convert an RSS feed into CSV</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-wmi-stats">8. An F# script that uses WMI to check the stats of a process</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-cloud">9. Use F# for configuring and managing the cloud</a><br />
+**パート3 - テストにF#を使う**
 
-**Part 3 - Using F# for testing**
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-nunit">10. 読みやすい名前の単体テストをF#で書く</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-runner">11. F#を使って単体テストをプログラムで実行する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-other">12. F#を使って他の方法で単体テストを書くことを学ぶ</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-fscheck">13. FsCheckを使ってより良い単体テストを書く</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-dummy">14. FsCheckを使ってランダムなダミーデータを作成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-mock">15. F#を使ってモックを作成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-canopy">16. F#を使って自動化されたブラウザテストを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-bdd">17. 振る舞い駆動開発にF#を使う</a><br />
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-nunit">10. Use F# to write unit tests with readable names</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-runner">11. Use F# to run unit tests programmatically</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-other">12. Use F# to learn to write unit tests in other ways</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-fscheck">13. Use FsCheck to write better unit tests</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-dummy">14. Use FsCheck to create random dummy data</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-mock">15. Use F# to create mocks</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-canopy">16. Use F# to do automated browser testing</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-bdd">17. Use F# for Behaviour Driven Development</a><br />
+**パート4. データベース関連のタスクにF#を使う**
 
-**Part 4. Using F# for database related tasks**
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-linqpad">18. F#を使ってLINQpadを置き換える</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-testprocs">19. F#を使ってストアドプロシージャの単体テストを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-randomdata">20. FsCheckを使ってランダムなデータベースレコードを生成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-etl">21. F#を使って簡単なETLを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-sqlagent">22. F#を使ってSQL Agentスクリプトを生成する</a><br />
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-linqpad">18. Use F# to replace LINQpad</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-testprocs">19. Use F# to unit test stored procedures</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-randomdata">20. Use FsCheck to generate random database records</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-etl">21. Use F# to do simple ETL</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-sqlagent">22. Use F# to generate SQL Agent scripts</a><br />
+**パート5: F#を使うその他の興味深い方法**
 
-**Part 5: Other interesting ways of using F# **
-
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-parsers">23. Use F# for parsing</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-diagramming">24. Use F# for diagramming and visualization</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-data-access">25. Use F# for accessing web-based data stores</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-data-science">26. Use F# for data science and machine learning</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-balance-power">(BONUS) 27: Balance the generation schedule for the UK power station fleet</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-parsers">23. パーシングにF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-diagramming">24. ダイアグラムと可視化にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-data-access">25. WebベースのデータストアへのアクセスにF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-data-science">26. データサイエンスと機械学習にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-balance-power">（ボーナス）27: イギリスの発電所群の発電スケジュールをバランスさせる</a><br />
 
 ----------
 
-## Part 4. Using F# for database related tasks
+## パート4. データベース関連のタスクにF#を使う
 
-This next group of suggestions is all about working with databases, and MS SQL Server in particular.
+次のグループの提案は、すべてデータベース、特にMS SQL Serverとの作業に関するものです。
 
-Relational databases are a critical part of most applications, but most teams do not approach the management of these in the same way as with other development tasks.
+リレーショナルデータベースはほとんどのアプリケーションにとって重要な部分ですが、ほとんどのチームは他の開発タスクと同じ方法でこれらの管理にアプローチしていません。
 
-For example, how many teams do you know that unit test their stored procedures?
+例えば、ストアドプロシージャの単体テストを行っているチームをいくつ知っていますか？
 
-Or their ETL jobs?
+またはETLジョブのテストは？
 
-Or generate T-SQL admin scripts and other boilerplate using a non-SQL scripting language that's stored in source control?
+または、ソース管理に保存されている非SQLスクリプト言語を使ってT-SQL管理スクリプトやその他の定型文を生成していますか？
 
-Here's where F# can shine over other scripting languages, and even over T-SQL itself.
+ここで、F#は他のスクリプト言語、さらにはT-SQL自体よりも輝くことができます。
 
-* The database type providers in F# give you the power to create simple, short scripts for testing and admin, with the bonus that...
-* The scripts are *type-checked* and will fail at compile time if the database schema changes, which means that...
-* The whole process works really well with builds and continuous integration processes, which in turn means that...
-* You have really high confidence in your database related code!
+* F#のデータベース型プロバイダーは、テストと管理のための簡単で短いスクリプトを作成する力を与えます。さらに...
+* スクリプトは*型チェック*され、データベーススキーマが変更された場合はコンパイル時に失敗します。これは...
+* このプロセス全体がビルドと継続的インテグレーションプロセスとうまく連携することを意味し、結果として...
+* データベース関連のコードに非常に高い信頼性を持つことができます！
 
-We'll look at a few examples to demonstrate what I'm talking about:
+私が言っていることを示すためにいくつかの例を見てみましょう：
 
-* Unit testing stored procedures
-* Using FsCheck to generate random records
-* Doing simple ETL with F#
-* Generating SQL Agent scripts
+* ストアドプロシージャの単体テスト
+* FsCheckを使ったランダムなレコードの生成
+* F#を使った簡単なETL
+* SQL Agentスクリプトの生成
 
-### Getting set up
+### セットアップ
 
-The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/).
-In there, there are some SQL scripts to create the sample database, tables and stored procs that I'll use in these examples.
+このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/)です。
+そこには、これらの例で使用するサンプルデータベース、テーブル、ストアドプロシージャを作成するためのいくつかのSQLスクリプトがあります。
 
-To run the examples, then, you'll need SQL Express or SQL Server running locally or somewhere accessible, with the relevant setup scripts having been run.
+したがって、これらの例を実行するには、ローカルまたはアクセス可能な場所でSQL ExpressまたはSQL Serverを実行し、関連するセットアップスクリプトを実行済みである必要があります。
 
-### Which type provider?
+### どの型プロバイダーを使うべきか？
 
-There are a number of SQL Type Providers for F# -- see [the fsharp.org Data Access page](http://fsharp.org/data-access/). For these examples, I'm going to use
-the [`SqlDataConnection` type provider](http://msdn.microsoft.com/en-us/library/hh361033.aspx), which is part of the `FSharp.Data.TypeProviders` DLL.
-It uses [SqlMetal](http://msdn.microsoft.com/en-us/library/bb386987.aspx) behind the scenes and so only works with SQL Server databases.
+F#用にいくつかのSQL型プロバイダーがあります - [fsharp.orgのデータアクセスページ](http://fsharp.org/data-access/)を参照してください。これらの例では、
+`FSharp.Data.TypeProviders` DLLの一部である[`SqlDataConnection`型プロバイダー](http://msdn.microsoft.com/en-us/library/hh361033.aspx)を使います。
+これは裏で[SqlMetal](http://msdn.microsoft.com/en-us/library/bb386987.aspx)を使っているため、SQL Serverデータベースでのみ動作します。
 
-The [SQLProvider](http://fsprojects.github.io/SQLProvider/) project is another good choice -- it supports MySql, SQLite and other non-Microsoft databases.
+[SQLProvider](http://fsprojects.github.io/SQLProvider/)プロジェクトも良い選択肢です - MySql、SQLite、その他の非Microsoftデータベースをサポートしています。
 
 <a name="sql-linqpad"></a>
-## 18. Use F# to replace LINQPad
+## 18. F#を使ってLINQPadを置き換える
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/FsharpInsteadOfLinqpad.fsx).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/FsharpInsteadOfLinqpad.fsx)です。*
 
-[LINQPad](http://www.linqpad.net/) is a great tool for doing queries against databases, and is also a general scratchpad for C#/VB/F# code.
+[LINQPad](http://www.linqpad.net/)はデータベースに対するクエリを行うための優れたツールであり、また一般的なC#/VB/F#コードのスクラッチパッドでもあります。
 
-You can use F# interactive to do many of the same things -- you get queries, autocompletion, etc., just like LINQPad. 
+F#インタラクティブを使って、LINQPadと同様の多くのことを行うことができます - クエリ、オートコンプリートなどが、LINQPadと同じように利用できます。
 
-For example, here's one that counts customers with a certain email domain.
+例えば、以下は特定のメールドメインを持つ顧客の数を数えるものです。
 
 ```fsharp
 [<Literal>]
@@ -120,7 +119,7 @@ let connectionString = "Data Source=localhost; Initial Catalog=SqlInFsharp; Inte
 type Sql = SqlDataConnection<connectionString>
 let db = Sql.GetDataContext()
 
-// find the number of customers with a gmail domain
+// gmailドメインを持つ顧客の数を見つける
 query {
     for c in db.Customer do
     where (c.Email.EndsWith("gmail.com"))
@@ -129,14 +128,14 @@ query {
     }
 ```
 
-If you want to see what SQL code is generated, you can turn logging on, of course:
+生成されたSQLコードを見たい場合は、もちろんログを有効にできます：
 
 ```fsharp
-// optional, turn logging on
+// オプション、ログを有効にする
 db.DataContext.Log <- Console.Out
 ```
 
-The logged output for this query is:
+このクエリのログ出力は以下の通りです：
 
 ```text
 SELECT COUNT(*) AS [value]
@@ -145,12 +144,12 @@ WHERE [t0].[Email] LIKE @p0
 -- @p0: Input VarChar (Size = 8000; Prec = 0; Scale = 0) [%gmail.com]
 ```
 
-You can also do more complicated things, such as using subqueries. Here's an example from [MSDN](http://msdn.microsoft.com/en-us/library/hh225374.aspx):
+サブクエリを使うなど、より複雑なこともできます。以下は[MSDN](http://msdn.microsoft.com/en-us/library/hh225374.aspx)からの例です：
 
-Note that, as befitting a functional approach, queries are nice and composable.
+関数型アプローチにふさわしく、クエリは素晴らしく合成可能であることに注意してください。
 
 ```fsharp
-// Find students who have signed up at least one course.
+// 少なくとも1つのコースに登録した学生を見つける
 query {
     for student in db.Student do
     where (query { for courseSelection in db.CourseSelection do
@@ -159,11 +158,11 @@ query {
 }
 ```
 
-And if the SQL engine doesn't support certain functions such as regexes, and assuming the size of the data is not too large,
-you can just stream the data out and do the processing in F#.
+そして、SQLエンジンが正規表現などの特定の関数をサポートしていない場合、データのサイズがあまり大きくないと仮定すると、
+データをストリームアウトしてF#で処理を行うことができます。
 
 ```fsharp
-// find the most popular domain for people born in each decade
+// 各10年代に生まれた人々の最も人気のあるドメインを見つける
 let getDomain email =
     Regex.Match(email,".*@(.*)").Groups.[1].Value
 
@@ -187,17 +186,16 @@ db.Customer
 |> Seq.iter (printfn "%A")
 ```
 
-As you can see from the code above, the nice thing about doing the processing in F# is that you can define helper functions separately and connect them together easily.
+上記のコードからわかるように、F#で処理を行う良い点は、ヘルパー関数を別々に定義し、それらを簡単に接続できることです。
 
 <a name="sql-testprocs"></a>
-## 19. Use F# to unit test stored procedures
+## 19. F#を使ってストアドプロシージャの単体テストを行う
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/TestUpsertCustomer.fs).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/TestUpsertCustomer.fs)です。*
 
-Now let's look at how we can use the type provider to make creating unit tests for stored procs really easy.
+では、型プロバイダーを使ってストアドプロシージャの単体テストを非常に簡単に作成する方法を見てみましょう。
 
-First, I create a helper module (which I'll call `DbLib`) to set up the connection and to provide shared utility functions such as `resetDatabase`,
-which will be called before each test.
+まず、接続を設定し、各テストの前に呼び出される`resetDatabase`などの共有ユーティリティ関数を提供するヘルパーモジュール（`DbLib`と呼びます）を作成します。
 
 ```fsharp
 module DbLib
@@ -225,97 +223,95 @@ let insertReferenceData (db:DbContext) =
         )
     db.DataContext.SubmitChanges()
 
-// removes all data and restores db to known starting point
+// すべてのデータを削除し、DBを既知の開始点に戻す
 let resetDatabase() =
     use db = Sql.GetDataContext()
     removeExistingData db
     insertReferenceData db
 ```
 
-Now I can write a unit test, using NUnit say, just like any other unit test.
+これで、NUnitを使って、他の単体テストと同じように単体テストを書くことができます。
 
-Assume that we have `Customer` table, and a sproc called `up_Customer_Upsert` that either inserts a new customer or updates an existing one, depending on whether
-the passed in customer id is null or not.
+`Customer`テーブルと、渡された顧客IDがnullかどうかによって新しい顧客を挿入するか既存の顧客を更新する`up_Customer_Upsert`というストアドプロシージャがあるとします。
 
-Here's what a test looks like:
+以下がテストの例です：
 
 ```fsharp
 [<Test>]
-let ``When upsert customer called with null id, expect customer created with new id``() = 
+let ``null idでupsert customerが呼ばれた場合、新しいidで顧客が作成されることを期待する``() = 
     DbLib.resetDatabase() 
     use db = DbLib.Sql.GetDataContext()
 
-    // create customer
+    // 顧客を作成
     let newId = db.Up_Customer_Upsert(Nullable(),"Alice","x@example.com",Nullable()) 
 
-    // check new id 
+    // 新しいidをチェック
     Assert.Greater(newId,0)
 
-    // check one customer exists
+    // 1人の顧客が存在することをチェック
     let customerCount = db.Customer |> Seq.length
     Assert.AreEqual(1,customerCount)
 ```
 
-Note that, because the setup is expensive, I do multiple asserts in the test. This could be refactored if you find this too ugly!
+セットアップにコストがかかるため、テストで複数のアサートを行っていることに注意してください。これが醜すぎると感じる場合はリファクタリングできます！
 
-Here's one that tests that updates work:
+以下は更新が機能することをテストするものです：
 
 ```fsharp
 [<Test>]
-let ``When upsert customer called with existing id, expect customer updated``() = 
+let ``既存のidでupsert customerが呼ばれた場合、顧客が更新されることを期待する``() = 
     DbLib.resetDatabase() 
     use db = DbLib.Sql.GetDataContext()
 
-    // create customer
+    // 顧客を作成
     let custId = db.Up_Customer_Upsert(Nullable(),"Alice","x@example.com",Nullable()) 
     
-    // update customer
+    // 顧客を更新
     let newId = db.Up_Customer_Upsert(Nullable custId,"Bob","y@example.com",Nullable()) 
     
-    // check id hasnt changed
+    // idが変更されていないことをチェック
     Assert.AreEqual(custId,newId)
 
-    // check still only one customer
+    // まだ1人の顧客しかいないことをチェック
     let customerCount = db.Customer |> Seq.length
     Assert.AreEqual(1,customerCount)
 
-    // check customer columns are updated
+    // 顧客の列が更新されていることをチェック
     let customer = db.Customer |> Seq.head
     Assert.AreEqual("Bob",customer.Name)
 ```
 
-And one more, that checks for exceptions:
+そしてもう1つ、例外をチェックするものです：
 
 ```fsharp
 [<Test>]
-let ``When upsert customer called with blank name, expect validation error``() = 
+let ``空白の名前でupsert customerが呼ばれた場合、バリデーションエラーが発生することを期待する``() = 
     DbLib.resetDatabase() 
     use db = DbLib.Sql.GetDataContext()
 
     try
-        // try to create customer will a blank name
+        // 空白の名前で顧客を作成しようとする
         db.Up_Customer_Upsert(Nullable(),"","x@example.com",Nullable()) |> ignore
-        Assert.Fail("expecting a SqlException")
+        Assert.Fail("SqlExceptionが発生することを期待")
     with
     | :? System.Data.SqlClient.SqlException as ex ->
         Assert.That(ex.Message,Is.StringContaining("@Name"))
         Assert.That(ex.Message,Is.StringContaining("blank"))
 ```
 
-As you can see, the whole process is very straightforward. 
+ご覧のように、全体のプロセスは非常に簡単です。
 
-These tests can be compiled and run as part of the continuous integration scripts.
-And what is great is that, if the database schema gets out of sync with the code, then the tests will fail to even compile!
+これらのテストは継続的インテグレーションスクリプトの一部としてコンパイルおよび実行できます。
+そして素晴らしいのは、データベーススキーマがコードと同期が取れていない場合、テストはコンパイルすらできないということです！
 
 <a name="sql-randomdata"></a>
-## 20. Use FsCheck to generate random database records
+## 20. FsCheckを使ってランダムなデータベースレコードを生成する
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/InsertDummyData.fsx).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/InsertDummyData.fsx)です。*
 
-As I showed in an earlier example, you can use FsCheck to generate random data. In this case we'll use it to generate random
-records in the database. 
+前の例で示したように、FsCheckを使ってランダムなデータを生成できます。この場合、データベースにランダムなレコードを生成するために使います。
 
-Let's say we have a `CustomerImport` table, defined as below. (We'll use this table in the next section on ETL)
+`CustomerImport`テーブルが以下のように定義されているとします。（このテーブルは次のETLのセクションで使います）
 
 ```text
 CREATE TABLE dbo.CustomerImport (
@@ -329,7 +325,7 @@ CREATE TABLE dbo.CustomerImport (
 	)
 ```
     
-Using the same code as before, we can then generate random instances of `CustomerImport`.    
+前と同じコードを使って、`CustomerImport`のランダムなインスタンスを生成できます。 
 
 ```fsharp
 [<Literal>]
@@ -337,20 +333,20 @@ let connectionString = "Data Source=localhost; Initial Catalog=SqlInFsharp; Inte
 
 type Sql = SqlDataConnection<connectionString>
 
-// a list of names to sample
+// サンプリングする名前のリスト
 let possibleFirstNames = 
     ["Merissa";"Kenneth";"Zora";"Oren"]
 let possibleLastNames = 
     ["Applewhite";"Feliz";"Abdulla";"Strunk"]
 
-// generate a random name by picking from the list at random
+// リストからランダムに選んで名前を生成
 let generateFirstName() = 
     FsCheck.Gen.elements possibleFirstNames 
 
 let generateLastName() = 
     FsCheck.Gen.elements possibleLastNames
 
-// generate a random email address by combining random users and domains
+// ランダムなユーザーとドメインを組み合わせてランダムなメールアドレスを生成
 let generateEmail() = 
     let userGen = FsCheck.Gen.elements ["a"; "b"; "c"; "d"; "e"; "f"]
     let domainGen = FsCheck.Gen.elements ["gmail.com"; "example.com"; "outlook.com"]
@@ -358,16 +354,16 @@ let generateEmail() =
     FsCheck.Gen.map2 makeEmail userGen domainGen 
 ```
 
-So far so good.  
+ここまでは順調です。
 
-Now we get to the `age` column, which is nullable. This means we can't generate random `int`s, but instead
-we have to generate random `Nullable<int>`s. This is where type checking is really useful -- the compiler has forced us to take that into account.
-So to make sure we cover all the bases, we'll generate a null value one time out of twenty.
-    
+次に`age`カラムに移りますが、これはnullable（null許容）です。これは、ランダムな`int`を生成するのではなく、
+ランダムな`Nullable<int>`を生成する必要があることを意味します。ここで型チェックが本当に役立ちます - コンパイラがそれを考慮するよう強制してくれます。
+すべてのケースをカバーするために、20回に1回の割合でnull値を生成することにします。
+
 ```fsharp
-// Generate a random nullable age.
-// Note that because age is nullable, 
-// the compiler forces us to take that into account
+// ランダムなnullable ageを生成。
+// ageがnullableであるため、
+// コンパイラはそれを考慮するよう強制する
 let generateAge() = 
     let nonNullAgeGenerator = 
         FsCheck.Gen.choose(1,99) 
@@ -375,26 +371,26 @@ let generateAge() =
     let nullAgeGenerator = 
         FsCheck.Gen.constant (Nullable())
 
-    // 19 out of 20 times choose a non null age
+    // 20回に19回の割合でnullでない年齢を選択
     FsCheck.Gen.frequency [ 
         (19,nonNullAgeGenerator) 
         (1,nullAgeGenerator)
         ]
 ```
 
-Putting it altogether...
+すべてをまとめると...
 
 ```fsharp
-// a function to create a customer
+// 顧客を作成する関数
 let createCustomerImport first last email age =
     let c = new Sql.ServiceTypes.CustomerImport()
     c.FirstName <- first
     c.LastName <- last
     c.EmailAddress <- email
     c.Age <- age
-    c //return new record
+    c //新しいレコードを返す
 
-// use applicatives to create a customer generator
+// アプリカティブを使って顧客ジェネレーターを作成
 let generateCustomerImport = 
     createCustomerImport 
     <!> generateFirstName() 
@@ -403,34 +399,34 @@ let generateCustomerImport =
     <*> generateAge() 
 ```
 
-Once we have a random generator, we can fetch as many records as we like, and insert them using the type provider.
+ランダムジェネレーターができたら、好きな数のレコードを取得し、型プロバイダーを使って挿入できます。
 
-In the code below, we'll generate 10,000 records, hitting the database in batches of 1,000 records.
+以下のコードでは、10,000件のレコードを生成し、1,000件ずつのバッチでデータベースにヒットします。
 
 ```fsharp
 let insertAll() =
     use db = Sql.GetDataContext()
 
-    // optional, turn logging on or off
+    // オプション、ログのオン/オフを切り替え
     // db.DataContext.Log <- Console.Out
     // db.DataContext.Log <- null
 
     let insertOne counter customer =
         db.CustomerImport.InsertOnSubmit customer
-        // do in batches of 1000
+        // 1000件ごとにバッチ処理
         if counter % 1000 = 0 then
             db.DataContext.SubmitChanges()
 
-    // generate the records
+    // レコードを生成
     let count = 10000
     let generator = FsCheck.Gen.sample 0 count generateCustomerImport
 
-    // insert the records
+    // レコードを挿入
     generator |> List.iteri insertOne
-    db.DataContext.SubmitChanges() // commit any remaining
+    db.DataContext.SubmitChanges() // 残りをコミット
 ```
 
-Finally, let's do it and time it.
+最後に、実行して時間を計測します。
 
 ```fsharp
 #time
@@ -438,25 +434,25 @@ insertAll()
 #time
 ```
 
-It's not as fast as using BCP, but it is plenty adequate for testing. For example, it only takes a few seconds to create the 10,000 records above.
+BCPを使うほど高速ではありませんが、テストには十分適しています。例えば、上記の10,000件のレコードを作成するのに数秒しかかかりません。
 
-I want to stress that this is a *single standalone script*, not a heavy binary, so it is really easy to tweak and run on demand.
+これが*単一のスタンドアロンスクリプト*であり、重いバイナリではないことを強調したいと思います。そのため、必要に応じて簡単に調整して実行できます。
 
-And of course you get all the goodness of a scripted approach, such as being able to store it in source control, track changes, etc.
+もちろん、ソース管理に保存したり、変更を追跡したりできるなど、スクリプトアプローチのすべての利点が得られます。
 
 <a name="sql-etl"></a>
-## 21. Use F# to do simple ETL
+## 21. F#を使って簡単なETLを行う
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/EtlExample.fsx).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/EtlExample.fsx)です。*
 
-Say that you need to transfer data from one table to another, but it is not a totally straightforward copy,
-as you need to do some mapping and transformation.
+あるテーブルから別のテーブルにデータを転送する必要があるが、完全に単純なコピーではなく、
+いくつかのマッピングと変換を行う必要があるとします。
 
-This is a classic ETL (Extract/Transform/Load) situation, and most people will reach for [SSIS](http://en.wikipedia.org/wiki/SQL_Server_Integration_Services).
+これは典型的なETL（抽出/変換/ロード）の状況で、ほとんどの人は[SSIS](http://en.wikipedia.org/wiki/SQL_Server_Integration_Services)を使おうと思うでしょう。
 
-But for some situations, such as one off imports, and where the volumes are not large, you could use F# instead. Let's have a look.
+しかし、一回限りのインポートや、大量のデータを扱わない場合など、いくつかの状況ではF#を代わりに使えます。見てみましょう。
 
-Say that we are importing data into a master table that looks like this:
+次のようなマスターテーブルにデータをインポートするとします：
 
 ```text
 CREATE TABLE dbo.Customer (
@@ -467,7 +463,7 @@ CREATE TABLE dbo.Customer (
 	)
 ```
 
-But the system we're importing from has a different format, like this:
+しかし、インポート元のシステムは次のような異なる形式を持っています：
 
 ```text
 CREATE TABLE dbo.CustomerImport (
@@ -479,16 +475,16 @@ CREATE TABLE dbo.CustomerImport (
 	)
 ```
 
-As part of this import then, we're going to have to:
+このインポートの一部として、以下のことを行う必要があります：
 
-* Concatenate the `FirstName` and `LastName` columns into one `Name` column
-* Map the `EmailAddress` column to the `Email` column
-* Calculate a `Birthdate` given an `Age`
-* I'm going to skip the `CustomerId` for now -- hopefully we aren't using IDENTITY columns in practice.
+* `FirstName`と`LastName`カラムを1つの`Name`カラムに連結する
+* `EmailAddress`カラムを`Email`カラムにマッピングする
+* `Age`から`Birthdate`を計算する
+* ここでは`CustomerId`はスキップします - 実際にはIDENTITYカラムを使っていないことを願っています。
 
-The first step is to define a function that maps source records to target records. In this case, we'll call it `makeTargetCustomer`.
+最初のステップは、ソースレコードをターゲットレコードにマッピングする関数を定義することです。この場合、`makeTargetCustomer`と呼びます。
 
-Here's some code for this:
+以下がそのコードです：
 
 ```fsharp
 [<Literal>]
@@ -516,10 +512,10 @@ let makeTargetCustomer (sourceCustomer:SourceSql.ServiceTypes.CustomerImport) =
     targetCustomer.Name <- makeName sourceCustomer.FirstName sourceCustomer.LastName
     targetCustomer.Email <- sourceCustomer.EmailAddress
     targetCustomer.Birthdate <- makeBirthdate sourceCustomer.Age
-    targetCustomer // return it
+    targetCustomer // 返す
 ```
 
-With this transform in place, the rest of the code is easy, we just just read from the source and write to the target.
+この変換ができたら、残りのコードは簡単です。ソースから読み取り、ターゲットに書き込むだけです。
 
 ```fsharp
 let transferAll() =
@@ -528,26 +524,26 @@ let transferAll() =
 
     let insertOne counter customer =
         targetDb.Customer.InsertOnSubmit customer
-        // do in batches of 1000
+        // 1000件ごとにバッチ処理
         if counter % 1000 = 0 then
             targetDb.DataContext.SubmitChanges()
-            printfn "...%i records transferred" counter 
+            printfn "...%i レコードが転送されました" counter 
 
-    // get the sequence of source records
+    // ソースレコードのシーケンスを取得
     sourceDb.CustomerImport
-    // transform to a target record
+    // ターゲットレコードに変換
     |>  Seq.map makeTargetCustomer 
-    // and insert
+    // そして挿入
     |>  Seq.iteri insertOne
     
-    targetDb.DataContext.SubmitChanges() // commit any remaining
-    printfn "Done"
+    targetDb.DataContext.SubmitChanges() // 残りをコミット
+    printfn "完了"
 ```
 
-Because these are sequence operations, only one record at a time is in memory (excepting the LINQ submit buffer), so even large data sets can
-be processed.
+これらはシーケンス操作なので、一度に1つのレコードだけがメモリ内にあります（LINQの送信バッファを除く）。そのため、大規模なデータセットでも
+処理できます。
 
-To see it in use, first insert a number of records using the dummy data script just discussed, and then run the transfer as follows:
+使用例を見るために、まず先ほど説明したダミーデータスクリプトを使っていくつかのレコードを挿入し、次に以下のように転送を実行します：
 
 ```fsharp
 #time
@@ -555,36 +551,36 @@ transferAll()
 #time
 ```
 
-Again, it only takes a few seconds to transfer 10,000 records.
+ここでも、10,000件のレコードを転送するのに数秒しかかかりません。
 
-And again, this is a *single standalone script* -- it's a very lightweight way to create simple ETL jobs.
+そして再び、これは*単一のスタンドアロンスクリプト*です - 簡単なETLジョブを作成するための非常に軽量な方法です。
 
 <a name="sql-sqlagent"></a>
-## 22. Use F# to generate SQL Agent scripts 
+## 22. F#を使ってSQL Agentスクリプトを生成する
 
-For the last database related suggestion, let me suggest the idea of generating SQL Agent scripts from code.
+データベース関連の最後の提案として、コードからSQL Agentスクリプトを生成するアイデアを提案します。
 
-In any decent sized shop you may have hundreds or thousands of SQL Agent jobs.  In my opinion, these should all be stored as script files, and 
-loaded into the database when provisioning/building the system.
+ある程度の規模のショップでは、数百から数千のSQL Agentジョブがあるかもしれません。私の意見では、これらはすべてスクリプトファイルとして保存され、
+システムのプロビジョニング/ビルド時にデータベースにロードされるべきです。
 
-Alas, there are often subtle differences between dev, test and production environments: connection strings, authorization, alerts, log configuration, etc.
+残念ながら、開発、テスト、本番環境の間にはしばしば微妙な違いがあります：接続文字列、認可、アラート、ログ設定など。
 
-That naturally leads to the problem of trying to keep three different copies of a script around, which in turn makes you think:
-why not have *one* script and parameterize it for the environment?
+それは自然に、スクリプトの3つの異なるコピーを保持しようとする問題につながり、次にこう考えさせます：
+*1つの*スクリプトを持ち、環境ごとにパラメータ化するのはどうだろうか？
 
-But now you are dealing with lots of ugly SQL code! The scripts that create SQL agent jobs are typically hundreds of lines long and were not really designed
-to be maintained by hand.
+しかし今度は、多くの醜いSQLコードを扱うことになります！SQL Agentジョブを作成するスクリプトは通常数百行に及び、手動で
+メンテナンスするようには設計されていませんでした。
 
-F# to the rescue!
+F#の出番です！
 
-In F#, it's really easy to create some simple record types that store all the data you need to generate and configure a job.
+F#では、ジョブを生成および設定するために必要なすべてのデータを保存する簡単なレコード型を作成するのが本当に簡単です。
 
-For example, in the script below:
+例えば、以下のスクリプトでは：
 
-* I created a union type called `Step` that could store a `Package`, `Executable`, `Powershell` and so on.
-* Each of these step types in turn have their own specific properties, so that a `Package` has a name and variables, and so on.
-* A `JobInfo` consists of a name plus a list of `Step`s.
-* An agent script is generated from a `JobInfo` plus a set of global properties associated with an environment, such as the databases, shared folder locations, etc.
+* `Package`、`Executable`、`Powershell`などを格納できる`Step`という共用体型を作成しました。
+* これらのステップ型にはそれぞれ固有のプロパティがあり、`Package`には名前と変数があるなどです。
+* `JobInfo`は名前と`Step`のリストで構成されます。
+* エージェントスクリプトは、`JobInfo`と環境に関連するグローバルプロパティのセット（データベース、共有フォルダの場所など）から生成されます。
 
 ```fsharp
 let thisDir = __SOURCE_DIRECTORY__
@@ -599,7 +595,7 @@ module MySqlAgentJob =
     let PackageFolder = @"\shared\etl\MyJob"
 
     let step1 = Package {
-        Name = "An SSIS package"
+        Name = "SSISパッケージ"
         Package = "AnSsisPackage.dtsx"
         Variables = 
             [
@@ -611,7 +607,7 @@ module MySqlAgentJob =
         }
 
     let step2 = Package {
-        Name = "Another SSIS package"
+        Name = "別のSSISパッケージ"
         Package = "AnotherSsisPackage.dtsx"
         Variables = 
             [
@@ -623,8 +619,8 @@ module MySqlAgentJob =
         }
 
     let jobInfo = {
-        JobName = "My SqlAgent Job"
-        JobDescription = "Copy data from one place to another"
+        JobName = "私のSqlAgentジョブ"
+        JobDescription = "データをある場所から別の場所にコピーする"
         JobCategory = "ETL"
         Steps = 
             [
@@ -644,17 +640,17 @@ module DevEnvironment =
 
     let globals = 
         [
-        // global
+        // グローバル
         "Environment", "DEV"
         "PackageFolder", @"\shared\etl\MyJob"
         "JobServer", "(local)"
 
-        // General variables
-        "JobName", "Some packages"
+        // 一般変数
+        "JobName", "いくつかのパッケージ"
         "SetStartFlag", "2"
         "SetEndFlag", "0"
 
-        // databases
+        // データベース
         "Database", "mydatabase"
         "Server",  "localhost"
         "EtlServer", "localhost"
@@ -671,38 +667,38 @@ module DevEnvironment =
 DevEnvironment.generateJob()
 ```
 
-I can't share the actual F# code, but I think you get the idea. It's quite simple to create.
+実際のF#コードは共有できませんが、アイデアはお分かりいただけたと思います。作成するのは非常に簡単です。
 
-Once we have these .FSX files, we can generate the real SQL Agent scripts en-masse and then deploy them to the appropriate servers.
+これらの.FSXファイルができたら、実際のSQL Agentスクリプトを一括生成し、適切なサーバーにデプロイできます。
 
-Below is an example of a SQL Agent script that might be generated automatically from the .FSX file. 
+以下は、.FSXファイルから自動生成される可能性のあるSQL Agentスクリプトの例です。
 
-As you can see, it is a nicely laid out and formatted T-SQL script. The idea is that a DBA can review it and be confident that no magic is happening, and thus be
-willing to accept it as input.  
+ご覧の通り、これは整形された見やすいT-SQLスクリプトです。アイデアとしては、DBAがこれをレビューし、魔法のようなことが起こっていないことを確認し、
+入力として受け入れる意欲を持つことができるということです。
 
-On the other hand, it would be risky to maintain scripts like. Editing the SQL code directly could be risky.
-Better to use type-checked (and more concise) F# code than untyped T-SQL!
+一方で、このようなスクリプトを維持するのはリスクがあります。SQLコードを直接編集するのは危険かもしれません。
+型チェックされた（そしてより簡潔な）F#コードを使う方が、型のないT-SQLよりも良いでしょう！
 
 ```sql
 USE [msdb]
 GO
 
 -- =====================================================
--- Script that deletes and recreates the SQL Agent job 'My SqlAgent Job'
+-- SQL Agentジョブ 'My SqlAgent Job' を削除して再作成するスクリプト
 -- 
--- The job steps are:
--- 1) An SSIS package
-     -- {Continue on error=false} 
--- 2) Another SSIS package
-     -- {Continue on error=false} 
+-- ジョブのステップは：
+-- 1) SSISパッケージ
+     -- {エラー時に続行=false} 
+-- 2) 別のSSISパッケージ
+     -- {エラー時に続行=false} 
 
 -- =====================================================
 
 
 -- =====================================================
--- Environment is DEV
+-- 環境はDEV
 -- 
--- The other global variables are:
+-- その他のグローバル変数は：
 -- Database = mydatabase
 -- EtlDatabase = etl_config
 -- EtlServer = localhost
@@ -719,20 +715,20 @@ GO
 
 
 -- =====================================================
--- Create job
+-- ジョブの作成
 -- =====================================================
 
 -- ---------------------------------------------
--- Delete Job if it exists
+-- ジョブが存在する場合は削除
 -- ---------------------------------------------
 IF  EXISTS (SELECT job_id FROM msdb.dbo.sysjobs_view WHERE name = 'My SqlAgent Job') 
 BEGIN
-    PRINT 'Deleting job "My SqlAgent Job"'
+    PRINT 'ジョブ "My SqlAgent Job" を削除中'
     EXEC msdb.dbo.sp_delete_job @job_name='My SqlAgent Job', @delete_unused_schedule=0
 END	
 
 -- ---------------------------------------------
--- Create Job
+-- ジョブの作成
 -- ---------------------------------------------
 
 BEGIN TRANSACTION
@@ -740,35 +736,35 @@ DECLARE @ReturnCode INT
 SELECT @ReturnCode = 0
 
 -- ---------------------------------------------
--- Create Category if needed
+-- 必要な場合はカテゴリを作成
 -- ---------------------------------------------
 IF NOT EXISTS (SELECT name FROM msdb.dbo.syscategories WHERE name='ETL' AND category_class=1)
 BEGIN
-    PRINT 'Creating category "ETL"'
+    PRINT 'カテゴリ "ETL" を作成中'
     EXEC @ReturnCode = msdb.dbo.sp_add_category @class=N'JOB', @type=N'LOCAL', @name='ETL'
     IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 END
 
 -- ---------------------------------------------
--- Create Job 
+-- ジョブの作成 
 -- ---------------------------------------------
 
 DECLARE @jobId BINARY(16)
-PRINT 'Creating job "My SqlAgent Job"'
+PRINT 'ジョブ "My SqlAgent Job" を作成中'
 EXEC @ReturnCode =  msdb.dbo.sp_add_job @job_name='My SqlAgent Job', 
         @enabled=1, 
         @category_name='ETL', 
         @owner_login_name=N'sa', 
-        @description='Copy data from one place to another',
+        @description='データをある場所から別の場所にコピーする',
         @job_id = @jobId OUTPUT
 
 IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 
 
 PRINT '-- ---------------------------------------------'
-PRINT 'Create step 1: "An SSIS package"'
+PRINT 'ステップ1の作成: "SSISパッケージ"'
 PRINT '-- ---------------------------------------------'
-DECLARE @Step1_Name nvarchar(50) = 'An SSIS package'
+DECLARE @Step1_Name nvarchar(50) = 'SSISパッケージ'
 DECLARE @Step1_Package nvarchar(170) = 'AnSsisPackage.dtsx'
 DECLARE @Step1_Command nvarchar(1700) = 
     '/FILE "\\shared\etl\MyJob\AnSsisPackage.dtsx"' + 
@@ -791,9 +787,9 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=@Step1_Nam
 
 
 PRINT '-- ---------------------------------------------'
-PRINT 'Create step 2: "Another SSIS Package"'
+PRINT 'ステップ2の作成: "別のSSISパッケージ"'
 PRINT '-- ---------------------------------------------'
-DECLARE @Step2_Name nvarchar(50) = 'Another SSIS Package'
+DECLARE @Step2_Name nvarchar(50) = '別のSSISパッケージ'
 DECLARE @Step2_Package nvarchar(170) = 'AnotherSsisPackage.dtsx'
 DECLARE @Step2_Command nvarchar(1700) = 
     '/FILE "\\shared\etl\MyJob\AnotherSsisPackage.dtsx.dtsx"' + 
@@ -814,25 +810,25 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=@Step2_Nam
           
         IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 
-    -- ---------------------------------------------
--- Job Schedule
+-- ---------------------------------------------
+-- ジョブスケジュール
 -- ---------------------------------------------
 
 
 -- ----------------------------------------------
--- Job Alert
+-- ジョブアラート
 -- ----------------------------------------------
 
 
 -- ---------------------------------------------
--- Set start step
+-- 開始ステップの設定
 -- ---------------------------------------------
 
 EXEC @ReturnCode = msdb.dbo.sp_update_job @job_id = @jobId, @start_step_id = 1
 IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 
 -- ---------------------------------------------
--- Set server
+-- サーバーの設定
 -- ---------------------------------------------
 
 
@@ -840,7 +836,7 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobserver @job_id = @jobId, @server_name = '(
 IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 
 
-PRINT 'Done!'
+PRINT '完了！'
 
 COMMIT TRANSACTION
 GOTO EndSave
@@ -852,14 +848,14 @@ GO
 
 
  
-## Summary
+## まとめ
 
-I hope that this set of suggestions has thrown a new light on what F# can be used for.
+この一連の提案が、F#の使い道について新しい光を当てたことを願っています。
 
-In my opinion, the combination of concise syntax, lightweight scripting (no binaries) and SQL type providers makes
-F# incredibly useful for database related tasks. 
+私の意見では、簡潔な構文、軽量なスクリプティング（バイナリなし）、SQLの型プロバイダーの組み合わせにより、
+F#はデータベース関連のタスクに信じられないほど有用です。
 
-Please leave a comment and let me know what you think. 
+コメントを残して、あなたの考えを聞かせてください。
 
 
 

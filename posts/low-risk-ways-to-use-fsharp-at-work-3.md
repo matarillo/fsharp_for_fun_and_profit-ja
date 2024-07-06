@@ -1,89 +1,88 @@
 ---
 layout: post
-title: "テストに F# を使う"
-description: "仕事で F# を使う 26 の低リスクな方法（パート3）"
+title: "テストにF#を使う"
+description: "仕事でF#を使う26の低リスクな方法（パート3）"
 categories: []
-seriesId: "仕事で F# を使う 26 の低リスクな方法"
+seriesId: "仕事でF#を低リスクで使う方法"
 seriesOrder: 3
 
 ---
 
-This post is a continuation of the previous series on [low-risk and incremental ways to use F# at work](../posts/low-risk-ways-to-use-fsharp-at-work.md) --
-how can you get your hands dirty with F# in a low-risk, incremental way, without affecting any mission critical code?
+この投稿は、[仕事でF#を低リスクかつ段階的に使う方法](../posts/low-risk-ways-to-use-fsharp-at-work.md)に関する前回のシリーズの続きです。
+ミッションクリティカルなコードに影響を与えることなく、低リスクで段階的にF#を実践するにはどうすればよいでしょうか？
 
-In this one, we'll talk about using F# for testing.
+今回は、テストにF#を使うことについて説明します。
 
-## Series contents
+## シリーズの内容
 
-Before moving on to the content of the post, here's the full list of the twenty six ways:
+本題に入る前に、26の方法の完全なリストを示します：
 
-**Part 1 - Using F# to explore and develop interactively**
+**パート1 - F#を使って対話的に探索し開発する**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-net-interactively">1. Use F# to explore the .NET framework interactively</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-own-code-interactively">2. Use F# to test your own code interactively</a> <br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-webservices-interactively">3. Use F# to play with webservices interactively</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-winforms-interactively">4. Use F# to play with UI's interactively</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html#explore-net-interactively">1. F#を使って.NETフレームワークを対話的に探索する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html#explore-own-code-interactively">2. F#を使って自分のコードを対話的にテストする</a> <br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html#explore-webservices-interactively">3. F#を使ってWebサービスを対話的に操作する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html#explore-winforms-interactively">4. F#を使ってUIを対話的に操作する</a><br />
 
-**Part 2 - Using F# for development and devops scripts**
+**パート2 - 開発およびDevOpsスクリプトにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#fake">5. Use FAKE for build and CI scripts</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-website-responding">6. An F# script to check that a website is responding</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-rss-to-csv">7. An F# script to convert an RSS feed into CSV</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-wmi-stats">8. An F# script that uses WMI to check the stats of a process</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-cloud">9. Use F# for configuring and managing the cloud</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#fake">5. ビルドとCIスクリプトにFAKEを使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#dev-website-responding">6. Webサイトの応答をチェックするF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#dev-rss-to-csv">7. RSSフィードをCSVに変換するF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#dev-wmi-stats">8. WMIを使ってプロセスの統計をチェックするF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#dev-cloud">9. クラウドの設定と管理にF#を使う</a><br />
 
-**Part 3 - Using F# for testing**
+**パート3 - テストにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-nunit">10. Use F# to write unit tests with readable names</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-runner">11. Use F# to run unit tests programmatically</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-other">12. Use F# to learn to write unit tests in other ways</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-fscheck">13. Use FsCheck to write better unit tests</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-dummy">14. Use FsCheck to create random dummy data</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-mock">15. Use F# to create mocks</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-canopy">16. Use F# to do automated browser testing</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-bdd">17. Use F# for Behaviour Driven Development</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-nunit">10. 読みやすい名前の単体テストをF#で書く</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-runner">11. F#を使って単体テストをプログラムで実行する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-other">12. F#を使って他の方法で単体テストを書くことを学ぶ</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-fscheck">13. FsCheckを使ってより良い単体テストを書く</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-dummy">14. FsCheckを使ってランダムなダミーデータを作成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-mock">15. F#を使ってモックを作成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-canopy">16. F#を使って自動化されたブラウザテストを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-bdd">17. 振る舞い駆動開発にF#を使う</a><br />
 
-**Part 4. Using F# for database related tasks**
+**パート4. データベース関連のタスクにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-linqpad">18. Use F# to replace LINQpad</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-testprocs">19. Use F# to unit test stored procedures</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-randomdata">20. Use FsCheck to generate random database records</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-etl">21. Use F# to do simple ETL</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-sqlagent">22. Use F# to generate SQL Agent scripts</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-linqpad">18. F#を使ってLINQpadを置き換える</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-testprocs">19. F#を使ってストアドプロシージャの単体テストを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-randomdata">20. FsCheckを使ってランダムなデータベースレコードを生成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-etl">21. F#を使って簡単なETLを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-sqlagent">22. F#を使ってSQL Agentスクリプトを生成する</a><br />
 
-**Part 5: Other interesting ways of using F# **
+**パート5: F#を使うその他の興味深い方法**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-parsers">23. Use F# for parsing</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-diagramming">24. Use F# for diagramming and visualization</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-data-access">25. Use F# for accessing web-based data stores</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-data-science">26. Use F# for data science and machine learning</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-balance-power">(BONUS) 27: Balance the generation schedule for the UK power station fleet</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-parsers">23. パーシングにF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-diagramming">24. ダイアグラムと可視化にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-data-access">25. WebベースのデータストアへのアクセスにF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-data-science">26. データサイエンスと機械学習にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-balance-power">（ボーナス）27: イギリスの発電所群の発電スケジュールをバランスさせる</a><br />
 
 
 ----------
    
-## Part 3 - Using F# for testing
+## パート3 - テストにF#を使う
 
-If you want to start writing useful code in F# without touching core code, writing tests is a great way to start.
+コアコードに触れずにF#で有用なコードを書き始めたい場合、テストを書くことは素晴らしい始め方です。
 
-Not only does F# have a more compact syntax, it also has many nice features, such as the "double backtick" syntax,
-that make test names much more readable.
+F#は構文がよりコンパクトなだけでなく、テスト名をより読みやすくする「二重バッククォート」構文など、多くの優れた機能があります。
 
-As with all of the suggestions in this series, I think this is a low risk option.
-Test methods tend to be short, so almost anyone will be able to read them without having to understand F# deeply.
-In the worst-case, you can easily port them back to C#.
+このシリーズのすべての提案と同様に、これは低リスクな選択肢だと考えます。
+テストメソッドは通常短いので、F#を深く理解していなくてもほとんどの人が読むことができます。
+最悪の場合でも、簡単にC#に移植することができます。
 
 
 
 <a name="test-nunit"></a>
 
-## 10. Use F# to write unit tests with readable names
+## 10. 読みやすい名前の単体テストをF#で書く
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithNUnit.fs).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithNUnit.fs)です。*
 
-Just like C#, F# can be used to write standard unit tests using the standard frameworks like NUnit, MsUnit, xUnit, etc.
+C#と同様に、F#でもNUnit、MsUnit、xUnitなどの標準的なフレームワークを使って標準的な単体テストを書くことができます。
 
-Here's an example of a test class written for use with NUnit. 
+以下は、NUnitで使うためのテストクラスの例です。
 
 ```fsharp
 [<TestFixture>]
@@ -94,11 +93,11 @@ type TestClass() =
         Assert.AreEqual(4, 2+2)
 ```
 
-As you can see, there's a class with the `TestFixture` attribute, and a public void method with the `Test` attribute.
-All very standard.
+ご覧のように、`TestFixture`属性を持つクラスと、`Test`属性を持つpublic voidメソッドがあります。
+すべて標準的なものです。
 
-But there are some nice extras you get when you use F# rather than C#. First you can use the double backtick syntax to create more readable names,
-and second, you can use `let` bound functions in modules rather than classes, which simplifies the code.
+しかし、C#ではなくF#を使うと、いくつかの素晴らしい追加機能があります。まず、二重バッククォート構文を使ってより読みやすい名前を作成でき、
+次に、クラスの代わりに`let`束縛関数をモジュールで使えるため、コードが簡略化されます。
 
 ```fsharp
 [<Test>]
@@ -106,60 +105,60 @@ let ``When 2 is added to 2 expect 4``() =
     Assert.AreEqual(4, 2+2)
 ```
 
-The double backtick syntax makes the test results much easier to read. Here is the output of the test with a standard class name:
+二重バッククォート構文を使うと、テスト結果がより読みやすくなります。以下は標準的なクラス名を使ったテストの出力です：
 
 ```text
 TestClass.When2IsAddedTo2Expect4
 Result: Success
 ```
 
-vs. the output using the more friendly name:
+対して、より親しみやすい名前を使った出力：
 
 ```text
 MyUnitTests.When 2 is added to 2 expect 4
 Result: Success
 ```
 
-So if you want to write test names that are accessible to non-programmers, give F# a go!
+したがって、非プログラマーにもわかりやすいテスト名を書きたい場合は、F#を試してみてください！
 
 <a name="test-runner"></a>
 
-## 11. Use F# to run unit tests programmatically
+## 11. F#を使って単体テストをプログラムで実行する
 
-Often, you might want to run the unit tests programmatically. This can be for various reasons,
-such as using custom filters, or doing custom logging, or not wanting to install NUnit on test machines.
+しばしば、単体テストをプログラムで実行したいことがあります。これにはさまざまな理由があり、
+カスタムフィルターの使用、カスタムログの記録、テストマシンにNUnitをインストールしたくない場合などがあります。
 
-One simple way to do this is to use the [Fuchu library](http://github.com/mausch/Fuchu) which lets you organize tests directly, especially parameterized tests, without any
-complex test attributes. 
+これを行う簡単な方法の1つは、[Fuchuライブラリ](http://github.com/mausch/Fuchu)を使うことです。Fuchuを使うと、複雑なテスト属性を使わずに、
+特にパラメータ化されたテストを直接整理することができます。
 
-Here's an example:
+以下は例です：
 
 ```fsharp
 let add1 x = x + 1
 
-// a simple test using any assertion framework:
-// Fuchu's own, Nunit, FsUnit, etc
+// 任意のアサーションフレームワークを使った簡単なテスト：
+// Fuchu独自のもの、Nunit、FsUnitなど
 let ``Assert that add1 is x+1`` x _notUsed = 
    NUnit.Framework.Assert.AreEqual(x+1, add1 x)
 
-// a single test case with one value
+// 1つの値を持つ単一のテストケース
 let simpleTest = 
    testCase "Test with 42" <| 
      ``Assert that add1 is x+1`` 42
 
-// a parameterized test case with one param
+// 1つのパラメータを持つパラメータ化されたテストケース
 let parameterizedTest i = 
    testCase (sprintf "Test with %i" i) <| 
      ``Assert that add1 is x+1`` i
 ```
 
-You can run these tests directly in F# interactive using code like this: `run simpleTest`.
+これらのテストは、`run simpleTest`のようなコードを使ってF#インタラクティブで直接実行できます。
 
-You can also combine these tests into one or more lists, or hierarchical lists of lists:
+また、これらのテストを1つ以上のリスト、またはリストの階層的なリストに組み合わせることもできます：
 
 ```fsharp
-// create a hierarchy of tests 
-// mark it as the start point with the "Tests" attribute
+// テストの階層を作成
+// "Tests"属性で開始点としてマークする
 [<Fuchu.Tests>]
 let tests = 
    testList "Test group A" [
@@ -169,9 +168,9 @@ let tests =
    ]
 ```
 
-*The code above is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/OrganizeTestsWithFuchu.fs).*
+*上記のコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/OrganizeTestsWithFuchu.fs)です。*
 
-Finally, with Fuchu, the test assembly becomes its own test runner. Just make the assembly a console app instead of a library and add this code to the `program.fs` file:
+最後に、Fuchuを使うと、テストアセンブリが独自のテストランナーになります。アセンブリをライブラリではなくコンソールアプリにし、`program.fs`ファイルに次のコードを追加するだけです：
 
 ```fsharp
 [<EntryPoint>]
@@ -181,27 +180,27 @@ let main args =
     Console.WriteLine("Press any key")
     Console.ReadLine() |> ignore
 
-    // return the exit code
+    // 終了コードを返す
     exitCode 
 ```
 
-[More on Fuchu here](http://bugsquash.blogspot.co.uk/2012/06/fuchu-functional-test-library-for-net.html).
+[Fuchuの詳細はこちら](http://bugsquash.blogspot.co.uk/2012/06/fuchu-functional-test-library-for-net.html)。
 
-### Using the NUnit test runner
+### NUnitテストランナーを使う
 
-If you do need to use an existing test runner (such as the NUnit one), then
-it's very simple to put together a simple script to do this.
+既存のテストランナー（NUnitのものなど）を使う必要がある場合、
+簡単なスクリプトを作成するのは非常に簡単です。
 
-I've made a little example, below, using the `Nunit.Runners` package.
+以下に、`Nunit.Runners`パッケージを使った小さな例を示します。
 
-All right, this might not be the most exciting use of F#, but it does show off F#'s "object expression" syntax to 
-create the `NUnit.Core.EventListener` interface, so I thought I'd leave it in as a demo.
+さて、これはF#の最も刺激的な使い方ではないかもしれませんが、F#の「オブジェクト式」構文を使って
+`NUnit.Core.EventListener`インターフェースを作成することを示しているので、デモとして残しておくことにしました。
 
 ```fsharp
-// sets the current directory to be same as the script directory
+// 現在のディレクトリをスクリプトディレクトリと同じに設定
 System.IO.Directory.SetCurrentDirectory (__SOURCE_DIRECTORY__)
 
-// Requires Nunit.Runners under script directory 
+// スクリプトディレクトリ下にNunit.Runnersが必要
 //    nuget install NUnit.Runners -o Packages -ExcludeVersion 
 
 #r @"Packages\NUnit.Runners\tools\lib\nunit.core.dll"
@@ -225,8 +224,8 @@ module Setup =
         let replaceNewline (s:string) = 
             s.Replace(Environment.NewLine, "")
 
-        // This is an example of F#'s "object expression" syntax.
-        // You don't need to create a class to implement an interface
+        // これはF#の「オブジェクト式」構文の例です。
+        // インターフェースを実装するためにクラスを作成する必要はありません
         {new NUnit.Core.EventListener
             with
         
@@ -274,7 +273,7 @@ module Setup =
             }
 
 
-// run all the tests in the DLL
+// DLL内のすべてのテストを実行
 do 
     let dllPath = @".\bin\MyUnitTests.dll"
 
@@ -286,25 +285,25 @@ do
     let listener = Setup.createListener logger
     let result = runner.Run(listener, TestFilter.Empty, true, LoggingThreshold.All)
 
-    // if running from the command line, wait for user input
+    // コマンドラインから実行している場合、ユーザー入力を待つ
     Console.ReadLine() |> ignore
 
-    // if running from the interactive session, reset session before recompiling MyUnitTests.dll
+    // 対話セッションから実行している場合、MyUnitTests.dllを再コンパイルする前にセッションをリセット
 ```
 
-*The code above is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/nunit-test-runner.fsx).*
+*上記のコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/nunit-test-runner.fsx)です。*
 
 <a name="test-other"></a>
 
-## 12. Use F# to learn to write unit tests in other ways
+## 12. F#を使って他の方法で単体テストを書くことを学ぶ
 
-The [unit test code above](#test-nunit) is familiar to all of us, but there are other ways to write tests.
-Learning to code in different styles is a great way to add some new techniques to your repertoire and expand your thinking in general,
-so let's have a quick look at some of them.
+[上記の単体テストコード](#test-nunit)は私たちにとって馴染み深いものですが、テストを書く他の方法もあります。
+異なるスタイルでコーディングすることを学ぶことは、レパートリーに新しいテクニックを追加し、一般的に思考を広げる素晴らしい方法です。
+そのうちのいくつかを簡単に見てみましょう。
 
-First up is [FsUnit](http://github.com/fsharp/FsUnit), which replaces `Assert` with a more fluent and idiomatic approach (natural language and piping).
+まず最初は[FsUnit](http://github.com/fsharp/FsUnit)です。これは`Assert`をより流暢で慣用的なアプローチ（自然言語とパイピング）に置き換えます。
 
-Here's a snippet:
+以下は簡単な例です：
 
 ```fsharp
 open NUnit.Framework
@@ -325,14 +324,14 @@ let ``When ToLower(), expect lowercase letters``() =
     "FSHARP".ToLower() |> should startWith "fs"
 ```
 
-*The above code is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithFsUnit.fs).*
+*上記のコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithFsUnit.fs)です。*
  
-A very different approach is used by [Unquote](http://code.google.com/p/unquote/).
-The Unquote approach is to wrap any F# expression in [F# quotations](http://msdn.microsoft.com/en-us/library/dd233212.aspx) and then evaluate it.
-If a test expression throws an exception, the test will fail and print not just the exception, but each step up to the point of the exception.
-This information could potentially give you much more insight in why the assert fails.
+非常に異なるアプローチを使うのが[Unquote](http://code.google.com/p/unquote/)です。
+Unquoteのアプローチは、任意のF#式を[F#クォーテーション](http://msdn.microsoft.com/en-us/library/dd233212.aspx)でラップしてから評価することです。
+テスト式が例外をスローすると、テストは失敗し、例外だけでなく、例外が発生するまでの各ステップも出力します。
+この情報は、アサートが失敗した理由をより深く理解するのに役立つ可能性があります。
 
-Here's a very simple example:
+以下は非常に簡単な例です：
  
 ```fsharp
 [<Test>]
@@ -340,7 +339,7 @@ let ``When 2 is added to 2 expect 4``() =
     test <@ 2 + 2 = 4 @>
 ```
 
-There are also a number of shortcut operators such as `=?` and `>?` that allow you to write your tests even more simply -- no asserts anywhere!
+また、`=?`や`>?`などのショートカット演算子もあり、テストをさらに簡単に書くことができます - どこにもアサートはありません！
 
 ```fsharp
 [<Test>]
@@ -355,15 +354,15 @@ let ``2 + 2 is bigger than 5``() =
 ```
 <a name="test-fscheck"></a>
 
-*The above code is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithUnquote.fs).*
+*上記のコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithUnquote.fs)です。*
 
-## 13. Use FsCheck to write better unit tests
+## 13. FsCheckを使ってより良い単体テストを書く
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithFsCheck.fs).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithFsCheck.fs)です。*
 
-Let's say that we have written a function that converts numbers to Roman numerals, and we want to create some test cases for it.
+数字をローマ数字に変換する関数を書いたとして、そのテストケースを作成したいとします。
 
-We might start writing tests like this:
+次のようなテストを書き始めるかもしれません：
 
 ```fsharp
 [<Test>]
@@ -371,45 +370,43 @@ let ``Test that 497 is CDXCVII``() =
     arabicToRoman 497 |> should equal "CDXCVII"
 ```
 
-But the problem with this approach is that it only tests a very specific example. There might be some edge cases that we haven't thought of.
+しかし、このアプローチの問題点は、非常に特定の例だけをテストしていることです。私たちが考えていないエッジケースがあるかもしれません。
 
-A much better approach is to find something that must be true for *all* cases. Then we can create a test that checks that this something (a "property") is true for
-all cases, or at least a large random subset.
+より良いアプローチは、*すべての*ケースで真でなければならないものを見つけることです。そして、このもの（「プロパティ」）がすべてのケース、または少なくとも大きなランダムな部分集合に対して真であることをチェックするテストを作成できます。
 
-For example, in the Roman numeral example, we can say that one property is "all Roman numerals have at most one 'V' character" or "all Roman numerals have at most three 'X' characters".
-We can then construct tests that check this property is indeed true.
+例えば、ローマ数字の例では、「すべてのローマ数字には最大で1つの'V'文字がある」や「すべてのローマ数字には最大で3つの'X'文字がある」というプロパティがあると言えます。そして、このプロパティが実際に真であることをチェックするテストを構築できます。
 
-This is where [FsCheck](http://github.com/fsharp/FsCheck) can help.
-FsCheck is a framework designed for exactly this kind of property-based testing. It's written in F# but it works equally well for testing C# code.
+ここで[FsCheck](http://github.com/fsharp/FsCheck)が役立ちます。
+FsCheckはまさにこの種のプロパティベースのテスティングのために設計されたフレームワークです。F#で書かれていますが、C#コードのテストにも同様に適しています。
 
-So, let's see how we'd use FsCheck for our Roman numerals.
+では、ローマ数字にFsCheckをどのように使うか見てみましょう。
 
-First, we define some properties that we expect to hold for all Roman numerals.
+まず、すべてのローマ数字に対して成り立つと予想されるプロパティをいくつか定義します。
 
 ```fsharp
 let maxRepetitionProperty ch count (input:string) = 
     let find = String.replicate (count+1) ch
     input.Contains find |> not
 
-// a property that holds for all roman numerals
+// すべてのローマ数字に対して成り立つプロパティ
 let ``has max rep of one V`` roman = 
     maxRepetitionProperty "V" 1 roman 
 
-// a property that holds for all roman numerals
+// すべてのローマ数字に対して成り立つプロパティ
 let ``has max rep of three Xs`` roman = 
     maxRepetitionProperty "X" 3 roman 
 ```
 
-With this in place we create tests that:
+これを使って、以下のようなテストを作成します：
 
-1. Create a property checker function suitable for passing to FsCheck.
-1. Use the `Check.Quick` function to generate hundreds of random test cases and send them into that property checker.
+1. FsCheckに渡すのに適したプロパティチェッカー関数を作成します。
+2. `Check.Quick`関数を使って、数百のランダムなテストケースを生成し、そのプロパティチェッカーに送ります。
 
 ```fsharp
 [<Test>]
 let ``Test that roman numerals have no more than one V``() = 
     let property num = 
-        // convert the number to roman and check the property
+        // 数字をローマ数字に変換し、プロパティをチェック
         arabicToRoman num |> ``has max rep of one V``
 
     Check.QuickThrowOnFailure (testWithRange property)
@@ -417,13 +414,13 @@ let ``Test that roman numerals have no more than one V``() =
 [<Test>]
 let ``Test that roman numerals have no more than three Xs``() = 
     let property num = 
-        // convert the number to roman and check the property
+        // 数字をローマ数字に変換し、プロパティをチェック
         arabicToRoman num |> ``has max rep of three Xs``
 
     Check.QuickThrowOnFailure (testWithRange property)
 ```
 
-Here are the results of the test. You can see that 100 random numbers have been tested, not just one.
+テストの結果は以下の通りです。1つだけでなく、100個のランダムな数字がテストされているのがわかります。
 
 ```text
 Test that roman numerals have no more than one V
@@ -433,7 +430,7 @@ Test that roman numerals have no more than three Xs
    Ok, passed 100 tests.
 ```
 
-If we changed the test to be "Test that roman numerals have no more than TWO Xs", then the test result is false, and looks like this:
+テストを「ローマ数字にはXが2つ以上ない」に変更すると、テスト結果は偽になり、以下のようになります：
 
 ```text
 Falsifiable, after 33 tests 
@@ -441,65 +438,63 @@ Falsifiable, after 33 tests
 30
 ```
 
-In other words, after generating 33 different inputs, FsCheck has correctly found a number (30) that does not meet the required property. Very nice!
+つまり、33個の異なる入力を生成した後、FsCheckは要求されたプロパティを満たさない数（30）を正しく見つけました。非常に素晴らしいですね！
 
-### Using FsCheck in practice
+### 実践でのFsCheckの使い方
 
-Not all situations have properties that can be tested this way, but you might find that it is more common than you think.
+すべての状況でこの方法でテストできるプロパティがあるわけではありませんが、思っているよりも一般的かもしれません。
 
-For example, property based testing is especially useful for "algorithmic" code. Here a few examples:
+例えば、プロパティベースのテストは特に「アルゴリズム的な」コードに有用です。以下にいくつかの例を示します：
 
-* If you reverse a list and then reverse it again, you get the original list.
-* If you factorize an integer and then multiply the factors, you get the original number.
+* リストを反転させてから再び反転させると、元のリストが得られます。
+* 整数を因数分解してから因数を掛け合わせると、元の数が得られます。
 
-But even in Boring Line-Of-Business Applications?, you may find that property based testing has a place. For example, here are some things that can be expressed as properties:
+しかし、退屈なビジネスアプリケーションでも、プロパティベースのテストが役立つ場合があります。例えば、以下のようなことをプロパティとして表現できます：
 
-* **Roundtripping**. For example, if you save a record to a database and then reload it, the record's fields should be unchanged. 
-  Similarly, if you serialize and then deserialize something, you should get the original thing back.
-* **Invariants**. If you add products to a sales order, the sum of the individual lines should be the same as the order total.
-  Or, the sum of word counts for each page should be the sum of the word count for the entire book.
-  More generally, if you calculate things via two different paths, you should get the same answer ([monoid homomorphisms!](../posts/monoids-part2.md#monoid-homomorphism))
-* **Rounding**. If you add ingredients to a recipe, the sum of the ingredient percentages (with 2 place precision) should always be exactly 100%.
-  Similar rules are needed for most partitioning logic, such as shares, tax calculations, etc. 
-  (e.g. [the "share pie" example in the DDD book](http://books.google.co.uk/books?id=xColAAPGubgC&pg=PA198&lpg=PA198&dq=%22domain+driven+design%22+%22share+pie%22&source=bl&ots=q9-HdfTK4p&sig=IUnHGFUdwQv2p0tuWVbrqqwdAk4&hl=en&sa=X&ei=IdFbU5bLK8SMOPLFgfgC&ved=0CC8Q6AEwAA#v=onepage&q=%22domain%20driven%20design%22%20%22share%20pie%22&f=false)).  
-  Making sure you get the rounding right in situations like this is where FsCheck shines.
+* **ラウンドトリップ**。例えば、レコードをデータベースに保存してから再読み込みすると、レコードのフィールドは変更されていないはずです。
+  同様に、何かをシリアライズしてからデシリアライズすると、元のものが戻ってくるはずです。
+* **不変条件**。販売注文に商品を追加する場合、個々の明細の合計は注文合計と同じになるはずです。
+  または、各ページの単語数の合計は、本全体の単語数の合計と同じになるはずです。
+  より一般的には、2つの異なる経路で計算する場合、同じ答えが得られるはずです（[モノイド準同型！](../posts/monoids-part2.md#monoid-homomorphism)）
+* **丸め**。レシピに材料を追加する場合、材料のパーセンテージの合計（小数点以下2桁の精度）は常に正確に100%になるはずです。
+  同様のルールは、株式、税金計算などのほとんどの分割ロジックに必要です。
+  （例：[DDDブックの「シェアパイ」の例](http://books.google.co.uk/books?id=xColAAPGubgC&pg=PA198&lpg=PA198&dq=%22domain+driven+design%22+%22share+pie%22&source=bl&ots=q9-HdfTK4p&sig=IUnHGFUdwQv2p0tuWVbrqqwdAk4&hl=en&sa=X&ei=IdFbU5bLK8SMOPLFgfgC&ved=0CC8Q6AEwAA#v=onepage&q=%22domain%20driven%20design%22%20%22share%20pie%22&f=false)）。
+  このような状況で丸めを正しく行うことを確認するのは、FsCheckが真価を発揮する場面です。
   
-See this [SO question](http://stackoverflow.com/questions/2446242/difficulty-thinking-of-properties-for-fscheck?rq=1) for other ideas.  
+他のアイデアについては、この[SOの質問](http://stackoverflow.com/questions/2446242/difficulty-thinking-of-properties-for-fscheck?rq=1)を参照してください。
 
-FsCheck is also very useful for doing refactoring, because once you trust that the tests are extremely thorough, you can confidently work on tweaks and optimization.
+FsCheckはリファクタリングにも非常に役立ちます。テストが非常に徹底的であると信頼できれば、自信を持って微調整や最適化に取り組むことができます。
 
-Some more links for FsCheck:
+FsCheckに関するその他のリンク：
 
-* I have written [an introduction to property-based testing](http://fsharpforfunandprofit.com/posts/property-based-testing/) and [a follow up on choosing properties for property-based testing](http://fsharpforfunandprofit.com/posts/property-based-testing-2/).
-* [FsCheck documentation](http://github.com/fsharp/FsCheck/blob/master/Docs/Documentation.md).
-* [An article on using FsCheck in practice](http://www.clear-lines.com/blog/post/FsCheck-and-XUnit-is-The-Bomb.aspx).
-* [My post on the Roman Numerals kata that mentions FsCheck](../posts/roman-numeral-kata.md).
+* [プロパティベーステストの入門](http://fsharpforfunandprofit.com/posts/property-based-testing/)と[プロパティベーステストのプロパティ選択に関するフォローアップ](http://fsharpforfunandprofit.com/posts/property-based-testing-2/)を書きました。
+* [FsCheckのドキュメント](http://github.com/fsharp/FsCheck/blob/master/Docs/Documentation.md)。
+* [実践でのFsCheckの使用に関する記事](http://www.clear-lines.com/blog/post/FsCheck-and-XUnit-is-The-Bomb.aspx)。
+* [FsCheckに言及しているローマ数字kata](../posts/roman-numeral-kata.md)に関する私の投稿。
 
+プロパティベーステスト一般については、QuickCheckに関する記事やビデオを探してください。
 
-For more on property-based testing in general, look for articles and videos about QuickCheck. 
-
-* [Intro to QuickCheck by John Hughes](http://www.cs.utexas.edu/~ragerdl/fmcad11/slides/tutorial-a.pdf) (PDF)
-* Fascinating talk on [using QuickCheck to find bugs in Riak](https://skillsmatter.com/skillscasts/4505-quickchecking-riak) ([another version](http://www.cs.utexas.edu/~ragerdl/fmcad11/slides/tutorial-a.pdf)) (videos)
-
+* [John HughesによるQuickCheckの紹介](http://www.cs.utexas.edu/~ragerdl/fmcad11/slides/tutorial-a.pdf)（PDF）
+* [QuickCheckを使ってRiakのバグを見つける](https://skillsmatter.com/skillscasts/4505-quickchecking-riak)に関する興味深い講演（[別バージョン](http://www.cs.utexas.edu/~ragerdl/fmcad11/slides/tutorial-a.pdf)）（ビデオ）
 
 <a name="test-dummy"></a>
 
-## 14. Use FsCheck to create random dummy data
+## 14. FsCheckを使ってランダムなダミーデータを作成する
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/RandomDataWithFsCheck.fs).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/RandomDataWithFsCheck.fs)です。*
 
-In addition to doing testing, FsCheck can be used to create random dummy data.
+テストに加えて、FsCheckはランダムなダミーデータの作成にも使えます。
 
-For example, below is the complete code for generating random customers. 
+例えば、以下はランダムな顧客を生成する完全なコードです。
 
-When you combine this with the SQL Type Provider (discussed later) or CSV writer, you can easily
-generate thousands of rows of random customers in a database or CSV file.
-Or you can use it with the JSON type provider to call a web service for testing validation logic, or load testing.
+これをSQL Type Provider（後で説明）やCSVライターと組み合わせると、簡単に
+データベースやCSVファイルに何千行もの顧客のランダムなデータを生成できます。
+または、JSON型プロバイダーと組み合わせて、バリデーションロジックのテストや負荷テストのためにWebサービスを呼び出すこともできます。
 
-*(Dont worry about not understanding the code -- this sample is just to show you how easy it is!)*
+*（コードを理解できなくても心配しないでください - このサンプルは、どれほど簡単かを示すためのものです！）*
 
 ```fsharp
-// domain objects
+// ドメインオブジェクト
 type EmailAddress = EmailAddress of string
 type PhoneNumber = PhoneNumber of string
 type Customer = {
@@ -509,7 +504,7 @@ type Customer = {
     birthdate: DateTime
     }
 
-// a list of names to sample
+// サンプリングする名前のリスト
 let possibleNames = [
     "Georgianne Stephan"
     "Sharolyn Galban"
@@ -521,18 +516,18 @@ let possibleNames = [
     "Oren Curlee"
     ]
 
-// generate a random name by picking from the list at random
+// リストからランダムに選んで名前を生成
 let generateName() = 
     FsCheck.Gen.elements possibleNames 
 
-// generate a random EmailAddress by combining random users and domains
+// ランダムなユーザーとドメインを組み合わせてランダムなEmailAddressを生成
 let generateEmail() = 
     let userGen = FsCheck.Gen.elements ["a"; "b"; "c"; "d"; "e"; "f"]
     let domainGen = FsCheck.Gen.elements ["gmail.com"; "example.com"; "outlook.com"]
     let makeEmail u d = sprintf "%s@%s" u d |> EmailAddress
     FsCheck.Gen.map2 makeEmail userGen domainGen 
 
-// generate a random PhoneNumber 
+// ランダムなPhoneNumberを生成
 let generatePhone() = 
     let areaGen = FsCheck.Gen.choose(100,999)
     let n1Gen = FsCheck.Gen.choose(1,999)
@@ -540,7 +535,7 @@ let generatePhone() =
     let makeNumber area n1 n2 = sprintf "(%03i)%03i-%04i" area n1 n2 |> PhoneNumber
     FsCheck.Gen.map3 makeNumber areaGen n1Gen n2Gen 
     
-// generate a random birthdate
+// ランダムな誕生日を生成
 let generateDate() = 
     let minDate = DateTime(1920,1,1).ToOADate() |> int
     let maxDate = DateTime(2014,1,1).ToOADate() |> int
@@ -548,11 +543,11 @@ let generateDate() =
     let makeDate oaDate = float oaDate |> DateTime.FromOADate 
     FsCheck.Gen.map makeDate oaDateGen
 
-// a function to create a customer
+// 顧客を作成する関数
 let createCustomer name email phone birthdate =
     {name=name; email=email; phone=phone; birthdate=birthdate}
 
-// use applicatives to create a customer generator
+// アプリカティブを使って顧客ジェネレーターを作成
 let generateCustomer = 
     createCustomer 
     <!> generateName() 
@@ -566,11 +561,11 @@ let printRandomCustomers() =
     let count = 10
     let data = FsCheck.Gen.sample size count generateCustomer
 
-    // print it
+    // 出力
     data |> List.iter (printfn "%A")
 ```
 
-And here is a sampling of the results:
+そして、結果のサンプルは以下の通りです：
 
 ```text
 {name = "Georgianne Stephan";
@@ -592,174 +587,174 @@ And here is a sampling of the results:
 
 <a name="test-mock"></a>
 
-## 15. Use F# to create mocks
+## 15. F#を使ってモックを作成する
 
-If you're using F# to write test cases for code written in C#, you may want to create mocks and stubs for interfaces.
+C#で書かれたコードのテストケースをF#で書く場合、インターフェースのモックやスタブを作成したいかもしれません。
 
-In C# you might use [Moq](http://github.com/Moq/moq4) or [NSubstitute](http://nsubstitute.github.io/).
-In F# you can use object expressions to create interfaces directly, or the [Foq library](http://foq.codeplex.com/).
+C#では[Moq](http://github.com/Moq/moq4)や[NSubstitute](http://nsubstitute.github.io/)を使うかもしれません。
+F#ではオブジェクト式を使ってインターフェースを直接作成するか、[Foqライブラリ](http://foq.codeplex.com/)を使うことができます。
 
-Both are easy to do, and in a way that is similar to Moq.
+どちらも簡単に行えて、Moqと似た方法で使えます。
 
-Here's some Moq code in C#:
+以下はC#でのMoqコードです：
 
 ```csharp
-// Moq Method
+// Moq メソッド
 var mock = new Mock<IFoo>();
 mock.Setup(foo => foo.DoSomething("ping")).Returns(true);
 var instance = mock.Object;
 
-// Moq Matching Arguments:
+// Moq 引数のマッチング：
 mock.Setup(foo => foo.DoSomething(It.IsAny<string>())).Returns(true);
 
-// Moq Property
+// Moq プロパティ
 mock.Setup(foo => foo.Name ).Returns("bar");
 ```
 
-And here's the equivalent Foq code in F#:
+そして以下はF#での同等のFoqコードです：
 
 ```fsharp
-// Foq Method
+// Foq メソッド
 let mock = 
     Mock<IFoo>()
         .Setup(fun foo -> <@ foo.DoSomething("ping") @>).Returns(true)
         .Create()
 
-// Foq Matching Arguments
+// Foq 引数のマッチング
 mock.Setup(fun foo -> <@ foo.DoSomething(any()) @>).Returns(true)
 
-// Foq Property
+// Foq プロパティ
 mock.Setup(fun foo -> <@ foo.Name @>).Returns("bar")
 ```
 
-For more on mocking in F#, see:
+F#でのモックについての詳細は以下を参照してください：
 
 * [F# as a Unit Testing Language](http://trelford.com/blog/post/fstestlang.aspx)
 * [Mocking with Foq](http://trelford.com/blog/post/Foq.aspx)
 * [Testing and mocking your C# code with F#](http://www.clear-lines.com/blog/post/Testing-and-mocking-your-C-sharp-code-with-F-sharp.aspx)
 
-And you need to mock external services such as SMTP over the wire, there is an interesting tool called [mountebank](http://www.mbtest.org/),
-which is [easy to interact with in F#](http://nikosbaxevanis.com/blog/2014/04/22/mountebank-mocks-with-f-number/).
+また、ネットワーク越しのSMTPなどの外部サービスをモックする必要がある場合、[mountebank](http://www.mbtest.org/)という興味深いツールがあります。
+これは[F#で簡単に対話できます](http://nikosbaxevanis.com/blog/2014/04/22/mountebank-mocks-with-f-number/)。
 
 <a name="test-canopy"></a>
 
-## 16. Use F# to do automated browser testing
+## 16. F#を使って自動化されたブラウザテストを行う
 
-In addition to unit tests, you should be doing some kind of automated web testing,
-driving the browser with [Selenium](http://docs.seleniumhq.org/) or [WatiN](http://watin.sourceforge.net/).
+単体テストに加えて、[Selenium](http://docs.seleniumhq.org/)や[WatiN](http://watin.sourceforge.net/)を使ってブラウザを操作する、
+何らかの自動化されたWebテストを行うべきです。
 
-But what language should you write the automation in? Ruby? Python? C#? I think you know the answer!
+しかし、自動化をどの言語で書くべきでしょうか？Ruby？Python？C#？答えはもうわかっていますね！
 
-To make your life even easier, try using [Canopy](http://lefthandedgoat.github.io/canopy/), a web testing framework built on top of Selenium and written in F#.
-Their site claims *"Quick to learn. Even if you've never done UI Automation, and don't know F#."*, and I'm inclined to believe them.
+さらに簡単にするには、F#で書かれたSelenium上に構築されたWebテストフレームワーク[Canopy](http://lefthandedgoat.github.io/canopy/)を試してみてください。
+彼らのサイトでは*「すぐに学べます。UIの自動化をしたことがなく、F#を知らなくても大丈夫です。」*と主張しており、私もそう信じています。
 
-Below is a snippet taken from the Canopy site. As you can see, the code is simple and easy to understand.
+以下はCanopyサイトから抜粋したスニペットです。ご覧の通り、コードは簡単で理解しやすいです。
 
-Also, FAKE integrates with Canopy, so you can [run automated browser tests as part of a CI build](http://fsharp.github.io/FAKE/canopy.html).
+また、FAKEはCanopyと統合されているので、[CIビルドの一部として自動化されたブラウザテストを実行できます](http://fsharp.github.io/FAKE/canopy.html)。
 
 ```fsharp
-//start an instance of the firefox browser
+//firefoxブラウザのインスタンスを開始
 start firefox
 
-//this is how you define a test
+//これがテストの定義方法です
 "taking canopy for a spin" &&& fun _ ->
-    //go to url
+    //URLに移動
     url "http://lefthandedgoat.github.io/canopy/testpages/"
 
-    //assert that the element with an id of 'welcome' has
-    //the text 'Welcome'
+    //id 'welcome'を持つ要素のテキストが
+    //'Welcome'であることをアサート
     "#welcome" == "Welcome"
 
-    //assert that the element with an id of 'firstName' has the value 'John'
+    //id 'firstName'を持つ要素の値が'John'であることをアサート
     "#firstName" == "John"
 
-    //change the value of element with
-    //an id of 'firstName' to 'Something Else'
+    //id 'firstName'を持つ要素の値を
+    //'Something Else'に変更
     "#firstName" << "Something Else"
 
-    //verify another element's value, click a button,
-    //verify the element is updated
+    //別の要素の値を確認し、ボタンをクリックし、
+    //要素が更新されたことを確認
     "#button_clicked" == "button not clicked"
     click "#button"
     "#button_clicked" == "button clicked"
 
-//run all tests
+//すべてのテストを実行
 run()
 ```
 
 
 <a name="test-bdd"></a>
-## 17. Use F# for Behaviour Driven Development
+## 17. 振る舞い駆動開発にF#を使う
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TickSpec.StepDefinitions.fs).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TickSpec.StepDefinitions.fs)です。*
 
-If you're not familiar with Behaviour Driven Development (BDD), the idea is that you express requirements in a way that is both human-readable and *executable*.
+振る舞い駆動開発（BDD）に馴染みがない場合、アイデアは要件を人間が読めると同時に*実行可能*な方法で表現することです。
 
-The standard format (Gherkin) for writing these tests uses the Given/When/Then syntax -- here's an example:
+これらのテストを書くための標準フォーマット（Gherkin）はGiven/When/Then構文を使います - 以下は例です：
 
 ```text
-Feature: Refunded or replaced items should be returned to stock
+機能: 返金または交換された商品は在庫に戻すべきである
 
-Scenario 1: Refunded items should be returned to stock
-	Given a customer buys a black jumper
-	And I have 3 black jumpers left in stock 
-	When they return the jumper for a refund 
-	Then I should have 4 black jumpers in stock
+シナリオ1: 返金された商品は在庫に戻すべきである
+	Given 顧客が黒いセーターを買う
+	And 私は在庫に3着の黒いセーターが残っている 
+	When 彼らがセーターを返品して返金を受ける 
+	Then 私は在庫に4着の黒いセーターを持っているはずである
 ```
 
-If you are using BDD already with .NET, you're probably using [SpecFlow](http://www.specflow.org/) or similar.
+.NETですでにBDDを使っているなら、おそらく[SpecFlow](http://www.specflow.org/)か同様のものを使っているでしょう。
 
-You should consider using [TickSpec](http://tickspec.codeplex.com/) instead
-because, as with all things F#, the syntax is much more lightweight. 
+代わりに[TickSpec](http://tickspec.codeplex.com/)の使用を検討すべきです。
+なぜなら、F#のすべてのものと同様に、構文がはるかに軽量だからです。
 
-For example, here's the full implementation of the scenario above. 
+例えば、以下は上記のシナリオの完全な実装です。
 
 ```fsharp
 type StockItem = { Count : int }
 
 let mutable stockItem = { Count = 0 }
 
-let [<Given>] ``a customer buys a black jumper`` () = 
+let [<Given>] ``顧客が黒いセーターを買う`` () = 
     ()
       
-let [<Given>] ``I have (.*) black jumpers left in stock`` (n:int) =  
+let [<Given>] ``私は在庫に (.*)着の黒いセーターが残っている`` (n:int) =  
     stockItem <- { stockItem with Count = n }
       
-let [<When>] ``they return the jumper for a refund`` () =  
+let [<When>] ``彼らがセーターを返品して返金を受ける`` () =  
     stockItem <- { stockItem with Count = stockItem.Count + 1 }
       
-let [<Then>] ``I should have (.*) black jumpers in stock`` (n:int) =     
+let [<Then>] ``私は在庫に (.*)着の黒いセーターを持っているはずである`` (n:int) =     
     let passed = (stockItem.Count = n)
     Assert.True(passed)
 ```
  
-The C# equivalent has a lot more clutter, and the lack of double backtick syntax really hurts:
+C#の同等のコードはより冗長で、二重バッククォート構文がないことが本当に不利です：
 
 ```csharp
-[Given(@"a customer buys a black jumper")]
+[Given(@"顧客が黒いセーターを買う")]
 public void GivenACustomerBuysABlackJumper()
 {
-   // code
+   // コード
 }
 
-[Given(@"I have (.*) black jumpers left in stock")]
+[Given(@"私は在庫に (.*)着の黒いセーターが残っている")]
 public void GivenIHaveNBlackJumpersLeftInStock(int n)
 {
-   // code
+   // コード
 }
 ```
 
-*Examples taken from the [TickSpec](http://tickspec.codeplex.com/) site.*
+*例は[TickSpec](http://tickspec.codeplex.com/)サイトから取られています。*
 
-## Summary of testing in F# ##
+## F#でのテストのまとめ ##
 
-You can of course combine all the test techniques we've seen so far ([as this slide deck demonstrates](http://www.slideshare.net/bartelink/testing-cinfdublinaltnet2013)):
+もちろん、これまで見てきたすべてのテスト技術を組み合わせることができます（[このスライドデッキが示すように](http://www.slideshare.net/bartelink/testing-cinfdublinaltnet2013)）：
 
-* Unit tests (FsUnit, Unquote) and property-based tests (FsCheck). 
-* Automated acceptance tests (or at least a smoke test) written in BDD (TickSpec) driven by browser automation (Canopy).
-* Both types of tests run on every build (with FAKE).
+* 単体テスト（FsUnit、Unquote）とプロパティベーステスト（FsCheck）。
+* BDD（TickSpec）で書かれた自動化された受け入れテスト（または少なくともスモークテスト）をブラウザ自動化（Canopy）で駆動。
+* 両方のタイプのテストを毎ビルド時に実行（FAKEで）。
 
-There's a lot of advice on test automation out there, and you'll find that it is easy to port concepts from other languages to these F# tools. Have fun!
+テスト自動化に関する多くのアドバイスがあり、他の言語からの概念をこれらのF#ツールに簡単に移植できることがわかるでしょう。楽しんでください！
 
 
 

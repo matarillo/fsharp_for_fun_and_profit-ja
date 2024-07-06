@@ -1,202 +1,202 @@
 ---
 layout: post
-title: "仕事で F# を使うその他の興味深い方法"
-description: "仕事で F# を使う 26 の低リスクな方法（パート5）"
+title: "仕事でF#を使うその他の興味深い方法"
+description: "仕事でF#を使う26の低リスクな方法（パート5）"
 categories: []
-seriesId: "仕事で F# を使う 26 の低リスクな方法"
+seriesId: "仕事でF#を低リスクで使う方法"
 seriesOrder: 5
 
 ---
 
-This post is the conclusion of the series on [low-risk and incremental ways to use F# at work](../posts/low-risk-ways-to-use-fsharp-at-work.md).
+この投稿は、[仕事でF#を低リスクかつ段階的に使う方法](../posts/low-risk-ways-to-use-fsharp-at-work.md)に関するシリーズの結論です。
 
-To wrap up, we'll look at a few more ways in which F# can help you with various development tasks around the edges, without impacting any core or mission critical code.
+最後に、コアや重要なコードに影響を与えることなく、F#がさまざまな開発タスクの周辺でどのように役立つかについて、いくつかの方法を見ていきます。
 
-## Series contents
+## シリーズの内容
 
-Before moving on to the content of the post, here's the full list of the twenty six ways:
+本題に入る前に、26の方法の完全なリストを示します：
 
-**Part 1 - Using F# to explore and develop interactively**
+**パート1 - F#を使って対話的に探索し開発する**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-net-interactively">1. Use F# to explore the .NET framework interactively</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-own-code-interactively">2. Use F# to test your own code interactively</a> <br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-webservices-interactively">3. Use F# to play with webservices interactively</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html/#explore-winforms-interactively">4. Use F# to play with UI's interactively</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html#explore-net-interactively">1. F#を使って.NETフレームワークを対話的に探索する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html#explore-own-code-interactively">2. F#を使って自分のコードを対話的にテストする</a> <br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html#explore-webservices-interactively">3. F#を使ってWebサービスを対話的に操作する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work.html#explore-winforms-interactively">4. F#を使ってUIを対話的に操作する</a><br />
 
-**Part 2 - Using F# for development and devops scripts**
+**パート2 - 開発およびDevOpsスクリプトにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#fake">5. Use FAKE for build and CI scripts</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-website-responding">6. An F# script to check that a website is responding</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-rss-to-csv">7. An F# script to convert an RSS feed into CSV</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-wmi-stats">8. An F# script that uses WMI to check the stats of a process</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html/#dev-cloud">9. Use F# for configuring and managing the cloud</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#fake">5. ビルドとCIスクリプトにFAKEを使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#dev-website-responding">6. Webサイトの応答をチェックするF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#dev-rss-to-csv">7. RSSフィードをCSVに変換するF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#dev-wmi-stats">8. WMIを使ってプロセスの統計をチェックするF#スクリプト</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-2.html#dev-cloud">9. クラウドの設定と管理にF#を使う</a><br />
 
-**Part 3 - Using F# for testing**
+**パート3 - テストにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-nunit">10. Use F# to write unit tests with readable names</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-runner">11. Use F# to run unit tests programmatically</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-other">12. Use F# to learn to write unit tests in other ways</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-fscheck">13. Use FsCheck to write better unit tests</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-dummy">14. Use FsCheck to create random dummy data</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-mock">15. Use F# to create mocks</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-canopy">16. Use F# to do automated browser testing</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html/#test-bdd">17. Use F# for Behaviour Driven Development</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-nunit">10. 読みやすい名前の単体テストをF#で書く</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-runner">11. F#を使って単体テストをプログラムで実行する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-other">12. F#を使って他の方法で単体テストを書くことを学ぶ</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-fscheck">13. FsCheckを使ってより良い単体テストを書く</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-dummy">14. FsCheckを使ってランダムなダミーデータを作成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-mock">15. F#を使ってモックを作成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-canopy">16. F#を使って自動化されたブラウザテストを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-bdd">17. 振る舞い駆動開発にF#を使う</a><br />
 
-**Part 4. Using F# for database related tasks**
+**パート4. データベース関連のタスクにF#を使う**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-linqpad">18. Use F# to replace LINQpad</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-testprocs">19. Use F# to unit test stored procedures</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-randomdata">20. Use FsCheck to generate random database records</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-etl">21. Use F# to do simple ETL</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html/#sql-sqlagent">22. Use F# to generate SQL Agent scripts</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-linqpad">18. F#を使ってLINQpadを置き換える</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-testprocs">19. F#を使ってストアドプロシージャの単体テストを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-randomdata">20. FsCheckを使ってランダムなデータベースレコードを生成する</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-etl">21. F#を使って簡単なETLを行う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-4.html#sql-sqlagent">22. F#を使ってSQL Agentスクリプトを生成する</a><br />
 
-**Part 5: Other interesting ways of using F# **
+**パート5: F#を使うその他の興味深い方法**
 
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-parsers">23. Use F# for parsing</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-diagramming">24. Use F# for diagramming and visualization</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-data-access">25. Use F# for accessing web-based data stores</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-data-science">26. Use F# for data science and machine learning</a><br />
-<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html/#other-balance-power">(BONUS) 27: Balance the generation schedule for the UK power station fleet</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-parsers">23. パーシングにF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-diagramming">24. ダイアグラムと可視化にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-data-access">25. WebベースのデータストアへのアクセスにF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-data-science">26. データサイエンスと機械学習にF#を使う</a><br />
+<a href="/posts/low-risk-ways-to-use-fsharp-at-work-5.html#other-balance-power">（ボーナス）27: イギリスの発電所群の発電スケジュールをバランスさせる</a><br />
 
 
 ----------
 
-## Part 5: Other ways of using F# outside the core
+## パート5: コアの外でF#を使うその他の方法
 
-This last group of suggestions is a bit of a mish-mash I'm afraid.
-These are things that didn't fit into earlier posts, mostly concerning using F# for analysis and data processing.
+この最後のグループの提案は、申し訳ありませんが、少し雑多なものです。
+これらは主に分析とデータ処理にF#を使うことに関するもので、前回の投稿には収まらなかったものです。
 
 <a name="other-parsers"></a>
-## 23. Use F# for parsing
+## 23. パーシングにF#を使う
 
-It is surprising how often you need to parse something in the course of routine development: splitting strings at spaces, reading a CSV file,
-doing substitutions in a template, finding HTML links for a web crawler, parsing a query string in a URI, and so on.
+日常的な開発の過程で、何かをパースする必要がある場面は驚くほど多いです：文字列をスペースで分割する、CSVファイルを読み込む、
+テンプレートで置換を行う、Webクローラー用にHTMLリンクを見つける、URIのクエリ文字列をパースするなど。
 
-F#, being an ML-derived language, is ideal for parsing tasks of all kinds, from simple regexes to full fledged parsers.
+F#はML由来の言語であり、簡単な正規表現から本格的なパーサーまで、あらゆる種類のパーシングタスクに理想的です。
 
-Of course, there are many off-the-shelf libraries for common tasks, but sometimes you need to write your own.
-A good example of this is TickSpec, the BDD framework that [we saw earlier](../posts/low-risk-ways-to-use-fsharp-at-work-3.md#test-bdd).
+もちろん、一般的なタスクには多くの既製ライブラリがありますが、時には独自のものを書く必要があります。
+良い例は、[先ほど見た](../posts/low-risk-ways-to-use-fsharp-at-work-3.md#test-bdd)BDDフレームワークのTickSpecです。
 
-TickSpec needs to parse the so-called "Gherkin" format of Given/When/Then. Rather than create a dependency on another library,
-I imagine that it was easier (and more fun) for [Phil](http://trelford.com/blog/post/TickSpec.aspx) to write his own parser in a few hundred lines.
-You can see part of the [source code here](http://tickspec.codeplex.com/SourceControl/latest#TickSpec/LineParser.fs).
+TickSpecは、Given/When/Thenのいわゆる「Gherkin」形式をパースする必要があります。別のライブラリに依存するよりも、
+[Phil](http://trelford.com/blog/post/TickSpec.aspx)にとっては、数百行で独自のパーサーを書く方が簡単（そして楽しい）だったのではないかと想像します。
+[ソースコードの一部はこちら](http://tickspec.codeplex.com/SourceControl/latest#TickSpec/LineParser.fs)で見ることができます。
 
-Another situation where it might be worth writing your own parser is when you have some complex system, such as a rules engine, which has a horrible XML configuration format.
-Rather than manually editing the configuration, you could create a very simple domain specific language (DSL) that is parsed and then converted to the complex XML.
+独自のパーサーを書く価値があるもう一つの状況は、ひどいXML設定形式を持つ複雑なシステム（ルールエンジンなど）がある場合です。
+設定を手動で編集する代わりに、非常に単純なドメイン固有言語（DSL）を作成し、それをパースして複雑なXMLに変換することができます。
 
-In [his book on DSLs](http://ptgmedia.pearsoncmg.com/images/9780321712943/samplepages/0321712943.pdf),
-Martin Fowler gives an example of this, [a DSL that is parsed to create a state machine](http://www.informit.com/articles/article.aspx?p=1592379&seqNum=3).
-And here is an [F# implementation](http://www.fssnip.net/5h) of that DSL.
+Martin Fowlerは[DSLに関する彼の本](http://ptgmedia.pearsoncmg.com/images/9780321712943/samplepages/0321712943.pdf)で、
+この例を挙げています。[ステートマシンを作成するためにパースされるDSL](http://www.informit.com/articles/article.aspx?p=1592379&seqNum=3)です。
+そして、こちらがそのDSLの[F#実装](http://www.fssnip.net/5h)です。
 
-For more complicating parsing tasks, I highly recommend using [FParsec](http://www.quanttec.com/fparsec/), which is perfectly suited for this kind of thing.
-For example, it has been used for parsing
-[search queries for FogCreek](http://blog.fogcreek.com/fparsec/), 
-[CSV files](http://blog.jb55.com/post/4247991875/f-csv-parsing-with-fparsec),
-[chess notation](http://github.com/iigorr/pgn.net),
-and a [custom DSL for load testing scenarios](http://www.frenk.com/2012/01/real-world-f-my-experience-part-two/).
+より複雑なパーシングタスクには、[FParsec](http://www.quanttec.com/fparsec/)の使用を強くお勧めします。これはこの種のことに完璧に適しています。
+例えば、以下のパーシングに使われています：
+[FogCreekの検索クエリ](http://blog.fogcreek.com/fparsec/)、
+[CSVファイル](http://blog.jb55.com/post/4247991875/f-csv-parsing-with-fparsec)、
+[チェス表記](http://github.com/iigorr/pgn.net)、
+[負荷テストシナリオ用のカスタムDSL](http://www.frenk.com/2012/01/real-world-f-my-experience-part-two/)。
 
 <a name="other-diagramming"></a>
-## 24. Use F# for diagramming and visualization
+## 24. ダイアグラムと可視化にF#を使う
 
-Once you have parsed or analyzed something, it is always nice if you can display the results visually, rather than as tables full of data.
+何かをパースまたは分析した後、データでいっぱいの表よりも、結果を視覚的に表示できると常に良いです。
 
-For example, in a [previous post](../posts/cycles-and-modularity-in-the-wild.md) I used F# in conjunction with [GraphViz](http://www.graphviz.org/)
-to create diagrams of dependency relationships. You can see a sample below:
+例えば、[以前の投稿](../posts/cycles-and-modularity-in-the-wild.md)で、[GraphViz](http://www.graphviz.org/)と組み合わせてF#を使い、
+依存関係のダイアグラムを作成しました。以下にサンプルを示します：
 
 ![](../assets/img/tickspec_svg.png)
 
-The code to generate the diagram itself was short, only about 60 lines,
-which you can [see here](http://gist.github.com/swlaschin/5742974#file-type-dependency-graph-fsx-L428).
+ダイアグラム自体を生成するコードは短く、約60行だけでした。
+[こちら](http://gist.github.com/swlaschin/5742974#file-type-dependency-graph-fsx-L428)で見ることができます。
 
-As an alternative to GraphViz, you could also consider using [FSGraph](http://github.com/piotrosz/FSGraph).
+GraphVizの代替として、[FSGraph](http://github.com/piotrosz/FSGraph)の使用も検討できます。
 
-For more mathematical or data-centric visualizations, there are a number of good libraries:
+より数学的またはデータ中心の可視化には、いくつかの優れたライブラリがあります：
 
-* [FSharp.Charting](http://fsharp.github.io/FSharp.Charting/) for desktop visualizations that is well integrated with F# scripting.
-* [FsPlot](http://github.com/TahaHachana/FsPlot) for interactive visualizations in HTML.
-* [VegaHub](http://github.com/panesofglass/VegaHub), an F# library for working with [Vega](http://trifacta.github.io/vega/)
+* [FSharp.Charting](http://fsharp.github.io/FSharp.Charting/) - F#スクリプティングとよく統合されたデスクトップ向け可視化。
+* [FsPlot](http://github.com/TahaHachana/FsPlot) - HTMLでのインタラクティブな可視化。
+* [VegaHub](http://github.com/panesofglass/VegaHub) - [Vega](http://trifacta.github.io/vega/)と連携するF#ライブラリ。
 * [F# for Visualization](http://www.ffconsultancy.com/products/fsharp_for_visualization/index.html) 
 
-And finally, there's the 800 lb gorilla -- Excel.  
+そして最後に、800ポンドのゴリラ - Excelがあります。
 
-Using the built-in capabilities of Excel is great, if it is available. And F# scripting plays well with Excel.
+利用可能であれば、Excelの組み込み機能を使うのは素晴らしいです。そしてF#スクリプティングはExcelとうまく連携します。
 
-You can [chart in Excel](http://msdn.microsoft.com/en-us/library/vstudio/hh297098.aspx),
-[plot functions in Excel](http://www.clear-lines.com/blog/post/Plot-functions-from-FSharp-to-Excel.aspx), and for even more power and integration,
-you have the [FCell](http://fcell.io/) and [Excel-DNA](http://excel-dna.net/) projects.
+[Excelでチャートを作成](http://msdn.microsoft.com/en-us/library/vstudio/hh297098.aspx)したり、
+[Excelで関数をプロットしたり](http://www.clear-lines.com/blog/post/Plot-functions-from-FSharp-to-Excel.aspx)できます。さらにパワフルな統合のために、
+[FCell](http://fcell.io/)や[Excel-DNA](http://excel-dna.net/)プロジェクトがあります。
 
 <a name="other-data-access"></a>
-## 25. Use F# for accessing web-based data stores
+## 25. WebベースのデータストアへのアクセスにF#を使う
 
-There is a lot of public data out on the web, just waiting to pulled down and loved.
-With the magic of type providers, F# is a good choice for direct integrating these web-scale data stores into your workflow. 
+Web上には、引き出して愛されるのを待っている多くの公開データがあります。
+型プロバイダーの魔法により、F#はこれらのWeb規模のデータストアをワークフローに直接統合するのに適しています。
 
-Right now, we'll look at two data stores: Freebase and World Bank. 
-More will be available soon -- see the [fsharp.org Data Access page](http://fsharp.org/data-access/) for the latest information.
+ここでは、FreebaseとWorld Bankという2つのデータストアを見ていきます。
+近々さらに多くのものが利用可能になる予定です - 最新情報は[fsharp.orgのデータアクセスページ](http://fsharp.org/data-access/)を参照してください。
 
 ## Freebase 
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/freebase.fsx).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/freebase.fsx)です。*
 
-[Freebase](http://en.wikipedia.org/wiki/Freebase) is a large collaborative knowledge base and online collection of structured data harvested from many sources.
+[Freebase](http://en.wikipedia.org/wiki/Freebase)は、多くのソースから収集された構造化データの大規模な協力型知識ベースとオンラインコレクションです。
 
-To get started, just link in the type provider DLL as we have seen before. 
+始めるには、これまで見てきたように型プロバイダーのDLLをリンクするだけです。
 
-The site is throttled, so you'll probably need an API key if you're using it a lot
-([api details here](http://developers.google.com/console/help/?csw=1#activatingapis))
+このサイトはスロットル制限があるため、頻繁に使う場合はAPIキーが必要になるでしょう
+（[APIの詳細はこちら](http://developers.google.com/console/help/?csw=1#activatingapis)）
 
 ```fsharp
-// sets the current directory to be same as the script directory
+// 現在のディレクトリをスクリプトディレクトリと同じに設定
 System.IO.Directory.SetCurrentDirectory (__SOURCE_DIRECTORY__)
 
-// Requires FSharp.Data under script directory 
+// スクリプトディレクトリ下にFSharp.Dataが必要
 //    nuget install FSharp.Data -o Packages -ExcludeVersion  
 #r @"Packages\FSharp.Data\lib\net40\FSharp.Data.dll"
 open FSharp.Data
 
-// without a key
+// キーなし
 let data = FreebaseData.GetDataContext()
 
-// with a key
+// キーあり
 (*
 [<Literal>]
-let FreebaseApiKey = "<enter your freebase-enabled google API key here>"
+let FreebaseApiKey = "<ここにfreebase対応のgoogle APIキーを入力>"
 type FreebaseDataWithKey = FreebaseDataProvider<Key=FreebaseApiKey>
 let data = FreebaseDataWithKey.GetDataContext()
 *)
 ```
 
-Once the type provider is loaded, you can start asking questions, such as...
+型プロバイダーがロードされたら、次のような質問を始めることができます...
 
-*"Who are the US presidents?"*
+*「アメリカの大統領は誰？」*
 
 ```fsharp
 data.Society.Government.``US Presidents``
 |> Seq.map (fun p ->  p.``President number`` |> Seq.head, p.Name)
 |> Seq.sortBy fst
-|> Seq.iter (fun (n,name) -> printfn "%s was number %i" name n )
+|> Seq.iter (fun (n,name) -> printfn "%sは%i番目でした" name n )
 ```
 
-Result:
+結果：
 
 ```text
-George Washington was number 1
-John Adams was number 2
-Thomas Jefferson was number 3
-James Madison was number 4
-James Monroe was number 5
-John Quincy Adams was number 6
+George Washingtonは1番目でした
+John Adamsは2番目でした
+Thomas Jeffersonは3番目でした
+James Madisonは4番目でした
+James Monroeは5番目でした
+John Quincy Adamsは6番目でした
 ...
-Ronald Reagan was number 40
-George H. W. Bush was number 41
-Bill Clinton was number 42
-George W. Bush was number 43
-Barack Obama was number 44
+Ronald Reaganは40番目でした
+George H. W. Bushは41番目でした
+Bill Clintonは42番目でした
+George W. Bushは43番目でした
+Barack Obamaは44番目でした
 ```
 
-Not bad for just four lines of code!
+たった4行のコードでこれだけできるのは悪くありません！
 
-How about *"what awards did Casablanca win?"*
+では、*「カサブランカはどんな賞を受賞した？」*はどうでしょうか？
 
 ```fsharp
 data.``Arts and Entertainment``.Film.Films.IndividualsAZ.C.Casablanca.``Awards Won``
@@ -205,7 +205,7 @@ data.``Arts and Entertainment``.Film.Films.IndividualsAZ.C.Casablanca.``Awards W
 |> Seq.iter (fun (year,name) -> printfn "%s -- %s" year name)
 ```
 
-The result is:
+結果は：
 
 ```text
 1943 -- Academy Award for Best Director
@@ -213,17 +213,17 @@ The result is:
 1943 -- Academy Award for Best Screenplay
 ```
 
-So that's Freebase. Lots of good information, both useful and frivolous.
+以上がFreebaseです。役立つものもあれば些細なものもある、たくさんの良い情報があります。
 
-[More on how to use the Freebase type provider](http://fsharp.github.io/FSharp.Data/library/Freebase.html).
+[Freebase型プロバイダーの使い方の詳細](http://fsharp.github.io/FSharp.Data/library/Freebase.html)。
 
-## Using Freebase to generate realistic test data
+## Freebaseを使って現実的なテストデータを生成する
 
-We've seen how FsCheck can be used to [generate test data](../posts/low-risk-ways-to-use-fsharp-at-work-3.md#test-dummy).
-Well, you can also get the same affect by getting data from Freebase, which makes the data much more realistic.
+FsCheckを使って[テストデータを生成する](../posts/low-risk-ways-to-use-fsharp-at-work-3.md#test-dummy)方法を見てきました。
+同様に、Freebaseからデータを取得することで、より現実的なデータを得ることができます。
 
-[Kit Eason](http://twitter.com/kitlovesfsharp) showed how to do this in a [tweet](http://twitter.com/kitlovesfsharp/status/296240699735695360),
-and here's an example based on his code:
+[Kit Eason](http://twitter.com/kitlovesfsharp)が[ツイート](http://twitter.com/kitlovesfsharp/status/296240699735695360)でこの方法を示しました。
+以下は彼のコードに基づく例です：
 
 ```fsharp
 let randomElement =
@@ -242,7 +242,7 @@ let firstnames =
     |> Seq.map (fun celeb -> celeb.Name.Split([|' '|]).[0])
     |> Array.ofSeq
 
-// generate ten random people and print
+// 10人のランダムな人物を生成して表示
 type Person = {Forename:string; Surname:string}
 Seq.init 10 ( fun _ -> 
     {Forename = (randomElement firstnames); 
@@ -251,7 +251,7 @@ Seq.init 10 ( fun _ ->
 |> Seq.iter (printfn "%A")
 ```
 
-The results are:
+結果は：
 
 <pre>
 {Forename = "Kelly"; Surname = "Deasy";}
@@ -266,19 +266,19 @@ The results are:
 {Forename = "Josh";  Surname = "Kramarsic";}
 </pre>
 
-## World Bank 
+## 世界銀行
 
-*The code for this section is [available on github](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/world-bank.fsx).*
+*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/world-bank.fsx)です。*
 
-On the other extreme from Freebase is the [World Bank Open Data](http://data.worldbank.org/), which has lots of detailed economic and social information from around the world.
+Freebaseとは対照的に、[世界銀行オープンデータ](http://data.worldbank.org/)は、世界中の詳細な経済・社会情報を多く持っています。
 
-The setup is identical to Freebase, but no API key is needed.
+セットアップはFreebaseと同じですが、APIキーは必要ありません。
 
 ```fsharp
-// sets the current directory to be same as the script directory
+// 現在のディレクトリをスクリプトディレクトリと同じに設定
 System.IO.Directory.SetCurrentDirectory (__SOURCE_DIRECTORY__)
 
-// Requires FSharp.Data under script directory 
+// スクリプトディレクトリ下にFSharp.Dataが必要
 //    nuget install FSharp.Data -o Packages -ExcludeVersion  
 #r @"Packages\FSharp.Data\lib\net40\FSharp.Data.dll"
 open FSharp.Data
@@ -286,60 +286,60 @@ open FSharp.Data
 let data = WorldBankData.GetDataContext()
 ```
 
-With the type provider set up, we can do a serious query, such as:
+型プロバイダーをセットアップしたら、次のような本格的なクエリを実行できます：
 
-*"How do malnutrition rates compare between low income and high income countries?"*
+*「低所得国と高所得国の栄養失調率を比較するとどうなりますか？」*
 
 ```fsharp
-// Create a list of countries to process
+// 処理する国のリストを作成
 let groups = 
  [| data.Countries.``Low income``
     data.Countries.``High income``
     |]
 
-// get data from an indicator for particular year
+// 特定の年の指標からデータを取得
 let getYearValue (year:int) (ind:Runtime.WorldBank.Indicator) =
     ind.Name,year,ind.Item year
 
-// get data
+// データを取得
 [ for c in groups -> 
     c.Name,
     c.Indicators.``Malnutrition prevalence, weight for age (% of children under 5)`` |> getYearValue 2010
 ] 
-// print the data
+// データを表示
 |> Seq.iter (
     fun (group,(indName, indYear, indValue)) -> 
        printfn "%s -- %s %i %0.2f%% " group indName indYear indValue)
 ```
 
-The result is:
+結果は：
 
 ```text
 Low income -- Malnutrition prevalence, weight for age (% of children under 5) 2010 23.19% 
 High income -- Malnutrition prevalence, weight for age (% of children under 5) 2010 1.36% 
 ```
 
-Similarly, here is the code to compare maternal mortality rates:
+同様に、以下は妊産婦死亡率を比較するコードです：
 
 ```fsharp
-// Create a list of countries to process
+// 処理する国のリストを作成
 let countries = 
  [| data.Countries.``European Union``
     data.Countries.``United Kingdom``
     data.Countries.``United States`` |]
 
-/ get data
+// データを取得
 [ for c in countries  -> 
     c.Name,
     c.Indicators.``Maternal mortality ratio (modeled estimate, per 100,000 live births)`` |> getYearValue 2010
 ] 
-// print the data
+// データを表示
 |> Seq.iter (
     fun (group,(indName, indYear, indValue)) -> 
        printfn "%s -- %s %i %0.1f" group indName indYear indValue)
 ```
 
-The result is:
+結果は：
 
 ```text
 European Union -- Maternal mortality ratio (modeled estimate, per 100,000 live births) 2010 9.0 
@@ -347,58 +347,58 @@ United Kingdom -- Maternal mortality ratio (modeled estimate, per 100,000 live b
 United States -- Maternal mortality ratio (modeled estimate, per 100,000 live births) 2010 21.0 
 ```
 
-[More on how to use the World Bank type provider](http://fsharp.github.io/FSharp.Data/library/WorldBank.html).
+[世界銀行型プロバイダーの使い方の詳細](http://fsharp.github.io/FSharp.Data/library/WorldBank.html)。
 
 <a name="other-data-science"></a>
-## 26. Use F# for data science and machine learning
+## 26. データサイエンスと機械学習にF#を使う
 
-So you're putting all these suggestions into practice. You're parsing your web logs with FParsec,
-extracting stats from your internal databases with the SQL type provider,
-and pulling down external data from web services. You've got all this data -- what can you do with it?
+これらの提案をすべて実践しているとします。FParsecでWebログを解析し、
+SQL型プロバイダーで内部データベースから統計を抽出し、
+Webサービスから外部データを取得しています。これらのデータを全て手に入れました - それで何ができるでしょうか？
 
-Let's finish up by having a quick look at using F# for data science and machine learning.
+最後に、データサイエンスと機械学習にF#を使うことについて簡単に見てみましょう。
 
-As we have seen, F# is great for exploratory programming -- it has a REPL with intellisense. But unlike Python and R, your
-code is type checked, so you know that your code is not going to fail with an exception halfway through a two hour processing job!
+これまで見てきたように、F#は探索的プログラミングに適しています - インテリセンス付きのREPLがあります。しかし、PythonやRとは異なり、
+コードは型チェックされるので、2時間の処理ジョブの途中で例外によってコードが失敗することはありません！
 
-If you are familiar with the Pandas library from Python or the ?tseries' package in R, then you should
-take a serious look at [Deedle](http://bluemountaincapital.github.io/Deedle/), an easy-to-use, high quality package for data and time series manipulation.
-Deedle is designed to work well for exploratory programming using the REPL, but can be also used in efficient compiled .NET code.
+PythonのPandasライブラリやRの'tseries'パッケージに馴染みがあれば、
+[Deedle](http://bluemountaincapital.github.io/Deedle/)を真剣に検討すべきです。これは使いやすく、高品質なデータおよび時系列操作用のパッケージです。
+DeedleはREPLを使った探索的プログラミングに適していますが、効率的にコンパイルされた.NETコードでも使えます。
 
-And if you use R a lot, there's an [R type provider](http://bluemountaincapital.github.io/FSharpRProvider)(of course).
-This means you can use R packages as if they were .NET libraries. How awesome is that!
+そして、Rをよく使う場合は、[R型プロバイダー](http://bluemountaincapital.github.io/FSharpRProvider)（もちろん）があります。
+これは、RパッケージをあたかもNETライブラリであるかのように使えることを意味します。素晴らしいですね！
 
-There's lots of other F# friendly packages too. You can find out all about them at fsharp.org.
+他にもF#フレンドリーなパッケージがたくさんあります。fsharp.orgでそれらについて知ることができます。
 
-* [Data science](http://fsharp.org/data-science/)
-* [Math](http://fsharp.org/math/)
-* [Machine learning](http://fsharp.org/machine-learning)
+* [データサイエンス](http://fsharp.org/data-science/)
+* [数学](http://fsharp.org/math/)
+* [機械学習](http://fsharp.org/machine-learning)
 
 ----------
 
-## Series summary
+## シリーズのまとめ
 
-Phew! That was a long list of examples and a lot of code to look at. If you've made it to the end, congratulations!
+ふう！長い例のリストと多くのコードを見てきました。最後まで読んでいただいた方、おめでとうございます！
 
-I hope that this has given you some new insights into the value of F#.
-It's not just a math-y or financial language -- it's a practical one too.
-And it can help you with all sorts of things in your development, testing, and data management workflows. 
+これによってF#の価値について新しい洞察が得られたことを願っています。
+F#は単なる数学的または金融的な言語ではありません - 実用的な言語でもあります。
+そして、開発、テスト、データ管理のワークフローにおけるあらゆる種類のことに役立ちます。
 
-Finally, as I have stressed throughout this series, all these uses are safe, low risk and incremental. What's the worst that can happen? 
+最後に、このシリーズを通じて強調してきたように、これらの使い方はすべて安全で、リスクが低く、段階的です。最悪の場合でも何が起こるでしょうか？
 
-So go on, persuade your team mates and boss to give F# a try, and let me know how it goes.
+さあ、チームメイトや上司を説得してF#を試してみてください。そしてその結果を教えてください。
 
 <a name="other-balance-power"></a>
 
-## Postscript
+## 追記
 
-After I posted this, Simon Cousins tweeted that I missed one -- I can't resist adding it.
+この投稿の後、Simon Cousinsがツイートで1つ忘れているものがあると指摘しました - 追加せずにはいられません。
 
-<blockquote class="twitter-tweet" lang="en"><p><a href="https://twitter.com/ScottWlaschin">@ScottWlaschin</a> 27: balance the generation schedule for the uk power station fleet. seriously, the alternative to <a href="https://twitter.com/search?q=%23fsharp&amp;src=hash">#fsharp</a> was way too risky</p>&mdash; Simon Cousins (@simontcousins) <a href="https://twitter.com/simontcousins/statuses/459591939902697472">April 25, 2014</a></blockquote>
+<blockquote class="twitter-tweet" lang="en"><p><a href="https://twitter.com/ScottWlaschin">@ScottWlaschin</a> 27: イギリスの発電所群の発電スケジュールをバランスさせる。本気で、<a href="https://twitter.com/search?q=%23fsharp&amp;src=hash">#fsharp</a>の代替案はリスクが高すぎた</p>&mdash; Simon Cousins (@simontcousins) <a href="https://twitter.com/simontcousins/statuses/459591939902697472">2014年4月25日</a></blockquote>
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-You can read more about Simon's real-world of use of F# (for power generation) on [his blog](http://www.simontylercousins.net/does-the-language-you-use-make-a-difference-revisited/).
-There are more testimonials to F# at [fsharp.org](http://fsharp.org/testimonials/).
+Simonの実世界でのF#の使用（発電用）について、[彼のブログ](https://web.archive.org/web/20160712051833/http://simontylercousins.net/does-the-language-you-use-make-a-difference-revisited)でもっと読むことができます。
+[fsharp.org](http://fsharp.org/testimonials/)にはF#についてのさらなる証言があります。
 
 
 
