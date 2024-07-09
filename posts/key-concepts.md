@@ -1,84 +1,80 @@
 ---
 layout: post
-title: "Four Key Concepts"
-description: "The concepts that differentiate F# from a standard imperative language"
+title: "4つの主要概念"
+description: "F#を標準的な命令型言語と区別する概念"
 nav: why-use-fsharp
-seriesId: "F# を使う理由"
+seriesId: "F#を使う理由"
 seriesOrder: 6
 categories: 
 image: "/assets/img/four-concepts2.png"
 ---
 
-In the next few posts we'll move on to demonstrating the themes of this series: conciseness, convenience, correctness, concurrency and completeness.
+これからの記事では、このシリーズのテーマである簡潔さ、利便性、正確性、並行性、完全性を実際に示していきます。
 
-But before that, let's look at some of the key concepts in F# that we will meet over and over again.  F# is different in many ways from a standard imperative language like C#, but there are a few major differences that are particularly important to understand:
+その前に、F#で何度も出てくる重要な概念をいくつか見ていきましょう。F#は多くの点でC#のような標準的な命令型言語とは異なりますが、特に理解しておくべき大きな違いがいくつかあります：
 
-* **Function-oriented** rather than object-oriented
-* **Expressions** rather than statements 
-* **Algebraic types** for creating domain models
-* **Pattern matching** for flow of control 
+* オブジェクト指向ではなく**関数指向**
+* 文ではなく**式**
+* ドメインモデルを作るための**代数的型**
+* 制御フローのための**パターンマッチング**
 
-In later posts, these will be dealt with in much greater depth -- this is just a taster to help you understand the rest of this series.
+これらの概念は後の記事でより詳しく扱います。ここではこのシリーズの残りを理解するためのお試し版程度です。
 
-![four key concepts](../assets/img/four-concepts2.png)
+![4つの主要概念](../assets/img/four-concepts2.png)
 
-### Function-oriented rather than object-oriented
+### オブジェクト指向ではなく関数指向
 
-As you might expect from the term "functional programming", functions are everywhere in F#.
+「関数型プログラミング」という言葉から想像できるように、F#では関数があちこちに登場します。
 
-Of course, functions are first class entities, and can be passed around like any other value:
+もちろん、関数はファーストクラスのエンティティで、他の値と同じように受け渡しができます：
 
 ```fsharp
 let square x = x * x
 
-// functions as values
+// 値としての関数
 let squareclone = square
 let result = [1..10] |> List.map squareclone
 
-// functions taking other functions as parameters
+// 他の関数をパラメータとして受け取る関数
 let execFunction aFunc aParam = aFunc aParam
 let result2 = execFunction square 12
 ```
 
-But C# has first-class functions too, so what's so special about functional programming?
+でも、C#にもファーストクラス関数があるじゃないか、と思うかもしれません。では、関数型プログラミングの何がそんなに特別なんでしょう？
 
-The short answer is that the function-oriented nature of F# infiltrates every part of the language and type system in a way that it does not in C#, so that things 
-that are awkward or clumsy in C# are very elegant in F#.
+簡単に言えば、F#の関数指向の性質は、C#では実現が難しいか面倒なことが、F#ではとてもエレガントに表現できるほど、言語とその型システムのあらゆる部分に浸透しているのです。
 
-It's hard to explain this in a few paragraphs, but here are some of the benefits that we will see demonstrated over this series of posts:
+これを数段落で説明するのは難しいですが、このシリーズの記事で示していく利点をいくつか挙げてみましょう：
 
-* **Building with composition**. Composition is the 'glue' that allows us build larger systems from smaller ones. This is not an optional technique, but is at the very heart of the functional style. Almost every line of code is a composable expression (see below). Composition is used to build basic functions, and then functions that use those functions, and so on. And the composition principle doesn't just apply to functions, but also to types (the product and sum types discussed below). 
-* **Factoring and refactoring**. The ability to factor a problem into parts depends how easily the parts can be glued back together. Methods and classes that might seem to be indivisible in an imperative language can often be broken down into surprisingly small pieces in a functional design. These fine-grained components typically consist of (a) a few very general functions that take other functions as parameters, and (b) other helper functions that specialize the general case for a particular data structure or application.
-  Once factored out, the generalized functions allow many additional operations to be programmed very easily without having to write new code. You can see a good example of a general function like this (the fold function) in the [post on extracting duplicate code from loops](../posts/conciseness-extracting-boilerplate.md).
-* **Good design**. Many of the principles of good design, such as "separation of concerns", "single responsibility principle", ["program to an interface, not an implementation"](../posts/convenience-functions-as-interfaces.md), arise naturally as a result of a functional approach. And functional code tends to be high level and declarative in general.
+* **合成による組み上げ**。合成は、小さなシステムからより大きなシステムを作り上げる「接着剤」です。これは単なる省略可能なオプションの技術ではなく、関数型スタイルの核心部分です。ほぼすべてのコード行が合成可能な式（後述）です。合成は基本的な関数を作るのに使われ、さらにそれらの関数を使う関数を作り、というように続きます。そして合成の原則は関数だけでなく、型（後述の直積型と直和型）にも適用されます。
+* **分割と再構成**。問題をパーツに分割する能力は、それらのパーツをどれだけ簡単に再び組み立てられるかに依存します。命令型言語では分割不可能に見えるメソッドやクラスも、関数型設計では驚くほど小さなピースに分解できることがよくあります。これらの細かいコンポーネントは通常、(a) 他の関数をパラメータとして受け取るいくつかの非常に一般的な関数と、(b) 特定のデータ構造やアプリケーションのために一般的なケースを特殊化する他のヘルパー関数で構成されます。
+  一度分割されると、一般化された関数を使って、新しいコードを書くことなく多くの追加操作を非常に簡単にプログラムできるようになります。このような一般的な関数の良い例（fold関数）は、「[ループから重複コードを抽出する](../posts/conciseness-extracting-boilerplate.md)」の記事で見ることができます。
+* **良い設計**。「関心の分離」、「単一責任の原則」、[「実装ではなくインターフェースに対してプログラミングする」](../posts/convenience-functions-as-interfaces.md)などの良い設計の原則の多くは、関数型アプローチの自然な結果として生まれます。そして一般的に、関数型コードは高レベルで宣言的になる傾向があります。
 
-The following posts in this series will have examples of how functions can make code more 
-concise and convenient, and then for a deeper understanding, there is a whole series on [thinking functionally](../series/thinking-functionally.md). 
+このシリーズの以降の記事では、関数がどのようにしてコードをより簡潔で便利にできるかの例を示します。さらに深く理解したい場合は、「[関数型思考](../series/thinking-functionally.md)」のシリーズ全体があります。
 
-### Expressions rather than statements 
+### 文ではなく式
 
-In functional languages, there are no statements, only expressions. That is, every chunk of code always returns a value, 
-and larger chunks are created by combining smaller chunks using composition rather than a serialized list of statements.
+関数型言語には文がなく、式しかありません。つまり、すべてのコードの塊は常に値を返し、より大きな塊は、一連の文ではなく、小さな塊を合成することで作られます。
 
-If you have used LINQ or SQL you will already be familiar with expression-based languages. For example, in pure SQL, 
-you cannot have assignments. Instead, you must have subqueries within larger queries. 
+LINQやSQLを使ったことがある人なら、すでに式ベースの言語に馴染みがあるでしょう。例えば、純粋なSQLでは、代入はできません。その代わり、より大きなクエリの中にサブクエリを持たなければなりません。
 
 ```sql
 SELECT EmployeeName 
 FROM Employees
 WHERE EmployeeID IN 
-	(SELECT DISTINCT ManagerID FROM Employees)  -- subquery
+	(SELECT DISTINCT ManagerID FROM Employees)  -- サブクエリ
 ```
 
-F# works in the same way -- every function definition is a single expression, not a set of statements.
+F#も同じように動作します - すべての関数定義は、一連の文ではなく、単一の式です。
 
-And it might not be obvious, but code built from expressions is both safer and more compact than using statements. 
-To see this, let's compare some statement-based code in C# with the equivalent expression-based code.  
+そしてあまり明白ではないかもしれませんが、式から作られたコードは、文を使うよりも安全でコンパクトです。
+これを理解するために、C#の文ベースのコードと、同等の式ベースのコードを比較してみましょう。
 
-First, the statement-based code. Statements don't return values, so you have to use temporary variables that are assigned to from within statement bodies.  
+まず、文ベースのコードです。文は値を返さないので、文の本体の中から代入される一時変数を使わなければなりません。
 
 ```csharp
-// statement-based code in C#
+// C#の文ベースのコード
 int result;     
 if (aBool)
 {
@@ -87,132 +83,131 @@ if (aBool)
 Console.WriteLine("result={0}", result);
 ```
 
-Because the `if-then` block is a statement, the `result` variable must be defined *outside* the statement but assigned to from *inside* the statement, which leads to issues such as:
+`if-then` ブロックが文なので、 `result` 変数は文の*外*で定義しなければならないのに、文の*中*から代入しなければなりません。これは以下のような問題を引き起こします：
 
-* What initial value should `result` be set to?
-* What if I forget to assign to the `result` variable?  
-* What is the value of the `result` variable in the "else" case?  
+* `result` にはどんな初期値を設定すべき？
+* `result` 変数への代入を忘れたらどうなる？
+* "else" の場合、 `result` 変数の値は何になる？
 
-For comparison, here is the same code, rewritten in an expression-oriented style:
+比較のために、同じコードを式指向のスタイルで書き直してみましょう：
 
 ```csharp
-// expression-based code in C#
+// C#の式ベースのコード
 int result = (aBool) ? 42 : 0;
 Console.WriteLine("result={0}", result);
 ```
 
-In the expression-oriented version, none of these issues apply:  
+式指向のバージョンでは、これらの問題はどれも当てはまりません：
 
-* The `result` variable is declared at the same time that it is assigned. No variables have to be set up "outside" the expression and there is no worry about what initial value they should be set to. 
-* The "else" is explicitly handled. There is no chance of forgetting to do an assignment in one of the branches.
-* It is not possible to forget to assign `result`, because then the variable would not even exist!
+* `result` 変数は、代入されると同時に宣言されます。式の「外側」で変数を設定する必要はなく、どんな初期値を設定すべきかを心配する必要もありません。
+* "else" が明示的に処理されています。分岐のどこかで代入し忘れる可能性はありません。
+* `result` への代入を忘れることはできません。なぜなら、そうすると変数自体が存在しないことになるからです！
 
-Expression-oriented style is not a choice in F#, and it is one of the things that requires a change of approach when coming from an imperative background.
+式指向のスタイルはF#では省略可能なオプションではなく、命令型のバックグラウンドから来た人にとっては、アプローチの変更が必要なものの一つです。
 
-### Algebraic Types
+### 代数的型
 
-The type system in F# is based on the concept of **algebraic types**. That is, new compound types are built by combining existing types in two different ways:
+F#の型システムは**代数的型**の概念に基づいています。つまり、新しい複合型は、既存の型を2つの異なる方法で組み合わせて構築されます：
 
-* First, a combination of values, each picked from a set of types. These are called "product" types. 
-* Of, alternately, as a disjoint union representing a choice between a set of types. These are called "sum" types.
+* まず、一連の型からそれぞれ選ばれた値の組み合わせ。これらは「直積」型と呼ばれます。
+* あるいは、一連の型の間の選択を表す、交わりを持たない和集合。これらは「直和」型と呼ばれます。
 
-For example, given existing types `int` and `bool`, we can create a new product type that must have one of each:
+例えば、既存の型 `int` と `bool` があれば、それぞれを1つずつ含む新しい直積型を作ることができます：
 
 ```fsharp
-//declare it
+// 宣言
 type IntAndBool = {intPart: int; boolPart: bool}
 
-//use it
+// 使用
 let x = {intPart=1; boolPart=false}
 ```
 
-Alternatively, we can create a new union/sum type that has a choice between each type:
+あるいは、各型のどれかを選択できる新しい和集合（直和）型を作ることもできます：
 
 ```fsharp
-//declare it
+// 宣言
 type IntOrBool = 
 	| IntChoice of int
 	| BoolChoice of bool
 
-//use it
+// 使用
 let y = IntChoice 42
 let z = BoolChoice true
 ```
 
-These "choice" types are not available in C#, but are incredibly useful for modeling many real-world cases, such as states in a state machine (which is a surprisingly common theme in many domains).
+これらの「選択」型はC#では利用できませんが、状態機械の状態（これは多くのドメインで驚くほど一般的なテーマです）など、多くの現実世界のケースをモデル化するのに非常に便利です。
 
-And by combining "product" and "sum" types in this way, it is easy to create a rich set of types that accurately models any business domain.
-For examples of this in action, see the posts on [low overhead type definitions](../posts/conciseness-type-definitions.md) and [using the type system to ensure correct code](../posts/correctness-type-checking).
+そして、この方法で「直積」型と「直和」型を組み合わせることで、任意のビジネスドメインを正確にモデル化する豊富な型のセットを簡単に作ることができます。
+この実際の例については、「[低オーバーヘッドの型定義](../posts/conciseness-type-definitions.md)と[型システムを使用して正しいコードを保証する](../posts/correctness-type-checking)」の記事を参照してください。
 
- 
-### Pattern matching for flow of control 
+### 制御フローのためのパターンマッチング
 
-Most imperative languages offer a variety of control flow statements for branching and looping: 
+ほとんどの命令型言語は、分岐とループのための様々な制御フロー文を提供しています：
 
-* `if-then-else` (and the ternary version `bool ? if-true : if-false`)
-* `case` or `switch` statements
-* `for` and `foreach` loops, with `break` and `continue` 
-* `while` and `until` loops
-* and even the dreaded `goto`
+* `if-then-else` （および三項演算子版の `bool ? if-true : if-false` ）
+* `case` または `switch` 文
+* `break` と `continue` を伴う `for` および `foreach` ループ
+* `while` および `until` ループ
+* そして恐ろしい `goto` まで
 
-F# does support some of these, but F# also supports the most general form of conditional expression, which is **pattern-matching**.
+F#もこれらの一部をサポートしていますが、F#は最も一般的な形の条件式である**パターンマッチング**もサポートしています。
 
-A typical matching expression that replaces `if-then-else` looks like this:
+`if-then-else` の代わりになる典型的なマッチング式は次のようになります：
 
 ```fsharp
 match booleanExpression with
-| true -> // true branch
-| false -> // false branch
+| true -> // trueの場合の処理
+| false -> // falseの場合の処理
 ```
 
-And the replacement of `switch` might look like this:
+そして、 `switch` の代わりは次のようになるかもしれません：
 
 ```fsharp
 match aDigit with
-| 1 -> // Case when digit=1
-| 2 -> // Case when digit=2
-| _ -> // Case otherwise
+| 1 -> // 数字が1の場合の処理
+| 2 -> // 数字が2の場合の処理
+| _ -> // それ以外の場合の処理
 ```
 
-Finally, loops are generally done using recursion, and typically look something like this:
+最後に、ループは一般的に再帰を使って行われ、通常は次のようになります：
 
 ```fsharp
 match aList with
 | [] -> 
-     // Empty case 
+     // 空のケース 
 | first::rest -> 
-     // Case with at least one element.
-	 // Process first element, and then call 
-     // recursively with the rest of the list
+     // 少なくとも1つの要素がある場合
+	 // 最初の要素を処理し、
+     // リストの残りで再帰的に呼び出す
 ```
 
-Although the match expression seems unnecessarily complicated at first, you'll see that in practice it is both elegant and powerful.
+マッチ式は最初は不必要に複雑に見えるかもしれませんが、実際には優雅で強力なものだと分かるでしょう。
 
-For the benefits of pattern matching, see the post on [exhaustive pattern matching](../posts/correctness-exhaustive-pattern-matching), and for a worked example that uses pattern matching heavily, see the [roman numerals example](../posts/roman-numerals.md).
+パターンマッチングの利点については、「[網羅的なパターンマッチング](../posts/correctness-exhaustive-pattern-matching)」の記事を、そしてパターンマッチングを多用した実例については、「[ローマ数字の例](../posts/roman-numerals.md)」を参照してください。
 
-### Pattern matching with union types ###
+### 直和型とのパターンマッチング
 
-We mentioned above that F# supports a "union" or "choice" type. This is used instead of inheritance to work with different variants of an underlying type. Pattern matching works seamlessly with these types to create a flow of control for each choice.
+上で、F#が「直和」型、言いかえると「選択」型をサポートしていると述べました。これは、継承の代わりに使用され、基礎となる型の異なるバリアントを扱います。パターンマッチングはこれらの型とシームレスに連携し、各選択肢に対する制御フローを作成します。
 
-In the following example, we create a `Shape` type representing four different shapes and then define a `draw` function with different behavior for each kind of shape.
-This is similar to polymorphism in an object oriented language, but based on functions.
+次の例では、4つの異なる形状を表す `Shape` 型を作成し、次に各種類の形状に対して異なる動作をする `draw` 関数を定義します。
+これはオブジェクト指向言語のポリモーフィズムに似ていますが、関数に基づいています。
 
 ```fsharp
-type Shape =        // define a "union" of alternative structures
+type Shape =        // 代替構造の「直和」を定義
 | Circle of int 
 | Rectangle of int * int
 | Polygon of (int * int) list
 | Point of (int * int) 
 
-let draw shape =    // define a function "draw" with a shape param
+let draw shape =    // shapeパラメータを持つ「draw」関数を定義
   match shape with
   | Circle radius -> 
-      printfn "The circle has a radius of %d" radius
+      printfn "この円の半径は%dです" radius
   | Rectangle (height,width) -> 
-      printfn "The rectangle is %d high by %d wide" height width
+      printfn "この長方形の高さは%d、幅は%dです" height width
   | Polygon points -> 
-      printfn "The polygon is made of these points %A" points
-  | _ -> printfn "I don't recognize this shape"
+      printfn "この多角形はこれらの点で構成されています: %A" points
+  | _ -> printfn "この形は認識できません"
 
 let circle = Circle(10)
 let rect = Rectangle(4,5)
@@ -222,16 +217,15 @@ let point = Point(2,3)
 [circle; rect; polygon; point] |> List.iter draw
 ```
 
-A few things to note:
+いくつか注目すべき点があります：
 
-* As usual, we didn't have to specify any types. The compiler correctly determined that the shape parameter for the "draw" function was of type `Shape`.
-* You can see that the `match..with` logic not only matches against the internal structure of the shape, but also assigns values based on what is appropriate for the shape. 
-* The underscore is similar to the "default" branch in a switch statement, except that in F# it is required -- every possible case must always be handled. If you comment out the line 
+* ここでも型を指定する必要はありませんでした。コンパイラは "draw" 関数のshapeパラメータが `Shape` 型であると正しく判断しました。
+* `match..with` のロジックが、形状の内部構造に対してマッチングするだけでなく、その形状に適した値も割り当てているのがわかります。
+* アンダースコアは、switch文の "default" 分岐に似ていますが、F#では必須です - 可能性のあるケースは常にすべて処理しなければなりません。以下の行をコメントアウトしてみてください：
 ```fsharp
-  | _ -> printfn "I don't recognize this shape"
+  | _ -> printfn "この形は認識できません"
 ```
+コンパイル時に何が起こるか見てみましょう！
 
-see what happens when you compile!
-
-These kinds of choice types can be simulated somewhat in C# by using subclasses or interfaces, but there is no built in support in the C# type system for this kind of exhaustive matching with error checking.
+これらの選択型は、C#ではサブクラスやインターフェースを使ってある程度シミュレートできますが、C#の型システムにはこの種の網羅的なマッチングとエラーチェックのためのビルトインサポートはありません。
 
