@@ -1,27 +1,27 @@
 ---
 layout: post
-title: "Worked example: Designing for correctness"
-description: "How to make illegal states unrepresentable"
+title: "実例：正しさのための設計"
+description: "不正な状態を表現不可能にする方法"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 22
 categories: [Correctness, Types, Worked Examples]
 ---
 
-In this post, we'll see how you can design for correctness (or at least, for the requirements as you currently understand them), by which I mean that a client of a well designed model will not be able to put the system into an illegal state ? a state that doesn't meet the requirements. You literally cannot create incorrect code because the compiler will not let you.
+この投稿では、正しさのための設計方法（少なくとも、現在理解している要件に対する正しさ）を見ていきます。ここで言う正しさとは、適切に設計されたモデルのクライアントが、システムを不正な状態（要件を満たさない状態）にできないということです。コンパイラが許可しないため、文字通り不正なコードを作ることができないのです。
 
-For this to work, we do have to spend some time up front thinking about design and making an effort to encode the requirements into the types that you use.
-If you just use strings or lists for all your data structures, you will not get any benefit from the type checking.
+これを実現するには、事前に設計についてよく考える必要があります。そして、要件を型に落とし込む努力も必要です。
+もし単に文字列やリストをすべてのデータ構造に当てはめるだけなら、型チェックの恩恵を受けることはできません。
 
-We'll use a simple example. Let's say that you are designing an e-commerce site which has a shopping cart and you are given the following requirements.
+簡単な例を使ってみましょう。eコマースサイトのショッピングカートを設計していて、以下の要件が与えられたとします。
 
-* You can only pay for a cart once.
-* Once a cart is paid for, you cannot change the items in it.
-* Empty carts cannot be paid for.
+* カートの支払いは1回しかできない。
+* 支払いが完了したら、カート内のアイテムを変更できない。
+* 空のカートは支払いできない。
 
-## A bad design in C# ##
+## C#での悪い設計 ##
 
-In C#, we might think that this is simple enough and dive straight into coding. Here is a straightforward implementation in C# that seems OK at first glance. 
+C#では、これは十分にシンプルだと考えて、すぐにコーディングに取り掛かるかもしれません。以下は、一見問題なさそうに見えるC#での素直な実装です。
 
 ```csharp
 public class NaiveShoppingCart<TItem>
@@ -35,13 +35,13 @@ public class NaiveShoppingCart<TItem>
       this.paidAmount = 0;
    }
 
-   /// Is cart paid for?
+   /// カートの支払いが完了しているか？
    public bool IsPaidFor { get { return this.paidAmount > 0; } }
 
-   /// Readonly list of items
+   /// アイテムの読み取り専用リスト
    public IEnumerable<TItem> Items { get {return this.items; } }
 
-   /// add item only if not paid for
+   /// 支払いが完了していない場合のみアイテムを追加
    public void AddItem(TItem item)
    {
       if (!this.IsPaidFor)
@@ -50,7 +50,7 @@ public class NaiveShoppingCart<TItem>
       }
    }
 
-   /// remove item only if not paid for
+   /// 支払いが完了していない場合のみアイテムを削除
    public void RemoveItem(TItem item)
    {
       if (!this.IsPaidFor)
@@ -59,7 +59,7 @@ public class NaiveShoppingCart<TItem>
       }
    }
 
-   /// pay for the cart
+   /// カートの支払い
    public void Pay(decimal amount)
    {
       if (!this.IsPaidFor)
@@ -70,56 +70,56 @@ public class NaiveShoppingCart<TItem>
 }
 ```
 
-Unfortunately, it's actually a pretty bad design:
+残念ながら、これは実際にはかなり悪い設計です：
 
-* One of the requirements is not even met. Can you see which one?
-* It has a major design flaw, and a number of minor ones. Can you see what they are?
+* 要件の1つが満たされていません。どれかわかりますか？
+* 大きな設計上の欠陥と、いくつかの小さな欠陥があります。それらが何かわかりますか？
 
-So many problems in such a short piece of code! 
+こんな短いコードにこんなにも多くの問題が！
 
-What would happen if we had even more complicated requirements and the code was thousands of lines long?  For example, the fragment that is repeated everywhere:
+もし要件がさらに複雑で、コードが何千行もあったらどうなるでしょうか？例えば、このようなフラグメントが至る所に繰り返し現れています。
 
 ```csharp
-if (!this.IsPaidFor) { do something }
+if (!this.IsPaidFor) { 何かを実行 }
 ```
 
-looks like it will be quite brittle if requirements change in some methods but not others.
+これは、一部のメソッドで要件が変更されても他のメソッドでは変更されない場合、かなり脆弱になりそうです。
 
-Before you read the next section, think for a minute how you might better implement the requirements above in C#, with these additional requirements:
+次のセクションを読む前に、上記の要件をC#でどのようにより良く実装できるか、以下の追加要件も含めて1分ほど考えてみてください：
 
-* If you try to do something that is not allowed in the requirements, you will get a *compile time error*, not a run time error. For example, you must create a design such that you cannot even call the `RemoveItem` method from an empty cart.
-* The contents of the cart in any state should be immutable. The benefit of this is that if I am in the middle of paying for a cart, the cart contents can't change even if some other process is adding or removing items at the same time.
+* 要件で許可されていないことを行おうとすると、実行時エラーではなく*コンパイル時エラー*が発生します。例えば、空のカートから `RemoveItem` メソッドを呼び出すことさえできないような設計にする必要があります。
+* どの状態でもカートの内容は不変でなければなりません。これの利点は、カートの支払い処理中に、他のプロセスがアイテムを追加または削除している場合でも、カートの内容が変更されないことです。
 
-## A correct design in F# ##
+## F#での正しい設計 ##
 
-Let's step back and see if we can come up with a better design. Looking at these requirements, it's obvious that we have a simple state machine with three states and some state transitions:
+一歩下がって、より良い設計ができないか考えてみましょう。これらの要件を見ると、3つの状態といくつかの状態遷移を持つシンプルな状態機械があることは明らかです：
 
-* A Shopping Cart can be Empty, Active or PaidFor
-* When you add an item to an Empty cart, it becomes Active
-* When you remove the last item from an Active cart, it becomes Empty
-* When you pay for an Active cart, it becomes PaidFor
+* ショッピングカートは Empty（空）、Active（アクティブ）、PaidFor（支払い済み）の状態を持ちます
+* 空のカートにアイテムを追加すると、アクティブになります
+* アクティブなカートから最後のアイテムを削除すると、空になります
+* アクティブなカートに対して支払いを行うと、支払い済みになります
 
-And now we can add the business rules to this model:
+そして、このモデルにビジネスルールを追加できます：
 
-* You can add an item only to carts that are Empty or Active 
-* You can remove an item only from carts that are Active 
-* You can only pay for carts that are Active 
+* アイテムの追加は、空またはアクティブな状態のカートに対してのみ可能です
+* アイテムの削除は、アクティブな状態のカートに対してのみ可能です
+* 支払いは、アクティブな状態のカートに対してのみ可能です
 
-Here is the state diagram:
+以下が状態遷移図です：
 
 ![Shopping Cart](../assets/img/ShoppingCart.png)
  
-It's worth noting that these kinds of state-oriented models are very common in business systems. Product development, customer relationship management, order processing, and other workflows can often be modeled this way.
+このような状態指向のモデルが、ビジネスシステムでは非常に一般的であることは注目に値します。製品開発、顧客関係管理、注文処理、その他のワークフローは、しばしばこのようにモデル化できます。
 
-Now we have the design, we can reproduce it in F#:
+では、この設計をF#で実装してみましょう：
 
 ```fsharp
-type CartItem = string    // placeholder for a more complicated type
+type CartItem = string    // より複雑な型のプレースホルダー
 
-type EmptyState = NoItems // don't use empty list! We want to
-                          // force clients to handle this as a 
-                          // separate case. E.g. "you have no 
-                          // items in your cart"
+type EmptyState = NoItems // 空のリストを使わないでください！
+                          // クライアントにこれを別のケースとして
+                          // 扱うよう強制します。例：「カートに
+                          // アイテムがありません」
 
 type ActiveState = { UnpaidItems : CartItem list; }
 type PaidForState = { PaidItems : CartItem list; 
@@ -131,26 +131,26 @@ type Cart =
     | PaidFor of PaidForState 
 ```
 
-We create a type for each state, and `Cart` type that is a choice of any one of the states. I have given everything a distinct name (e.g. `PaidItems` and `UnpaidItems` rather than just `Items`) because this helps the inference engine and makes the code more self documenting.
+各状態に対して型を作成し、任意の1つの状態を選択できる `Cart` 型を作成します。すべてに明確な名前（例：単なる `Items` ではなく `PaidItems` と `UnpaidItems` ）を付けています。これは推論エンジンに役立ち、コードをより自己文書化します。
 
 <div class="alert alert-info">
-<p>This is a much longer example than the earlier ones! Don't worry too much about the F# syntax right now, but I hope that you can get the gist of the code, and see how it fits into the overall design. </p>
-<p>Also, do paste the snippets into a script file and evaluate them for yourself as they come up.</p>
+<p>これは以前の例よりもかなり長い例です！今はF#の構文についてあまり気にしないでください。コードの概要を把握し、全体的な設計にどのように適合するかを理解できればと思います。</p>
+<p>また、これらのスニペットをスクリプトファイルに貼り付けて、自分で評価してみてください。</p>
 </div>
 
-Next we can create the operations for each state. The main thing to note is each operation will always take one of the States as input and return a new Cart. That is, you start off with a particular known state, but you return a `Cart` which is a wrapper for a choice of three possible states.
+次に、各状態に対する操作を作成できます。主な点は、各操作が常に状態の1つを入力として受け取り、新しい `Cart` を返すことです。つまり、特定の既知の状態から始まりますが、3つの可能な状態のいずれかを選択するラッパーである `Cart` を返します。
 
 ```fsharp
 // =============================
-// operations on empty state
+// 空の状態に対する操作
 // =============================
 
 let addToEmptyState item = 
-   // returns a new Active Cart
+   // 新しいアクティブなカートを返します
    Cart.Active {UnpaidItems=[item]}
 
 // =============================
-// operations on active state
+// アクティブな状態に対する操作
 // =============================
 
 let addToActiveState state itemToAdd = 
@@ -166,11 +166,11 @@ let removeFromActiveState state itemToRemove =
    | _ -> Cart.Active {state with UnpaidItems=newList} 
 
 let payForActiveState state amount = 
-   // returns a new PaidFor Cart
+   // 新しい支払い済みカートを返します
    Cart.PaidFor {PaidItems=state.UnpaidItems; Payment=amount}
 ```
 
-Next, we attach the operations to the states as methods
+次に、これらの操作を状態にメソッドとして付加します
 
 ```fsharp
 type EmptyState with
@@ -182,7 +182,7 @@ type ActiveState with
    member this.Pay = payForActiveState this 
 ```
 
-And we can create some cart level helper methods as well. At the cart level, we have to explicitly handle each possibility for the internal state with a `match..with` expression.
+そして、カートレベルのヘルパーメソッドもいくつか作成できます。カートレベルでは、内部状態の各可能性を `match..with` 式で明示的に処理する必要があります。
 
 ```fsharp
 let addItemToCart cart item =  
@@ -190,29 +190,29 @@ let addItemToCart cart item =
    | Empty state -> state.Add item
    | Active state -> state.Add item
    | PaidFor state ->  
-       printfn "ERROR: The cart is paid for"
+       printfn "エラー：カートは支払い済みです"
        cart   
 
 let removeItemFromCart cart item =  
    match cart with
    | Empty state -> 
-      printfn "ERROR: The cart is empty"
-      cart   // return the cart 
+      printfn "エラー：カートは空です"
+      cart   // カートを返します 
    | Active state -> 
       state.Remove item
    | PaidFor state ->  
-      printfn "ERROR: The cart is paid for"
-      cart   // return the cart
+      printfn "エラー：カートは支払い済みです"
+      cart   // カートを返します
 
 let displayCart cart  =  
    match cart with
    | Empty state -> 
-      printfn "The cart is empty"   // can't do state.Items
+      printfn "カートは空です"   // state.Itemsは使えません
    | Active state -> 
-      printfn "The cart contains %A unpaid items"
+      printfn "カートには %A の未払いアイテムが含まれています"
                                                 state.UnpaidItems
    | PaidFor state ->  
-      printfn "The cart contains %A paid items. Amount paid: %f"
+      printfn "カートには %A の支払い済みアイテムが含まれています。支払額：%f"
                                     state.PaidItems state.Payment
 
 type Cart with
@@ -222,9 +222,9 @@ type Cart with
    member this.Display = displayCart this 
 ```
 
-## Testing the design ##
+## 設計のテスト ##
 
-Let's exercise this code now:
+では、このコードを実際に動かしてみましょう：
 
 ```fsharp
 let emptyCart = Cart.NewCart
@@ -234,9 +234,9 @@ let cartA = emptyCart.Add "A"
 printf "cartA="; cartA.Display
 ```
 
-We now have an active cart with one item in it. Note that "`cartA`" is a completely different object from "`emptyCart`" and is in a different state.
+これで、1つのアイテムを含むアクティブなカートができました。「cartA」は「emptyCart」とは完全に異なるオブジェクトで、異なる状態にあることに注目してください。
 
-Let's keep going:
+続けてみましょう：
 
 ```fsharp
 let cartAB = cartA.Add "B"
@@ -249,23 +249,23 @@ let emptyCart2 = cartB.Remove "B"
 printf "emptyCart2="; emptyCart2.Display
 ```
 
-So far, so good. Again, all these are distinct objects in different states,
+ここまでは順調です。繰り返しになりますが、これらはすべて異なる状態の別々のオブジェクトです。
 
-Let's test the requirement that you cannot remove items from an empty cart:
+空のカートからアイテムを削除できないという要件をテストしてみましょう：
 
 ```fsharp
-let emptyCart3 = emptyCart2.Remove "B"    //error
+let emptyCart3 = emptyCart2.Remove "B"    //エラー
 printf "emptyCart3="; emptyCart3.Display
 ```
 
-An error ? just what we want!
+エラーが発生しました。まさに私たちが望んでいたことです！
 
-Now say that we want to pay for a cart. We didn't create this method at the Cart level, because we didn't want to tell the client how to handle all the cases. This method only exists for the Active state, so the client will have to explicitly handle each case and only call the `Pay` method when an Active state is matched.
+次に、カートの支払いを行いたいとします。このメソッドはカートレベルでは作成しませんでした。なぜなら、クライアントにすべてのケースの処理方法を指示したくなかったからです。このメソッドはアクティブな状態でのみ存在するため、クライアントは各ケースを明示的に処理し、アクティブな状態がマッチした場合にのみ `Pay` メソッドを呼び出す必要があります。
 
-First we'll try to pay for cartA.
+まず、cartAの支払いをしてみます。
 
 ```fsharp
-//  try to pay for cartA
+//  cartAの支払いをしてみる
 let cartAPaid = 
     match cartA with
     | Empty _ | PaidFor _ -> cartA 
@@ -273,12 +273,12 @@ let cartAPaid =
 printf "cartAPaid="; cartAPaid.Display
 ```
 
-The result was a paid cart.
+結果は支払い済みのカートになりました。
 
-Now we'll try to pay for the emptyCart.
+次に、emptyCartの支払いをしてみます。
 
 ```fsharp
-//  try to pay for emptyCart
+//  emptyCartの支払いをしてみる
 let emptyCartPaid = 
     match emptyCart with
     | Empty _ | PaidFor _ -> emptyCart
@@ -286,27 +286,27 @@ let emptyCartPaid =
 printf "emptyCartPaid="; emptyCartPaid.Display
 ```
 
-Nothing happens. The cart is empty, so the Active branch is not called. We might want to raise an error or log a message in the other branches, but no matter what we do we cannot accidentally call the `Pay` method on an empty cart, because that state does not have a method to call!
+何も起こりません。カートが空なので、アクティブなブランチは呼び出されません。他のブランチでエラーを発生させたりメッセージをログに記録したりすることもできますが、何をしても空のカートに対して誤って `Pay` メソッドを呼び出すことはできません。なぜなら、その状態にはそのメソッドがないからです！
 
-The same thing happens if we accidentally try to pay for a cart that is already paid.
+すでに支払い済みのカートに対して誤って支払いをしようとした場合も同じことが起こります。
 
 ```fsharp
-//  try to pay for cartAB 
+//  cartABの支払いをしてみる 
 let cartABPaid = 
     match cartAB with
-    | Empty _ | PaidFor _ -> cartAB // return the same cart
+    | Empty _ | PaidFor _ -> cartAB // 同じカートを返す
     | Active state -> state.Pay 100m
 
-//  try to pay for cartAB again
+//  cartABの支払いをもう一度してみる
 let cartABPaidAgain = 
     match cartABPaid with
-    | Empty _ | PaidFor _ -> cartABPaid  // return the same cart
+    | Empty _ | PaidFor _ -> cartABPaid  // 同じカートを返す
     | Active state -> state.Pay 100m
 ```
 
-You might argue that the client code above might not be representative of code in the real world ? it is well-behaved and already dealing with the requirements. 
+このクライアントコードについて、あなたは次のように指摘するかもしれません。「このコードはすでに要件を適切に扱っており、期待通りに動作しています。しかし、これは現実的なコードを正確に反映しているとは言えないでしょう。」
 
-So what happens if we have badly written or malicious client code that tries to force payment:
+では、支払いを強制しようとする悪意のある、または不適切に書かれたクライアントコードの場合はどうなるでしょうか：
 
 ```fsharp
 match cartABPaid with
@@ -315,72 +315,72 @@ match cartABPaid with
 | Active state -> state.Pay 100m
 ```
 
-If we try to force it like this, we will get compile errors. There is no way the client can create code that does not meet the requirements.
+このように強制しようとすると、コンパイルエラーが発生します。クライアントが要件を満たさないコードを作成することは不可能なのです。
 
-## Summary ##
+## まとめ ##
 
-We have designed a simple shopping cart model which has many benefits over the C# design.
+我々は、C#の設計よりも多くの利点を持つシンプルなショッピングカートモデルを設計しました。
 
-* It maps to the requirements quite clearly. It is impossible for a client of this API to call code that doesn't meet the requirements.
-* Using states means that the number of possible code paths is much smaller than the C# version, so there will be many fewer unit tests to write. 
-* Each function is simple enough to probably work the first time, as, unlike the C# version, there are no conditionals anywhere. 
+* 要件が非常に明確に反映されています。このAPIのクライアントが要件を満たさないコードを呼び出すことは不可能です。
+* 状態を使うことで、C#バージョンよりもはるかに少ない可能なコードパスになるため、書くべきユニットテストの数が大幅に減ります。
+* 各関数は、C#バージョンとは異なり、どこにも条件分岐がないため、おそらく最初から正しく動作するでしょう。
 
 <div class="well">
-<h3>Analysis of the original C# code</h3>
+<h3>元のC#コードの分析</h3>
 
 <p>
-Now that you have seen the F# code, we can revisit the original C# code with fresh eyes. In case you were wondering, here are my thoughts as to what is wrong with the C# shopping cart example as designed.
+F#のコードを見たことで、元のC#コードを新鮮な目で再検討できるようになりました。もし気になっていたのであれば、C#のショッピングカートの例の設計に何が問題があるかについての私の考えを以下に示します。
 </p>
 
 <p>
-<i>Requirement not met</i>: An empty cart can still be paid for. 
+<i>満たされていない要件</i>：空のカートでも支払いができてしまいます。
 </p>
 
 <p>
-<i>Major design flaw</i>: Overloading the payment amount to be a signal for IsPaidFor means that a zero paid amount can never lock down the cart. Are you sure it would never be possible to have a cart which is paid for but free of charge? The requirements are not clear, but what if this did become a requirement later? How much code would have to be changed?
+<i>主要な設計上の欠陥</i>：支払い金額をIsPaidForのシグナルとしてオーバーロードしているため、支払い金額が0の場合にカートをロックできません。無料のカートが支払い済みになることは絶対にないと確信できますか？要件が明確ではありませんが、後でこれが要件になったらどうしますか？どれだけのコードを変更する必要があるでしょうか？
 </p>
 
 <p>
-<i>Minor design flaws</i>: What should happen when trying to remove an item from an empty cart? And what should happen when attempting to pay for a cart that is already paid for? Should we throw exceptions in these cases, or just silently ignore them? And does it make sense that a client should be able to enumerate the items in an empty cart? And this is not thread safe as designed; so what happens if a secondary thread adds an item to the cart while a payment is being made on the main thread?
+<i>軽微な設計上の欠陥</i>：空のカートからアイテムを削除しようとした場合、どうなるべきでしょうか？また、すでに支払い済みのカートに対して支払いを試みた場合はどうでしょうか？これらのケースで例外をスローすべきでしょうか、それともただ静かに無視すべきでしょうか？そして、クライアントが空のカートのアイテムを列挙できることは意味があるでしょうか？また、この設計はスレッドセーフではありません。メインスレッドで支払いが行われている間に、別のスレッドがカートにアイテムを追加した場合、どうなるでしょうか？
 </p>
 
 <p>
-That's quite a lot of things to worry about. 
+これだけ多くの問題点があるとは驚きです。
 </p>
 
 <p>
-The nice thing about the F# design is none of these problems can even exist. So designing this way not only ensures correct code, but it also really reduces the cognitive effort to ensure that the design is bullet proof in the first place.
+F#の設計の良いところは、これらの問題が存在し得ないことです。今回のように設計することで、正しいコードを保証するだけでなく、そもそも設計が抜け穴のないものであることを確認する認知的な労力も大幅に減らすことができます。
 </p>
 
 <p>
-<i>Compile time checking:</i>  The original C# design mixes up all the states and transitions in a single class, which makes it very error prone. A better approach would be to create separate state classes (with a common base class say) which reduces complexity, but still, the lack of a built in "union" type means that you cannot statically verify that the code is correct.  There are ways of doing "union" types in C#, but it is not idiomatic at all, while in F# it is commonplace.
+<i>コンパイル時チェック：</i> C#における元の設計は、すべての状態と遷移を単一のクラスに混在させており、これは非常にエラーを起こしやすいものです。別々の状態クラス（例えば共通の基底クラスを持つ）を作成するアプローチの方が複雑さを軽減できますが、それでも組み込みの「union」型がないため、コードが正しいことを静的に検証することはできません。C#で「union」型を実現する方法はありますが、これは一般的な書き方とはかけ離れています。一方、F#ではそれが一般的です。
 </p>
 
 
 </div>
 
-## Appendix: C# code for a correct solution
+## 付録：C#での正しい解決策のコード
 
-When faced with these requirements in C#, you might immediately think -- just create an interface!
+C#でこういった要件に直面したときには、インターフェースを作ればいいだけだと、すぐ思いつくかもしれません。
 
-But it is not as easy as you might think. I have written a follow up post on this to explain why: [The shopping cart example in C#](../csharp/union-types-in-csharp.html).
+しかし、それは思ったほど簡単ではありません。なぜそうなのかについては、フォローアップの投稿「[C#でのショッピングカートの例](../csharp/union-types-in-csharp.html)」で説明しています。
 
-If you are interested to see what the C# code for a solution looks like, here it is below. This code meets the requirements above and guarantees correctness at *compile time*, as desired.
+正しい解決策のC#コードがどのようなものか興味がある場合は、以下に示します。このコードは上記の要件を満たし、望み通り*コンパイル時*に正確性を保証します。
 
-The key thing to note is that, because C# doesn't have union types, the implementation uses a ["fold" function](../posts/match-expression.md#folds),
-a function that has three function parameters, one for each state. To use the cart, the caller passes a set of three lambdas in, and the (hidden) state determines what happens.
+重要なポイントは、C#にはユニオン型がないため、実装には3つの関数パラメータ（各状態に1つずつ）を持つ「[fold関数](../posts/match-expression.md#folds)」を使用していることです。
+カートを使用するには、呼び出し元が3つのラムダのセットを渡し、（隠された）状態が何が起こるかを決定します。
 
 ```csharp
 var paidCart = cartA.Do(
-    // lambda for Empty state
+    // Empty状態用のラムダ
     state => cartA,  
-    // lambda for Active state
+    // Active状態用のラムダ
     state => state.Pay(100),
-    // lambda for Paid state
+    // Paid状態用のラムダ
     state => cartA);
 ```
 
-This approach means that the caller can never call the "wrong" function, such as "Pay" for the Empty state, because the parameter to the lambda will not support it. Try it and see!
+このアプローチでは、呼び出し元が「間違った」関数（例えば、Empty状態に対する "Pay" ）を呼び出すことは決してありません。なぜなら、ラムダのパラメータがそれをサポートしないからです。試してみてください！
 
 ```csharp
 using System;
@@ -396,7 +396,7 @@ namespace WhyUseFsharp
         #region ShoppingCart State classes
 
         /// <summary>
-        /// Represents the Empty state
+        /// Empty状態を表します
         /// </summary>
         public class EmptyState
         {
@@ -409,7 +409,7 @@ namespace WhyUseFsharp
         }
 
         /// <summary>
-        /// Represents the Active state
+        /// Active状態を表します
         /// </summary>
         public class ActiveState
         {
@@ -453,7 +453,7 @@ namespace WhyUseFsharp
         }
 
         /// <summary>
-        /// Represents the Paid state
+        /// Paid状態を表します
         /// </summary>
         public class PaidForState
         {
@@ -470,15 +470,15 @@ namespace WhyUseFsharp
         #endregion ShoppingCart State classes
 
         //====================================
-        // Execute of shopping cart proper
+        // ショッピングカート本体の実行
         //====================================
 
         private enum Tag { Empty, Active, PaidFor }
         private readonly Tag _tag = Tag.Empty;
-        private readonly object _state;       //has to be a generic object
+        private readonly object _state;       //ジェネリックなオブジェクトである必要があります
 
         /// <summary>
-        /// Private ctor. Use FromState instead
+        /// プライベートコンストラクタ。代わりにFromStateを使用してください
         /// </summary>
         private ShoppingCart(Tag tagValue, object state)
         {
@@ -502,7 +502,7 @@ namespace WhyUseFsharp
         }
 
         /// <summary>
-        /// Create a new empty cart
+        /// 新しい空のカートを作成します
         /// </summary>
         public static ShoppingCart<TItem> NewCart()
         {
@@ -511,10 +511,10 @@ namespace WhyUseFsharp
         }
 
         /// <summary>
-        /// Call a function for each case of the state
+        /// 状態の各ケースに対して関数を呼び出します
         /// </summary>
         /// <remarks>
-        /// Forcing the caller to pass a function for each possible case means that all cases are handled at all times.
+        /// 呼び出し元に各可能性に対する関数を渡すよう強制することで、常にすべてのケースが処理されることが保証されます。
         /// </remarks>
         public TResult Do<TResult>(
             Func<EmptyState, TResult> emptyFn,
@@ -536,7 +536,7 @@ namespace WhyUseFsharp
         }
 
         /// <summary>
-        /// Do an action without a return value
+        /// 戻り値のないアクションを実行します
         /// </summary>
         public void Do(
             Action<EmptyState> emptyFn,
@@ -544,7 +544,7 @@ namespace WhyUseFsharp
             Action<PaidForState> paidForyFn
             )
         {
-            //convert the Actions into Funcs by returning a dummy value
+            //ActionをFuncに変換してダミー値を返します
             Do(
                 state => { emptyFn(state); return 0; },
                 state => { activeFn(state); return 0; },
@@ -557,43 +557,43 @@ namespace WhyUseFsharp
     }
 
     /// <summary>
-    /// Extension methods for my own personal library
+    /// 私個人のライブラリ用の拡張メソッド
     /// </summary>
     public static class ShoppingCartExtension
     {
         /// <summary>
-        /// Helper method to Add
+        /// Addのヘルパーメソッド
         /// </summary>
         public static ShoppingCart<TItem> Add<TItem>(this ShoppingCart<TItem> cart, TItem item)
         {
             return cart.Do(
                 state => state.Add(item), //empty case
                 state => state.Add(item), //active case
-                state => { Console.WriteLine("ERROR: The cart is paid for and items cannot be added"); return cart; } //paid for case
+                state => { Console.WriteLine("エラー：カートは支払い済みでアイテムを追加できません"); return cart; } //paid for case
             );
         }
 
         /// <summary>
-        /// Helper method to Remove
+        /// Removeのヘルパーメソッド
         /// </summary>
         public static ShoppingCart<TItem> Remove<TItem>(this ShoppingCart<TItem> cart, TItem item)
         {
             return cart.Do(
-                state => { Console.WriteLine("ERROR: The cart is empty and items cannot be removed"); return cart; }, //empty case
+                state => { Console.WriteLine("エラー：カートは空でアイテムを削除できません"); return cart; }, //empty case
                 state => state.Remove(item), //active case
-                state => { Console.WriteLine("ERROR: The cart is paid for and items cannot be removed"); return cart; } //paid for case
+                state => { Console.WriteLine("エラー：カートは支払い済みでアイテムを削除できません"); return cart; } //paid for case
             );
         }
 
         /// <summary>
-        /// Helper method to Display
+        /// Displayのヘルパーメソッド
         /// </summary>
         public static void Display<TItem>(this ShoppingCart<TItem> cart)
         {
             cart.Do(
-                state => Console.WriteLine("The cart is empty"),
-                state => Console.WriteLine("The active cart contains {0} items", state.Items.Count()),
-                state => Console.WriteLine("The paid cart contains {0} items. Amount paid {1}", state.Items.Count(), state.Amount)
+                state => Console.WriteLine("カートは空です"),
+                state => Console.WriteLine("アクティブなカートには {0} 個のアイテムが含まれています", state.Items.Count()),
+                state => Console.WriteLine("支払い済みのカートには {0} 個のアイテムが含まれています。支払額 {1}", state.Items.Count(), state.Amount)
             );
         }
     }
@@ -607,35 +607,35 @@ namespace WhyUseFsharp
             var emptyCart = ShoppingCart<string>.NewCart();
             emptyCart.Display();
 
-            var cartA = emptyCart.Add("A");  //one item
+            var cartA = emptyCart.Add("A");  //1つのアイテム
             cartA.Display();
 
-            var cartAb = cartA.Add("B");  //two items
+            var cartAb = cartA.Add("B");  //2つのアイテム
             cartAb.Display();
 
-            var cartB = cartAb.Remove("A"); //one item
+            var cartB = cartAb.Remove("A"); //1つのアイテム
             cartB.Display();
 
-            var emptyCart2 = cartB.Remove("B"); //empty
+            var emptyCart2 = cartB.Remove("B"); //空
             emptyCart2.Display();
 
-            Console.WriteLine("Removing from emptyCart");
-            emptyCart.Remove("B"); //error
+            Console.WriteLine("emptyCartから削除");
+            emptyCart.Remove("B"); //エラー
 
 
-            //  try to pay for cartA
-            Console.WriteLine("paying for cartA");
+            //  cartAの支払いを試みる
+            Console.WriteLine("cartAの支払い");
             var paidCart = cartA.Do(
                 state => cartA,
                 state => state.Pay(100),
                 state => cartA);
             paidCart.Display();
 
-            Console.WriteLine("Adding to paidCart");
+            Console.WriteLine("paidCartにアイテムを追加");
             paidCart.Add("C");
 
-            //  try to pay for emptyCart
-            Console.WriteLine("paying for emptyCart");
+            //  emptyCartの支払いを試みる
+            Console.WriteLine("emptyCartの支払い");
             var emptyCartPaid = emptyCart.Do(
                 state => emptyCart,
                 state => state.Pay(100),
