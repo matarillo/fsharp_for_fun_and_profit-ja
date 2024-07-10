@@ -1,16 +1,16 @@
 ---
 layout: post
-title: "Exhaustive pattern matching"
-description: "A powerful technique to ensure correctness"
+title: "網羅的なパターンマッチング"
+description: "正確性を確保するための強力な技法"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 20
 categories: [Correctness, Patterns]
 ---
 
-We briefly noted earlier that when pattern matching there is a requirement to match all possible cases.  This turns out be a very powerful technique to ensure correctness.
+先ほど簡単に触れましたが、パターンマッチングを行う際には、すべての可能なケースにマッチさせる必要があります。これは正確性を確保するための非常に強力な技法であることがわかります。
 
-Let's compare some C# to F# again. Here's some C# code that uses a switch statement to handle different types of state.
+C#とF#を再び比較してみましょう。以下は、switch文を使って異なる種類の状態を扱うC#のコードです。
 
 ```csharp
 enum State { New, Draft, Published, Inactive, Discontinued }
@@ -18,69 +18,69 @@ void HandleState(State state)
 {
     switch (state)
     {
-        case State.Inactive: // code for Inactive
+        case State.Inactive: // Inactiveの場合のコード
             break;
-        case State.Draft: // code for Draft
+        case State.Draft: // Draftの場合のコード
             break;
-        case State.New: // code for New
+        case State.New: // Newの場合のコード
             break;
-        case State.Discontinued: // code for Discontinued
+        case State.Discontinued: // Discontinuedの場合のコード
             break;
     }
 }
 ```
 
-This code will compile, but there is an obvious bug! The compiler couldn't see it ? can you? If you can, and you fixed it, would it stay fixed if I added another `State` to the list?
+このコードはコンパイルされますが、明らかなバグがあります！コンパイラはそれを見つけられませんでしたが、あなたには見つけられますか？もし見つけて修正したとしても、 `State` のリストに新しい項目を追加したら、それは修正されたままでしょうか？
 
-Here's the F# equivalent:
+以下がF#での同等のコードです：
 
 ```fsharp
 type State = New | Draft | Published | Inactive | Discontinued
 let handleState state = 
    match state with
-   | Inactive -> () // code for Inactive
-   | Draft -> () // code for Draft
-   | New -> () // code for New
-   | Discontinued -> () // code for Discontinued
+   | Inactive -> () // Inactiveの場合のコード
+   | Draft -> () // Draftの場合のコード
+   | New -> () // Newの場合のコード
+   | Discontinued -> () // Discontinuedの場合のコード
 ```
    
-Now try running this code. What does the compiler tell you?
+このコードを実行してみてください。コンパイラは何を教えてくれるでしょうか？
 
-The fact that exhaustive matching is always done means that certain common errors will be detected by the compiler immediately:
+網羅的なマッチングが常に行われるという事実は、特定の一般的なエラーがコンパイラによってすぐに検出されることを意味します：
 
-* A missing case (often caused when a new choice has been added due to changed requirements or refactoring).
-* An impossible case (when an existing choice has been removed).
-* A redundant case that could never be reached (the case has been subsumed in a previous case -- this can sometimes be non-obvious). 
+* 欠落しているケース（多くの場合、要件の変更やリファクタリングによって新しい選択肢が追加されたときに発生します）。
+* 不可能なケース（既存の選択肢が削除されたとき）。
+* 到達できない冗長なケース（そのケースが前のケースに包含されている場合 -- これが明白でない場合もあります）。
 
-Now let's look at some real examples of how exhaustive matching can help you write correct code.
+では、網羅的なマッチングが正確なコードを書く上でどのように役立つか、実際の例を見てみましょう。
 
-## Avoiding nulls with the Option type ##
+## Option型を使ってnullを回避する
 
-We'll start with an extremely common scenario where the caller should always check for an invalid case, namely testing for nulls. A typical C# program is littered with code like this:
+まず、呼び出し元が常に無効なケースをチェックすべき、非常によくあるシナリオから始めましょう。つまり、nullのテストです。典型的なC#プログラムには、このようなコードがあちこちに散らばっています：
 
 ```csharp
 if (myObject != null)
 {
-  // do something
+  // 何かを実行
 }
 ```
 
-Unfortunately, this test is not required by the compiler. All it takes is for one piece of code to forget to do this, and the program can crash.
-Over the years, a huge amount of programming effort has been devoted to handling nulls ? the invention of nulls has even been called a [billion dollar mistake](http://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare)! 
+残念ながら、このテストはコンパイラによって要求されるわけではありません。一つのコードがこれを忘れただけで、プログラムがクラッシュする可能性があります。
+長年にわたり、nullを扱うために膨大なプログラミングの労力が費やされてきました。nullの発明は[10億ドルの過ち](http://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare)とさえ呼ばれています！
 
-In pure F#, nulls cannot exist accidentally. A string or object must always be assigned to something at creation, and is immutable thereafter. 
+純粋なF#では、nullが偶発的に存在することはありません。文字列やオブジェクトは、作成時に必ず何かに割り当てられ、その後は不変です。
 
-However, there are many situations where the *design intent* is to distinguish between valid and invalid values,
-and you require the caller to handle both cases. 
+しかし、有効な値と無効な値を区別することが*設計上の意図*である状況が多くあり、
+呼び出し元に両方のケースを扱うことを要求します。
 
-In C#, this can be managed in certain situations by using nullable value types (such as `Nullable<int>`) to make the design decision clear.
-When a nullable is encountered the compiler will force you to be aware of it. You can then test the validity of the value before using it.
-But nullables do not work for standard classes (i.e. reference types), and it is easy to accidentally bypass the tests too and just call `Value` directly.
+C#では、特定の状況で、nullable値型（ `Nullable<int>` など）を使って設計上の決定を明確にすることができます。
+nullableに遭遇したとき、コンパイラはそれを認識するよう強制します。そして、値を使用する前にその有効性をテストできます。
+ただし、nullableは標準のクラス（つまり参照型）では機能せず、テストを偶発的にバイパスして直接 `Value` を呼び出すのも簡単です。
 
-In F# there is a similar but more powerful concept to convey the design intent: the generic wrapper type called `Option`, with two choices: `Some` or `None`.
-The `Some` choice wraps a valid value, and `None` represents a missing value.
+F#には、設計上の意図を伝えるための、同様だがより強力な概念があります。 `Some` または `None` という2つの選択肢を持つ、 `Option` と呼ばれるジェネリックなラッパー型です。
+`Some` の選択肢は有効な値をラップし、 `None` は欠落した値を表します。
 
-Here's an example where `Some` is returned if a file exists, but a missing file returns `None`.
+以下は、ファイルが存在する場合に `Some` を返し、存在しないファイルの場合に `None` を返す例です。
 
 ```fsharp
 let getFileInfo filePath =
@@ -94,31 +94,31 @@ let goodFileInfo = getFileInfo goodFileName // Some(fileinfo)
 let badFileInfo = getFileInfo badFileName   // None
 ```
 
-If we want to do anything with these values, we must always handle both possible cases.
+これらの値で何かをしたい場合、常に両方の可能性を扱う必要があります。
 
 ```fsharp
 match goodFileInfo with
   | Some fileInfo -> 
-      printfn "the file %s exists" fileInfo.FullName
+      printfn "ファイル %s は存在します" fileInfo.FullName
   | None -> 
-      printfn "the file doesn't exist" 
+      printfn "ファイルは存在しません" 
 
 match badFileInfo with
   | Some fileInfo -> 
-      printfn "the file %s exists" fileInfo.FullName
+      printfn "ファイル %s は存在します" fileInfo.FullName
   | None -> 
-      printfn "the file doesn't exist" 
+      printfn "ファイルは存在しません" 
 ```
 	  
-We have no choice about this. Not handling a case is a compile-time error, not a run-time error.
-By avoiding nulls and by using `Option` types in this way, F# completely eliminates a large class of null reference exceptions.
+これについて選択の余地はありません。ケースを扱わないのは、実行時エラーではなく、コンパイル時エラーです。
+このようにnullを避け、 `Option` 型を使うことで、F#は大きなクラスのnull参照例外を完全に排除します。
  
-<sub>Caveat: F# does allow you to access the value without testing, just like C#, but that is considered extremely bad practice.</sub> 
+<sub>注意：F#でも、C#と同様にテストなしで値にアクセスすることは可能ですが、これは非常に悪い習慣とされています。</sub>
 
 
-## Exhaustive pattern matching for edge cases ##
+## エッジケースに対する網羅的なパターンマッチング
 
-Here's some C# code that creates a list by averaging pairs of numbers from an input list:
+以下は、入力リストから数値のペアの平均を取って新しいリストを作成するC#のコードです：
 
 ```csharp
 public IList<float> MovingAverages(IList<int> list)
@@ -133,155 +133,155 @@ public IList<float> MovingAverages(IList<int> list)
 }
 ```
 
-It compiles correctly, but it actually has a couple of issues. Can you find them quickly? If you're lucky, your unit tests will find them for you, assuming you have thought of all the edge cases.
+このコードは正しくコンパイルされますが、実際にはいくつかの問題があります。すぐに見つけられますか？運が良ければ、あなたのユニットテストがそれらを見つけてくれるでしょう。もちろん、すべてのエッジケースを考慮したテストを書いていればの話ですが。
 
-Now let's try the same thing in F#:
+では、F#で同じことをやってみましょう：
 
 ```fsharp
 let rec movingAverages list = 
     match list with
-    // if input is empty, return an empty list
+    // 入力が空の場合、空のリストを返す
     | [] -> []
-    // otherwise process pairs of items from the input 
+    // それ以外の場合、入力からアイテムのペアを処理する
     | x::y::rest -> 
         let avg = (x+y)/2.0 
-        //build the result by recursing the rest of the list
+        // リストの残りを再帰的に処理して結果を構築
         avg :: movingAverages (y::rest)
 ```
 
-This code also has a bug. But unlike C#, this code will not even compile until I fix it.  The compiler will tell me that I haven't handled the case when I have a single item in my list.
-Not only has it found a bug, it has revealed a gap in the requirements: what should happen when there is only one item?
+このコードにもバグがあります。しかし、C#とは違い、このコードは修正するまでコンパイルすらされません。コンパイラは、リストに1つのアイテムしかない場合を扱っていないと教えてくれます。
+バグを見つけただけでなく、要件のギャップも明らかにしました：1つのアイテムしかない場合、何が起こるべきでしょうか？
 
-Here's the fixed up version:
+以下が修正後のバージョンです：
 
 ```fsharp
 let rec movingAverages list = 
     match list with
-    // if input is empty, return an empty list
+    // 入力が空の場合、空のリストを返す
     | [] -> []
-    // otherwise process pairs of items from the input 
+    // それ以外の場合、入力からアイテムのペアを処理する
     | x::y::rest -> 
         let avg = (x+y)/2.0 
-        //build the result by recursing the rest of the list
+        // リストの残りを再帰的に処理して結果を構築
         avg :: movingAverages (y::rest)
-    // for one item, return an empty list
+    // 1つのアイテムの場合、空のリストを返す
     | [_] -> []
 
-// test
+// テスト
 movingAverages [1.0]
 movingAverages [1.0; 2.0]
 movingAverages [1.0; 2.0; 3.0]
 ```
 
-As an additional benefit, the F# code is also much more self-documenting. It explicitly describes the consequences of each case.
-In the C# code, it is not at all obvious what happens if a list is empty or only has one item.  You would have to read the code carefully to find out.
+追加の利点として、F#のコードはより自己文書化されています。各ケースの結果を明示的に記述しています。
+C#のコードでは、リストが空の場合や1つのアイテムしかない場合に何が起こるのかが全く明確ではありません。それを知るには、コードを注意深く読む必要があります。
 
-## Exhaustive pattern matching as an error handling technique ##
+## エラー処理技術としての網羅的なパターンマッチング
 
-The fact that all choices must be matched can also be used as a useful alternative to throwing exceptions. For example consider the following common scenario:
+すべての選択肢をマッチさせる必要があるという特性は、例外を投げる代わりに使える便利な方法でもあります。例えば、次のような一般的なシナリオを考えてみましょう：
 
-* There is a utility function in the lowest tier of your app that opens a file and performs an arbitrary operation on it (that you pass in as a callback function)
-* The result is then passed back up through to tiers to the top level.
-* A client calls the top level code, and the result is processed and any error handling done. 
+* アプリケーションの最下層にあるユーティリティ関数が、ファイルを開いて任意の操作（コールバック関数として渡される）を実行します。
+* その結果は、複数の層を通して最上層まで渡されます。
+* クライアントが最上層のコードを呼び出し、結果が処理され、エラー処理が行われます。
 
-In a procedural or OO language, propagating and handling exceptions across layers of code is a common problem. Top level functions are not easily able to tell the difference between an exception that they should recover from (`FileNotFound` say) vs. an exception that they needn't handle (`OutOfMemory` say). In Java, there has been an attempt to do this with checked exceptions, but with mixed results.
+手続き型やオブジェクト指向の言語では、コードの層をまたいで例外を伝播させ、適切に処理することがよく問題になります。最上層の関数は、回復すべき例外（例えば `FileNotFound` ）と処理する必要のない例外（例えば `OutOfMemory` ）を簡単に区別できません。Javaでは、チェック例外を使ってこの問題に対処しようとしましたが、結果は芳しくありませんでした。
 
-In the functional world, a common technique is to create a new structure to hold both the good and bad possibilities, rather than throwing an exception if the file is missing.
+関数型の世界では、ファイルが見つからない場合に例外を投げるのではなく、良い結果と悪い結果の両方を保持する新しい構造を作成するのが一般的な手法です。
 
 ```fsharp
-// define a "union" of two different alternatives
+// 2つの異なる選択肢を持つ「union」を定義
 type Result<'a, 'b> = 
-    | Success of 'a  // 'a means generic type. The actual type
-                     // will be determined when it is used.
-    | Failure of 'b  // generic failure type as well
+    | Success of 'a  // 'aはジェネリック型を意味します。実際の型は
+                     // 使用時に決定されます。
+    | Failure of 'b  // 失敗の型もジェネリックです
 
-// define all possible errors
+// すべての可能なエラーを定義
 type FileErrorReason = 
     | FileNotFound of string
     | UnauthorizedAccess of string * System.Exception
 
-// define a low level function in the bottom layer
+// 最下層の関数を定義
 let performActionOnFile action filePath =
    try
-      //open file, do the action and return the result
+      // ファイルを開き、アクションを実行して結果を返す
       use sr = new System.IO.StreamReader(filePath:string)
-      let result = action sr  //do the action to the reader
+      let result = action sr  // リーダーに対してアクションを実行
       sr.Close()
-      Success (result)        // return a Success
-   with      // catch some exceptions and convert them to errors
+      Success (result)        // Successを返す
+   with      // いくつかの例外をキャッチしてエラーに変換
       | :? System.IO.FileNotFoundException as ex 
           -> Failure (FileNotFound filePath)      
       | :? System.Security.SecurityException as ex 
           -> Failure (UnauthorizedAccess (filePath,ex))  
-      // other exceptions are unhandled
+      // その他の例外は処理されません
 ```
       
-The code demonstrates how `performActionOnFile` returns a `Result` object which has two alternatives: `Success` and `Failure`.  The `Failure` alternative in turn has two alternatives as well: `FileNotFound` and `UnauthorizedAccess`.
+このコードは、 `performActionOnFile` が `Success` と `Failure` という2つの選択肢を持つ `Result` オブジェクトを返すことを示しています。 `Failure` の選択肢はさらに、 `FileNotFound` と `UnauthorizedAccess` という2つの選択肢を持っています。
 
-Now the intermediate layers can call each other, passing around the result type without worrying what its structure is, as long as they don't access it:
+ここで、中間層は結果の構造を気にせずに、それにアクセスしない限り、お互いを呼び出して結果の型を渡すことができます：
 
 ```fsharp
-// a function in the middle layer
+// 中間層の関数
 let middleLayerDo action filePath = 
     let fileResult = performActionOnFile action filePath
-    // do some stuff
-    fileResult //return
+    // 何か処理をする
+    fileResult // 返す
 
-// a function in the top layer
+// 最上層の関数
 let topLayerDo action filePath = 
     let fileResult = middleLayerDo action filePath
-    // do some stuff
-    fileResult //return
+    // 何か処理をする
+    fileResult // 返す
 ```
 	
-Because of type inference, the middle and top layers do not need to specify the exact types returned. If the lower layer changes the type definition at all, the intermediate layers will not be affected.
+型推論のおかげで、中間層と最上層は返される正確な型を指定する必要がありません。下層が型定義を変更しても、中間層には影響しません。
 
-Obviously at some point, a client of the top layer does want to access the result. And here is where the requirement to match all patterns is enforced. The client must handle the case with a `Failure` or else the compiler will complain. And furthermore, when handling the `Failure` branch, it must handle the possible reasons as well. In other words, special case handling of this sort can be enforced at compile time, not at runtime!   And in addition the possible reasons are explicitly documented by examining the reason type. 
+もちろん、ある時点で最上層のクライアントが結果にアクセスしたいと思うでしょう。ここで、すべてのパターンをマッチさせる要件が活きてきます。クライアントは `Failure` のケースを処理しなければなりません。さもなければコンパイラが警告を出します。さらに、 `Failure` のブランチを処理する際には、可能な理由も処理しなければなりません。つまり、このような特別なケース処理は、実行時ではなくコンパイル時に強制できるのです！さらに、可能な理由は理由型を調べることで明示的に文書化されます。
 
-Here is an example of a client function that accesses the top layer:
+以下は、最上層にアクセスするクライアント関数の例です：
 
 ```fsharp
-/// get the first line of the file
+/// ファイルの最初の行を取得
 let printFirstLineOfFile filePath = 
     let fileResult = topLayerDo (fun fs->fs.ReadLine()) filePath
 
     match fileResult with
     | Success result -> 
-        // note type-safe string printing with %s
-        printfn "first line is: '%s'" result   
+        // 型安全な文字列出力に%sを使用
+        printfn "最初の行は: '%s'" result   
     | Failure reason -> 
-       match reason with  // must match EVERY reason
+       match reason with  // すべての理由にマッチしなければならない
        | FileNotFound file -> 
-           printfn "File not found: %s" file
+           printfn "ファイルが見つかりません: %s" file
        | UnauthorizedAccess (file,_) -> 
-           printfn "You do not have access to the file: %s" file
+           printfn "ファイルにアクセスする権限がありません: %s" file
 ```
 
-		   
-You can see that this code must explicitly handle the `Success` and `Failure` cases, and then for the failure case, it explicitly handles the different reasons. If you want to see what happens if it does not handle one of the cases, try commenting out the line that handles `UnauthorizedAccess` and see what the compiler says.
 
-Now it is not required that you always handle all possible cases explicitly. In the example below, the function uses the underscore wildcard to treat all the failure reasons as one. This can considered bad practice if we want to get the benefits of the strictness, but at least it is clearly done.
+このコードは `Success` と `Failure` のケースを明示的に処理し、さらに失敗のケースでは、異なる理由を明示的に処理していることがわかります。ケースの1つを処理しない場合に何が起こるかを見たい場合は、 `UnauthorizedAccess` を処理する行をコメントアウトして、コンパイラが何を言うか見てみてください。
+
+常にすべての選択肢をマッチさせる必要がないケースもあります。以下の例では、関数はアンダースコアのワイルドカードを使ってすべての失敗の理由を一つとして扱っています。これは厳密さの利点を得たい場合には良くない習慣と考えられますが、少なくとも明確に行われています。
 
 ```fsharp
-/// get the length of the text in the file
+/// ファイル内のテキストの長さを取得
 let printLengthOfFile filePath = 
    let fileResult = 
      topLayerDo (fun fs->fs.ReadToEnd().Length) filePath
 
    match fileResult with
    | Success result -> 
-      // note type-safe int printing with %i
-      printfn "length is: %i" result       
+      // 型安全な整数出力に%iを使用
+      printfn "長さは: %i" result       
    | Failure _ -> 
-      printfn "An error happened but I don't want to be specific"
+      printfn "エラーが発生しましたが、具体的には言いたくありません"
 ```
 
-Now let's see all this code work in practice with some interactive tests. 
+では、このコードが実際にどのように動作するか、いくつかのインタラクティブなテストで見てみましょう。
 
-First set up a good file and a bad file.
+まず、正常なファイルと不正なファイルを設定します。
 
 ```fsharp
-/// write some text to a file
+/// ファイルにテキストを書き込む
 let writeSomeText filePath someText = 
     use writer = new System.IO.StreamWriter(filePath:string)
     writer.WriteLine(someText:string)
@@ -293,7 +293,7 @@ let badFileName = "bad.txt"
 writeSomeText goodFileName "hello"
 ```
 
-And now test interactively:
+そして、インタラクティブにテストします：
 
 ```fsharp
 printFirstLineOfFile goodFileName 
@@ -303,20 +303,20 @@ printFirstLineOfFile badFileName
 printLengthOfFile badFileName 
 ```
 
-I think you can see that this approach is very attractive:
+このアプローチが非常に魅力的であることがわかると思います：
 
-* Functions return error types for each expected case (such as `FileNotFound`), but the handling of these types does not need to make the calling code ugly.
-* Functions continue to throw exceptions for unexpected cases (such as `OutOfMemory`), which will generally be caught and logged at the top level of the program.
+* 関数は予想される各ケース（ `FileNotFound` など）に対してエラー型を返しますが、これらの型の処理が呼び出しコードを醜くすることはありません。
+* 関数は予期しないケース（ `OutOfMemory` など）に対しては例外を投げ続けます。これらは一般的にプログラムの最上位でキャッチされ、ログに記録されます。
 
-This technique is simple and convenient. Similar (and more generic) approaches are standard in functional programming.
+この技法は単純で便利です。同様の（そしてより汎用的な）アプローチが関数型プログラミングでは標準的です。
 
-It is feasible to use this approach in C# too, but it is normally impractical, due to the lack of union types and the lack of type inference (we would have to specify generic types everywhere). 
+C#でもこのアプローチを使うことは可能ですが、通常は非現実的です。ユニオン型がないことと、型推論がないこと（ジェネリック型をどこでも指定しなければならない）が原因です。
 
-## Exhaustive pattern matching as a change management tool ##
+## 変更管理ツールとしての網羅的なパターンマッチング
 
-Finally, exhaustive pattern matching is a valuable tool for ensuring that code stays correct as requirements change, or during refactoring.
+最後に、網羅的なパターンマッチングは、要件が変更されたとき、またはリファクタリング中にコードが正しいままであることを保証するための貴重なツールです。
 
-Let's say that the requirements change and we need to handle a third type of error: "Indeterminate". To implement this new requirement, change the first `Result` type as follows, and re-evaluate all the code. What happens?
+例えば、要件が変更され、3番目のエラー型「Indeterminate（不確定）」を扱う必要が出てきたとします。この新しい要件を実装するには、最初の `Result` 型を以下のように変更し、すべてのコードを再評価します。何が起こるでしょうか？
 
 ```fsharp
 type Result<'a, 'b> = 
@@ -325,16 +325,16 @@ type Result<'a, 'b> =
     | Indeterminate
 ```
 
-Or sometimes a requirements change will remove a possible choice. To emulate this, change the first `Result` type to eliminate all but one of the choices. 
+また、時には要件の変更によって可能な選択肢が削除されることもあります。これをシミュレートするには、最初の `Result` 型を変更して、1つの選択肢以外をすべて削除します。
 
 ```fsharp
 type Result<'a> = 
     | Success of 'a 
 ```
 
-Now re-evaluate the rest of the code. What happens now?
+ここで、残りのコードを再評価してみてください。今度は何が起こるでしょうか？
 
-This is very powerful!  When we adjust the choices, we immediately know all the places which need to be fixed to handle the change. This is another example of the power of statically checked type errors. It is often said about functional languages like F# that "if it compiles, it must be correct".
+これは非常に強力です！選択肢を調整すると、変更に対応するために修正が必要なすべての場所をすぐに知ることができます。これは、静的にチェックされた型エラーの力の別の例です。F#のような関数型言語について「コンパイルが通れば、正しいはずだ」とよく言われるのはこのためです。
 
 
 

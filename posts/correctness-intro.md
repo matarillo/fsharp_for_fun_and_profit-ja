@@ -1,28 +1,28 @@
 ---
 layout: post
-title: "Correctness"
-description: "How to write 'compile time unit tests'"
+title: "正確性"
+description: "「コンパイル時ユニットテスト」の書き方"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 18
 categories: [Correctness]
 ---
 
-As a programmer, you are constantly judging the code that you and others write. In an ideal world, you should be able to look at a piece of code and easily understand exactly what it does; and of course, being concise, clear and readable is a major factor in this. 
+プログラマーとして、あなたは常に自分や他人が書いたコードを判断しています。理想的な世界では、コードを見ればその動作を簡単に理解できるはずです。もちろん、簡潔で明確で読みやすいことが、そのための大きな要因です。
 
-But more importantly, you have to be able to convince yourself that the code *does what it is supposed to do*. As you program, you are constantly reasoning about code correctness, and the little compiler in your brain is checking the code for errors and possible mistakes. 
+しかし、もっと重要なのは、そのコードが*本来やるべきことをしているか*を確信できることです。プログラミングをしているとき、あなたは常にコードの正確性について考え、頭の中にある小さなコンパイラがエラーや間違いがないかチェックしています。
 
-So how can a programming language help you with this?  
+では、プログラミング言語はこの点でどのように役立つのでしょうか？
 
-A modern imperative language like C# provides many ways that you are already familiar with: type checking, scoping and naming rules, access modifiers and so on. And, in recent versions, static code analysis and code contracts.  
+C#のような現代の命令型言語は、すでにおなじみの多くの方法を提供しています。型チェック、スコープとネーミングルール、アクセス修飾子などです。最近のバージョンでは、静的コード解析やコード契約も加わりました。
 
-All these techniques mean that the compiler can take on a lot of the burden of checking for correctness. If you make a mistake, the compiler will warn you.
+これらの技術のおかげで、コンパイラが正確性チェックの多くを担当できます。間違いがあれば、コンパイラが警告してくれます。
 
-But F# has some additional features that can have a huge impact on ensuring correctness. The next few posts will be devoted to four of them:
+しかし、F#にはさらに正確性を確保するのに大きな効果を発揮する機能がいくつかあります。これから数回の投稿では、その中の4つについて詳しく見ていきます：
 
-* **Immutability**, which enables code to behave much more predictably.
-* **Exhaustive pattern matching**, which traps many common errors at compile time.
-* **A strict type system**, which is your friend, not your enemy. You can use the static type checking almost as an instant "compile time unit test".
-* **An expressive type system** that can help you "make illegal states unrepresentable"* . We'll see how to design a real-world example that demonstrates this.
+* **イミュータビリティ（不変性）**：コードの振る舞いをより予測しやすくします。
+* **網羅的パターンマッチング**：多くのよくあるエラーをコンパイル時に捕捉します。
+* **厳格な型システム**：これは敵ではなく、味方です。静的型チェックをほぼ瞬時の「コンパイル時ユニットテスト」として活用できます。
+* **表現力豊かな型システム**：「不正な状態を表現不可能にする」*のに役立ちます。これを示す実世界の例を設計して見ていきます。
 
-<sub>* Thanks to Yaron Minsky at Jane Street for this phrase.</sub>
+<sub>* この表現は、Jane StreetのYaron Minsky氏に感謝します。</sub>

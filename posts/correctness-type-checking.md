@@ -1,102 +1,102 @@
 ---
 layout: post
-title: "Using the type system to ensure correct code"
-description: "In F# the type system is your friend, not your enemy"
+title: "型システムを使って正しいコードを保証する"
+description: "F#では型システムはあなたの味方であり、敵ではありません"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 21
 categories: [Correctness, Types]
 ---
 
-You are familiar with static type checking through languages such as C# and Java. In these languages, the type checking is straightforward but rather crude, and can be seen as an annoyance compared with the freedom of dynamic languages such as Python and Ruby.
+C#やJavaなどの言語を通じて、静的型チェックには馴染みがあるでしょう。これらの言語では、型チェックは単純ですが粗く、PythonやRubyなどの動的言語の自由さに比べると煩わしく感じることがあります。
 
-But in F# the type system is your friend, not your enemy. You can use static type checking almost as an instant unit test ? making sure that your code is correct at compile time.
+しかし、F#では型システムはあなたの味方であり、敵ではありません。静的型チェックをほぼ即座のユニットテストのように使えるのです。つまり、コンパイル時にコードの正しさを確認できます。
 
-In the earlier posts we have already seen some of the things that you can do with the type system in F#:
+これまでの投稿で、F#の型システムでできることをいくつか見てきました：
 
-* The types and their associated functions provide an abstraction to model the problem domain. Because creating types is so easy, there is rarely an excuse to avoid designing them as needed for a given problem, and unlike C# classes it is hard to create "kitchen-sink" types that do everything.
-* Well defined types aid in maintenance. Since F# uses type inference, you can normally rename or restructure types easily without using a refactoring tool. And if the type is changed in an incompatible way, this will almost certainly create compile-time errors that aid in tracking down any problems. 
-* Well named types provide instant documentation about their roles in the program (and this documentation can never be out of date). 
+* 型とそれに関連する関数は、問題領域をモデル化する抽象化を提供します。型の作成が非常に簡単なので、与えられた問題に必要な型を設計するのを避ける言い訳はほとんどありません。また、C#のクラスとは異なり、何でもできる「何でもあり型」を作るのは難しくなっています。
+* よく定義された型はメンテナンスに役立ちます。F#は型推論を使うので、通常はリファクタリングツールを使わずに型の名前変更や再構築が簡単にできます。また、型が互換性のない方法で変更された場合、ほぼ確実にコンパイル時エラーが発生し、問題の追跡に役立ちます。
+* 適切に名付けられた型は、プログラム内での役割に関する即座のドキュメントを提供します（そして、このドキュメントが古くなることは決してありません）。
 
-In this post and the next we will focus on using the type system as an aid to writing correct code. I will demonstrate that you can create designs such that, if your code actually compiles, it will almost certainly work as designed.
+この投稿と次の投稿では、正しいコードを書くための補助として型システムを使うことに焦点を当てます。実際にコンパイルが通れば、設計通りに動作するようなデザインを作れることを示します。
 
-## Using standard type checking ##
+## 標準的な型チェックを使う ##
 
-In C#, you use the compile-time checks to validate your code without even thinking about it. For example, would you give up `List<string>` for a plain `List`? Or give up `Nullable<int>` and be forced to used `object` with casting? Probably not. 
+C#では、考えることなくコンパイル時チェックを使ってコードを検証しています。例えば、 `List<string>` を単なる `List` に置き換えたいと思いますか？あるいは、 `Nullable<int>` をやめてキャストを伴う `object` を使うことを強いられたいですか？おそらくそうではないでしょう。
 
-But what if you could have even more fine-grained types? You could have even better compile-time checks. And this is exactly what F# offers.
+しかし、さらに細かい粒度の型を持てたらどうでしょうか？さらに優れたコンパイル時チェックが可能になります。そして、これがまさにF#が提供するものです。
 
-The F# type checker is not that much stricter than the C# type checker.  But because it is so easy to create new types without clutter, you can represent the domain better, and, as a useful side-effect, avoid many common errors.
+F#の型チェッカーは、C#の型チェッカーよりそれほど厳密というわけではありません。しかし、煩雑さなしに新しい型を作るのが非常に簡単なので、問題領域をより良く表現でき、有用な副作用として多くの一般的なエラーを避けることができます。
 
-Here is a simple example:
+以下は簡単な例です：
 
 ```fsharp
-//define a "safe" email address type
+// "安全な"メールアドレス型を定義
 type EmailAddress = EmailAddress of string
 
-//define a function that uses it 
+// それを使う関数を定義
 let sendEmail (EmailAddress email) = 
-   printfn "sent an email to %s" email
+   printfn "%s にメールを送信しました" email
 
-//try to send one
+// 送信を試みる
 let aliceEmail = EmailAddress "alice@example.com"
 sendEmail aliceEmail
 
-//try to send a plain string
-sendEmail "bob@example.com"   //error
+// 単純な文字列で送信を試みる
+sendEmail "bob@example.com"   // エラー
 ```
 
-By wrapping the email address in a special type, we ensure that normal strings cannot be used as arguments to email specific functions. (In practice, we would also hide the constructor of the `EmailAddress` type as well, to ensure that only valid values could be created in the first place.)
+メールアドレスを特別な型でラップすることで、通常の文字列をメール固有の関数の引数として使えないようにしています。（実際には、 `EmailAddress` 型のコンストラクタも隠して、最初から有効な値だけが作成できるようにします。）
 
-There is nothing here that couldn't be done in C#, but it would be quite a lot of work to create a new value type just for this one purpose, so in C#, it is easy to be lazy and just pass strings around.
+ここには、C#でできないことは何もありませんが、この1つの目的のために新しい値型を作るのはかなりの作業になるでしょう。そのため、C#では単に文字列をあちこちに渡すという怠惰な方法を取りがちです。
 
-## Additional type safety features in F# ##
+## F#の追加的な型安全性機能 ##
 
-Before moving on to the major topic of "designing for correctness", let's see a few of the other minor, but cool, ways that F# is type-safe.
+「正確性のための設計」という主要なトピックに移る前に、F#の型安全性が発揮される場面を他にもいくつか見てみましょう。些細ですが、クールな機能ばかりです。
 
-### Type-safe formatting with printf ###
+### printfを使った型安全なフォーマット ###
 
-Here is a minor feature that demonstrates one of the ways that F# is more type-safe than C#, and how the F# compiler can catch errors that would only be detected at runtime in C#.
+ここで、F#がC#よりも型安全である方法の1つを示す小さな機能を紹介します。これは、C#では実行時にしか検出できないエラーをF#コンパイラがどのように捕捉できるかを示しています。
 
-Try evaluating the following and look at the errors generated:
+以下を評価して、生成されるエラーを確認してみてください：
 
 ```fsharp
 let printingExample = 
-   printf "an int %i" 2                        // ok
-   printf "an int %i" 2.0                      // wrong type
-   printf "an int %i" "hello"                  // wrong type
-   printf "an int %i"                          // missing param
+   printf "整数 %i" 2                        // OK
+   printf "整数 %i" 2.0                      // 型が間違っています
+   printf "整数 %i" "hello"                  // 型が間違っています
+   printf "整数 %i"                          // パラメータが不足しています
 
-   printf "a string %s" "hello"                // ok
-   printf "a string %s" 2                      // wrong type
-   printf "a string %s"                        // missing param
-   printf "a string %s" "he" "lo"              // too many params
+   printf "文字列 %s" "hello"                // OK
+   printf "文字列 %s" 2                      // 型が間違っています
+   printf "文字列 %s"                        // パラメータが不足しています
+   printf "文字列 %s" "he" "lo"              // パラメータが多すぎます
 
-   printf "an int %i and string %s" 2 "hello"  // ok
-   printf "an int %i and string %s" "hello" 2  // wrong type
-   printf "an int %i and string %s" 2          // missing param
+   printf "整数 %i と文字列 %s" 2 "hello"    // OK
+   printf "整数 %i と文字列 %s" "hello" 2    // 型が間違っています
+   printf "整数 %i と文字列 %s" 2            // パラメータが不足しています
 ```
 
-Unlike C#, the compiler analyses the format string and determines what the number and types of the arguments are supposed to be. 
+C#とは異なり、コンパイラはフォーマット文字列を分析し、引数の数と型がどうあるべきかを決定します。
 
-This can be used to constrain the types of parameters without explicitly having to specify them. So for example, in the code below, the compiler can deduce the types of the arguments automatically.
+これを使って、明示的に指定することなくパラメータの型を制約できます。例えば、以下のコードでは、コンパイラが引数の型を自動的に推論できます。
 
 ```fsharp
 let printAString x = printf "%s" x
 let printAnInt x = printf "%i" x
 
-// the result is:
-// val printAString : string -> unit  //takes a string parameter
-// val printAnInt : int -> unit       //takes an int parameter
+// 結果は：
+// val printAString : string -> unit  // 文字列パラメータを取ります
+// val printAnInt : int -> unit       // 整数パラメータを取ります
 ```
 
 <a name="units-of-measure"></a>
-### Units of measure ###
+### 測定単位 ###
 
-F# has the ability to define units of measure and associate them with floats. The unit of measure is then "attached" to the float as a type and prevents mixing different types. This is another feature that can be very handy if you need it.
+F#には、測定単位を定義し、それらをfloatに関連付ける機能があります。測定単位は次にfloatに型として「付加」され、異なる型の混合を防ぎます。これは、必要な場合に非常に便利な別の機能です。
 
 ```fsharp
-// define some measures
+// いくつかの単位を定義
 [<Measure>] 
 type cm
 
@@ -105,21 +105,21 @@ type inches
 
 [<Measure>] 
 type feet =
-   // add a conversion function
+   // 変換関数を追加
    static member toInches(feet : float<feet>) : float<inches> = 
       feet * 12.0<inches/feet>
 
-// define some values
+// いくつかの値を定義
 let meter = 100.0<cm>
 let yard = 3.0<feet>
 
-//convert to different measure
+// 異なる単位に変換
 let yardInInches = feet.toInches(yard)
 
-// can't mix and match!
+// 混ぜて使うことはできません！
 yard + meter
 
-// now define some currencies
+// ここで通貨を定義
 [<Measure>] 
 type GBP
 
@@ -128,17 +128,17 @@ type USD
 
 let gbp10 = 10.0<GBP>
 let usd10 = 10.0<USD>
-gbp10 + gbp10             // allowed: same currency
-gbp10 + usd10             // not allowed: different currency
-gbp10 + 1.0               // not allowed: didn't specify a currency
-gbp10 + 1.0<_>            // allowed using wildcard
+gbp10 + gbp10             // 許可：同じ通貨
+gbp10 + usd10             // 許可されない：異なる通貨
+gbp10 + 1.0               // 許可されない：通貨を指定していない
+gbp10 + 1.0<_>            // ワイルドカードを使用して許可
 ```
 
-### Type-safe equality ###
+### 型安全な等価性 ###
 
-One final example. In C# any class can be equated with any other class (using reference equality by default). In general, this is a bad idea! For example, you shouldn't really be able to compare a string with a person at all.  
+最後の例をみてみましょう。C#では、どのクラスも他のどのクラスとも等価性を比較できます（デフォルトで参照等価性を使用）。一般的に、これは良くないアイデアです！例えば、文字列と人を比較できるべきではありません。
 
-Here is some C# code which is perfectly valid and compiles fine:
+以下は完全に有効で、問題なくコンパイルされるC#コードです：
 
 ```csharp
 using System;
@@ -147,7 +147,7 @@ var ex = new Exception();
 var b = (obj == ex);
 ```
 
-If we write the identical code in F#, we get a compile-time error:
+同じコードをF#で書くと、コンパイル時エラーが発生します：
 
 ```fsharp
 open System
@@ -156,19 +156,19 @@ let ex = new Exception()
 let b = (obj = ex)
 ```
 
-Chances are, if you are testing equality between two different types, you are doing something wrong.
+2つの異なる型の等価性をテストしているなら、おそらく何か間違ったことをしているのでしょう。
 
-In F#, you can even stop a type being compared at all!  This is not as silly as it seems. For some types, there may not be a useful default, or you may want to force equality to be based on a specific field rather than the object as whole.
+F#では、型の比較を完全に禁止することさえできます！これは思うほど馬鹿げたことではありません。一部の型では、有用なデフォルトがない場合や、オブジェクト全体ではなく特定のフィールドに基づいて等価性を強制したい場合があるかもしれません。
 
-Here is an example of this:
+以下はその例です：
 
 ```fsharp
-// deny comparison
+// 比較を拒否
 [<NoEquality; NoComparison>]
 type CustomerAccount = {CustomerAccountId: int}
 
 let x = {CustomerAccountId = 1}
 
-x = x       // error!
-x.CustomerAccountId = x.CustomerAccountId // no error
+x = x       // エラー！
+x.CustomerAccountId = x.CustomerAccountId // エラーなし
 ```

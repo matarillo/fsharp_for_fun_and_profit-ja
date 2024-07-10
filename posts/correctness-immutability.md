@@ -1,16 +1,16 @@
 ---
 layout: post
-title: "Immutability"
-description: "Making your code predictable"
+title: "イミュータビリティ"
+description: "コードを予測可能にする"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 19
 categories: [Correctness, Immutability]
 ---
 
-To see why immutability is important, let's start with a small example.
+イミュータビリティ（不変性）が重要である理由を理解するために、小さな例から始めましょう。
 
-Here's some simple C# code that processes a list of numbers.
+以下は、数値のリストを処理する簡単なC#のコードです。
 
 ```csharp
 public List<int> MakeList() 
@@ -20,28 +20,28 @@ public List<int> MakeList()
 
 public List<int> OddNumbers(List<int> list) 
 { 
-   // some code
+   // 何らかのコード
 }
 
 public List<int> EvenNumbers(List<int> list) 
 { 
-   // some code
+   // 何らかのコード
 }
 ```
 
-Now let me test it:
+では、これをテストしてみましょう：
 
 ```csharp
 public void Test() 
 { 
    var odds = OddNumbers(MakeList()); 
    var evens = EvenNumbers(MakeList());
-   // assert odds = 1,3,5,7,9 -- OK!
-   // assert evens = 2,4,6,8,10 -- OK!
+   // odds が 1,3,5,7,9 であることを確認 -- OK!
+   // evens が 2,4,6,8,10 であることを確認 -- OK!
 }
 ```
 
-Everything works great, and the test passes, but I notice that I am creating the list twice ? surely I should refactor this out?  So I do the refactoring, and here's the new improved version:
+すべてうまく動作し、テストにも合格します。ただ、リストを2回作成しているのに気づきました。これはリファクタリングすべきでしょうか？ここでは、リファクタリングをしてみます。以下が新しく改良されたバージョンです：
 
 ```csharp
 public void RefactoredTest() 
@@ -49,18 +49,18 @@ public void RefactoredTest()
    var list = MakeList();
    var odds = OddNumbers(list); 
    var evens = EvenNumbers(list);
-   // assert odds = 1,3,5,7,9 -- OK!
-   // assert evens = 2,4,6,8,10 -- FAIL!
+   // odds が 1,3,5,7,9 であることを確認 -- OK!
+   // evens が 2,4,6,8,10 であることを確認 -- 失敗!
 }
 ```
 
-But now the test suddenly fails! Why would a refactoring break the test? Can you tell just by looking at the code?
+しかし、今度はテストが突然失敗してしまいました！なぜリファクタリングがテストを壊してしまったのでしょうか？コードを見ただけでその理由がわかりますか？
 
-The answer is, of course, that the list is mutable, and it is probable that the `OddNumbers` function is making destructive changes to the list as part of its filtering logic. Of course, in order to be sure, we would have to examine the code inside the `OddNumbers` function.
+答えは、もちろん、リストがミュータブル（可変）であり、`OddNumbers`関数がフィルタリングのロジックの一部としてリストに破壊的な変更を加えている可能性が高いということです。確実なことを言うには、`OddNumbers`関数の中身を調べる必要があります。
 
-In other words, when I call the `OddNumbers` function, I am unintentionally creating undesirable side effects.  
+つまり、`OddNumbers`関数を呼び出すとき、意図せずに望ましくない副作用を生み出してしまっているのです。
 
-Is there a way to ensure that this cannot happen?  Yes -- if the functions had used `IEnumerable` instead:
+これが起こらないようにする方法はあるでしょうか？はい、関数が代わりに`IEnumerable`を使えば可能です：
 
 ```csharp
 public IEnumerable<int> MakeList() {}
@@ -68,74 +68,74 @@ public List<int> OddNumbers(IEnumerable<int> list) {}
 public List<int> EvenNumbers(IEnumerable <int> list) {}
 ```
 
-In this case we can be confident that calling the `OddNumbers` function could not possibly have any effect on the list, and `EvenNumbers` would work correctly. What's more, we can know this *just by looking at the signatures*, without having to examine the internals of the functions.  And if you try to make one of the functions misbehave by assigning to the list then you will get an error straight away, at compile time. 
+この場合、`OddNumbers`関数を呼び出してもリストに影響を与える可能性はなく、`EvenNumbers`も正しく動作すると確信できます。さらに重要なのは、関数の内部を調べることなく、*シグネチャを見るだけで*このことがわかるという点です。そして、リストに代入することで関数の一つを誤動作させようとしても、コンパイル時にすぐにエラーが発生します。
 
-So `IEnumerable` can help in this case, but what if I had used a type such as `IEnumerable<Person>` instead of `IEnumerable<int>`? Could I still be as confident that the functions wouldn't have unintentional side effects?
+このケースでは`IEnumerable`が役立ちますが、`IEnumerable<int>`の代わりに`IEnumerable<Person>`のような型を使った場合はどうでしょうか？それでも関数が意図しない副作用を持たないと確信できるでしょうか？
 
-## Reasons why immutability is important ##
+## イミュータビリティが重要な理由 ##
 
-The example above shows why immutability is helpful. In fact, this is just the tip of the iceberg. There are a number of reasons why immutability is important:
+上記の例は、イミュータビリティが役立つ理由を示しています。実は、これは氷山の一角に過ぎません。イミュータビリティが重要な理由はいくつかあります：
 
-* Immutable data makes the code predictable
-* Immutable data is easier to work with
-* Immutable data forces you to use a "transformational" approach 
+* イミュータブルなデータはコードを予測可能にする
+* イミュータブルなデータは扱いやすい
+* イミュータブルなデータは「変換」アプローチの使用を強制する
 
-First, immutability makes the code **predictable**. If data is immutable, there can be no side-effects. If there are no side-effects, it is much, much, easier to reason about the correctness of the code. 
+まず、イミュータビリティはコードを**予測可能**にします。データがイミュータブルであれば、副作用はありえません。副作用がなければ、コードの正確性について推論するのがずっと、ずっと簡単になります。
 
-And when you have two functions that work on immutable data, you don't have to worry about which order to call them in, or whether one function will mess with the input of the other function.  And you have peace of mind when passing data around (for example, you don't have to worry about using an object as a key in a hashtable and having its hash code change).
+そして、イミュータブルなデータを扱う2つの関数がある場合、どちらを先に呼び出すべきか、あるいは一方の関数が他方の関数の入力をめちゃくちゃにしないかなどを心配する必要がありません。また、データを受け渡す際にも安心です（例えば、オブジェクトをハッシュテーブルのキーとして使い、そのハッシュコードが変更される心配がありません）。
 
-In fact, immutability is a good idea for the same reasons that global variables are a bad idea: data should be kept as local as possible and side-effects should be avoided. 
+実際、イミュータビリティが良いアイデアである理由は、グローバル変数が悪いアイデアである理由と同じです：データはできるだけローカルに保ち、副作用は避けるべきです。
 
-Second, immutability is **easier to work with**.  If data is immutable, many common tasks become much easier.  Code is easier to write and easier to maintain. Fewer unit tests are needed (you only have to check that a function works in isolation), and mocking is much easier. Concurrency is much simpler, as you don't have to worry about using locks to avoid update conflicts (because there are no updates). 
+第二に、イミュータビリティは**扱いやすい**です。データがイミュータブルであれば、多くの一般的なタスクがずっと簡単になります。コードは書きやすく、メンテナンスもしやすくなります。必要なユニットテストの数が少なくなり（関数が単独で機能することを確認するだけで済みます）、モックの作成も非常に簡単になります。並行処理も非常に簡単になります。更新の競合を避けるためにロックを使う心配がないからです（更新がないため）。
 
-Finally, using immutability by default means that you start thinking differently about programming. You tend to think about **transforming** the data rather than mutating it in place. 
+最後に、デフォルトでイミュータビリティを使うことは、プログラミングに対する考え方を変えることを意味します。データをその場で変更するのではなく、**変換**することを考えるようになります。
 
-SQL queries and LINQ queries are good examples of this "transformational" approach.  In both cases, you always transform the original data through various functions (selects, filters, sorts) rather than modifying the original data.  
+SQLクエリとLINQクエリは、この「変換」アプローチの良い例です。どちらの場合も、元のデータを変更するのではなく、常に元のデータをさまざまな関数（選択、フィルタリング、ソートなど）を通じて変換します。
 
-When a program is designed using a transformation approach, the result tends to be more elegant, more modular, and more scalable. And as it happens, the transformation approach is also a perfect fit with a function-oriented paradigm.
+プログラムが変換アプローチを使って設計されると、結果はより優雅で、よりモジュール化され、よりスケーラブルになる傾向があります。そして、偶然にも、変換アプローチは関数指向のパラダイムにも完璧にフィットします。
 
-## How F# does immutability ##
+## F#がイミュータビリティを実現する方法 ##
 
-We saw earlier that immutable values and types are the default in F#:
+先ほど見たように、F#ではイミュータブルな値と型がデフォルトです：
 
 ```fsharp
-// immutable list
+// イミュータブルなリスト
 let list = [1;2;3;4]    
 
 type PersonalName = {FirstName:string; LastName:string}
-// immutable person
+// イミュータブルな人物
 let john = {FirstName="John"; LastName="Doe"}
 ```
 
-Because of this, F# has a number of tricks to make life easier and to optimize the underlying code.
+このため、F#には生活を楽にし、基礎となるコードを最適化するためのいくつかのトリックがあります。
 
-First, since you can't modify a data structure, you must copy it when you want to change it. F# makes it easy to copy another data structure with only the changes you want:
+まず、データ構造を変更できないため、変更したい場合はコピーする必要があります。F#では、必要な変更だけを加えて別のデータ構造をコピーするのが簡単です：
 
 ```fsharp
 let alice = {john with FirstName="Alice"}
 ```
 
-And complex data structures are implemented as linked lists or similar, so that common parts of the structure are shared. 
+そして、複雑なデータ構造は連結リストや類似のものとして実装されているため、構造の共通部分が共有されます。
 
 ```fsharp
-// create an immutable list
+// イミュータブルなリストを作成
 let list1 = [1;2;3;4]   
 
-// prepend to make a new list
+// 先頭に追加して新しいリストを作成
 let list2 = 0::list1    
 
-// get the last 4 of the second list 
+// 2番目のリストの最後の4つを取得
 let list3 = list2.Tail
 
-// the two lists are the identical object in memory!
+// 2つのリストはメモリ上で同一のオブジェクト！
 System.Object.ReferenceEquals(list1,list3)
 ```
 
-This technique ensures that, while you might appear to have hundreds of copies of a list in your code, they are all sharing the same memory behind the scenes.
+この技術により、コード上では何百ものリストのコピーがあるように見えても、舞台裏では同じメモリを共有していることが保証されます。
 
-## Mutable data ##
+## ミュータブルなデータ ##
 
-F# is not dogmatic about immutability; it does support mutable data with the `mutable` keyword. But turning on mutability is an explicit decision, a deviation from the default, and it is generally only needed for special cases such as optimization, caching, etc, or when dealing with the .NET libraries.  
+F#はイミュータビリティに関して融通が利きます。`mutable`キーワードを使ってミュータブルなデータもサポートしています。ただし、何かをミュータブルにするには、明示的にそう指定する必要があります。これはF#のデフォルトの動作（イミュータブル）から意識的に外れることを意味します。通常、最適化やキャッシュなどの特殊なケース、あるいは.NETライブラリを扱う場合にのみ必要とされます。
 
-In practice, a serious application is bound to have some mutable state if it deals with messy world of user interfaces, databases, networks and so on.  But F# encourages the minimization of such mutable state. You can generally still design your core business logic to use immutable data, with all the corresponding benefits. 
+実際には、現実世界のアプリケーションは、ユーザーインターフェース、データベース、ネットワークなどの複雑な要素を扱う場合、何らかのミュータブルな状態を持つことになります。しかし、F#はそのようなミュータブルな状態を最小限に抑えることを奨励しています。一般的に、コアとなるビジネスロジックはイミュータブルなデータを使って設計することができ、それに伴うすべての利点を得ることができます。
 
