@@ -1,23 +1,23 @@
 ---
 layout: post
-title: "Using functions to extract boilerplate code"
-description: "The functional approach to the DRY principle"
+title: "関数を使用してボイラープレートコードを抽出する"
+description: "DRY原則への関数型アプローチ"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 10
 categories: [Conciseness, Functions, Folds]
 ---
 
-In the very first example in this series, we saw a simple function that calculated the sum of squares, implemented in both F# and C#. 
-Now let's say we want some new functions which are similar, such as:
+このシリーズの最初の例では、F#とC#の両方で実装された、平方和を計算する簡単な関数を見ました。
+ここで、以下のような類似した新しい関数が必要になったとしましょう：
 
-* Calculating the product of all the numbers up to N
-* Counting the sum of odd numbers up to N
-* The alternating sum of the numbers up to N
+* Nまでのすべての数の積を計算する
+* Nまでの奇数の和を数える
+* Nまでの数の交互和を計算する
 
-Obviously, all these requirements are similar, but how would you extract any common functionality?
+明らかに、これらの要件はすべて似ていますが、共通の機能をどのように抽出できるでしょうか？
 
-Let's start with some straightforward implementations in C# first:
+まずは、C#での直接的な実装から始めましょう：
 
 ```csharp
 public static int Product(int n)
@@ -61,36 +61,36 @@ public static int AlternatingSum(int n)
 }
 ```
 
-What do all these implementations have in common?  The looping logic!  As programmers, we are told to remember the DRY principle ("don't repeat yourself"), yet here we have repeated almost exactly the same loop logic each time. Let's see if we can extract just the differences between these three methods:
+これらの実装に共通しているのは何でしょうか？ それはループのロジックです！ プログラマーとして、私たちはDRY原則（「繰り返すな」）を覚えておくように言われていますが、ここではほぼ同じループロジックを毎回繰り返しています。これら3つのメソッドの違いだけを抽出できないか見てみましょう：
 
 <table class="table">
 <thead>
   <tr>
-	<th>Function</th>
-	<th>Initial value</th>
-	<th>Inner loop logic</th>
+    <th>関数</th>
+    <th>初期値</th>
+    <th>内部ループのロジック</th>
   </tr>
 </thead>
 <tbody>
   <tr>
-	<td>Product</td>
-	<td>product=1</td>
-	<td>Multiply the i'th value with the running total</td>
+    <td>Product</td>
+    <td>product=1</td>
+    <td>i番目の値を実行中の合計に掛ける</td>
   </tr>
   <tr>
-	<td>SumOfOdds</td>
-	<td>sum=0</td>
-	<td>Add the i'th value to the running total if not even</td>
+    <td>SumOfOdds</td>
+    <td>sum=0</td>
+    <td>偶数でない場合、i番目の値を実行中の合計に加える</td>
   </tr>
   <tr>
-	<td>AlternatingSum</td>
-	<td>int sum = 0<br>bool isNeg = true</td>
-	<td>Use the isNeg flag to decide whether to add or subtract, and flip the flag for the next pass.</td>
+    <td>AlternatingSum</td>
+    <td>int sum = 0<br>bool isNeg = true</td>
+    <td>isNegフラグを使用して加算するか減算するかを決定し、次の処理のためにフラグを反転させる</td>
   </tr>
 </tbody>
 </table>
 
-Is there a way to strip the duplicate code and focus on the just the setup and inner loop logic?  Yes there is. Here are the same three functions in F#:
+重複するコードを取り除き、セットアップと内部ループのロジックだけに焦点を当てる方法はありますか？ はい、あります。以下がF#での同じ3つの関数です：
 
 ```fsharp
 let product n = 
@@ -98,7 +98,7 @@ let product n =
     let action productSoFar x = productSoFar * x
     [1..n] |> List.fold action initialValue
 
-//test
+//テスト
 product 10
 
 let sumOfOdds n = 
@@ -106,7 +106,7 @@ let sumOfOdds n =
     let action sumSoFar x = if x%2=0 then sumSoFar else sumSoFar+x 
     [1..n] |> List.fold action initialValue
 
-//test
+//テスト
 sumOfOdds 10
 
 let alternatingSum n = 
@@ -115,27 +115,27 @@ let alternatingSum n =
                                              else (true ,sumSoFar+x)
     [1..n] |> List.fold action initialValue |> snd
 
-//test
+//テスト
 alternatingSum 100
 ```
 
-All three of these functions have the same pattern:
+これら3つの関数はすべて同じパターンを持っています：
 
-1. Set up the initial value
-2. Set up an action function that will be performed on each element inside the loop. 
-3. Call the library function `List.fold`. This is a powerful, general purpose function which starts with the initial value and then runs the action function for each element in the list in turn.
+1. 初期値を設定する
+2. ループ内の各要素に対して実行されるアクション関数を設定する
+3. ライブラリ関数 `List.fold` を呼び出す。これは強力な汎用関数で、初期値から始めて、リスト内の各要素に対してアクション関数を順番に実行します。
 
-The action function always has two parameters: a running total (or state) and the list element to act on (called "x" in the above examples).
+アクション関数には常に2つのパラメータがあります：実行中の合計（または状態）とアクションを実行するリスト要素（上記の例では "x" と呼ばれています）です。
 
-In the last function, `alternatingSum`, you will notice that it used a tuple (pair of values) for the initial value and the result of the action.  This is because both the running total and the `isNeg` flag must be passed to the next iteration of the loop -- there are no "global" values that can be used.  The final result of the fold is also a tuple so we have to use the "snd" (second) function to extract the final total that we want.
+最後の関数 `alternatingSum` では、初期値とアクションの結果にタプル（値のペア）を使用していることに気づくでしょう。これは、実行中の合計と `isNeg` フラグの両方をループの次の反復に渡す必要があるためです - 使用できる「グローバル」な値はありません。foldの最終結果もタプルなので、欲しい最終合計を抽出するために "snd"（2番目）関数を使用する必要があります。
 
-By using `List.fold` and avoiding any loop logic at all, the F# code gains a number of benefits:
+`List.fold` を使用し、ループのロジックを完全に避けることで、F#のコードはいくつかの利点を得ています：
 
-* **The key program logic is emphasized and made explicit**. The important differences between the functions become very clear, while the commonalities are pushed to the background.
-* **The boilerplate loop code has been eliminated**, and as a result the code is more condensed than the C# version (4-5 lines of F# code vs. at least 9 lines of C# code)
-* **There can never be a error in the loop logic** (such as off-by-one) because that logic is not exposed to us.
+* **主要なプログラムロジックが強調され、明示的になります**。関数間の重要な違いが非常に明確になり、共通点は背景に押しやられます。
+* **定型的なループコードが排除されます**。結果としてコードはC#バージョンよりも簡潔になります（F#コードは4-5行に対し、C#コードは少なくとも9行）。
+* **ループロジックにエラーが発生することはありません**（例えば、1つずれるなど）。なぜなら、そのロジックが私たちに露出していないからです。
 
-By the way, the sum of squares example could also be written using `fold` as well:
+ちなみに、平方和の例も `fold` を使って書くことができます：
 
 ```fsharp
 let sumOfSquaresWithFold n = 
@@ -143,13 +143,13 @@ let sumOfSquaresWithFold n =
     let action sumSoFar x = sumSoFar + (x*x)
     [1..n] |> List.fold action initialValue 
 
-//test
+//テスト
 sumOfSquaresWithFold 100
 ```
 
-## "Fold" in C# ##
+## C#での "Fold" ##
 
-Can you use the "fold" approach in C#? Yes. LINQ does have an equivalent to `fold`, called `Aggregate`. And here is the C# code rewritten to use it:
+C#で "fold" アプローチを使用できますか？はい、できます。LINQには `fold` に相当する `Aggregate` があります。以下がそれを使用して書き直したC#コードです：
 
 ```csharp
 public static int ProductWithAggregate(int n)
@@ -183,14 +183,14 @@ public static int AlternatingSumsWithAggregate(int n)
 }
 ```
 
-Well, in some sense these implementations are simpler and safer than the original C# versions, but all the extra noise from the generic types makes this approach much less elegant than the equivalent code in F#.  You can see why most C# programmers prefer to stick with explicit loops.
+ある意味では、これらの実装は元のC#バージョンよりも単純で安全ですが、ジェネリック型からの余計なノイズのせいで、このアプローチはF#での同等のコードほどエレガントではありません。C#プログラマーのほとんどが明示的なループを好む理由がわかります。
 
-## A more relevant example ##
+## より現実的な例 ##
 
-A slightly more relevant example that crops up frequently in the real world is how to get the "maximum" element of a list when the elements are classes or structs.
-The LINQ method 'max' only returns the maximum value, not the whole element that contains the maximum value.
+実世界でよく出てくるやや関連性の高い例は、要素がクラスや構造体である場合にリストの「最大」要素を取得する方法です。
+LINQの "max" メソッドは最大値のみを返し、最大値を含む要素全体は返しません。
 
-Here's a solution using an explicit loop:
+以下は明示的なループを使用した解決策です：
 
 ```csharp
 public class NameAndSize
@@ -219,11 +219,11 @@ public static NameAndSize MaxNameAndSize(IList<NameAndSize> list)
 
 ```
 
-Doing this in LINQ seems hard to do efficiently (that is, in one pass), and has come up as a [Stack Overflow question](http://stackoverflow.com/questions/1101841/linq-how-to-perform-max-on-a-property-of-all-objects-in-a-collection-and-ret). Jon Skeet event wrote an [article about it](http://codeblog.jonskeet.uk/2005/10/02/a-short-case-study-in-linq-efficiency/).
+LINQでこれを効率的に（つまり、1回のパスで）行うのは難しいように見え、[Stack Overflowの質問](http://stackoverflow.com/questions/1101841/linq-how-to-perform-max-on-a-property-of-all-objects-in-a-collection-and-ret)として取り上げられています。Jon Skeetさんも[この問題について記事を書いています](http://codeblog.jonskeet.uk/2005/10/02/a-short-case-study-in-linq-efficiency/)。
 
-Again, fold to the rescue!
+ここでも、foldが救世主です！
 
-And here's the C# code using `Aggregate`:
+以下が `Aggregate` を使用したC#コードです：
 
 ```csharp
 public class NameAndSize
@@ -246,9 +246,9 @@ public static NameAndSize MaxNameAndSize(IList<NameAndSize> list)
 }
 ```
 
-Note that this C# version returns null for an empty list.  That seems dangerous -- so what should happen instead? Throwing an exception? That doesn't seem right either.
+このC#バージョンは空のリストに対してnullを返すことに注意してください。これは危険そうです - では代わりに何をすべきでしょうか？例外をスローする？それも正しくないように思えます。
 
-Here's the F# code using fold:
+以下がfoldを使用したF#コードです：
 
 ```fsharp
 type NameAndSize= {Name:string;Size:int}
@@ -259,7 +259,7 @@ let maxNameAndSize list =
         let action maxSoFar x = if maxSoFar.Size < x.Size then x else maxSoFar
         rest |> List.fold action initialValue 
 
-    // handle empty lists
+    // 空のリストを処理する
     match list with
     | [] -> 
         None
@@ -268,17 +268,17 @@ let maxNameAndSize list =
         Some max
 ```
 
-The F# code has two parts:
+F#コードには2つの部分があります：
 
-* the `innerMaxNameAndSize` function is similar to what we have seen before.
-* the second bit, `match list with`, branches on whether the list is empty or not.
-With an empty list, it returns  a `None`, and in the non-empty case, it returns a `Some`.
-Doing this guarantees that the caller of the function has to handle both cases.
+* `innerMaxNameAndSize` 関数は、これまで見てきたものと似ています。
+* 2つ目の部分、 `match list with` は、リストが空かどうかで分岐します。
+空のリストの場合は `None` を返し、空でない場合は `Some` を返します。
+これにより、関数の呼び出し元が両方のケースを処理することが保証されます。
 
-And a test:
+そしてテスト：
 
 ```fsharp
-//test
+//テスト
 let list = [
     {Name="Alice"; Size=10}
     {Name="Bob"; Size=1}
@@ -289,15 +289,15 @@ maxNameAndSize list
 maxNameAndSize []
 ```
 
-Actually, I didn't need to write this at all, because F# already has a `maxBy` function!
+実は、 `maxNameAndSize` 関数を書く必要はありませんでした。F#にはすでに `maxBy` 関数があるからです！
 
 ```fsharp
-// use the built in function
+// 組み込み関数を使用する
 list |> List.maxBy (fun item -> item.Size)
 [] |> List.maxBy (fun item -> item.Size)
 ```
 
-But as you can see, it doesn't handle empty lists well. Here's a version that wraps the `maxBy` safely.
+しかし、ご覧のとおり、空のリストをうまく処理できません。以下は `maxBy` を安全にラップしたバージョンです。
 
 ```fsharp
 let maxNameAndSize list = 

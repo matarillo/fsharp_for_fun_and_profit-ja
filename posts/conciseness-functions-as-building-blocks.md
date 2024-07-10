@@ -1,73 +1,73 @@
 ---
 layout: post
-title: "Using functions as building blocks"
-description: "Function composition and mini-languages make code more readable"
+title: "関数を構成要素として使用する"
+description: "関数合成とミニ言語によってコードの可読性が向上する"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 11
 categories: [Conciseness, Functions]
 ---
 
-A well-known principle of good design is to create a set of basic operations and then combine these building blocks in various ways to build up more complex behaviors. In object-oriented languages, this goal gives rise to a number of implementation approaches such as "fluent interfaces", "strategy pattern", "decorator pattern", and so on. In F#, they are all done the same way, via function composition. 
+良い設計の有名な原則の1つは、基本的な操作のセットを作成し、これらの構成要素をさまざまな方法で組み合わせて、より複雑な動作を構築することです。オブジェクト指向言語では、この目標を達成するために「流れるようなインターフェース」、「ストラテジーパターン」、「デコレーターパターン」などの実装アプローチが生まれます。F#では、これらはすべて同じ方法、つまり関数合成を通じて行われます。
 
-Let's start with a simple example using integers. Say that we have created some basic functions to do arithmetic:
+整数を使用した簡単な例から始めましょう。算術計算を行ういくつかの基本的な関数を作成したとします：
 
 ```fsharp
-// building blocks
+// 構成要素
 let add2 x = x + 2
 let mult3 x = x * 3
 let square x = x * x
 
-// test
+// テスト
 [1..10] |> List.map add2 |> printfn "%A"
 [1..10] |> List.map mult3 |> printfn "%A"
 [1..10] |> List.map square |> printfn "%A" 
 ```
 
-Now we want to create new functions that build on these:
+次に、これらを基に新しい関数を作成したいとします：
 
 ```fsharp
-// new composed functions
+// 新しい合成関数
 let add2ThenMult3 = add2 >> mult3
 let mult3ThenSquare = mult3 >> square 
 ```
 
-The "`>>`" operator is the composition operator. It means: do the first function, and then do the second. 
+`>>` 演算子は合成演算子です。これは「最初の関数を実行し、次に2番目の関数を実行する」という意味です。
 
-Note how concise this way of combining functions is. There are no parameters, types or other irrelevant noise.
+この関数の組み合わせ方がいかに簡潔かに注目してください。パラメータ、型、その他の無関係なノイズはありません。
 
-To be sure, the examples could also have been written less concisely and more explicitly as:
+もちろん、これらの例は以下のように、より明示的で冗長に書くこともできます：
 
 ```fsharp
 let add2ThenMult3 x = mult3 (add2 x)
 let mult3ThenSquare x = square (mult3 x) 
 ```
 
-But this more explicit style is also a bit more cluttered:
+しかし、この明示的なスタイルは少し煩雑です：
 
-* In the explicit style, the x parameter and the parentheses must be added, even though they don't add to the meaning of the code.
-* And in the explicit style, the functions are written back-to-front from the order they are applied. In my example of `add2ThenMult3` I want to add 2 first, and then multiply. The `add2 >> mult3` syntax makes this visually clearer than `mult3(add2 x)`.
+* 明示的なスタイルでは、xパラメータと括弧を追加する必要がありますが、これらはコードの意味に何も加えません。
+* また、明示的なスタイルでは、関数が適用される順序とは逆に書かれています。 `add2ThenMult3` の例では、最初に2を足してから掛けたいのです。 `add2 >> mult3` の構文は、 `mult3(add2 x)` よりも視覚的に明確です。
 
-Now let's test these compositions:
+では、これらの合成をテストしてみましょう：
 
 ```fsharp
-// test
+// テスト
 add2ThenMult3 5
 mult3ThenSquare 5
 [1..10] |> List.map add2ThenMult3 |> printfn "%A"
 [1..10] |> List.map mult3ThenSquare |> printfn "%A"
 ```
 
-## Extending existing functions
+## 既存の関数の拡張
 
-Now say that we want to decorate these existing functions with some logging behavior. We can compose these as well, to make a new function with the logging built in.
+次に、これらの既存の関数にログ記録の動作を追加したいとします。これらも合成して、ログ記録が組み込まれた新しい関数を作ることができます。
 
 ```fsharp
-// helper functions;
-let logMsg msg x = printf "%s%i" msg x; x     //without linefeed 
-let logMsgN msg x = printfn "%s%i" msg x; x   //with linefeed
+// ヘルパー関数
+let logMsg msg x = printf "%s%i" msg x; x     //改行なし 
+let logMsgN msg x = printfn "%s%i" msg x; x   //改行あり
 
-// new composed function with new improved logging!
+// 新しい合成関数（ログ機能が改善されています！）
 let mult3ThenSquareLogged = 
    logMsg "before=" 
    >> mult3 
@@ -75,14 +75,14 @@ let mult3ThenSquareLogged =
    >> square
    >> logMsgN " result=" 
 
-// test
+// テスト
 mult3ThenSquareLogged 5
-[1..10] |> List.map mult3ThenSquareLogged //apply to a whole list
+[1..10] |> List.map mult3ThenSquareLogged //リスト全体に適用
 ```
 
-Our new function, `mult3ThenSquareLogged`, has an ugly name, but it is easy to use and nicely hides the complexity of the functions that went into it. You can see that if you define your building block functions well, this composition of functions can be a powerful way to get new functionality.
+新しい関数 `mult3ThenSquareLogged` は名前が少し醜いですが、使いやすく、その中に含まれる関数の複雑さをうまく隠しています。構成要素となる関数をうまく定義すれば、この関数の合成が新しい機能を得るための強力な方法になることがわかります。
 
-But wait, there's more!  Functions are first class entities in F#, and can be acted on by any other F# code. Here is an example of using the composition operator to collapse a list of functions into a single operation.
+でもちょっと待ってください、まだ続きがあるんです！F#では関数は第一級のエンティティであり、他のF#コードによって操作することができます。以下は、合成演算子を使用して関数のリストを単一の操作にまとめる例です。
 
 ```fsharp
 let listOfFunctions = [
@@ -92,29 +92,29 @@ let listOfFunctions = [
    logMsgN "result=";
    ]
 
-// compose all functions in the list into a single one
+// リスト内のすべての関数を単一の関数に合成
 let allFunctions = List.reduce (>>) listOfFunctions 
 
-//test
+//テスト
 allFunctions 5
 ```
 
-## Mini languages
+## ミニ言語
 
-Domain-specific languages (DSLs) are well recognized as a technique to create more readable and concise code. The functional approach is very well suited for this.
+ドメイン特化言語（DSL）は、より読みやすく簡潔なコードを作成するための技術として広く認識されています。関数型アプローチはこれに非常に適しています。
 
-If you need to, you can go the route of having a full "external" DSL with its own lexer, parser, and so on, and there are various toolsets for F# that make this quite straightforward.
+必要に応じて、独自の字句解析器、構文解析器などを持つ完全な「外部」DSLを作成することもでき、F#にはこれを非常に簡単にするさまざまなツールセットがあります。
 
-But in many cases, it is easier to stay within the syntax of F#, and just design a set of "verbs" and "nouns" that encapsulate the behavior we want.
+しかし多くの場合、F#の構文内にとどまり、必要な動作をカプセル化する「動詞」と「名詞」のセットを設計するだけで十分です。
 
-The ability to create new types concisely and then match against them makes it very easy to set up fluent interfaces quickly. For example, here is a little function that calculates dates using a simple vocabulary. Note that two new enum-style types are defined just for this one function.
+新しい型を簡潔に作成し、それに対してマッチングを行う能力により、流れるようなインターフェースを素早く設定することが非常に簡単になります。例えば、以下は単純な語彙を使用して日付を計算する小さな関数です。この1つの関数のために、2つの新しい列挙型スタイルの型が定義されていることに注目してください。
 
 ```fsharp
-// set up the vocabulary
+// 語彙を設定
 type DateScale = Hour | Hours | Day | Days | Week | Weeks
 type DateDirection = Ago | Hence
 
-// define a function that matches on the vocabulary
+// 語彙に基づいてマッチングを行う関数を定義
 let getDate interval scale direction =
     let absHours = match scale with
                    | Hour | Hours -> 1 * interval
@@ -125,22 +125,22 @@ let getDate interval scale direction =
                       | Hence ->  absHours 
     System.DateTime.Now.AddHours(float signedHours)
 
-// test some examples
+// いくつかの例をテスト
 let example1 = getDate 5 Days Ago
 let example2 = getDate 1 Hour Hence
 
-// the C# equivalent would probably be more like this:
+// C#の同等のコードは、おそらく以下のようになるでしょう：
 // getDate().Interval(5).Days().Ago()
 // getDate().Interval(1).Hour().Hence()
 ```
 
-The example above only has one "verb", using lots of types for the "nouns".
+上の例では、「名詞」に多くの型を使用していますが、「動詞」は1つだけです。
 
-The following example demonstrates how you might build the functional equivalent of a fluent interface with many "verbs". 
+次の例では、多くの「動詞」を持つ流れるようなインターフェースの関数型の等価物を構築する方法を示します。
 
-Say that we are creating a drawing program with various shapes. Each shape has a color, size, label and action to be performed when clicked, and we want a fluent interface to configure each shape.
+描画プログラムを作成していて、さまざまな形状があるとします。各形状には色、サイズ、ラベル、クリック時に実行されるアクションがあり、各形状を設定するための流れるようなインターフェースが欲しいとします。
 
-Here is an example of what a simple method chain for a fluent interface in C# might look like:
+以下は、C#での流れるようなインターフェースの単純なメソッドチェーンの例です：
 
 ```fsharp
 FluentShape.Default
@@ -149,20 +149,20 @@ FluentShape.Default
    .OnClick( s => Console.Write("clicked") );
 ```
 
-Now the concept of "fluent interfaces" and "method chaining" is really only relevant for object-oriented design. In a functional language like F#, the nearest equivalent would be the use of the pipeline operator to chain a set of functions together.
+「流れるようなインターフェース」と「メソッドチェーン」の概念は、実際にはオブジェクト指向設計にのみ関連します。F#のような関数型言語では、最も近い等価物は、パイプライン演算子を使用して一連の関数を連鎖させることです。
 
-Let's start with the underlying Shape type:
+まず、基礎となるShape型から始めましょう：
 
 ```fsharp
-// create an underlying type
+// 基礎となる型を作成
 type FluentShape = {
     label : string; 
     color : string; 
-    onClick : FluentShape->FluentShape // a function type
+    onClick : FluentShape->FluentShape // 関数型
     }
 ```
 	
-We'll add some basic functions:
+いくつかの基本的な関数を追加します：
 
 ```fsharp
 let defaultShape = 
@@ -173,12 +173,12 @@ let click shape =
 
 let display shape = 
     printfn "My label=%s and my color=%s" shape.label shape.color
-    shape   //return same shape
+    shape   //同じ形状を返す
 ```
 
-For "method chaining" to work, every function should return an object that can be used next in the chain. So you will see that the "`display`" function returns the shape, rather than nothing.
+「メソッドチェーン」が機能するためには、すべての関数がチェーンの次で使用できるオブジェクトを返す必要があります。そのため、`display`関数が何も返さずに形状を返しているのがわかります。
 
-Next we create some helper functions which we expose as the "mini-language", and will be used as building blocks by the users of the language. 
+次に、「ミニ言語」として公開し、言語のユーザーが構成要素として使用するヘルパー関数を作成します。
 
 ```fsharp
 let setLabel label shape = 
@@ -187,52 +187,52 @@ let setLabel label shape =
 let setColor color shape = 
    {shape with FluentShape.color = color}
 
-//add a click action to what is already there
+//既存のものにクリックアクションを追加
 let appendClickAction action shape = 
    {shape with FluentShape.onClick = shape.onClick >> action}
 ```
 
-Notice that `appendClickAction` takes a function as a parameter and composes it with the existing click action. As you start getting deeper into the functional approach to reuse, you start seeing many more "higher order functions" like this, that is, functions that act on other functions. Combining functions like this is one of the keys to understanding the functional way of programming. 
+`appendClickAction` が関数をパラメータとして受け取り、それを既存のクリックアクションと合成していることに注目してください。関数型アプローチによる再利用をより深く理解し始めると、このような「高階関数」、つまり他の関数に作用する関数をより多く目にするようになります。このように関数を組み合わせることは、関数型プログラミングの方法を理解するための鍵の1つです。
 
-Now as a user of this "mini-language", I can compose the base helper functions into more complex functions of my own, creating my own function library. (In C# this kind of thing might be done using extension methods.)
+さて、この「ミニ言語」のユーザーとして、基本的なヘルパー関数をより複雑な関数に合成し、独自の関数ライブラリを作成することができます。（C#では、このような操作は拡張メソッドを使用して行われるかもしれません。）
 
 ```fsharp
-// Compose two "base" functions to make a compound function.
+// 2つの「基本」関数を合成して複合関数を作成
 let setRedBox = setColor "red" >> setLabel "box" 
 
-// Create another function by composing with previous function.
-// It overrides the color value but leaves the label alone.
+// 前の関数と合成して別の関数を作成
+// 色の値を上書きしますが、ラベルはそのままです
 let setBlueBox = setRedBox >> setColor "blue"  
 
-// Make a special case of appendClickAction
+// appendClickActionの特殊なケースを作成
 let changeColorOnClick color = appendClickAction (setColor color)   
 ```
 
-I can then combine these functions together to create objects with the desired behavior.
+これらの関数を組み合わせて、望みの動作を持つオブジェクトを作成できます。
 
 ```fsharp
-//setup some test values
+//テスト用の値を設定
 let redBox = defaultShape |> setRedBox
 let blueBox = defaultShape |> setBlueBox 
 
-// create a shape that changes color when clicked
+// クリック時に色が変わる形状を作成
 redBox 
     |> display
     |> changeColorOnClick "green"
     |> click
-    |> display  // new version after the click
+    |> display  // クリック後の新バージョン
 
-// create a shape that changes label and color when clicked
+// クリック時にラベルと色が変わる形状を作成
 blueBox 
     |> display
     |> appendClickAction (setLabel "box2" >> setColor "green")  
     |> click
-    |> display  // new version after the click
+    |> display  // クリック後の新バージョン
 ```
 
-In the second case, I actually pass two functions to `appendClickAction`, but I compose them into one first. This kind of thing is trivial to do with a well structured functional library, but it is quite hard to do in C# without having lambdas within lambdas.
+2番目の場合、実際には2つの関数を `appendClickAction` に渡していますが、まず最初にそれらを1つに合成しています。このような操作は、適切に構造化された関数型ライブラリでは簡単にできますが、C#ではラムダ式の中にラムダ式を入れるなどしないと難しいです。
 
-Here is a more complex example. We will create a function "`showRainbow`" that, for each color in the rainbow, sets the color and displays the shape.
+ここでもっと複雑な例を示します。虹の各色について、色を設定し形状を表示する `showRainbow` 関数を作成します。
 
 ```fsharp
 let rainbow =
@@ -244,8 +244,8 @@ let showRainbow =
     |> List.map setColorAndDisplay 
     |> List.reduce (>>)
 
-// test the showRainbow function
+// showRainbow関数をテスト
 defaultShape |> showRainbow 
 ```
 
-Notice that the functions are getting more complex, but the amount of code is still quite small. One reason for this is that the function parameters can often be ignored when doing function composition, which reduces visual clutter. For example, the "`showRainbow`" function does take a shape as a parameter, but it is not explicitly shown! This elision of parameters is called "point-free" style and will be discussed further in the ["thinking functionally"](../series/thinking-functionally.md) series
+関数がより複雑になっていますが、コードの量はまだかなり少ないことに注目してください。その理由の1つは、関数合成を行う際に関数のパラメータを無視できることが多く、視覚的な煩雑さが減るためです。例えば、 `showRainbow` 関数は確かに形状をパラメータとして受け取りますが、それは明示的に表示されていません！このパラメータの省略は「ポイントフリー」スタイルと呼ばれます。「[関数型思考](../series/thinking-functionally.md)」シリーズでさらに詳しく説明します。

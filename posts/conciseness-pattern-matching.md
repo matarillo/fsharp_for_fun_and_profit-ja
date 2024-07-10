@@ -1,34 +1,34 @@
 ---
 layout: post
-title: "Pattern matching for conciseness"
-description: "Pattern matching can match and bind in a single step"
+title: "簡潔性のためのパターンマッチング"
+description: "パターンマッチングは一度の手順でマッチングとバインディングが可能"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 12
 categories: [Conciseness, Patterns]
 ---
 
-So far we have seen the pattern matching logic in the `match..with` expression, where it seems to be just a switch/case statement. But in fact pattern matching is much more general ? it can compare expressions in a number of ways, matching on values, conditions, and types, and then assign or extract values, all at the same time.
+これまで、 `match..with` 式でのパターンマッチングのロジックを見てきました。一見すると単なるswitch/case文のように見えますが、実はパターンマッチングはもっと汎用的です。値、条件、型に基づいてさまざまな方法で式を比較し、同時に値の割り当てや抽出を行うことができるのです。
 
-Pattern matching will be discussed in depth in later posts, but to start with, here is a little taster of one way that it aids conciseness. 
-We'll look at the way pattern matching is used for binding values to expressions (the functional equivalent of assigning to variables). 
+パターンマッチングについては後の投稿で詳しく説明しますが、まずは簡潔性を助ける一つの方法について、簡単に紹介しましょう。
+ここでは、式に値をバインドする（変数への代入に相当する関数型の方法）ためにパターンマッチングがどのように使用されるかを見ていきます。
 
-In the following examples, we are binding to the internal members of tuples and lists directly:
+以下の例では、タプルやリストの内部メンバーに直接バインドしています：
 
 ```fsharp
-//matching tuples directly
-let firstPart, secondPart, _ =  (1,2,3)  // underscore means ignore
+//タプルに直接マッチング
+let firstPart, secondPart, _ =  (1,2,3)  // アンダースコアは無視を意味する
 
-//matching lists directly
-let elem1::elem2::rest = [1..10]       // ignore the warning for now
+//リストに直接マッチング
+let elem1::elem2::rest = [1..10]       // 今は警告を無視してください
 
-//matching lists inside a match..with
+//match..with内でのリストマッチング
 let listMatcher aList = 
     match aList with
-    | [] -> printfn "the list is empty" 
-    | [firstElement] -> printfn "the list has one element %A " firstElement 
-    | [first; second] -> printfn "list is %A and %A" first second 
-    | _ -> printfn "the list has more than two elements"
+    | [] -> printfn "リストは空です" 
+    | [firstElement] -> printfn "リストには一つの要素 %A があります" firstElement 
+    | [first; second] -> printfn "リストは %A と %A です" first second 
+    | _ -> printfn "リストには2つ以上の要素があります"
 
 listMatcher [1;2;3;4]
 listMatcher [1;2]
@@ -36,30 +36,30 @@ listMatcher [1]
 listMatcher []
 ```
 
-You can also bind values to the inside of complex structures such as records. In the following example, we will create an "`Address`" type, and then a "`Customer`" type which contains an address. Next, we will create a customer value, and then match various properties against it. 
+レコードのような複雑な構造の内部に値をバインドすることもできます。次の例では、 `Address` 型を作成し、そのアドレスを含む `Customer` 型を作ります。次に、顧客の値を作成し、それに対してさまざまなプロパティをマッチングさせます。
 
 ```fsharp
-// create some types
+// 型を作成
 type Address = { Street: string; City: string; }   
 type Customer = { ID: int; Name: string; Address: Address}   
 
-// create a customer 
+// 顧客を作成 
 let customer1 = { ID = 1; Name = "Bob"; 
       Address = {Street="123 Main"; City="NY" } }     
 
-// extract name only
+// 名前のみを抽出
 let { Name=name1 } =  customer1 
-printfn "The customer is called %s" name1
+printfn "顧客の名前は %s です" name1
 
-// extract name and id 
+// 名前とIDを抽出 
 let { ID=id2; Name=name2; } =  customer1 
-printfn "The customer called %s has id %i" name2 id2
+printfn "%s という名前の顧客のIDは %i です" name2 id2
 
-// extract name and address
+// 名前と住所を抽出
 let { Name=name3;  Address={Street=street3}  } =  customer1   
-printfn "The customer is called %s and lives on %s" name3 street3
+printfn "%s という名前の顧客は %s に住んでいます" name3 street3
 ```
 
-In the last example, note how we could reach right into the `Address` substructure and pull out the street as well as the customer name.  
+最後の例では、 `Address` のサブ構造の中まで到達して、顧客名と同様に通りの名前も取り出せることに注目してください。
 
-This ability to process a nested structure, extract only the fields you want, and assign them to values, all in a single step, is very useful.  It removes quite a bit of coding drudgery, and is another factor in the conciseness of typical F# code.
+ネストした構造を処理し、欲しいフィールドだけを抽出し、それらを値に割り当てる、これらすべてを一度の手順で行えるこの能力は非常に便利です。かなりのコーディングの面倒さを取り除き、典型的なF#コードの簡潔性を生み出すもう一つの要因となっています。

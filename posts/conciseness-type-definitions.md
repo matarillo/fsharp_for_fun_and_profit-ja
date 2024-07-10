@@ -1,48 +1,47 @@
 ---
 layout: post
-title: "Low overhead type definitions"
-description: "No penalty for making new types"
+title: "低オーバーヘッドの型定義"
+description: "新しい型を作成するペナルティなし"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 9
 categories: [Conciseness,Types]
 ---
 
-In C#, there is a disincentive for creating new types ? the lack of type inference means you need to explicitly specify types in most places, resulting in brittleness and more visual clutter. As a result, there is always a temptation to create monolithic classes rather than modularizing them.
+C#では、新しい型を作成することに抵抗があります。型推論がないため、ほとんどの場所で型を明示的に指定する必要があり、結果として柔軟性が失われ、視覚的な煩雑さが増します。そのため、クラスをモジュール化するよりも、巨大なクラスを作成する誘惑に駆られがちです。
 
-In F# there is no penalty for making new types, so it is quite common to have hundreds if not thousands of them.  Every time you need to define a structure, you can create a special type, rather than reusing (and overloading) existing types such as strings and lists. 
+F#では新しい型を作成するペナルティがないので、数百、場合によっては数千の型を持つのが一般的です。構造を定義する必要があるたびに、文字列やリストなどの既存の型を再利用（そしてオーバーロード）するのではなく、特別な型を作成できます。
 
-This means that your programs will be more type-safe, more self documenting, and more maintainable (because when the types change you will immediately get compile-time errors rather than runtime errors).
+これにより、プログラムはより型安全で、自己文書化され、より保守しやすくなります（型が変更されたときに、実行時エラーではなく、即座にコンパイル時エラーが発生するため）。
 
-Here are some examples of one-liner types in F#: 
+F#での1行で定義できる型の例をいくつか紹介します：
 
 ```fsharp
 open System
 
-// some "record" types
+// いくつかの「レコード」型
 type Person = {FirstName:string; LastName:string; Dob:DateTime}
 type Coord = {Lat:float; Long:float}
 
-// some "union" (choice) types
+// いくつかの「ユニオン」（選択）型
 type TimePeriod = Hour | Day | Week | Year
 type Temperature = C of int | F of int
 type Appointment = OneTime of DateTime 
                    | Recurring of DateTime list
 ```
 
+## F#の型とドメイン駆動設計
 
-## F# types and domain driven design
+F#の型システムの簡潔さは、ドメイン駆動設計（DDD）を行う際に特に役立ちます。DDDでは、理想的には、実世界のエンティティと値オブジェクトごとに対応する型を持つことが望ましいです。これは数百の「小さな」型を作成することを意味し、C#では面倒な作業になる可能性があります。
 
-The conciseness of the type system in F# is particularly useful when doing domain driven design (DDD).  In DDD, for each real world entity and value object, you ideally want to have a corresponding type. This can mean creating hundreds of "little" types, which can be tedious in C#.  
+さらに、DDDにおける「値」オブジェクトは構造的な等価性を持つべきで、同じデータを含む2つのオブジェクトは常に等しくなるべきです。C#ではこれは `IEquatable<T>` をオーバーライドするという面倒な作業を意味しますが、F#ではデフォルトでこれが無料で得られます。
 
-Furthermore, "value" objects in DDD should have structural equality, meaning that two objects containing the same data should always be equal.  In C# this can mean more tedium in overriding `IEquatable<T>`, but in F#, you get this for free by default.
-
-To show how easy it is to create DDD types in F#, here are some example types that might be created for a simple "customer" domain. 
+F#でDDDの型を作成するのがいかに簡単かを示すために、シンプルな「顧客」ドメインで作成される可能性のある型の例をいくつか示します。
 
 ```fsharp
 type PersonalName = {FirstName:string; LastName:string}
 
-// Addresses
+// 住所
 type StreetAddress = {Line1:string; Line2:string; Line3:string }
 
 type ZipCode =  ZipCode of string   
@@ -56,30 +55,30 @@ type UKAddress = {Street:StreetAddress; Region:UKPostCode}
 type InternationalAddress = {
     Street:StreetAddress; Region:string; CountryName:string}
 
-// choice type  -- must be one of these three specific types
+// 選択型 -- これら3つの特定の型のいずれかでなければならない
 type Address = USAddress | UKAddress | InternationalAddress
 
-// Email
+// メールアドレス
 type Email = Email of string
 
-// Phone
+// 電話番号
 type CountryPrefix = Prefix of int
 type Phone = {CountryPrefix:CountryPrefix; LocalNumber:string}
 
 type Contact = 
     {
     PersonalName: PersonalName;
-    // "option" means it might be missing
+    // "option"は存在しない可能性があることを意味する
     Address: Address option;
     Email: Email option;
     Phone: Phone option;
     }
 
-// Put it all together into a CustomerAccount type
+// すべてをCustomerAccount型にまとめる
 type CustomerAccountId  = AccountId of string
 type CustomerType  = Prospect | Active | Inactive
 
-// override equality and deny comparison
+// 等価性をオーバーライドし、比較を拒否する
 [<CustomEquality; NoComparison>]
 type CustomerAccount = 
     {
@@ -97,9 +96,9 @@ type CustomerAccount =
     override this.GetHashCode() = hash this.CustomerAccountId 
 ```
 
-This code fragment contains 17 type definitions in just a few lines, but with minimal complexity. How many lines of C# code would you need to do the same thing?
+このコード断片には、わずか数行で17の型定義が含まれていますが、複雑さは最小限に抑えられています。同じことをC#で行うには、どれだけの行数が必要でしょうか？
 
-Obviously, this is a simplified version with just the basic types ? in a real system, constraints and other methods would be added.  But note how easy it is to create lots of DDD value objects, especially wrapper types for strings, such as "`ZipCode`" and "`Email`". By using these wrapper types, we can enforce certain constraints at creation time, and also ensure that these types don't get confused with unconstrained strings in normal code. The only "entity" type is the `CustomerAccount`, which is clearly indicated as having special treatment for equality and comparison.
+もちろん、これは基本的な型だけを含む簡略版です。実際のシステムでは、制約やその他のメソッドが追加されるでしょう。しかし、 `ZipCode` や `Email` のような文字列のラッパー型など、多くのDDD値オブジェクトを作成するのがいかに簡単かに注目してください。これらのラッパー型を使用することで、作成時に特定の制約を強制し、通常のコードで制約のない文字列と混同されないようにすることができます。唯一の「エンティティ」型は `CustomerAccount` で、等価性と比較に特別な扱いが必要であることが明確に示されています。
 
-For a more in-depth discussion, see the series called ["Domain driven design in F#"](../series/domain-driven-design-in-fsharp.md).
+より詳細な議論については、「[F#におけるドメイン駆動設計](../series/domain-driven-design-in-fsharp.md)」というシリーズをご覧ください。
 

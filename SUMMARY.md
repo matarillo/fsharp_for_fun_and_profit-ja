@@ -28,7 +28,7 @@
   * [F# の 4 つの重要概念](posts/key-concepts.md) 
   * [簡潔さ](posts/conciseness-intro.md) 
   * [型推論](posts/conciseness-type-inference.md) 
-  * [低オーバーヘッド型定義](posts/conciseness-type-definitions.md)
+  * [低オーバーヘッドの型定義](posts/conciseness-type-definitions.md)
   * [ボイラープレートコードを抽出するための関数を使う](posts/conciseness-extracting-boilerplate.md)
   * [ビルディングブロックとしての関数を使う](posts/conciseness-functions-as-building-blocks.md) 
   * [簡潔さのためのパターンマッチング](posts/conciseness-pattern-matching.md) 
