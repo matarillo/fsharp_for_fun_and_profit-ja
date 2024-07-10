@@ -1,36 +1,36 @@
 ---
 layout: post
 title: '型に関する既定のふるまい'
-description: "Immutability and built-in equality with no coding"
+description: "不変性とコーディング不要の組み込み等価性"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 14
 categories: [Convenience, Types]
 ---
 
-One nice thing about F# is that most types immediately have some useful "out-of-the-box" behavior such as immutability and built-in equality, functionality that often has to be explicitly coded for in C#.  
+F#の素晴らしい点の1つは、ほとんどの型が「すぐに使える」便利な動作を最初から持っていることです。例えば、不変性や組み込みの等価性機能などがあり、これらはC#では明示的にコーディングする必要があることが多いです。
 
-By "most" F# types, I mean the core "structural" types such as tuples, records, unions, options, lists, etc. Classes and some other types have been added to help with .NET integration, but lose some of the power of the structural types. 
+ここで言う「ほとんどの」F#の型とは、タプル、レコード、ユニオン、オプション、リストなどの主要な「構造的」な型のことです。クラスやその他の型は.NETとの統合を助けるために追加されていますが、構造的な型の力の一部を失っています。
 
-This built-in functionality for these core types includes:
+これらの主要な型に対する組み込み機能には以下のものがあります：
 
-* Immutability
-* Pretty printing when debugging
-* Equality
-* Comparisons
+* 不変性
+* デバッグ時の見やすい表示
+* 等価性
+* 比較
 
-Each of these is addressed below.
+これらについて以下で詳しく説明します。
 
-## F# types have built-in immutability
+## F#の型には組み込みの不変性がある
 
-In C# and Java, it is has become good practice to create immutable classes whenever possible. In F#, you get this for free.
+C#やJavaでは、可能な限り不変クラスを作成することが良い習慣となっています。F#では、これが自動的に手に入ります。
 
-Here is an immutable type in F#:
+F#での不変型の例：
 ```fsharp
 type PersonalName = {FirstName:string; LastName:string}
 ```
 
-And here is how the same type is typically coded in C#:
+同じ型をC#で通常コーディングする方法：
 
 ```csharp
 class ImmutablePersonalName
@@ -46,13 +46,13 @@ class ImmutablePersonalName
 }
 ```
 
-That's 10 lines to do the same thing as 1 line of F#.
+F#の1行で済むことを、C#では10行もかけて行っています。
 
-## Most F# types have built-in pretty printing
+## ほとんどのF#の型には組み込みの見やすい表示がある
 
-In F#, you don't have to override `ToString()` for most types -- you get pretty printing for free!
+F#では、ほとんどの型で `ToString()` をオーバーライドする必要がありません。見やすい表示が自動的に手に入ります！
 
-You have probably already seen this when running the earlier examples. Here is another simple example:
+これは、おそらく以前の例を実行したときにすでに見たことがあるでしょう。ここでもう一つ簡単な例を示します：
 
 ```fsharp
 type USAddress = 
@@ -74,7 +74,7 @@ printfn "Alice is %A" alice
 printfn "Bob is %A" bob
 ```
 
-The output is:
+出力は以下のようになります：
 
 ```fsharp
 Alice is {Name = "Alice";
@@ -84,11 +84,11 @@ Alice is {Name = "Alice";
                Zip = "91201";};}
 ```
 
-## Most F# types have built-in structural equality
+## ほとんどのF#の型には組み込みの構造的等価性がある
 
-In C#, you often have to implement the `IEquatable` interface so that you can test for equality between objects. This is needed when using objects for Dictionary keys, for example.
+C#では、オブジェクト間の等価性をテストするために `IEquatable` インターフェースを実装することがよく必要となります。これは例えば、オブジェクトをDictionaryのキーとして使用する場合に必要です。
 
-In F#, you get this for free with most F# types. For example, using the `PersonalName` type from above, we can compare two names straight away.
+F#では、ほとんどのF#の型でこれが自動的に手に入ります。例えば、上記の `PersonalName` 型を使用して、すぐに2つの名前を比較できます。
 
 ```fsharp
 type PersonalName = {FirstName:string; LastName:string}
@@ -96,17 +96,17 @@ let alice1 = {FirstName="Alice"; LastName="Adams"}
 let alice2 = {FirstName="Alice"; LastName="Adams"}
 let bob1 = {FirstName="Bob"; LastName="Bishop"}
 
-//test
+//テスト
 printfn "alice1=alice2 is %A" (alice1=alice2)
 printfn "alice1=bob1 is %A" (alice1=bob1)
 ```
 
 
-## Most F# types are automatically comparable
+## ほとんどのF#の型は自動的に比較可能
 
-In C#, you often have to implement the `IComparable` interface so that you can sort objects. 
+C#では、オブジェクトをソートするために `IComparable` インターフェースを実装することがよく必要となります。。
 
-Again, in F#, you get this for free with most F# types. For example, here is a simple definition of a deck of cards.
+ここでもF#では、ほとんどのF#の型でこれが自動的に手に入ります。例えば、以下はトランプのデッキの簡単な定義です。
 
 ```fsharp
 
@@ -115,8 +115,8 @@ type Rank = Two | Three | Four | Five | Six | Seven | Eight
             | Nine | Ten | Jack | Queen | King | Ace
 ```
 
-			
-We can write a function to test the comparison logic:
+
+比較ロジックをテストする関数を書くことができます：
 
 ```fsharp
 let compareCard card1 card2 = 
@@ -125,7 +125,7 @@ let compareCard card1 card2 =
     else printfn "%A is greater than %A" card1 card2 
 ```
 
-And let's see how it works:
+そして、それがどのように機能するか見てみましょう：
 
 ```fsharp
 let aceHearts = Heart, Ace
@@ -136,21 +136,21 @@ compareCard aceHearts twoHearts
 compareCard twoHearts aceSpades
 ```
 
-Note that the Ace of Hearts is automatically greater than the Two of Hearts, because the "Ace" rank value comes after the "Two" rank value.
+ハートのエースは自動的にハートの2より大きくなることに注目してください。これは、「Ace」のランク値が「Two」のランク値の後に来るためです。
 
-But also note that the Two of Hearts is automatically greater than the Ace of Spades, because the Suit part is compared first, and the "Heart" suit value comes after the "Spade" value.
+しかし、ハートの2はスペードのエースより自動的に大きくなることにも注目してください。これは、スート（マーク）部分が最初に比較され、「Heart」のスート値が「Spade」の値の後に来るためです。
 
-Here's an example of a hand of cards:
+以下は手札の例です：
 
 ```fsharp
 let hand = [ Club,Ace; Heart,Three; Heart,Ace; 
              Spade,Jack; Diamond,Two; Diamond,Ace ]
 
-//instant sorting!
+//即座にソート！
 List.sort hand |> printfn "sorted hand is (low to high) %A"
 ```
 
-And as a side benefit, you get min and max for free too!
+そして、おまけとして、最小値と最大値も自動的に手に入ります！
 
 ```fsharp
 List.max hand |> printfn "high card is %A"

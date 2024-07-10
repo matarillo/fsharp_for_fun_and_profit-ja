@@ -1,16 +1,16 @@
 ---
 layout: post
-title: "Convenience"
-description: "Features that reduce programming drudgery and boilerplate code"
+title: "便利な機能"
+description: "プログラミングの面倒な作業や定型コードを減らす機能"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 13
 categories: [Convenience]
 ---
 
-In the next set of posts, we will explore a few more features of F# that I have grouped under the theme of "convenience".  These features do not necessarily result in more concise code, but they do remove much of the drudgery and boilerplate code that would be needed in C#.
+これからの一連の投稿では、「便利な機能」というテーマでまとめたF#のいくつかの機能について詳しく見ていきます。これらの機能は必ずしもコードを簡潔にするわけではありませんが、C#では必要となる多くの面倒な作業や定型コードを省くことができます。
 
-* **Useful "out-of-the-box" behavior for types**. Most types that you create will immediately have some useful behavior, such as immutability and built-in equality ? functionality that has to be explicitly coded for in C#.
-* **All functions are "interfaces"**, meaning that many of the roles that interfaces play in object-oriented design are implicit in the way that functions work.  And similarly, many object-oriented design patterns are unnecessary or trivial within a functional paradigm.
-* **Partial application**. Complicated functions with many parameters can have some of the parameters fixed or "baked in" and yet leave other parameters open.
-* **Active patterns**. Active patterns are a special kind of pattern where the pattern can be matched or detected dynamically, rather than statically.  They are great for simplifying frequently used parsing and grouping behaviors.
+* **型の「すぐに使える」便利な動作**。作成するほとんどの型は、最初から便利な機能が備わっています。例えば、不変性や組み込みの等価性機能などです。これらはC#では明示的にコーディングする必要がある機能です。
+* **すべての関数が「インターフェース」**。つまり、オブジェクト指向設計でインターフェースが果たす多くの役割が、関数の動作に暗黙的に含まれています。同様に、多くのオブジェクト指向設計パターンは、関数型パラダイムでは不要か、ごく簡単に実現できます。
+* **部分適用**。多くのパラメータを持つ複雑な関数で、一部のパラメータを固定または「焼き付け」しつつ、他のパラメータを開いたままにできます。
+* **アクティブパターン**。アクティブパターンは特殊なパターンで、静的ではなく動的にパターンをマッチングまたは検出できます。頻繁に使用される解析やグループ化の動作を簡素化するのに最適です。

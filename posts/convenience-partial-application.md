@@ -1,100 +1,100 @@
 ---
 layout: post
-title: "Partial Application"
-description: "How to fix some of a function's parameters"
+title: "部分適用"
+description: "関数のパラメータの一部を固定する方法"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 16
 categories: [Convenience, Functions, Partial Application]
 ---
 
-A particularly convenient feature of F# is that complicated functions with many parameters can have some of the parameters fixed or "baked in" and yet leave other parameters open.  In this post, we'll take a quick look at how this might be used in practice.
+F#の特に便利な機能の1つは、多くのパラメータを持つ複雑な関数の一部のパラメータを固定または「焼き付け」しつつ、他のパラメータを開いたままにできることです。この投稿では、これが実際にどのように使われるかを簡単に見ていきます。
 
-Let's start with a very simple example of how this works. We'll start with a trivial function:
+まず、これがどのように機能するかの非常に簡単な例から始めましょう。ごく簡単な関数から始めます：
 
 ```fsharp
-// define a adding function
+// 足し算関数を定義
 let add x y = x + y
 
-// normal use 
+// 通常の使用法
 let z = add 1 2
 ```
 
-But we can do something strange as well ? we can call the function with only one parameter!
+しかし、奇妙なこともできます。関数を1つのパラメータだけで呼び出すことができるのです！
 
 ```fsharp
 let add42 = add 42
 ```
 
-The result is a new function that has the "42" baked in, and now takes only one parameter instead of two!  This technique is called "partial application", and it means that, for any function, you can "fix" some of the parameters and leave other ones open to be filled in later.
+結果は、 "42" が焼き付けられた新しい関数で、2つではなく1つのパラメータだけを取るようになります！ この技術は「部分適用」と呼ばれ、任意の関数に対して、一部のパラメータを「固定」し、他のパラメータを後で埋めるために開いたままにできることを意味します。
 
 ```fsharp
-// use the new function
+// 新しい関数を使用
 add42 2
 add42 3
 ```
 
-With that under our belt, let's revisit the generic logger that we saw earlier:
+これを理解した上で、先ほど見た汎用ロガーを再度見てみましょう：
 
 ```fsharp
 let genericLogger anyFunc input = 
-   printfn "input is %A" input   //log the input
-   let result = anyFunc input    //evaluate the function
-   printfn "result is %A" result //log the result
-   result                        //return the result
+   printfn "input is %A" input   // 入力をログに記録
+   let result = anyFunc input    // 関数を評価
+   printfn "result is %A" result // 結果をログに記録
+   result                        // 結果を返す
 ```
 
-Unfortunately, I have hard-coded the logging operations.  Ideally, I'd like to make this more generic so that I can choose how logging is done. 
+残念ながら、ログ記録操作をハードコードしてしまいました。理想的には、ログ記録の方法を選択できるようにもっと汎用的にしたいところです。
 
-Of course, F# being a functional programming language, we will do this by passing functions around. 
+もちろん、F#は関数型プログラミング言語なので、関数を受け渡すことでこれを実現します。
 
-In this case we would pass "before" and "after" callback functions to the library function, like this:
+この場合、「before」と「after」のコールバック関数をライブラリ関数に渡します：
 
 ```fsharp
 let genericLogger before after anyFunc input = 
-   before input               //callback for custom behavior
-   let result = anyFunc input //evaluate the function
-   after result               //callback for custom behavior
-   result                     //return the result
+   before input               // カスタム動作のためのコールバック
+   let result = anyFunc input // 関数を評価
+   after result               // カスタム動作のためのコールバック
+   result                     // 結果を返す
 ```
 
-You can see that the logging function now has four parameters. The "before" and "after" actions are passed in as explicit parameters as well as the function and its input. To use this in practice, we just define the functions and pass them in to the library function along with the final int parameter:
+ログ記録関数が今や4つのパラメータを持っていることがわかります。「before」と「after」のアクションが、関数とその入力と同様に明示的なパラメータとして渡されています。実際に使用するには、関数を定義し、最後のintパラメータと一緒にライブラリ関数に渡すだけです：
 
 ```fsharp
 let add1 input = input + 1
 
-// reuse case 1
+// 再利用ケース1
 genericLogger 
-    (fun x -> printf "before=%i. " x) // function to call before 
-    (fun x -> printfn " after=%i." x) // function to call after
-    add1                              // main function
-    2                                 // parameter 
+    (fun x -> printf "before=%i. " x) // 前に呼び出す関数
+    (fun x -> printfn " after=%i." x) // 後に呼び出す関数
+    add1                              // メイン関数
+    2                                 // パラメータ
 
-// reuse case 2
+// 再利用ケース2
 genericLogger
-    (fun x -> printf "started with=%i " x) // different callback 
+    (fun x -> printf "started with=%i " x) // 異なるコールバック
     (fun x -> printfn " ended with=%i" x) 
-    add1                              // main function
-    2                                 // parameter 
+    add1                              // メイン関数
+    2                                 // パラメータ
 ```
 
-This is a lot more flexible. I don't have to create a new function every time I want to change the behavior -- I can define the behavior on the fly. 
+これははるかに柔軟です。動作を変更したいたびに新しい関数を作成する必要はありません。その場で動作を定義できます。
 
-But you might be thinking that this is a bit ugly. A library function might expose a number of callback functions and it would be inconvenient to have to pass the same functions in over and over.
+しかし、これは少し醜いと思うかもしれません。ライブラリ関数が多数のコールバック関数を公開する場合、同じ関数を何度も渡さなければならないのは不便です。
 
-Luckily, we know the solution for this. We can use partial application to fix some of the parameters. So in this case, let's define a new function which fixes the `before` and `after` functions, as well as the `add1` function, but leaves the final parameter open.
+幸い、私たちはこの解決策を知っています。部分適用を使用して一部のパラメータを固定できます。そこで、この場合、 `before` と `after` 関数、そして `add1` 関数を固定し、最後のパラメータを開いたままにする新しい関数を定義しましょう。
 
 ```fsharp
-// define a reusable function with the "callback" functions fixed
+// "コールバック"関数を固定した再利用可能な関数を定義
 let add1WithConsoleLogging = 
     genericLogger
         (fun x -> printf "input=%i. " x) 
         (fun x -> printfn " result=%i" x)
         add1
-        // last parameter NOT defined here yet!
+        // 最後のパラメータはここではまだ定義されていません！
 ```
 
-The new "wrapper" function is called with just an int now, so the code is much cleaner. As in the earlier example, it can be used anywhere the original `add1` function could be used without any changes.
+新しい「ラッパー」関数は今やintだけで呼び出されるので、コードはずっとクリーンになります。先ほどの例と同様に、元の `add1` 関数が使用できる場所であれば、変更なしでどこでも使用できます。
 
 ```fsharp
 add1WithConsoleLogging 2
@@ -103,13 +103,13 @@ add1WithConsoleLogging 4
 [1..5] |> List.map add1WithConsoleLogging 
 ```
 
-## The functional approach in C# ##
+## C#での関数型アプローチ
 
-In a classical object-oriented approach, we would probably have used inheritance to do this kind of thing. For instance, we might have had an abstract `LoggerBase` class, with virtual methods for "`before`" and "`after`" and the function to execute.  And then to implement a particular kind of behavior, we would have created a new subclass and overridden the virtual methods as needed.
+古典的なオブジェクト指向アプローチでは、このような種類のことを行うために、おそらく継承を使用したでしょう。例えば、「before」と「after」のための仮想メソッドと実行する関数を持つ抽象的な `LoggerBase` クラスを作成していたかもしれません。そして、特定の種類の動作を実装するために、新しいサブクラスを作成し、必要に応じて仮想メソッドをオーバーライドしたでしょう。
 
-But classical style inheritance is now becoming frowned upon in object-oriented design, and composition of objects is much preferred. And indeed, in "modern" C#, we would probably write the code in the same way as F#, either by using events or by passing functions in.
+しかし、古典的なスタイルの継承は現在、オブジェクト指向設計で避けられるようになっており、オブジェクトのコンポジションがはるかに好まれています。実際、「モダンな」C#では、おそらくF#と同じ方法でコードを書くでしょう。イベントを使用するか、関数を渡すかのいずれかです。
 
-Here's the F# code translated into C# (note that I had to specify the types for each Action)
+以下はF#のコードをC#に翻訳したものです（各Actionの型を指定する必要があることに注意してください）：
 
 ```csharp
 public class GenericLoggerHelper<TInput, TResult>
@@ -120,15 +120,15 @@ public class GenericLoggerHelper<TInput, TResult>
         Func<TInput, TResult> aFunc,
         TInput input)
     {
-        before(input);             //callback for custom behavior
-        var result = aFunc(input); //do the function
-        after(result);             //callback for custom behavior
+        before(input);             // カスタム動作のためのコールバック
+        var result = aFunc(input); // 関数を実行
+        after(result);             // カスタム動作のためのコールバック
         return result;
     }
 }
 ```
 
-And here it is in use:
+そして、これが使用例です：
 
 ```csharp
 [NUnit.Framework.Test]
@@ -143,4 +143,4 @@ public void TestGenericLogger()
 }
 ```
 
-In C#, this style of programming is required when using the LINQ libraries, but many developers have not embraced it fully to make their own code more generic and adaptable. And it's not helped by the ugly `Action<>` and `Func<>` type declarations that are required. But it can certainly make the code much more reusable. 
+C#では、LINQライブラリを使う際にこのプログラミングスタイルが欠かせません。しかし、多くの開発者はこのスタイルを十分に活用していません。そのため、彼らのコードはより汎用的で適応性のあるものになる可能性を逃しています。 `Action<>` と `Func<>` といった型宣言の見た目の悪さも、このスタイルの採用をためらわせる一因となっています。しかし、このアプローチを使えば、コードの再利用性を大幅に向上させることができます。
