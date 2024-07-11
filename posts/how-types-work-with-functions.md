@@ -1,53 +1,53 @@
 ---
 layout: post
-title: "How types work with functions"
-description: "Understanding the type notation"
+title: "関数における型の働き"
+description: "型表記の理解"
 nav: thinking-functionally
 seriesId: "関数型思考"
 seriesOrder: 4
-categories: [Types, Functions]
+categories: [型, 関数]
 ---
 
-Now that we have some understanding of functions, we'll look at how types work with functions, both as domains and ranges. This is just an overview; the series ["understanding F# types"](../series/understanding-fsharp-types.md) will cover types in detail. 
+関数について理解を深めたところで、関数と型がどのように連携するかを見ていきましょう。これは定義域と値域の両方に関わります。ここでは概要のみ説明し、詳細は「[F#の型を理解する](../series/understanding-fsharp-types.md)」シリーズで扱います。
 
-First, we need to understand the type notation a bit more. We've seen that the arrow notation "`->`" is used to show the domain and range. So that a function signature always looks like:
+まず、型の表記についてもう少し理解を深めましょう。以前説明したように、定義域と値域を示すには矢印表記 `->` を使います。関数のシグネチャは常に次のような形になります。
 
 ```fsharp
-val functionName : domain -> range
+val 関数名 : 定義域 -> 値域
 ```
 
-Here are some example functions:
+具体的な例を見てみましょう。
 
 ```fsharp
-let intToString x = sprintf "x is %i" x  // format int to string
+let intToString x = sprintf "x is %i" x  // 整数を文字列にフォーマット
 let stringToInt x = System.Int32.Parse(x)
 ```
 
-If you evaluate that in the F# interactive window, you will see the signatures: 
+F#のインタラクティブウィンドウでこれを評価すると、次のようなシグネチャが表示されます。
 
 ```fsharp
 val intToString : int -> string
 val stringToInt : string -> int
 ```
 
-This means:
+これは以下のことを意味します。
 
-* `intToString` has a domain of `int` which it maps onto the range `string`.
-* `stringToInt` has a domain of `string` which it maps onto the range `int`. 
+* `intToString` は `int` の定義域を `string` の値域に写像します。
+* `stringToInt` は `string` の定義域を `int` の値域に写像します。
 
-##  Primitive types ##
+## プリミティブ型 ##
 
-The possible primitive types are what you would expect:  string, int, float, bool, char, byte, etc., plus many more derived from the .NET type system.
+F#で使えるプリミティブ型には、予想通りのものがあります。string, int, float, bool, char, byte などです。これらに加えて、.NETの型システムから派生した多くの型も使用できます。
 
-Here are some more examples of functions using primitive types:
+プリミティブ型を使った関数の例をさらに見てみましょう。
 
 ```fsharp
-let intToFloat x = float x // "float" fn. converts ints to floats
-let intToBool x = (x = 2)  // true if x equals 2
+let intToFloat x = float x // "float"関数は整数を浮動小数点数に変換
+let intToBool x = (x = 2)  // xが2に等しければtrue
 let stringToString x = x + " world"
 ```
 
-and their signatures are:
+これらのシグネチャは次のようになります。
 
 ```fsharp
 val intToFloat : int -> float
@@ -55,305 +55,305 @@ val intToBool : int -> bool
 val stringToString : string -> string
 ```
 
-## Type annotations ##
+## 型注釈
 
-In the previous examples, the F# compiler correctly determined the types of the parameters and results. But this is not always the case. If you try the following code, you will get a compiler error:
+前の例では、F#コンパイラがパラメータと結果の型を正しく判断しました。しかし、常にそうとは限りません。次のコードを試すと、コンパイラエラーが発生します。
 
 ```fsharp
 let stringLength x = x.Length         
-   => error FS0072: Lookup on object of indeterminate type
+   => error FS0072: 不確定の型のオブジェクトに対する参照です
 ```
 
-The compiler does not know what type "x" is, and therefore does not know if "Length" is a valid method. In most cases, this can be fixed by giving the F# compiler a "type annotation" so that it knows which type to use. In the corrected version below, we indicate that the type of "x" is a string. 
+コンパイラは "x" の型がわからないため、 "Length" が有効なメソッドかどうかわかりません。多くの場合、これはF#コンパイラに「型注釈」を与えることで解決できます。以下の修正版では、 "x" の型が文字列であることを示しています。
 
 ```fsharp
 let stringLength (x:string) = x.Length         
 ```
 
-The parens around the `x:string` param are important. If they are missing, the compiler thinks that the return value is a string! That is, an "open" colon is used to indicate the type of the return value, as you can see in the example below.
+`x:string` パラメータを囲むかっこは重要です。かっこがないと、コンパイラは戻り値が文字列だと勘違いしてしまいます。「開いた」コロンは戻り値の型を示すのに使います。以下の例でそれがわかります。
 
 ```fsharp
 let stringLengthAsInt (x:string) :int = x.Length         
 ```
 
-We're indicating that the x param is a string and the return value is an int. 
+ここでは、xパラメータが文字列で、戻り値が整数であることを示しています。
 
-## Function types as parameters ##
+## パラメータとしての関数型
 
-A function that takes other functions as parameters, or returns a function, is called a **higher-order function** (sometimes abbreviated as HOF). They are used as a way of abstracting out common behavior. These kinds of functions are extremely common in F#; most of the standard libraries use them. 
+他の関数をパラメータとして受け取るか、関数を返す関数を**高階関数**（Higher-Order Function、略してHOF）と呼びます。これらは共通の振る舞いを抽象化する方法として使われます。F#では高階関数が非常に一般的で、ほとんどの標準ライブラリで使われています。
 
-Consider a function `evalWith5ThenAdd2`, which takes a function as a parameter, then evaluates the function with the value 5, and adds 2 to the result:
+`evalWith5ThenAdd2`という関数について考えてみましょう。この関数はまず、パラメータとして別の関数を受け取ります。次に、その関数に5という値を適用して評価し、その結果に2を加えます。
 
 ```fsharp
-let evalWith5ThenAdd2 fn = fn 5 + 2     // same as fn(5) + 2
+let evalWith5ThenAdd2 fn = fn 5 + 2     // fn(5) + 2 と同じ
 ```
 
-The signature of this function looks like this:
+この関数のシグネチャは次のようになります。
 
 ```fsharp
 val evalWith5ThenAdd2 : (int -> int) -> int
 ```
 
-You can see that the domain is `(int->int)` and the range is `int`. What does that mean?  It means that the input parameter is not a simple value, but a function, and what's more is restricted only to functions that map `ints` to `ints`. The output is not a function, just an int.
+このシグネチャを見ると、定義域が `(int->int)` で値域が `int` であることがわかります。これは何を意味するのでしょうか。この関数の入力パラメータは単純な値ではなく、それ自体が関数であることを示しています。しかも、その関数は `int` を `int` に写像するものに限定されています。一方、この関数の出力は関数ではなく、単なる整数です。
 
-Let's try it:
+実際に試してみましょう。
 
 ```fsharp
-let add1 x = x + 1      // define a function of type (int -> int)
-evalWith5ThenAdd2 add1  // test it
+let add1 x = x + 1      // (int -> int) 型の関数を定義
+evalWith5ThenAdd2 add1  // テスト
 ```
 
-gives:
+結果は次のようになります。
 
 ```fsharp
 val add1 : int -> int
 val it : int = 8
 ```
 
-"`add1`" is a function that maps ints to ints, as we can see from its signature. So it is a valid parameter for the `evalWith5ThenAdd2` function. And the result is 8. 
+`add1` は整数を整数に写像する関数です。そのシグネチャからこれがわかります。したがって、`evalWith5ThenAdd2` 関数の有効なパラメータとなります。結果は8です。
 
-By the way, the special word "`it`" is used for the last thing that was evaluated; in this case the result we want. It's not a keyword, just a convention.
+注意：特殊な単語 `it` は最後に評価されたものを指します。この場合は求めていた結果です。これはキーワードではなく、単なる慣習です。
 
-Here's another one:
+もう一つ例を見てみましょう。
 
 ```fsharp
-let times3 x = x * 3      // a function of type (int -> int)
-evalWith5ThenAdd2 times3  // test it 
+let times3 x = x * 3      // (int -> int) 型の関数
+evalWith5ThenAdd2 times3  // テスト
 ```
 
-gives:
+結果は次のようになります。
 
 ```fsharp
 val times3 : int -> int
 val it : int = 17
 ```
 
-"`times3`" is also a function that maps ints to ints, as we can see from its signature. So it is also a valid parameter for the `evalWith5ThenAdd2` function. And the result is 17.
+`times3` もまた整数を整数に写像する関数です。そのシグネチャからこれがわかります。したがって、これも `evalWith5ThenAdd2` 関数の有効なパラメータとなります。結果は17です。
 
-Note that the input is sensitive to the types. If our input function uses `floats` rather than `ints`, it will not work. For example, if we have:
+入力は型に敏感であることに注意してください。入力関数が `int` ではなく `float` を使うと、うまく動作しません。例えば、
 
 ```fsharp
-let times3float x = x * 3.0  // a function of type (float->float)  
+let times3float x = x * 3.0  // (float->float) 型の関数
 evalWith5ThenAdd2 times3float 
 ```
 
-Evaluating this will give an error:
+これを評価すると、次のようなエラーが発生します。
 
 ```fsharp
-error FS0001: Type mismatch. Expecting a int -> int but 
-              given a float -> float    
+error FS0001: 型が一致しません。 'int -> int' という指定が必要ですが、
+              'float -> float' が指定されました。
 ```
 
-meaning that the input function should have been an `int->int` function.
+このエラーは、入力関数が `int->int` 関数であるべきだったことを示しています。
 
-### Functions as output ###
+### 出力としての関数
 
-A function value can also be the output of a function. For example, the following function will generate an "adder" function that adds using the input value. 
+関数値は、関数の出力にもなり得ます。「加算器」関数を生成する例を見てみましょう。
 
 ```fsharp
 let adderGenerator numberToAdd = (+) numberToAdd
 ```
 
-The signature is:
+このシグネチャは次のようになります。
 
 ```fsharp
 val adderGenerator : int -> (int -> int)
 ```
 
-which means that the generator takes an `int`, and creates a function (the "adder") that maps `ints` to `ints`. Let's see how it works:
+このシグネチャは、ジェネレーターが興味深い動作をすることを示しています。まず `int` を受け取り、次に `int` を `int` に写像する関数（「加算器」）を作成します。実際の動作を確認してみましょう。
 
 ```fsharp
 let add1 = adderGenerator 1
 let add2 = adderGenerator 2
 ```
 
-This creates two adder functions. The first generated function adds 1 to its input, and the second adds 2. Note that the signatures are just as we would expect them to be.
+これにより、2つの加算器関数が作成されます。最初の関数は入力に1を加え、2番目の関数は2を加えます。シグネチャは予想通りになります。
 
 ```fsharp
 val add1 : (int -> int)
 val add2 : (int -> int)
 ```
 
-And we can now use these generated functions in the normal way. They are indistinguishable from functions defined explicitly
+これらの生成された関数は、通常の方法で使用できます。明示的に定義された関数と区別がつきません。
 
 ```fsharp
 add1 5    // val it : int = 6
 add2 5    // val it : int = 7
 ```
 
-### Using type annotations to constrain function types ###
+### 型注釈を使用して関数型を制約する
 
-In the first example, we had the function:
+関数型を制約する方法を見てみましょう。最初の例を振り返ります。
 
 ```fsharp
-let evalWith5ThenAdd2 fn = fn 5 +2
+let evalWith5ThenAdd2 fn = fn 5 + 2
     => val evalWith5ThenAdd2 : (int -> int) -> int
 ```
 
-In this case F# could deduce that "`fn`" mapped `ints` to `ints`, so its signature would be `int->int`
+この場合、F#は `fn` について重要な推論を行いました。 `fn` が `int` を `int` に写像することを認識し、そのシグネチャが `int->int` になると判断しました。
 
-But what is the signature of "fn" in this following case?
+しかし、次の場合はどうでしょうか。
 
 ```fsharp
 let evalWith5 fn = fn 5
 ```
 
-Obviously, "`fn`" is some kind of function that takes an int, but what does it return? The compiler can't tell. If you do want to specify the type of the function, you can add a type annotation for function parameters in the same way as for a primitive type.
+この場合、 `fn` が整数を受け取ることは明らかですが、何を返すのかはわかりません。関数の型を明確にしたい場合、プリミティブ型と同じように関数パラメータに型注釈を追加できます。
 
 ```fsharp
 let evalWith5AsInt (fn:int->int) = fn 5
 let evalWith5AsFloat (fn:int->float) = fn 5
 ```
 
-Alternatively, you could also specify the return type instead.
+また、戻り値の型を指定することもできます。
 
 ```fsharp
 let evalWith5AsString fn :string = fn 5
 ```
 
-Because the main function returns a string, the "`fn`" function is also constrained to return a string, so no explicit typing is required for "fn". 
+この場合、メイン関数が文字列を返すため、 `fn` 関数も自動的に文字列を返すように制約されます。そのため、 `fn` に対する明示的な型指定は不要となります。
 
 <a name="unit-type"></a>
-## The "unit" type ##
+## "unit" 型
 
-When programming, we sometimes want a function to do something without returning a value. Consider the function "`printInt`", defined below. The function doesn't actually return anything. It just prints a string to the console as a side effect.
+プログラミングでは、値を返さずに何かを行う関数が必要な場合があります。以下の `printInt` 関数を例に考えてみましょう。
 
 ```fsharp
-let printInt x = printf "x is %i" x        // print to console
+let printInt x = printf "x is %i" x        // コンソールに出力
 ```
 
-So what is the signature for this function? 
+この関数は実際には何も返しません。単に副作用としてコンソールに文字列を出力するだけです。では、このような関数のシグネチャはどうなるでしょうか。
 
 ```fsharp
 val printInt : int -> unit
 ```
 
-What is this "`unit`"?  
+ここで疑問が生じます。この `unit` とは何でしょうか。
 
-Well, even if a function returns no output, it still needs a range. There are no "void" functions in mathematics-land. Every function must have some output, because a function is a mapping, and a mapping has to have something to map to!
- 
+関数が出力を返さない場合でも、値域が必要です。これは数学の原則に基づいています。数学の世界には「void」関数は存在しません。すべての関数は何らかの出力を持つ必要があります。なぜなら、関数は本質的に写像だからです。そして、写像には必ず写像先が必要です。
+
 ![](../assets/img/Functions_Unit.png)
- 
-So in F#, functions like this return a special range called "`unit`". This range has exactly one value in it, called "`()`". You can think of `unit` and `()` as somewhat like "void" (the type) and "null" (the value) in C#. But unlike void/null, `unit` is a real type and `()` is a real value. To see this, evaluate:
+
+F#では、このような「何も返さない」関数に対処するため、`unit` という特別な値域を用意しています。この値域にはちょうど1つの値 `()` があります。 `unit` と `()` は、C#の `void` （型）と `null` （値）に似ていると考えることができます。ただし、重要な違いがあります。void/nullとは異なり、 `unit` は実際の型であり、 `()` は実際の値なのです。これを確認するには、次のコードを評価してみてください。
 
 ```fsharp
 let whatIsThis = ()
 ```
 
-and you will see the signature:
+結果として、次のようなシグネチャが表示されます。
 
 ```fsharp
 val whatIsThis : unit = ()
 ```
 
-Which means that the value "`whatIsThis`" is of type `unit` and has been bound to the value `()`
+この結果は、値 `whatIsThis` が `unit` 型であり、値 `()` に束縛されていることを示しています。
 
-So, going back to the signature of "`printInt`", we can now understand it:
+では、 `printInt` のシグネチャに戻って考えてみましょう。
 
 ```fsharp
 val printInt : int -> unit
 ```
 
-This signature says: `printInt` has a domain of `int` which it maps onto nothing that we care about.
+このシグネチャは次のことを示しています。 `printInt` は `int` の定義域を持ち、それを私たちが特に気にしない何か（unit）に写像します。
 
 <a name="parameterless-functions"></a>
 
-### Parameterless functions
+### パラメーターのない関数
 
-Now that we understand unit, can we predict its appearance in other contexts?  For example, let's try to create a reusable "hello world" function. Since there is no input and no output, we would expect it to have a signature `unit -> unit`. Let's see:
+unitについて理解したところで、他の文脈でのunitの出現を予測できるでしょうか。例えば、再利用可能な "hello world" 関数を作ることを考えてみましょう。この関数には入力も出力もないため、 `unit -> unit` というシグネチャになると予想されます。実際に試してみましょう。
 
 ```fsharp
-let printHello = printf "hello world"        // print to console
+let printHello = printf "hello world"        // コンソールに出力
 ```
 
-The result is:
+結果は次のようになります。
 
 ```fsharp
 hello world
 val printHello : unit = ()
 ```
 
-Not quite what we expected. "Hello world" is printed immediately and the result is not a function, but a simple value of type unit. As we saw earlier, we can tell that this is a simple value because it has a signature of the form:  
+これは予想とは少し異なります。"Hello world" がすぐに出力され、結果は関数ではなく単なる unit 型の値になっています。この結果が単純な値であることは、シグネチャの形式から分かります。以前見たように、単純な値のシグネチャは次の形式になります。
 
 ```fsharp
-val aName: type = constant
+val 名前: 型 = 定数
 ```
 
-So in this case, we see that `printHello` is actually a *simple value* with the value `()`. It's not a function that we can call again.
+したがって、この場合 `printHello` は実際には値 `()` を持つ*単純な値*であり、再び呼び出すことのできる関数ではありません。
 
-Why the difference between `printInt` and `printHello`?  In the `printInt` case, the value could not be determined until we knew the value of the x parameter, so the definition was of a function. In the `printHello` case, there were no parameters, so the right hand side could be determined immediately. Which it was, returning the `()` value, with the side effect of printing to the console. 
+`printInt` と `printHello` の違いは何でしょうか。 `printInt` の場合、x パラメータの値が分かるまで値を決定できないため、関数の定義になりました。一方、 `printHello` の場合、パラメータがないため、右辺をすぐに評価できました。そして、コンソールへの出力という副作用とともに `()` 値を返しました。
 
-We can create a true reusable function that is parameterless by forcing the definition to have a unit argument, like this:
+真に再利用可能なパラメーターのない関数を作るには、unit 引数を強制的に持たせる方法があります。
 
 ```fsharp
-let printHelloFn () = printf "hello world"    // print to console
+let printHelloFn () = printf "hello world"    // コンソールに出力
 ```
 
-The signature is now:
+このシグネチャは次のようになります。
 
 ```fsharp
 val printHelloFn : unit -> unit
 ```
 
-and to call it, we have to pass the `()` value as a parameter, like so:
+この関数を呼び出すには、 `()` 値をパラメーターとして渡す必要があります。
 
 ```fsharp
 printHelloFn ()
 ```
 
-### Forcing unit types with the ignore function ###
+### ignore 関数を使って unit 型を強制する
 
-In some cases the compiler requires a unit type and will complain. For example, both of the following will be compiler errors:
+コンパイラが unit 型を要求し、エラーを発生させる場合があります。例えば、次のようなコードはコンパイラエラーになります。
 
 ```fsharp
-do 1+1     // => FS0020: This expression should have type 'unit'
+do 1+1     // => FS0020: この式の結果の型は 'int' で、暗黙的に無視されます。
 
 let something = 
-  2+2      // => FS0020: This expression should have type 'unit'
+  2+2      // => FS0020: この式の結果の型は 'int' で、暗黙的に無視されます。
   "hello"
 ```
 
-To help in these situations, there is a special function `ignore` that takes anything and returns the unit type. The correct version of this code would be:
+このような状況を解決するために、`ignore` という特別な関数が用意されています。この関数は任意の値を受け取り、unit 型を返します。これを使用すると、先ほどのコードは次のように書き直せます。
 
 ```fsharp
-do (1+1 |> ignore)  // ok
+do (1+1 |> ignore)  // OK
 
 let something = 
-  2+2 |> ignore     // ok
+  2+2 |> ignore     // OK
   "hello"
 ```
 
-## Generic types ##
+## ジェネリック型
 
-In many cases, the type of the function parameter can be any type, so we need a way to indicate this. F# uses the .NET generic type system for this situation. 
+多くの場合、関数のパラメータは特定の型に限定されません。このような状況に対応するため、F#は.NETのジェネリック型システムを使用しています。
 
-For example, the following function converts the parameter to a string and appends some text:
+ジェネリック型の使用例を見てみましょう。次の関数は、パラメータを文字列に変換し、特定のテキストを追加します。
 
 ```fsharp
 let onAStick x = x.ToString() + " on a stick"
 ```
 
-It doesn't matter what type the parameter is, as all objects understand `ToString()`. 
+この関数は、パラメータの型を問いません。すべてのオブジェクトが `ToString()` メソッドを持つため、どのような型でも受け入れることができます。
 
-The signature is:
+この関数のシグネチャは次のようになります。
 
 ```fsharp
 val onAStick : 'a -> string
 ```
 
-What is this type called `'a`?  That is F#'s way of indicating a generic type that is not known at compile time. The apostrophe in front of the "a" means that the type is generic. The signature for the C# equivalent of this would be:
+ここで注目すべきは `'a` という型表記です。これは、コンパイル時に未知のジェネリック型を示すF#の方法です。"a" の前のアポストロフィは、その型がジェネリックであることを示しています。C#で同様の関数を定義する場合、以下のようになります。
 
 ```csharp
 string onAStick<a>();   
 
-//or more idiomatically 
-string OnAStick<TObject>();   // F#'s use of 'a is like 
-                              // C#'s "TObject" convention 
+// より一般的な書き方
+string OnAStick<TObject>();   // F#の 'a は
+                              // C#の "TObject" 規約に相当します
 ```
 
-Note that the F# function is still strongly typed with a generic type. It does *not* take a parameter of type `Object`. This strong typing is desirable so that when functions are composed together, type safety is still maintained.
+F#の関数がジェネリック型で強く型付けされていることは重要なポイントです。これは `Object` 型のパラメータを取る関数とは異なります。この強い型付けにより、関数を組み合わせて使用する際に型安全性が保たれます。
 
-Here's the same function being used with an int, a float and a string
+この関数の汎用性を確認するため、異なる型の値で使用してみましょう。
 
 ```fsharp
 onAStick 22
@@ -361,65 +361,65 @@ onAStick 3.14159
 onAStick "hello"
 ```
 
-If there are two generic parameters, the compiler will give them different names: `'a` for the first generic, `'b` for the second generic, and so on. Here's an example:
+ジェネリックパラメータが複数ある場合、コンパイラは異なる名前を割り当てます。最初のジェネリックに `'a`、2番目に `'b` というように続きます。例を見てみましょう。
 
 ```fsharp
 let concatString x y = x.ToString() + y.ToString()
 ```
 
-The type signature for this has two generics: `'a` and `'b`:
+この関数の型シグネチャには、`'a` と `'b` の2つのジェネリックが含まれます。
 
 ```fsharp
 val concatString : 'a -> 'b -> string
 ```
 
-On the other hand, the compiler will recognize when only one generic type is required. In the following example, the x and y parameters must be of the same type:
+一方、コンパイラは1つのジェネリック型で十分な場合を認識します。次の例では、x と y のパラメータは同じ型である必要があります。
 
 ```fsharp
 let isEqual x y = (x=y)
 ```
 
-So the function signature has the same generic type for both of them:
+そのため、関数シグネチャでは両方のパラメータに同じジェネリック型が使用されます。
 
 ```fsharp
 val isEqual : 'a -> 'a -> bool 
 ```
 
-Generic parameters are also very important when it comes to lists and more abstract structures, and we will be seeing them a lot in upcoming examples.
+ジェネリックパラメータの重要性は、リストやより抽象的なデータ構造を扱う際により顕著になります。これらについては、今後の例で詳しく見ていくことになるでしょう。
 
-## Other types ##
+## その他の型
 
-The types discussed so far are just the basic types. These types can be combined in various ways to make much more complex types. A full discussion of these types will have to wait for [another series](../series/understanding-fsharp-types.md), but meanwhile, here is a brief introduction to them so that you can recognize them in function signatures.
+これまで議論してきた型は、F#で使用できる型の一部にすぎません。これらの基本的な型は様々な方法で組み合わせることができ、より複雑な型を作り出すことができます。ここでは、関数のシグネチャでよく見かける型を簡単に紹介します。これらの型の詳細な説明は[別のシリーズ](../series/understanding-fsharp-types.md)で行います。
 
-* **The "tuple" types**. These are pairs, triples, etc., of other types. For example `("hello", 1)` is a tuple made from a string and an int. The comma is the distinguishing characteristic of a tuple -- if you see a comma in F#, it is almost certainly part of a tuple!
+* **タプル型**：他の型のペアやトリプルなどを表現します。例えば `("hello", 1)` は文字列と整数から構成されたタプルです。F#ではコンマがタプルの特徴的な要素です。コードの中でコンマを見かけたら、それはほぼ確実にタプルの一部だと考えてよいでしょう。
 
-In function signatures, tuples are written as the "multiplication" of the two types involved. So in this case, the tuple would have type:
+関数のシグネチャでは、タプルは関係する型の「乗算」として記述されます。例えば、先ほどの例のタプル型は以下のように表現されます。
 
 ```fsharp
 string * int      // ("hello", 1)
 ```
 
-* **The collection types**. The most common of these are lists, sequences, and arrays. Lists and arrays are fixed size, while sequences are potentially infinite (behind the scenes, sequences are the same as `IEnumerable`). In function signatures, they have their own keywords: "`list`", "`seq`", and "`[]`" for arrays.
+* **コレクション型**：最も一般的なコレクション型はリスト、シーケンス、配列です。リストと配列は固定サイズですが、シーケンスは潜在的に無限の要素を持つことができます。シーケンスは内部的には `IEnumerable` と同じものです。関数のシグネチャでは、これらのコレクション型はそれぞれ固有のキーワードを使用します。リストは `list` 、シーケンスは `seq` 、配列は `[]` を使います。例を見てみましょう。
 
 ```fsharp
-int list          // List type  e.g. [1;2;3]
-string list       // List type  e.g. ["a";"b";"c"]
-seq<int>          // Seq type   e.g. seq{1..10}
-int []            // Array type e.g. [|1;2;3|]
+int list          // リスト型  例: [1;2;3]
+string list       // リスト型  例: ["a";"b";"c"]
+seq<int>          // シーケンス型   例: seq{1..10}
+int []            // 配列型 例: [|1;2;3|]
 ```
 
-* **The option type**. This is a simple wrapper for objects that might be missing. There are two cases: `Some` and `None`. In function signatures, they have their own "`option`" keyword:
+* **オプション型**：値が存在しない可能性がある場合に使用されるシンプルなラッパーです。`Some` と `None` の2つのケースがあります。関数のシグネチャでは `option` キーワードを使用します。
 
 ```fsharp
 int option        // Some(1)
 ```
 
-* **The discriminated union type**. These are built from a set of choices of other types. We saw some examples of this in the ["F# を使う理由"](../series/why-use-fsharp.md) series. In function signatures, they are referred to by the name of the type, so there is no special keyword.
-* **The record type**. These are like structures or database rows, a list of named slots. We saw some examples of this in the ["F# を使う理由"](../series/why-use-fsharp.md) series as well. In function signatures, they are referred to by the name of the type, so again there is no special keyword.
+* **判別共用体型**：他の型の選択肢の集合から構築される型です。この型の例は「[F# を使う理由](../series/why-use-fsharp.md)」シリーズで見ました。関数のシグネチャでは、型の名前そのもので参照されるため、特別なキーワードはありません。
+* **レコード型**：これは構造体やデータベースの行に似ており、名前付きのフィールドのリストです。この型の例も「[F# を使う理由](../series/why-use-fsharp.md)」シリーズで見ました。判別共用体型と同様に、関数のシグネチャでは型の名前で参照され、特別なキーワードはありません。
 
-## Test your understanding of types ##
+## 型の理解度テスト
 
-How well do you understand the types yet?  Here are some expressions for you -- see if you can guess their signatures. To see if you are correct, just run them in the interactive window!
+ここまでで型についての理解を深めてきました。では、実際にどれくらい理解できたか、テストしてみましょう。以下にいくつかの式を示します。これらの式のシグネチャを推測してみてください。正解を確認するには、これらの式をF#のインタラクティブウィンドウで実行してみてください。
 
 ```fsharp
 let testA   = float 2
@@ -435,6 +435,6 @@ let testJ (x:int) = 2 * 2 |> ignore
 let testK   = "hello"
 let testL() = "hello"
 let testM x = x=x
-let testN x = x 1          // hint: what kind of thing is x?
-let testO x:string = x 1   // hint: what does :string modify? 
+let testN x = x 1          // ヒント: x はどのような種類のものでしょうか？
+let testO x:string = x 1   // ヒント: :string は何を修飾していますか？ 
 ```

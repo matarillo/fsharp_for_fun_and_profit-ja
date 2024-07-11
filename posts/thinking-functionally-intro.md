@@ -1,27 +1,27 @@
 ---
 layout: post
-title: "Thinking Functionally: Introduction"
-description: "A look at the basics of functional programming"
+title: "関数型思考：はじめに"
+description: "関数型プログラミングの基礎を見ていく"
 nav: thinking-functionally
 seriesId: "関数型思考"
 seriesOrder: 1
 ---
 
-Now that you have seen some of the power of F# in the ["F# を使う理由"](../series/why-use-fsharp.md) series, we're going to step back and look at the fundamentals of functional  programming -- what does it really mean to "program functionally", and how this approach is different from object oriented or imperative programming.
+「[F# を使う理由](../series/why-use-fsharp.md)」シリーズで、F# の力強さの一端をご覧いただきました。ここで一歩下がって、関数型プログラミングの基礎を見ていきましょう。「関数型でプログラミングする」とは実際どういうことなのでしょうか。そして、このアプローチがオブジェクト指向や命令型プログラミングとどう違うのかを探ります。
 
-### Changing the way you think ###
+### 考え方を変える ###
 
-It is important to understand that functional programming is not just a stylistic difference; it is a completely different way of thinking about programming, in the way that truly object-oriented programming (in Smalltalk say) is also a different way of thinking from a traditional imperative language such as C. 
+関数型プログラミングは単なるスタイルの違いではありません。これは全く異なるプログラミングの考え方なのです。純粋なオブジェクト指向プログラミング（例えば Smalltalk）が、C のような従来の命令型言語とは異なる考え方であるのと同じです。
 
-F# does allow non-functional styles, and it is tempting to retain the habits you already are familiar with. You could just use F# in a non-functional way without really changing your mindset, and not realize what you are missing. To get the most out of F#, and to be fluent and comfortable with functional programming in general, it is critical that you think functionally, not imperatively.
-And that is the goal of this series: to help you understand functional programming in a deep way, and help to change the way you think.
+F# は非関数型のスタイルも許容します。そのため、既に慣れ親しんだ習慣を手放したくないという誘惑があります。F# を関数型でない方法で使い、考え方を変えずにいると、重要な側面を見逃してしまう可能性があります。F# を最大限に活用し、関数型プログラミング全般に流暢かつ快適に取り組むには、命令型ではなく関数型で考えることが極めて重要です。
+そして、それがこのシリーズの目標です。関数型プログラミングを深く理解し、あなたの考え方を変えるお手伝いをします。
 
-This will be a quite abstract series, although I will use lots of short code examples to demonstrate the points. We will cover the following points:
+このシリーズは抽象的な内容になりますが、要点を示すために短いコード例を多く使います。以下の点をカバーします。
 
-* **Mathematical functions**. The first post introduces the mathematical ideas behind functional languages, and the benefits that come from this approach.
-* **Functions and values**. The next post introduces functions and values, showing how "values" are different from variables, and why there are similarities between function and simple values. 
-* **Types**.  Then we move on to the basic types that work with functions: primitive types such as string and int; the unit type, function types, and generic types.
-* **Functions with multiple parameters**. Next, I explain the concepts of "currying" and "partial application". This is where your brain can start to hurt, if you are coming from an imperative background!
-* **Defining functions**. Then some posts devoted to the many different ways to define and combine functions.
-* **Function signatures**. Then a important post on the critical topic of function signatures: what they mean and how to use them as an aid to understanding.
-* **Organizing functions**. Once you know how to create functions, how can you organize them to make them available to the rest of your code?
+* **数学的関数**：最初の投稿では、関数型言語の背景にある数学的な考え方を紹介します。また、このアプローチがもたらす利点についても説明します。
+* **関数と値**：次の投稿では関数と値を紹介します。「値」が変数とどう違うのか、そして関数と単純な値の間になぜ類似点があるのかを示します。
+* **型**：次に、関数と一緒に使う基本的な型に移ります。文字列や整数のようなプリミティブ型、ユニット型、関数型、そしてジェネリック型について説明します。
+* **複数のパラメータを持つ関数**：ここでは「カリー化」と「部分適用」の概念を説明します。命令型のバックグラウンドを持つ人にとっては、ここから頭を悩ませ始めるかもしれません！
+* **関数の定義**：関数を定義し組み合わせる多様な方法について、いくつかの投稿を使って詳しく見ていきます。
+* **関数シグネチャ**：関数シグネチャという重要なトピックを取り上げます。それらが意味するところと、理解の助けとしての使い方を説明する大切な投稿です。
+* **関数の整理**：関数の作り方を知ったら、次はそれらをどのように整理するのでしょうか。コードの他の部分で使えるようにする方法を探ります。

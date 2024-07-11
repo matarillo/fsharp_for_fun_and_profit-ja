@@ -1,46 +1,46 @@
 ---
 layout: post
-title: "Function Values and Simple Values"
-description: "Binding not assignment"
+title: "関数の値と単純な値"
+description: "代入ではなく束縛"
 nav: thinking-functionally
 seriesId: "関数型思考"
 seriesOrder: 3
 ---
 
-Let's look at the simple function again
+単純な関数をもう一度見てみましょう。
 
 ```fsharp
 let add1 x = x + 1
 ```
 
-What does the "x" mean here? It means:
+この "x" は何を意味するのでしょうか？2つの役割があります。
 
-1. Accept some value from the input domain.
-2. Use the name "x" to represent that value so that we can refer to it later.
+1. 入力定義域から値を受け取る。
+2. その値に "x" という名前をつけて、後で参照できるようにする。
 
-This process of using a name to represent a value is called "binding". The name "x" is "bound" to the input value. 
+この、値に名前をつけるプロセスを「束縛」と呼びます。名前 "x" が入力値に「束縛」されるのです。
 
-So if we evaluate the function with the input 5 say, what is happening is that everywhere we see "x" in the original definition, we replace it with "5", sort of like search and replace in a word processor. 
+例えば、この関数に5を入力する場合を考えてみましょう。元の定義の "x" をすべて "5" に置き換えることになります。ワープロの検索と置換のようなイメージです。
 
 ```fsharp
 let add1 x = x + 1
 add1 5
-// replace "x" with "5"
+// "x" を "5" に置換
 // add1 5 = 5 + 1 = 6
-// result is 6
+// 結果は 6
 ```
 
-It is important to understand that this is not assignment. "x" is not a "slot" or variable that is assigned to the value and can be assigned to another value later on. It is a onetime association of the name "x" with the value. The value is one of the predefined integers, and cannot change. And so, once bound, x cannot change either; once associated with a value, always associated with a value. 
+ここで重要なのは、これが代入ではないということです。"x" は値を割り当てる「スロット」や変数ではありません。後で別の値に変更することはできません。"x" という名前と値を一度だけ関連付けるのです。値は事前に定義された整数の1つで、変更できません。そのため、一度束縛されたxも変更できません。値と一度関連付けられたら、常にその値と関連付けられたままです。
 
-This concept is a critical part of thinking functionally: *there are no "variables", only values*.
+この概念は関数型思考の重要な部分です。*「変数」は存在せず、あるのは値だけです。*
 
-## Function values ##
+## 関数値 ##
 
-If you think about this a bit more, you will see that the name "`add1`" itself is just a binding to "the function that adds one to its input". The function itself is independent of the name it is bound to.
+さらに考えてみましょう。 `add1` という名前自体が「入力に1を足す関数」への束縛にすぎないことがわかります。関数自体は、束縛される名前とは独立しているのです。
 
-When you type `let add1 x = x + 1` you are telling the F# compiler "every time you see the name "`add1`", replace it with the function that adds 1 to its input". "`add1`" is called a **function value**.
+`let add1 x = x + 1` と入力すると、F#コンパイラに次のように伝えていることになります。「 `add1` という名前を見つけたら、それを入力に1を足す関数に置き換えてください」。この `add1` を**関数値**と呼びます。
 
-To see that the function is independent of its name, try:
+関数が名前から独立していることを確認するには、次のコードを試してみてください。
 
 ```fsharp
 let add1 x = x + 1
@@ -49,97 +49,97 @@ add1 5
 plus1 5
 ```
 
-You can see that "`add1`" and "`plus1`" are two names that refer ("bound to") to the same function.
+`add1` と `plus1` が同じ関数を参照する（束縛された）2つの名前であることがわかります。
 
-You can always identify a function value because its signature has the standard form `domain -> range`. Here is a generic function value signature:
+関数値は、そのシグネチャで常に識別できます。シグネチャは `定義域 -> 値域` という標準形式を持ちます。一般的な関数値のシグネチャは次のようになります。
 
 ```fsharp
-val functionName : domain -> range
+val 関数名 : 定義域 -> 値域
 ```
 
-## Simple values ##
+## 単純な値 ##
 
-Imagine an operation that always returned the integer 5 and didn't have any input. 
+次に、常に整数5を返し、入力を持たない操作を想像してみてください。
 
 ![](../assets/img/Functions_Const.png)
  
-This would be a "constant" operation.
+これは「定数」操作と呼べるでしょう。
 
-How would we write this in F#?  We want to tell the F# compiler "every time you see the name `c`, replace it with 5". Here's how:
+F#でこれをどのように書くのでしょうか？F#コンパイラに「 `c` という名前を見つけたら、それを 5 に置き換えてください」と伝えたいわけです。方法は次の通りです。
 
 ```fsharp
 let c = 5
 ```
 
-which when evaluated, returns:
+これを評価すると、次の結果が返ります。
 
 ```fsharp
 val c : int = 5
 ```
 
-There is no mapping arrow this time, just a single int. What's new is an equals sign with the actual value printed after it. The F# compiler knows that this binding has a known value which it will always return, namely the value 5. 
+今回は写像を示す矢印はなく、単一のintだけです。新しい点は、等号の後に実際の値が表示されていることです。F#コンパイラは、この束縛が常に返す既知の値（この場合は5）を持っていることを認識しています。
 
-In other words, we've just defined a constant, or in F# terms, a simple value. 
+つまり、これは定数の定義、あるいはF#の用語では単純な値の定義です。
 
-You can always tell a simple value from a function value because all simple values have a signature that looks like:
+単純な値は関数値と区別できます。すべての単純な値は次のようなシグネチャを持ちます。
 
 ```fsharp
-val aName: type = constant     // Note that there is no arrow
+val 名前: 型 = 定数     // 矢印がないことに注意
 ```
 
-## Simple values vs. function values ##
+## 単純な値 vs. 関数値 ##
 
-It is important to understand that in F#, unlike languages such as C#, there is very little difference between simple values and function values. They are both values which can be bound to names (using the same keyword `let`) and then passed around. And in fact, one of the key aspects of thinking functionally is exactly that: *functions are values that can be passed around as inputs to other functions*, as we will soon see.
+F#では、C#のような言語とは異なり、単純な値と関数値の間にほとんど違いがないことが重要です。どちらも名前に束縛できる値であり（同じキーワード `let` を使います）、引数として渡すことができます。実際、関数型思考の重要な側面の1つは、まさにこの点です。 *関数は他の関数への入力として渡すことができる値である。* これについてはすぐに見ていきます。
 
-Note that there is a subtle difference between a simple value and a function value. A function always has a domain and range and must be "applied" to an argument to get a result. A simple value does not need to be evaluated after being bound. Using the example above, if we wanted to define a "constant function" that returns five we would have to use 
+ただし、単純な値と関数値には微妙な違いがあります。関数には常に定義域と値域があり、結果を得るには引数に「適用」する必要があります。一方、単純な値は束縛された後に評価する必要はありません。例えば、5を返す「定数関数」を定義したい場合は、次のようにする必要があります。
 
 ```fsharp
 let c = fun()->5    
-// or
+// または
 let c() = 5
 ```
 
-The signature for these functions is:
+これらの関数のシグネチャは以下のようになります。
 
 ```fsharp
 val c : unit -> int
 ```
 
-instead of:
+次のようにはなりません。
 
 ```fsharp
 val c : int = 5
 ```
 
-More on unit, function syntax and anonymous functions later.
+unit、関数構文、匿名関数については後ほど詳しく説明します。
 
-## "Values" vs. "Objects" ##
+## 「値」vs.「オブジェクト」 ##
 
-In a functional programming language like F#, most things are called "values". In an object-oriented language like C#, most things are called "objects". So what is the difference between a "value" and an "object"?  
+F#のような関数型プログラミング言語では、ほとんどのものを「値」と呼びます。一方、C#のようなオブジェクト指向言語では、ほとんどのものを「オブジェクト」と呼びます。では、「値」と「オブジェクト」の違いは何でしょうか？
 
-A value, as we have seen above, is just a member of a domain. The domain of ints, the domain of strings, the domain of functions that map ints to strings, and so on. In principle, values are immutable. And values do not have any behavior attached them. 
+値は、単に定義域のメンバーです。整数の定義域、文字列の定義域、整数を文字列に写像する関数の定義域などがあります。原則として、値は不変です。また、値には振る舞いが付随していません。
 
-An object, in a standard definition, is an encapsulation of a data structure with its associated behavior (methods). In general, objects are expected to have state (that is, be mutable), and all operations that change the internal state must be provided by the object itself (via "dot" notation).
+一方、オブジェクトは、標準的な定義によれば、データ構造とそれに関連する振る舞い（メソッド）のカプセル化です。一般的に、オブジェクトは状態を持つ（つまり可変である）ことが期待されます。また、内部状態を変更するすべての操作はオブジェクト自体が提供する必要があります（「ドット」表記を介して）。
 
-In F#, even the primitive values have some object-like behavior. For example, you can dot into a string to get its length:
+F#では、プリミティブな値でさえもオブジェクトのような振る舞いを持っています。例えば、文字列にドットを使って長さを取得できます。
 
 ```fsharp
 "abc".Length
 ```
 
-But, in general, we will avoid using "object" for standard values in F#, reserving it to refer to instances of true classes, or other values that expose member methods.
+しかし、一般的にF#では標準的な値に対して「オブジェクト」という用語は使いません。「オブジェクト」は、真のクラスのインスタンスやメンバーメソッドを公開する他の値を指す場合に限って使います。
 
-## Naming Values ##
+## 値の命名 ##
 
-Standard naming rules are used for value and function names, basically, any alphanumeric string, including underscores.  There are a couple of extras:
+値や関数の名前には標準的な命名規則が使われます。基本的には、アンダースコアを含むすべてのアルファベットと数字の文字列が使えます。いくつか特別なルールがあります。
 
-You can put an apostrophe anywhere in a name, except the first character. So: 
+1. アポストロフィは、最初の文字以外ならどこにでも置けます。たとえば、
 
 ```fsharp
-A'b'c     begin'  // valid names
+A'b'c     begin'  // 有効な名前
 ```
 
-The final tick is often used to signal some sort of "variant" version of a value:
+2. 末尾のアポストロフィは、値の「派生」バージョンを示すのによく使われます。
 
 ```fsharp
 let f = x
@@ -147,40 +147,40 @@ let f' = derivative f
 let f'' = derivative f'
 ```
 
-or define variants of existing keywords
+3. 既存のキーワードの派生を定義するのにも使えます。
 
 ```fsharp
 let if' b t f = if b then t else f
 ```
 
-You can also put double backticks around any string to make a valid identifier.
+4. 任意の文字列を二重バッククォートで囲むと、有効な識別子になります。
 
 ```fsharp
-``this is a name``  ``123``    //valid names
+``this is a name``  ``123``    //有効な名前
 ```
 
-You might want to use the double backtick trick sometimes:
+二重バッククォートのテクニックは以下のような場合に便利です。
 
-* When you want to  use an identifier that is the same as a keyword 
+* キーワードと同じ識別子を使いたい場合。
 
 ```fsharp
 let ``begin`` = "begin"
 ```
 
-* When trying to use natural language for business rules, unit tests, or BDD style executable specifications a la Cucumber. 
+* ビジネスルール、単体テスト、またはCucumberのようなBDDスタイルの実行可能な仕様で自然言語を使いたい場合。
 
 ```fsharp
-let ``is first time customer?`` = true
-let ``add gift to order`` = ()
-if ``is first time customer?`` then ``add gift to order``
+let ``初回顧客か？`` = true
+let ``注文にギフトを追加`` = ()
+if ``初回顧客か？`` then ``注文にギフトを追加``
 
-// Unit test 
-let [<Test>] ``When input is 2 then expect square is 4``=  
-   // code here
+// 単体テスト 
+let [<Test>] ``入力が2の場合、二乗は4になることを期待``=  
+   // ここにコード
 
-// BDD clause
-let [<Given>] ``I have (.*) N products in my cart`` (n:int) =  
-   // code here
+// BDD句
+let [<Given>] ``カートに (.*) 個の商品がある`` (n:int) =  
+   // ここにコード
 ```
 
-Unlike C#, the naming convention for F# is that functions and values start with lowercase letters rather than uppercase (`camelCase` rather than `PascalCase`) unless designed for exposure to other .NET languages.  Types and modules use uppercase however.
+F#の命名規則には、C#とは異なる点があります。F#では、他の.NET言語に公開するように設計されていない限り、関数と値は大文字ではなく小文字で始めます（ `PascalCase` ではなく `camelCase` ）。ただし、型とモジュールは大文字で始めます。
