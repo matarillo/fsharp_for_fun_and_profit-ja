@@ -1,22 +1,22 @@
 ---
 layout: post
-title: "Completeness"
-description: "F# is part of the whole .NET ecosystem"
+title: "完全性"
+description: "F#は.NETエコシステム全体の一部です"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 27
 categories: [Completeness]
 ---
 
-In this final set of posts, we will look at some other aspects of F# under the theme of "completeness".  
+この最後の一連の投稿では、「完全性」というテーマで、F#のその他の側面を見ていきます。
 
-Programming languages coming from the academic world tend to focus on elegance and purity over real-world usefulness, while more mainstream business languages such as C# and Java are valued precisely because they are pragmatic; they can work in a wide array of situations and have extensive tools and libraries to meet almost every need. In other words, to be useful in the enterprise, a language needs to be *complete*, not just well-designed.
+学術界発のプログラミング言語は、実用性よりも美しさや純粋性を重視しがちです。一方、C#やJavaのようなビジネス向けの主流言語は、まさにその実用性で評価されています。これらの言語は様々な場面で使え、ほぼすべてのニーズに応える豊富なツールやライブラリを持っているからです。つまり、企業で役立つ言語は、単に設計が優れているだけでなく、「完全」である必要があるのです。
 
-F# is unusual in that it successfully bridges both worlds. Although all the examples so far have focused on F# as an elegant functional language, it does support an object-oriented paradigm as well, and can integrate easily with other .NET languages and tools. As a result, F# is not a isolated island, but benefits from being part of the whole .NET ecosystem.
+F#はユニークな存在で、この両方の世界をうまくつないでいます。これまでの例では、エレガントな関数型言語としてのF#に注目してきましたが、F#はオブジェクト指向のパラダイムもサポートしており、他の.NET言語やツールとも簡単に連携できます。そのため、F#は孤立した存在ではなく、.NETエコシステム全体の一員として恩恵を受けているのです。
 
-The other aspects that make F# "complete" are being an official .NET language (with all the support and documentation that that entails) and being designed to work in Visual Studio (which provides a nice editor with IntelliSense support, a debugger, and so on).  These benefits should be obvious and won't be discussed here.
+F#を「完全」にしている他の要素としては、公式の.NET言語であること（それに伴うサポートとドキュメントがあること）、そしてVisual Studioでの使用を前提に作られていること（IntelliSenseサポート付きの優れたエディタ、デバッガなどが使える）が挙げられます。これらの利点は明らかなので、ここでは詳しく触れません。
 
-So, in this last section, we'll focus on two particular areas:
+そこで、この最後のセクションでは、次の2つの特定の領域に焦点を当てます：
 
-* **Seamless interoperation with .NET libraries**. Obviously, there can be a mismatch between the functional approach of F# and the imperative approach that is designed into the base libraries. We'll look at some of the features of F# that make this integration easier.
-* **Full support for classes and other C# style code**. F# is designed as a hybrid functional/OO language, so it can do almost everything that C# can do as well. We'll have a quick tour of the syntax for these other features.
+* **.NETライブラリとのシームレスな相互運用性**。F#の関数型アプローチと、基本ライブラリの命令型アプローチの間にはギャップがあるかもしれません。この統合をより簡単にするF#の機能について見ていきます。
+* **クラスやその他のC#スタイルのコードの完全サポート**。F#は関数型とオブジェクト指向のハイブリッド言語として設計されているので、C#とほぼ同じことができます。これらの機能の文法について簡単に紹介します。

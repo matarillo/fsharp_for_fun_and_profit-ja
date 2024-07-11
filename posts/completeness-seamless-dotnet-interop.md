@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Seamless interoperation with .NET libraries"
-description: "Some convenient features for working with .NET libraries"
+title: ".NETライブラリとのシームレスな連携"
+description: ".NETライブラリを扱うための便利な機能"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 28
@@ -9,70 +9,70 @@ categories: [Completeness]
 ---
 
 
-We have already seen many examples of F#'s use with the .NET libraries, such as using `System.Net.WebRequest` and `System.Text.RegularExpressions`. And the integration was indeed seamless.
+これまでに、 `System.Net.WebRequest` や `System.Text.RegularExpressions` など、F#で.NETライブラリを使う例をたくさん見てきました。そして、その連携は確かにシームレスでした。
 
-For more complex requirements, F# natively supports .NET classes, interfaces, and structures, so the interop is still very straightforward.  For example, you can write an `ISomething` interface in C# and have the implementation be done in F#. 
+より複雑な要件に対しても、F#は.NETのクラス、インターフェース、構造体をネイティブにサポートしているので、連携はとても簡単です。例えば、C#で `ISomething` インターフェースを書いて、それをF#で実装できます。
 
-But not only can F# call into existing .NET code, it can also expose almost any .NET API back to other languages. For example, you can write classes and methods in F# and expose them to C#, VB or COM.  You can even do the above example backwards -- define an `ISomething` interface in F# and have the implementation be done in C#! The benefit of all this is that you don't have to discard any of your existing code base; you can start using F# for some things while retaining C# or VB for others, and pick the best tool for the job.  
+F#は既存の.NETコードを呼び出せるだけでなく、ほぼすべての.NET APIを他の言語に公開できます。例えば、F#でクラスやメソッドを書いて、それらをC#、VB、またはCOMに公開できます。さらに、上の例を逆にもできます。F#で `ISomething` インターフェースを定義して、それをC#で実装できるのです！これらすべての利点は、既存のコードベースを捨てる必要がないことです。F#を一部の用途に使い始めながら、他の部分ではC#やVBを維持し、仕事に最適なツールを選べるのです。
 
-In addition to the tight integration though, there are a number of nice features in F# that often make working with .NET libraries more convenient than C# in some ways. Here are some of my favorites:
+緊密な統合に加えて、F#には.NETライブラリの扱いを便利にする素晴らしい機能がいくつかあります。これらの機能のおかげで、ある面ではC#よりも.NETライブラリを扱いやすくなっています。以下に、私のお気に入りをいくつか紹介します。
 
-* You can use `TryParse` and `TryGetValue` without passing an "out" parameter.
-* You can resolve method overloads by using argument names, which also helps with type inference.
-* You can use "active patterns" to convert .NET APIs into more friendly code.
-* You can dynamically create objects from an interface such as `IDisposable` without creating a concrete class.
-* You can mix and match "pure" F# objects with existing .NET APIs
+* "out"パラメータを渡さずに `TryParse` や `TryGetValue` を使えます。
+* 引数名を使ってメソッドのオーバーロードを解決できます。これは型推論にも役立ちます。
+* "アクティブパターン"を使って.NET APIをより親しみやすいコードに変換できます。
+* 具象クラスを作らずに `IDisposable` などのインターフェースからオブジェクトを動的に作成できます。
+* "純粋な"F#オブジェクトと既存の.NET APIを組み合わせて使えます。
 
-## TryParse and TryGetValue ##
+## TryParseとTryGetValue
 
-The `TryParse` and `TryGetValue` functions for values and dictionaries are frequently used to avoid extra exception handling. But the C# syntax is a bit clunky. Using them from F# is more elegant because F# will automatically convert the function into a tuple where the first element is the function return value and the second is the "out" parameter. 
+値や辞書に対する `TryParse` と `TryGetValue` 関数は、余分な例外処理を避けるためによく使われます。しかし、C#の構文はちょっと扱いにくいです。F#からこれらを使うとより優雅になります。なぜなら、F#は自動的にこの関数をタプルに変換し、最初の要素が関数の戻り値、2番目が"out"パラメータになるからです。
 
 ```fsharp
-//using an Int32
+//Int32を使う
 let (i1success,i1) = System.Int32.TryParse("123");
-if i1success then printfn "parsed as %i" i1 else printfn "parse failed"
+if i1success then printfn "パースされた値は %i" i1 else printfn "パース失敗"
 
 let (i2success,i2) = System.Int32.TryParse("hello");
-if i2success then printfn "parsed as %i" i2 else printfn "parse failed"
+if i2success then printfn "パースされた値は %i" i2 else printfn "パース失敗"
 
-//using a DateTime
+//DateTimeを使う
 let (d1success,d1) = System.DateTime.TryParse("1/1/1980");
 let (d2success,d2) = System.DateTime.TryParse("hello");
 
-//using a dictionary
+//辞書を使う
 let dict = new System.Collections.Generic.Dictionary<string,string>();
 dict.Add("a","hello")
 let (e1success,e1) = dict.TryGetValue("a");
 let (e2success,e2) = dict.TryGetValue("b");
 ```
 
-## Named arguments to help type inference
+## 型推論を助ける名前付き引数
 
-In C# (and .NET in general), you can have overloaded methods with many different parameters. F# can have trouble with this. For example, here is an attempt to create a `StreamReader`:
+C#（および.NET一般）では、多くの異なるパラメータを持つオーバーロードされたメソッドを持つことができます。F#はこれに対処するのが難しい場合があります。例えば、 `StreamReader` を作成しようとする次の例を見てみましょう。
 
 ```fsharp
 let createReader fileName = new System.IO.StreamReader(fileName)
-// error FS0041: A unique overload for method 'StreamReader' 
-//               could not be determined
+// エラー FS0041: メソッド'StreamReader'の一意のオーバーロードを
+//                決定できませんでした
 ```
 
-The problem is that F# does not know if the argument is supposed to be a string or a stream. You could explicitly specify the type of the argument, but that is not the F# way! 
+問題は、F#が引数が文字列なのかストリームなのかわからないことです。引数の型を明示的に指定することもできますが、それはF#らしくありません！
 
-Instead, a nice workaround is enabled by the fact that in F#, when calling methods in .NET libraries, you can specify named arguments.
+代わりに、F#では.NETライブラリのメソッドを呼び出す際に名前付き引数を指定できるという事実を利用した素晴らしい回避策があります。
 
 ```fsharp
 let createReader2 fileName = new System.IO.StreamReader(path=fileName)
 ```
 
-In many cases, such as the one above, just using the argument name is enough to resolve the type issue. And using explicit argument names can often help to make the code more legible anyway.
+上の例のように、多くの場合、引数名を使うだけで型の問題を解決できます。そして、明示的な引数名を使うことで、コードの可読性が向上することもよくあります。
 
-## Active patterns for .NET functions ##
+## .NET関数のためのアクティブパターン
 
-There are many situations where you want to use pattern matching against .NET types, but the native libraries do not support this. Earlier, we briefly touched on the F# feature called "active patterns" which allows you to dynamically create choices to match on. This can be very for useful .NET integration. 
+.NET型に対してパターンマッチングを使いたい場合がよくありますが、ネイティブのライブラリはこれをサポートしていません。以前、「アクティブパターン」というF#の機能について少し触れましたが、これを使うとマッチングする選択肢を動的に作成できます。これは.NETとの連携にとても役立ちます。
 
-A common case is that a .NET library class has a number of mutually exclusive `isSomething`, `isSomethingElse` methods, which have to be tested with horrible looking cascading if-else statements. Active patterns can hide all the ugly testing, letting the rest of your code use a more natural approach. 
+よくあるケースとして、.NETライブラリのクラスに相互に排他的な `isSomething` 、 `isSomethingElse` メソッドがあり、これらを醜いカスケード式のif-else文でテストしなければならないことがあります。アクティブパターンを使えば、すべての醜いテストを隠し、残りのコードでより自然なアプローチを使えるようになります。
 
-For example, here's the code to test for various `isXXX` methods for `System.Char`.
+例えば、 `System.Char` の様々な `isXXX` メソッドをテストするコードは次のようになります。
 
 ```fsharp
 let (|Digit|Letter|Whitespace|Other|) ch = 
@@ -82,23 +82,23 @@ let (|Digit|Letter|Whitespace|Other|) ch =
    else Other
 ```
 
-Once the choices are defined, the normal code can be straightforward: 
+選択肢を定義すれば、通常のコードはシンプルになります。
 
 ```fsharp
 let printChar ch = 
   match ch with
-  | Digit -> printfn "%c is a Digit" ch
-  | Letter -> printfn "%c is a Letter" ch
-  | Whitespace -> printfn "%c is a Whitespace" ch
-  | _ -> printfn "%c is something else" ch
+  | Digit -> printfn "%c は数字です" ch
+  | Letter -> printfn "%c は文字です" ch
+  | Whitespace -> printfn "%c は空白文字です" ch
+  | _ -> printfn "%c はその他の文字です" ch
 
-// print a list
+// リストを表示
 ['a';'b';'1';' ';'-';'c'] |> List.iter printChar
 ```
 
-Another common case is when you have to parse text or error codes to determine the type of an exception or result. Here's an example that uses an active pattern to parse the error number associated with `SqlExceptions`, making them more palatable. 
+もう一つのよくあるケースは、例外や結果の種類を判断するためにテキストやエラーコードを解析する必要がある場合です。以下の例では、アクティブパターンを使って `SqlExceptions` に関連するエラー番号を解析し、より扱いやすくしています。
 
-First, set up the active pattern matching on the error number:
+まず、エラー番号に対するアクティブパターンマッチングを設定します。
 
 ```fsharp
 open System.Data.SqlClient
@@ -110,100 +110,100 @@ let (|ConstraintException|ForeignKeyException|Other|) (ex:SqlException) =
    else Other 
 ```
 
-Now we can use these patterns when processing SQL commands:
+これで、SQLコマンドを処理する際にこれらのパターンを使えます。
 
 ```fsharp
 let executeNonQuery (sqlCommmand:SqlCommand) = 
     try
        let result = sqlCommmand.ExecuteNonQuery()
-       // handle success
+       // 成功時の処理
     with 
-    | :?SqlException as sqlException -> // if a SqlException
-        match sqlException with         // nice pattern matching
-        | ConstraintException  -> // handle constraint error
-        | ForeignKeyException  -> // handle FK error
-        | _ -> reraise()          // don't handle any other cases
-    // all non SqlExceptions are thrown normally
+    | :?SqlException as sqlException -> // SqlExceptionの場合
+        match sqlException with         // きれいなパターンマッチング
+        | ConstraintException  -> // 制約エラーの処理
+        | ForeignKeyException  -> // 外部キーエラーの処理
+        | _ -> reraise()          // その他のケースは処理しない
+    // SqlException以外の例外は通常通り投げられる
 ```
 
-## Creating objects directly from an interface ##
+## インターフェースから直接オブジェクトを作成する
 
-F# has another useful feature called "object expressions". This is the ability to directly create objects from an interface or abstract class without having to define a concrete class first. 
+F#には「オブジェクト式」というもう一つの便利な機能があります。これは、具象クラスを先に定義せずに、インターフェースや抽象クラスから直接オブジェクトを作成する機能です。
 
-In the example below, we create some objects that implement `IDisposable` using a `makeResource` helper function.
+以下の例では、 `makeResource` ヘルパー関数を使って `IDisposable` を実装するオブジェクトをいくつか作成しています。
 
 ```fsharp
-// create a new object that implements IDisposable
+// IDisposableを実装する新しいオブジェクトを作成
 let makeResource name = 
    { new System.IDisposable 
-     with member this.Dispose() = printfn "%s disposed" name }
+     with member this.Dispose() = printfn "%s が破棄されました" name }
 
 let useAndDisposeResources = 
-    use r1 = makeResource "first resource"
-    printfn "using first resource" 
+    use r1 = makeResource "最初のリソース"
+    printfn "最初のリソースを使用中" 
     for i in [1..3] do
-        let resourceName = sprintf "\tinner resource %d" i
+        let resourceName = sprintf "\t内部リソース %d" i
         use temp = makeResource resourceName 
-        printfn "\tdo something with %s" resourceName 
-    use r2 = makeResource "second resource"
-    printfn "using second resource" 
-    printfn "done." 
+        printfn "\t%s で何かをする" resourceName 
+    use r2 = makeResource "2番目のリソース"
+    printfn "2番目のリソースを使用中" 
+    printfn "完了。" 
 ```
 
-The example also demonstrates how the "`use`" keyword automatically disposes a resource when it goes out of scope. Here is the output:
+この例は、`use` キーワードによって、変数がスコープ外になると自動的にリソースが解放されることも示しています。以下が出力結果です。
 
 
-	using first resource
-		do something with 	inner resource 1
-		inner resource 1 disposed
-		do something with 	inner resource 2
-		inner resource 2 disposed
-		do something with 	inner resource 3
-		inner resource 3 disposed
-	using second resource
-	done.
-	second resource disposed
-	first resource disposed
+	最初のリソースを使用中
+		内部リソース 1 で何かをする
+		内部リソース 1 が破棄されました
+		内部リソース 2 で何かをする
+		内部リソース 2 が破棄されました
+		内部リソース 3 で何かをする
+		内部リソース 3 が破棄されました
+	2番目のリソースを使用中
+	完了。
+	2番目のリソース が破棄されました
+	最初のリソース が破棄されました
 
-## Mixing .NET interfaces with pure F# types ##
+## .NETインターフェースと純粋なF#型の混在
 
-The ability to create instances of an interface on the fly means that it is easy to mix and match interfaces from existing APIs with pure F# types.
+インターフェースのインスタンスをその場で作成できるということは、既存のAPIからのインターフェースと純粋なF#型を簡単に組み合わせて使えるということです。
 
-For example, say that you have a preexisting API which uses the `IAnimal` interface, as shown below.
+例えば、以下に示すような `IAnimal` インターフェースを使う既存のAPIがあるとします。
 
 ```fsharp
 type IAnimal = 
    abstract member MakeNoise : unit -> string
 
 let showTheNoiseAnAnimalMakes (animal:IAnimal) = 
-   animal.MakeNoise() |> printfn "Making noise %s" 
+   animal.MakeNoise() |> printfn "鳴き声は %s" 
 ```
 
-But we want to have all the benefits of pattern matching, etc, so we have created pure F# types for cats and dogs instead of classes. 
+しかし、パターンマッチングなどの利点をすべて活かしたいので、クラスの代わりに純粋なF#型で猫と犬を作成したいとします。
 
 ```fsharp
 type Cat = Felix | Socks
 type Dog = Butch | Lassie 
 ```
 
-But using this pure F# approach means that that we cannot pass the cats and dogs to the `showTheNoiseAnAnimalMakes` function directly.
+しかし、この純粋なF#のアプローチを使うと、猫や犬を直接 `showTheNoiseAnAnimalMakes` 関数に渡すことができません。
 
-However, we don't have to create new sets of concrete classes just to implement `IAnimal`. Instead, we can dynamically create the `IAnimal` interface by extending the pure F# types.
+ただし、 `IAnimal` を実装するための新しい具象クラスのセットを作成する必要はありません。代わりに、純粋なF#型を拡張して `IAnimal` インターフェースを動的に作成できます。
 
 ```fsharp
-// now mixin the interface with the F# types
+// F#型にインターフェースを混ぜ込む
 type Cat with
    member this.AsAnimal = 
         { new IAnimal 
-          with member a.MakeNoise() = "Meow" }
+          with member a.MakeNoise() = "ニャー" }
 
 type Dog with
    member this.AsAnimal = 
         { new IAnimal 
-          with member a.MakeNoise() = "Woof" }
+          with member a.MakeNoise() = "ワン" }
 ```
 
-Here is some test code:
+以下はテストコードです。
 
 ```fsharp
 let dog = Lassie
@@ -213,30 +213,30 @@ let cat = Felix
 showTheNoiseAnAnimalMakes (cat.AsAnimal)
 ```
 
-This approach gives us the best of both worlds. Pure F# types internally, but the ability to convert them into interfaces as needed to interface with libraries.
+このアプローチは、両方の世界の良いところを取り入れています。内部的には純粋なF#型を使いつつ、必要に応じてライブラリとのインターフェースのためにそれらを変換する能力を持っています。
 
-## Using reflection to examine F# types ##
+## リフレクションを使ってF#型を調べる
 
-F# gets the benefit of the .NET reflection system, which means that you can do all sorts of interesting things that are not directly available to you using the syntax of the language itself.  The `Microsoft.FSharp.Reflection` namespace has a number of functions that are designed to help specifically with F# types.
+F#は.NETのリフレクションシステムの恩恵を受けているため、言語の構文だけでは直接利用できない興味深いことがたくさんできます。 `Microsoft.FSharp.Reflection` 名前空間には、特にF#型を扱うために設計された関数がいくつかあります。
 
-For example, here is a way to print out the fields in a record type, and the choices in a union type.
+例えば、以下はレコード型のフィールドや判別共用体の選択肢を表示する方法です。
 
 ```fsharp
 open System.Reflection
 open Microsoft.FSharp.Reflection
 
-// create a record type...
+// レコード型を作成...
 type Account = {Id: int; Name: string}
 
-// ... and show the fields
+// ...そしてフィールドを表示
 let fields = 
     FSharpType.GetRecordFields(typeof<Account>)
     |> Array.map (fun propInfo -> propInfo.Name, propInfo.PropertyType.Name)
 
-// create a union type...
+// 判別共用体を作成...
 type Choices = | A of int | B of string
 
-// ... and show the choices
+// ...そして選択肢を表示
 let choices = 
     FSharpType.GetUnionCases(typeof<Choices>)
     |> Array.map (fun choiceInfo -> choiceInfo.Name)

@@ -1,98 +1,98 @@
 ---
 layout: post
-title: "Anything C# can do..."
-description: "A whirlwind tour of object-oriented code in F#"
+title: "C#でできることは何でも..."
+description: "F#でのオブジェクト指向コードの駆け足ツアー"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 29
 categories: [Completeness]
 ---
 
-As should be apparent, you should generally try to prefer functional-style code over object-oriented code in F#, but in some situations, you may need all the features of a fully fledged OO language ? classes, inheritance, virtual methods, etc.  
+F#では、関数型コードをオブジェクト指向コードよりも一般的に優先すべきなのは明白ですが、状況によっては、クラス、継承、仮想メソッドなどの完全なオブジェクト指向言語の機能がすべて必要になる場合もあります。
 
-So just to conclude this section, here is a whirlwind tour of the F# versions of these features.  
+そこで、このセクションの締めくくりとして、これらの機能のF#版を駆け足で見ていきましょう。
 
-Some of these will be dealt with in much more depth in a later series on .NET integration. But I won't cover some of the more obscure ones, as you can read about them in the MSDN documentation if you ever need them.
+これらの一部については、後の.NET統合に関するシリーズでもっと詳しく扱います。ただし、あまり使われない機能については触れません。必要になった場合はMicrosoft Learnのドキュメントを参照してください。
 
-## Classes and interfaces ##
+## クラスとインターフェース
 
-First, here are some examples of an interface, an abstract class, and a concrete class that inherits from the abstract class.
+まず、インターフェース、抽象クラス、そして抽象クラスを継承した具象クラスの例を見てみましょう。
 
 ```fsharp
-// interface
+// インターフェース
 type IEnumerator<'a> = 
     abstract member Current : 'a
     abstract MoveNext : unit -> bool 
 
-// abstract base class with virtual methods
+// 仮想メソッドを持つ抽象基底クラス
 [<AbstractClass>]
 type Shape() = 
-    //readonly properties
+    // 読み取り専用プロパティ
     abstract member Width : int with get
     abstract member Height : int with get
-    //non-virtual method
+    // 非仮想メソッド
     member this.BoundingArea = this.Height * this.Width
-    //virtual method with base implementation
+    // 基本実装を持つ仮想メソッド
     abstract member Print : unit -> unit 
-    default this.Print () = printfn "I'm a shape"
+    default this.Print () = printfn "私は図形です"
 
-// concrete class that inherits from base class and overrides 
+// 基底クラスを継承してオーバーライドする具象クラス
 type Rectangle(x:int, y:int) = 
     inherit Shape()
     override this.Width = x
     override this.Height = y
-    override this.Print ()  = printfn "I'm a Rectangle"
+    override this.Print ()  = printfn "私は長方形です"
 
-//test
+// テスト
 let r = Rectangle(2,3)
-printfn "The width is %i" r.Width
-printfn "The area is %i" r.BoundingArea
+printfn "幅は %i です" r.Width
+printfn "面積は %i です" r.BoundingArea
 r.Print()
 ```
 
-Classes can have multiple constructors, mutable properties, and so on.
+クラスは複数のコンストラクタ、可変プロパティなどを持つことができます。
 
 ```fsharp
 type Circle(rad:int) = 
     inherit Shape()
 
-    //mutable field
+    // 可変フィールド
     let mutable radius = rad
     
-    //property overrides
+    // プロパティのオーバーライド
     override this.Width = radius * 2
     override this.Height = radius * 2
     
-    //alternate constructor with default radius
+    // デフォルトの半径を持つ別のコンストラクタ
     new() = Circle(10)      
 
-    //property with get and set
+    // getとsetを持つプロパティ
     member this.Radius
          with get() = radius
          and set(value) = radius <- value
 
-// test constructors
-let c1 = Circle()   // parameterless ctor
-printfn "The width is %i" c1.Width
-let c2 = Circle(2)  // main ctor
-printfn "The width is %i" c2.Width
+// コンストラクタのテスト
+let c1 = Circle()   // パラメータなしのコンストラクタ
+printfn "幅は %i です" c1.Width
+let c2 = Circle(2)  // メインのコンストラクタ
+printfn "幅は %i です" c2.Width
 
-// test mutable property
+// 可変プロパティのテスト
 c2.Radius <- 3
-printfn "The width is %i" c2.Width
+printfn "幅は %i です" c2.Width
 ```
 
-## Generics ##
+## ジェネリクス
 
-F# supports generics and all the associated constraints.
+F#はジェネリクスと関連するすべての制約をサポートしています。
 
 ```fsharp
-// standard generics
+// 標準的なジェネリクス
 type KeyValuePair<'a,'b>(key:'a, value: 'b) = 
     member this.Key = key
     member this.Value = value
     
-// generics with constraints
+// 制約付きジェネリクス
 type Container<'a,'b 
     when 'a : equality 
     and 'b :> System.Collections.ICollection>
@@ -101,9 +101,9 @@ type Container<'a,'b
     member this.Values = values
 ```
 
-## Structs ##
+## 構造体
 
-F# supports not just classes, but the .NET struct types as well, which can help to boost performance in certain cases.
+F#はクラスだけでなく、.NETの構造体型もサポートしており、特定のケースでパフォーマンスを向上させるのに役立ちます。
 
 ```fsharp
 
@@ -114,52 +114,52 @@ type Point2D =
       new(x: float, y: float) = { X = x; Y = y }
    end
 
-//test
-let p = Point2D()  // zero initialized
-let p2 = Point2D(2.0,3.0)  // explicitly initialized
+// テスト
+let p = Point2D()  // ゼロで初期化
+let p2 = Point2D(2.0,3.0)  // 明示的に初期化
 ```
 
-## Exceptions ##
+## 例外
 
-F# can create exception classes, raise them and catch them.
+F#では例外クラスを作成し、それらを投げたり捕捉したりできます。
 
 ```fsharp
-// create a new Exception class
+// 新しい例外クラスを作成
 exception MyError of string
 
 try
-    let e = MyError("Oops!")
+    let e = MyError("おっと！")
     raise e
 with 
     | MyError msg -> 
-        printfn "The exception error was %s" msg
+        printfn "例外のエラーは %s でした" msg
     | _ -> 
-        printfn "Some other exception" 
+        printfn "その他の例外です" 
 ```
 
-## Extension methods ##
+## 拡張メソッド
 
-Just as in C#, F# can extend existing classes with extension methods.
+C#と同様に、F#でも既存のクラスを拡張メソッドで拡張できます。
 
 ```fsharp
 type System.String with
     member this.StartsWithA = this.StartsWith "A"
 
-//test
+// テスト
 let s = "Alice"
-printfn "'%s' starts with an 'A' = %A" s s.StartsWithA
+printfn "'%s' はAで始まる = %A" s s.StartsWithA
 
 type System.Int32 with
     member this.IsEven = this % 2 = 0
 
-//test
+// テスト
 let i = 20
-if i.IsEven then printfn "'%i' is even" i
+if i.IsEven then printfn "'%i' は偶数です" i
 ```
 
-## Parameter arrays ##
+## パラメータ配列
 
-Just like C#'s variable length "params" keyword, this allows a variable length list of arguments to be converted to a single array parameter.
+C#の可変長引数キーワード `params` と同様に、この機能は可変長の引数リストを単一の配列パラメーターに変換できます。
 
 ```fsharp
 open System
@@ -172,9 +172,9 @@ let cons = new MyConsole()
 cons.WriteLine("abc", 42, 3.14, true)
 ```
 
-## Events ##
+## イベント
 
-F# classes can have events, and the events can be triggered and responded to.
+F#のクラスはイベントを持つことができ、イベントをトリガーしたり応答したりできます。
 
 ```fsharp
 type MyButton() =
@@ -186,55 +186,55 @@ type MyButton() =
     member this.TestEvent(arg) =
         clickEvent.Trigger(this, arg)
 
-// test
+// テスト
 let myButton = new MyButton()
 myButton.OnClick.Add(fun (sender, arg) -> 
-        printfn "Click event with arg=%O" arg)
+        printfn "引数 %O でクリックイベントが発生" arg)
 
-myButton.TestEvent("Hello World!")
+myButton.TestEvent("こんにちは、世界！")
 ```
 
-## Delegates ##
+## デリゲート
 
-F# can do delegates.
+F#はデリゲートを扱えます。
 
 ```fsharp
-// delegates
+// デリゲート
 type MyDelegate = delegate of int -> int
 let f = MyDelegate (fun x -> x * x)
 let result = f.Invoke(5)
 ```
 
-## Enums ##
+## 列挙型
 
-F# supports CLI enums types, which look similar to the "union" types, but are actually different behind the scenes.
+F#はCLIの列挙型をサポートしています。これは「判別共用体」型に似ていますが、内部的には異なります。
 
 ```fsharp
-// enums
+// 列挙型
 type Color = | Red=1 | Green=2 | Blue=3
 
-let color1  = Color.Red    // simple assignment
-let color2:Color = enum 2  // cast from int
-// created from parsing a string
-let color3 = System.Enum.Parse(typeof<Color>,"Green") :?> Color // :?> is a downcast
+let color1  = Color.Red    // 単純な代入
+let color2:Color = enum 2  // intからのキャスト
+// 文字列の解析から作成
+let color3 = System.Enum.Parse(typeof<Color>,"Green") :?> Color // :?> はダウンキャスト
 
 [<System.FlagsAttribute>]
 type FileAccess = | Read=1 | Write=2 | Execute=4 
 let fileaccess = FileAccess.Read ||| FileAccess.Write
 ```
 
-## Working with the standard user interface ##
+## 標準ユーザーインターフェースの操作
 
-Finally, F# can work with the WinForms and WPF user interface libraries, just like C#.  
+最後に、F#はC#と同様に、WinFormsやWPFのユーザーインターフェースライブラリを操作できます。
 
-Here is a trivial example of opening a form and handling a click event.
+以下は、フォームを開いてクリックイベントを処理する簡単な例です。
 
 ```fsharp
 open System.Windows.Forms 
 
-let form = new Form(Width= 400, Height = 300, Visible = true, Text = "Hello World") 
+let form = new Form(Width= 400, Height = 300, Visible = true, Text = "こんにちは、世界") 
 form.TopMost <- true
-form.Click.Add (fun args-> printfn "the form was clicked")
+form.Click.Add (fun args-> printfn "フォームがクリックされました")
 form.Show()
 ```
 

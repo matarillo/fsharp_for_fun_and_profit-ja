@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "F# を使う理由: Conclusion"
+title: "F# を使う理由: 結論"
 description: ""
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
@@ -8,9 +8,9 @@ seriesOrder: 30
 categories: []
 ---
 
-This completes the tour of F# features. I hope that the examples have given you some appreciation of the power of F# and functional programming. If you have any comments on the series as a whole, please leave them at the bottom of this page.
+F# 機能の紹介はこれで終了です。 この一連の例を通して、F#と関数型プログラミングの持つ力を理解していただけたかと思います。もし、このシリーズ全体についてご意見がありましたら、このページの下部にコメントを残してください。
 
-In later series I hope to go deeper into data structures, pattern matching, list processing, asynchronous and parallel programming, and much more.
+次回以降のシリーズでは、データ構造、パターンマッチング、リスト処理、非同期および並列プログラミングなど、さらに深く掘り下げていく予定です。
 
-But before those, I recommend you read the ["thinking functionally"](../series/thinking-functionally.md) series, which will help you understand functional programming at a deeper level.   
+しかし、その前に、関数型プログラミングをより深く理解するのに役立つ「[関数型思考](../series/thinking-functionally.md)」シリーズを読むことをお勧めします。
 
