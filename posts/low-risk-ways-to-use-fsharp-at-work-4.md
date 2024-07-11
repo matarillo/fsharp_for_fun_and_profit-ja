@@ -96,8 +96,8 @@ seriesOrder: 4
 ### どの型プロバイダーを使うべきか？
 
 F#用にいくつかのSQL型プロバイダーがあります - [fsharp.orgのデータアクセスページ](http://fsharp.org/data-access/)を参照してください。これらの例では、
-`FSharp.Data.TypeProviders` DLLの一部である[`SqlDataConnection`型プロバイダー](http://msdn.microsoft.com/en-us/library/hh361033.aspx)を使います。
-これは裏で[SqlMetal](http://msdn.microsoft.com/en-us/library/bb386987.aspx)を使っているため、SQL Serverデータベースでのみ動作します。
+`FSharp.Data.TypeProviders` DLLの一部である[`SqlDataConnection`型プロバイダー](https://learn.microsoft.com/ja-jp/dotnet/fsharp/tutorials/type-providers/)を使います。
+これは裏で[SqlMetal](https://learn.microsoft.com/ja-jp/dotnet/framework/tools/sqlmetal-exe-code-generation-tool)を使っているため、SQL Serverデータベースでのみ動作します。
 
 [SQLProvider](http://fsprojects.github.io/SQLProvider/)プロジェクトも良い選択肢です - MySql、SQLite、その他の非Microsoftデータベースをサポートしています。
 
@@ -144,7 +144,7 @@ WHERE [t0].[Email] LIKE @p0
 -- @p0: Input VarChar (Size = 8000; Prec = 0; Scale = 0) [%gmail.com]
 ```
 
-サブクエリを使うなど、より複雑なこともできます。以下は[MSDN](http://msdn.microsoft.com/en-us/library/hh225374.aspx)からの例です：
+サブクエリを使うなど、より複雑なこともできます。以下は[Microsoft Learn](https://learn.microsoft.com/ja-jp/dotnet/fsharp/language-reference/query-expressions)からの例です：
 
 関数型アプローチにふさわしく、クエリは素晴らしく合成可能であることに注意してください。
 

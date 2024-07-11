@@ -94,7 +94,7 @@ PowerShellや[ScriptCS](http://scriptcs.net/)、あるいはPythonを使うこ�
 しかし、もちろん、F#スクリプトはほとんどすべての.NETライブラリと統合できます。以下は、スクリプト化できるその他のユーティリティの提案です：
 
 * 簡単なファイルコピー、ディレクトリ走査、アーカイブ（例：ログファイルの）。
-  .NET 4.5を使っている場合は、新しい[System.IO.Compression.ZipArchive](http://msdn.microsoft.com/en-us/library/vstudio/hh485720.aspx)
+  .NET 4.5を使っている場合は、新しい[System.IO.Compression.ZipArchive](https://learn.microsoft.com/ja-jp/dotnet/api/system.io.compression.zipfileextensions.createentryfromfile)
   クラスを使って、サードパーティのライブラリを必要とせずにZIP圧縮と解凍を行うことができます。
 * JSONを扱う作業。既知の形式
   （[JSON Type Provider](http://fsharp.github.io/FSharp.Data/library/JsonProvider.html)を使用）
@@ -118,7 +118,7 @@ F#スクリプトを使う大きな利点は、プロジェクト全体を作成
   通常、これを簡単な`log`関数でラップし、フラグでログ出力のオン/オフを切り替えられるようにします。
 * [FsEye](http://code.google.com/p/fseye/)ツールを使って、対話セッションで変数を検査し、監視できます。
 * 最後に、Visual Studioのデバッガーを使うこともできます。コツは、[デバッガーをアタッチする](http://stackoverflow.com/a/9337016/1136133)ことです。
-  fsi.exeプロセスに対して行い、その後[`Debugger.Break`](http://msdn.microsoft.com/en-us/library/vstudio/system.diagnostics.debugger.break)
+  fsi.exeプロセスに対して行い、その後[`Debugger.Break`](https://learn.microsoft.com/ja-jp/dotnet/api/system.diagnostics.debugger.break)
   を使って特定のポイントで停止できます。
 
 <a name="fake"></a>

@@ -327,7 +327,7 @@ let ``When ToLower(), expect lowercase letters``() =
 *上記のコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithFsUnit.fs)です。*
  
 非常に異なるアプローチを使うのが[Unquote](http://code.google.com/p/unquote/)です。
-Unquoteのアプローチは、任意のF#式を[F#クォーテーション](http://msdn.microsoft.com/en-us/library/dd233212.aspx)でラップしてから評価することです。
+Unquoteのアプローチは、任意のF#式を[F#クォーテーション](https://learn.microsoft.com/ja-jp/dotnet/fsharp/language-reference/code-quotations)でラップしてから評価することです。
 テスト式が例外をスローすると、テストは失敗し、例外だけでなく、例外が発生するまでの各ステップも出力します。
 この情報は、アサートが失敗した理由をより深く理解するのに役立つ可能性があります。
 

@@ -429,8 +429,8 @@ buzzStream
 
 関数型リアクティブプログラミング（FRPと呼ばれています）は大きなトピックで、ここではその一部に触れただけです。この入門で、このアプローチの有用性の一端を感じ取っていただけたら嬉しいです。
 
-もっと学びたい方は、上で使った基本的な変換が含まれているF#の[Observableモジュール](http://msdn.microsoft.com/en-us/library/ee370313)のドキュメントをご覧ください。
-また、.NET 4の一部として提供されている[Reactive Extensions (Rx)](http://msdn.microsoft.com/en-us/library/hh242985%28v=vs.103%29)ライブラリもあります。これには他にもたくさんの便利な変換が含まれています。
+もっと学びたい方は、上で使った基本的な変換が含まれているF#の[Observableモジュール](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-control-observablemodule.html)のドキュメントをご覧ください。
+また、.NET 4の一部として提供されている[Reactive Extensions (Rx)](https://learn.microsoft.com/ja-jp/previous-versions/dotnet/reactive-extensions/hh242985%28v=vs.103%29)ライブラリもあります。これには他にもたくさんの便利な変換が含まれています。
 
 
 

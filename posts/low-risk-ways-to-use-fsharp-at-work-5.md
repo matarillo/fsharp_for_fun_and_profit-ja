@@ -121,7 +121,7 @@ GraphVizの代替として、[FSGraph](http://github.com/piotrosz/FSGraph)の使
 
 利用可能であれば、Excelの組み込み機能を使うのは素晴らしいです。そしてF#スクリプティングはExcelとうまく連携します。
 
-[Excelでチャートを作成](http://msdn.microsoft.com/en-us/library/vstudio/hh297098.aspx)したり、
+[Excelでチャートを作成](https://learn.microsoft.com/ja-jp/previous-versions/visualstudio/visual-studio-2010/hh297098%28v=vs.100%29)したり、
 [Excelで関数をプロットしたり](http://www.clear-lines.com/blog/post/Plot-functions-from-FSharp-to-Excel.aspx)できます。さらにパワフルな統合のために、
 [FCell](http://fcell.io/)や[Excel-DNA](http://excel-dna.net/)プロジェクトがあります。
 
