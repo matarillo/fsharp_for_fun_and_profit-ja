@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Concurrency"
-description: "The next major revolution in how we write software?"
+title: "並行性"
+description: "ソフトウェア開発方法における次の大革命？"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 23
@@ -9,40 +9,40 @@ categories: [Concurrency]
 ---
 
 
-We hear a lot about concurrency nowadays, how important it is, and how it is ["the next major revolution in how we write software"](http://www.gotw.ca/publications/concurrency-ddj.htm).  
+最近、並行性についてよく耳にします。その重要性や、「[ソフトウェア開発方法における次の大革命](http://www.gotw.ca/publications/concurrency-ddj.htm)」としての位置づけなどが話題になっています。
 
-So what do we actually mean by "concurrency" and how can F# help?
+では、実際に「並行性」とは何を意味し、F#はどのようにそれを支援できるのでしょうか？
 
-The simplest definition of concurrency is just "several things happening at once, and maybe interacting with each other". It seems a trivial definition, but the key point is that most computer programs (and languages) are designed to work serially, on one thing at a time, and are not well-equipped to handle concurrency.
+並行性の最もシンプルな定義は、「複数のことが同時に起こり、場合によってはそれらが相互に影響し合う」ということです。一見些細な定義に思えますが、重要なポイントは、ほとんどのコンピュータプログラム（そしてプログラミング言語）が一度に1つのことを処理する直列処理を前提に設計されており、並行性をうまく扱えるようにはなっていないことです。
 
-And even if computer programs are written to handle concurrency, there is an even more serious problem:  our brains do not do well when thinking about concurrency. It is commonly acknowledged that writing code that handles concurrency is extremely hard. Or I should say, writing concurrent code that is *correct* is extremely hard! It's very easy to write concurrent code that is buggy; there might be race conditions, or operations might not be atomic, or tasks might be starved or blocked unnecessarily, and these issues are hard to find by looking at the code or using a debugger.
+そして、たとえプログラムが並行性を扱えるように書かれていたとしても、さらに深刻な問題があります。私たち人間の脳は並行性を考える上で苦手意識があるのです。並行性を扱うコードを書くのは非常に難しいとよく言われています。正確に言えば、「正しい」並行コードを書くのが極めて難しいのです！バグのある並行コードを書くのは簡単です。競合状態が発生したり、操作が原子的でなかったりすることがあります。また、タスクが不必要に飢餓状態に置かれたり、ブロックされたりする可能性もあります。これらの問題はコードを見たりデバッガを使ったりしても発見しづらいのです。
 
-Before talking about the specifics of F#, let's try to classify some of the common types of concurrency scenarios that we have to deal with as developers: 
+F#の具体的な話に入る前に、開発者として扱う必要のある一般的な並行性シナリオをいくつか分類してみましょう。
 
-* **"Concurrent Multitasking"**. This is when we have a number of concurrent tasks (e.g. processes or threads) within our direct control, and we want them to communicate with each other and share data safely.
-* **"Asynchronous" programming**. This is when we initiate a conversation with a separate system outside our direct control, and then wait for it to get back to us. Common cases of this are when talking to the filesystem, a database, or the network. These situations are typically I/O bound, so you want to do something else useful while you are waiting. These types of tasks are often *non-deterministic* as well, meaning that running the same program twice might give a different result.
-* **"Parallel" programming**. This is when we have a single task that we want to split into independant subtasks, and then run the subtasks in parallel, ideally using all the cores or CPUs that are available. These situations are typically CPU bound. Unlike the async tasks, parallelism is typically  *deterministic*, so running the same program twice will give the same result.
-* **"Reactive" programming**. This is when we do not initiate tasks ourselves, but are focused on listening for events which we then process as fast as possible. This situation occurs when designing servers, and when working with a user interface.
+* **「並行マルチタスキング」**：これは、直接制御下にある複数の並行タスク（プロセスやスレッドなど）があり、それらが互いに通信し、安全にデータを共有する必要がある場合です。
+* **「非同期」プログラミング**：これは、直接制御下にない別のシステムとの対話を開始し、その応答を待つ場合です。ファイルシステム、データベース、ネットワークとの通信がよくある例です。これらの状況は通常I/Oバウンドなので、待っている間に他の有用な処理をしたいものです。このタイプのタスクはしばしば「非決定的」でもあり、同じプログラムを2回実行しても異なる結果が得られる可能性があります。
+* **「並列」プログラミング**：これは、1つのタスクを独立したサブタスクに分割し、そのサブタスクを並列で実行したい場合です。理想的には、利用可能なすべてのコアやCPUを使います。これらの状況は通常CPUバウンドです。非同期タスクとは異なり、並列処理は通常「決定的」であり、同じプログラムを2回実行しても同じ結果が得られます。
+* **「リアクティブ」プログラミング**：これは、自分でタスクを開始するのではなく、イベントを監視し、それらをできるだけ早く処理することに焦点を当てる場合です。この状況は、サーバーの設計やユーザーインターフェースの操作時によく発生します。
 
-Of course, these are vague definitions and overlap in practice. In general, though, for all these cases, the actual implementations that address these scenarios tend to use two distinct approaches: 
+もちろん、これらは曖昧な定義であり、実際には重複する部分もあります。しかし一般的に、こうしたケースすべてに対処する実際の実装は、主に2つの異なるアプローチを使う傾向があります。
 
-* If there are lots of different tasks that need to share state or resources without waiting, then use a "buffered asynchronous" design.
-* If there are lots of identical tasks that do not need to share state, then use parallel tasks using "fork/join" or "divide and conquer" approaches.
+* 待機せずに状態やリソースを共有する必要のある多数の異なるタスクがある場合は、「バッファ付き非同期」設計を使います。
+* 状態を共有する必要のない多数の同一タスクがある場合は、「フォーク/ジョイン」や「分割統治」アプローチを使った並列タスクを使います。
 
-## F# tools for concurrent programming ##
+## 並行プログラミングのためのF#ツール
 
-F# offers a number of different approaches to writing concurrent code:
+F#は並行コードを書くためのいくつかの異なるアプローチを提供しています。
 
-* For multitasking and asynchronous problems, F# can directly use all the usual .NET suspects, such as `Thread` 
-`AutoResetEvent`, `BackgroundWorker` and `IAsyncResult`. But it also offers a much simpler model for all types of async IO and background task management, called "asynchronous workflows". 
-We will look at these in the next post.
+* マルチタスキングと非同期の問題に対しては、F#は `Thread` 、 `AutoResetEvent` 、 `BackgroundWorker` 、 `IAsyncResult` など、.NETでおなじみのものを直接使えます。
+しかし、F#はあらゆるタイプの非同期I/Oやバックグラウンドタスク管理のために、「非同期ワークフロー」と呼ばれるより簡単なモデルも提供しています。
+これについては次の投稿で詳しく見ていきます。
 
-* An alternative approach for asynchronous problems is to use message queues and the ["actor model"](http://en.wikipedia.org/wiki/Actor_model) (this is the "buffered asynchronous" design mentioned above). F# has a built in implementation of the actor model called `MailboxProcessor`.
-  I am a big proponent of designing with actors and message queues, as it decouples the various components and allows you to think serially about each one.
+* 非同期問題に対する別のアプローチとして、メッセージキューと「[アクターモデル](http://en.wikipedia.org/wiki/Actor_model)」を使う方法があります（これは前述の「バッファ付き非同期」設計です）。F#にはアクターモデルの組み込み実装である `MailboxProcessor` があります。
+  私は、アクターとメッセージキューを使った設計を強く推奨します。これにより様々なコンポーネントが分離され、それぞれを直列的に考えることができるからです。
 
-* For true CPU parallelism, F# has convenient library code that builds on the asynchronous workflows mentioned above, and it can also use the .NET [Task Parallel Library](http://msdn.microsoft.com/en-us/library/dd460717.aspx).
+* 真のCPU並列性に関しては、F#には前述の非同期ワークフローをベースにした便利なライブラリコードがありますし、.NETの[Task Parallel Library](http://msdn.microsoft.com/en-us/library/dd460717.aspx)も使えます。
 
-* Finally, the functional approach to event handling and reactive programming is quite different from the traditional approach. The functional approach treats events as "streams" which can be filtered, 
-split, and combined in much the the same way that LINQ handles collections.  F# has built in support for this model, as well as for the standard event-driven model.
+* 最後に、イベント処理とリアクティブプログラミングに対する関数型アプローチは、従来のアプローチとはかなり異なります。
+関数型アプローチでは、イベントを「ストリーム」として扱い、LINQがコレクションを処理するのと同じように、フィルタリング、分割、結合することができます。F#はこのモデルと、標準的なイベント駆動モデルの両方をサポートしています。
 
 

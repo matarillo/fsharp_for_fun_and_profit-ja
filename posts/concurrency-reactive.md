@@ -1,203 +1,203 @@
 ---
 layout: post
-title: "Functional Reactive Programming"
-description: "Turning events into streams"
+title: "関数型リアクティブプログラミング"
+description: "イベントをストリームに変換する"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 26
 categories: [Concurrency]
 ---
 
-Events are everywhere.  Almost every program has to handle events, whether it be button clicks in the user interface, listening to sockets in a server, or even a system shutdown notification.
+イベントは私たちの身の回りに溢れています。ほとんどのプログラムがイベント処理を必要としています。ユーザーインターフェースのボタンクリック、サーバーでのソケット待ち受け、システムのシャットダウン通知など、様々な場面でイベントが発生します。
 
-And events are the basis of one of the most common OO design patterns: the "Observer" pattern.
+イベントは、オブジェクト指向設計でよく使われる「オブザーバー」パターンの基礎にもなっています。
 
-But as we know, event handling, like concurrency in general, can be tricky to implement.  Simple event logic is straightforward, but what about logic like "do something if two events happen in a row but do something different if only one event happens" or "do something if two events happen at roughly the same time". And how easy is it to combine these requirements in other, more complex ways?
+しかし、並行処理全般と同じように、イベント処理の実装は厄介な場合があります。単純なイベントロジックなら簡単ですが、「2つのイベントが連続して起きたら何かをして、1つだけなら別のことをする」とか、「2つのイベントがほぼ同時に起きたら何かをする」といった複雑なロジックはどうでしょう？さらに、これらの要件を組み合わせて、もっと複雑なことをしようとしたら？
 
-Even you can successfully implement these requirements, the code tends to be spaghetti like and hard to understand, even with the best intentions.
+こういった要件を何とか実装できたとしても、結果的にコードがスパゲッティのようになり、理解が難しくなりがちです。これは最善を尽くしても避けられないことがあります。
 
-Is there a approach that can make event handling easier? 
+もっと簡単にイベント処理ができる方法はないのでしょうか？
 
-We saw in the previous post on message queues that one of the advantages of that approach was that the requests were "serialized" making it conceptually easier to deal with.
- 
-There is a similar approach that can be used with events. The idea is to turn a series of events into an "event stream". 
-Event streams then become quite like IEnumerables, and so the obvious next step
-is to treat them in much the the same way that LINQ handles collections, so that they can be filtered, mapped, split and combined.
+前回のメッセージキューに関する記事で、リクエストが「直列化」されることで扱いやすくなるという利点を見ました。
 
-F# has built in support for this model, as well as for the more tradition approach.
+実は、イベントに対しても似たようなアプローチが使えます。そのアイデアは、一連のイベントを「イベントストリーム」に変換するというものです。
+イベントストリームはIEnumerableによく似ています。そのため、次の自然な流れとして、LINQがコレクションを扱うのとほぼ同じ方法で扱えるようになります。
+つまり、フィルタリングやマッピング、分割、結合といった操作が可能になるのです。
 
-## A simple event stream ##
+F#には、従来のアプローチに加えて、このモデルのサポートも組み込まれています。
 
-Let's start with a simple example to compare the two approaches. We'll implement the classic event handler approach first.
+## シンプルなイベントストリーム ##
 
-First, we define a utility function that will:
+まずは、2つのアプローチを比較する簡単な例から見ていきましょう。最初に、古典的なイベントハンドラーのアプローチを実装します。
 
-* create a timer
-* register a handler for the `Elapsed` event
-* run the timer for five seconds and then stop it
+以下の機能を持つユーティリティ関数を定義します。
 
-Here's the code:
+* タイマーを作る
+* `Elapsed` イベントにハンドラーを登録する
+* タイマーを5秒間動かし、その後止める
+
+コードは以下のようになります。
 
 ```fsharp
 open System
 open System.Threading
 
-/// create a timer and register an event handler, 
-/// then run the timer for five seconds
+/// タイマーを作り、イベントハンドラーを登録し、
+/// その後タイマーを5秒間動かします
 let createTimer timerInterval eventHandler =
-    // setup a timer
+    // タイマーをセットアップ
     let timer = new System.Timers.Timer(float timerInterval)
     timer.AutoReset <- true
     
-    // add an event handler
+    // イベントハンドラーを追加
     timer.Elapsed.Add eventHandler
 
-    // return an async task
+    // 非同期タスクを返す
     async {
-        // start timer...
+        // タイマーを開始...
         timer.Start()
-        // ...run for five seconds...
+        // ...5秒間動かす...
         do! Async.Sleep 5000
-        // ... and stop
+        // ...そして停止
         timer.Stop()
         }
 ```
 
-Now test it interactively:
+では、対話的にテストしてみましょう。
 
 ```fsharp
-// create a handler. The event args are ignored
+// ハンドラーを作る。イベント引数は無視します
 let basicHandler _ = printfn "tick %A" DateTime.Now
 
-// register the handler
+// ハンドラーを登録
 let basicTimer1 = createTimer 1000 basicHandler
 
-// run the task now
+// タスクを今すぐ実行
 Async.RunSynchronously basicTimer1 
 ```
 
-Now let's create a similar utility method to create a timer, but this time it will return an "observable" as well, which is the stream of events.
+次に、タイマーを作る同じようなユーティリティメソッドを作りますが、今回はイベントストリームである「Observable」も返すようにします。
 
 ```fsharp
 let createTimerAndObservable timerInterval =
-    // setup a timer
+    // タイマーをセットアップ
     let timer = new System.Timers.Timer(float timerInterval)
     timer.AutoReset <- true
 
-    // events are automatically IObservable
+    // イベントは自動的にIObservableになります
     let observable = timer.Elapsed  
 
-    // return an async task
+    // 非同期タスクを返す
     let task = async {
         timer.Start()
         do! Async.Sleep 5000
         timer.Stop()
         }
 
-    // return a async task and the observable
+    // 非同期タスクとObservableを返す
     (task,observable)
 ```
 
-And again test it interactively:
+そして、再び対話的にテストします。
 
 ```fsharp
-// create the timer and the corresponding observable
+// タイマーと対応するObservableを作る
 let basicTimer2 , timerEventStream = createTimerAndObservable 1000
 
-// register that everytime something happens on the 
-// event stream, print the time.
+// イベントストリームで何かが起きるたびに
+// 時間を表示するよう登録
 timerEventStream 
 |> Observable.subscribe (fun _ -> printfn "tick %A" DateTime.Now)
 
-// run the task now
+// タスクを今すぐ実行
 Async.RunSynchronously basicTimer2
 ```
 
-The difference is that instead of registering a handler directly with an event, 
-we are "subscribing" to an event stream. Subtly different, and important.
+違いは、イベントに直接ハンドラーを登録する代わりに、イベントストリームを「購読」していることです。
+一見些細な違いに見えますが、実はこれが重要なポイントです。
 
-## Counting events  ##
+## イベントを数える ##
 
-In this next example, we'll have a slightly more complex requirement: 
+次の例では、少し複雑な要件を扱ってみましょう。
 
-    Create a timer that ticks every 500ms. 
-    At each tick, print the number of ticks so far and the current time.
+    500ミリ秒ごとに発火するタイマーを作ります。
+    発火するたびに、これまでの発火回数と現在時刻を表示します。
 
-To do this in a classic imperative way, we would probably create a class with a mutable counter, as below:
+これを古典的な命令型の方法で行うなら、おそらく可変のカウンターを持つクラスを作ることになるでしょう。以下のようになります。
 
 ```fsharp
 type ImperativeTimerCount() =
     
     let mutable count = 0
 
-    // the event handler. The event args are ignored
+    // イベントハンドラー。イベント引数は無視します
     member this.handleEvent _ =
       count <- count + 1
       printfn "timer ticked with count %i" count
 ```
 
-We can reuse the utility functions we created earlier to test it:
+先ほど作ったユーティリティ関数を使ってテストできます。
 
 ```fsharp
-// create a handler class
+// ハンドラークラスを作る
 let handler = new ImperativeTimerCount()
 
-// register the handler method
+// ハンドラーメソッドを登録
 let timerCount1 = createTimer 500 handler.handleEvent
 
-// run the task now
+// タスクを今すぐ実行
 Async.RunSynchronously timerCount1 
 ```
 
-Let's see how we would do this same thing in a functional way:
+では、これと同じことを関数型の方法でやってみましょう。
 
 ```fsharp
-// create the timer and the corresponding observable
+// タイマーと対応するObservableを作る
 let timerCount2, timerEventStream = createTimerAndObservable 500
 
-// set up the transformations on the event stream
+// イベントストリームの変換を設定
 timerEventStream 
 |> Observable.scan (fun count _ -> count + 1) 0 
 |> Observable.subscribe (fun count -> printfn "timer ticked with count %i" count)
 
-// run the task now
+// タスクを今すぐ実行
 Async.RunSynchronously timerCount2
 ```
 
-Here we see how you can build up layers of event transformations, just as you do with list transformations in LINQ.
+ここでは、LINQでリストを変換するのと同じように、イベント変換のレイヤーを重ねていく様子が見られます。
 
-The first transformation is `scan`, which accumulates state for each event. It is roughly equivalent to the `List.fold` function that we have seen used with lists.
-In this case, the accumulated state is just a counter.
+最初の変換は `scan` で、各イベントに対して状態を蓄積します。これは、リストで使う `List.fold` 関数とよく似ています。
+この場合、蓄積される状態は単なるカウンターです。
 
-And then, for each event, the count is printed out.
+そして、イベントが起きるたびに、カウントが出力されます。
 
-Note that in this functional approach, we didn't have any mutable state, and we didn't need to create any special classes.
+この関数型アプローチでは、可変状態を持たず、特別なクラスを作る必要もありませんでした。これが大きな違いです。
 
-## Merging multiple event streams  ##
+## 複数のイベントストリームをマージする ##
 
-For a final example, we'll look at merging multiple event streams.
+最後の例として、複数のイベントストリームをマージする方法を見てみましょう。
 
-Let's make a requirement based on the well-known "FizzBuzz" problem: 
+有名な「FizzBuzz」問題をもとに、こんな要件を考えてみました。
 
-    Create two timers, called '3' and '5'. The '3' timer ticks every 300ms and the '5' timer ticks 
-    every 500ms. 
+    '3'と'5'という2つのタイマーを作ります。'3'タイマーは300ミリ秒ごとに動き、'5'タイマーは
+    500ミリ秒ごとに動きます。
     
-    Handle the events as follows:
-    a) for all events, print the id of the time and the time
-    b) when a tick is simultaneous with a previous tick, print 'FizzBuzz'
-    otherwise:
-    c) when the '3' timer ticks on its own, print 'Fizz'
-    d) when the '5' timer ticks on its own, print 'Buzz'
+    イベントの処理は次のようにします。
+    a) すべてのイベントで、タイマーの番号と時刻を表示します
+    b) 前回のイベントと同時に起きた場合は、'FizzBuzz'と表示します
+    そうでない場合は、
+    c) '3'タイマーだけが動いたら、'Fizz'と表示します
+    d) '5'タイマーだけが動いたら、'Buzz'と表示します
 
-First let's create some code that both implementations can use. 
+まずは、両方の実装で使えるコードを作りましょう。
 
-We'll want a generic event type that captures the timer id and the time of the tick.
-    
+タイマーの番号と動いた時刻を記録する、汎用的なイベント型が必要です。
+
 ```fsharp
 type FizzBuzzEvent = {label:int; time: DateTime}
 ```
 
-And then we need a utility function to see if two events are simultaneous. We'll be generous and allow a time difference of up to 50ms.
+そして、2つのイベントが同時かどうかを判断する関数も必要です。ここでは寛大に、50ミリ秒以内の差なら同時とみなすことにします。
 
 ```fsharp
 let areSimultaneous (earlierEvent,laterEvent) =
@@ -206,8 +206,8 @@ let areSimultaneous (earlierEvent,laterEvent) =
     t2.Subtract(t1).Milliseconds < 50
 ```
 
-In the imperative design, we'll need to keep track of the previous event, so we can compare them. 
-And we'll need special case code for the first time, when the previous event doesn't exist
+命令型の設計では、前回のイベントを覚えておく必要があります。そうすることで、イベントを比較できるからです。
+また、前回のイベントがない最初の場合には、特別な処理が必要になります。
 
 ```fsharp
 type ImperativeFizzBuzzHandler() =
@@ -233,41 +233,41 @@ type ImperativeFizzBuzzHandler() =
       previousEvent <- Some event
 ```
 
-Now the code is beginning to get ugly fast! Already we have mutable state, complex conditional logic, and special cases, just for such a simple requirement.
+コードがみるみる複雑になっていきますね！こんな単純な要件なのに、すでに変更可能な状態、複雑な条件分岐、特殊なケース処理が登場しています。
 
-Let's test it:
-        
+テストしてみましょう。
+
 ```fsharp
-// create the class
+// クラスを作る
 let handler = new ImperativeFizzBuzzHandler()
 
-// create the two timers and register the two handlers
+// 2つのタイマーを作って、それぞれにハンドラーを設定
 let timer3 = createTimer 300 handler.handleEvent3
 let timer5 = createTimer 500 handler.handleEvent5
  
-// run the two timers at the same time
+// 2つのタイマーを同時に動かす
 [timer3;timer5]
 |> Async.Parallel
 |> Async.RunSynchronously
 ```
 
-It does work, but are you sure the code is not buggy? Are you likely to accidentally break something if you change it?
- 
-The problem with this imperative code is that it has a lot of noise that obscures the the requirements. 
+確かに動きはしますが、このコードにバグがないと自信を持って言えますか？何か変更を加えたとき、うっかり壊してしまう可能性はないでしょうか？
 
-Can the functional version do better? Let's see!
+この命令型コードの問題は、要件を分かりにくくする余計な要素がたくさんあることです。
 
-First, we create *two* event streams, one for each timer:
+関数型のバージョンならもっとうまくできるでしょうか？見てみましょう！
+
+まず、各タイマーに対して2つのイベントストリームを作ります。
 
 ```fsharp
 let timer3, timerEventStream3 = createTimerAndObservable 300
 let timer5, timerEventStream5 = createTimerAndObservable 500
 ```
 
-Next, we convert each event on the "raw" event streams into our FizzBuzz event type:
- 
+次に、「生の」イベントストリーム上の各イベントを、私たちのFizzBuzzイベント型に変換します。
+
 ```fsharp
-// convert the time events into FizzBuzz events with the appropriate id
+// 時間イベントを適切な番号を持つFizzBuzzイベントに変換
 let eventStream3  = 
    timerEventStream3  
    |> Observable.map (fun _ -> {label=3; time=DateTime.Now})
@@ -277,64 +277,64 @@ let eventStream5  =
    |> Observable.map (fun _ -> {label=5; time=DateTime.Now})
 ```
 
-Now, to see if two events are simultaneous, we need to compare them from the two different streams somehow.
+ここで、2つのイベントが同時かどうかを確認するには、2つの異なるストリームからのイベントを何らかの方法で比較する必要があります。
 
-It's actually easier than it sounds, because we can: 
+実は、これは思ったより簡単です。次のような手順で行えます。
 
-* combine the two streams into a single stream:
-* then create pairs of sequential events
-* then test the pairs to see if they are simultaneous
-* then split the input stream into two new output streams based on that test
+* 2つのストリームを1つにまとめる
+* 続けて起きたイベントをペアにする
+* そのペアが同時かどうかを調べる
+* その結果に基づいて、入力ストリームを2つの新しい出力ストリームに分ける
 
-Here's the actual code to do this:
- 
+これを実際のコードで見てみましょう。
+
 ```fsharp
-// combine the two streams
+// 2つのストリームをまとめる
 let combinedStream = 
     Observable.merge eventStream3 eventStream5
  
-// make pairs of events
+// イベントのペアを作る
 let pairwiseStream = 
    combinedStream |> Observable.pairwise
  
-// split the stream based on whether the pairs are simultaneous
+// ペアが同時かどうかでストリームを分ける
 let simultaneousStream, nonSimultaneousStream = 
     pairwiseStream |> Observable.partition areSimultaneous
 ```
 
 
-Finally, we can split the `nonSimultaneousStream` again, based on the event id:
+最後に、 `nonSimultaneousStream` をイベントの番号に基づいてさらに分けられます。
 
 ```fsharp
-// split the non-simultaneous stream based on the id
+// 同時でないストリームを番号で分ける
 let fizzStream, buzzStream  =
     nonSimultaneousStream  
-    // convert pair of events to the first event
+    // イベントのペアを最初のイベントに変換
     |> Observable.map (fun (ev1,_) -> ev1)
-    // split on whether the event id is three
+    // イベントの番号が3かどうかで分ける
     |> Observable.partition (fun {label=id} -> id=3)
 ```
 
-Let's review so far. We have started with the two original event streams and from them created four new ones:
+ここまでの流れを振り返ってみましょう。2つの元のイベントストリームから、4つの新しいストリームを作りました。
 
-* `combinedStream` contains all the events
-* `simultaneousStream` contains only the simultaneous events
-* `fizzStream` contains only the non-simultaneous events with id=3
-* `buzzStream` contains only the non-simultaneous events with id=5
+* `combinedStream` はすべてのイベントを含みます
+* `simultaneousStream` は同時に起きたイベントだけを含みます
+* `fizzStream` は番号が3の、同時でないイベントだけを含みます
+* `buzzStream` は番号が5の、同時でないイベントだけを含みます
 
-Now all we need to do is attach behavior to each stream:
+あとは各ストリームに動作をつけるだけです。
 
 ```fsharp
-//print events from the combinedStream
+// combinedStreamからイベントを表示
 combinedStream 
 |> Observable.subscribe (fun {label=id;time=t} -> 
                               printf "[%i] %i.%03i " id t.Second t.Millisecond)
  
-//print events from the simultaneous stream
+// 同時ストリームからイベントを表示
 simultaneousStream 
 |> Observable.subscribe (fun _ -> printfn "FizzBuzz")
 
-//print events from the nonSimultaneous streams
+// 同時でないストリームからイベントを表示
 fizzStream 
 |> Observable.subscribe (fun _ -> printfn "Fizz")
 
@@ -342,95 +342,95 @@ buzzStream
 |> Observable.subscribe (fun _ -> printfn "Buzz")
 ```
 
-Let's test it:
-        
+テストしてみましょう。
+
 ```fsharp
-// run the two timers at the same time
+// 2つのタイマーを同時に動かす
 [timer3;timer5]
 |> Async.Parallel
 |> Async.RunSynchronously
 ```
 
-Here's all the code in one complete set:
+すべてのコードを1つにまとめると次のようになります。
 
 ```fsharp
-// create the event streams and raw observables
+// イベントストリームと生のObservableを作る
 let timer3, timerEventStream3 = createTimerAndObservable 300
 let timer5, timerEventStream5 = createTimerAndObservable 500
 
-// convert the time events into FizzBuzz events with the appropriate id
+// 時間イベントを適切な番号を持つFizzBuzzイベントに変換
 let eventStream3  = timerEventStream3  
                     |> Observable.map (fun _ -> {label=3; time=DateTime.Now})
 let eventStream5  = timerEventStream5  
                     |> Observable.map (fun _ -> {label=5; time=DateTime.Now})
 
-// combine the two streams
+// 2つのストリームをまとめる
 let combinedStream = 
    Observable.merge eventStream3 eventStream5
  
-// make pairs of events
+// イベントのペアを作る
 let pairwiseStream = 
    combinedStream |> Observable.pairwise
  
-// split the stream based on whether the pairs are simultaneous
+// ペアが同時かどうかでストリームを分ける
 let simultaneousStream, nonSimultaneousStream = 
    pairwiseStream |> Observable.partition areSimultaneous
 
-// split the non-simultaneous stream based on the id
+// 同時でないストリームを番号で分ける
 let fizzStream, buzzStream  =
     nonSimultaneousStream  
-    // convert pair of events to the first event
+    // イベントのペアを最初のイベントに変換
     |> Observable.map (fun (ev1,_) -> ev1)
-    // split on whether the event id is three
+    // イベントの番号が3かどうかで分ける
     |> Observable.partition (fun {label=id} -> id=3)
 
-//print events from the combinedStream
+// combinedStreamからイベントを表示
 combinedStream 
 |> Observable.subscribe (fun {label=id;time=t} -> 
                               printf "[%i] %i.%03i " id t.Second t.Millisecond)
  
-//print events from the simultaneous stream
+// 同時ストリームからイベントを表示
 simultaneousStream 
 |> Observable.subscribe (fun _ -> printfn "FizzBuzz")
 
-//print events from the nonSimultaneous streams
+// 同時でないストリームからイベントを表示
 fizzStream 
 |> Observable.subscribe (fun _ -> printfn "Fizz")
 
 buzzStream 
 |> Observable.subscribe (fun _ -> printfn "Buzz")
 
-// run the two timers at the same time
+// 2つのタイマーを同時に動かす
 [timer3;timer5]
 |> Async.Parallel
 |> Async.RunSynchronously
 ```
 
-The code might seem a bit long winded, but this kind of incremental, step-wise approach is very clear and self-documenting. 
+このコードは少し長く見えるかもしれません。でも、こういう段階を踏んだアプローチは非常に分かりやすく、自己説明的です。
 
-Some of the benefits of this style are:
+このスタイルには次のような利点があります。
 
-* I can see that it meets the requirements just by looking at it, without even running it. Not so with the imperative version.
-* From a design point of view, each final "output" stream follows the single responsibility principle -- it only does one thing -- so it is very easy to
-associate behavior with it. 
-* This code has no conditionals, no mutable state, no edge cases. It would be easy to maintain or change, I hope.
-* It is easy to debug. For example, I could easily "tap" the output of the `simultaneousStream` to see if it
-contains what I think it contains:
+* 実際に動かさなくても、要件を満たしていることが見て取れます。命令型のバージョンではそうはいきません。
+* 設計の観点から見ると、各最終的な「出力」ストリームは単一責任の原則に従っています。
+  つまり1つのことだけを行うので、それに振る舞いを関連付けるのが非常に簡単です。
+* このコードには条件分岐、変更可能な状態、例外的なケースがありません。メンテナンスや変更が容易だと思います。
+* デバッグが簡単です。例えば、 `simultaneousStream` の出力を「のぞき見」して、
+  想定通りの内容が含まれているかを簡単に確認できます。
 
 ```fsharp
-// debugging code
+// デバッグ用コード
 //simultaneousStream |> Observable.subscribe (fun e -> printfn "sim %A" e)
 //nonSimultaneousStream |> Observable.subscribe (fun e -> printfn "non-sim %A" e)
 ```
 
-This would be much harder in the imperative version.
- 
-## Summary ##
+これは命令型のバージョンでは、ずっと難しいでしょう。
 
-Functional Reactive Programming (known as FRP) is a big topic, and we've only just touched on it here. I hope this introduction has given you a glimpse of the usefulness of this way of doing things.
+## まとめ ##
 
-If you want to learn more, see the documentation for the F# [Observable module](http://msdn.microsoft.com/en-us/library/ee370313), which has the basic transformations used above. 
-And there is also the [Reactive Extensions (Rx)](http://msdn.microsoft.com/en-us/library/hh242985%28v=vs.103%29) library which shipped as part of .NET 4.  That contains many other additional transformations.
+関数型リアクティブプログラミング（FRPと呼ばれています）は大きなトピックで、ここではその一部に触れただけです。この入門で、このアプローチの有用性の一端を感じ取っていただけたら嬉しいです。
+
+もっと学びたい方は、上で使った基本的な変換が含まれているF#の[Observableモジュール](http://msdn.microsoft.com/en-us/library/ee370313)のドキュメントをご覧ください。
+また、.NET 4の一部として提供されている[Reactive Extensions (Rx)](http://msdn.microsoft.com/en-us/library/hh242985%28v=vs.103%29)ライブラリもあります。これには他にもたくさんの便利な変換が含まれています。
 
 
 

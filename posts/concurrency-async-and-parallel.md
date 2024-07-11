@@ -1,127 +1,127 @@
 ---
 layout: post
-title: "Asynchronous programming"
-description: "Encapsulating a background task with the Async class"
+title: "非同期プログラミング"
+description: "Asyncクラスによるバックグラウンドタスクのカプセル化"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 24
 categories: [Concurrency]
 ---
 
-In this post we'll have a look at a few ways to write asynchronous code in F#, and a very brief example of parallelism as well.
+この記事では、F#で非同期コードを書くいくつかの方法と、並列処理の簡単な例も見ていきます。
 
-## Traditional asynchronous programming ##
+## 従来の非同期プログラミング ##
 
-As noted in the previous post, F# can directly use all the usual .NET suspects, such as `Thread` `AutoResetEvent`, `BackgroundWorker` and `IAsyncResult`. 
+前回の記事で触れたように、F#では `Thread` 、 `AutoResetEvent` 、 `BackgroundWorker` 、 `IAsyncResult` など、.NETでおなじみのものを直接使えます。
 
-Let's see a simple example where we wait for a timer event to go off:
+タイマーイベントが発生するのを待つ簡単な例を見てみましょう。
 
 ```fsharp
 open System
 
 let userTimerWithCallback = 
-    // create an event to wait on
+    // 待機用のイベントを作成
     let event = new System.Threading.AutoResetEvent(false)
 
-    // create a timer and add an event handler that will signal the event
+    // タイマーを作成し、イベントを通知するイベントハンドラを追加
     let timer = new System.Timers.Timer(2000.0)
     timer.Elapsed.Add (fun _ -> event.Set() |> ignore )
 
-    //start
+    // 開始
     printfn "Waiting for timer at %O" DateTime.Now.TimeOfDay
     timer.Start()
 
-    // keep working
+    // 待機中に何か有用な処理を行う
     printfn "Doing something useful while waiting for event"
 
-    // block on the timer via the AutoResetEvent
+    // AutoResetEventを通じてタイマーをブロック
     event.WaitOne() |> ignore
 
-    //done
+    // 完了
     printfn "Timer ticked at %O" DateTime.Now.TimeOfDay
 ```
 
-This shows the use of `AutoResetEvent` as a synchronization mechanism. 
+これは同期メカニズムとして `AutoResetEvent` を使っています。
 
-* A lambda is registered with the `Timer.Elapsed` event, and when the event is triggered, the AutoResetEvent is signalled. 
-* The main thread starts the timer, does something else while waiting, and then blocks until the event is triggered.
-* Finally, the main thread continues, about 2 seconds later.
+* ラムダ式が `Timer.Elapsed` イベントに登録され、イベントが発生するとAutoResetEventが通知されます。
+* メインスレッドはタイマーを開始し、待機中に他の処理を行い、その後イベントが発生するまでブロックします。
+* 最後に、メインスレッドは約2秒後に続行します。
 
-The code above is reasonably straightforward, but does require you to instantiate an AutoResetEvent, 
-and could be buggy if the lambda is defined incorrectly.
+上のコードはかなり簡単ですが、AutoResetEventをインスタンス化する必要があり、
+ラムダ式が正しく定義されていないとバグの原因になる可能性があります。
 
-## Introducing asynchronous workflows ##
+## 非同期ワークフローの紹介 ##
 
-F# has a built-in construct called "asynchronous workflows" which makes async code much easier to write.
-These workflows are objects that encapsulate a background task, and provide a number of useful operations to manage them.
+F#には「非同期ワークフロー」と呼ばれる組み込みの構造があり、非同期コードをより簡単に書けるようになっています。
+これらのワークフローは、バックグラウンドタスクをカプセル化したオブジェクトで、それらを管理するための便利な操作をいくつか提供しています。
 
-Here's the previous example rewritten to use one:
+前の例を非同期ワークフローを使って書き直すとこうなります。
 
 ```fsharp
 open System
-//open Microsoft.FSharp.Control  // Async.* is in this module.
+//open Microsoft.FSharp.Control  // Async.*はこのモジュールにあります
 
 let userTimerWithAsync = 
 
-    // create a timer and associated async event
+    // タイマーと関連する非同期イベントを作成
     let timer = new System.Timers.Timer(2000.0)
     let timerEvent = Async.AwaitEvent (timer.Elapsed) |> Async.Ignore
 
-    // start
+    // 開始
     printfn "Waiting for timer at %O" DateTime.Now.TimeOfDay
     timer.Start()
 
-    // keep working
+    // 待機中に何か有用な処理を行う
     printfn "Doing something useful while waiting for event"
 
-    // block on the timer event now by waiting for the async to complete
+    // 非同期処理が完了するのを待つことで、タイマーイベントをブロック
     Async.RunSynchronously timerEvent
 
-    // done
+    // 完了
     printfn "Timer ticked at %O" DateTime.Now.TimeOfDay
 ```
 
-Here are the changes:
+変更点は以下の通りです。
 
-* the `AutoResetEvent` and lambda have disappeared, and are replaced by `let timerEvent = Control.Async.AwaitEvent (timer.Elapsed)`, which creates an `async` object directly from the event, without needing a lambda. The `ignore` is added to ignore the result.
-* the `event.WaitOne()` has been replaced by `Async.RunSynchronously timerEvent` which blocks on the async object until it has completed.
+*  `AutoResetEvent` とラムダ式が消え、代わりに `let timerEvent = Control.Async.AwaitEvent (timer.Elapsed)` が使われています。これはラムダ式を必要とせず、イベントから直接 `async` オブジェクトを作成します。 `ignore` は結果を無視するために追加されています。
+*  `event.WaitOne()` が `Async.RunSynchronously timerEvent` に置き換えられました。これは非同期オブジェクトが完了するまでブロックします。
 
-That's it. Both simpler and easier to understand.
-	
-The async workflows can also be used with `IAsyncResult`, begin/end pairs, and other standard .NET methods.
+以上です。より簡単で理解しやすくなりました。
 
-For example, here's how you might do an async file write by wrapping the `IAsyncResult` generated from `BeginWrite`.
+非同期ワークフローは `IAsyncResult` 、begin/endペア、その他の標準的な.NETメソッドでも使えます。
+
+例えば、 `BeginWrite` から生成された `IAsyncResult` をラップして非同期ファイル書き込みを行う方法は次のようになります。
 
 ```fsharp
 let fileWriteWithAsync = 
 
-    // create a stream to write to
+    // 書き込み用のストリームを作成
     use stream = new System.IO.FileStream("test.txt",System.IO.FileMode.Create)
 
-    // start
+    // 開始
     printfn "Starting async write"
     let asyncResult = stream.BeginWrite(Array.empty,0,0,null,null)
 	
-	// create an async wrapper around an IAsyncResult
+    // IAsyncResultの周りに非同期ラッパーを作成
     let async = Async.AwaitIAsyncResult(asyncResult) |> Async.Ignore
 
-    // keep working
+    // 待機中に何か有用な処理を行う
     printfn "Doing something useful while waiting for write to complete"
 
-    // block on the timer now by waiting for the async to complete
+    // 非同期処理が完了するのを待つことで、タイマーをブロック
     Async.RunSynchronously async 
 
-    // done
+    // 完了
     printfn "Async write completed"
 ```
 
-## Creating and nesting asynchronous workflows ##
+## 非同期ワークフローの作成とネスト ##
 
-Asynchronous workflows can also be created manually.
-A new workflow is created using the `async` keyword and curly braces. 
-The braces contain a set of expressions to be executed in the background.
+非同期ワークフローは手動でも作成できます。
+新しいワークフローは `async` キーワードとかっこを使って作成します。
+かっこ内には、バックグラウンドで実行される一連の式が含まれます。
 
-This simple workflow just sleeps for 2 seconds.
+この簡単なワークフローは2秒間スリープするだけです。
 
 ```fsharp
 let sleepWorkflow  = async{
@@ -133,10 +133,10 @@ let sleepWorkflow  = async{
 Async.RunSynchronously sleepWorkflow  
 ```
 
-*Note: the code `do! Async.Sleep 2000` is similar to `Thread.Sleep` but designed to work with asynchronous workflows.*
-	
-Workflows can contain *other* async workflows nested inside them.
-Within the braces, the nested workflows can be blocked on by using the `let!` syntax.
+*注： `do! Async.Sleep 2000` というコードは `Thread.Sleep` に似ていますが、非同期ワークフローで動作するように設計されています。*
+
+ワークフローには、他の非同期ワークフローを内部にネストすることができます。
+かっこ内で、ネストされたワークフローは `let!` 構文を使ってブロックできます。
 
 ```fsharp
 let nestedWorkflow  = async{
@@ -144,87 +144,87 @@ let nestedWorkflow  = async{
     printfn "Starting parent"
     let! childWorkflow = Async.StartChild sleepWorkflow
 
-    // give the child a chance and then keep working
+    // 子に機会を与え、その後作業を続ける
     do! Async.Sleep 100
     printfn "Doing something useful while waiting "
 
-    // block on the child
+    // 子をブロック
     let! result = childWorkflow
 
-    // done
+    // 完了
     printfn "Finished parent" 
     }
 
-// run the whole workflow
+// ワークフロー全体を実行
 Async.RunSynchronously nestedWorkflow  
 ```
 
 
-## Cancelling workflows  ##
+## ワークフローのキャンセル  ##
 
-One very convenient thing about async workflows is that they support a built-in cancellation mechanism. No special code is needed.
+非同期ワークフローの非常に便利な点の1つは、組み込みのキャンセルメカニズムをサポートしていることです。特別なコードは必要ありません。
 
-Consider a simple task that prints numbers from 1 to 100:
+1から100までの数字を出力する簡単なタスクを考えてみましょう。
 
 ```fsharp
 let testLoop = async {
     for i in [1..100] do
-        // do something
+        // 何かを行う
         printf "%i before.." i
         
-        // sleep a bit 
+        // 少し待つ 
         do! Async.Sleep 10  
         printfn "..after"
     }
 ```
 
-We can test it in the usual way:
+通常の方法でテストできます。
 
 ```fsharp
 Async.RunSynchronously testLoop
 ```
 
-Now let's say we want to cancel this task half way through. What would be the best way of doing it? 
+ここで、このタスクを途中でキャンセルしたいとします。最良の方法は何でしょうか？
 
-In C#, we would have to create flags to pass in and then check them frequently, but in F# this technique is built in, using the `CancellationToken` class.
+C#では、フラグを作成して渡し、頻繁にチェックする必要がありますが、F#ではこの技術が `CancellationToken` クラスを使って組み込まれています。
 
-Here an example of how we might cancel the task:
+タスクをキャンセルする例を見てみましょう。
 
 ```fsharp
 open System
 open System.Threading
 
-// create a cancellation source
+// キャンセルソースを作成
 let cancellationSource = new CancellationTokenSource()
 
-// start the task, but this time pass in a cancellation token
+// タスクを開始するが、今回はキャンセルトークンを渡す
 Async.Start (testLoop,cancellationSource.Token)
 
-// wait a bit
+// 少し待つ
 Thread.Sleep(200)  
 
-// cancel after 200ms
+// 200ms後にキャンセル
 cancellationSource.Cancel()
 ```
 
-In F#, any nested async call will check the cancellation token automatically! 
+F#では、ネストされた非同期呼び出しは自動的にキャンセルトークンをチェックします！
 
-In this case it was the line:
+この場合、それは以下の行でした。
 
 ```fsharp
 do! Async.Sleep(10) 
 ```
 
-As you can see from the output, this line is where the cancellation happened.
+出力を見ると、この行でキャンセルが発生したことがわかります。
 
-## Composing workflows in series and parallel ##
+## ワークフローの直列・並列合成 ##
 
-Another useful thing about async workflows is that they can be easily combined in various ways: both in series and in parallel. 
+非同期ワークフローの他の便利な点は、直列や並列など、様々な方法で簡単に組み合わせられることです。
 
-Let's again create a simple workflow that just sleeps for a given time:
+まず、指定された時間だけスリープする簡単なワークフローを作成しましょう。
 
 ```fsharp
-// create a workflow to sleep for a time
+// 指定時間スリープするワークフローを作成
 let sleepWorkflowMs ms = async {
     printfn "%i ms workflow started" ms
     do! Async.Sleep ms
@@ -232,7 +232,7 @@ let sleepWorkflowMs ms = async {
     }
 ```
 
-Here's a version that combines two of these in series:
+これらを直列に組み合わせたバージョンは次のようになります。
 
 ```fsharp
 let workflowInSeries = async {
@@ -247,14 +247,14 @@ Async.RunSynchronously workflowInSeries
 #time
 ```
 
-And here's a version that combines two of these in parallel:
+そして、これらを並列に組み合わせたバージョンは次のようになります。
 
 ```fsharp
-// Create them
+// 作成
 let sleep1 = sleepWorkflowMs 1000
 let sleep2 = sleepWorkflowMs 2000
 
-// run them in parallel
+// 並列で実行
 #time
 [sleep1; sleep2] 
     |> Async.Parallel
@@ -263,22 +263,22 @@ let sleep2 = sleepWorkflowMs 2000
 ```
 
 <div class="alert alert-info">
-Note: The #time command toggles the timer on and off. It only works in the interactive window, so this example must be sent to the interactive window in order to work corrrectly. 
+注：#timeコマンドはタイマーのオン/オフを切り替えます。これはインタラクティブウィンドウでのみ機能するため、このサンプルを正しく動作させるにはインタラクティブウィンドウに送信する必要があります。
 </div>
 
-We're using the `#time` option to show the total elapsed time, which, because they run in parallel, is 2 secs. If they ran in series instead, it would take 3 seconds.  
+ `#time` オプションを使って合計経過時間を表示しています。並列で実行されるため、2秒かかります。直列で実行した場合は3秒かかるはずです。
 
-Also you might see that the output is garbled sometimes because both tasks are writing to the console at the same time!
+また、両方のタスクが同時にコンソールに書き込むため、出力が乱れることがあるかもしれません！
 
-This last sample is a classic example of a "fork/join" approach, where a number of a child tasks are spawned and then the parent waits for them 
-all to finish. As you can see, F# makes this very easy!
+この最後のサンプルは、「フォーク/ジョイン」アプローチの典型的な例です。複数の子タスクが生成され、親がそれらすべての完了を待ちます。
+ご覧のように、F#ではこれが非常に簡単に実現できます！
 
-## Example: an async web downloader ##
+## 例：非同期Webダウンローダー ##
 
-In this more realistic example, we'll see how easy it is to convert some existing code from a non-asynchronous style to an asynchronous style, 
-and the corresponding performance increase that can be achieved.
+この、より現実的な例では、既存のコードを非同期スタイルに変換する簡単さと、
+それによって得られるパフォーマンスの向上を見てみましょう。
 
-So here is a simple URL downloader, very similar to the one we saw at the start of the series:
+まず、シリーズの最初で見たものと非常によく似た、シンプルなURLダウンローダーがあります。
 
 ```fsharp
 open System.Net
@@ -294,48 +294,48 @@ let fetchUrl url =
     printfn "finished downloading %s" url 
 ```
 
-And here is some code to time it:
+そして、これを時間計測するコードがあります。
 
 ```fsharp
-// a list of sites to fetch
+// 取得するサイトのリスト
 let sites = ["http://www.bing.com";
              "http://www.google.com";
              "http://www.microsoft.com";
              "http://www.amazon.com";
              "http://www.yahoo.com"]
 
-#time                     // turn interactive timer on
-sites                     // start with the list of sites
-|> List.map fetchUrl      // loop through each site and download
-#time                     // turn timer off
+#time                     // インタラクティブタイマーをオン
+sites                     // サイトのリストから開始
+|> List.map fetchUrl      // 各サイトをループしてダウンロード
+#time                     // タイマーをオフ
 ```
 
-Make a note of the time taken, and let's if we can improve on it!
+かかった時間をメモしておいて、改善できるか見てみましょう！
 
-Obviously the example above is inefficient -- only one web site at a time is visited. The program would be faster if we could visit them all at the same time.
+明らかに、上の例は非効率です - 一度に1つのウェブサイトしか訪問していません。すべてのサイトを同時に訪問できれば、プログラムはより高速になるでしょう。
 
-So how would we convert this to a concurrent algorithm?  The logic would be something like:
+では、これを並行アルゴリズムに変換するにはどうすればよいでしょうか？ ロジックは以下のようになります。
 
-* Create a task for each web page we are downloading, and then for each task, the download logic would be something like:
-  * Start downloading a page from a website. While that is going on, pause and let other tasks have a turn.
-  * When the download is finished, wake up and continue on with the task
-* Finally, start all the tasks up and let them go at it!
+* ダウンロードする各Webページに対してタスクを作成し、各タスクでは以下のようなダウンロードロジックを実行します。
+  * Webサイトからページのダウンロードを開始します。その間、一時停止して他のタスクに順番を譲ります。
+  * ダウンロードが完了したら、起動して残りのタスクを続行します。
+* 最後に、すべてのタスクを開始して実行させます！
 
-Unfortunately, this is quite hard to do in a standard C-like language. In C# for example, you have to create a callback for when an async task completes.  Managing these callbacks is painful and creates a lot of extra support code that gets in the way of understanding the logic. There are some elegant solutions to this, but in general, the signal to noise ratio for concurrent programming in C# is very high*.
+残念ながら、これは標準的なC言語風の言語では非常に難しいです。例えば、C#では非同期タスクが完了したときのコールバックを作成する必要があります。これらのコールバックの管理は面倒で、ロジックの理解を妨げる多くの余分なサポートコードを生成します。これに対する洗練された解決策もありますが、一般的に、C#での並行プログラミングのシグナル対ノイズ比は非常に高いです*。
 
-<sub>* As of the time of this writing. Future versions of C# will have the `await` keyword, which is similar to what F# has now.</sub>
+<sub>* これは執筆時点での話です。将来のバージョンのC#では、F#が現在持っているものと似た `await` キーワードが導入される予定です。</sub>
 
-But as you can guess, F# makes this easy.  Here is the concurrent F# version of the downloader code:
+しかし、予想通り、F#ではこれが簡単です。以下は、ダウンローダーコードの並行F#バージョンです。
 
 ```fsharp
 open Microsoft.FSharp.Control.CommonExtensions   
-                                        // adds AsyncGetResponse
+                                        // AsyncGetResponseを追加
 
-// Fetch the contents of a web page asynchronously
+// Webページの内容を非同期に取得
 let fetchUrlAsync url =        
     async {                             
         let req = WebRequest.Create(Uri(url)) 
-        use! resp = req.AsyncGetResponse()  // new keyword "use!"  
+        use! resp = req.AsyncGetResponse()  // 新しいキーワード "use!"  
         use stream = resp.GetResponseStream() 
         use reader = new IO.StreamReader(stream) 
         let html = reader.ReadToEnd() 
@@ -343,72 +343,72 @@ let fetchUrlAsync url =
         }
 ```
 
-Note that the new code looks almost exactly the same as the original. There are only a few minor changes. 
+新しいコードが元のコードとほぼ同じに見えることに注目してください。変更点はわずかです。
 
-* The change from "`use resp = `" to "`use! resp =`" is exactly the change that we talked about above -- while the async operation is going on, let other tasks have a turn. 
-* We also used the extension method `AsyncGetResponse` defined in the `CommonExtensions` namespace.  This returns an async workflow that we can nest inside the main workflow.
-* In addition the whole set of steps is contained in the  "`async {...}`" wrapper which turns it into a block that can be run asynchronously.
+* `use resp = ` から `use! resp =` への変更は、まさに上で説明した変更です - 非同期操作が行われている間、他のタスクに順番を譲ります。
+* また、 `CommonExtensions` 名前空間で定義されている拡張メソッド `AsyncGetResponse` を使っています。これは、メインのワークフロー内にネストできる非同期ワークフローを返します。
+* さらに、一連のステップ全体が `async {...}` ラッパーで囲まれており、これによって非同期で実行できるブロックに変換されます。
 
-And here is a timed download using the async version.
+そして、非同期バージョンを使った時間計測ダウンロードの例です。
 
 ```fsharp
-// a list of sites to fetch
+// 取得するサイトのリスト
 let sites = ["http://www.bing.com";
              "http://www.google.com";
              "http://www.microsoft.com";
              "http://www.amazon.com";
              "http://www.yahoo.com"]
 
-#time                      // turn interactive timer on
+#time                      // インタラクティブタイマーをオン
 sites 
-|> List.map fetchUrlAsync  // make a list of async tasks
-|> Async.Parallel          // set up the tasks to run in parallel
-|> Async.RunSynchronously  // start them off
-#time                      // turn timer off
+|> List.map fetchUrlAsync  // 非同期タスクのリストを作成
+|> Async.Parallel          // タスクを並列実行するよう設定
+|> Async.RunSynchronously  // タスクを開始
+#time                      // タイマーをオフ
 ```
 
 
-The way this works is:
+これがどのように機能するかは次の通りです。
 
-* `fetchUrlAsync` is applied to each site. It does not immediately start the download, but returns an async workflow for running later.
-* To set up all the tasks to run at the same time we use the `Async.Parallel` function
-* Finally we call `Async.RunSynchronously` to start all the tasks, and wait for them all to stop. 
+*  `fetchUrlAsync` が各サイトに適用されます。これはすぐにダウンロードを開始するのではなく、後で実行するための非同期ワークフローを返します。
+* すべてのタスクを同時に実行するように設定するために、 `Async.Parallel` 関数を使います。
+* 最後に `Async.RunSynchronously` を呼び出して、すべてのタスクを開始し、すべてが停止するのを待ちます。
 
-If you try out this code yourself, you will see that the async version is much faster than the sync version. Not bad for a few minor code changes!  Most importantly, the underlying logic is still very clear and is not cluttered up with noise.
+このコードを自分で試してみると、非同期バージョンが同期バージョンよりもはるかに高速であることがわかるでしょう。わずかなコード変更でこれだけの成果が得られるのは素晴らしいですね！最も重要なのは、基本的なロジックがまだ非常に明確で、ノイズで乱れていないことです。
 
-	
-## Example: a parallel computation ##
 
-To finish up, let's have another quick look at a parallel computation again. 
+## 例：並列計算 ##
 
-Before we start, I should warn you that the example code below is just to demonstrate the basic principles. 
-Benchmarks from "toy" versions of parallelization like this are not meaningful, because any kind of real concurrent code has so many dependencies.
+最後に、並列計算をもう一度簡単に見てみましょう。
 
-And also be aware that parallelization is rarely the best way to speed up your code. Your time is almost always better spent on improving your algorithms. 
-I'll bet my serial version of quicksort against your parallel version of bubblesort any day! 
-(For more details on how to improve performance, see the [optimization series](../series/optimization.md))
+始める前に、以下のサンプルコードは基本的な原理を示すためのものだということを警告しておきます。
+この種の「おもちゃ」の並列化バージョンに対するベンチマークは意味がありません。なぜなら、実際の並行コードにはたくさんの依存関係があるからです。
 
-Anyway, with that caveat, let's create a little task that chews up some CPU. We'll test this serially and in parallel. 
+さらに、並行処理は必ずしもコードの速度向上に最適な方法とは限らないことを認識しておきましょう。ほとんどの場合、アルゴリズムの改善に時間を費やす方が効果的です。
+私のクイックソートの直列バージョンが、あなたのバブルソートの並列バージョンに勝つと、賭けてもいいですよ！
+（パフォーマンス改善の詳細については、「[最適化シリーズ](../series/optimization.md)」を参照してください）
+
+とはいえ、その注意点を踏まえた上で、CPUを少し使う小さなタスクを作成してみましょう。これを直列と並列でテストします。
 
 ```fsharp
 let childTask() = 
-    // chew up some CPU. 
+    // CPUを使う 
     for i in [1..1000] do 
         for i in [1..1000] do 
             do "Hello".Contains("H") |> ignore 
-            // we don't care about the answer!
+            // 結果は気にしません！
 
-// Test the child task on its own.
-// Adjust the upper bounds as needed
-// to make this run in about 0.2 sec
+// 子タスクを単独でテスト
+// 必要に応じて上限を調整し
+// これが約0.2秒で実行されるようにします
 #time
 childTask()
 #time
 ```
 
-Adjust the upper bounds of the loops as needed to make this run in about 0.2 seconds.
+これが約0.2秒で実行されるように、ループの上限を必要に応じて調整してください。
 
-Now let's combine a bunch of these into a single serial task (using composition), and test it with the timer:
+次に、これらをまとめて（合成を使って）1つの直列タスクにし、タイマーでテストしてみましょう。
 
 ```fsharp
 let parentTask = 
@@ -416,23 +416,23 @@ let parentTask =
     |> List.replicate 20
     |> List.reduce (>>)
 
-//test
+// テスト
 #time
 parentTask()
 #time
 ```
 
-This should take about 4 seconds.
+これは約4秒かかるはずです。
 
-Now in order to make the `childTask` parallelizable, we have to wrap it inside an `async`:
+ここで `childTask` を並列化可能にするために、 `async` でラップする必要があります。
 
 ```fsharp
 let asyncChildTask = async { return childTask() }
 ```
 
-And to combine a bunch of asyncs into a single parallel task, we use `Async.Parallel`.
+そして、複数の非同期を1つの並列タスクにまとめるには、 `Async.Parallel` を使います。
 
-Let's test this and compare the timings:
+これをテストして、タイミングを比較してみましょう。
 
 ```fsharp
 let asyncParentTask = 
@@ -440,15 +440,15 @@ let asyncParentTask =
     |> List.replicate 20
     |> Async.Parallel
 
-//test
+// テスト
 #time
 asyncParentTask 
 |> Async.RunSynchronously
 #time
 ```
 
-On a dual-core machine, the parallel version is about 50% faster. It will get faster in proportion to the number of cores or CPUs, of course, but sublinearly. Four cores will be faster than one core, but not four times faster. 
+デュアルコアマシンでは、並列バージョンは約50％高速です。もちろん、コアやCPUの数に応じて速くなりますが、それは非線形的です。4コアは1コアよりも高速ですが、4倍速くはなりません。
 
-On the other hand, as with the async web download example, a few minor code changes can make a big difference, while still leaving the code easy to read and understand. So in cases where parallelism will genuinely help, it is nice to know that it is easy to arrange.
+一方で、非同期Webダウンロードの例と同様に、わずかなコード変更で大きな違いを生み出すことができ、しかもコードは読みやすく理解しやすいままです。したがって、並列処理が本当に役立つ場合に備えて、簡単に実現できると知っておくのは良いことです。
 
 
