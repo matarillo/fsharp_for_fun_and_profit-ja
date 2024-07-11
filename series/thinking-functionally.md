@@ -1,7 +1,7 @@
 ---
 layout: series_index
-title: "The 'thinking functionally' series"
-seriesIndexId: "Thinking functionally"
+title: "「関数型思考」シリーズ"
+seriesIndexId: "関数型思考"
 ---
 
 This series of posts will introduce you to the fundamentals of functional programming

@@ -3,7 +3,7 @@ layout: post
 title: "Attaching functions to types"
 description: "Creating methods the F# way"
 nav: thinking-functionally
-seriesId: "Thinking functionally"
+seriesId: "関数型思考"
 seriesOrder: 11
 ---
 

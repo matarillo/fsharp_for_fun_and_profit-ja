@@ -3,7 +3,7 @@ layout: post
 title: "Organizing functions"
 description: "Nested functions and modules"
 nav: thinking-functionally
-seriesId: "Thinking functionally"
+seriesId: "関数型思考"
 seriesOrder: 10
 categories: [Functions, Modules]
 ---

@@ -3,7 +3,7 @@ layout: post
 title: "How types work with functions"
 description: "Understanding the type notation"
 nav: thinking-functionally
-seriesId: "Thinking functionally"
+seriesId: "関数型思考"
 seriesOrder: 4
 categories: [Types, Functions]
 ---

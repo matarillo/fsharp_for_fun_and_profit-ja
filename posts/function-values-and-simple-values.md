@@ -3,7 +3,7 @@ layout: post
 title: "Function Values and Simple Values"
 description: "Binding not assignment"
 nav: thinking-functionally
-seriesId: "Thinking functionally"
+seriesId: "関数型思考"
 seriesOrder: 3
 ---
 

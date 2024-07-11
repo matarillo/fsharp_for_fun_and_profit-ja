@@ -3,7 +3,7 @@ layout: post
 title: "Mathematical functions"
 description: "The impetus behind functional programming"
 nav: thinking-functionally
-seriesId: "Thinking functionally"
+seriesId: "関数型思考"
 seriesOrder: 2
 ---
 

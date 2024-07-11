@@ -3,7 +3,7 @@ layout: post
 title: "Currying"
 description: "Breaking multi-parameter functions into smaller one-parameter functions"
 nav: thinking-functionally
-seriesId: "Thinking functionally"
+seriesId: "関数型思考"
 seriesOrder: 5
 categories: [Currying]
 ---

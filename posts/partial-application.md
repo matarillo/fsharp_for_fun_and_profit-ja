@@ -3,7 +3,7 @@ layout: post
 title: "Partial application"
 description: "Baking-in some of the parameters of a function"
 nav: thinking-functionally
-seriesId: "Thinking functionally"
+seriesId: "関数型思考"
 seriesOrder: 6
 categories: [Currying, Partial Application]
 ---

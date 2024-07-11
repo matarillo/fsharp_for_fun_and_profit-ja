@@ -3,7 +3,7 @@ layout: post
 title: "Function associativity and composition"
 description: "Building new functions from existing ones"
 nav: thinking-functionally
-seriesId: "Thinking functionally"
+seriesId: "関数型思考"
 seriesOrder: 7
 categories: [Functions]
 image: "/assets/img/Functions_Composition.png"

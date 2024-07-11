@@ -3,7 +3,7 @@ layout: post
 title: "Thinking Functionally: Introduction"
 description: "A look at the basics of functional programming"
 nav: thinking-functionally
-seriesId: "Thinking functionally"
+seriesId: "関数型思考"
 seriesOrder: 1
 ---
 

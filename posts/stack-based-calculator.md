@@ -3,7 +3,7 @@ layout: post
 title: "Worked example: A stack based calculator"
 description: "Using combinators to build functionality"
 nav: thinking-functionally
-seriesId: "Thinking functionally"
+seriesId: "関数型思考"
 seriesOrder: 13
 categories: [Combinators, Functions, Worked Examples]
 ---

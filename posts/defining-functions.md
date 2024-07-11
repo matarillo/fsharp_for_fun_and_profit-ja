@@ -3,7 +3,7 @@ layout: post
 title: "Defining functions"
 description: "Lambdas and more"
 nav: thinking-functionally
-seriesId: "Thinking functionally"
+seriesId: "関数型思考"
 seriesOrder: 8
 categories: [Functions, Combinators]
 ---

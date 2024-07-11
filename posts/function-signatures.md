@@ -3,7 +3,7 @@ layout: post
 title: "Function signatures"
 description: "A function signature can give you some idea of what it does"
 nav: thinking-functionally
-seriesId: "Thinking functionally"
+seriesId: "関数型思考"
 seriesOrder: 9
 categories: [Functions]
 ---
