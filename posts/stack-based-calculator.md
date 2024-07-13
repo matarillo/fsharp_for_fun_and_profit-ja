@@ -1,64 +1,64 @@
 ---
 layout: post
-title: "Worked example: A stack based calculator"
-description: "Using combinators to build functionality"
+title: "実践例：スタックベース電卓"
+description: "コンビネータを使って機能を組み立てる"
 nav: thinking-functionally
 seriesId: "関数型思考"
 seriesOrder: 13
-categories: [Combinators, Functions, Worked Examples]
+categories: [コンビネータ, 関数, 実践例]
 ---
 
-In this post, we'll implement a simple stack based calculator (also known as "reverse Polish" style). The implementation is almost entirely done with functions, with only one special type and no pattern matching at all, so it is a great testing ground for the concepts introduced in this series.
+この記事では、シンプルなスタックベース電卓（「逆ポーランド記法」スタイルとも呼ばれる）を作ります。ほぼ全て関数で実装し、特殊な型を1つ使うだけで、パターンマッチングは全く使いません。そのため、このシリーズで紹介した概念を試すのに最適な題材です。
 
-If you are not familiar with a stack based calculator, it works as follows: numbers are pushed on a stack, and operations such as addition and multiplication pop numbers off the stack and push the result back on.
+スタックベース電卓に馴染みがない方のために説明すると、こんな風に動きます。数字をスタックに積んでいき、加算や乗算などの演算をすると、スタックから数字を取り出して結果を再び積みます。
 
-Here is a diagram showing a simple calculation using a stack:
+以下は、スタックを使った簡単な計算を示す図です。
 
-![Stack based calculator diagram](../assets/img/stack-based-calculator.png) 
+![スタックベース電卓の図](../assets/img/stack-based-calculator.png)
 
-The first steps to designing a system like this is to think about how it would be used. Following a Forth like syntax, we will give each action a label, so that the example above might want to be written something like:
+このようなシステムを設計する最初の一歩は、どう使うかを考えることです。Forthに似た構文に従うと、上の例はこんな風に書きたくなるでしょう。
 
     EMPTY ONE THREE ADD TWO MUL SHOW
 
-We might not be able to get this exact syntax, but let's see how close we can get.
+この正確な構文は無理かもしれませんが、どれだけ近づけるか見てみましょう。
 
-## The Stack data type
+## スタックのデータ型
 
-First we need to define the data structure for a stack. To keep things simple, we'll just use a list of floats.
+まず、スタックのデータ構造を決める必要があります。簡単にするために、floatのリストを使います。
 
 ```fsharp
 type Stack = float list
 ```
 
-But, hold on, let's wrap it in a [single case union type](../posts/discriminated-unions.md#single-case) to make it more descriptive, like this:
+でも、ちょっと待ってください。これを[単一ケースのユニオン型](../posts/discriminated-unions.md#single-case)でラップして、もっとわかりやすくしましょう。
 
 ```fsharp
 type Stack = StackContents of float list
 ```
 
-For more details on why this is nicer, read the discussion of single case union types in [this post](../posts/discriminated-unions.md#single-case).
+なぜこっちの方がいいのかについては、[この記事](../posts/discriminated-unions.md#single-case)で単一ケースのユニオン型について説明しています。
 
-Now, to create a new stack, we use `StackContents` as a constructor:
+これで、新しいスタックを作るには `StackContents` をコンストラクタとして使います。
 
 ```fsharp
 let newStack = StackContents [1.0;2.0;3.0]
 ```
 
-And to extract the contents of an existing Stack,  we pattern match with `StackContents`:
+そして、既存のStackの中身を取り出すには、 `StackContents` でパターンマッチングをします。
 
 ```fsharp
 let (StackContents contents) = newStack 
 
-// "contents" value set to 
+// "contents"の値は
 // float list = [1.0; 2.0; 3.0]
 ```
 
 
-## The Push function
+## プッシュ関数
 
-Next we need a way to push numbers on to the stack. This will be simply be prepending the new value at the front of the list using the "`::`" operator.  
+次に、スタックに数字を積む方法が要ります。これは単に「 `::` 」演算子を使って新しい値をリストの先頭に追加するだけです。
 
-Here is our push function:
+以下がプッシュ関数です。
 
 ```fsharp
 let push x aStack =   
@@ -67,37 +67,37 @@ let push x aStack =
     StackContents newContents 
 ```
 
-This basic function has a number of things worth discussing.
+このシンプルな関数にも、いくつか話すべきポイントがあります。
 
-First, note that the list structure is immutable, so the function must accept an existing stack and return a new stack.  It cannot just alter the existing stack. In fact, all of the functions in this example will have a similar format like this:
+まず、リスト構造は変更できないので、関数は既存のスタックを受け取り、新しいスタックを返す必要があります。既存のスタックを変えることはできません。実は、この例のすべての関数は次のような同じ形になります。
 
-    Input: a Stack plus other parameters
-    Output: a new Stack
+    入力：Stackと他のパラメータ
+    出力：新しいStack
 
-Next, what should the order of the parameters be? Should the stack parameter come first or last? If you remember the discussion of [designing functions for partial application](../posts/partial-application), you will remember that the most changeable thing should come last. You'll see shortly that this guideline will be born out.
+次に、パラメータの順番はどうすべきでしょうか？スタックパラメータを最初にすべきか、最後にすべきか？[部分適用のための関数設計](../posts/partial-application)の話を覚えていれば、最も変わりやすいものを最後にすべきだと思い出すでしょう。この指針が正しいことがすぐにわかります。
 
-Finally, the function can be made more concise by using pattern matching in the function parameter itself, rather than using a `let` in the body of the function.
+最後に、関数の中で `let` を使うのではなく、関数パラメータ自体でパターンマッチングをすると、関数をもっと簡潔にできます。
 
-Here is the rewritten version:
+以下が書き直したバージョンです。
 
 ```fsharp
 let push x (StackContents contents) =   
     StackContents (x::contents)
 ```
 
-Much nicer!
+ずっと良くなりました！
 
-And by the way, look at the nice signature it has:
+ちなみに、この関数の素晴らしいシグネチャを見てください。
 
 ```fsharp
 val push : float -> Stack -> Stack
 ```
 
-As we know from a [previous post](../posts/function-signatures), the signature tells you a lot about the function.
-In this case, I could probably guess what it did from the signature alone, even without knowing that the name of the function was "push".
-This is one of the reasons why it is a good idea to have explicit type names. If the stack type had just been a list of floats, it wouldn't have been as self-documenting.
+[以前の記事](../posts/function-signatures)で学んだように、シグネチャは関数について多くのことを教えてくれます。
+この場合、関数の名前が "push" だと知らなくても、シグネチャだけからその機能をほぼ推測できるでしょう。
+これは、はっきりした型名を持つことがいいアイデアである理由の一つです。スタック型が単なるfloatのリストだった場合、これほど分かりやすくはなかったでしょう。
 
-Anyway, now let's test it:
+では、試してみましょう。
 
 ```fsharp
 let emptyStack = StackContents []
@@ -105,18 +105,18 @@ let stackWith1 = push 1.0 emptyStack
 let stackWith2 = push 2.0 stackWith1
 ```
 
-Works great!
+うまく動いています！
 
-## Building on top of "push"
+## "push"の上に組み立てる
 
-With this simple function in place, we can easily define an operation that pushes a particular number onto the stack. 
+このシンプルな関数を使って、特定の数字をスタックに積む操作を簡単に定義できます。
 
 ```fsharp
 let ONE stack = push 1.0 stack
 let TWO stack = push 2.0 stack
 ```
 
-But wait a minute! Can you see that the `stack` parameter is used on both sides? In fact, we don't need to mention it at all. Instead we can skip the `stack` parameter and write the functions using partial application as follows:
+でも、待ってください！ `stack` パラメータが両側で使われているのが見えますか？実は、これを全く言う必要はありません。代わりに、部分適用を使って `stack` パラメータを省略できます。
 
 ```fsharp
 let ONE = push 1.0
@@ -126,15 +126,15 @@ let FOUR = push 4.0
 let FIVE = push 5.0
 ```
 
-Now you can see that if the parameters for `push` were in a different order, we wouldn't have been able to do this. 
+これで、 `push` のパラメータの順番が違っていたら、こうはできなかったことがわかります。
 
-While we're at it, let's define a function that creates an empty stack as well:
+ついでに、空のスタックを作る関数も定義しましょう。
 
 ```fsharp
 let EMPTY = StackContents []
 ```
 
-Let's test all of these now:
+では、これらを全部試してみましょう。
 
 ```fsharp
 let stackWith1 = ONE EMPTY 
@@ -142,13 +142,13 @@ let stackWith2 = TWO stackWith1
 let stackWith3  = THREE stackWith2 
 ```
 
-These intermediate stacks are annoying ? can we get rid of them? Yes!  Note that these functions ONE, TWO, THREE all have the same signature:
+これらの途中のスタックは邪魔ですね。取り除けないでしょうか？はい、できます！ONE、TWO、THREEなどの関数は全て同じシグネチャを持っていることに注目してください。
 
 ```fsharp
 Stack -> Stack
 ```
 
-This means that they can be chained together nicely! The output of one can be fed into the input of the next, as shown below:
+これは、これらの関数をうまくつなげられるということです！一つの出力を次の入力に渡せます。こんな風に。
 
 ```fsharp
 let result123 = EMPTY |> ONE |> TWO |> THREE 
@@ -156,24 +156,24 @@ let result312 = EMPTY |> THREE |> ONE |> TWO
 ```
 
 
-## Popping the stack
+## スタックからポップする
 
-That takes care of pushing onto the stack ? what about a `pop` function next?
+これでスタックへのプッシュは完了しました。次は `pop` 関数はどうでしょう？
 
-When we pop the stack, we will return the top of the stack, obviously, but is that all?  
+スタックからポップするとき、明らかにスタックの一番上を返す必要がありますが、それだけでしょうか？
 
-In an object-oriented style, [the answer is yes](http://msdn.microsoft.com/en-us/library/system.collections.stack.pop.aspx). In an OO approach, we would *mutate* the stack itself behind the scenes, so that the top element was removed.
+オブジェクト指向スタイルでは、[答えはイエスです](https://learn.microsoft.com/ja-jp/dotnet/api/system.collections.stack.pop)。OOアプローチでは、裏でスタック自体を*変更*し、一番上の要素を取り除きます。
 
-But in a functional style, the stack is immutable.  The only way to remove the top element is to create a *new stack* with the element removed.
-In order for the caller to have access to this new diminished stack, it needs to be returned along with the top element itself.
+でも、関数型スタイルでは、スタックは変更できません。一番上の要素を取り除く唯一の方法は、要素が取り除かれた*新しいスタック*を作ることです。
+呼び出し元がこの新しく小さくなったスタックを使えるようにするには、一番上の要素と一緒に返す必要があります。
 
-In other words, the `pop` function will have to return *two* values, the top plus the new stack.  The easiest way to do this in F# is just to use a tuple.
+つまり、 `pop` 関数は*2つの*値、つまり一番上と新しいスタックを返す必要があります。F#でこれを行う最も簡単な方法は、単にタプルを使うことです。
 
-Here's the implementation:
+以下が実装です。
 
 ```fsharp
-/// Pop a value from the stack and return it 
-/// and the new stack as a tuple
+/// スタックから値を取り出し、
+/// その値と新しいスタックをタプルとして返す
 let pop (StackContents contents) = 
     match contents with 
     | top::rest -> 
@@ -181,27 +181,27 @@ let pop (StackContents contents) =
         (top,newStack)
 ```
 
-This function is also very straightforward. 
+この関数も非常に簡単です。
 
-As before, we are extracting the `contents` directly in the parameter.
+前と同じように、パラメータで直接 `contents` を取り出しています。
 
-We then use a `match..with` expression to test the contents.
+次に、 `match..with` 式を使ってcontentsをテストします。
 
-Next, we separate the top element from the rest, create a new stack from the remaining elements and finally return the pair as a tuple.
+そして、一番上の要素を残りの部分から分け、残りの要素から新しいスタックを作り、最後にペアをタプルとして返します。
 
-Try the code above and see what happens. You will get a compiler error!
-The compiler has caught a case we have overlooked -- what happens if the stack is empty?
+上のコードを試してみてください。コンパイルエラーが出るはずです！
+コンパイラは我々が見落としていたケース - スタックが空の場合はどうなるか - を見つけました。
 
-So now we have to decide how to handle this. 
+ここで、この問題をどう処理するか決める必要があります。
 
-* Option 1: Return a special "Success" or "Error" state, as we did in a [post from the "F# を使う理由" series](../posts/correctness-exhaustive-pattern-matching.md).
-* Option 2: Throw an exception.
+* オプション1：「[F# を使う理由](../posts/correctness-exhaustive-pattern-matching.md)」シリーズの記事でやったように、特別な「成功」または「エラー」状態を返す。
+* オプション2：例外を投げる。
 
-Generally, I prefer to use error cases, but in this case, we'll use an exception. So here's the `pop` code changed to handle the empty case:
+一般的に、エラーケースを使うことを好みますが、この場合は例外を使います。以下は空のケースを処理するように変えた `pop` コードです。
 
 ```fsharp
-/// Pop a value from the stack and return it 
-/// and the new stack as a tuple
+/// スタックから値を取り出し、
+/// その値と新しいスタックをタプルとして返す
 let pop (StackContents contents) = 
     match contents with 
     | top::rest -> 
@@ -211,7 +211,7 @@ let pop (StackContents contents) =
         failwith "Stack underflow"
 ```
 
-Now let's test it:
+では、試してみましょう。
 
 ```fsharp
 let initialStack = EMPTY  |> ONE |> TWO 
@@ -219,31 +219,31 @@ let popped1, poppedStack = pop initialStack
 let popped2, poppedStack2 = pop poppedStack
 ```
 
-and to test the underflow:
+そして、アンダーフローをテストするには、
 
 ```fsharp
 let _ = pop EMPTY
 ```
 
-## Writing the math functions
+## 数学関数を書く
 
-Now with both push and pop in place, we can work on the "add" and "multiply" functions:
+これでプッシュとポップの両方が整ったので、 `add` と `multiply` 関数に取り組めます。
 
 ```fsharp
 let ADD stack =
-   let x,s = pop stack  //pop the top of the stack
-   let y,s2 = pop s     //pop the result stack
-   let result = x + y   //do the math
-   push result s2       //push back on the doubly-popped stack
+   let x,s = pop stack  // スタックの一番上を取り出す
+   let y,s2 = pop s     // 結果のスタックを取り出す
+   let result = x + y   // 計算する
+   push result s2       // 2回取り出したスタックに戻して積む
 
 let MUL stack = 
-   let x,s = pop stack  //pop the top of the stack
-   let y,s2 = pop s     //pop the result stack
-   let result = x * y   //do the math 
-   push result s2       //push back on the doubly-popped stack
+   let x,s = pop stack  // スタックの一番上を取り出す
+   let y,s2 = pop s     // 結果のスタックを取り出す
+   let result = x * y   // 計算する 
+   push result s2       // 2回取り出したスタックに戻して積む
 ```
 
-Test these interactively:
+対話的に試してみましょう。
 
 ```fsharp
 let add1and2 = EMPTY |> ONE |> TWO |> ADD
@@ -251,59 +251,59 @@ let add2and3 = EMPTY |> TWO |> THREE |> ADD
 let mult2and3 = EMPTY |> TWO |> THREE |> MUL
 ```
 
-It works!
+うまく動いています！
 
-### Time to refactor...
+### リファクタリングの時間...
 
-It is obvious that there is significant duplicate code between these two functions. How can we refactor?
+これらの2つの関数の間に大量の重複コードがあるのは明らかです。どうやってリファクタリングできるでしょうか？
 
-Both functions pop two values from the stack, apply some sort of binary function, and then push the result back on the stack.  This leads us to refactor out the common code into a "binary" function that takes a two parameter math function as a parameter:
+両方の関数はスタックから2つの値を取り出し、何らかの二項演算を適用し、結果をスタックに戻して積みます。これにより、共通のコードを「binary」関数にリファクタリングし、二項演算関数をパラメータとして受け取るようにできます。
 
 ```fsharp
 let binary mathFn stack = 
-    // pop the top of the stack
+    // スタックの一番上を取り出す
     let y,stack' = pop stack    
-    // pop the top of the stack again
+    // スタックの一番上を再び取り出す
     let x,stack'' = pop stack'  
-    // do the math
+    // 計算する
     let z = mathFn x y
-    // push the result value back on the doubly-popped stack
+    // 結果の値を2回取り出したスタックに積む
     push z stack''      
 ```
 
-*Note that in this implementation, I've switched to using ticks to represent changed states of the "same" object, rather than numeric suffixes. Numeric suffixes can easily get quite confusing.*
+*注意：この実装では、数字のサフィックスではなく、アポストロフィを使って「同じ」オブジェクトの変更状態を表現しています。数字のサフィックスはとても混乱しやすくなる可能性があります。*
 
-Question: why are the parameters in the order they are, instead of `mathFn` being after `stack`?
+質問：なぜパラメータはこの順番になっているのでしょうか？ `mathFn` が `stack` の後ではなく前にあるのはなぜですか？
 
-Now that we have `binary`, we can define ADD and friends more simply:
+これで `binary` ができたので、ADDなどをもっとシンプルに定義できます。
 
-Here's a first attempt at ADD using the new `binary` helper:
+新しい `binary` ヘルパーを使ったADDの最初の試みはこんな感じです。
 
 ```fsharp
 let ADD aStack = binary (fun x y -> x + y) aStack 
 ```
 
-But we can eliminate the lambda, as it is *exactly* the definition of the built-in `+` function!  Which gives us:
+でも、ラムダを省略できます。これは組み込みの `+` 関数の定義そのものです！つまり、
 
 ```fsharp
 let ADD aStack = binary (+) aStack 
 ```
 
-And again, we can use partial application to hide the stack parameter. Here's the final definition:
+そして再び、部分適用を使ってスタックパラメータを隠せます。これが最終的な定義です。
 
 ```fsharp
 let ADD = binary (+)
 ```
 
-And here's the definition of some other math functions:
+そして、他の数学関数の定義はこんな感じになります。
 
 ```fsharp
 let SUB = binary (-)
 let MUL = binary (*)
-let DIV = binary (../)
+let DIV = binary (/)
 ```
 
-Let's test interactively again.
+もう一度対話的に試してみましょう。
 
 ```fsharp
 let div2by3 = EMPTY |> THREE|> TWO |> DIV
@@ -311,72 +311,72 @@ let sub2from5 = EMPTY  |> TWO |> FIVE |> SUB
 let add1and2thenSub3 = EMPTY |> ONE |> TWO |> ADD |> THREE |> SUB
 ```
 
-In a similar fashion, we can create a helper function for unary functions
+同じように、単項関数用のヘルパー関数も作れます。
 
 ```fsharp
 let unary f stack = 
-    let x,stack' = pop stack  //pop the top of the stack
-    push (f x) stack'         //push the function value on the stack
+    let x,stack' = pop stack  // スタックの一番上を取り出す
+    push (f x) stack'         // 関数の結果をスタックに積む
 ```
     
-And then define some unary functions:
+そして、いくつかの単項関数を定義します。
 
 ```fsharp
 let NEG = unary (fun x -> -x)
 let SQUARE = unary (fun x -> x * x)
 ```
 
-Test interactively again:
+再び対話的に試してみましょう。
 
 ```fsharp
 let neg3 = EMPTY  |> THREE|> NEG
 let square2 = EMPTY  |> TWO |> SQUARE
 ```
 
-## Putting it all together
+## すべてを組み合わせる
 
-In the original requirements, we mentioned that we wanted to be able to show the results, so let's define a SHOW function.
+最初の要件では、結果を表示できるようにすると言いました。そこで、SHOW関数を定義しましょう。
 
 ```fsharp
 let SHOW stack = 
     let x,_ = pop stack
-    printfn "The answer is %f" x
-    stack  // keep going with same stack
+    printfn "答えは %f です" x
+    stack  // 同じスタックで続ける
 ```
 
-Note that in this case, we pop the original stack but ignore the diminished version. The final result of the function is the original stack, as if it had never been popped.
+この場合、元のスタックから取り出しますが、小さくなったバージョンは無視します。関数の最終結果は元のスタックで、取り出されなかったかのようになります。
 
-So now finally, we can write the code example from the original requirements
+これで最後に、最初の要件から例のコードが書けます。
 
 ```fsharp
 EMPTY |> ONE |> THREE |> ADD |> TWO |> MUL |> SHOW
 ```
 
-### Going further
+### さらに進める
 
-This is fun -- what else can we do?
+これは楽しいですね - 他に何ができるでしょうか？
 
-Well, we can define a few more core helper functions:
+いくつかのコアヘルパー関数を定義できます。
 
 ```fsharp
-/// Duplicate the top value on the stack
+/// スタックの一番上の値を複製する
 let DUP stack = 
-    // get the top of the stack
+    // スタックの一番上を取得
     let x,_ = pop stack  
-    // push it onto the stack again
+    // それをスタックに再度積む
     push x stack 
     
-/// Swap the top two values
+/// 上位2つの値を交換する
 let SWAP stack = 
     let x,s = pop stack  
     let y,s' = pop s
     push y (push x s')   
     
-/// Make an obvious starting point
+/// はっきりした開始点を作る
 let START  = EMPTY
 ```
     
-And with these additional functions in place, we can write some nice examples:
+これらの追加関数を使って、いくつかの素敵な例が書けます。
 
 ```fsharp
 START
@@ -392,118 +392,118 @@ START
 START
     |> ONE |> TWO |> ADD |> SHOW  // 3
     |> THREE |> MUL |> SHOW       // 9
-    |> TWO |> SWAP |> DIV |> SHOW // 9 div 2 = 4.5
+    |> TWO |> SWAP |> DIV |> SHOW // 9 ÷ 2 = 4.5
 ```
 
-## Using composition instead of piping
+## コンポジションを使ってパイプを置き換える
 
-But that's not all. In fact, there is another very interesting way to think about these functions. 
+でも、それだけではありません。実は、これらの関数について考える別のとても面白い方法があります。
 
-As I pointed out earlier, they all have an identical signature: 
+前に言ったように、これらは全て同じシグネチャを持っています。
 
 ```fsharp
 Stack -> Stack
 ```
 
-So, because the input and output types are the same, these functions can be composed using the composition operator `>>`, not just chained together with pipes. 
+つまり、入力と出力の型が同じなので、これらの関数はパイプでつなぐだけでなく、コンポジション演算子 `>>` を使って合成できます。
 
-Here are some examples:
+いくつか例を見てみましょう。
 
 ```fsharp
-// define a new function
+// 新しい関数を定義
 let ONE_TWO_ADD = 
     ONE >> TWO >> ADD 
 
-// test it
+// テスト
 START |> ONE_TWO_ADD |> SHOW
 
-// define a new function
+// 新しい関数を定義
 let SQUARE = 
     DUP >> MUL 
 
-// test it
+// テスト
 START |> TWO |> SQUARE |> SHOW
 
-// define a new function
+// 新しい関数を定義
 let CUBE = 
     DUP >> DUP >> MUL >> MUL 
 
-// test it
+// テスト
 START |> THREE |> CUBE |> SHOW
 
-// define a new function
+// 新しい関数を定義
 let SUM_NUMBERS_UPTO = 
     DUP                     // n  
     >> ONE >> ADD           // n+1
     >> MUL                  // n(n+1)
     >> TWO >> SWAP >> DIV   // n(n+1) / 2 
 
-// test it
+// テスト
 START |> THREE |> SQUARE |> SUM_NUMBERS_UPTO |> SHOW
 ```
 
-In each of these cases, a new function is defined by composing other functions together to make a new one. This is a good example of the "combinator" approach to building up functionality.
+これらの各ケースで、他の関数を組み合わせて新しい関数を定義しています。これは関数を組み立てる「コンビネータ」アプローチの良い例です。
 
-## Pipes vs composition
+## パイプ vs コンポジション
 
-We have now seen two different ways that this stack based model can be used; by piping or by composition. So what is the difference? And why would we prefer one way over another?
+このスタックベースのモデルを使う2つの異なる方法を見てきました。パイプを使う方法とコンポジションを使う方法です。では、その違いは何でしょうか？そして、なぜ一方を他方より好むのでしょうか？
 
-The difference is that piping is, in a sense, a "realtime transformation" operation. When you use piping you are actually doing the operations right now, passing a particular stack around.
+違いは、パイプがある意味で「リアルタイム変換」操作だということです。パイプを使うと、実際にその場で操作を行い、特定のスタックを渡します。
 
-On the other hand, composition is a kind of "plan" for what you want to do, building an overall function from a set of parts, but *not* actually running it yet.
+一方、コンポジションは、やりたいことの一種の「計画」です。一連の部品から全体的な関数を組み立てますが、まだ実際には実行しません。
 
-So for example, I can create a "plan" for how to square a number by combining smaller operations:
+例えば、小さな操作を組み合わせて数字を2乗する「計画」を作れます。
 
 ```fsharp
 let COMPOSED_SQUARE = DUP >> MUL 
 ```
 
-I cannot do the equivalent with the piping approach.
+パイプアプローチでは同じことはできません。
 
 ```fsharp
 let PIPED_SQUARE = DUP |> MUL 
 ```
 
-This causes a compilation error. I have to have some sort of concrete stack instance to make it work:
+これはコンパイルエラーを起こします。動かすには、何らかの具体的なスタックインスタンスが必要です。
 
 ```fsharp
 let stackWith2 = EMPTY |> TWO
 let twoSquared = stackWith2 |> DUP |> MUL 
 ```
 
-And even then, I only get the answer for this particular input, not a plan for all possible inputs, as in the COMPOSED_SQUARE example.
+そしてその場合でも、COMPOSED_SQUAREの例のようにすべての可能な入力に対する計画ではなく、この特定の入力に対する答えしか得られません。
 
-The other way to create a "plan" is to explicitly pass in a lambda to a more primitive function, as we saw near the beginning:
+「計画」を作るもう一つの方法は、始めの方で見たように、より原始的な関数にラムダを明示的に渡すことです。
 
 ```fsharp
 let LAMBDA_SQUARE = unary (fun x -> x * x)
 ```
 
-This is much more explicit (and is likely to be faster) but loses all the benefits and clarity of the composition approach.
+これははるかに明示的（そしておそらく速い）ですが、コンポジションアプローチのすべての利点と分かりやすさを失います。
 
-So, in general, go for the composition approach if you can!
+だから、一般的には、できるだけコンポジションアプローチを選びましょう！
 
-## The complete code
+## 完全なコード
 
-Here's the complete code for all the examples so far.
+これまでの例のすべてのコードを以下に示します。
 
 ```fsharp
 // ==============================================
-// Types
+// 型
 // ==============================================
 
 type Stack = StackContents of float list
 
 // ==============================================
-// Stack primitives
+// スタックのプリミティブ
 // ==============================================
 
-/// Push a value on the stack
+/// スタックに値を積む
 let push x (StackContents contents) =   
     StackContents (x::contents)
 
-/// Pop a value from the stack and return it 
-/// and the new stack as a tuple
+/// スタックから値を取り出し、
+/// その値と新しいスタックをタプルとして返す
 let pop (StackContents contents) = 
     match contents with 
     | top::rest -> 
@@ -513,62 +513,62 @@ let pop (StackContents contents) =
         failwith "Stack underflow"
 
 // ==============================================
-// Operator core
+// 演算子のコア
 // ==============================================
 
-// pop the top two elements
-// do a binary operation on them
-// push the result 
+// 上位2つの要素を取り出す
+// それらに対して二項演算を行う
+// 結果を積む 
 let binary mathFn stack = 
     let y,stack' = pop stack    
     let x,stack'' = pop stack'  
     let z = mathFn x y
     push z stack''      
 
-// pop the top element
-// do a unary operation on it
-// push the result 
+// 一番上の要素を取り出す
+// それに対して単項演算を行う
+// 結果を積む 
 let unary f stack = 
     let x,stack' = pop stack  
     push (f x) stack'         
 
 // ==============================================
-// Other core 
+// その他のコア 
 // ==============================================
 
-/// Pop and show the top value on the stack
+/// スタックの一番上の値を取り出して表示
 let SHOW stack = 
     let x,_ = pop stack
-    printfn "The answer is %f" x
-    stack  // keep going with same stack
+    printfn "答えは %f です" x
+    stack  // 同じスタックで続ける
 
-/// Duplicate the top value on the stack
+/// スタックの一番上の値を複製
 let DUP stack = 
     let x,s = pop stack  
     push x (push x s)   
     
-/// Swap the top two values
+/// 上位2つの値を交換
 let SWAP stack = 
     let x,s = pop stack  
     let y,s' = pop s
     push y (push x s')   
 
-/// Drop the top value on the stack
+/// スタックの一番上の値を削除
 let DROP stack = 
-    let _,s = pop stack  //pop the top of the stack
-    s                    //return the rest
+    let _,s = pop stack  // スタックの一番上を取り出す
+    s                    // 残りを返す
 
 // ==============================================
-// Words based on primitives
+// プリミティブに基づく単語
 // ==============================================
 
-// Constants
+// 定数
 // -------------------------------
 let EMPTY = StackContents []
 let START  = EMPTY
 
 
-// Numbers
+// 数字
 // -------------------------------
 let ONE = push 1.0
 let TWO = push 2.0
@@ -576,18 +576,18 @@ let THREE = push 3.0
 let FOUR = push 4.0
 let FIVE = push 5.0
 
-// Math functions
+// 数学関数
 // -------------------------------
 let ADD = binary (+)
 let SUB = binary (-)
 let MUL = binary (*)
-let DIV = binary (../)
+let DIV = binary (/)
 
 let NEG = unary (fun x -> -x)
 
 
 // ==============================================
-// Words based on composition
+// コンポジションに基づく単語
 // ==============================================
 
 let SQUARE =  
@@ -603,10 +603,10 @@ let SUM_NUMBERS_UPTO =
     >> TWO >> SWAP >> DIV   // n(n+1) / 2 
 ```
 
-## Summary
+## まとめ
 
-So there we have it, a simple stack based calculator. We've seen how we can start with a few primitive operations (`push`, `pop`, `binary`, `unary`) and from them, build up a whole domain specific language that is both easy to implement and easy to use.
+これで、シンプルなスタックベース電卓ができました。いくつかの基本的な操作（ `push` 、 `pop` 、 `binary` 、 `unary` ）から始めて、実装も使用も簡単な、完全なドメイン固有言語を組み立てられることがわかりました。
 
-As you might guess, this example is based heavily on the Forth language. I highly recommend the free book ["Thinking Forth"](http://thinking-forth.sourceforge.net/), which is not just about the Forth language, but about (*non* object-oriented!) problem decomposition techniques which are equally applicable to functional programming.
+気づいたかもしれませんが、この例はForth言語に大きく基づいています。無料の本「[Thinking Forth](https://thinking-forth.sourceforge.net/)」を強くお勧めします。これはForth言語だけでなく、（オブジェクト指向*ではない*）問題分解技術についての本で、関数型プログラミングにも同じように当てはまる内容です。
 
-I got the idea for this post from a great blog by [Ashley Feniello](http://blogs.msdn.com/b/ashleyf/archive/2011/04/21/programming-is-pointless.aspx). If you want to go deeper into emulating a stack based language in F#, start there. Have fun! 
+この記事のアイデアは、[Ashley Feniello](https://web.archive.org/web/20140406021650/http://blogs.msdn.com/b/ashleyf/archive/2011/04/21/programming-is-pointless.aspx)の素晴らしいブログから得ました。F#でスタックベース言語をエミュレートすることについてもっと深く学びたい場合は、そこから始めてください。楽しんでください！
