@@ -52,7 +52,7 @@ C#（および.NET一般）では、多くの異なるパラメータを持つ�
 
 ```fsharp
 let createReader fileName = new System.IO.StreamReader(fileName)
-// エラー FS0041: メソッド'StreamReader'の一意のオーバーロードを
+// error FS0041: メソッド'StreamReader'の一意のオーバーロードを
 //                決定できませんでした
 ```
 

@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Defining functions"
-description: "Lambdas and more"
+title: "関数の定義"
+description: "ラムダ式とその他の手法"
 nav: thinking-functionally
 seriesId: "関数型思考"
 seriesOrder: 8
@@ -9,71 +9,71 @@ categories: [Functions, Combinators]
 ---
 
 
-We have seen how to create typical functions using the "let" syntax, below:
+これまで、以下のような `let` 構文を使って一般的な関数を作る方法を見てきました。
 
 ```fsharp
 let add x y = x + y
 ```
 
-In this section, we'll look at some other ways of creating functions, and tips for defining functions.
+このセクションでは、関数を作るその他の方法と、関数を定義するためのヒントを見ていきます。
 
-## Anonymous functions (a.k.a. lambdas) ##
+## 無名関数（別名：ラムダ式）
 
-If you are familiar with lambdas in other languages, this will not be new to you. An anonymous function (or "lambda expression") is defined using the form:
+他の言語でラムダ式を使ったことがある人には、これは目新しくないでしょう。無名関数（または「ラムダ式」）は以下の形で定義します。
 
 ```fsharp
 fun parameter1 parameter2 etc -> expression
 ```
 
-If you are used to lambdas in C# there are a couple of differences:
+C#のラムダ式に慣れている人は、いくつかの違いに気づくでしょう。
 
-* the lambda must have the special keyword `fun`, which is not needed in the C# version
-* the arrow symbol is a single arrow `->` rather than the double arrow (`=>`) in C#.
+* ラムダ式には特別なキーワード `fun` が必要です。これはC#版では必要ありません。
+* 矢印記号は単一の矢印 `->` で、C#の二重矢印（ `=>` ）とは違います。
 
-Here is a lambda that defines addition:
+以下は加算を定義するラムダ式です。
 
 ```fsharp
 let add = fun x y -> x + y
 ```
 
-This is exactly the same as a more conventional function definition:
+これは、より一般的な関数定義と全く同じです。
 
 ```fsharp
 let add x y = x + y
 ```
 
-Lambdas are often used when you have a short expression and you don't want to define a function just for that expression. This is particularly common with list operations, as we have seen already.
+ラムダ式は、短い式があって、その式だけのために関数を定義したくない場合によく使います。これは特にリスト操作でよく見られ、すでに見てきたとおりです。
 
 ```fsharp
-// with separately defined function
+// 別に定義した関数を使う
 let add1 i = i + 1
 [1..10] |> List.map add1
 
-// inlined without separately defined function
+// 別に定義した関数を使わずにインライン化
 [1..10] |> List.map (fun i -> i + 1)
 ```
 
-Note that you must use parentheses around the lambda.
+ラムダ式の周りにはかっこを使う必要があることに注意してください。
 
-Lambdas are also used when you want to make it clear that you are returning a function from another function. For example, the "`adderGenerator`" function that we talked about earlier could be rewritten with a lambda.
+ラムダ式は、ある関数から別の関数を返すことを明確にしたい場合にも使います。例えば、先ほど説明した `adderGenerator` 関数は、ラムダ式を使って書き直せます。
 
 ```fsharp
-// original definition
+// 元の定義
 let adderGenerator x = (+) x
 
-// definition using lambda
+// ラムダ式を使った定義
 let adderGenerator x = fun y -> x + y
 ```
 
-The lambda version is slightly longer, but makes it clear that an intermediate function is being returned.
+ラムダ式版は少し長くなりますが、中間的な関数が返されることが明確になります。
 
-You can nest lambdas as well. Here is yet another definition of `adderGenerator`, this time using lambdas only. 
+ラムダ式をネストすることもできます。以下は `adderGenerator` のさらに別の定義で、今回はラムダ式だけを使っています。
 
 ```fsharp
 let adderGenerator = fun x -> (fun y -> x + y)
 ```
 
-Can you see that all three of the following definitions are the same thing?
+次の3つの定義がすべて同じものだとわかりますか？
 
 ```fsharp
 let adderGenerator1 x y = x + y 
@@ -81,235 +81,233 @@ let adderGenerator2 x   = fun y -> x + y
 let adderGenerator3     = fun x -> (fun y -> x + y)
 ```
 
-If you can't see it, then do reread the [post on currying](../posts/currying.md). This is important stuff to understand!
+もしわからない場合は、「[カリー化](../posts/currying.md)」に関する投稿をもう一度読んでください。これは理解すべき重要な内容です！
 
-## Pattern matching on parameters ##
+## パラメータに対するパターンマッチング
 
-When defining a function, you can pass an explicit parameter, as we have seen, but you can also pattern match directly in the parameter section. In other words, the parameter section can contain *patterns*, not just identifiers!
+関数を作るとき、これまで見てきたように明示的なパラメータを渡せますが、パラメータ部分で直接パターンマッチングをすることもできます。つまり、パラメータ部分には識別子だけでなく、*パターン*を含められるのです！
 
-The following example demonstrates how to use patterns in a function definition:
+以下の例は、関数定義でパターンを使う方法を示しています。
 
 ```fsharp
-type Name = {first:string; last:string} // define a new type
-let bob = {first="bob"; last="smith"}   // define a value 
+type Name = {first:string; last:string} // 新しい型を作る
+let bob = {first="bob"; last="smith"}   // 値を作る
 
-// single parameter style
-let f1 name =                       // pass in single parameter   
-   let {first=f; last=l} = name     // extract in body of function 
+// 単一パラメータスタイル
+let f1 name =                       // 単一パラメータを渡す
+   let {first=f; last=l} = name     // 関数本体で展開
    printfn "first=%s; last=%s" f l
 
-// match in the parameter itself
-let f2 {first=f; last=l} =          // direct pattern matching 
+// パラメータ自体でマッチング
+let f2 {first=f; last=l} =          // 直接パターンマッチング
    printfn "first=%s; last=%s" f l 
 
-// test
+// テスト
 f1 bob
 f2 bob
 ```
 
-This kind of matching can only occur when the matching is always possible. For example, you cannot match on union types or lists this way, because some cases might not be matched.
+このようなマッチングは、マッチングが常に可能な場合にのみ使えます。例えば、和集合型やリストに対してはこの方法でマッチングできません。いくつかのケースがマッチしない可能性があるからです。
 
 ```fsharp
-let f3 (x::xs) =            // use pattern matching on a list
-   printfn "first element is=%A" x
+let f3 (x::xs) =            // リストに対するパターンマッチングを使う
+   printfn "最初の要素は=%A" x
 ```
 
-You will get a warning about incomplete pattern matches.
+不完全なパターンマッチに関する警告が表示されます。
 
 <a name="tuples"></a>
 
-## A common mistake: tuples vs. multiple parameters ##
+## よくある間違い：タプルと複数のパラメータの混同
 
-If you come from a C-like language, a tuple used as a single function parameter can look awfully like multiple parameters. They are not the same thing at all!   As I noted earlier, if you see a comma, it is probably part of a tuple. Parameters are separated by spaces.
+C言語系の言語を使ってきた人には、単一の関数パラメータとして使うタプルが、複数のパラメータとよく似て見えるかもしれません。しかし、これらは全く別物です！ 先ほども言ったように、コンマが見えたら、それはおそらくタプルの一部です。パラメータはスペースで区切ります。
 
-Here is an example of the confusion:
+以下は、この混同の例です。
 
 ```fsharp
-// a function that takes two distinct parameters
+// 2つの別々のパラメータを取る関数
 let addTwoParams x y = x + y
 
-// a function that takes a single tuple parameter
+// 単一のタプルパラメータを取る関数
 let addTuple aTuple = 
    let (x,y) = aTuple
    x + y
 
-// another function that takes a single tuple parameter 
-// but looks like it takes two ints
+// 単一のタプルパラメータを取る別の関数
+// しかし、2つのintを取るように見える
 let addConfusingTuple (x,y) = x + y
 ```
 
-* The first definition, "`addTwoParams`", takes two parameters, separated with spaces.
-* The second definition, "`addTuple`", takes a single parameter. It then binds "x" and "y" to the inside of the tuple and does the addition.
-* The third definition, "`addConfusingTuple`", takes a single parameter just like "`addTuple`", but the tricky thing is that the tuple is unpacked and bound as part of the parameter definition using pattern matching. Behind the scenes, it is exactly the same as "`addTuple`".
+* 最初の定義 `addTwoParams` は、スペースで区切られた2つのパラメータを取ります。
+* 2つ目の定義 `addTuple` は、単一のパラメータを取ります。その後、タプルの中身を「x」と「y」に束縛し、加算をします。
+* 3つ目の定義 `addConfusingTuple` は、 `addTuple` と同じく単一のパラメータを取りますが、トリッキーなのは、パラメータ定義の一部としてパターンマッチングを使ってタプルが展開され、束縛されることです。裏側では、これは `addTuple` とまったく同じです。
 
-Let's look at the signatures (it is always a good idea to look at the signatures if you are unsure)
+シグネチャを見てみましょう（不安なときは、常にシグネチャを確認することをお勧めします）
 
 ```fsharp
-val addTwoParams : int -> int -> int        // two params
-val addTuple : int * int -> int             // tuple->int
-val addConfusingTuple : int * int -> int    // tuple->int
+val addTwoParams : int -> int -> int        // 2つのパラメータ
+val addTuple : int * int -> int             // タプル->int
+val addConfusingTuple : int * int -> int    // タプル->int
 ```
 
-Now let's use them:
+では、これらを使ってみましょう。
 
 ```fsharp
-//test
-addTwoParams 1 2      // ok - uses spaces to separate args
-addTwoParams (1,2)    // error trying to pass a single tuple 
-//   => error FS0001: This expression was expected to have type
-//                    int but here has type 'a * 'b
+//テスト
+addTwoParams 1 2      // OK - 引数の区切りにスペースを使う
+addTwoParams (1,2)    // エラー - 単一のタプルを渡そうとしている
+//   => error FS0001: この式に必要な型は 'int' ですが、
+//                     ここでは次の型が指定されています ''a * 'b'
 ```
 
-Here we can see an error occur in the second case above. 
+ここで、上記の2つ目のケースでエラーが起きていることがわかります。
 
-First, the compiler treats `(1,2)` as a generic tuple of type `('a * 'b)`, which it attempts to pass as the first parameter to "`addTwoParams`".
-Then it complains that the first parameter of `addTwoParams` is an `int`, and we're trying to pass a tuple.
+まず、コンパイラは `(1,2)` を型 `('a * 'b)` の一般的なタプルとして扱い、これを `addTwoParams` の最初のパラメータとして渡そうとします。
+そして、 `addTwoParams` の最初のパラメータが `int` なのに、タプルを渡そうとしていると訴えます。
 
-To make a tuple, use a comma!  Here's how to do it correctly:
+タプルを作るには、カンマを使います！ 以下が正しい方法です。
 
 ```fsharp
-addTuple (1,2)           // ok
-addConfusingTuple (1,2)  // ok
+addTuple (1,2)           // OK
+addConfusingTuple (1,2)  // OK
 
 let x = (1,2)                 
-addTuple x               // ok
+addTuple x               // OK
 
-let y = 1,2              // it's the comma you need, 
-                         // not the parentheses!      
-addTuple y               // ok
-addConfusingTuple y      // ok
+let y = 1,2              // 必要なのはカンマで、
+                         // かっこではありません！      
+addTuple y               // OK
+addConfusingTuple y      // OK
 ```
 
-Conversely, if you attempt to pass multiple arguments to a function expecting a tuple, you will also get an obscure error.
+逆に、タプルを期待する関数に複数の引数を渡そうとすると、同じように分かりにくいエラーが起きます。
 
 ```fsharp
-addConfusingTuple 1 2    // error trying to pass two args 
-// => error FS0003: This value is not a function and 
-//                  cannot be applied
+addConfusingTuple 1 2    // エラー - 2つの引数を渡そうとしている 
+// => error FS0003: この値は関数ではないため、適用できません
 ```
 
-In this case, the compiler thinks that, since you are passing two arguments, `addConfusingTuple` must be curryable. So then "`addConfusingTuple 1`" would be a partial application that returns another intermediate function. Trying to apply that intermediate function with "2" gives an error, because there is no intermediate function! We saw this exact same error in the post on currying, when we discussed the issues that can occur from having too many parameters.
+この場合、コンパイラは2つの引数を渡していることから、 `addConfusingTuple` がカリー化できると考えます。そのため、 `addConfusingTuple 1` は中間的な関数を返す部分適用となるはずです。その中間的な関数に `2` を適用しようとするとエラーが起きます。なぜなら、中間的な関数は存在しないからです！ カリー化に関する投稿で、パラメータが多すぎる場合に起きる問題について議論したときに、まさにこの同じエラーを見ました。
 
-### Why not use tuples as parameters? ###
+### なぜタプルをパラメータとして使わないのか？
 
-The discussion of the issues with tuples above shows that there's another way to define functions with more than one parameter: rather than passing them in separately, all the parameters can be combined into a single composite data structure. In the example below, the function takes a single parameter, which is a tuple containing three items. 
+タプルに関する上記の議論から、1つ以上のパラメータを持つ関数を作る別の方法があることがわかります。パラメータを個別に渡すのではなく、すべてのパラメータを単一の複合データ構造にまとめられます。以下の例では、関数は3つの項目を含むタプルである単一のパラメータを取ります。
 
 ```fsharp
 let f (x,y,z) = x + y * z
-// type is int * int * int -> int
+// 型は int * int * int -> int
 
-// test
+// テスト
 f (1,2,3)
 ```
 
-Note that the function signature is different from a true three parameter function. There is only one arrow, so only one parameter, and the stars indicate that this is a tuple of `(int*int*int)`. 
+関数シグネチャが本当の3パラメータ関数とは違うことに注意してください。矢印は1つしかないので、パラメータは1つだけで、アスタリスクは `(int*int*int)` のタプルであることを示しています。
 
-When would we want to use tuple parameters instead of individual ones?  
+では、個別のパラメータの代わりにタプルパラメータを使いたい場合はいつでしょうか？
 
-* When the tuples are meaningful in themselves. For example, if we are working with three dimensional coordinates, a three-tuple might well be more convenient than three separate dimensions.
-* Tuples are occasionally used to bundle data together in a single structure that should be kept together. For example, the `TryParse` functions in .NET library return the result and a Boolean as a tuple.  But if you have a lot of data that is kept together as a bundle, then you will probably want to define a record or class type to store it.
+* タプル自体に意味がある場合。例えば、3次元座標を扱う場合、3つの次元を別々に扱うより、3タプルの方が便利かもしれません。
+* タプルは、一緒に保持すべきデータをまとめて単一の構造にするために時々使います。例えば、.NETライブラリの `TryParse` 関数は、結果とブール値をタプルとして返します。しかし、まとめて保持すべきデータが多い場合は、おそらくレコードまたはクラス型を作ってそれを格納したいでしょう。
 
-### A special case: tuples and .NET library functions ###
+### 特殊なケース：タプルと.NETライブラリ関数
 
-One area where commas are seen a lot is when calling .NET library functions! 
+カンマがよく見られる領域の1つは、.NETライブラリ関数を呼び出すときです！
 
-These all take tuple-like arguments, and so these calls look just the same as they would from C#:  
+これらはすべてタプルのような引数を取るため、これらの呼び出しはC#の場合とまったく同じように見えます。
 
 ```fsharp
-// correct
+// 正しい
 System.String.Compare("a","b")
 
-// incorrect
+// 間違い
 System.String.Compare "a" "b"
 ```
 
-The reason is that .NET library functions are not curried and cannot be partially applied. *All* the parameters must *always* be passed in, and using a tuple-like approach is the obvious way to do this.
+理由は、.NETライブラリ関数がカリー化されておらず、部分適用できないからです。*すべての*パラメータを*常に*渡す必要があり、タプルに似たアプローチを使うのは明らかな方法です。
 
-But do note that although these calls look like tuples, they are actually a special case. Real tuples cannot be used, so the following code is invalid:
+ただし、これらの呼び出しはタプルのように見えますが、実際には特殊なケースだということに注意してください。本物のタプルは使えません。そのため、以下のコードは無効です。
 
 ```fsharp
 let tuple = ("a","b")
-System.String.Compare tuple   // error  
+System.String.Compare tuple   // エラー
 
-System.String.Compare "a","b" // error  
+System.String.Compare "a","b" // エラー
 ```
 
-If you do want to partially apply .NET library functions, it is normally trivial to write wrapper functions for them, as we have [seen earlier](../posts/partial-application.md), and as shown below:
+.NETライブラリ関数を部分適用したい場合は、通常、[以前見たように](../posts/partial-application.md)、以下のようにラッパー関数を書くのは簡単です。
 
 ```fsharp
-// create a wrapper function
+// ラッパー関数を作る
 let strCompare x y = System.String.Compare(x,y)
 
-// partially apply it
+// 部分適用する
 let strCompareWithB = strCompare "B"
 
-// use it with a higher order function
+// 高階関数で使う
 ["A";"B";"C"]
 |> List.map strCompareWithB 
 ```
 
 
-## Guidelines for separate vs. grouped parameters ##
+## 個別パラメータとグループ化されたパラメータのガイドライン
 
-The discussion on tuples leads us to a more general topic: when should function parameters be separate and when should they be grouped?
+タプルに関する議論から、より一般的な話題に移ります。関数パラメータはいつ個別にすべきで、いつグループ化すべきでしょうか？
 
-Note that F# is different from C# in this respect. In C# *all* the parameters are *always* provided, so the question does not even arise!  In F#, due to partial application, only some parameters might be provided, so you need to distinguish between those that are required to be grouped together vs. those that are independent. 
+F#はこの点でC#とは違うことに注意してください。C#では*すべての*パラメータが*常に*提供されるため、この問題は起きません！ F#では、部分適用のため、一部のパラメータのみが提供される可能性があるので、一緒にグループ化する必要があるパラメータと独立したパラメータを区別する必要があります。
 
-Here are some general guidelines of how to structure parameters when you are designing your own functions.
+以下は、自分で関数を設計するときにパラメータをどう構成するかの一般的なガイドラインです。
 
-* In general, it is always better to use separate parameters rather than passing them as a single structure such as a tuple or record. This allows for more flexible behavior such as partial application.
-* But, when a group of parameters *must* all be set at once, then *do* use some sort of grouping mechanism.  
+* 基本的に、パラメータをタプルやレコードなどの単一の構造として渡すより、常に個別のパラメータを使う方が良いです。これにより、部分適用などのより柔軟な動作が可能になります。
+* ただし、パラメータのグループが*必ず*一緒に設定される必要がある場合は、*何らかの*グループ化の仕組みを使ってください。
 
-In other words, when designing a function, ask yourself "could I provide this parameter in isolation?" If the answer is no, the parameters should be grouped.
+言い換えれば、関数を設計するとき、「このパラメータを単独で提供できるだろうか？」と自問してください。答えがノーなら、パラメータはグループ化すべきです。
 
-Let's look at some examples:
+いくつか例を見てみましょう。
 
 ```fsharp
-// Pass in two numbers for addition. 
-// The numbers are independent, so use two parameters
+// 加算のために2つの数値を渡す。
+// 数値は独立しているので、2つのパラメータを使う
 let add x y = x + y
 
-// Pass in two numbers as a geographical co-ordinate. 
-// The numbers are dependent, so group them into a tuple or record
-let locateOnMap (xCoord,yCoord) = // do something
+// 地理座標として2つの数値を渡す。
+// 数値は依存しているので、タプルまたはレコードにグループ化する
+let locateOnMap (xCoord,yCoord) = // 何かを行う
 
-// Set first and last name for a customer.
-// The values are dependent, so group them into a record.
+// 顧客の名と姓を設定する。
+// 値は依存しているので、レコードにグループ化する。
 type CustomerName = {First:string; Last:string}
-let setCustomerName aCustomerName = // good
-let setCustomerName first last = // not recommended
+let setCustomerName aCustomerName = // 良い
+let setCustomerName first last = // お勧めしない
 
-// Set first and last name and and pass the 
-// authorizing credentials as well.
-// The name and credentials are independent, keep them separate
-let setCustomerName myCredentials aName = //good
+// 名と姓を設定し、認証資格情報も渡す。
+// 名前と資格情報は独立しているので、別々に保持する
+let setCustomerName myCredentials aName = // 良い
 ```
 
-Finally, do be sure to order the parameters appropriately to assist with partial application (see the guidelines in the earlier [post](../posts/partial-application.md)). For example, in the last function above, why did I put the `myCredentials` parameter ahead of the `aName` parameter?
+最後に、部分適用を簡単にするためにパラメータを適切に順序付けることを忘れないでください（[以前の投稿](../posts/partial-application.md)のガイドラインを参照）。例えば、上記の最後の関数で、なぜ `myCredentials` パラメータを `aName` パラメータの前に置いたのでしょうか？
 
-## Parameter-less functions ##
+## パラメータなしの関数
 
-Sometimes we may want functions that don't take any parameters at all. For example, we may want a "hello world" function that we can call repeatedly. As we saw in a previous section, the naive definition will not work.
+時々、パラメータを全く取らない関数が必要な場合があります。例えば、繰り返し呼び出せる「hello world」関数が欲しい場合があります。以前のセクションで見たように、単純な定義では動きません。
 
 ```fsharp
-let sayHello = printfn "Hello World!"     // not what we want
+let sayHello = printfn "Hello World!"     // 望んでいるものではない
 ```
 
-The fix is to add a unit parameter to the function, or use a lambda. 
+解決策は、関数に unit パラメータを追加するか、ラムダ式を使うことです。
 
 ```fsharp
-let sayHello() = printfn "Hello World!"           // good
-let sayHello = fun () -> printfn "Hello World!"   // good
+let sayHello() = printfn "Hello World!"           // 良い
+let sayHello = fun () -> printfn "Hello World!"   // 良い
 ```
 
-And then the function must always be called with a unit argument:
+そして、関数は常に unit 引数を渡して呼び出す必要があります。
 
 ```fsharp
-// call it
+// 呼び出し
 sayHello()
 ```
 
-This is particularly common with the .NET libraries. Some examples are:
+これは特に.NETライブラリでよく見られます。いくつか例を挙げます。
 
 ```fsharp
 Console.ReadLine()
@@ -317,128 +315,128 @@ System.Environment.GetCommandLineArgs()
 System.IO.Directory.GetCurrentDirectory()
 ```
 
-Do remember to call them with the unit parameter!
+unit パラメータを渡して呼び出すことを忘れないでください！
 
-## Defining new operators ##
+## 新しい演算子の定義
 
-You can define functions named using one or more of the operator symbols (see the [F# documentation](http://msdn.microsoft.com/en-us/library/dd233204) for the exact list of symbols that you can use):
+演算子記号を1つ以上使って名前を付けた関数を定義できます（使える記号の正確なリストについては[F#のドキュメント](https://learn.microsoft.com/ja-jp/dotnet/fsharp/language-reference/operator-overloading)を参照してください）。
 
 ```fsharp
-// define
+// 定義
 let (.*%) x y = x + y + 1
 ```
 
-You must use parentheses around the symbols when defining them. 
+定義するときは記号の周りにかっこを使う必要があります。
 
-Note that for custom operators that begin with `*`, a space is required; otherwise the `(*` is interpreted as the start of a comment: 
+`*` で始まるカスタム演算子の場合、スペースが必要です。そうしないと、 `(*` がコメントの開始と解釈されてしまいます。
 
 ```fsharp
 let ( *+* ) x y = x + y + 1
 ```
 
-Once defined, the new function can be used in the normal way, again with parens around the symbols:
+定義後、新しい関数は通常の方法で使えます。再び記号の周りにかっこを付けます。
 
 ```fsharp
 let result = (.*%) 2 3
 ```
 
-If the function has exactly two parameters, you can use it as an infix operator without parentheses.
+関数がちょうど2つのパラメータを持つ場合、かっこなしで中置演算子として使えます。
 
 ```fsharp
 let result = 2 .*% 3
 ```
 
-You can also define prefix operators that start with `!` or `~` (with some restrictions -- see the [F# documentation on operator overloading](http://msdn.microsoft.com/en-us/library/dd233204#prefix))
+`!` または `~` で始まる前置演算子も定義できます（いくつか制限があります - [演算子のオーバーロードに関するF#のドキュメント](https://learn.microsoft.com/ja-jp/dotnet/fsharp/language-reference/operator-overloading#creating-new-operators)を参照してください）
 
 ```fsharp
 let (~%%) (s:string) = s.ToCharArray()
 
-//use
+//使用
 let result = %% "hello"
 ```
 
-In F# it is quite common to create your own operators, and many libraries will export operators with names such as `>=>` and `<*>`.
+F#では、自分で演算子を作るのはとても一般的です。多くのライブラリが `>=>` や `<*>` などの名前の演算子を提供しています。
 
-## Point-free style ##
+## ポイントフリースタイル
 
-We have already seen many examples of leaving off the last parameter of functions to reduce clutter. This style is referred to as **point-free style** or **tacit programming**.
+関数の最後のパラメータを省略して簡潔にする例をすでに多く見てきました。このスタイルは**ポイントフリースタイル**または**暗黙的プログラミング**と呼ばれます。
 
-Here are some examples:
-
-```fsharp
-let add x y = x + y   // explicit
-let add x = (+) x     // point free
-
-let add1Times2 x = (x + 1) * 2    // explicit
-let add1Times2 = (+) 1 >> (*) 2   // point free
-
-let sum list = List.reduce (fun sum e -> sum+e) list // explicit
-let sum = List.reduce (+)                            // point free
-```
-
-There are pros and cons to this style. 
-
-On the plus side, it focuses attention on the high level function composition rather than the low level objects. For example "`(+) 1 >> (*) 2`" is clearly an addition operation followed by a multiplication. And "`List.reduce (+)`" makes it clear that the plus operation is key, without needing to know about the list it is actually applied to. 
-
-Point-free helps to clarify the underlying algorithm and reveal commonalities between code -- the "`reduce`" function used above is a good example of this -- it will be discussed in a planned series on list processing.
-
-On the other hand, too much point-free style can make for confusing code. Explicit parameters can act as a form of documentation, and their names (such as "list") make it clear what the function is acting on. 
-
-As with anything in programming, the best guideline is to use the approach that provides the most clarity.
-
-## Combinators ##
-
-The word "**combinator**" is used to describe functions whose result depends only on their parameters.  That means there is no dependency on the outside world, and in particular no other functions or global value can be accessed at all.
-
-In practice, this means that a combinator function is limited to combining its parameters in various ways.
-
-We have already seen some combinators already: the "pipe" operator and the "compose" operator.  If you look at their definitions, it is clear that all they do is reorder the parameters in various ways
+いくつか例を見てみましょう。
 
 ```fsharp
-let (|>) x f = f x             // forward pipe
-let (<|) f x = f x             // reverse pipe
-let (>>) f g x = g (f x)       // forward composition
-let (<<) g f x = g (f x)       // reverse composition
+let add x y = x + y   // 明示的
+let add x = (+) x     // ポイントフリー
+
+let add1Times2 x = (x + 1) * 2    // 明示的
+let add1Times2 = (+) 1 >> (*) 2   // ポイントフリー
+
+let sum list = List.reduce (fun sum e -> sum+e) list // 明示的
+let sum = List.reduce (+)                            // ポイントフリー
 ```
 
-On the other hand, a function like "printf", although primitive, is not a combinator, because it has a dependency on the outside world (I/O).
+このスタイルには長所と短所があります。
 
-### Combinator birds ###
+長所としては、低レベルのオブジェクトではなく、高レベルの関数合成に注目できることです。例えば、 `(+) 1 >> (*) 2` は明らかに加算操作に続く乗算操作です。また、 `List.reduce (+)` は、実際に適用されるリストを知る必要なく、プラス操作が重要だということを明確にします。
 
-Combinators are the basis of a whole branch of logic (naturally called "combinatory logic") that was invented many years before computers and programming languages. Combinatory logic has had a very large influence on functional programming.
+ポイントフリースタイルは、基本的なアルゴリズムを明確にし、コード間の共通点を明らかにするのに役立ちます。上記で使った `reduce` 関数はその良い例です。これについては、リスト処理に関する予定のシリーズで話し合う予定です。
 
-To read more about combinators and combinatory logic, I recommend the book "To Mock a Mockingbird" by Raymond Smullyan.  In it, he describes many other combinators and whimsically gives them names of birds.  Here are some examples of some standard combinators and their bird names:
+一方で、ポイントフリースタイルを使いすぎると、混乱を招くコードになる可能性があります。明示的なパラメータは一種のドキュメントとして機能し、その名前（「list」など）が関数が何に対して働いているかを明確にします。
+
+プログラミングにおける他の多くのことと同様に、最も分かりやすさを提供するアプローチを使うのが最良のガイドラインです。
+
+## コンビネータ
+
+**コンビネータ**という言葉は、結果が引数だけに依存する関数を表すのに使います。つまり、外部世界への依存性がなく、特に他の関数やグローバルな値にまったくアクセスできません。
+
+実際には、コンビネータ関数は引数を様々な方法で組み合わせることに限定されています。
+
+すでにいくつかのコンビネータを見てきました。「パイプ」演算子と「合成」演算子です。これらの定義を見ると、それらがパラメータを様々な方法で並べ替えるだけだということがはっきりわかります。
 
 ```fsharp
-let I x = x                // identity function, or the Idiot bird
-let K x y = x              // the Kestrel
-let M x = x >> x           // the Mockingbird
-let T x y = y x            // the Thrush (this looks familiar!)
-let Q x y z = y (x z)      // the Queer bird (also familiar!)
-let S x y z = x z (y z)    // The Starling
-// and the infamous...
-let rec Y f x = f (Y f) x  // Y-combinator, or Sage bird
+let (|>) x f = f x             // 前方パイプ
+let (<|) f x = f x             // 後方パイプ
+let (>>) f g x = g (f x)       // 前方合成
+let (<<) g f x = g (f x)       // 後方合成
 ```
 
-The letter names are quite standard, so if you refer to "the K combinator", everyone will be familiar with that terminology.
+一方、「printf」のような関数は原始的ですが、外の世界（I/O）への依存性があるため、コンビネータではありません。
 
-It turns out that many common programming patterns can be represented using these standard combinators. For example, the Kestrel is a common pattern in fluent interfaces where you do something but then return the original object. The Thrush is the pipe operation, the Queer bird is forward composition, and the Y-combinator is famously used to make functions recursive.
+### コンビネータ鳥
 
-Indeed, there is a well-known theorem that states that any computable function whatsoever can be built from just two basic combinators, the Kestrel and the Starling. 
+コンビネータは、コンピュータやプログラミング言語が発明される遥か以前に作られた論理学の一分野（当然「コンビネータ論理」と呼ばれます）の基礎です。コンビネータ論理は関数型プログラミングに非常に大きな影響を与えてきました。
 
-### Combinator libraries ###
+コンピネータとコンビネータ論理についてもっと学びたい方は、レイモンド・スマリヤン著の「ものまね鳥をまねる」という本がおすすめです。この本では、スマリヤンは様々なコンビネータを紹介し、ユーモアを交えて鳥の名前を付けています。以下に、代表的なコンビネータとその鳥の名前をいくつか紹介します。
 
-A combinator library is a code library that exports a set of combinator functions that are designed to work together. The user of the library can then easily combine simple functions together to make bigger and more complex functions, like building with Lego.  
+```fsharp
+let I x = x                // 恒等関数、または「アホウドリ」
+let K x y = x              // 「ケストレル」
+let M x = x >> x           // 「モッキングバード」
+let T x y = y x            // 「ツグミ」（見覚えがありますね！）
+let Q x y z = y (x z)      // 「クィアバード」（これも見覚えがあります！）
+let S x y z = x z (y z)    // 「ホシムクドリ」
+// そして悪名高い...
+let rec Y f x = f (Y f) x  // Yコンビネータ、または「セージバード」
+```
 
-A well designed combinator library allows you to focus on the high level operations, and push the low level "noise" to the background. We've already seen some examples of this power in the examples in ["F# を使う理由"](../series/why-use-fsharp.md) series, and the `List` module is full of them -- the "`fold`" and "`map`" functions are also combinators, if you think about it.
+文字名はかなり標準的なので、「Kコンビネータ」と言えば、誰もがその用語を理解するでしょう。
 
-Another advantage of combinators is that they are the safest type of function. As they have no dependency on the outside world they cannot change if the global environment changes.  A function that reads a global value or uses a library function can break or alter between calls if the context is different. This can never happen with combinators. 
+興味深いことに、これらの標準的なコンビネータを用いることで、多くの一般的なプログラミングパターンを表現できます。例えば、「ケストレル」は、操作を実行後に元のオブジェクトを返す、流暢なインターフェースにおける典型的なパターンです。「ツグミ」はパイプ操作を表し、「クィアバード」は前方合成、そしてYコンビネータは関数を再帰的にするために用いられることで有名です。
 
-In F#, combinator libraries are available for parsing (the FParsec library), HTML construction, testing frameworks, and more.  We'll discuss and use combinators further in later series.
+実は、よく知られている定理によると、「ケストレル」と「ホシムクドリ」という2つの基本的なコンビネータだけで、どんな計算可能な関数でも作れるとされています。
 
-## Recursive functions ##
+### コンビネータライブラリ
 
-Often, a function will need to refer to itself in its body.  The classic example is the Fibonacci function:
+コンビネータライブラリは、一緒に動くように設計された一連のコンビネータ関数を提供するコードライブラリです。ライブラリのユーザーは、単純な関数を組み合わせて、より大きく複雑な関数を簡単に作れます。まるでレゴブロックで組み立てるようです。
+
+うまく設計されたコンビネータライブラリを使うと、高レベルの操作に集中でき、低レベルの「ノイズ」を背景に押しやれます。このような力の例をいくつか、「[F# を使う理由](../series/why-use-fsharp.md)」シリーズの例で既に見てきました。また、 `List` モジュールにはそのような例がたくさんあります。よく考えてみると、 `fold` や `map` 関数もコンビネータです。
+
+コンビネータのもう一つの利点は、最も安全な種類の関数だということです。外部世界に依存しないため、グローバルな環境が変わっても変更されることはありません。グローバル値を読み取ったりライブラリ関数を使ったりする関数は、状況が違うと呼び出し間で壊れたり変化したりする可能性があります。コンビネータではこのようなことは決して起こりません。
+
+F#では、パース（FParsecライブラリ）、HTML構築、テストフレームワークなどのためのコンビネータライブラリが使えます。後のシリーズでコンビネータについてさらに議論し、使っていく予定です。
+
+## 再帰関数
+
+しばしば、関数は本体で自分自身を参照する必要があります。古典的な例はフィボナッチ関数です。
 
 ```fsharp
 let fib i = 
@@ -448,11 +446,11 @@ let fib i =
    | n -> fib(n-1) + fib(n-2)
 ```
 
-Unfortunately, this will not compile: 
+残念ながら、これはコンパイルできません。
 
-	error FS0039: The value or constructor 'fib' is not defined
+    error FS0039: 値またはコンストラクター 'fib' が定義されていません。
 
-You have to tell the compiler that this is a recursive function using the rec keyword.
+コンパイラに、これが再帰関数だと伝えるために、recキーワードを使う必要があります。
 
 ```fsharp
 let rec fib i = 
@@ -462,4 +460,4 @@ let rec fib i =
    | n -> fib(n-1) + fib(n-2)
 ```
 
-Recursive functions and data structures are extremely common in functional programming, and I hope to devote a whole later series to this topic.
+再帰関数とデータ構造は関数型プログラミングではとてもよく使われます。後のシリーズでこのトピックに1つ全体を当てたいと思います。
