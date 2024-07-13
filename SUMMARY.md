@@ -60,7 +60,7 @@
   * [型と関数のしくみ](posts/how-types-work-with-functions.md)
   * [カリー化](posts/currying.md)
   * [部分適用](posts/partial-application.md)
-  * [関数のアソシエイティビティと合成](posts/function-composition.md)
+  * [関数の結合性と合成](posts/function-composition.md)
   * [関数の定義](posts/defining-functions.md)
   * [関数シグネチャ](posts/function-signatures.md)
   * [関数の整理](posts/organizing-functions.md)
