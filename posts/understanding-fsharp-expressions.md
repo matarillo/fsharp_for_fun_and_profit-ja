@@ -1,46 +1,46 @@
 ---
 layout: post
-title: "Overview of F# expressions"
-description: "Control flows, lets, dos, and more"
+title: "F#における式の概要"
+description: "制御フロー、let、do、その他について"
 nav: thinking-functionally
 seriesId: "式と構文"
 seriesOrder: 3
 ---
 
-In this post we'll look at the different kinds of expressions that are available in F# and some general tips for using them.
+この記事では、F#で使える様々な種類の式と、それらを使う際の一般的なヒントを紹介します。
 
-## Is everything really an expression?
+## 本当にすべてが式なのか？
 
-You might be wondering how "everything is an expression" actually works in practice.
+「すべてが式である」というのが実際にどう機能するのか、疑問に思うかもしれません。
 
-Let's start with some basic expression examples that should be familiar:
+まずは、おなじみのはずの基本的な式の例から見てみましょう。
 
 ```fsharp
-1                            // literal
-[1;2;3]                      // list expression
--2                           // prefix operator	
-2 + 2                        // infix operator	
-"string".Length              // dot lookup
-printf "hello"               // function application
+1                            // リテラル
+[1;2;3]                      // リスト式
+-2                           // 前置演算子	
+2 + 2                        // 中置演算子	
+"string".Length              // ドットによるアクセス
+printf "hello"               // 関数適用
 ```
 
-No problems there. Those are obviously expressions.
+ここまでは問題ないですね。これらが式であることは明らかです。
 
-But here are some more complex things which are *also* expressions. That is, each of these returns a value that can be used for something else. 
+しかし、以下のようなより複雑なものも*式*です。つまり、これらはそれぞれ値を返すので、他の目的に使えます。
 
 ```fsharp
-fun () -> 1                  // lambda expression
+fun () -> 1                  // ラムダ式
 
-match 1 with                 // match expression
+match 1 with                 // マッチ式
     | 1 -> "a"
     | _ -> "b"
 
-if true then "a" else "b"    // if-then-else
+if true then "a" else "b"    // if-then-else式
 
-for i in [1..10]             // for loop
+for i in [1..10]             // forループ
   do printf "%i" i
 
-try                          // exception handling
+try                          // 例外処理
   let result = 1 / 0
   printfn "%i" result
 with
@@ -48,10 +48,10 @@ with
      printfn "%s" e.Message
 
 
-let n=1 in n+2               // let expression
+let n=1 in n+2               // let式
 ```
 
-In other languages, these might be statements, but in F# they really do return values, as you can see by binding a value to the result:
+他の言語ではこれらが文として扱われることもありますが、F#では実際に値を返します。以下のように結果に値を束縛すれば、確認できます。
 
 ```fsharp
 let x1 = fun () -> 1                  
@@ -76,119 +76,119 @@ let x5 = try
 let x6 = let n=1 in n+2
 ```
 
-## What kinds of expressions are there?
+## どのような種類の式があるのか？
 
-There are lots of diffent kinds of expressions in F#, about 50 currently.  Most of them are trivial and obvious, such as literals, operators, function application, "dotting into", and so on.
+F#には現在、約50種類のさまざまな式があります。そのほとんどは、リテラル、演算子、関数適用、「ドットによるアクセス」などのような、単純で自明なものです。
 
-The more interesting and high-level ones can be grouped as follows:
+より興味深く高レベルなものは、以下のようにグループ分けできます。
 
-* Lambda expressions
-* "Control flow" expressions, including:
-  * The match expression (with the `match..with` syntax)
-  * Expressions related to imperative control flow, such as if-then-else, loops 
-  * Exception-related expressions
-* "let" and "use" expressions
-* Computation expressions such as `async {..}`
-* Expressions related to object-oriented code, including casts, interfaces, etc
+* ラムダ式
+* 「制御フロー」式。以下を含みます。
+  * `match..with` 構文を使用したマッチ式
+  * if-then-elseやループなど、命令型の制御フローに関連する式
+  * 例外関連の式
+* "let" 式と "use" 式
+* `async {..}` のようなコンピュテーション式
+* キャストやインターフェイスなど、オブジェクト指向コードに関連する式
 
-We have already discussed lambdas in the ["thinking functionally"](../series/thinking-functionally.md) series, and as noted earlier, computation expressions and object-oriented expressions will be left to later series.
+ラムダについては「[関数型思考](../series/thinking-functionally.md)」シリーズですでに説明しました。また、先に述べたように、コンピュテーション式とオブジェクト指向式は後のシリーズで扱います。
 
-So, in upcoming posts in this series, we will focus on "control flow" expressions and "let" expressions.
+そのため、このシリーズの今後の記事では、「制御フロー」式と「let」式に焦点を当てます。
  
-### "Control flow" expressions 
+### 「制御フロー」式 
 
-In imperative languages, control flow expressions like if-then-else, for-in-do, and match-with are normally implemented as statements with side-effects, In F#, they are all implemented as just another type of expression. 
+命令型言語では、if-then-else、for-in-do、match-withなどの制御フロー式は通常、副作用を伴う文として実装されます。F#では、これらはすべて別の種類の式として実装されます。
 
-In fact, it is not even helpful to think of "control flow" in a functional language; the concept doesn't really exist.  Better to just think of the program as a giant expression containing sub-expressions, some of which are evaluated and some of which are not.  If you can get your head around this way of thinking, you have a good start on thinking functionally.
+実際、関数型言語において「制御フロー」を考えるのは役に立ちません。この概念は実際には存在しないのです。プログラムを、サブ式を含む巨大な式として考える方が良いでしょう。サブ式の一部は評価され、一部は評価されません。この考え方を理解できれば、関数型思考への良いスタートを切れたと言えるでしょう。
 
-There will be some upcoming posts on these different types of control flow expressions:
+これらのさまざまな種類の制御フロー式については、今後いくつかの記事で取り上げます。
 
-* [The match expression](../posts/match-expression)
-* [Imperative control flow: if-then-else and for loops](../posts/control-flow-expressions)
-* [Exceptions](../posts/exceptions)
+* [マッチ式](../posts/match-expression)
+* [命令型制御フロー：if-then-elseとforループ](../posts/control-flow-expressions)
+* [例外](../posts/exceptions)
 
-### "let" bindings as expressions 
+### 式としての「let」束縛 
 
-What about `let x=something`? In the examples above we saw:
+`let x=something` はどうでしょうか？上記の例では以下のようなものがありました。
 
 ```fsharp
 let x5 = let n=1 in n+2
 ```
 
-How can "`let`" be an expression? The reason will be discussed in the next post on ["let", "use" and "do"](../posts/let-use-do).
+「let」がどのように式になりうるのでしょうか？その理由は次の記事「["let"、"use"、"do"](../posts/let-use-do)」で説明します。
 
-## General tips for using expressions 
+## 式を使う際の一般的なヒント 
 
-But before we cover the important expression types in details, here are some tips for using expressions in general. 
+重要な式の種類を詳しく説明する前に、一般的に式を使う際のヒントをいくつか紹介します。
 
-### Multiple expressions on one line 
+### 1行に複数の式 
 
-Normally, each expression is put on a new line. But you can use a semicolon to separate expressions on one line if you need to. Along with its use as a separator for list and record elements, this is one of the few times where a semicolon is used in F#.
+通常、各式は新しい行に置きます。しかし、必要な場合はセミコロンを使って1行に複数の式を区切ることができます。リストやレコードの要素を区切るときと並んで、F#でセミコロンを使う数少ない場面の一つです。
 
 ```fsharp
-let f x =                           // one expression per line
+let f x =                           // 1行に1つの式
       printfn "x=%i" x
       x + 1
 
-let f x = printfn "x=%i" x; x + 1   // all on same line with ";"
+let f x = printfn "x=%i" x; x + 1   // セミコロンを使って1行にまとめる
 ```
 
-The rule about requiring unit values until the last expression still applies, of course:
+もちろん、最後の式まではunit値が必要というルールは、引き続き適用されます。
 
 ```fsharp
-let x = 1;2              // error: "1;" should be a unit expression
-let x = ignore 1;2       // ok
-let x = printf "hello";2 // ok
+let x = 1;2              // エラー: "1;"はunit式であるべき
+let x = ignore 1;2       // OK
+let x = printf "hello";2 // OK
 ```
 
-### Understanding expression evaluation order 
+### 式の評価順序を理解する 
 
-In F#, expressions are evaluated from the "inside out" -- that is, as soon as a complete subexpression is "seen", it is evaluated.
+F#では、式は「内側から外側へ」評価されます。つまり、完全なサブ式が「見つかった」らすぐに評価されます。
 
-Have a look at the following code and try to guess what will happen, then evaluate the code and see.
+以下のコードを見て、何が起こるか予想してから、実際にコードを評価してみてください。
 
 ```fsharp
-// create a clone of if-then-else
+// if-then-elseのクローンを作る
 let test b t f = if b then t else f
 
-// call it with two different choices
+// 2つの異なる選択肢で呼び出す
 test true (printfn "true") (printfn "false")
 ```
 
-What happens is that both "true" and "false" are printed, even though the test function will never actually evaluate the "else" branch.  Why? Because the `(printfn "false")` expression is evaluated immediately, regardless of how the test function will be using it.
+実際には、test関数が「else」ブランチを評価することはないにもかかわらず、 "true" と "false" の両方が出力されます。なぜなら、 `(printfn "false")` 式は、test関数がどのように使用するかとは関係なく、即座に評価されるからです。
 
-This style of evaluation is called "eager". It has the advantage that it is easy to understand, but it does mean that it can be inefficient on occasion.
+この評価スタイルは「正格（eager）」と呼ばれます。理解しやすいという利点がありますが、場合によっては非効率になることもあります。
 
-The alternative style of evaluation is called "lazy", whereby expressions are only evaluated when they are needed.  The Haskell language follows this approach, so a similar example in Haskell would only print "true".
+もう一つの評価スタイルは「遅延（lazy）」と呼ばれ、式は必要になった時点で評価されます。Haskell言語はこのアプローチを採用しているため、Haskellで同様の例を書くと "true" だけが出力されます。
 
-In F#, there are a number of techniques to force expressions *not* to be evaluated immediately. The simplest it to wrap it in a function that only gets evaluated on demand:
+F#では、式を即座に評価しないようにするためのテクニックがいくつかあります。最も簡単なのは、必要に応じて評価される関数でラップすることです。
 
 ```fsharp
-// create a clone of if-then-else that accepts functions rather than simple values
+// 単純な値ではなく関数を受け取るif-then-elseのクローンを作る
 let test b t f = if b then t() else f()
 
-// call it with two different functions
+// 2つの異なる関数で呼び出す
 test true (fun () -> printfn "true") (fun () -> printfn "false")
 ```
 
-The problem with this is that now the "true" function might be evaluated twice by mistake, when we only wanted to evaluate it once!
+この方法の問題点は、"true" 関数が誤って2回評価される可能性があることです。1回だけ評価したいのに！
 
-So, the preferred way for expressions not to be evaluated immediately is to use the `Lazy<>` wrapper.
+そこで、式を即座に評価しないようにするには、 `Lazy<>` ラッパーを使うのが望ましい方法です。
 
 ```fsharp
-// create a clone of if-then-else with no restrictions...
+// 制限のないif-then-elseのクローンを作る...
 let test b t f = if b then t else f
 
-// ...but call it with lazy values
+// ...そして、遅延値で呼び出す
 let f = test true (lazy (printfn "true")) (lazy (printfn "false"))
 ```
 
-The final result value `f` is also a lazy value, and can be passed around without being evaluated until you are finally ready to get the result.
+最終的な結果値 `f` も遅延値であり、結果を取得する準備ができるまで評価されることなく渡すことができます。
 
 ```fsharp
-f.Force()     // use Force() to force the evaluation of a lazy value
+f.Force()     // Force()を使って遅延値の評価を強制する
 ```
 
-If you never need the result, and never call `Force()`, then the wrapped value will never be evaluated.
+結果が必要ない場合、 `Force()` を呼ばなければ、ラップされた値は決して評価されません。
 
-There will much more on laziness in an upcoming series on performance.
+遅延については、パフォーマンスに関する今後のシリーズでさらに詳しく取り上げます。
