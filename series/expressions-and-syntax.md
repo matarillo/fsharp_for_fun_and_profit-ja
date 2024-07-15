@@ -1,20 +1,20 @@
 ---
 layout: series_index
-title: "The 'expressions and syntax' series"
+title: "「式と構文」シリーズ"
 seriesIndexId: "Expressions and syntax"
 ---
 
-In this series of posts we'll look at how functions and values are combined into expressions, and the different kinds of expressions that are available in F#.
+このシリーズでは、関数と値が組み合わさって式になるしくみ、そしてF#で利用できるさまざまな種類の式について見ていきます。
 
-* [Expressions and syntax: Introduction](../posts/expressions-intro.md). How to code in F#.
-* [Expressions vs. statements](../posts/expressions-vs-statements.md). Why expressions are safer and make better building blocks.
-* [Overview of F# expressions](../posts/understanding-fsharp-expressions.md). Control flows, lets, dos, and more.
-* [Binding with let, use, and do](../posts/let-use-do.md). How to use them.
-* [F# syntax: indentation and verbosity](../posts/fsharp-syntax.md). Understanding the offside rule.
-* [Parameter and value naming conventions](../posts/naming-conventions.md). a, f, x and friends.
-* [Control flow expressions](../posts/control-flow-expressions.md). And how to avoid using them.
-* [Exceptions](../posts/exceptions.md). Syntax for throwing and catching.
-* [Match expressions](../posts/match-expression.md). The workhorse of F#.
-* [Formatted text using printf](../posts/printf.md). Tips and techniques for printing and logging.
-* [Worked example: Parsing command line arguments](../posts/pattern-matching-command-line.md). Pattern matching in practice.
-* [Worked example: Roman numerals](../posts/roman-numerals.md). More pattern matching in practice.
+* [式と構文：はじめに](../posts/expressions-intro.md)。F#でのコーディング方法。
+* [式 vs. 文](../posts/expressions-vs-statements.md)。式の方が安全で、より良い構成要素となる理由。
+* [F#の式の概要](../posts/understanding-fsharp-expressions.md)。制御フロー、let、do、その他の解説。
+* [let、use、doでのバインディング](../posts/let-use-do.md)。バインディングの使い方。
+* [F#の構文：インデントと冗長性](../posts/fsharp-syntax.md)。オフサイドルールの理解。
+* [パラメータと値の命名規則](../posts/naming-conventions.md)。a、f、xなどの使い方。
+* [制御フロー式](../posts/control-flow-expressions.md)。そして、制御フロー式を使わない方法。
+* [例外](../posts/exceptions.md)。スローとキャッチの構文。
+* [match式](../posts/match-expression.md)。F#の主力となる機能。
+* [printfで整形したテキストを作る](../posts/printf.md)。表示とロギングのコツとテクニック。
+* [実践例：コマンドライン引数の解析](../posts/pattern-matching-command-line.md)。パターンマッチングの実践。
+* [実践例：ローマ数字](../posts/roman-numerals.md)。さらなるパターンマッチングの実践。

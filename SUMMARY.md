@@ -73,7 +73,7 @@
   * [式と構文: はじめに](posts/expressions-intro.md)
   * [式 vs. ステートメント](posts/expressions-vs-statements.md)
   * [F# 式の概要](posts/understanding-fsharp-expressions.md)
-  * let, use, do によるバインド](posts/let-use-do.md)
+  * [let, use, do によるバインド](posts/let-use-do.md)
   * [F# 構文: インデントと冗長性](posts/fsharp-syntax.md)
   * [パラメーターと値の名前付け規則](posts/naming-conventions.md)
   * [制御フロー式](posts/control-flow-expressions.md)
