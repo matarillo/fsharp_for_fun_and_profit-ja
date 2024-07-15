@@ -1,7 +1,7 @@
 ---
 layout: series_index
 title: "「式と構文」シリーズ"
-seriesIndexId: "Expressions and syntax"
+seriesIndexId: "式と構文"
 ---
 
 このシリーズでは、関数と値が組み合わさって式になるしくみ、そしてF#で利用できるさまざまな種類の式について見ていきます。

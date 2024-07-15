@@ -3,7 +3,7 @@ layout: post
 title: "Worked example: Roman numerals"
 description: "More pattern matching in practice"
 nav: thinking-functionally
-seriesId: "Expressions and syntax"
+seriesId: "式と構文"
 seriesOrder: 12
 categories: [Patterns, Worked Examples]
 ---

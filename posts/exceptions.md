@@ -3,7 +3,7 @@ layout: post
 title: "Exceptions"
 description: "Syntax for throwing and catching"
 nav: thinking-functionally
-seriesId: "Expressions and syntax"
+seriesId: "式と構文"
 seriesOrder: 8
 ---
 

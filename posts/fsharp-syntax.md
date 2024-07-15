@@ -3,7 +3,7 @@ layout: post
 title: "F# syntax: indentation and verbosity"
 description: "Understanding the offside rule"
 nav: thinking-functionally
-seriesId: "Expressions and syntax"
+seriesId: "式と構文"
 seriesOrder: 5
 ---
 

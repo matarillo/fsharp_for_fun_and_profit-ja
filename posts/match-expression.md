@@ -3,7 +3,7 @@ layout: post
 title: "Match expressions"
 description: "The workhorse of F#"
 nav: thinking-functionally
-seriesId: "Expressions and syntax"
+seriesId: "式と構文"
 seriesOrder: 9
 categories: [Patterns,Folds]
 ---

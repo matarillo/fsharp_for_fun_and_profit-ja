@@ -3,7 +3,7 @@ layout: post
 title: "Control flow expressions"
 description: "And how to avoid using them"
 nav: thinking-functionally
-seriesId: "Expressions and syntax"
+seriesId: "式と構文"
 seriesOrder: 7
 ---
 

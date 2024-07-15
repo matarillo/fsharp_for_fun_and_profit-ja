@@ -3,7 +3,7 @@ layout: post
 title: "Parameter and value naming conventions"
 description: "a, f, x and friends"
 nav: thinking-functionally
-seriesId: "Expressions and syntax"
+seriesId: "式と構文"
 seriesOrder: 6
 ---
 

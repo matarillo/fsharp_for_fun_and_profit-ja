@@ -3,7 +3,7 @@ layout: post
 title: "Formatted text using printf"
 description: "Tips and techniques for printing and logging"
 nav: thinking-functionally
-seriesId: "Expressions and syntax"
+seriesId: "式と構文"
 seriesOrder: 10
 ---
 

@@ -7,7 +7,7 @@ seriesId: "Porting from C#"
 seriesOrder: 1
 ---
 
-*NOTE: Before reading this series, I suggest that you read the following series as a prerequisite: ["thinking functionally"](../series/thinking-functionally.md), ["expressions and syntax"](../series/expressions-and-syntax.md), and ["understanding F# types"](../series/understanding-fsharp-types.md).* 
+*NOTE: Before reading this series, I suggest that you read the following series as a prerequisite: ["thinking functionally"](../series/thinking-functionally.md), ["式と構文"](../series/expressions-and-syntax.md), and ["understanding F# types"](../series/understanding-fsharp-types.md).* 
 
 For many developers, the next step after learning a new language might be to port some existing code over to it, so that they can get a good feel for the differences between the two languages.
 

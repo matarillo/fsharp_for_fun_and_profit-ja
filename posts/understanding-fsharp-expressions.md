@@ -3,7 +3,7 @@ layout: post
 title: "Overview of F# expressions"
 description: "Control flows, lets, dos, and more"
 nav: thinking-functionally
-seriesId: "Expressions and syntax"
+seriesId: "式と構文"
 seriesOrder: 3
 ---
 

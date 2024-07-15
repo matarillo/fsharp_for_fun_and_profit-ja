@@ -3,7 +3,7 @@ layout: post
 title: "Worked example: Parsing command line arguments"
 description: "Pattern matching in practice"
 nav: thinking-functionally
-seriesId: "Expressions and syntax"
+seriesId: "式と構文"
 seriesOrder: 11
 categories: [Patterns, Worked Examples]
 ---

@@ -3,7 +3,7 @@ layout: post
 title: "Binding with let, use, and do"
 description: "How to use them"
 nav: thinking-functionally
-seriesId: "Expressions and syntax"
+seriesId: "式と構文"
 seriesOrder: 4
 ---
 

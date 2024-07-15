@@ -1,57 +1,57 @@
 ---
 layout: post
-title: "Expressions vs. statements"
-description: "Why expressions are safer and make better building blocks"
+title: "式 vs. 文"
+description: "式がより安全で、より良い構成要素となる理由"
 nav: thinking-functionally
-seriesId: "Expressions and syntax"
+seriesId: "式と構文"
 seriesOrder: 2
 ---
 
-In programming language terminology, an "expression" is a combination of values and functions that are combined and interpreted by the compiler to create a new value, as opposed to a "statement" which is just a standalone unit of execution and doesn't return anything.  One way to think of this is that the purpose of an expression is to create a value (with some possible side-effects), while the sole purpose of a statement is to have side-effects.
+プログラミング言語において、「式」は、値と関数を組み合わせたものであり、コンパイラによって解釈され、新しい値が生成されます。一方、「文」は単独の実行単位で、何も返しません。別の見方をすれば、式の目的は（副作用があるかもしれませんが）値を作ることで、文の目的は副作用を持つことだけです。
 
-C# and most imperative languages make a distinction between expressions and statements and have rules about where each kind can be used.  But as should be apparent, a truly pure functional language cannot support statements at all, because in a truly pure language, there would be no side-effects.  
+C#や多くの命令型言語は式と文を区別し、それぞれをどこで使えるかルールを設けています。しかし、純粋な関数型言語では文をまったくサポートできません。なぜなら、本当に純粋な言語なら副作用がないはずだからです。
 
-Even though F# is not pure, it does follow the same principle. In F# everything is an expression. Not just values and functions, but also control flows (such as if-then-else and loops), pattern matching, and so on.
+F#は純粋ではありませんが、同じ原則に従っています。F#ではすべてが式です。値や関数だけでなく、制御フロー（if-then-elseやループなど）、パターンマッチングなども含まれます。
 
-There are some subtle benefits to using expressions over statements. First, unlike statements, smaller expressions can be combined (or "composed") into larger expressions. So if everything is an expression, then everything is also composable. 
+文の代わりに式を使う利点はいくつかあります。まず、文と違って、小さな式を組み合わせて（「合成」して）、もっと大きな式にできます。つまり、すべてが式なら、すべてが合成可能でもあります。
 
-Second, a series of statements always implies a specific order of evaluation, which means that a statement cannot be understood without looking at prior statements.  But with pure expressions, the subexpressions do not have any implied order of execution or dependencies. 
+次に、文の並びは必ず決まった順序で評価されます。そのため、文を理解するには前の文を見る必要があります。しかし、純粋な式なら、サブ式に決まった実行順序や依存関係はありません。
 
-So in the expression `a+b`, if both the '`a`' and '`b`' parts are pure, then the '`a`' part can be isolated, understood, tested and evaluated on its own, as can the '`b`' part.   
-This "isolatibility" of expressions is another beneficial aspect of functional programming.   
+したがって、式 `a+b` で `a` の部分と `b` の部分が両方とも純粋なら、 `a` の部分を単独で切り離して、理解して、テストして、評価できます。 `b` の部分も同じです。
+式を「切り離せる性質」も、関数型プログラミングの良いところの一つです。
 
 <div class="alert alert-info">
-Note that the F# interactive window also relies on everything being an expression. It would be much harder to use a C# interactive window.
+F#のインタラクティブウィンドウも、すべてが式であることを前提にしています。C#のインタラクティブウィンドウを使うのは、ずっと大変でしょう。
 </div>
 
-## Expressions are safer and more compact ##
+## 式はより安全でコンパクト ##
 
-Using expressions consistently leads to code that is both safer and more compact. Let's see what I mean by this.
+一貫して式を使うと、コードがより安全でコンパクトになります。これがどういう意味か見てみましょう。
 
-First, let's look at a statement based approach.  Statements don't return values, so you have to use temporary variables that are assigned to from within statement bodies.  Here are some examples using a C-like language (OK, C#) rather than F#:
+まず、文ベースのアプローチを見てみましょう。文は値を返さないので、文の本体内で一時変数を使い、値を代入する必要があります。以下は、F#ではなくC風の言語（まあ、C#ですね）を使った例です。
 
 ```csharp
 public void IfThenElseStatement(bool aBool)
 {
-   int result;     //what is the value of result before it is used?
+   int result;     //resultが使われる前の値は？
    if (aBool)
    {
-      result = 42; //what is the result in the 'else' case?
+      result = 42; //「else」の場合のresultは？
    }
    Console.WriteLine("result={0}", result);
 }
 ```
 
-Because the "if-then" is a statement, the `result` variable must be defined *outside* the statement and but assigned to *inside* the statement, which leads to some issues:
+"if-then"が文なので、`result`変数を文の*外*で定義して、文の*内*で代入しないといけません。これにはいくつか問題があります。
 
-* The `result` variable has to be set up outside the statement itself. What initial value should it be set to?
-* What if I forget to assign to the `result` variable in the `if` statement?  The purpose of the "if "statement is purely to have side effects (the assignment to the variables).  This means that the statements are potentially buggy, because it would be easy to forget to do an assignment in one branch. And because the assignment was just a side effect, the compiler could not offer any warning.  Since the `result` variable has already been defined in scope, I could easily use it, unaware that it was invalid.
-* What is the value of the `result` variable in the "else" case?  In this case, I haven't specified a value. Did I forget? Is this a potential bug? 
-* Finally, the reliance on side-effects to get things done means that the statements are not easily usable in another context (for example, extracted for refactoring, or parallelizing) because they have a dependency on a variable that is not part of the statement itself.
+* `result` 変数を文の外で設定しないといけません。。どんな初期値を設定すればいいのでしょうか？
+* `if` 文で `result` 変数への代入を忘れたらどうなりますか？ "if" 文の目的は単に副作用（変数への代入）を持つことだけです。つまり、文には潜在的にバグがあるかもしれません。なぜなら、分岐の片方で代入を忘れやすいからです。そして、代入が単なる副作用だったため、コンパイラは警告を出せませんでした。 `result` 変数はすでにスコープ内で定義されているので、それが無効だと知らずに簡単に使ってしまう可能性があります。
+* "else" の場合の `result` 変数の値は何ですか？この場合、値を指定していません。指定を忘れましたか？これは潜在的なバグですか？
+* 最後に、物事を行うために副作用に頼っているということは、文を別のコンテキストで使う（例えば、リファクタリングのために抽出したり、並列化したりする場合）のが簡単ではないということです。なぜなら、文自体の一部ではない変数に依存しているからです。
 
-Note: the code above will not compile in C# because the compiler will complain if you use an unassigned local variable like this. But having to define *some* default value for `result` before it is even used is still a problem.
+注意：上のコードはC#ではコンパイルできません。コンパイラは、このように未割り当てのローカル変数を使おうとすると警告を出すからです。しかし、 `result` が使われる前に*何らかの*デフォルト値を定義しなければならないのは、やっぱり問題です。
 
-For comparison, here is the same code, rewritten in an expression-oriented style:
+比較のために、同じコードを式指向のスタイルで書き直したものを見てみましょう。
 
 ```csharp
 public void IfThenElseExpression(bool aBool)
@@ -61,35 +61,35 @@ public void IfThenElseExpression(bool aBool)
 }
 ```
 
-In the expression-oriented version, none of the earlier issues even apply!  
+式指向のバージョンだと、さっきの問題はまったく当てはまりません！
 
-* The `result` variable is declared at the same time that it is assigned. No variables have to be set up "outside" the expression and there is no worry about what initial value they should be set to. 
-* The "else" is explicitly handled. There is no chance of forgetting to do an assignment in one of the branches.
-* And I cannot possibly forget to assign to `result`, because then the variable would not even exist!
+* `result` 変数は、代入と同時に宣言されます。式の「外」で変数を設定する必要はなく、どんな初期値を設定すべきかという心配もありません。
+* "else" が明示的に処理されています。分岐の片方で代入を忘れる可能性はありません。
+* そして、 `result` への代入を忘れることはあり得ません。なぜなら、そうすれば変数自体が存在しないからです！
 
-In F#, the two examples would be written as:
+F#では、この2つの例は次のように書きます。
 
 ```fsharp
 let IfThenElseStatement aBool = 
-   let mutable result = 0       // mutable keyword required
+   let mutable result = 0       // mutableキーワードが必要
    if (aBool) then result <- 42 
    printfn "result=%i" result
 ```
 
-The "`mutable`" keyword is considered a code smell in F#, and is discouraged except in certain special cases. It should be avoided at all cost while you are learning!
+F#では、 `mutable` キーワードはコードのにおいだと思われていて、特別なケース以外では推奨されません。学習中は絶対に避けるべきです！
 
-In the expression based version, the mutable variable has been eliminated and there is no reassignment anywhere.  
+式ベースのバージョンでは、可変変数がなくなり、どこにも再代入はありません。
 
 ```fsharp
 let IfThenElseExpression aBool = 
    let result = if aBool then 42 else 0   
-                // note that the else case must be specified 
+                // elseケースを指定する必要があることに注意
    printfn "result=%i" result
 ```
 
-Once we have the `if` statement converted into an expression, it is now trivial to refactor it and move the entire subexpression to a different context without introducing errors.
+`if` 文を式に変換すれば、サブ式全体を別のコンテキストに移動してリファクタリングするのは簡単で、エラーを引き起こしません。
 
-Here's the refactored version in C#:
+C#でリファクタリングしたバージョンはこうなります。
 
 ```csharp
 public int StandaloneSubexpression(bool aBool)
@@ -104,7 +104,7 @@ public void IfThenElseExpressionRefactored(bool aBool)
 }
 ```
 
-And in F#:
+F#ではこうです。
 
 ```fsharp
 let StandaloneSubexpression aBool = 
@@ -117,19 +117,19 @@ let IfThenElseExpressionRefactored aBool =
 
 
 
-### Statements vs. expressions for loops ###
+### ループにおける文 vs. 式 ###
 
-Going back to C# again, here is a similar example of statements vs. expressions using a loop statement 
+C#に戻って、ループ文を使った文 vs. 式の似たような例を見てみましょう。
 
 ```csharp
 public void LoopStatement()
 {
-    int i;    //what is the value of i before it is used? 
+    int i;    // iが使われる前の値は？
     int length;
     var array = new int[] { 1, 2, 3 };
-    int sum;  //what is the value of sum if the array is empty?
+    int sum;  // 配列が空の場合のsumの値は？
 
-    length = array.Length;   //what if I forget to assign to length?
+    length = array.Length;   // lengthへの代入を忘れたら？
     for (i = 0; i < length; i++)
     {
         sum += array[i];
@@ -139,15 +139,15 @@ public void LoopStatement()
 }
 ```
 
-I've used an old-style "for" statement, where the index variables are declared outside the loop. Many of the issues discussed earlier apply to the loop index "`i`" and the max value "`length`", such as: can they be used outside the loop? And what happens if they are not assigned to?
+古いスタイルの "for" 文を使用しましたが、ここではインデックス変数がループの外で宣言されています。以前に議論した多くの問題が、ループインデックス `i` と最大値 `length` にも当てはまります。例えば、これらの変数はループの外で使えるかどうか、また割り当てられていない場合どうなるかという点です。
 
-A more modern version of a for-loop addresses these issues by declaring and assigning the loop variables in the "for" loop itself, and by requiring the "`sum`" variable to be initialized:
+現代的な for ループでは、これらの問題を解決するために、ループ変数を for ループ内で宣言・代入し、さらに `sum` 変数を初期化することが求められます。
 
 ```csharp
 public void LoopStatementBetter()
 {
     var array = new int[] { 1, 2, 3 };
-    int sum = 0;        // initialization is required
+    int sum = 0;        // 初期化が必要
 
     for (var i = 0; i < array.Length; i++)
     {
@@ -158,15 +158,15 @@ public void LoopStatementBetter()
 }
 ```
 
-This more modern version follows the general principle of combining the declaration of a local variable with its first assignment. 
+現代的なバージョンは、ローカル変数の宣言と最初の代入を組み合わせるという一般的な原則に従っています。
 
-But of course, we can keep improving by using a `foreach` loop instead of a `for` loop:
+しかし、もちろん `for` ループの代わりに `foreach` ループを使うことでさらに改善できます。
 
 ```csharp
 public void LoopStatementForEach()
 {
     var array = new int[] { 1, 2, 3 };
-    int sum = 0;        // initialization is required
+    int sum = 0;        // 初期化が必要
 
     foreach (var i in array)
     {
@@ -177,9 +177,9 @@ public void LoopStatementForEach()
 }
 ```
 
-Each time, not only are we condensing the code, but we are reducing the likelihood of errors.
+改善のたびに、コードを簡潔にするだけでなく、エラーの可能性も減らしています。
 
-But taking that principle to its logical conclusion leads to a completely expression based approach! Here's how it might be done using LINQ:
+その原則を論理的に突き詰めると、完全に式ベースのアプローチに行き着きます！LINQを使用した場合は次のようになります。
 
 ```csharp
 public void LoopExpression()
@@ -192,7 +192,7 @@ public void LoopExpression()
 }
 ```
 
-Note that I could have used LINQ's built-in "sum" function, but I used `Aggregate` in order to show how the sum logic embedded in a statement can be converted into a lambda and used as part of an expression.
+LINQ の組み込み関数 "sum" を使うこともできたのですが、今回は文に埋め込まれた合計処理のロジックをラムダ式に変換し、式の一部として使う方法を示すために  `Aggregate` を使いました。
 
-In the next post, we'll look at the various kinds of expressions in F#.
+次回の記事では、F# のさまざまな種類の式について見ていきます。
 
