@@ -88,7 +88,7 @@ let sumOfSquaresTo100withFun =
 // 関数は常に、使用された最後の式の値を返す
 
 // ======== パターンマッチ ========
-// match..with.. は強化版の case/switch ステートメントである
+// match..with.. は強化版の case/switch 文である
 let simplePatternMatch =
    let x = "a"
    match x with

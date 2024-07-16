@@ -18,7 +18,7 @@ seriesIndexId: "F# を使う理由"
 * [オーバーヘッドの低い型定義](../posts/conciseness-type-definitions.md)。新しい型を作るペナルティがありません。
 * [関数を使ってボイラープレートコードを抽出する](../posts/conciseness-extracting-boilerplate.md)。DRY原則への関数型アプローチ。
 * [関数をビルディングブロックとして使う](../posts/conciseness-functions-as-building-blocks.md)。関数合成とミニ言語がコードをより読みやすくします。
-* [簡潔さのためのパターンマッチング](../posts/conciseness-pattern-matching.md)。パターンマッチングは一度のステップでマッチングとバインディングができます。
+* [簡潔さのためのパターンマッチング](../posts/conciseness-pattern-matching.md)。パターンマッチングは一度のステップでマッチングと束縛ができます。
 * [利便性](../posts/convenience-intro.md)。プログラミングの苦労とボイラープレートコードを減らす機能。
 * [型に関する既定のふるまい](../posts/convenience-types.md)。コーディングなしで不変性と組み込みの等価性を実現。
 * [インターフェースとしての関数](../posts/convenience-functions-as-interfaces.md)。関数を使うとOOデザインパターンが些細なものになります。

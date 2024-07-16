@@ -1,32 +1,32 @@
 ---
 layout: post
-title: "Binding with let, use, and do"
-description: "How to use them"
+title: "let、use、doでの束縛"
+description: "使い方について"
 nav: thinking-functionally
 seriesId: "式と構文"
 seriesOrder: 4
 ---
 
 
-As we've have already seen, there are no "variables" in  F#. Instead there are values.
+これまで見てきたように、F#には「変数」はありません。代わりに「値」があります。
 
-And we have also seen that keywords such as `let`, `use`, and `do` act as *bindings* -- associating an identifier with a value or function expression. 
+また、 `let` 、 `use` 、 `do` といったキーワードは、識別子を値や関数式に関連付ける「*束縛*」として働くことも見てきました。
 
-In this post we'll look at these bindings in more detail.
+この記事では、これらの束縛について詳しく見ていきます。
 
-## "let" bindings ##
+## `let` 束縛
 
-The `let` binding is straightforward, it has the general form:
+`let` 束縛は単純です。一般的な形は次のとおりです。
 
 ```fsharp
 let aName = someExpression
 ```
 
-But there are two uses of `let` that are subtly different.  One is to define a named expression at a the top level of a module*, and the other is to define a local name used in the context of some expression.  This is somewhat analogous to the difference between "top level" method names and "local" variable names in C#.
+ただし、 `let` には微妙に異なる2つの使い方があります。1つはモジュールのトップレベルで名前付き式を定義すること*で、もう1つは式の中で使うローカルな名前を定義することです。これは、C#の「トップレベル」メソッド名と「ローカル」変数名の違いに似ています。
 
-<sub>* and in a later series, when we talk about OO features, classes can have top level let bindings too.</sub>
+<sub>* なお、後のシリーズでオブジェクト指向機能について説明するとき、クラスにもトップレベルの`let`束縛を持てることを説明します。</sub>
 
-Here's an example of both types:
+以下は、両方のタイプの例です。
 
 ```fsharp
 module MyModule = 
@@ -38,13 +38,13 @@ module MyModule =
 ```
 
 
-The top level name is a *definition*, which is part of the module, and you can access it with a fully qualified name such as `MyModule.topLevelName`. It's the equivalent of a class method, in a sense.
+トップレベルの名前は*定義*であり、モジュールの一部です。 `MyModule.topLevelName` のような完全修飾名でアクセスできます。ある意味、クラスメソッドに相当します。
 
-But the nested names are completely inaccessible to anyone -- they are only valid within the context of the top level name binding.
+しかし、ネストされた名前は外部から全くアクセスできません。それらはトップレベルの名前束縛のコンテキストでのみ有効です。
 
-### Patterns in "let" bindings 
+### `let` 束縛のパターン
 
-We have already seen examples of how bindings can use patterns directly
+束縛で直接パターンを使う例はすでに見てきました。
 
 ```fsharp
 let a,b = 1,2
@@ -54,181 +54,181 @@ let alice = {First="Alice"; Last="Doe"}
 let {First=first} = alice
 ```
 
-And in function definitions the binding includes parameters as well:
+また、関数定義では、束縛にパラメータも含まれます。
 
 ```fsharp
-// pattern match the parameters
+// パラメータのパターンマッチング
 let add (x,y) = x + y
 
-// test    
+// テスト    
 let aTuple = (1,2)
 add aTuple
 ```
 
-The details of the various pattern bindings depends on the type being bound, and will be discussed further in later posts on pattern matching.
+さまざまなパターン束縛の詳細は、束縛される型によって異なります。後続のパターンマッチングに関する記事でさらに詳しく説明します。
 
-### Nested "let" bindings as expressions 
+### 式としてのネストされた `let` 束縛
 
-We have emphasized that an expression is composed from smaller expressions.  But what about a nested `let`? 
+式はより小さな式から構成されると強調してきました。しかし、ネストされた `let` はどうでしょうか？
 
 ```fsharp
 let nestedName = someExpression
 ```
 
-How can "`let`" be an expression? What does it return?
+`let` はどのようにして式になるのでしょうか？何を返すのでしょうか？
 
-The answer that a nested "let" can never be used in isolation -- it must always be part of a larger code block, so that it can be interpreted as:
+答えは、ネストされた `let` は単独で使えず、常に大きなコードブロックの一部でなければならないということです。そのため、次のように解釈できます。
 
 ```fsharp
-let nestedName = [some expression] in [some other expression involving nestedName]
+let nestedName = [何らかの式] in [nestedNameを含む他の式]
 ```
 
-That is, every time you see the symbol "nestedName" in the second expression (called the *body expression*), substitute it with the first expression.  
+つまり、2番目の式（*本体式*）で "nestedName" シンボルが出現するたびに、それを1つ目の式で置き換えるのです。
 
-So for example, the expression:
+たとえば、次の式は、
 
 ```fsharp
-// standard syntax
+// 標準的な構文
 let f () = 
   let x = 1  
   let y = 2
-  x + y          // the result
+  x + y          // 結果
 ```
 
-really means: 
+実際には次のような意味になります。
 
 ```fsharp
-// syntax using "in" keyword
+// "in"キーワードを使った構文
 let f () = 
-  let x = 1 in   // the "in" keyword is available in F#
+  let x = 1 in   // "in"キーワードはF#で使えます
     let y = 2 in 
-      x + y      // the result
+      x + y      // 結果
 ```
 
-When the substitutions are performed, the last line becomes:
+置換が行われると、最後の行は次のようになります。
 
-    (definition of x) + (definition of y) 
-    // or
+    (xの定義) + (yの定義) 
+    // または
     (1) + (2) 
 
-In a sense, the nested names are just "macros" or "placeholders" that disappear when the expression is compiled.  And therefore you should be able to see that the nested `let`s have no effect on the expression as whole. So, for example, the type of an expression containing nested `let`s is just the type of the final body expression.
-   
-If you understand how nested `let` bindings work, then certain errors become understandable. For example, if there is nothing for a nested "let" to be "in", the entire expression is not complete. In the example below, there is nothing following the let line, which is an error:
+ある意味、ネストされた名前は単なる「マクロ」や「プレースホルダー」であり、式がコンパイルされると消えます。したがって、ネストされた `let` は式全体に影響を与えないことがわかるでしょう。たとえば、ネストされた `let` を含む式の型は、最終的な本体式の型と同じです。
+
+ネストされた `let` 束縛の仕組みを理解していれば、特定のエラーが理解できるようになります。たとえば、ネストされた `let` に続くものがない場合、式全体が不完全になります。以下の例では、 `let` 行の後に何もないため、エラーになります。
 
 ```fsharp
 let f () = 
   let x = 1  
-// error FS0588: Block following this 'let' is unfinished. 
-//               Expect an expression.
+// エラー FS0588: この'let'に続くブロックが未完成です。
+//               式を期待しています。
 ```
 
-And you cannot have multiple expression results, because you cannot have multiple body expressions. Anything evaluated before the final body expression must be a "`do`" expression (see below), and return `unit`.
+また、複数の式の結果を持つことはできません。複数の本体式を持てないからです。最終的な本体式より前に評価されるものは、すべて `do` 式（後述）でなければならず、 `unit` を返す必要があります。
 
 ```fsharp
 let f () = 
-  2 + 2      // warning FS0020: This expression should 
-             // have type 'unit'
+  2 + 2      // 警告 FS0020: この式は'unit'型である
+             // べきです
   let x = 1  
-  x + 1      // this is the final result
+  x + 1      // これが最終的な結果です
 ```
 
-In a case like this, you must pipe the results into "ignore".
+このような場合、結果は "ignore" にパイプする必要があります。
 
 ```fsharp
 let f () = 
   2 + 2 |> ignore 
   let x = 1  
-  x + 1      // this is the final result
+  x + 1      // これが最終的な結果です
 ```
 
 <a name="use"></a>
-## "use" bindings ##
+## `use` 束縛
 
-The `use` keyword serves the same purpose as `let` -- it binds the result of an expression to a named value.
+`use`キーワードは`let`と同じ目的を果たします。つまり、式の結果を名前付きの値に束縛します。
 
-The key difference is that is also *automatically disposes* the value when it goes out of scope. 
+主な違いは、スコープ外に出たときに値を*自動的に破棄する*ことです。
 
-Obviously, this means that `use` only applies in nested situations. You cannot have a top level `use` and the compiler will warn you if you try.
+明らかに、これはネストされた状況でのみ適用されます。トップレベルで `use` は使えず、試みるとコンパイラが警告を出します。
 
 ```fsharp
 module A = 
-    use f () =  // Error
+    use f () =  // エラー
       let x = 1  
       x + 1      
 ```
 
-To see how a proper `use` binding works, first let's create a helper function that creates an `IDisposable` on the fly.
+適切な`use`束縛がどのように働くかを確認するために、まず、`IDisposable` をその場で作るヘルパー関数を作ってみましょう。
 
 ```fsharp
-// create a new object that implements IDisposable
+// IDisposableを実装する新しいオブジェクトを作る
 let makeResource name = 
    { new System.IDisposable 
      with member this.Dispose() = printfn "%s disposed" name }
 ```
 
-Now let's test it with a nested `use` binding:
+では、ネストされた `use` 束縛でテストしてみましょう。
 
 ```fsharp
 let exampleUseBinding name =
     use myResource = makeResource name
     printfn "done"
 
-//test
+//テスト
 exampleUseBinding "hello"
 ```
 
-We can see that "done" is printed, and then immediately after that, `myResource` goes out of scope, its `Dispose` is called, and "hello disposed" is also printed.
+"done" が出力され、その直後に `myResource` がスコープ外になり、 `Dispose` が呼ばれ、 "hello disposed" も出力されるのがわかります。
 
-On the other hand, if we test it using the regular `let` binding, we don't get the same effect.
+一方、通常の `let` 束縛を使ってテストすると、同じ効果は得られません。
 
 ```fsharp
 let exampleLetBinding name =
     let myResource = makeResource name
     printfn "done"
 
-//test
+//テスト
 exampleLetBinding "hello"
 ```
 
-In this case, we see that "done" is printed, but `Dispose` is never called.
+この場合、 "done" は出力されますが、 `Dispose` は呼ばれません。
 
-### "Use" only works with IDisposables
+### `use` は `IDisposable` でのみ動作する
 
-Note that "use" bindings only work with types that implement `IDisposable`, and the compiler will complain otherwise:
+`use` 束縛は `IDisposable` を実装する型でのみ動作します。そうでない場合はコンパイラが警告を出します。
 
 ```fsharp
 let exampleUseBinding2 name =
-    use s = "hello"  // Error: The type 'string' is 
-                     // not compatible with the type 'IDisposable'
+    use s = "hello"  // エラー: 型 'string' は
+                     // 型 'IDisposable' と互換性がありません
     printfn "done"
 ```
 
 
-### Don't return "use'd" values
+### `use` された値を返さない
 
-It is important to realize that the value is disposed as soon as it goes out of scope *in the expression where it was declared*.
-If you attempt to return the value for use by another function, the return value will be invalid.
+値が*宣言された式のスコープ*を出るとすぐに破棄されることに注意してください。
+別の関数で使用するために値を返そうとすると、戻り値は無効になります。
 
-The following example shows how *not* to do it:
+次の例は、*やってはいけない*やり方です。
 
 ```fsharp
 let returnInvalidResource name =
     use myResource = makeResource name
-    myResource // don't do this!
+    myResource // これはダメ！
 
-// test
+// テスト
 let resource = returnInvalidResource  "hello"
 ```
 
-If you need to work with a disposable "outside" the function that created it, probably the best way is to use a callback.
+破棄可能なものを関数の「外側」で操作する必要がある場合、おそらく最良の方法はコールバックを使うことです。
 
-The function then would work as follows:
+この場合、関数は次のように動きます。
 
-* create the disposable.
-* evaluate the callback with the disposable
-* call `Dispose` on the disposable
+* 破棄可能なオブジェクトを作成する。
+* 破棄可能なオブジェクトを引数としてコールバックを評価する。
+* 破棄可能なオブジェクトの `Dispose` を呼ぶ。
 
-Here's an example:
+以下に例を示します。
 
 ```fsharp
 let usingResource name callback =
@@ -240,68 +240,68 @@ let callback aResource = printfn "Resource is %A" aResource
 do usingResource "hello" callback 
 ```
 
-This approach guarantees that the same function that creates the disposable also disposes of it and there is no chance of a leak.
+このアプローチでは、破棄可能なオブジェクトを作成した関数が確実にそれを破棄することも保証され、リークの可能性がありません。
 
-Another possible way is to *not* use a `use` binding on creation, but use a `let` binding instead, and make the caller responsible for disposing.
+もう一つの可能な方法は、作成時に `use` 束縛を使わず、代わりに `let` 束縛を使い、呼び出し側に破棄の責任を持たせることです。
 
-Here's an example:
+以下に例を示します。
 
 ```fsharp
 let returnValidResource name =
-    // "let" binding here instead of "use"
+    // ここでは"use"の代わりに"let"束縛を使う
     let myResource = makeResource name
-    myResource // still valid
+    myResource // まだ有効
 
 let testValidResource =
-    // "use" binding here instead of "let"
+    // ここでは"let"の代わりに"use"束縛を使う
     use resource = returnValidResource  "hello"
     printfn "done"
 ```
 
-Personally, I don't like this approach, because it is not symmetrical and separates the create from the dispose, which could lead to resource leaks.
+個人的には、このアプローチは好みません。対称的でなく、作成と破棄が分離されているため、リソースリークにつながる可能性があるからです。
 
-### The "using" function
+### `using` 関数
 
-The preferred approach to sharing a disposable, shown above, used a callback function.
+前述のように、破棄可能なオブジェクトを共有するための推奨アプローチは、コールバック関数を使うことです。
 
-There is a built-in `using` function that works in the same way. It takes two parameters:
+同じように動作する組み込みの `using` 関数があります。これは2つのパラメータを取ります。
 
-* the first is an expression that creates the resource
-* the second is a function that uses the resource, taking it as a parameter
+* 1つ目はリソースを作る式です。
+* 2つ目はリソースを使う関数です。リソースをパラメーターとして受け取ります。
 
-Here's our earlier example rewritten with the `using` function:
+先ほどの例を `using` 関数で書き直すと次のようになります。
 
 ```fsharp
 let callback aResource = printfn "Resource is %A" aResource
 using (makeResource "hello") callback 
 ```
  
-In practice, the `using` function is not used that often, because it is so easy to make your own custom version of it, as we saw earlier. 
+実際には、 `using` 関数はあまり使われません。先ほど見たように、独自のカスタムバージョンを作るのがとても簡単だからです。
 
-### Misusing "use"
+### `use` の誤用
 
-One trick in F# is to appropriate the `use` keyword to do any kind of "stop" or "revert" functionality automatically.
+F#のテクニックの1つとして、 `use` キーワードを流用して、あらゆる種類の「停止」や「元に戻す」機能を自動的に実行することがあります。
 
-The way to do this is:
+この方法は次のとおりです。
 
-* Create an [extension method](../posts/type-extensions) for some type 
-* In that method, start the behavior you want but then return an `IDisposable` that stops the behavior.
+* ある型の[拡張メソッド](../posts/type-extensions)を作成する。
+* そのメソッドで、目的の動作を開始し、その後、動作を停止する `IDisposable` を返す。
 
-For example, here is an extension method that starts a timer and then returns an `IDisposable` that stops it.
+たとえば、タイマーを開始して停止する `IDisposable` を返す拡張メソッドを以下に示します。
 
 ```fsharp
 module TimerExtensions = 
 
     type System.Timers.Timer with 
         static member StartWithDisposable interval handler = 
-            // create the timer
+            // タイマーを作る
             let timer = new System.Timers.Timer(interval)
             
-            // add the handler and start it
+            // ハンドラを追加して開始
             do timer.Elapsed.Add handler 
             timer.Start()
             
-            // return an IDisposable that calls "Stop"
+            // "Stop"を呼ぶIDisposableを返す
             { new System.IDisposable with 
                 member disp.Dispose() = 
                     do timer.Stop() 
@@ -309,7 +309,7 @@ module TimerExtensions =
                 }
 ```
 
-So now in the calling code, we create the timer and bind it with `use`. When the timer value goes out of scope, it will stop automatically!
+呼び出しコードでは、タイマーを作成して `use` で束縛します。タイマーの値がスコープ外になると、自動的に停止します！
 
 ```fsharp
 open TimerExtensions
@@ -319,54 +319,54 @@ let testTimerWithDisposable =
     System.Threading.Thread.Sleep 500
 ```
 
-This same approach can be used for other common pairs of operations, such as:
+この同じアプローチは、他の一般的な操作のペアにも使えます。
 
-* opening/connecting and then closing/disconnecting a resource (which is what `IDisposable` is supposed to be used for anyway, but your target type might not have implemented it)
-* registering and then deregistering an event handler (instead of using `WeakReference`)
-* in a UI, showing a splash screen at the start of a block of code, and then automatically closing it at the end of the block
+* リソースの開閉/接続と切断（これは本来 `IDisposable` が使われるべきものですが、対象のが実装していない可能性があります）
+* イベントハンドラの登録と登録解除（ `WeakReference` の代わりに）
+* UIで、コードブロックの開始時にスプラッシュ画面を表示し、ブロックの終了時に自動的に閉じる
 
-I wouldn't recommend this approach generally, because it does hide what is going on, but on occasion it can be quite useful.
+一般的にはこのアプローチをお勧めしません。何が起こっているかを隠してしまうからです。しかし、場合によっては非常に便利です。
 
-## "do" bindings ##
+## `do` 束縛
 
-Sometimes we might want to execute code independently of a function or value definition. This can be useful in module initialization, class initialization and so on. 
+関数や値の定義とは別にコードを実行したい場合もあります。これは、モジュールの初期化やクラスの初期化などで役立ちます。
 
-That is, rather than having "`let x = do something`" we just the "`do something`" on its own. This is analogous to a statement in an imperative language.
+つまり、 `let x = do something` ではなく、単に `do something` だけを使います。これは命令型言語の文（ステートメント）に似ています。
 
-You can do this by prefixing the code with "`do`":
+コードの先頭に `do` をつけることで、これを実現できます。
 
 ```fsharp
 do printf "logging"
 ```
 
-In many situations, the `do` keyword can be omitted:
+多くの場合、 `do` キーワードは省略できます。
 
 ```fsharp
 printf "logging"
 ```
 
-But in both cases, the expression must return unit. If it does not, you will get a compiler error.
+ただし、どちらの場合も、式は `unit` を返す必要があります。そうでない場合、コンパイラエラーが発生します。
 
 ```fsharp
-do 1 + 1    // warning: This expression is a function 
+do 1 + 1    // 警告: この式は関数です 
 ```
 
-As always, you can force a non-unit result to be discarded by piping the results into "`ignore`".
+いつものように、 `unit` 以外の結果を強制的に破棄するには、結果を `ignore` にパイプします。
 
 ```fsharp
 do ( 1+1 |> ignore )
 ```
 
-You will also see the "`do`" keyword used in loops in the same way.
+また、ループでも同じように `do` キーワードが使われます。
 
-Note that although you can sometimes omit it, it is considered good practice to always have an explicit "`do`", as it acts as documentation that you do not want a result, only the side-effects.
+省略できる場合もありますが、明示的な `do` を常に付けることが良い習慣とされています。これは、結果ではなく副作用のみを望んでいることを示す、ドキュメントの役割を果たすからです。
 
 
-### "do" for module initialization
+### モジュールの初期化のための `do`
 
-Just like `let`, `do` can be used both in a nested context, and at the top level in a module or class.
+`let` と同様に、 `do` はネストされたコンテキストでも、モジュールやクラスのトップレベルでも使えます。
 
-When used at the module level, the `do` expression is evaluated once only, when the module is first loaded.  
+モジュールレベルで使われる場合、`do` 式はモジュールが最初に読み込まれたときに一度だけ評価されます。
 
 ```fsharp
 module A =
@@ -380,61 +380,61 @@ module A =
     do printfn "Module A initialized"
 ```
 
-This is somewhat analogous to a static class constructor in C#, except that if there are multiple modules, the order of initialization is fixed and they are initialized in order of declaration.
+これは、C#の静的クラスコンストラクタに似ていますが、複数のモジュールがある場合、初期化の順序は固定されており、宣言順に初期化されます。
 
-## let! and use! and do!
+## `let!` と `use!` と `do!`
 
-When you see `let!`, `use!` and `do!` (that is, with exclamation marks) and they are part of a curly brace `{..}` block, then they are being used as part of a "computation expression". The exact meaning of `let!`, `use!` and `do!` in this context depends on the computation expression itself.  Understanding computation expressions in general will have to wait for a later series.
+`let!` 、 `use!` 、 `do!` （つまり、感嘆符付き）が中かっこ `{...}` ブロックの一部である場合、それらは「コンピュテーション式」の一部として使われています。このコンテキストでの `let!` 、 `use!` 、 `do!` の正確な意味は、コンピュテーション式自体によって決まります。コンピュテーション式全般の理解は、今後のシリーズで待たなければなりません。
 
-The most common type of computation expression you will run into are *asynchronous workflows*, indicated by a `async{..}` block.
-In this context, it means they are being used to wait for an async operation to finish, and only then bind to the result value.
+最も一般的なコンピュテーション式の種類は、 `async{..}` ブロックで示される*非同期ワークフロー*です。
+このコンテキストでは、非同期操作が完了するのを待ってから、結果の値に束縛するために使います。
 
-Here are some examples we saw earlier in [a post from the "F# を使う理由" series](../posts/concurrency-async-and-parallel):
+以下は、「[F#を使う理由](../posts/concurrency-async-and-parallel)」シリーズで見た例です。
 
 ```fsharp
-//This simple workflow just sleeps for 2 seconds.
+//この簡単なワークフローは2秒間スリープするだけです。
 open System
 let sleepWorkflow  = async{
     printfn "Starting sleep workflow at %O" DateTime.Now.TimeOfDay
     
-    // do! means to wait as well
+    // do! も待機を意味します
     do! Async.Sleep 2000
     printfn "Finished sleep workflow at %O" DateTime.Now.TimeOfDay
     }
 
-//test
+//テスト
 Async.RunSynchronously sleepWorkflow  
 
 
-// Workflows with other async workflows nested inside them. 
-/// Within the braces, the nested workflows can be blocked on by using the let! or use! syntax.
+// 他の非同期ワークフローがネストされているワークフロー。
+/// 中括弧内で、let! または use! 構文を使ってネストされたワークフローをブロックできます。
 let nestedWorkflow  = async{
 
     printfn "Starting parent"
     
-    // let! means wait and then bind to the childWorkflow value
+    // let! は待機してから childWorkflow の値に束縛することを意味します
     let! childWorkflow = Async.StartChild sleepWorkflow
 
-    // give the child a chance and then keep working
+    // 子に機会を与えてから作業を続ける
     do! Async.Sleep 100
     printfn "Doing something useful while waiting "
 
-    // block on the child
+    // 子をブロック
     let! result = childWorkflow
 
-    // done
+    // 完了
     printfn "Finished parent" 
     }
 
-// run the whole workflow
+// ワークフロー全体を実行
 Async.RunSynchronously nestedWorkflow  
 ```
 
-## Attributes on let and do bindings
+## `let` および `do` 束縛の属性
 
-If they are at the top-level in a module, `let` and `do` bindings can have attributes. F# attributes use the syntax `[<MyAttribute>]`.
+モジュールのトップレベルにある場合、 `let` および `do` 束縛には属性をつけることができます。F#の属性は `[<MyAttribute>]` という構文を使います。
 
-Here are some examples in C# and then the same code in F#:
+以下は、C#での例と、同じコードをF#で書いたものです。
 
 ```csharp
 class AttributeTest
@@ -461,17 +461,17 @@ module AttributeTest =
     let nonCompliant () = ()
 ```
 
-Let's have a brief look at three attribute examples:
+3つの属性の例を簡単に見てみましょう。
 
-* The EntryPoint attribute used to indicate the "main" function.
-* The various AssemblyInfo attributes.
-* The DllImport attribute for interacting with unmanaged code.
+* "main" 関数を示すために使用するEntryPoint属性。
+* さまざまなAssemblyInfo属性。
+* アンマネージドコードとやり取りするためのDllImport属性。
 
-### The EntryPoint attribute 
+### EntryPoint属性
 
-The special `EntryPoint` attribute is used to mark the entry point of a standalone app, just as in C#, the `static void Main` method is.
+特別な `EntryPoint` 属性は、C#で `static void Main` メソッドが使われるのと同様に、スタンドアロンアプリのエントリポイントを示すために使います。
 
-Here's the familiar C# version:
+おなじみのC#バージョンは次のとおりです。
 
 ```csharp
 class Program
@@ -483,13 +483,13 @@ class Program
             Console.WriteLine(arg);
         }
         
-        //same as Environment.Exit(code)
+        //Environment.Exit(code)と同じ
         return 0;
     }
 }
 ```
 
-And here's the F# equivalent:
+F#の同等のコードは次のようになります。
 
 ```fsharp
 module Program
@@ -498,32 +498,32 @@ module Program
 let main args =
     args |> Array.iter printfn "%A" 
     
-    0  // return is required!
+    0  // returnが必要です！
 ```
 
-Just as in C#, the args are an array of strings. But unlike C#, where the static `Main` method can be `void`, the F# function *must* return an int.
+C#と同様に、args は文字列の配列です。しかし、C#では静的 `Main` メソッドは `void` にすることができますが、F#の関数は*必ず* `int` を返さなければなりません。
 
-Also, a big gotcha is that the function that has this attribute must be the very last function in the last file in the project! Otherwise you get this error:
+また、大きな落とし穴は、この属性を持つ関数はプロジェクトの最後のファイルの最後の関数でなければならないということです！そうでないと、次のエラーが発生します。
 
-    error FS0191: A function labelled with the 'EntryPointAttribute' atribute must be the last declaration in the last file in the compilation sequence
+   error FS0191: 'EntryPointAttribute' 属性が付いた関数は、コンパイル順序の最後のファイルの最後の宣言でなければなりません
 
-Why is the F# compiler so fussy? In C#, the class can go anywhere.  
+C#では、クラスはどこにでも置けるのに、なぜF#コンパイラはそこまでうるさいのでしょうか？
 
-One analogy that might help is this: in some sense, the whole application is a single huge expression bound to `main`,
-where `main` is an expression that contains subexpressions that contain other subexpressions.
+理解の助けになる類推としては、ある意味、アプリケーション全体が単一の巨大な式であり、 `main` に束縛されているということです。
+ここで、 `main` はサブ式を含んでいて、それぞれのサブ式もまた別のサブ式を含んでいます。
 
     [<EntryPoint>]
     let main args =
-        the entire application as a set of subexpressions
-    
-Now in F# projects, there are no forward references allowed. That is, expressions that refer to other expressions must be declared after them.
-And so logically, the highest, most top-level function of them all, `main`, must come last of all.
+        アプリケーション全体をサブ式の集合として表現
 
-### The AssemblyInfo attributes
+さて、F#プロジェクトでは、前方参照は許されません。つまり、他の式を参照する式は、後ろに宣言されなければなりません。
+よって当然の結果として、最上位のトップレベル関数である `main` は、最後に来なければなりません。
 
-In a C# project, there is an `AssemblyInfo.cs` file that contains all the assembly level attributes.
+### AssemblyInfo属性
 
-In F#, the equivalent way to do this is with a dummy module which contains a `do` expression annotated with these attributes.
+C#プロジェクトでは、アセンブリレベルの属性をすべて含む `AssemblyInfo.cs` ファイルがあります。
+
+F#では、これと同等の方法として、属性で注釈付けされた `do` 式を含むダミーモジュールを使います。
 
 ```fsharp
 open System.Reflection
@@ -532,12 +532,12 @@ module AssemblyInfo =
     [<assembly: AssemblyTitle("MyAssembly")>]
     [<assembly: AssemblyVersion("1.2.0.0")>]
     [<assembly: AssemblyFileVersion("1.2.3.4152")>]
-    do ()   // do nothing -- just a placeholder for the attribute
+    do ()   // 何もしない -- 属性のためのプレースホルダーです
 ```
-    
-### The DllImport attribute 
 
-Another occasionally useful attribute is the `DllImport` attribute. Here's a C# example.
+### DllImport属性
+
+属性をもう一つ説明します。時々便利な `DllImport` 属性です。C#の例を以下に示します。
 
 ```csharp
 using System.Runtime.InteropServices;
@@ -563,7 +563,7 @@ public class TestDllImport
 }
 ```
 
-It works the same way in F# as in C#. One thing to note is that the `extern declaration ...` puts the types before the parameters, C-style.
+F#でもC#と同じように動きます。注意すべき点は、 `extern declaration ...` はパラメータの前に型を置くC言語スタイルであることです。
 
 ```fsharp
 open System.Runtime.InteropServices
@@ -582,8 +582,8 @@ let TestPathCanonicalize() =
 
     printfn "actual=%s success=%b" actual (expected = actual)
 
-// test
+// テスト
 TestPathCanonicalize() 
 ```
 
-Interop with unmanaged code is a big topic which will need its own series.
+アンマネージドコードとの相互運用は大きなトピックなので、独自のシリーズが必要になるでしょう。

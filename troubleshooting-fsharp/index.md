@@ -741,7 +741,7 @@ This is generally caused by implic
 let something = 
   2+2   // => FS0020: この式の結果の型は 'int' で、暗黙的に無視されます。
         //            'ignore' を使用してこの値を明示的に破棄してください (例: 'expr |> ignore')。
-        //            または 'let' を使用して結果を名前にバインドします (例: 'let result = expr')。
+        //            または 'let' を使用して結果を名前に束縛します (例: 'let result = expr')。
   "hello"
 ```
 
@@ -768,7 +768,7 @@ let result = 2+2 |> ignore; "hello";
 このエラーの別のバリエーションは、プロパティに代入する際に発生します。
 
     この等式の結果の型は 'bool' で、暗黙的に破棄されます。
-    'let' を使用して結果を名前にバインドすることを検討してください。
+    'let' を使用して結果を名前に束縛することを検討してください。
     たとえば、'let result = expression' などとします。
     意図的に値を変更する場合、'<-' 演算子を 'x <- expression' などと使用します。
 

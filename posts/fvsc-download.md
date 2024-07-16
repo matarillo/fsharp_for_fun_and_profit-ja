@@ -67,7 +67,7 @@ class WebPageDownloader
 - かっこだけで10行あり、5段階のネストで見た目も複雑になっています。 *
 - すべてのパラメータ型を明示的に宣言する必要があり、ジェネリックの`TResult`型を3回も繰り返さなければなりません。
 
-<sub>* 確かに、この特定の例では、すべての `using` ステートメントが隣接している場合、[余分なかっことインデントを省略できます](https://stackoverflow.com/questions/1329739/nested-using-statements-in-c-sharp)が、
+<sub>* 確かに、この特定の例では、すべての `using` 文が隣接している場合、[余分なかっことインデントを省略できます](https://stackoverflow.com/questions/1329739/nested-using-statements-in-c-sharp)が、
 より一般的なケースでは必要になります。</sub>
 
 ## コードのテスト
