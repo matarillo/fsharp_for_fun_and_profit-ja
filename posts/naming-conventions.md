@@ -1,21 +1,21 @@
 ---
 layout: post
-title: "Parameter and value naming conventions"
-description: "a, f, x and friends"
+title: "パラメータと値の命名規則"
+description: "a、f、xとその仲間たち"
 nav: thinking-functionally
 seriesId: "式と構文"
 seriesOrder: 6
 ---
 
-If you are coming to F# from an imperative language such as C#, then you might find a lot of the names shorter and more cryptic than you are used to.  
+C#などの命令型言語からF#に移行すると、多くの場合、識別子が短く、難解に感じるかもしれません。
 
-In C# and Java, the best practice is to have long descriptive identifiers.  In functional languages, the function names themselves can be descriptive, but the local identifiers inside a function tend to be quite short, and piping and composition is used a lot to get everything on a minimal number of lines.
+C#やJavaでは、長くて説明的な識別子を使うのがベストプラクティスです。一方、関数型言語では、関数名自体は説明的になることもありますが、関数内のローカル識別子は非常に短くなりがちです。また、パイプ処理や関数合成を多用して、コード行数を最小限に抑えます。
 
-For example, here is a crude implementation of a prime number sieve with very descriptive names for the local values.
+例えば、素数のふるいの簡単な実装において、ローカル値に長く説明的な名前を使ったものを以下に示します。
 
 ```fsharp
 let primesUpTo n = 
-    // create a recursive intermediate function
+    // 再帰的な中間関数を作る
     let rec sieve listOfNumbers  = 
         match listOfNumbers with 
         | [] -> []
@@ -23,18 +23,18 @@ let primesUpTo n =
             let sievedNumbersNotDivisibleByP = 
                 sievedNumbersBiggerThanP
                 |> List.filter (fun i-> i % primeP > 0)
-            //recursive part
+            // 再帰部分
             let newPrimes = sieve sievedNumbersNotDivisibleByP
             primeP :: newPrimes
-    // use the sieve
+    // ふるいを使う
     let listOfNumbers = [2..n]
-    sieve listOfNumbers     // return
+    sieve listOfNumbers     // 戻り値
 
-//test
+// テスト
 primesUpTo 100
 ```
 
-Here is the same implementation, with terser, idiomatic names and more compact code:
+同じ実装を、より簡潔で慣用的な名前とコンパクトなコードで以下に示します。
 
 ```fsharp
 let primesUpTo n = 
@@ -46,28 +46,28 @@ let primesUpTo n =
    [2..n] |> sieve 
 ```
 
-The cryptic names are not always better, of course, but if the function is kept to a few lines and the operations used are standard, then this is a fairly common idiom.
+暗号めいた名前が常に良いわけではありません。ただし、関数が数行に収まり、使う操作が標準的なものであれば、割と一般的な慣用表現です。
 
-The common naming conventions are as follows:
+一般的な命名規則は以下のとおりです。
 
-* "a", "b", "c" etc., are types
-* "f", "g", "h" etc., are functions
-* "x", "y", "z" etc., are arguments to the functions 
-* Lists are indicated by adding an "s" suffix, so that "`xs`" is a list of `x`'s, "`fs`" is a list of functions, and so on.  It is extremely common to see "`x::xs`" meaning the head (first element) and tail (the remaining elements) of a list.
-* "_" is used whenever you don't care about the value. So "`x::_`" means that you don't care about the rest of the list, and "`let f _ = something`" means you don't care about the argument to `f`.
+* "a"、"b"、"c"などは型を表します。
+* "f"、"g"、"h"などは関数を表します。
+* "x"、"y"、"z"などは関数の引数を表します。
+* リストは末尾に"s"を付けて示します。つまり、 `xs` はxのリスト、 `fs` は関数のリストなどを表します。 `x::xs` はリストの先頭（最初の要素）と末尾（残りの要素）を意味し、非常によく見かける表現です。
+* `_` は値を気にしない場合に使います。つまり、 `x::_` はリストの残りを気にしないことを意味し、 `let f _ = something` はfの引数を気にしないことを意味します。
 
-Another reason for the short names is that often, they cannot be assigned to anything meaningful.  For example, the definition of the pipe operator is:
+短い名前を使うもう一つの理由は、多くの場合、意味のある名前を付けられないためです。例えば、パイプ演算子の定義は次のようになります。
 
 ```fsharp
 let (|>) x f = f x
 ```
 
-We don't know what `f` and `x` are going to be, `f` could be any function and `x` could be any value. Making this explicit does not make the code any more understandable.
+`f`と`x`が何になるかはわかりません。`f`はどんな関数にもなり得るし、`x`はどんな値にもなり得ます。これを明示的にしても、コードの理解度は上がりません。
 
 ```fsharp
-let (|>) aValue aFunction = aFunction aValue // any better?
+let (|>) aValue aFunction = aFunction aValue // これで良くなったといえますか？
 ```
 
-### The style used on this site 
+### このサイトで使うスタイル 
 
-On this site I will use both styles.  For the introductory series, when most of the concepts are new, I will use a very descriptive style, with intermediate values and long names.  But in more advanced series, the style will become terser.
+このサイトでは両方のスタイルを使います。入門シリーズでは、ほとんどの概念が新しいため、中間値や長い名前を使った非常に説明的なスタイルを使います。しかし、より高度なシリーズでは、スタイルはより簡潔になります。
