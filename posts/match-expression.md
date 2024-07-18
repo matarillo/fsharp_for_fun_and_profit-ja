@@ -1,51 +1,51 @@
 ---
 layout: post
-title: "Match expressions"
-description: "The workhorse of F#"
+title: "match 式"
+description: "F#の主力機能"
 nav: thinking-functionally
 seriesId: "式と構文"
 seriesOrder: 9
-categories: [Patterns,Folds]
+categories: [パターン,畳み込み]
 ---
 
-Pattern matching is ubiquitous in F#. It is used for binding values to expressions with `let`, and in function parameters, and for branching using the `match..with` syntax.
+F#ではパターンマッチングが広く使われています。 `let` で式に値を束縛したり、関数のパラメータを定義したり、 `match..with` 構文で分岐したりするときに活躍します。
 
-We have briefly covered binding values to expressions in a [post in the "F# を使う理由" series](../posts/conciseness-pattern-matching), and it will be covered many times as we [investigate types](../posts/overview-of-types-in-fsharp). 
+値を式に束縛することについては、[「F#を使う理由」シリーズの投稿](../posts/conciseness-pattern-matching.html)で軽く触れました。また、「[型の調査](../posts/overview-of-types-in-fsharp.html)」でも何度か取り上げる予定です。
 
-So in this post, we'll cover the `match..with` syntax and its use for control flow.
+そのため、この投稿では `match..with` 構文とその制御フローでの使い方に焦点を当てます。
 
-## What is a match expression?
+## match 式とは
 
-We have already seen `match..with` expressions a number of times. And we know that it has the form: 
+`match..with` 式はすでに何度か目にしています。基本的な形は以下のとおりです。
 
-    match [something] with 
-    | pattern1 -> expression1
-    | pattern2 -> expression2
-    | pattern3 -> expression3
+    match [何か] with 
+    | パターン1 -> 式1
+    | パターン2 -> 式2
+    | パターン3 -> 式3
     
-If you squint at it just right, it looks a bit like a series of lambda expressions:
+少し目を凝らすと、一連のラムダ式のようにも見えます。
     
-    match [something] with 
-    | lambda-expression-1
-    | lambda-expression-2
-    | lambda-expression-3
+    match [何か] with 
+    | ラムダ式1
+    | ラムダ式2
+    | ラムダ式3
 
-Where each lambda expression has exactly one parameter:
+ここで、各ラムダ式は1つのパラメータを持ちます。
 
-    param -> expression
+    パラメータ -> 式
     
-So one way of thinking about `match..with` is that it is a choice between a set of lambda expressions. But how to make the choice?
+つまり、 `match..with` は一連のラムダ式から1つを選ぶものと考えられます。では、どうやって選ぶのでしょうか？
 
-This is where the patterns come in.  The choice is made based on whether the "match with" value can be matched with the parameter of the lambda expression.
-The first lambda whose parameter can be made to match the input value "wins"!
+ここでパターンが重要になります。「match with」の値がラムダ式のパラメータとマッチするかどうかで選びます。
+入力値とマッチする最初のラムダ式のパラメータが「勝者」です！
 
-So for example, if the param is the wildcard `_`, it will always match, and if first, always win.
+たとえば、パラメータがワイルドカード `_` なら、常にマッチし、最初にあれば必ず勝者になります。
 
-    _ -> expression  
+    _ -> 式  
 
-### Order is important!
+### 順序が大切！
     
-Looking at the following example:
+次の例を見てみましょう。
 
 ```fsharp
 let x = 
@@ -55,15 +55,15 @@ let x =
     | _ -> "z" 
 ```
 
-We can see that there are three lambda expressions to match, in this order:
+ここでは、以下の順序で3つのラムダ式がマッチングされます。
 
     fun 1 -> "a"
     fun 2 -> "b"
     fun _ -> "z"
 
-So, the `1` pattern gets tried first, then then the `2` pattern, and finally, the `_` pattern.
-    
-On the other hand, if we changed the order to put the wildcard first, it would be tried first and always win immediately:
+つまり、まず `1` パターンを試し、次に `2` パターン、最後に `_` パターンを試します。
+
+一方、ワイルドカードを最初に置くと、最初に試されて必ず勝者になってしまいます。
 
 ```fsharp
 let x = 
@@ -73,128 +73,128 @@ let x =
     | 2 -> "b"  
 ```
 
-In this case, the F# compiler helpfully warns us that the other rules will never be matched.
+この場合、F#コンパイラは他のルールが決してマッチしないと親切に警告してくれます。
 
-So this is one major difference between a "`switch`" or "`case`" statement compared with a `match..with`. In a `match..with`, **the order is important**.
+これが `switch` や `case` 文と `match..with` の大きな違いの1つです。 `match..with` では、**順序が重要**なのです。
 
-## Formatting a match expression
+## match 式のフォーマット
 
-Since F# is sensitive to indentation, you might be wondering how best to format this expression, as there are quite a few moving parts.
+F#はインデントに敏感なので、この式をどのようにフォーマットするのが最適か疑問に思うかもしれません。整列に関する要素が多いからです。
 
-The [post on F# syntax](../posts/fsharp-syntax) gives an overview of how alignment works, but for `match..with` expressions, here are some specific guidelines.
+[F#の構文に関する投稿](../posts/fsharp-syntax)では整列の概要を説明しましたが、 `match..with` 式には以下のような具体的なガイドラインがあります。
 
-**Guideline 1: The alignment of the `| expression` clauses should be directly under the `match`**
+**ガイドライン1： `| expression` 句は `match` の直下に整列させる**
 
-This guideline is straightforward.
+このガイドラインは分かりやすいでしょう。
 
 ```fsharp
 let f x =   match x with 
-            // aligned
-            | 1 -> "pattern 1" 
-            // aligned
-            | 2 -> "pattern 2" 
-            // aligned
-            | _ -> "anything" 
+            // 整列
+            | 1 -> "パターン1" 
+            // 整列
+            | 2 -> "パターン2" 
+            // 整列
+            | _ -> "その他" 
 ```
 
 
-**Guideline 2: The `match..with` should be on a new line**
+**ガイドライン2： `match..with` は新しい行に書く**
 
-The `match..with` can be on the same line or a new line, but using a new line keeps the indenting consistent, independent of the lengths of the names:
+`match..with` は同じ行に書けますが、新しい行に書くと名前の長さに関係なく一貫したインデントを保てます。
 
 ```fsharp
-                                              // ugly alignment!  
+                                              // 醜い整列！  
 let myVeryLongNameForAFunction myParameter =  match myParameter with 
-                                              | 1 -> "something" 
-                                              | _ -> "anything" 
+                                              | 1 -> "何か" 
+                                              | _ -> "その他" 
 
-// much better
+// はるかに良い
 let myVeryLongNameForAFunction myParameter =  
     match myParameter with 
-    | 1 -> "something" 
-    | _ -> "anything" 
+    | 1 -> "何か" 
+    | _ -> "その他" 
 ```
 
-**Guideline 3: The expression after the arrow `->` should be on a new line**
+**ガイドライン3：矢印 `->` の後の式は新しい行に書く**
 
-Again, the result expression can be on the same line as the arrow, but using a new line again keeps the indenting consistent and helps to
-separate the match pattern from the result expression.
+結果の式を矢印と同じ行に書けますが、新しい行に書くと一貫したインデントを保ち、
+マッチパターンと結果の式を分けやすくなります。
 
 ```fsharp
 let f x =  
     match x with 
-    | "a very long pattern that breaks up the flow" -> "something" 
-    | _ -> "anything" 
+    | "フローを中断する非常に長いパターン" -> "何か" 
+    | _ -> "その他" 
 
 let f x =  
     match x with 
-    | "a very long pattern that breaks up the flow" -> 
-        "something" 
+    | "フローを中断する非常に長いパターン" -> 
+        "何か" 
     | _ -> 
-        "anything" 
+        "その他" 
 ```
 
-Of course, when all the patterns are very compact, a common sense exception can be made:
+もちろん、すべてのパターンが非常にコンパクトな場合は、例外的に同じ行に書いても構いません。
 
 ```fsharp
 let f list =  
     match list with 
-    | [] -> "something" 
-    | x::xs -> "something else" 
+    | [] -> "何か" 
+    | x::xs -> "その他" 
 ```
         
     
-## match..with is an expression
+## match..withは式である
 
-It is important to realize that `match..with` is not really a "control flow" construct.  The "control" does not "flow" down the branches, but instead, the whole thing is an expression that gets evaluated at some point, just like any other expression.  The end result in practice might be the same, but it is a conceptual difference that can be important.
+`match..with` は実際には「制御フロー」の構造ではありません。「制御」が分岐を「流れる」のではなく、むしろ全体が単なる式であり、他の式と同じように評価されるのです。実際の結果は同じかもしれませんが、概念的な違いは重要です。
 
-One consequence of it being an expression is that all branches *must* evaluate to the *same* type -- we have already seen this same behavior with if-then-else expressions and for loops.
+式であることの1つの結果として、すべての分岐が*同じ*型に評価されなければなりません。これは、if-then-else式やforループでも同じ動きを見てきました。
 
 ```fsharp
 let x = 
     match 1 with 
     | 1 -> 42
-    | 2 -> true  // error wrong type
-    | _ -> "hello" // error wrong type
+    | 2 -> true  // エラー：型が間違っている
+    | _ -> "hello" // エラー：型が間違っている
 ```
 
-You cannot mix and match the types in the expression.
+式の中で型を混ぜることはできません。
 
-### You can use match expressions anywhere
+### match 式はどこでも使える
 
-Since they are normal expressions, match expressions can appear anywhere an expression can be used.
+通常の式なので、match 式は式が使える場所ならどこでも使えます。
 
-For example, here's a nested match expression:
+たとえば、以下はネストされたmatch 式です。
 
 ```fsharp
-// nested match..withs are ok
+// ネストされたmatch..withは問題ない
 let f aValue = 
     match aValue with 
     | x -> 
         match x with 
-        | _ -> "something" 
+        | _ -> "何か" 
 ```
 
-And here's a match expression embedded in a lambda:
+そして、以下はラムダにmatch 式を埋め込んだ例です。
 
 ```fsharp
 [2..10]
 |> List.map (fun i ->
         match i with 
-        | 2 | 3 | 5 | 7 -> sprintf "%i is prime" i
-        | _ -> sprintf "%i is not prime" i
+        | 2 | 3 | 5 | 7 -> sprintf "%iは素数です" i
+        | _ -> sprintf "%iは素数ではありません" i
         )
 ```
 
 
 
-## Exhaustive matching
+## 網羅的なマッチング
 
-Another consequence of being an expression is that there must always be *some* branch that matches. The expression as a whole must evaluate to *something*!
+式であることのもう1つの結果として、必ず*何らかの*分岐がマッチしなければなりません。式全体が*何かに*評価される必要があるのです！
 
-That is, the valuable concept of "exhaustive matching" comes from the "everything-is-an-expression" nature of F#. In a statement oriented language, there would be no requirement for this to happen.
+つまり、「網羅的なマッチング」という重要な概念は、F#の「すべてが式である」性質から生まれています。文指向の言語では、このような要求はありません。
 
-Here's an example of an incomplete match:
+以下は不完全なマッチの例です。
 
 ```fsharp
 let x = 
@@ -203,17 +203,17 @@ let x =
     | 2 -> "b"
 ```
 
-The compiler will warn you if it thinks there is a missing branch.
-And if you deliberately ignore the warning, then you will get a nasty runtime error (`MatchFailureException`) when none of the patterns match.
+コンパイラは、不足している分岐があると判断すると警告を出します。
+そして、意図的に警告を無視すると、どのパターンもマッチしないときに厄介なランタイムエラー（ `MatchFailureException` ）が発生します。
 
-### Exhaustive matching is not perfect
+### 網羅的なマッチングは完璧ではない
 
-The algorithm for checking that all possible matches are listed is good but not always perfect. Occasionally it will complain that you have not matched every possible case, when you know that you have.
-In this case, you may need to add an extra case just to keep the compiler happy.
+すべての可能なマッチをリストアップしたかどうかをチェックするアルゴリズムは優れていますが、常に完璧というわけではありません。時々、すべての可能なケースをマッチさせていないと指摘されるけれども、実際にはすべてをカバーしていることがわかっている場合もあります。
+このような場合、コンパイラを満足させるためだけに、余分なケースを追加する必要があるかもしれません。
 
-### Using (and avoiding) the wildcard match
+### ワイルドカードマッチの使い方（と避け方）
 
-One way to guarantee that you always match all cases is to put the wildcard parameter as the last match:
+すべてのケースを確実にマッチさせる1つの方法は、最後のマッチとしてワイルドカードパラメータを置くことです。
 
 ```fsharp
 let x = 
@@ -223,11 +223,11 @@ let x =
     | _ -> "z"
 ```
 
-You see this pattern frequently, and I have used it a lot in these examples. It's the equivalent of having a catch-all `default` in a switch statement.
+このパターンはよく見かけます。私もこれらの例でたくさん使いました。これは、switch文でcatch-all  `default` を持つのと同じです。
 
-But if you want to get the full benefits of exhaustive pattern matching, I would encourage you *not* to use wildcards,
-and try to match all the cases explicitly if you can.  This is particularly true if you are matching on
-the cases of a union type:
+しかし、網羅的なパターンマッチングの恩恵を最大限に得たい場合は、ワイルドカードを*使わず*、
+可能な限りすべてのケースを明示的にマッチさせることをお勧めします。これは特に、
+union 型のケースにマッチングする場合に当てはまります。
 
 ```fsharp
 type Choices = A | B | C
@@ -236,12 +236,12 @@ let x =
     | A -> "a"
     | B -> "b"
     | C -> "c"
-    //NO default match
+    // デフォルトのマッチはなし
 ```
 
-By being always explicit in this way, you can trap any error caused by adding a new case to the union. If you had a wildcard match, you would never know.
+このように常に明示的にすることで、union に新しいケースを追加したことによるエラーを捕捉できます。ワイルドカードマッチを使っていたら、気づくことはありませんでした。
 
-If you can't have *every* case be explicit, you might try to document your boundary conditions as much as possible, and assert an runtime error for the wildcard case.
+すべてのケースを明示的にできない場合は、できるだけ境界条件を文書化し、ワイルドカードケースに対してランタイムエラーをアサートすることを検討してください。
 
 ```fsharp
 let x = 
@@ -249,359 +249,359 @@ let x =
     | 1 -> "a"
     | 2 -> "b"
     | i when i >= 0 && i<=100 -> "ok"
-    // the last case will always match
-    | x -> failwithf "%i is out of range" x
+    // 最後のケースは常にマッチする
+    | x -> failwithf "%iは範囲外です" x
 ```
 
 
-## Types of patterns
+## パターンの種類
 
-There are lots of different ways of matching patterns, which we'll look at next.
+パターンをマッチングする方法は多数あります。次にそれらを見ていきましょう。
 
-For more details on the various patterns, see the [MSDN documentation](http://msdn.microsoft.com/en-us/library/dd547125%28v=vs.110%29).
+各種パターンの詳細については、[Microsoft Learnのドキュメント](https://learn.microsoft.com/ja-jp/dotnet/fsharp/language-reference/pattern-matching)を参照してください。
 
-### Binding to values
+### 値への束縛
 
-The most basic pattern is to bind to a value as part of the match:
+最も基本的なパターンは、マッチの一部として値を束縛することです。
 
 ```fsharp
 let y = 
     match (1,0) with 
-    // binding to a named value
+    // 名前付き値への束縛
     | (1,x) -> printfn "x=%A" x
 ```
 
-*By the way, I have deliberately left this pattern (and others in this post) as incomplete. As an exercise, make them complete without using the wildcard.*
+*ちなみに、このパターン（および本投稿の他のパターン）は、意図的に未完成のままにしています。練習として、ワイルドカードを使わずに完成させてみてください。*
 
-It is important to note that the values that are bound *must* be distinct for each pattern. So you can't do something like this:
+束縛される値は各パターンで異なる必要があることに注意してください。つまり、以下のようなことはできません。
 
 ```fsharp
 let elementsAreEqual aTuple = 
     match aTuple with 
     | (x,x) -> 
-        printfn "both parts are the same" 
+        printfn "両方の部分が同じです" 
     | (_,_) -> 
-        printfn "both parts are different" 
+        printfn "両方の部分が異なります" 
 ```
 
-Instead, you have to do something like this:
+代わりに、以下のようにする必要があります。
 
 ```fsharp
 let elementsAreEqual aTuple = 
     match aTuple with 
     | (x,y) -> 
-        if (x=y) then printfn "both parts are the same" 
-        else printfn "both parts are different" 
+        if (x=y) then printfn "両方の部分が同じです" 
+        else printfn "両方の部分が異なります" 
 ```
 
-This second option can also be rewritten using "guards" (`when` clauses) instead. Guards will be discussed shortly.
+この2つ目のオプションは、「ガード」（ `when` 句）を使って書き直すこともできます。ガードについては後ほど説明します。
 
-### AND and OR
+### ANDとOR
 
-You can combine multiple patterns on one line, with OR logic and AND logic:
+ORロジックとANDロジックを使い、複数のパターンを組み合わせて1行にできます。
 
 ```fsharp
 let y = 
     match (1,0) with 
-    // OR  -- same as multiple cases on one line
+    // OR  -- 1行に複数のケースを書くのと同じ
     | (2,x) | (3,x) | (4,x) -> printfn "x=%A" x 
 
-    // AND  -- must match both patterns at once
-	// Note only a single "&" is used
+    // AND  -- 両方のパターンに同時にマッチする必要がある
+    // 注意：単一の"&"のみ使う
     | (2,x) & (_,1) -> printfn "x=%A" x 
 ```
 
-The OR logic is particularly common when matching a large number of union cases:
+ORロジックは、多数のunion ケースにマッチングする際によく使います。
 
 ```fsharp
 type Choices = A | B | C | D
 let x = 
     match A with 
-    | A | B | C -> "a or b or c"
+    | A | B | C -> "aまたはbまたはc"
     | D -> "d"
 ```
 
 
-### Matching on lists
+### リストのマッチング
 
-Lists can be matched explicitly in the form `[x;y;z]` or in the "cons" form `head::tail`:
+リストは `[x;y;z]` の形式で明示的にマッチングするか、「cons」つまり `head::tail` の形式でマッチングできます。
 
 ```fsharp
 let y = 
     match [1;2;3] with 
-    // binding to explicit positions
-    // square brackets used!
+    // 明示的な位置への束縛
+    // 角括弧を使う！
     | [1;x;y] -> printfn "x=%A y=%A" x y
 
-    // binding to head::tail. 
-    // no square brackets used!
+    // head::tailへの束縛 
+    // 角括弧は使わない！
     | 1::tail -> printfn "tail=%A" tail 
 
-    // empty list
-    | [] -> printfn "empty" 
+    // 空のリスト
+    | [] -> printfn "空" 
 ```
 
-A similar syntax is available for matching arrays exactly `[|x;y;z|]`.
+配列に対しても、 `[|x;y;z|]` のような似た構文を使って正確にマッチングできます。
 
-It is important to understand that sequences (aka `IEnumerables`) can *not* be matched on this way directly, because they are "lazy" and meant to be accessed one element at a time.
-Lists and arrays, on the other hand, are fully available to be matched on.
+シーケンス（別名 `IEnumerable` ）は「遅延評価」され、一度に1要素ずつアクセスすることを意図しているため、このように直接マッチングできないことを理解しておくことが重要です。
+一方、リストと配列は完全にマッチングできます。
 
-Of these patterns, the most common one is the "cons" pattern, often used in conjunction with recursion to loop through the elements of the list.
+これらのパターンの中で最も一般的なのは「cons」パターンで、再帰と組み合わせてリストの要素をループ処理するのによく使います。
 
-Here are some examples of looping through lists using recursion:
+以下は、再帰を使ってリストをループ処理する例です。
 
 ```fsharp
-// loop through a list and print the values
+// リストをループして値を出力する
 let rec loopAndPrint aList = 
     match aList with 
-    // empty list means we're done.
+    // 空のリストは処理終了を意味する
     | [] -> 
-        printfn "empty" 
+        printfn "空" 
 
-    // binding to head::tail. 
+    // head::tailへの束縛 
     | x::xs -> 
-        printfn "element=%A," x
-        // do all over again with the 
-        // rest of the list
+        printfn "要素=%A," x
+        // リストの残りの部分で
+        // 再度同じ処理を行う
         loopAndPrint xs 
 
-//test
+// テスト
 loopAndPrint [1..5]
 
 // ------------------------
-// loop through a list and sum the values
+// リストをループして値を合計する
 let rec loopAndSum aList sumSoFar = 
     match aList with 
-    // empty list means we're done.
+    // 空のリストは処理終了を意味する
     | [] -> 
         sumSoFar  
 
-    // binding to head::tail. 
+    // head::tailへの束縛 
     | x::xs -> 
         let newSumSoFar = sumSoFar + x
-        // do all over again with the 
-        // rest of the list and the new sum
+        // リストの残りの部分と新しい合計で
+        // 再度同じ処理を行う
         loopAndSum xs newSumSoFar 
 
-//test
+// テスト
 loopAndSum [1..5] 0
 ```
 
-The second example shows how we can carry state from one iteration of the loop to the next using a special "accumulator" parameter (called `sumSoFar` in this example). This is a very common pattern.
+2つ目の例は、ループの1回の反復から次の反復へ状態を引き渡す方法を示しています。特別な「アキュムレータ」パラメータ（この例では `sumSoFar` ）を使います。これは非常によく使うパターンです。
 
-### Matching on tuples, records and unions
+### タプル、レコード、union のマッチング
 
-Pattern matching is available for all the built-in F# types.  More details in the [series on types](../posts/overview-of-types-in-fsharp).
+パターンマッチングは、F#のすべての組み込み型で利用できます。詳細は[型に関するシリーズ](../posts/overview-of-types-in-fsharp.html)を参照してください。
 
 ```fsharp
 // -----------------------
-// Tuple pattern matching
+// タプルのパターンマッチング
 let aTuple = (1,2)
 match aTuple with 
-| (1,_) -> printfn "first part is 1"
-| (_,2) -> printfn "second part is 2"
+| (1,_) -> printfn "最初の部分は1"
+| (_,2) -> printfn "2番目の部分は2"
 
 
 // -----------------------
-// Record pattern matching
+// レコードのパターンマッチング
 type Person = {First:string; Last:string}
 let person = {First="john"; Last="doe"}
 match person with 
-| {First="john"}  -> printfn "Matched John" 
-| _  -> printfn "Not John" 
+| {First="john"}  -> printfn "ジョンにマッチしました" 
+| _  -> printfn "ジョンではありません" 
 
 // -----------------------
-// Union pattern matching
+// union のパターンマッチング
 type IntOrBool= I of int | B of bool
 let intOrBool = I 42
 match intOrBool with 
-| I i  -> printfn "Int=%i" i
-| B b  -> printfn "Bool=%b" b
+| I i  -> printfn "整数=%i" i
+| B b  -> printfn "論理値=%b" b
 ```
 
 
-### Matching the whole and the part with the "as" keyword
+### 全体と部分のマッチング（"as"キーワードの使用）
 
-Sometimes you want to match the individual components of the value *and* also the whole thing. You can use the `as` keyword for this.
+時には、値の個々の構成要素と*全体*の両方にマッチさせたい場合があります。この場合、 `as` キーワードを使えます。
 
 ```fsharp
 let y = 
     match (1,0) with 
-    // binding to three values
+    // 3つの値への束縛
     | (x,y) as t -> 
-        printfn "x=%A and y=%A" x y
-        printfn "The whole tuple is %A" t
+        printfn "x=%A かつ y=%A" x y
+        printfn "タプル全体は %A" t
 ```
 
 
-### Matching on subtypes
+### サブタイプのマッチング
 
-You can match on subtypes, using the `:?` operator, which gives you a crude polymorphism:
+`:?` 演算子を使ってサブタイプにマッチングでき、これによって簡易的な多態性を実現できます。
 
 ```fsharp
 let x = new Object()
 let y = 
     match x with 
     | :? System.Int32 -> 
-        printfn "matched an int"
+        printfn "整数にマッチしました"
     | :? System.DateTime -> 
-        printfn "matched a datetime"
+        printfn "日時にマッチしました"
     | _ -> 
-        printfn "another type"
+        printfn "別の型です"
 ```
 
-This only works to find subclasses of a parent class (in this case, Object). The overall type of the expression has the parent class as input.
+これは、親クラス（この場合はObject）のサブクラスを見つけるためにのみ機能します。式全体の型は、親クラスを入力として持ちます。
 
-Note that in some cases, you may need to "box" the value.
+場合によっては、値を「ボックス化」する必要があることに注意してください。
 
 ```fsharp
 let detectType v =
     match v with
-        | :? int -> printfn "this is an int"
-        | _ -> printfn "something else"
-// error FS0008: This runtime coercion or type test from type 'a to int    
-// involves an indeterminate type based on information prior to this program point. 
-// Runtime type tests are not allowed on some types. Further type annotations are needed.
+        | :? int -> printfn "これは整数です"
+        | _ -> printfn "それ以外です"
+// エラーFS0008：この実行時の型変換または型テストは、型'a から int への
+// このプログラムポイントより前の情報に基づく不確定な型を含んでいます。
+// 実行時の型テストは一部の型では許可されていません。さらなる型注釈が必要です。
 ```
 
-The message tells you the problem: "runtime type tests are not allowed on some types". 
-The answer is to "box" the value which forces it into a reference type, and then you can type check it:
+メッセージが問題を示しています。「実行時の型テストは一部の型では許可されていません」。
+解決策は値を「ボックス化」することです。これにより参照型に強制され、型チェックができるようになります。
 
 ```fsharp
 let detectTypeBoxed v =
-    match box v with      // used "box v" 
-        | :? int -> printfn "this is an int"
-        | _ -> printfn "something else"
+    match box v with      // "box v"を使う 
+        | :? int -> printfn "これは整数です"
+        | _ -> printfn "それ以外です"
 
-//test
+// テスト
 detectTypeBoxed 1
 detectTypeBoxed 3.14
 ```
 
-In my opinion, matching and dispatching on types is a code smell, just as it is in object-oriented programming.
-It is occasionally necessary, but used carelessly is an indication of poor design.
+私の意見では、オブジェクト指向プログラミングと同様に、型に基づくマッチングとディスパッチはコードの臭いです。
+時には必要ですが、注意せずに使うと、貧弱な設計の兆候となります。
 
-In a good object oriented design, the correct approach would be to use [polymorphism to replace the subtype tests](http://sourcemaking.com/refactoring/replace-conditional-with-polymorphism), along with techniques such as [double dispatch](http://www.c2.com/cgi/wiki?DoubleDispatchExample). So if you are doing this kind of OO in F#, you should probably use those same techniques.
+適切なオブジェクト指向設計では、[サブタイプテストを多態性で置き換える](https://sourcemaking.com/refactoring/replace-conditional-with-polymorphism)アプローチと、[二重ディスパッチ](https://wiki.c2.com/?DoubleDispatchExample)のような技術を使うのが正しいアプローチです。したがって、F#でこのようなオブジェクト指向を行う場合は、おそらく同じ手法を使うべきでしょう。
 
-## Matching on multiple values
+## 複数の値に対するマッチング
 
-All the patterns we've looked at so far do pattern matching on a *single* value. How can you do it for two or more?
+これまで見てきたパターンはすべて、*単一の*値に対するパターンマッチングでした。複数の値に対してはどのように行えばよいでしょうか？
 
-The short answer is: you can't. Matches are only allowed on single values.
+短い答えは、できません。マッチングは単一の値に対してのみ許可されています。
 
-But wait a minute -- could we combine two values into a *single* tuple on the fly and match on that? Yes, we can!
+しかし、ちょっと待ってください。その場で2つの値を*単一の*タプルに結合して、それにマッチングすることはできないでしょうか？はい、できます！
 
 ```fsharp
 let matchOnTwoParameters x y = 
     match (x,y) with 
     | (1,y) -> 
-        printfn "x=1 and y=%A" y
+        printfn "x=1 かつ y=%A" y
     | (x,1) -> 
-        printfn "x=%A and y=1" x
+        printfn "x=%A かつ y=1" x
 ```
 
-And indeed, this trick will work whenever you want to match on a set of values -- just group them all into a single tuple.
+実際、この小技は一連の値に対してマッチングしたい場合はいつでも使えます。単にすべての値を単一のタプルにグループ化するだけです。
 
 ```fsharp
 let matchOnTwoTuples x y = 
     match (x,y) with 
-    | (1,_),(1,_) -> "both start with 1"
-    | (_,2),(_,2) -> "both end with 2"
-    | _ -> "something else"
+    | (1,_),(1,_) -> "両方とも1で始まる"
+    | (_,2),(_,2) -> "両方とも2で終わる"
+    | _ -> "それ以外"
 
-// test
+// テスト
 matchOnTwoTuples (1,3) (1,2)
 matchOnTwoTuples (3,2) (1,2)
 ```
 
-## Guards, or the "when" clause
+## ガード、または"when"句
 
-Sometimes pattern matching is just not enough, as we saw in this example:
+時にはパターンマッチングだけでは不十分な場合があります。以下の例を見てみましょう。
 
 ```fsharp
 let elementsAreEqual aTuple = 
     match aTuple with 
     | (x,y) -> 
-        if (x=y) then printfn "both parts are the same" 
-        else printfn "both parts are different" 
+        if (x=y) then printfn "両方の部分が同じです" 
+        else printfn "両方の部分が異なります" 
 ```
 
-Pattern matching is based on patterns only -- it can't use functions or other kinds of conditional tests.
+パターンマッチングはパターンのみに基づいています。関数や他の種類の条件テストを使うことはできません。
 
-But there *is* a way to do the equality test as part of the pattern match -- using an additional `when` clause to the left of the function arrow.
-These clauses are known as "guards".
+しかし、パターンマッチの一部として等値テストを行う方法が*あります*。それは、関数の矢印の左側に追加の `when` 句を使うことです。
+これらの句は「ガード」として知られています。
 
-Here's the same logic written using a guard instead:
+以下は、同じロジックをガードを使って書き直したものです。
 
 ```fsharp
 let elementsAreEqual aTuple = 
     match aTuple with 
     | (x,y) when x=y -> 
-        printfn "both parts are the same" 
+        printfn "両方の部分が同じです" 
     | _ ->
-        printfn "both parts are different" 
+        printfn "両方の部分が異なります" 
 ```
 
-This is nicer, because we have integrated the test into the pattern proper, rather than using a test after the match has been done.
+これはより良い方法です。マッチ後にテストを使うのではなく、テストをパターン自体に統合したからです。
 
-Guards can be used for all sorts of things that pure patterns can't be used for, such as:
+ガードは、純粋なパターンでは使えないあらゆる種類のことに使えます。
 
-* comparing the bound values 
-* testing object properties
-* doing other kinds of matching, such as regular expressions
-* conditionals derived from functions 
+* 束縛された値の比較
+* オブジェクトのプロパティのテスト
+* 正規表現など、他の種類のマッチング
+* 関数から派生した条件
 
-Let's look at some examples of these:
+いくつか例を見てみましょう。
 
 ```fsharp
 // --------------------------------
-// comparing values in a when clause
+// when句での値の比較
 let makeOrdered aTuple = 
     match aTuple with 
-    // swap if x is bigger than y
+    // xがyより大きい場合、交換
     | (x,y) when x > y -> (y,x)
         
-    // otherwise leave alone
+    // それ以外の場合はそのまま
     | _ -> aTuple
 
-//test        
+// テスト        
 makeOrdered (1,2)        
 makeOrdered (2,1)
 
 // --------------------------------
-// testing properties in a when clause        
+// when句でのプロパティのテスト        
 let isAM aDate = 
     match aDate:System.DateTime with 
     | x when x.Hour <= 12-> 
-        printfn "AM"
+        printfn "午前"
         
-    // otherwise leave alone
+    // それ以外の場合
     | _ -> 
-        printfn "PM"
+        printfn "午後"
 
-//test
+// テスト
 isAM System.DateTime.Now
 
 // --------------------------------
-// pattern matching using regular expressions
+// 正規表現を使ったパターンマッチング
 open System.Text.RegularExpressions
 
 let classifyString aString = 
     match aString with 
     | x when Regex.Match(x,@".+@.+").Success-> 
-        printfn "%s is an email" aString
+        printfn "%sはメールアドレスです" aString
         
-    // otherwise leave alone
+    // それ以外の場合
     | _ -> 
-        printfn "%s is something else" aString
+        printfn "%sは他の何かです" aString
 
 
-//test
+// テスト
 classifyString "alice@example.com"
 classifyString "google.com"
 
 // --------------------------------
-// pattern matching using arbitrary conditionals
+// 任意の条件を使ったパターンマッチング
 let fizzBuzz x = 
     match x with 
     | i when i % 15 = 0 -> 
@@ -613,142 +613,142 @@ let fizzBuzz x =
     | i  -> 
         printfn "%i" i
 
-//test
+// テスト
 [1..30] |> List.iter fizzBuzz
 ```
 
-### Using active patterns instead of guards
+### ガードの代わりにアクティブパターンを使う
 
-Guards are great for one-off matches. But if there are certain guards that you use over and over, consider using active patterns instead.
+ガードは一回限りのマッチングには素晴らしいです。しかし、何度も使う特定のガードがある場合は、代わりにアクティブパターンの使用を検討してください。
 
-For example, the email example above could be rewritten as follows:
+たとえば、上記のメールの例は次のように書き直せます。
 
 ```fsharp
 open System.Text.RegularExpressions
 
-// create an active pattern to match an email address
+// メールアドレスにマッチするアクティブパターンを作成
 let (|EmailAddress|_|) input =
    let m = Regex.Match(input,@".+@.+") 
    if (m.Success) then Some input else None  
 
-// use the active pattern in the match   
+// マッチでアクティブパターンを使う   
 let classifyString aString = 
     match aString with 
     | EmailAddress x -> 
-        printfn "%s is an email" x
+        printfn "%sはメールアドレスです" x
         
-    // otherwise leave alone
+    // それ以外の場合
     | _ -> 
-        printfn "%s is something else" aString
+        printfn "%sは他の何かです" aString
 
-//test
+// テスト
 classifyString "alice@example.com"
 classifyString "google.com"
 ```
 
-You can see other examples of active patterns in a [previous post](../posts/convenience-active-patterns).
+アクティブパターンの他の例は[以前の投稿](../posts/convenience-active-patterns.html)で見ることができます。
 
-## The "function" keyword
+## "function"キーワード
 
-In the examples so far, we've seen a lot of this:
+これまでの例で、以下のようなコードをたくさん見てきました。
 
 ```fsharp
 let f aValue = 
     match aValue with 
-    | _ -> "something" 
+    | _ -> "何か" 
 ```
 
-In the special case of function definitions we can simplify this dramatically by using the `function` keyword.
+関数定義の特別なケースでは、 `function` キーワードを使ってこれを大幅に簡略化できます。
 
 ```fsharp
 let f = 
     function 
-    | _ -> "something" 
+    | _ -> "何か" 
 ```
 
-As you can see, the `aValue` parameter has completely disappeared, along with the `match..with`.
+ご覧の通り、 `aValue` パラメータは完全に消え、 `match..with` も消えました。
 
-This keyword is *not* the same as the `fun` keyword for standard lambdas, rather it combines `fun` and `match..with` in a single step.
+このキーワードは標準的なラムダの `fun` キーワードとは*同じではなく*、 `fun` と `match..with` を1つのステップで組み合わせたものです。
 
-The `function` keyword works anywhere a function definition or lambda can be used, such as nested matches:
+`function` キーワードは、関数定義やラムダが使える場所ならどこでも使えます。たとえば、ネストされたマッチでも。
 
 ```fsharp
-// using match..with
+// match..withを使う
 let f aValue = 
     match aValue with 
     | x -> 
         match x with 
-        | _ -> "something" 
+        | _ -> "何か" 
 
-// using function keyword
+// functionキーワードを使う
 let f = 
     function 
     | x -> 
         function 
-        | _ -> "something" 
+        | _ -> "何か" 
 ```
 
-or lambdas passed to a higher order function:
+または高階関数に渡されるラムダでも。
 
 ```fsharp
-// using match..with
+// match..withを使う
 [2..10] |> List.map (fun i ->
         match i with 
-        | 2 | 3 | 5 | 7 -> sprintf "%i is prime" i
-        | _ -> sprintf "%i is not prime" i
+        | 2 | 3 | 5 | 7 -> sprintf "%iは素数です" i
+        | _ -> sprintf "%iは素数ではありません" i
         )
 
-// using function keyword
+// functionキーワードを使う
 [2..10] |> List.map (function 
-        | 2 | 3 | 5 | 7 -> sprintf "prime"
-        | _ -> sprintf "not prime"
+        | 2 | 3 | 5 | 7 -> sprintf "素数"
+        | _ -> sprintf "素数ではない"
         )
 ```
 
-A minor drawback of `function` compared with `match..with` is that you can't see the original input value and have to rely on value bindings in the pattern.
+`function` の小さな欠点は、 `match..with` と比べて、元の入力値が見えず、パターン内の値の束縛に頼らなければならないことです。
 
-## Exception handling with try..with
+## try..withを使った例外処理
 
-In the [previous post](../posts/exceptions), we looked at catching exceptions with the `try..with` expression.
+[前回の投稿](../posts/exceptions.html)では、 `try..with` 式を使った例外のキャッチについて説明しました。
 
 ```fsharp
 try
-    failwith "fail"
+    failwith "失敗"
 with
-    | Failure msg -> "caught: " + msg
-    | :? System.InvalidOperationException as ex -> "unexpected"
+    | Failure msg -> "キャッチしました: " + msg
+    | :? System.InvalidOperationException as ex -> "予期しない例外"
 ```
     
-The `try..with` expression implements pattern matching in the same way as `match..with`.
+`try..with` 式は `match..with` と同じ方法でパターンマッチングを実装します。
 
-So in the above example we see the use of matching on a custom pattern 
+上記の例では、カスタムパターンへのマッチングの使い方を見ることができます。
 
-* `| Failure msg` is an example of matching on (what looks like) an active pattern 
-* `| :? System.InvalidOperationException as ex` is an example of matching on the subtype (with the use of `as` as well).
+* `| Failure msg` は（アクティブパターンのような）パターンへのマッチングの例です。
+* `| :? System.InvalidOperationException as ex` はサブタイプへのマッチング（ `as` の使用も含む）の例です。
 
-Because the `try..with` expression implements full pattern matching, we can also use guards as well, if needed to add extra conditional logic:
+`try..with` 式は完全なパターンマッチングを実装しているため、必要に応じてガードも使えます。これにより、追加の条件ロジックを加えることができます。
 
 ```fsharp
 let debugMode = false
 try
-    failwith "fail"
+    failwith "失敗"
 with
     | Failure msg when debugMode  -> 
         reraise()
     | Failure msg when not debugMode -> 
-        printfn "silently logged in production: %s" msg
+        printfn "本番環境で静かにログに記録: %s" msg
 ```
 
     
-## Wrapping match expressions with functions
+## match 式を関数でラップする
 
-Match expressions are very useful, but can lead to complex code if not used carefully.
+match 式は非常に便利ですが、注意して使わないと複雑なコードになってしまう可能性があります。
 
-The main problem is that match expressions doesn't compose very well. That is, it is hard to chain `match..with` expressions and build simple ones into complex ones.
+主な問題は、match 式があまりうまく合成できないことです。つまり、 `match..with` 式を連鎖させたり、簡単な式を複雑な式に組み立てるのが難しいのです。
 
-The best way of avoiding this is to wrap `match..with` expressions into functions, which can then be composed nicely.
+これを避ける最良の方法は、 `match..with` 式を関数でラップすることです。そうすれば、きれいに合成できるようになります。
 
-Here's a simple example. The `match x with 42` is wrapped in a `isAnswerToEverything` function.
+簡単な例を示します。 `match x with 42` は `isAnswerToEverything` 関数でラップされています。
 
 ```fsharp
 let times6 x = x * 6
@@ -758,17 +758,17 @@ let isAnswerToEverything x =
     | 42 -> (x,true)
     | _ -> (x,false)
 
-// the function can be used for chaining or composition
+// この関数は連鎖や合成に使える
 [1..10] |> List.map (times6 >> isAnswerToEverything)
 ```
 
-### Library functions to replace explicit matching
+### 明示的なマッチングを置き換えるライブラリ関数
 
-Most built-in F# types have such functions already available.
+ほとんどの組み込みF#型には、すでにそのような関数が用意されています。
 
-For example, instead of using recursion to loop through lists, you should try to use the functions in the `List` module, which will do almost everything you need.
+たとえば、リストをループ処理するために再帰を使う代わりに、 `List` モジュールの関数を使いましょう。必要なことはほとんど何でもしてくれます。
 
-In particular, the function we wrote earlier:
+特に、先ほど書いた関数
 
 ```fsharp
 let rec loopAndSum aList sumSoFar = 
@@ -780,28 +780,28 @@ let rec loopAndSum aList sumSoFar =
         loopAndSum xs newSumSoFar 
 ```
 
-can be rewritten using the `List` module in at least three different ways!
+は、 `List` モジュールを使って少なくとも3つの異なる方法で書き直せます！
 
 ```fsharp
-// simplest
+// 最もシンプル
 let loopAndSum1 aList = List.sum aList 
 [1..10] |> loopAndSum1 
 
-// reduce is very powerful    
+// reduceは非常に強力    
 let loopAndSum2 aList = List.reduce (+) aList 
 [1..10] |> loopAndSum2 
 
-// fold is most powerful of all
+// foldは最も強力
 let loopAndSum3 aList = List.fold (fun sum i -> sum+i) 0 aList 
 [1..10] |> loopAndSum3 
 ```
 
-Similarly, the Option type (discussed at length in [this post](../posts/the-option-type)) has an associated `Option` module with many useful functions.
+同様に、[こちらの記事](../posts/the-option-type.html)で詳しく説明した Option 型には、多くの便利な関数を持つ `Option` モジュールが関連付けられています。
 
-For example, a function that does a match on `Some` vs `None` can be replaced with `Option.map`:
+たとえば、 `Some` と `None` に対してマッチングする関数は、 `Option.map` で置き換えられます。
 
 ```fsharp
-// unnecessary to implement this explicitly
+// これを明示的に実装する必要はありません
 let addOneIfValid optionalInt = 
     match optionalInt with 
     | Some i -> Some (i + 1)
@@ -809,7 +809,7 @@ let addOneIfValid optionalInt =
 
 Some 42 |> addOneIfValid
 
-// much easier to use the built in function
+// 組み込み関数を使う方がはるかに簡単です
 let addOneIfValid2 optionalInt = 
     optionalInt |> Option.map (fun i->i+1)
 
@@ -817,19 +817,19 @@ Some 42 |> addOneIfValid2
 ```
 
 <a name="folds" ></a>
-### Creating "fold" functions to hide matching logic
+### マッチングロジックを隠す「fold」関数の作成
 
-Finally, if you create your own types which need to be frequently matched,
-it is good practice to create a corresponding generic "fold" function that wraps it
-nicely.
+最後に、頻繁なマッチングが必要な独自の型を作る場合、
+それをきれいにラップする汎用の「fold」関数を作るのが
+良い習慣です。
 
-For example, here is a type for defining temperature. 
+たとえば、温度を定義する型があるとします。
 
 ```fsharp
 type TemperatureType  = F of float | C of float
 ```
 
-Chances are, we will matching these cases a lot, so let's create a generic function that will do the matching for us.
+おそらく、これらのケースに頻繁にマッチングすることになるので、代わりにマッチングを行ってくれる汎用関数を作りましょう。
 
 ```fsharp
 module Temperature =
@@ -839,29 +839,29 @@ module Temperature =
         | C c -> celsiusFunction c
 ```
 
-All `fold` functions follow this same general pattern:
+すべての `fold` 関数は、以下の一般的なパターンに従います。
 
-* there is one function for each case in the union structure (or clause in the match pattern)
-* finally, the actual value to match on comes last. (Why? See the post on ["designing functions for partial application"](../posts/partial-application))
+* union 構造の各ケース（またはマッチパターンの各句）に対して1つの関数があります
+* 最後に、実際にマッチングする値が来ます（なぜでしょうか？[「部分適用のための関数設計」](../posts/partial-application.html)の投稿を参照してください）
 
-Now we have our fold function, we can use it in different contexts.
+fold関数ができあがったので、別のコンテキストで使えます。
 
-Let's start by testing for a fever. We need a function for testing degrees F for fever and another one for testing degrees C for fever.
+まず、発熱の検査から始めましょう。華氏で発熱を検査する関数と、摂氏で発熱を検査する関数が必要です。
 
-And then we combine them both using the fold function.
+そして、fold関数を使ってそれらを組み合わせます。
 
 ```fsharp
 let fFever tempF =
-    if tempF > 100.0 then "Fever!" else "OK"
+    if tempF > 100.0 then "発熱！" else "正常"
 
 let cFever tempC =
-    if tempC > 38.0 then "Fever!" else "OK"
+    if tempC > 38.0 then "発熱！" else "正常"
 
-// combine using the fold
+// foldを使って組み合わせる
 let isFever aTemp = Temperature.fold fFever cFever aTemp
 ```
 
-And now we can test.
+これで、テストしてみましょう。
 
 ```fsharp
 let normalTemp = C 37.0
@@ -871,30 +871,30 @@ let highTemp = F 103.1
 let result2 = isFever highTemp 
 ```
 
-For a completely different use, let's write a temperature conversion utility.
+まったく異なる用途として、温度変換ユーティリティを書いてみましょう。
 
-Again we start by writing the functions for each case, and then combine them.
+こちらも、各ケースに対する関数を作成してから、それらを組み合わせます。
 
 ```fsharp
 let fConversion tempF =
     let convertedValue = (tempF - 32.0) / 1.8
-    TemperatureType.C convertedValue    //wrapped in type
+    TemperatureType.C convertedValue    // 型でラップ
 
 let cConversion tempC =
     let convertedValue = (tempC * 1.8) + 32.0
-    TemperatureType.F convertedValue    //wrapped in type
+    TemperatureType.F convertedValue    // 型でラップ
 
-// combine using the fold
+// foldを使って組み合わせる
 let convert aTemp = Temperature.fold fConversion cConversion aTemp
 ```
 
-Note that the conversion functions wrap the converted values in a new `TemperatureType`, so the `convert` function has the signature: 
+変換関数は変換された値を新しい `TemperatureType` でラップしているので、 `convert` 関数のシグネチャは次のようになります。
 
 ```fsharp
 val convert : TemperatureType -> TemperatureType
 ```
 
-And now we can test.
+そして、テストしてみましょう。
 
 ```fsharp
 let c20 = C 20.0
@@ -904,11 +904,11 @@ let f75 = F 75.0
 let resultInC = convert f75 
 ```
 
-We can even call convert twice in a row, and we should get back the same temperature that we started with!
+convertを2回続けて呼び出しても、開始時と同じ温度が返ってくるはずです！
 
 ```fsharp
 let resultInC = C 20.0 |> convert |> convert
 ```
 
 
-There will be much more discussion on folds in the upcoming series on recursion and recursive types.
+foldについては、今後予定されている再帰と再帰型に関するシリーズでさらに詳しく説明します。
