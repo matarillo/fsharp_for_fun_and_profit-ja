@@ -1,72 +1,72 @@
 ---
 layout: post
-title: "Worked example: Parsing command line arguments"
-description: "Pattern matching in practice"
+title: "実践例：コマンドライン引数の解析"
+description: "実践的なパターンマッチング"
 nav: thinking-functionally
 seriesId: "式と構文"
 seriesOrder: 11
-categories: [Patterns, Worked Examples]
+categories: [パターン, 実践例]
 ---
 
-Now that we've seen how the match expression works, let's look at some examples in practice. But first, a word about the design approach.
+match 式のしくみを理解したところで、実践的な例を見てみましょう。ただし、その前に設計アプローチについて説明します。
 
-## Application design in F# ##
+## F#でのアプリケーション設計
 
-We've seen that a generic function takes input and emits output.  But in a sense, that approach applies at *any* level of functional code, even at the top level.
+ジェネリック関数が入力を受け取って出力を生み出すことは見てきました。ある意味で、このアプローチは関数型コードのどのレベルにも当てはまります。トップレベルでさえ同じです。
 
-In fact, we can say that a functional *application* takes input, transforms it, and emits output:
+実際、関数型アプリケーションは入力を受け取り、それを変換し、出力を生み出すと言えます。
 
 ![](../assets/img/function_transform1.png)
 
-Now ideally, the transformations work within the pure type-safe world that we create to model the domain, but unfortunately, the real world is untyped!
-That is, the input is likely to be simple strings or bytes, and the output also. 
+理想的には、この変換はドメインをモデル化するために作った純粋な型安全な世界の中で行われます。でも、残念ながら現実の世界は型付けされていません！
+つまり、入力と出力はおそらく単純な文字列やバイト列です。
 
-How can we work with this? The obvious solution is to have a separate stage to convert the input to our pure internal model, and then another separate stage to convert from the internal model to the output.
+これをどうやって扱うのでしょうか？最も簡単な解決策は、入力を純粋な内部モデルに変換する段階と、内部モデルを出力に変換する段階を別々に設けることです。
 
 ![](../assets/img/function_transform2.png)
 
-In this way, we can hide the messiness of the real world from the core of the application. This "keep your model pure" approach is similar to the ["Hexagonal Architecture"](http://alistair.cockburn.us/Hexagonal+architecture) concept in the large, or the MVC pattern in the small.
+こうすることで、アプリケーションの中核から現実世界の厄介な部分を隠せます。この「モデルを純粋に保つ」アプローチは、大規模では「[ヘキサゴナルアーキテクチャ](http://alistair.cockburn.us/Hexagonal+architecture)」の概念に、小規模ではMVCパターンに似ています。
 
-In this post and the [next](../posts/roman-numerals), we'll see some simple examples of this.
+この投稿と[次の投稿](../posts/roman-numerals)では、このアプローチの簡単な例をいくつか見ていきます。
 
-## Example: parsing a command line
+## 例：コマンドラインの解析
 
-We talked about the match expression in general in the [previous post](../posts/match-expression), so let's look at a real example where it is useful, namely parsing a command line.
+[前回の投稿](../posts/match-expression)では、match式について一般的に説明しました。今回は、実際に役立つ例を見てみましょう。具体的には、コマンドラインの解析です。
 
-We'll design and implement two slightly different versions, one with a basic internal model, and second one with some improvements.
+基本的な内部モデルを持つバージョンと、いくつか改良を加えたバージョンの2つを設計し実装します。
 
-### Requirements
+### 要件
 
-Let's say that we have three commandline options: "verbose", "subdirectories", and "orderby".
-"Verbose" and "subdirectories" are flags, while "orderby" has two choices: "by size" and "by name".
+コマンドラインオプションに、「verbose」、「subdirectories」、「orderby」の3つがあるとします。
+「verbose」と「subdirectories」はフラグで、「orderby」には「by size」と「by name」の2つの選択肢があります。
 
-So the command line params would look like
+コマンドラインパラメータは次のようになります。
 
 	MYAPP [/V] [/S] [/O order]
-	/V    verbose
-	/S    include subdirectories
-	/O    order by. Parameter is one of 
-			N - order by name. 
-			S - order by size
+	/V    詳細表示
+	/S    サブディレクトリを含む
+	/O    並び順。パラメータは以下のいずれか 
+			N - 名前で並べ替え
+			S - サイズで並べ替え
 
-## First version
+## 最初のバージョン
 
-Following the design rule above, we can see that:
+上記の設計ルールに従うと、以下のことがわかります。
 
-* the input will be an array (or list) of strings, one for each argument.
-* the internal model will be a set of types that model the (tiny) domain.
-* the output is out of scope in this example.
+* 入力は文字列の配列（またはリスト）で、各引数に対応します。
+* 内部モデルは（小さな）ドメインをモデル化する型の集まりです。
+* 出力はこの例では扱いません。
 
-So we'll start by first creating the internal model of the parameters, and then look at how we can parse the input into types used in the internal model. 
+まず、パラメータの内部モデルを作り、次に入力を内部モデルで使う型に解析する方法を見ていきます。
 
-Here's a first stab at the model:
+最初のモデルを試作してみましょう。
 
 ```fsharp
-// constants used later
+// 後で使う定数
 let OrderByName = "N"
 let OrderBySize = "S"
 
-// set up a type to represent the options
+// オプションを表す型を設定
 type CommandLineOptions = {
     verbose: bool;
     subdirectories: bool;
@@ -74,34 +74,34 @@ type CommandLineOptions = {
     }
 ```
 
-Ok, that looks alright. Now let's parse the arguments.
+これで良さそうです。次に引数を解析してみましょう。
 
-The parsing logic is very similar to the `loopAndSum` example in the previous post. 
+解析のロジックは、前回の投稿で紹介した `loopAndSum` の例とよく似ています。
 
-* We create a recursive loop on the list of arguments.
-* Each time through the loop, we parse one argument.
-* The options parsed so far are passed into each loop as a parameter (the "accumulator" pattern).
+* 引数のリストに対して再帰的なループを作ります。
+* ループの各回で、1つの引数を解析します。
+* これまでに解析したオプションは、各ループにパラメータとして渡します（「アキュムレータ」パターン）。
 
 ```fsharp
 let rec parseCommandLine args optionsSoFar = 
     match args with 
-    // empty list means we're done.
+    // 空のリストは処理完了を意味します
     | [] -> 
         optionsSoFar  
 
-    // match verbose flag
+    // verboseフラグのマッチング
     | "/v"::xs -> 
         let newOptionsSoFar = { optionsSoFar with verbose=true}
         parseCommandLine xs newOptionsSoFar 
 
-    // match subdirectories flag
+    // subdirectoriesフラグのマッチング
     | "/s"::xs -> 
         let newOptionsSoFar = { optionsSoFar with subdirectories=true}
         parseCommandLine xs newOptionsSoFar 
 
-    // match orderBy by flag
+    // orderByフラグのマッチング
     | "/o"::xs -> 
-        //start a submatch on the next arg
+        // 次の引数に対するサブマッチを開始
         match xs with
         | "S"::xss -> 
             let newOptionsSoFar = { optionsSoFar with orderby=OrderBySize}
@@ -111,147 +111,147 @@ let rec parseCommandLine args optionsSoFar =
             let newOptionsSoFar = { optionsSoFar with orderby=OrderByName}
             parseCommandLine xss newOptionsSoFar 
             
-        // handle unrecognized option and keep looping
+        // 認識できないオプションを処理し、ループを続ける
         | _ -> 
-            eprintfn "OrderBy needs a second argument"
+            eprintfn "OrderByには2番目の引数が必要です"
             parseCommandLine xs optionsSoFar 
 
-    // handle unrecognized option and keep looping
+    // 認識できないオプションを処理し、ループを続ける
     | x::xs -> 
-        eprintfn "Option '%s' is unrecognized" x
+        eprintfn "オプション '%s' は認識できません" x
         parseCommandLine xs optionsSoFar 
 ```
 
-This code is straightforward, I hope. 
+このコードは、わかりやすいと思います。
 
-Each match consist of a `option::restOfList` pattern.
-If the option is matched, a new `optionsSoFar` value is created and the loop repeats with the remaining list, until the list becomes empty,
-at which point we can exit the loop and return the `optionsSoFar` value as the final result.
+各マッチは `option::restOfList` パターンで構成されています。
+オプションがマッチすると、新しい `optionsSoFar` 値を作り、リストの残りに対してループを繰り返します。リストが空になるまでこれを続け、
+空になったらループを終了し、 `optionsSoFar` 値を最終結果として返します。
 
-There are two special cases:
+特殊なケースが2つあります。
 
-* Matching the "orderBy" option creates a submatch pattern that looks at the first item in the rest of the list and if not found, complains about a missing second parameter.
-* The very last match on the main `match..with` is not a wildcard, but a "bind to value". Just like a wildcard, this will always succeed, but because we havd bound to the value, it allows us to print the offending unmatched argument.
-* Note that for printing errors, we use `eprintf` rather than `printf`. This will write to STDERR rather than STDOUT.
+* 「orderBy」オプションのマッチングでは、リストの残りの最初の項目を調べるサブマッチパターンを作ります。見つからない場合は2番目のパラメータがないと警告します。
+* メインの `match..with` の最後のマッチはワイルドカードではなく、「値への束縛」です。ワイルドカードと同じく常に成功しますが、値に束縛しているため、マッチしなかった引数を表示できます。
+* エラーの表示には `printf` ではなく `eprintf` を使います。これによりSTDOUTではなくSTDERRに書き込まれます。
 
-So now let's test this:
+では、これをテストしてみましょう。
 
 ```fsharp
 parseCommandLine ["/v"; "/s"] 
 ```
             
-Oops! That didn't work -- we need to pass in an initial `optionsSoFar` argument! Lets try again:
+おっと！うまくいきませんでした。初期の `optionsSoFar` 引数を渡す必要があります！もう一度試してみましょう。
 
 ```fsharp
-// define the defaults to pass in
+// 渡すデフォルト値を定義
 let defaultOptions = {
     verbose = false;
     subdirectories = false;
     orderby = ByName
     }
 
-// test it
+// テスト
 parseCommandLine ["/v"] defaultOptions
 parseCommandLine ["/v"; "/s"] defaultOptions
 parseCommandLine ["/o"; "S"] defaultOptions
 ```
 
-Check that the output is what you would expect.
+出力が期待通りかどうか確認してください。
 
-And we should also check the error cases:
+エラーケースもチェックしておきましょう。
 
 ```fsharp
 parseCommandLine ["/v"; "xyz"] defaultOptions
 parseCommandLine ["/o"; "xyz"] defaultOptions
 ```
 
-You should see the error messages in these cases now.
+これらのケースでエラーメッセージが表示されるはずです。
 
-Before we finish this implementation, let's fix something annoying.
-We are passing in these default options every time -- can we get rid of them?
+この実装を終える前に、少し気になる点を直しましょう。
+デフォルトオプションを毎回渡していますが、これを省略できないでしょうか？
 
-This is a very common situation: you have a recursive function that takes a "accumulator" parameter, but you don't want to be passing initial values all the time.
+これはよくある状況です。再帰関数が「アキュムレータ」パラメータを取りますが、毎回初期値を渡したくないという場合です。
 
-The answer is simple: just create another function that calls the recursive function with the defaults.
+解決策は簡単です。デフォルト値を使って再帰関数を呼び出す別の関数を作るだけです。
 
-Normally, this second one is the "public" one and the recursive one is hidden, so we will rewrite the code as follows:
+通常、この2つ目の関数を「公開」し、再帰関数は非公開です。したがって、以下のようにコードを書き直します。
 
-* Rename `parseCommandLine` to `parseCommandLineRec`. There are other naming conventions you could use as well, such as `parseCommandLine'` with a tick mark, or `innerParseCommandLine`.
-* Create a new `parseCommandLine` that calls `parseCommandLineRec` with the defaults
+* `parseCommandLine` を `parseCommandLineRec` にリネームします。他の命名規則も使えます。たとえば、アポストロフィをつけた `parseCommandLine'` や、 `innerParseCommandLine` などです。
+* デフォルト値を使って `parseCommandLineRec` を呼び出す新しい `parseCommandLine` を作ります。
 
 ```fsharp
-// create the "helper" recursive function
+// 「ヘルパー」再帰関数を作る
 let rec parseCommandLineRec args optionsSoFar = 
-	// implementation as above
+	// 実装は上記と同じ
 
-// create the "public" parse function
+// 「公開」解析関数を作る
 let parseCommandLine args = 
-    // create the defaults
+    // デフォルト値を作る
     let defaultOptions = {
         verbose = false;
         subdirectories = false;
         orderby = OrderByName
         }
 
-    // call the recursive one with the initial options
+    // 初期オプションを使って再帰関数を呼び出す
     parseCommandLineRec args defaultOptions 
 ```
 
-In this case the helper function can stand on its own. But if you really want to hide it, you can put it as a nested subfunction in the defintion of `parseCommandLine` itself.
+この場合、ヘルパー関数は独立して使えます。でも、本当に非公開にする場合は、 `parseCommandLine` の定義内にネストしたサブ関数として置くこともできます。
 
 ```fsharp
-// create the "public" parse function
+// 「公開」解析関数を作る
 let parseCommandLine args = 
-    // create the defaults
+    // デフォルト値を作る
     let defaultOptions = 
-		// implementation as above
+		// 実装は上記と同じ
 
-	// inner recursive function
+	// 内部再帰関数
 	let rec parseCommandLineRec args optionsSoFar = 
-		// implementation as above
+		// 実装は上記と同じ
 
-    // call the recursive one with the initial options
+    // 初期オプションを使って再帰関数を呼び出す
     parseCommandLineRec args defaultOptions 
 ```
 
-In this case, I think it would just make things more complicated, so I have kept them separate.
+こうすると、複雑になるだけだと思うので、別々にしました。
 
-So, here is all the code at once, wrapped in a module:
+では、すべてのコードをモジュールにまとめて一度に見てみましょう。
 
 ```fsharp
 module CommandLineV1 =
 
-    // constants used later
+    // 後で使う定数
     let OrderByName = "N"
     let OrderBySize = "S"
 
-    // set up a type to represent the options
+    // オプションを表す型を設定
     type CommandLineOptions = {
         verbose: bool;
         subdirectories: bool;
         orderby: string; 
         }
 
-    // create the "helper" recursive function
+    // 「ヘルパー」再帰関数を作る
     let rec parseCommandLineRec args optionsSoFar = 
         match args with 
-        // empty list means we're done.
+        // 空のリストは処理完了を意味します
         | [] -> 
             optionsSoFar  
 
-        // match verbose flag
+        // verboseフラグのマッチング
         | "/v"::xs -> 
             let newOptionsSoFar = { optionsSoFar with verbose=true}
             parseCommandLineRec xs newOptionsSoFar 
 
-        // match subdirectories flag
+        // subdirectoriesフラグのマッチング
         | "/s"::xs -> 
             let newOptionsSoFar = { optionsSoFar with subdirectories=true}
             parseCommandLineRec xs newOptionsSoFar 
 
-        // match orderBy by flag
+        // orderByフラグのマッチング
         | "/o"::xs -> 
-            //start a submatch on the next arg
+            // 次の引数に対するサブマッチを開始
             match xs with
             | "S"::xss -> 
                 let newOptionsSoFar = { optionsSoFar with orderby=OrderBySize}
@@ -261,42 +261,42 @@ module CommandLineV1 =
                 let newOptionsSoFar = { optionsSoFar with orderby=OrderByName}
                 parseCommandLineRec xss newOptionsSoFar 
             
-            // handle unrecognized option and keep looping
+            // 認識できないオプションを処理し、ループを続ける
             | _ -> 
-                eprintfn "OrderBy needs a second argument"
+                eprintfn "OrderByには2番目の引数が必要です"
                 parseCommandLineRec xs optionsSoFar 
 
-        // handle unrecognized option and keep looping
+        // 認識できないオプションを処理し、ループを続ける
         | x::xs -> 
-            eprintfn "Option '%s' is unrecognized" x
+            eprintfn "オプション '%s' は認識できません" x
             parseCommandLineRec xs optionsSoFar 
 
-    // create the "public" parse function
+    // 「公開」解析関数を作る
     let parseCommandLine args = 
-        // create the defaults
+        // デフォルト値を作る
         let defaultOptions = {
             verbose = false;
             subdirectories = false;
             orderby = OrderByName
             }
 
-        // call the recursive one with the initial options
+        // 初期オプションを使って再帰関数を呼び出す
         parseCommandLineRec args defaultOptions 
 
 
-// happy path
+// 正常系
 CommandLineV1.parseCommandLine ["/v"] 
 CommandLineV1.parseCommandLine  ["/v"; "/s"] 
 CommandLineV1.parseCommandLine  ["/o"; "S"] 
 
-// error handling
+// エラー処理
 CommandLineV1.parseCommandLine ["/v"; "xyz"] 
 CommandLineV1.parseCommandLine ["/o"; "xyz"] 
 ```
 
-## Second version
+## 第2バージョン
 
-In our initial model we used bool and string to represent the possible values. 
+最初のモデルでは、可能な値を表すのにboolとstringを使いました。
 
 ```fsharp
 type CommandLineOptions = {
@@ -306,22 +306,22 @@ type CommandLineOptions = {
     }
 ```
 
-There are two problems with this:
+これには2つの問題があります。
 
-* **It doesn't *really* represent the domain.** For example, can `orderby` really be *any* string? Would my code break if I set it to "ABC"?
+* **ドメインを*本当に*表現していません。** たとえば、 `orderby` は*どんな*文字列でも良いのでしょうか？「ABC」を設定したらコードは壊れるでしょうか？
 
-* **The values are not self documenting.** For example, the verbose value is a bool. We only know that the bool represents the "verbose" option because of the *context* (the field named `verbose`) it is found in.
-If we passed that bool around, and took it out of context, we would not know what it represented. I'm sure we have all seen C# functions with many boolean parameters like this:
+* **値が自己文書化されていません。** たとえば、verbose値はboolです。そのboolが「verbose」オプションを表しているとわかるのは、それが見つかる*コンテキスト*（ `verbose` という名前のフィールド）があるからです。
+そのboolを渡して、コンテキストから外すと、それが何を表しているのかわからなくなります。次のような多くのブール型パラメータを持つC#の関数を見たことがあるでしょう。
 
 ```csharp
 myObject.SetUpComplicatedOptions(true,false,true,false,false);
 ```
 
-Because the bool doesn't represent anything at the domain level, it is very easy to make mistakes.
+boolがドメインレベルで何も表現していないため、間違いを犯しやすくなります。
 
-The solution to both these problems is to be as specific as possible when defining the domain, typically by creating lots of very specific types.
+これらの問題の解決策は、ドメインを定義する際にできるだけ具体的にすることです。通常は、非常に具体的な型をたくさん作ります。
 
-So here's a new version of `CommandLineOptions`:
+では、 `CommandLineOptions` の新しいバージョンを見てみましょう。
 
 ```fsharp
 type OrderByOption = OrderBySize | OrderByName
@@ -335,15 +335,15 @@ type CommandLineOptions = {
     }
 ```
 
-A couple of things to notice:
+注目すべき点がいくつかあります。
 
-* There are no bools or strings anywhere.
-* The names are quite explicit. This acts as documentation when a value is taken in isolation,
-but also means that the name is unique, which helps type inference, which in turn helps you avoid explicit type annotations.
+* どこにもboolや文字列はありません。
+* 名前がとても明示的です。これは値が単独で取り出された場合にドキュメントとして機能するだけでなく、名前が一意であることも意味します。
+これは型推論に役立ち、結果として明示的な型注釈を避けられます。
 
-Once we have made the changes to the domain, it is easy to fix up the parsing logic.
+ドメインに変更を加えたら、解析ロジックを直すのは簡単です。
 
-So, here is all the revised code, wrapped in a "v2" module:
+では、改訂後のコードをすべて「v2」モジュールにまとめてみましょう。
 
 ```fsharp
 module CommandLineV2 =
@@ -358,26 +358,26 @@ module CommandLineV2 =
         orderby: OrderByOption
         }
 
-    // create the "helper" recursive function
+    // 「ヘルパー」再帰関数を作る
     let rec parseCommandLineRec args optionsSoFar = 
         match args with 
-        // empty list means we're done.
+        // 空のリストは処理完了を意味します
         | [] -> 
             optionsSoFar  
 
-        // match verbose flag
+        // verboseフラグのマッチング
         | "/v"::xs -> 
             let newOptionsSoFar = { optionsSoFar with verbose=VerboseOutput}
             parseCommandLineRec xs newOptionsSoFar 
 
-        // match subdirectories flag
+        // subdirectoriesフラグのマッチング
         | "/s"::xs -> 
             let newOptionsSoFar = { optionsSoFar with subdirectories=IncludeSubdirectories}
             parseCommandLineRec xs newOptionsSoFar 
 
-        // match sort order flag
+        // 並び順フラグのマッチング
         | "/o"::xs -> 
-            //start a submatch on the next arg
+            // 次の引数に対するサブマッチを開始
             match xs with
             | "S"::xss -> 
                 let newOptionsSoFar = { optionsSoFar with orderby=OrderBySize}
@@ -385,55 +385,55 @@ module CommandLineV2 =
             | "N"::xss -> 
                 let newOptionsSoFar = { optionsSoFar with orderby=OrderByName}
                 parseCommandLineRec xss newOptionsSoFar 
-            // handle unrecognized option and keep looping
+            // 認識できないオプションを処理し、ループを続ける
             | _ -> 
-                printfn "OrderBy needs a second argument"
+                printfn "OrderByには2番目の引数が必要です"
                 parseCommandLineRec xs optionsSoFar 
 
-        // handle unrecognized option and keep looping
+        // 認識できないオプションを処理し、ループを続ける
         | x::xs -> 
-            printfn "Option '%s' is unrecognized" x
+            printfn "オプション '%s' は認識できません" x
             parseCommandLineRec xs optionsSoFar 
 
-    // create the "public" parse function
+    // 「公開」解析関数を作る
     let parseCommandLine args = 
-        // create the defaults
+        // デフォルト値を作る
         let defaultOptions = {
             verbose = TerseOutput;
             subdirectories = ExcludeSubdirectories;
             orderby = OrderByName
             }
 
-        // call the recursive one with the initial options
+        // 初期オプションを使って再帰関数を呼び出す
         parseCommandLineRec args defaultOptions 
             
 // ==============================
-// tests    
+// テスト    
 
-// happy path
+// 正常系
 CommandLineV2.parseCommandLine ["/v"] 
 CommandLineV2.parseCommandLine ["/v"; "/s"] 
 CommandLineV2.parseCommandLine ["/o"; "S"] 
 
-// error handling
+// エラー処理
 CommandLineV2.parseCommandLine ["/v"; "xyz"] 
 CommandLineV2.parseCommandLine ["/o"; "xyz"] 
 ```
 
-## Using fold instead of recursion?
+## 再帰の代わりにfoldを使う？
 
-We said in the previous post that it is good to avoid recursion where possible and use the built in functions in the `List` module like `map` and `fold`.
+前回の投稿で、できるだけ再帰を避け、 `List` モジュールの `map` や `fold` のような組み込み関数を使うのが良いと言いました。
 
-So can we take this advice here and fix up this code to do this?
+では、このアドバイスに従って、このコードを直せるでしょうか？
 
-Unfortunately, not easily. The problem is that the list functions generally work on one element at a time, while the "orderby" option requires a "lookahead" argument as well.
+残念ながら、簡単にはできません。問題は、リスト関数が一般的に一度に1つの要素を処理するのに対し、「orderby」オプションは「先読み」引数も必要とすることです。
 
-To make this work with something like `fold`, we need to create a "parse mode" flag to indicate whether we are in lookahead mode or not.
-This is possible, but I think it just adds extra complexity compared to the straightforward recursive version above.  
+これを `fold` のようなものでうまく動かすには、先読みモードかどうかを示す「解析モード」フラグを作る必要があります。
+これは可能ですが、上記の単純な再帰バージョンと比べると、余計な複雑さが加わるだけだと思います。
 
-And in a real-world situation, anything more complicated than this would be a signal that you need to switch to a proper parsing system such as [FParsec](http://www.quanttec.com/fparsec/).
+そして、実際の状況では、これ以上複雑なものは[FParsec](http://www.quanttec.com/fparsec/)のような適切な解析システムに切り替える必要があるというシグナルでしょう。
 
-However, just to show you it can be done with `fold`:
+しかし、 `fold` でもできることを示しておきます。
 
 ```fsharp
 module CommandLineV3 =
@@ -455,32 +455,32 @@ module CommandLineV3 =
         parseMode: ParseMode;
         }
 
-    // parse the top-level arguments
-    // return a new FoldState
+    // トップレベルの引数を解析
+    // 新しいFoldStateを返す
     let parseTopLevel arg optionsSoFar = 
         match arg with 
 
-        // match verbose flag
+        // verboseフラグのマッチング
         | "/v" -> 
             let newOptionsSoFar = {optionsSoFar with verbose=VerboseOutput}
             {options=newOptionsSoFar; parseMode=TopLevel}
 
-        // match subdirectories flag
+        // subdirectoriesフラグのマッチング
         | "/s"-> 
             let newOptionsSoFar = { optionsSoFar with subdirectories=IncludeSubdirectories}
             {options=newOptionsSoFar; parseMode=TopLevel}
 
-        // match sort order flag
+        // 並び順フラグのマッチング
         | "/o" -> 
             {options=optionsSoFar; parseMode=OrderBy}
 
-        // handle unrecognized option and keep looping
+        // 認識できないオプションを処理し、ループを続ける
         | x -> 
-            printfn "Option '%s' is unrecognized" x
+            printfn "オプション '%s' は認識できません" x
             {options=optionsSoFar; parseMode=TopLevel}
 
-    // parse the orderBy arguments
-    // return a new FoldState
+    // orderBy引数を解析
+    // 新しいFoldStateを返す
     let parseOrderBy arg optionsSoFar = 
         match arg with
         | "S" -> 
@@ -489,23 +489,23 @@ module CommandLineV3 =
         | "N" -> 
             let newOptionsSoFar = { optionsSoFar with orderby=OrderByName}
             {options=newOptionsSoFar; parseMode=TopLevel}
-        // handle unrecognized option and keep looping
+        // 認識できないオプションを処理し、ループを続ける
         | _ -> 
-            printfn "OrderBy needs a second argument"
+            printfn "OrderByには2番目の引数が必要です"
             {options=optionsSoFar; parseMode=TopLevel}
 
-    // create a helper fold function
+    // ヘルパーfold関数を作る
     let foldFunction state element  = 
         match state with
         | {options=optionsSoFar; parseMode=TopLevel} ->
-            // return new state
+            // 新しい状態を返す
             parseTopLevel element optionsSoFar
 
         | {options=optionsSoFar; parseMode=OrderBy} ->
-            // return new state
+            // 新しい状態を返す
             parseOrderBy element optionsSoFar
            
-    // create the "public" parse function
+    // 「公開」解析関数を作る
     let parseCommandLine args = 
 
         let defaultOptions = {
@@ -517,43 +517,43 @@ module CommandLineV3 =
         let initialFoldState = 
             {options=defaultOptions; parseMode=TopLevel}
 
-        // call fold with the initial state
+        // 初期状態でfoldを呼び出す
         args |> List.fold foldFunction initialFoldState 
 
 // ==============================
-// tests    
+// テスト    
 
-// happy path
+// 正常系
 CommandLineV3.parseCommandLine ["/v"] 
 CommandLineV3.parseCommandLine ["/v"; "/s"] 
 CommandLineV3.parseCommandLine ["/o"; "S"] 
 
-// error handling
+// エラー処理
 CommandLineV3.parseCommandLine ["/v"; "xyz"] 
 CommandLineV3.parseCommandLine ["/o"; "xyz"] 
 ```
 
-By the way, can you see a subtle change of behavior in this version? 
+ところで、このバージョンの微妙な動作の変化に気づきましたか？
 
-In the previous versions, if there was no parameter to the "orderBy" option, the recursive loop would still parse it next time.
-But in the 'fold' version, this token is swallowed and lost.
+以前のバージョンでは、「orderBy」オプションにパラメータがない場合、再帰ループは次回にそれを解析していました。
+しかし、'fold'バージョンでは、このトークンは飲み込まれて失われてしまいます。
 
-To see this, compare the two implementations:
+これを確認するために、2つの実装を比較してみましょう。
 
 ```fsharp
-// verbose set
+// verboseが設定される
 CommandLineV2.parseCommandLine ["/o"; "/v"] 
 
-// verbose not set! 
+// verboseが設定されない！ 
 CommandLineV3.parseCommandLine ["/o"; "/v"] 
 ```
 
-To fix this would be even more work. Again this argues for the second implementation as the easiest to debug and maintain.
+これを直すにはさらに多くの作業が必要です。これも、デバッグとメンテナンスがしやすいという点で、2 番目の実装が最適であることを示しています。
 
-## Summary
+## まとめ
 
-In this post we've seen how to apply pattern matching to a real-world example.
+この投稿では、パターンマッチングを実際の例に当てはめる方法を見てきました。
 
-More importantly, we've seen how easy it is to create a properly designed internal model for even the smallest domain. And that this internal model provides more type safety and documentation than using primitive types such as string and bool.
+より重要なのは、どんなに小さなドメインでも、適切に設計された内部モデルを簡単に作れることを見てきたことです。そして、この内部モデルは、文字列やboolのようなプリミティブな型を使うよりも、型安全性と文書化が向上します。
 
-In the next example, we'll do even more pattern matching!
+次の例では、さらにパターンマッチングを行います！
