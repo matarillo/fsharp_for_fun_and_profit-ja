@@ -1,511 +1,511 @@
 ---
 layout: post
-title: "Formatted text using printf"
-description: "Tips and techniques for printing and logging"
+title: "printfで書式付きテキストを作る"
+description: "出力とログ記録のヒントとテクニック"
 nav: thinking-functionally
 seriesId: "式と構文"
 seriesOrder: 10
 ---
 
-In this post, we'll take a small detour and look at how to create formatted text.  The printing and formatting functions are technically library functions,
-but in practice they as used as if they were part of the core language.
+この記事では、少し脱線して、フォーマットされたテキストの作り方を見ていきます。出力や書式設定の関数は技術的にはライブラリ関数ですが、
+実際には言語の中核部分のように使われています。
 
-F# supports two distinct styles of formatting text:
+F#では、テキストの書式設定に2つの異なる方法があります。
 
-* The standard .NET technique of ["composite formatting"](http://msdn.microsoft.com/en-us/library/txafckwd.aspx) as seen in `String.Format`, `Console.WriteLine` and other places.
-* The C-style technique of using `printf` and the [associated family of functions](http://msdn.microsoft.com/en-us/library/ee370560) such as `printfn`, `sprintf` and so on.
+* .NETで共通に使用されている「[複合書式指定](https://learn.microsoft.com/ja-jp/dotnet/standard/base-types/composite-formatting)」テクニック。 `String.Format` や `Console.WriteLine` などで使われます。
+* `printf` と、[それに関連する関数](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-core-printfmodule.html)（ `printfn` 、 `sprintf` など）を使うC言語風のテクニック。
 
 ## String.Format vs printf
 
-The composite formatting technique is available in all .NET languages, and you are probably familiar with it from C#.
+複合書式指定はすべての.NET言語で使えます。C#を使ったことがある人なら馴染みがあるでしょう。
 
 ```fsharp
-Console.WriteLine("A string: {0}. An int: {1}. A float: {2}. A bool: {3}","hello",42,3.14,true)
+Console.WriteLine("文字列: {0}。整数: {1}。浮動小数点数: {2}。真偽値: {3}","こんにちは",42,3.14,true)
 ```
 
-The `printf` technique, on the other hand, is based on the C-style format strings:
+一方、 `printf` はC言語風の書式文字列を使います。
 
 ```fsharp
-printfn "A string: %s. An int: %i. A float: %f. A bool: %b" "hello" 42 3.14 true
+printfn "文字列: %s。整数: %i。浮動小数点数: %f。真偽値: %b" "こんにちは" 42 3.14 true
 ```
 
-As you have seen, the `printf` technique is very common in F#, while `String.Format`, `Console.Write` and so on, are rarely used.
+見てきたように、F#では `printf` がよく使われますが、 `String.Format` 、 `Console.Write` などはあまり使われません。
 
-Why is `printf` preferred and considered idiomatic for F#? The reasons are:
+なぜ `printf` がF#で好まれ、慣用的な方法とされるのでしょうか？理由は以下の通りです。
 
-* It is statically type checked.
-* It is a well-behaved F# function and so supports partial application, etc.
-* It supports native F# types.
+* 静的型チェックが行われる。
+* F# の関数として適切に動作するため、部分適用などをサポートする。
+* ネイティブなF#型に対応している。
 
-### printf is statically type checked
+### printfは静的型チェックされる
 
-Unlike `String.Format`, `printf` is *statically type checked*, both for the types of the parameters, and the number.
+`String.Format` と違って、`printf` はパラメータの型と数の両方について*静的型チェック*が行われます。
 
-For example, here are two snippets using `printf` that will fail to compile:
+例えば、以下の `printf` を使ったコードはコンパイルに失敗します。
 
 ```fsharp
-// wrong parameter type
-printfn "A string: %s" 42 
+// パラメータの型が間違っている
+printfn "文字列: %s" 42 
 
-// wrong number of parameters
-printfn "A string: %s" "Hello" 42 
+// パラメータの数が間違っている
+printfn "文字列: %s" "こんにちは" 42 
 ```
 
-The equivalent code using composite formatting will compile fine but either work incorrectly but silently, or give a runtime error:
+一方、同じことを複合書式指定で行うと、コンパイルは通りますが、正しく動作しないか、実行時エラーを起こします。
 
 ```fsharp
-// wrong parameter type
-Console.WriteLine("A string: {0}", 42)   //works!
+// パラメータの型が間違っている
+Console.WriteLine("文字列: {0}", 42)   // 動いてしまう！
 
-// wrong number of parameters
-Console.WriteLine("A string: {0}","Hello",42)  //works!
-Console.WriteLine("A string: {0}. An int: {1}","Hello") //FormatException
+// パラメータの数が間違っている
+Console.WriteLine("文字列: {0}","こんにちは",42)  // 動いてしまう！
+Console.WriteLine("文字列: {0}。整数: {1}","こんにちは") // FormatException
 ```
 
-### printf supports partial application
+### printfは部分適用ができる
 
-The .NET formatting functions require all parameters to be passed in *at the same time*.
+.NETの書式設定関数は、すべてのパラメータを*同時に*渡す必要があります。
 
-But `printf` is a standard, well-behaved F# function, and so supports [partial application](../posts/partial-application).
+しかし、 `printf` は標準的なF# 関数であり、適切に動作するため、[部分適用](../posts/partial-application.html)ができます。
 
-Here are some examples:
+いくつか例を見てみましょう。
 
 ```fsharp
-// partial application - explicit parameters
-let printStringAndInt s i =  printfn "A string: %s. An int: %i" s i
-let printHelloAndInt i = printStringAndInt "Hello" i
+// 部分適用 - 明示的なパラメータ
+let printStringAndInt s i =  printfn "文字列: %s。整数: %i" s i
+let printHelloAndInt i = printStringAndInt "こんにちは" i
 do printHelloAndInt 42
 
-// partial application - point free style
-let printInt =  printfn "An int: %i"
+// 部分適用 - ポイントフリースタイル
+let printInt =  printfn "整数: %i"
 do printInt 42
 ```
 
-And of course, `printf` can be used for function parameters anywhere a standard function can be used.
+もちろん、 `printf` は標準的な関数と同じように、関数パラメータとしてどこでも使えます。
 
 ```fsharp
 let doSomething printerFn x y = 
     let result = x + y
-    printerFn "result is" result 
+    printerFn "結果は" result 
 
 let callback = printfn "%s %i"
 do doSomething callback 3 4
 ```
 
-This also includes the higher order functions for lists, etc:
+リストなどの高階関数でも使えます。
 
 ```fsharp
 [1..5] |> List.map (sprintf "i=%i")
 ```
 
-### printf supports native F# types
+### printfはネイティブなF#型に対応している
 
-For non-primitive types, the .NET formatting functions only support using `ToString()`, but `printf` supports native F# types using the `%A` specifier:
+プリミティブ型以外の場合、.NETの書式設定関数は `ToString()` メソッドのみを使えますが、 `printf` は `%A` 指定子を使ってネイティブなF#型に対応しています。
 
 ```fsharp
-// tuple printing
+// タプルの出力
 let t = (1,2)
-Console.WriteLine("A tuple: {0}", t)
-printfn "A tuple: %A" t
+Console.WriteLine("タプル: {0}", t)
+printfn "タプル: %A" t
 
-// record printing
+// レコードの出力
 type Person = {First:string; Last:string}
 let johnDoe = {First="John"; Last="Doe"}
-Console.WriteLine("A record: {0}", johnDoe )
-printfn "A record: %A" johnDoe 
+Console.WriteLine("レコード: {0}", johnDoe )
+printfn "レコード: %A" johnDoe 
 
-// union types printing
+// 判別共用体の出力
 type Temperature = F of int | C of int
 let freezing = F 32
-Console.WriteLine("A union: {0}", freezing )
-printfn "A union: %A" freezing 
+Console.WriteLine("共用体: {0}", freezing )
+printfn "共用体: %A" freezing 
 ```
 
-As you can see, tuple types have a nice `ToString()` but other user defined types don't,
-so if you want to use them with the .NET formatting functions, you will have to override the `ToString()` method explicitly.
+見てわかるように、タプル型には適切な `ToString()` がありますが、他のユーザー定義型にはありません。
+そのため、.NETの書式設定関数でそれらを使いたい場合は、明示的に `ToString()` メソッドをオーバーライドする必要があります。
 
-## printf gotchas
+## printfの注意点
 
-There are a couple of "gotchas" to be aware of when using `printf`.
+`printf` を使う際には、いくつかの「落とし穴」に気をつける必要があります。
 
-First, if there are *too few* parameters, rather than too many, the compiler will *not* complain immediately, but might give cryptic errors later.
+まず、パラメータが多すぎる場合ではなく、*少なすぎる*場合、コンパイラはすぐにエラーを報告せず、後でわかりにくいエラーを出す可能性があります。
 
 ```fsharp
-// too few parameters
-printfn "A string: %s An int: %i" "Hello" 
+// パラメータが少なすぎる
+printfn "文字列: %s 整数: %i" "こんにちは" 
 ```
 
-The reason, of course, is that this is not an error at all; `printf` is just being partially applied!
-See the [discussion of partial application](../posts/partial-application) if you are not clear of why this happens.
+もちろん、これがエラーにならない理由は、 `printf` が単に部分適用されているだけだからです！
+なぜこんなことが起こるのかわからない場合は、[部分適用の説明](../posts/partial-application.html)を見てください。
 
-Another issue is that the "format strings" are not actually strings.
+もう一つの問題は、「書式文字列」が実際には文字列ではないことです。
 
-In the .NET formatting model, the formatting strings are normal strings, so you can pass them around, store them in  resource files, and so on.
-Which means that the following code works fine:
+.NETの書式設定モデルでは、書式文字列は普通の文字列なので、それらを渡したり、リソースファイルに保存したりできます。
+つまり、次のコードは問題なく動きます。
 
 ```fsharp
-let netFormatString = "A string: {0}"
-Console.WriteLine(netFormatString, "hello")
+let netFormatString = "文字列: {0}"
+Console.WriteLine(netFormatString, "こんにちは")
 ```
 
-On the other hand, the "format strings" that are the first argument to `printf` are not really strings at all, but something called a `TextWriterFormat`. 
-Which means that the following code does **not** work:
+一方、 `printf` の最初の引数である「書式文字列」は実際には文字列ではなく、 `TextWriterFormat` と呼ばれるものです。
+つまり、次のコードは**動きません**。
 
 ```fsharp
-let fsharpFormatString = "A string: %s"
-printfn fsharpFormatString  "Hello" 
+let fsharpFormatString = "文字列: %s"
+printfn fsharpFormatString  "こんにちは" 
 ```
 
-The compiler does some magic behind the scenes to convert the string constant `"A string: %s"` into the appropriate TextWriterFormat.
-The TextWriterFormat is the key component that "knows" the type of the format string, such as `string->unit` or `string->int->unit`, which in turn allows
-`printf` to be typesafe.
+コンパイラは、文字列定数 `"文字列: %s"` を適切なTextWriterFormatに変換するために、裏で魔法をかけています。
+TextWriterFormatは、 `string->unit` や `string->int->unit` などの書式文字列の型を「知っている」重要な部品であり、
+これにより `printf` が型安全になります。
 
-If you want to emulate the compiler, you can create your own TextWriterFormat value from a string using the `Printf.TextWriterFormat` type in the `Microsoft.FSharp.Core.Printf` module.
+コンパイラのまねをしたい場合は、 `Microsoft.FSharp.Core.Printf` モジュールの `Printf.TextWriterFormat` 型を使って、文字列から独自のTextWriterFormat値を作れます。
 
-If the format string is "inline", the compiler can deduce the type for you during binding:
+書式文字列が「インライン」の場合、コンパイラは束縛時に型を推測できます。
 
 ```fsharp
-let format:Printf.TextWriterFormat<_> = "A string: %s"
-printfn format "Hello" 
+let format:Printf.TextWriterFormat<_> = "文字列: %s"
+printfn format "こんにちは" 
 ```
 
-But if the format string is truly dynamic (e.g. stored in a resource or created on the fly), the compiler cannot deduce the type for you,
-and you must explicitly provide it with the constructor.
+しかし、書式文字列が本当に動的（例えばリソースに保存されているか、実行時に作られる）な場合、コンパイラは型を推測できないので、
+コンストラクタで明示的に指定する必要があります。
 
-In the example below, my first format string has a single string parameter and returns a unit, so I have to specify `string->unit` as the format type.
-And in the second case, I have to specify `string->int->unit` as the format type.
+以下の例では、最初の書式文字列は文字列パラメータを1つ持ち、unitを返します。そのため、書式の型として `string->unit` を指定する必要があります。
+そして2番目の場合は、書式の型として `string->int->unit` を指定する必要があります。
 
 ```fsharp
-let formatAString = "A string: %s"
-let formatAStringAndInt = "A string: %s. An int: %i"
+let formatAString = "文字列: %s"
+let formatAStringAndInt = "文字列: %s。整数: %i"
 
-//convert to TextWriterFormat
+// TextWriterFormatに変換
 let twFormat1  = Printf.TextWriterFormat<string->unit>(formatAString)
-printfn twFormat1 "Hello" 
+printfn twFormat1 "こんにちは" 
 let twFormat2  = Printf.TextWriterFormat<string->int->unit>(formatAStringAndInt)
-printfn twFormat2  "Hello" 42
+printfn twFormat2  "こんにちは" 42
 ```
 
-I won't go into detail on exactly how `printf and `TextWriterFormat` work together right now -- just be aware that is not just a matter of simple format strings being passed around.
+`printf` と `TextWriterFormat` がどのように連携しているかの詳細については、今は深く掘り下げません。ただ、単純な書式文字列を渡しているだけではないことを覚えておいてください。
 
-Finally, it's worth noting that `printf` and family are *not* thread-safe, while `Console.Write` and family *are*.
+最後に、 `printf` とその仲間は*スレッドセーフではありません*が、 `Console.Write` とその仲間は*スレッドセーフである*ことを覚えておくと役立つでしょう。
 
-## How to specify a format 
+## 書式の指定方法
 
-The "%" format specifications are quite similar to those used in C, but with some special customizations for F#.
+`%` で始まる書式指定は、C言語で使われるものとよく似ていますが、F#独自のカスタマイズもいくつかあります。
 
-As with C, the characters immediately following the `%` have a specific meaning, as shown below.
+Cと同じく、 `%` の直後の文字には特別な意味があります。以下のような形式になっています。
 
-    %[flags][width][.precision]specifier 
+    %[フラグ][幅][.精度]指定子
 
-We'll discuss each of these attributes in more detail below.    
+これらの属性について、詳しく見ていきましょう。
 
-### Formatting for dummies
+### 基本的な書式指定
 
-The most commonly used format specifiers are: 
+最もよく使う書式指定子は次のとおりです。
 
-* `%s` for strings
-* `%b` for bools
-* `%i` for ints
-* `%f` for floats
-* `%A` for pretty-printing tuples, records and union types
-* `%O` for other objects, using `ToString()`
+* `%s` - 文字列用
+* `%b` - 真偽値用
+* `%i` - 整数用
+* `%f` - 浮動小数点数用
+* `%A` - タプル、レコード、判別共用体の整形出力用
+* `%O` - その他のオブジェクト用（ `ToString()` を使う）
 
-These six will probably meet most of your basic needs.
+これら6つで、基本的なニーズのほとんどを満たせるでしょう。
 
-### Escaping %
+### % のエスケープ
 
-The `%` character on its own will cause an error. To escape it, just double it up:
+単独の `%` 文字はエラーを引き起こします。エスケープするには、2 つ重ねます。
 
 ```fsharp
-printfn "unescaped: %" // error
-printfn "escape: %%" 
+printfn "エスケープなし: %" // エラー
+printfn "エスケープ: %%" 
 ```
 
-### Controlling width and alignment
+### 幅と位置揃えの制御
 
-When formatting fixed width columns and tables, you need to have control of the alignment and width.
+固定幅の列や表を書式設定する際、位置揃えと幅を制御する必要があります。
 
-You can do that with the "width" and "flags" options.
+それには「幅」と「フラグ」オプションを使います。
 
-* `%5s`, `%5i`. A number sets the width of the value
-* `%*s`, `%*i`. A star sets the width of the value dynamically (from an extra parameter just before the param to format)
-* `%-s`, `%-i`. A hyphen left justifies the value.
+* `%5s`、`%5i` - 数字で値の幅を設定します
+* `%*s`、`%*i` - アスタリスクで値の幅を動的に設定します（書式設定する値の直前の追加パラメータから）
+* `%-s`、`%-i` - ハイフンで値を左揃えにします
 
-Here are some examples of these in use:
+これらの使用例を示します。
 
 ```fsharp
 let rows = [ (1,"a"); (-22,"bb"); (333,"ccc"); (-4444,"dddd") ] 
 
-// no alignment
+// 位置揃えなし
 for (i,s) in rows do
     printfn "|%i|%s|" i s
 
-// with alignment
+// 位置揃えあり
 for (i,s) in rows do
     printfn "|%5i|%5s|" i s
 
-// with left alignment for column 2
+// 2列目を左揃えに
 for (i,s) in rows do
     printfn "|%5i|%-5s|" i s
 
-// with dynamic column width=20 for column 1
+// 1列目の幅を動的に20に設定
 for (i,s) in rows do
     printfn "|%*i|%-5s|" 20 i s 
 
-// with dynamic column width for column 1 and column 2
+// 1列目と2列目の幅を動的に設定
 for (i,s) in rows do
     printfn "|%*i|%-*s|" 20 i 10 s 
 ```
 
-### Formatting integers
+### 整数の書式設定
 
-There are some special options for basic integer types:
+基本的な整数型には、特別なオプションがいくつかあります。
 
-* `%i` or `%d` for signed ints 
-* `%u` for unsigned ints 
-* `%x` and `%X` for lowercase and uppercase hex
-* `%o` for octal
+* `%i`または`%d` - 符号付き整数用 
+* `%u` - 符号なし整数用 
+* `%x`と`%X` - 小文字と大文字の16進数用
+* `%o` - 8進数用
 
-Here are some examples: 
+例を示します。
 
 ```fsharp
 printfn "signed8: %i unsigned8: %u" -1y -1y
 printfn "signed16: %i unsigned16: %u" -1s -1s
 printfn "signed32: %i unsigned32: %u" -1 -1
 printfn "signed64: %i unsigned64: %u" -1L -1L
-printfn "uppercase hex: %X lowercase hex: %x octal: %o" 255 255 255
-printfn "byte: %i " 'A'B
+printfn "大文字16進数: %X 小文字16進数: %x 8進数: %o" 255 255 255
+printfn "バイト: %i " 'A'B
 ```
 
-The specifiers do not enforce any type safety within the integer types. As you can see from the examples above, you can pass a signed int to an unsigned specifier without problems.
-What is different is how it is formatted. The unsigned specifiers treat the int as unsigned no matter how it is actually typed.
+これらの指定子は、整数型の中での型安全性を強制するものではありません。上の例からわかるように、符号付き整数を符号なし指定子に渡しても問題ありません。
+違いは、どのように書式設定されるかです。符号なし指定子は、実際の型に関係なく、整数を符号なしとして扱います。
 
-Note that `BigInteger` is *not* a basic integer type, so you must format it with `%A` or `%O`.
+`BigInteger` は基本的な整数型ではないので、 `%A` または `%O` で書式設定する必要があることに注意してください。
 
 ```fsharp
-printfn "bigInt: %i " 123456789I  // Error
+printfn "bigInt: %i " 123456789I  // エラー
 printfn "bigInt: %A " 123456789I  // OK
 ```
 
-You can control the formatting of signs and zero padding using the flags:
+フラグを使って、符号とゼロ埋めの書式設定を制御できます。
 
-* `%0i` pads with zeros
-* `%+i` shows a plus sign
-* `% i` shows a blank in place of a plus sign
+* `%0i` - ゼロで埋めます
+* `%+i` - プラス記号を表示します
+* `% i` - プラス記号の代わりに空白を表示します
 
-Here are some examples:
+例を示します。
 
 ```fsharp
 let rows = [ (1,"a"); (-22,"bb"); (333,"ccc"); (-4444,"dddd") ] 
 
-// with alignment
+// 位置揃えあり
 for (i,s) in rows do
     printfn "|%5i|%5s|" i s
 
-// with plus signs
+// プラス記号付き
 for (i,s) in rows do
     printfn "|%+5i|%5s|" i s
 
-// with zero pad
+// ゼロ埋め
 for (i,s) in rows do
     printfn "|%0+5i|%5s|" i s 
 
-// with left align
+// 左揃え
 for (i,s) in rows do
     printfn "|%-5i|%5s|" i s 
 
-// with left align and plus
+// 左揃えとプラス記号
 for (i,s) in rows do
     printfn "|%+-5i|%5s|" i s 
 
-// with left align and space instead of plus
+// 左揃えとプラスの代わりに空白
 for (i,s) in rows do
     printfn "|% -5i|%5s|" i s 
 ```
 
-### Formatting floats and decimals
+### 浮動小数点数と10進数の書式設定
 
-For floating point types, there are also some special options:
+浮動小数点型にも、特別なオプションがいくつかあります。
 
-* `%f` for standard format
-* `%e` or `%E` for exponential format
-* `%g` or `%G` for the more compact of `f` and `e`.
-* `%M` for decimals
+* `%f` - 標準的な形式
+* `%e`または`%E` - 指数形式
+* `%g`または`%G` - `f`と`e`のうち、よりコンパクトな方
+* `%M` - 10進数用
 
-Here are some examples: 
+例を示します。
 
 ```fsharp
 let pi = 3.14
-printfn "float: %f exponent: %e compact: %g" pi pi pi 
+printfn "浮動小数点: %f 指数: %e コンパクト: %g" pi pi pi 
 
 let petabyte = pown 2.0 50
-printfn "float: %f exponent: %e compact: %g" petabyte petabyte petabyte 
+printfn "浮動小数点: %f 指数: %e コンパクト: %g" petabyte petabyte petabyte 
 ```
 
-The decimal type can be used with the floating point specifiers, but you might lose some precision.
-The `%M` specifier can be used to ensure that no precision is lost.  You can see the difference with this example: 
+10進数型は浮動小数点指定子で使えますが、精度が失われる可能性があります。
+`%M` 指定子を使うと、精度が失われないことが保証されます。次の例でその違いがわかります。
 
 ```fsharp
-let largeM = 123456789.123456789M  // a decimal
-printfn "float: %f decimal: %M" largeM largeM 
+let largeM = 123456789.123456789M  // 10進数
+printfn "浮動小数点: %f 10進数: %M" largeM largeM 
 ```
 
-You can control the precision of floats using a precision specification, such as `%.2f` and `%.4f`.
-For the `%f` and `%e` specifiers, the precision affects the number of digits after the decimal point, while for `%g` it is the number of digits in total.
-Here's an example:
+精度指定子（例： `%.2f` や `%.4f` ）を使って、浮動小数点数の精度を制御できます。
+`%f` と `%e` 指定子の場合、精度は小数点以下の桁数に影響しますが、 `%g` の場合は合計の桁数に影響します。
+例を示します。
 
 ```fsharp
-printfn "2 digits precision: %.2f. 4 digits precision: %.4f." 123.456789 123.456789
-// output => 2 digits precision: 123.46. 4 digits precision: 123.4568.
-printfn "2 digits precision: %.2e. 4 digits precision: %.4e." 123.456789 123.456789
-// output => 2 digits precision: 1.23e+002. 4 digits precision: 1.2346e+002.
-printfn "2 digits precision: %.2g. 4 digits precision: %.4g." 123.456789 123.456789
-// output => 2 digits precision: 1.2e+02. 4 digits precision: 123.5.
+printfn "2桁の精度: %.2f 4桁の精度: %.4f" 123.456789 123.456789
+// 出力 => 2桁の精度: 123.46 4桁の精度: 123.4568
+printfn "2桁の精度: %.2e 4桁の精度: %.4e" 123.456789 123.456789
+// 出力 => 2桁の精度: 1.23e+002 4桁の精度: 1.2346e+002
+printfn "2桁の精度: %.2g 4桁の精度: %.4g" 123.456789 123.456789
+// 出力 => 2桁の精度: 1.2e+02 4桁の精度: 123.5
 ```
 
-The alignment and width flags work for floats and decimals as well.
+位置揃えと幅のフラグは、浮動小数点数と10進数にも使えます。
 
 ```fsharp
-printfn "|%f|" pi     // normal   
-printfn "|%10f|" pi   // width
-printfn "|%010f|" pi  // zero-pad
-printfn "|%-10f|" pi  // left aligned
-printfn "|%0-10f|" pi // left zero-pad
+printfn "|%f|" pi     // 通常   
+printfn "|%10f|" pi   // 幅指定
+printfn "|%010f|" pi  // ゼロ埋め
+printfn "|%-10f|" pi  // 左揃え
+printfn "|%0-10f|" pi // 左揃えゼロ埋め
 ```
 
-### Custom formatting functions
+### カスタム書式設定関数
 
-There are two special format specifiers that allow to you pass in a function rather than just a simple value.
+単純な値ではなく、関数を渡せる特別な書式指定子が2つあります。
 
-* `%t` expects a function that outputs some text with no input
-* `%a` expects a function that outputs some text from a given input
+* `%t` - 入力なしでテキストを出力する関数を受け取ります
+* `%a` - 与えられた入力からテキストを出力する関数を受け取ります
 
-Here's an example of using `%t`:
+`%t` の使用例を示します。
 
 ```fsharp
 open System.IO
 
-//define the function
-let printHello (tw:TextWriter) = tw.Write("hello")
+// 関数を定義
+let printHello (tw:TextWriter) = tw.Write("こんにちは")
 
-//test it
-printfn "custom function: %t" printHello 
+// テスト
+printfn "カスタム関数: %t" printHello 
 ```
 
-Obviously, since the callback function takes no parameters, it will probably be a closure that does reference some other value.
-Here's an example that prints random numbers:
+明らかに、コールバック関数はパラメータを取らないので、おそらく他の値を参照するクロージャになるでしょう。
+以下は、乱数を出力する例です。
 
 ```fsharp
 open System
 open System.IO
 
-//define the function using a closure
+// クロージャを使って関数を定義
 let printRand = 
     let rand = new Random()
-    // return the actual printing function
+    // 実際の出力関数を返す
     fun (tw:TextWriter) -> tw.Write(rand.Next(1,100))
 
-//test it
+// テスト
 for i in [1..5] do
-    printfn "rand = %t" printRand 
+    printfn "乱数 = %t" printRand 
 ```
 
-For the `%a` specifier, the callback function takes an extra parameter. That is, when using the `%a` specifier, you must pass in both a function and a value to format.
+`%a` 指定子の場合、コールバック関数は追加のパラメータを取ります。つまり、 `%a` 指定子を使う際は、関数と書式設定する値の両方を渡す必要があります。
 
-Here's an example of custom formatting a tuple:
+タプルのカスタム書式設定の例を示します。
 
 ```fsharp
 open System
 open System.IO
 
-//define the callback function
-//note that the data parameter comes after the TextWriter
+// コールバック関数を定義
+// データパラメータがTextWriterの後にくることに注意
 let printLatLong (tw:TextWriter) (lat,long) = 
-    tw.Write("lat:{0} long:{1}", lat, long)
+    tw.Write("緯度:{0} 経度:{1}", lat, long)
 
-// test it
+// テスト
 let latLongs = [ (1,2); (3,4); (5,6)]
 for latLong  in latLongs  do
-    // function and value both passed in to printfn
-    printfn "latLong = %a" printLatLong latLong  
+    // 関数と値の両方をprintfnに渡す
+    printfn "緯度経度 = %a" printLatLong latLong  
 ```
 
 
-### Date formatting
+### 日付の書式設定
 
-There are no special format specifiers for dates in F#.
+F#には日付用の特別な書式指定子はありません。
 
-If you want to format dates, you have a couple of options:
+日付を書式設定したい場合、以下のような選択肢があります。
 
-* Use `ToString` to convert the date into a string, and then use the `%s` specifier
-* Use a custom callback function with the `%a` specifier as described above
+* `ToString` を使って日付を文字列に変換し、 `%s` 指定子を使う
+* 上で説明した `%a` 指定子を使ってカスタムコールバック関数を使う
 
-Here are the two approaches in use:
+以下に、2つのアプローチの使用例を示します。
 
 ```fsharp
-// function to format a date
+// 日付を書式設定する関数
 let yymmdd1 (date:DateTime) = date.ToString("yy.MM.dd")
 
-// function to format a date onto a TextWriter
+// TextWriterに日付を書式設定する関数
 let yymmdd2 (tw:TextWriter) (date:DateTime) = tw.Write("{0:yy.MM.dd}", date)
 
-// test it
+// テスト
 for i in [1..5] do
     let date = DateTime.Now.AddDays(float i)
 
-    // using %s
-    printfn "using ToString = %s" (yymmdd1 date)
+    // %sを使用
+    printfn "ToStringを使用 = %s" (yymmdd1 date)
     
-    // using %a
-    printfn "using a callback = %a" yymmdd2 date
+    // %aを使用
+    printfn "コールバックを使用 = %a" yymmdd2 date
 ```
 
-Which approach is better?
+どちらのアプローチが良いでしょうか？
 
-The `ToString` with `%s` is easier to test and use, but it will be less efficient than writing directly to a TextWriter.
+`ToString` と `%s` の方がテストや使用が簡単ですが、TextWriterに直接書き込むよりは効率が悪くなります。
 
 
-## The printf family of functions
+## printf関数ファミリー
 
-There are a number of variants of `printf` functions. Here is a quick guide:
+printfには多くの派生関数があります。以下に簡単なガイドを示します。
 
-F# function  | C# equivalent | Comment
+F#関数 | C#での同等品 | コメント
 -------------|---------|----
-`printf` and `printfn`  | `Console.Write` and `Console.WriteLine` | Functions starting with "print" write to standard out.
-`eprintf` and `eprintfn`  | `Console.Error.Write` and `Console.Error.WriteLine` | Functions starting with "eprint" write to standard error.
-`fprintf` and `fprintfn`  | `TextWriter.Write` and `TextWriter.WriteLine` | Functions starting with "fprint" write to a TextWriter.
-`sprintf`  | `String.Format` | Functions starting with "sprint" return a string.
-`bprintf`  | `StringBuilder.AppendFormat` | Functions starting with "bprint" write to a StringBuilder.
-`kprintf`, `kfprintf`, `ksprintf` and `kbprintf` | No equivalent | Functions that accept a continuation. See next section for a discussion.
+`printf` と `printfn` | `Console.Write` と `Console.WriteLine` | "print"で始まる関数は標準出力に書き込みます。
+`eprintf` と `eprintfn` | `Console.Error.Write` と `Console.Error.WriteLine` | "eprint"で始まる関数は標準エラー出力に書き込みます。
+`fprintf` と `fprintfn` | `TextWriter.Write` と `TextWriter.WriteLine` | "fprint"で始まる関数はTextWriterに書き込みます。
+`sprintf` | `String.Format` | "sprint"で始まる関数は文字列を返します。
+`bprintf` | `StringBuilder.AppendFormat` | "bprint"で始まる関数はStringBuilderに書き込みます。
+`kprintf` 、 `kfprintf` 、 `ksprintf` 、 `kbprintf` | 同等品なし | 継続を受け取る関数。次のセクションで説明します。
 
-*All of these except `bprintf` and the `kXXX` family are automatically available (via [Microsoft.FSharp.Core.ExtraTopLevelOperators](http://msdn.microsoft.com/en-us/library/ee370230)).
-But if you need to access them using a module, they are in the [`Printf` module](http://msdn.microsoft.com/en-us/library/ee370560).*
+*`bprintf` とkXXXファミリーを除くすべての関数は、自動的に使えます（[Microsoft.FSharp.Core.ExtraTopLevelOperators](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-core-extratopleveloperators.html)を通じて）。
+しかし、モジュールを使ってアクセスする必要がある場合は、[`Printf` モジュール](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-core-printfmodule.html)にあります。*
 
-The usage of these should be obvious (except for the `kXXX` family, of which more below).
+使い方自体は、 `kXXX` ファミリー（詳細は後述）を除けば、どれも明らかでしょう。
 
-A particularly useful technique is to use partial application to "bake in" a TextWriter or StringBuilder. 
+部分適用を使ってTextWriterやStringBuilderを「組み込む」テクニックは特に便利です。
 
-Here is an example using a StringBuilder:
+StringBuilderを使った例を示します。
 
 ```fsharp
 let printToSb s i = 
     let sb = new System.Text.StringBuilder()
 
-    // use partial application to fix the StringBuilder
+    // 部分適用を使ってStringBuilderを固定
     let myPrint format = Printf.bprintf sb format    
 
-    do myPrint "A string: %s. " s
-    do myPrint "An int: %i" i
+    do myPrint "文字列: %s " s
+    do myPrint "整数: %i" i
 
-    //get the result
+    // 結果を取得
     sb.ToString()
 
-// test
-printToSb "hello" 42
+// テスト
+printToSb "こんにちは" 42
 ```
 
-And here is an example using a TextWriter:
+TextWriterを使った例を示します。
 
 ```fsharp
 open System
@@ -516,72 +516,72 @@ let printToFile filename s i =
     let fullPath = Path.Combine(myDocsPath, filename)
     use sw = new StreamWriter(path=fullPath)
 
-    // use partial application to fix the TextWriter
+    // 部分適用を使ってTextWriterを固定
     let myPrint format = fprintf sw format
 
-    do myPrint "A string: %s. " s
-    do myPrint "An int: %i" i
+    do myPrint "文字列: %s " s
+    do myPrint "整数: %i" i
 
-    //get the result
+    // 結果を取得
     sw.Close()
 
-// test
-printToFile "myfile.txt" "hello" 42
+// テスト
+printToFile "myfile.txt" "こんにちは" 42
 ```
 
-### More on partially applying printf
+### printfの部分適用についてさらに詳しく
 
-Note that in both cases above, we had to pass a format parameter when creating the partial application.
+上の両方の例で、部分適用を作る際に書式パラメータを渡す必要があったことに注意してください。
 
-That is, we had to do:
+つまり、次のようにする必要がありました。
 
 ```fsharp
 let myPrint format = fprintf sw format
 ```
 
-rather than the point-free version:
+ポイントフリー版ではうまくいきません。
 
 ```fsharp
-let myPrint  = fprintf sw 
+let myPrint = fprintf sw 
 ```
 
-This stops the compiler complaining about an incorrect type. The reason why is non-obvious. We briefly mentioned the `TextWriterFormat` above as the first parameter to `printf`.  It turns out that `printf` is not actually a particular function, like `String.Format`,
-but rather a generic function that has to be parameterized with a TextWriterFormat (or the similar StringFormat) in order to become "real".
+これは、コンパイラが正しくない型について文句を言うのを防ぐためです。理由は明白ではありません。 `printf` の最初のパラメータである `TextWriterFormat` について、上で簡単に触れました。実は、 `printf` は `String.Format` のような単純な関数ではなく、
+TextWriterFormat（または類似のStringFormat）をパラメータとして渡すことで「実体化」する必要があるジェネリック関数なのです。
 
-So, to be safe, it is best to always pair a `printf` with a format parameter, rather than being overly aggressive with the partial application.
+したがって、安全を期すには、過度に部分適用をするのではなく、常に `printf` を書式パラメータと一緒に使うようにしましょう。
 
-## The kprintf functions 
+## kprintf関数
 
-The four `kXXX` functions are similar to their cousins, except that they take an extra parameter -- a continuation. That is, a function to be called immediately after the formatting has been done.
+4つの `kXXX` 関数は、 `printf` ファミリーの関数と似ていますが、追加のパラメータ（継続）を取ります。つまり、書式設定が完了した直後に呼び出される関数です。
 
-Here's a simple snippet:
+簡単な例を示します。
 
 ```fsharp
 let doAfter s = 
-    printfn "Done"
-    // return the result
+    printfn "完了"
+    // 結果を返す
     s
 
-let result = Printf.ksprintf doAfter "%s" "Hello"
+let result = Printf.ksprintf doAfter "%s" "こんにちは"
 ```
 
-Why would you want this?  A number of reasons:
+なぜこれが必要なのでしょうか？いくつかの理由があります。
 
-* You can pass the result to another function that does something useful, such as a logging framework 
-* You can do things such as flushing the TextWriter
-* You can raise an event 
+* 結果を、ロギングフレームワークなどの別の関数に渡せます。
+* TextWriterをフラッシュするなどのことができます。
+* イベントを発生させることができます。
 
-Let's look at a sample that uses a external logging framework plus custom events.
+外部のロギングフレームワークとカスタムイベントを使ったサンプルを見てみましょう。
 
-First, let's create a simple logging class along the lines of log4net or System.Diagnostics.Trace.
-In practice, this would be replaced by a real third-party library.
+まず、log4netやSystem.Diagnostics.Traceに似た簡単なロギングクラスを作ります。
+実際には、サードパーティのライブラリに置き換えられるでしょう。
 
 ```fsharp
 open System
 open System.IO
 
-// a logging library such as log4net 
-// or System.Diagnostics.Trace
+// log4netやSystem.Diagnostics.Traceのような
+// ロギングライブラリ
 type Logger(name) = 
     
     let currentTime (tw:TextWriter) = 
@@ -600,58 +600,58 @@ type Logger(name) =
         new Logger(name)
 ```
 
-Next in my application code, I do the following:
+次に、アプリケーションコードで以下のことを行います。
 
-* Create an instance of the logging framework. I've hard-coded the factory method here, but you could also use an IoC container.
-* Create helper functions called `logInfo` and `logError` that call the logging framework, and in the case of `logError`, show a popup message as well.
+* ロギングフレームワークのインスタンスを作ります。ここではファクトリーメソッドをハードコードしていますが、IoCコンテナを使うこともできます。
+* `logInfo` と `logError` というヘルパー関数を作ります。これらはロギングフレームワークを呼び出し、 `logError` の場合はポップアップメッセージも表示します。
 
 ```fsharp
-// my application code
+// アプリケーションコード
 module MyApplication = 
 
     let logger = Logger.CreateLogger("MyApp")
 
-    // create a logInfo using the Logger class
+    // Loggerクラスを使ってlogInfoを作る
     let logInfo format = 
         let doAfter s = 
             logger.LogInfo(s)
         Printf.ksprintf doAfter format 
 
-    // create a logError using the Logger class
+    // Loggerクラスを使ってlogErrorを作る
     let logError format = 
         let doAfter s = 
             logger.LogError(s)
             System.Windows.Forms.MessageBox.Show(s) |> ignore
         Printf.ksprintf doAfter format 
     
-    // function to exercise the logging
+    // ロギングを試すための関数
     let test() = 
-        do logInfo "Message #%i" 1
-        do logInfo "Message #%i" 2
-        do logError "Oops! an error occurred in my app"
+        do logInfo "メッセージ #%i" 1
+        do logInfo "メッセージ #%i" 2
+        do logError "おっと！アプリでエラーが発生しました"
 ```
 
 
-Finally, when we run the `test` function, we should get the message written to the console, and also see the popup message:
+最後に、 `test` 関数を実行すると、メッセージがコンソールに書き込まれ、ポップアップメッセージも表示されるはずです。
 
 ```fsharp
 MyApplication.test()
 ```
 
-You could also create an object-oriented version of the helper methods by creating a "FormattingLogger" wrapper class around the logging library, as shown below.
+ロギングライブラリをラップした「FormattingLogger」クラスを作り、オブジェクト指向のヘルパーメソッドを作ることもできます。以下に示します。
 
 ```fsharp
 type FormattingLogger(name) = 
 
     let logger = Logger.CreateLogger(name)
 
-    // create a logInfo using the Logger class
+    // Loggerクラスを使ってlogInfoを作る
     member this.logInfo format = 
         let doAfter s = 
             logger.LogInfo(s)
         Printf.ksprintf doAfter format 
 
-    // create a logError using the Logger class
+    // Loggerクラスを使ってlogErrorを作る
     member this.logError format = 
         let doAfter s = 
             logger.LogError(s)
@@ -661,21 +661,21 @@ type FormattingLogger(name) =
     static member createLogger name = 
         new FormattingLogger(name)
 
-// my application code
+// アプリケーションコード
 module MyApplication2 = 
 
     let logger = FormattingLogger.createLogger("MyApp2")
 
     let test() = 
-        do logger.logInfo "Message #%i" 1
-        do logger.logInfo "Message #%i" 2
-        do logger.logError "Oops! an error occurred in app 2"
+        do logger.logInfo "メッセージ #%i" 1
+        do logger.logInfo "メッセージ #%i" 2
+        do logger.logError "おっと！アプリ2でエラーが発生しました"
 
-// test
+// テスト
 MyApplication2.test()
 
 ```
 
-The object-oriented approach, although more familiar, is not automatically better! The pros and cons of OO methods vs. pure functions are discussed [here](../posts/type-extensions.md#downsides-of-methods).
+オブジェクト指向のアプローチは、より馴染みがあるかもしれませんが、必ずしも優れているわけではありません！関数型とオブジェクト指向メソッドの長所と短所については[ここ](../posts/type-extensions.md#downsides-of-methods.html)で議論されています。
 
 
