@@ -1,63 +1,63 @@
 ---
 layout: post
-title: "Worked example: Roman numerals"
-description: "More pattern matching in practice"
+title: "実例解説：ローマ数字"
+description: "パターンマッチングの実践的な応用"
 nav: thinking-functionally
 seriesId: "式と構文"
 seriesOrder: 12
-categories: [Patterns, Worked Examples]
+categories: [パターン, 実例解説]
 ---
 
-[Last time](../posts/pattern-matching-command-line) we looked at parsing a command line. This time we'll we'll look at another pattern matching example, this time using Roman numerals.
+[前回](../posts/pattern-matching-command-line.html)はコマンドラインの解析について見ました。今回は別のパターンマッチングの例として、ローマ数字を取り上げます。
 
-As before, we will try to have a "pure" internal model with separate stages to convert the input to the internal model, and then another separate stage to convert from the internal model to the output.
+前回と同様に、内部モデルを「純粋」にして、入力から内部モデルへの変換と、内部モデルから出力への変換を別々の段階で行うよう心がけます。
 
 ![](../assets/img/function_transform2.png)
 
-## Requirements
+## 要件
 
-Let's start with the requirements:
+まずは要件から始めましょう。
 
-	1) Accept a string of letters like "MMMXCLXXIV" as a string and convert it to an integer.
-	The conversions are: I=1; V=5; X=10; L=50; C=100; D=500; and M=1000;
-	
-	If a lower letter comes before a higher one, the value of the higher is reduced accordingly, so
-	IV=4; IX=9; XC=90; and so on.
+1. "MMMXCLXXIV"のような文字列を受け取り、整数に変換します。
+   変換規則は次の通りです：I=1、V=5、X=10、L=50、C=100、D=500、M=1000
 
-	2) As an additional step, validate the string of letters to see if it is a valid number. For example: "IIVVMM" is a not a valid roman numeral.
+   小さい文字が大きい文字の前にある場合、大きい方の値はそれに応じて減らされます。
+   たとえば、IV=4、IX=9、XC=90などです。
 
+2. さらに、文字列が有効なローマ数字かどうかを確認します。
+   たとえば、"IIVVMM"は有効なローマ数字ではありません。
 
-## First version
+## 第1版
 
-As before we'll start by first creating the internal model, and then look at how we can parse the input into the internal model. 
+前回と同様に、まず内部モデルを作り、次に入力を内部モデルに解析する方法を考えます。
 
-Here's a first stab at the model. We'll treat a `RomanNumeral` as a list of `RomanDigits`.
+モデルの最初の案はこうです。 `RomanNumeral` を `RomanDigits` のリストとして扱います。
 
 ```fsharp
 type RomanDigit = int
 type RomanNumeral = RomanDigit list 
 ```
 
-No, stop right there! A `RomanDigit` is not just *any* digit, it has to be taken from a limited set.
+いや、ちょっと待ってください！ `RomanDigit` は単なる*任意の*数字ではありません。限られた集合から選ぶべきです。
 
-Also `RomanNumeral` should not just be a [type alias](../posts/type-abbreviations) for a list of digits. It would be better if it was its own special type as well.
-We can do this by creating a [single case union type](../posts/discriminated-unions).
+また、 `RomanNumeral` は単なる数字のリストの[型エイリアス](../posts/type-abbreviations.html)であってはなりません。独自の特別な型である方が良いでしょう。
+これは[単一ケースの判別共用体](../posts/discriminated-unions.html)を作ることで実現できます。
 
-Here's a much better version:
+こちらがより良いバージョンです。
 
 ```fsharp
 type RomanDigit = I | V | X | L | C | D | M
 type RomanNumeral = RomanNumeral of RomanDigit list 
 ```
 
-### Output: Converting a numeral to an int
+### 出力：ローマ数字から整数への変換
 
-Now let's do the output logic, converting a Roman numeral to an int.
+次に、出力ロジック、つまりローマ数字を整数に変換する部分を考えましょう。
 
-The digit conversion is easy:
+1文字の数字を変換するのは簡単です。
 
 ```fsharp
-/// Converts a single RomanDigit to an integer
+/// 1つのRomanDigitを整数に変換する
 let digitToInt =
     function
     | I -> 1
@@ -68,35 +68,35 @@ let digitToInt =
     | D -> 500
     | M -> 1000
 
-// tests
+// テスト
 I  |> digitToInt
 V  |> digitToInt
 M  |> digitToInt
 ```
 
-Note that we're using the `function` keyword instead of the `match..with` expression.
+ここでは `match..with` 式の代わりに `function` キーワードを使っています。
 
-To convert a list of digits, we'll use a recursive loop again.
-There is a special case when we need to look ahead to the next digit, and if it is larger than the current one, then use their difference.
+数字のリストを変換するには、再び再帰的なループを使います。
+次の数字を先読みして、現在の数字より大きい場合にはその差を使うという特別なケースがあります。
 
 ```fsharp
 let rec digitsToInt =
     function
         
-    // empty is 0
+    // 空リストは0
     | [] -> 0
 
-    // special case when a smaller comes before larger
-    // convert both digits and add the difference to the sum 
-	// Example: "IV" and "CM"
+    // 小さい数字が大きい数字の前にある特殊ケース
+    // 両方の数字を変換し、その差を合計に加える 
+	// 例： "IV" と "CM"
     | smaller::larger::ns when smaller < larger -> 
         (digitToInt larger - digitToInt smaller)  + digitsToInt ns
 
-    // otherwise convert the digit and add to the sum 
+    // それ以外の場合は数字を変換して合計に加える 
     | digit::ns -> 
         digitToInt digit + digitsToInt ns
 
-// tests
+// テスト
 [I;I;I;I]  |> digitsToInt
 [I;V]  |> digitsToInt
 [V;I]  |> digitsToInt
@@ -105,15 +105,15 @@ let rec digitsToInt =
 [M;C;M;X;L;I;V] |> digitsToInt // 1944
 ```
 
-*Note that the "less than" operation did not have to be defined. The types are automatically sorted by their order of declaration.*
+*「より小さい」演算を定義する必要がなかったことに注目してください。型は宣言順で自動的にソートされます。*
 
-Finally, we can convert the `RomanNumeral` type itself by unpacking the contents into a list and calling `digitsToInt`.
+最後に、 `RomanNumeral` 型自体を変換するには、内容をリストに展開して `digitsToInt` を呼び出します。
 
 ```fsharp
-/// converts a RomanNumeral to an integer
+/// RomanNumeralを整数に変換する
 let toInt (RomanNumeral digits) = digitsToInt digits
 
-// test
+// テスト
 let x = RomanNumeral [I;I;I;I]
 x |> toInt
 
@@ -121,13 +121,13 @@ let x = RomanNumeral [M;C;M;L;X;X;I;X]
 x |> toInt
 ```
 
-That takes care of the output.
+これで出力の処理が完了しました。
 
-### Input: Converting a string to an Roman Numeral
+### 入力：文字列からローマ数字への変換
 
-Now let's do the input logic, converting a string to our internal model.
+次に、入力ロジック、つまり文字列を内部モデルに変換する部分を考えましょう。
 
-First, let's handle a single character conversion. It seems straightforward.
+まず、1文字の変換を扱います。一見単純そうです。
 
 ```fsharp
 let charToRomanDigit =
@@ -141,13 +141,13 @@ let charToRomanDigit =
     | 'M' -> M
 ```
 
-The compiler doesn't like that! What happens if we get some other character? 
+コンパイラがエラーを吐きました！他の文字が入力された場合はどうなるでしょうか？
 
-This is a great example of how [exhaustive pattern matching](../posts/correctness-exhaustive-pattern-matching) can force you to think about missing requirements. 
+これは[網羅的パターンマッチング](../posts/correctness-exhaustive-pattern-matching.html)が不足している要件について考えさせてくれる良い例です。
 
-So, what should be done for bad input. How about printing an error message? 
+では、不正な入力に対してはどうすればよいでしょうか。エラーメッセージを表示するのはどうでしょう？
 
-Let's try again and add a case to handle all other characters:
+再度試してみましょう。今度は他のすべての文字を扱うケースを加えます。
 
 ```fsharp
 let charToRomanDigit =
@@ -159,17 +159,17 @@ let charToRomanDigit =
     | 'C' -> C
     | 'D' -> D
     | 'M' -> M
-	| ch -> eprintf "%c is not a valid character" ch
+	| ch -> eprintf "%cは無効な文字です" ch
 ```
 
-The compiler doesn't like that either! The normal cases return a valid `RomanDigit` but the error case returns `unit`. As we saw in the [earlier post](../posts/pattern-matching), every branch *must* return the same type.
+コンパイラはこれも気に入らないようです！通常のケースは有効な `RomanDigit` を返しますが、エラーケースは `unit` を返します。[以前の投稿](../posts/pattern-matching.html)で見たように、すべての分岐は同じ型を返さなければなりません。
 
-How can we fix this? We could throw an exception, but that seems a bit excessive. If we think about it some more, there's no way that `charToRomanDigit` can *always* return a valid `RomanDigit`.
-Sometimes it can, and sometimes it can't. In other words, we need to use something like an option type here. 
+これをどう直せばいいでしょうか？例外を投げることもできますが、それは少し大げさかもしれません。よく考えると、 `charToRomanDigit` が*常に*有効な `RomanDigit` を返すことができるわけではありません。
+返せる場合もあれば、返せない場合もあります。つまり、ここではオプション型のようなものを使う必要があります。
 
-But on further consideration, we might also want the caller to know what the bad char was. So we need to create our own little variant on the option type to hold both cases.
+さらに考えると、不正な文字が何だったかを呼び出し元に知らせる必要があるかもしれません。そこで、両方のケースを保持するためにオプション型の変種を自作する必要があります。
 
-Here's the fixed up version:
+これが修正版です。
 
 ```fsharp
 type ParsedChar = 
@@ -188,30 +188,30 @@ let charToRomanDigit =
     | ch -> BadChar ch
 ```
 
-Note that I have removed the error message. Since the bad char is being returned, the caller can print its own message for the `BadChar` case.
+エラーメッセージは削除しました。不正な文字が返されるので、呼び出し元が `BadChar` ケースに対して独自のメッセージを表示できます。
 
-Next, we should check the function signature to make sure it is what we expect:
+次に、関数のシグネチャが期待通りかを確認しましょう。
 
 ```fsharp
 charToRomanDigit : char -> ParsedChar
 ```
 
-That looks good.  
+良さそうです。
 
-Now, how can we convert a string into these digits? We convert the string to a char array, convert that into a list, and then do a final conversion using `charToRomanDigit`.
+では、文字列をこれらの数字に変換するにはどうすればよいでしょうか？文字列をchar配列に変え、それをリストに変換し、最後に `charToRomanDigit` を使って変換します。
 
 ```fsharp
 let toRomanDigitList s = 
-    s.ToCharArray() // error FS0072
+    s.ToCharArray() // エラー FS0072
     |> List.ofArray 
     |> List.map charToRomanDigit
 ```
 
-But the compiler complains again with "FS0072: Lookup on object of indeterminate type",
+しかし、コンパイラは再び「FS0072: 型が特定できないオブジェクトに対する参照」というエラーを出します。
 
-That typically happens when you use a method rather than a function.  Any object could implement `.ToCharArray()` so the type inference cannot tell what type is meant.
+これは通常、関数ではなくメソッドを使った場合に起こります。どのオブジェクトでも `.ToCharArray()` を実装できるので、型推論はどの型が意図されているか判断できません。
 
-In this case, the solution is just to use an explicit type annotation on the parameter -- our first so far!
+この場合の解決方法は、パラメータに明示的な型注釈を付けることです。これが今回初めての型注釈です！
 
 ```fsharp
 let toRomanDigitList (s:string) = 
@@ -220,42 +220,42 @@ let toRomanDigitList (s:string) =
     |> List.map charToRomanDigit
 ```
 
-But look at the signature:
+しかし、シグネチャを見てください。
 
 ```fsharp
 toRomanDigitList : string -> ParsedChar list
 ```
 
-It still has the pesky `ParsedChar` in it rather than `RomanDigits`. How do we want to proceed? Answer, let's pass the buck again and let someone else deal with it!
+`RomanDigits` ではなく、厄介な `ParsedChar` がまだ含まれています。どうすればよいでしょうか？答えは、再び責任を先送りして、他の誰かに対処させることです！
 
-"Passing the buck" in this case is actually a good design principle. This function doesn't know what its clients might want to do -- some might want to ignore errors, while others might want to fail fast. So just pass back the information and let them decide.
+この場合、「責任を先送りする」ことは実際には良い設計原則です。この関数はクライアントが何をしたいのか知りません。エラーを無視したいクライアントもいれば、すぐに失敗させたいクライアントもいるかもしれません。だから、情報を返して、クライアントに決めさせましょう。
 
-In this case, the client is the top level function that creates a `RomanNumeral` type. Here's our first attempt:
+この場合、クライアントは `RomanNumeral` 型を作るトップレベルの関数です。これが最初の試みです。
 
 ```fsharp
-// convert a string to a RomanNumeral
+// 文字列をRomanNumeralに変換する
 let toRomanNumeral s = 
     toRomanDigitList s
     |> RomanNumeral
 ```
 
-The compiler is not happy -- the `RomanNumeral` constructor requires a list of `RomanDigits`, but the `toRomanDigitList` is giving us a list of `ParsedChars` instead.
+コンパイラは満足していません。 `RomanNumeral` コンストラクタは `RomanDigits` のリストを必要としますが、 `toRomanDigitList` は `ParsedChars` のリストを返しています。
 
-Now we finally *do* have to commit to an error handling policy. Let's choose to ignore bad chars, but print out errors when they occur. We'll use the `List.choose` function for this.
-It's similar to `List.map`, but in addition has a filter built into it. Elements that are valid (`Some something`) are returned, but elements that are `None` are filtered out.
+ここで**ようやく**、エラー処理ポリシーを決める必要があります。不正な文字を無視し、エラーが起きたら表示することにしましょう。これには `List.choose` 関数を使います。
+これは `List.map` に似ていますが、フィルタも組み込まれています。有効な要素（ `Some something` ）は返され、 `None` の要素は除かれます。
 
-Our choose function should thus do the following:
+従って、choose関数は以下のようになります。
 
-* For valid digits return `Some digit` 
-* For the invalid `BadChars`, print the error message and return `None`.
+* 有効な数字に対しては `Some digit` を返す 
+* 無効な `BadChars` に対しては、エラーメッセージを表示し `None` を返す
 
-If we do this, the output of `List.choose` will be a list of `RomanDigits`, exactly as needed as the input to the `RomanNumeral` constructor.
+これを行えば、 `List.choose` の出力は `RomanDigits` のリストとなり、 `RomanNumeral` コンストラクタへの入力として必要なものになります。
 
-Here is everything put together:
+以下がすべてをまとめたものです。
 
 ```fsharp
-/// Convert a string to a RomanNumeral
-/// Does not validate the input.E.g. "IVIV" would be valid
+/// 文字列をRomanNumeralに変換する
+/// 入力の検証は行わない。たとえば、"IVIV"は有効となる
 let toRomanNumeral s = 
     toRomanDigitList s
     |> List.choose (
@@ -263,16 +263,16 @@ let toRomanNumeral s =
         | Digit digit -> 
             Some digit 
         | BadChar ch -> 
-            eprintfn "%c is not a valid character" ch
+            eprintfn "%cは無効な文字です" ch
             None
         )
     |> RomanNumeral
 ```
 
-Let's test!
+テストしてみましょう！
 
 ```fsharp
-// test good cases
+// 正常系のテスト
 
 "IIII"  |> toRomanNumeral
 "IV"  |> toRomanNumeral
@@ -282,24 +282,24 @@ Let's test!
 "MCMXLIV" |> toRomanNumeral
 "" |> toRomanNumeral
 
-// error cases
+// エラーケース
 "MC?I" |> toRomanNumeral
 "abc" |> toRomanNumeral
 ```
 
-Ok, everything is good so far. Let's move on to validation.
+ここまで順調です。次は検証に移りましょう。
 
-### Validation rules
+### 検証ルール
 
-The validation rules were not listed in the requirements, so let's put down our best guess based on what we know about Roman numerals:
+要件には検証ルールが明記されていなかったので、ローマ数字について知っていることに基づいて推測をしてみましょう。
 
-* Five in a row of any digit is not allowed
-* Some digits are allowed in runs of up to 4. They are I,X,C, and M. The others (V,L,D) can only appear singly.
-* Some lower digits can come before a higher digit, but only if they appear singly. E.g. "IX" is ok but "IIIX" is not.
-* But this is only for pairs of digits. Three ascending numbers in a row is invalid. E.g. "IX" is ok but "IXC" is not.
-* A single digit with no runs is always allowed
+* 同じ数字が5つ以上連続するのは禁止
+* 一部の数字は最大4つまで連続して使える。それはI、X、C、M。他の数字（V、L、D）は単独でのみ使用可
+* 一部の小さい数字は大きい数字の前に来られるが、単独の場合に限る。たとえば、「IX」は有効だが、「IIIX」は無効
+* ただし、これは数字のペアに限る。3つの昇順の数字が連続するのは無効。たとえば、「IX」は有効だが、「IXC」は無効
+* 単独の数字は常に許可
 
-We can convert these requirements into a pattern matching function as follows:
+これらの要件をパターンマッチング関数に変換すると、次のようになります。
 
 ```fsharp
 let runsAllowed = 
@@ -309,30 +309,30 @@ let runsAllowed =
 
 let noRunsAllowed  = runsAllowed >> not 
 
-// check for validity
+// 有効性のチェック
 let rec isValidDigitList digitList =
     match digitList with
 
-    // empty list is valid
+    // 空リストは有効
     | [] -> true
 
-    // A run of 5 or more anything is invalid
-    // Example:  XXXXX
+    // 5つ以上の連続は無効
+    // 例：  XXXXX
     | d1::d2::d3::d4::d5::_ 
         when d1=d2 && d1=d3 && d1=d4 && d1=d5 -> 
             false
 
-    // 2 or more non-runnable digits is invalid
-    // Example:  VV
+    // 連続不可の数字が2つ以上は無効
+    // 例：  VV
     | d1::d2::_ 
         when d1=d2 && noRunsAllowed d1 -> 
             false
 
-    // runs of 2,3,4 in the middle are invalid if next digit is higher
-    // Example:  IIIX
+    // 中間の2,3,4の連続は、次の数字がより大きい場合無効
+    // 例：  IIIX
     | d1::d2::d3::d4::higher::ds 
         when d1=d2 && d1=d3 && d1=d4 
-        && runsAllowed d1 // not really needed because of the order of matching
+        && runsAllowed d1 // マッチングの順序により実際には不要
         && higher > d1 -> 
             false
 
@@ -348,24 +348,24 @@ let rec isValidDigitList digitList =
         && higher > d1 -> 
             false
 
-    // three ascending numbers in a row is invalid
-    // Example:  IVX
+    // 3つの昇順の数字の連続は無効
+    // 例：  IVX
     | d1::d2::d3::_  when d1<d2 && d2<= d3 -> 
         false
 
-    // A single digit with no runs is always allowed
+    // 連続のない単一の数字は常に許可
     | _::ds -> 
-        // check the remainder of the list
+        // リストの残りをチェック
         isValidDigitList ds 
 
 ```
 
-*Again, note that "equality" and "less than" did not need to be defined.*
+*ここでも、「等号」と「未満」を定義する必要がなかったことに注目してください。*
 
-And let's test the validation:
+検証をテストしてみましょう。
 
 ```fsharp
-// test valid 
+// 有効なケースのテスト 
 let validList = [
     [I;I;I;I]
     [I;V]
@@ -380,70 +380,70 @@ let validList = [
 let testValid = validList |> List.map isValidDigitList
 
 let invalidList = [
-    // Five in a row of any digit is not allowed
+    // 5つ以上の連続は許されない
     [I;I;I;I;I]
-    // Two in a row for V,L, D is not allowed
+    // V、L、Dの2つ連続は許されない
     [V;V] 
     [L;L] 
     [D;D]
-    // runs of 2,3,4 in the middle are invalid if next digit is higher
+    // 中間の2,3,4の連続は、次の数字がより大きい場合無効
     [I;I;V]
     [X;X;X;M]
     [C;C;C;C;D]
-    // three ascending numbers in a row is invalid
+    // 3つの昇順の数字の連続は無効
     [I;V;X]
     [X;L;D]
     ]
 let testInvalid = invalidList |> List.map isValidDigitList
 ```
 
-Finally, we add a top level function to test validity of the `RomanNumeral` type itself.
+最後に、 `RomanNumeral` 型自体の有効性を確認するトップレベル関数を追加します。
 ```fsharp
-// top level check for validity
+// 有効性チェックのトップレベル関数
 let isValid (RomanNumeral digitList) =
     isValidDigitList digitList
 
 
-// test good cases
+// 正常系のテスト
 "IIII"  |> toRomanNumeral |> isValid
 "IV"  |> toRomanNumeral |> isValid
 "" |> toRomanNumeral |> isValid
 
-// error cases
+// エラーケース
 "IIXX" |> toRomanNumeral |> isValid
 "VV" |> toRomanNumeral |> isValid
 
-// grand finale
+// 総仕上げ
 [ "IIII"; "XIV"; "MMDXC"; 
 "IIXX"; "VV"; ]
 |> List.map toRomanNumeral 
 |> List.iter (function
     | n when isValid n ->
-        printfn "%A is valid and its integer value is %i" n (toInt n) 
+        printfn "%Aは有効で、整数値は%iです" n (toInt n) 
     | n ->
-        printfn "%A is not valid" n
+        printfn "%Aは無効です" n
     )
 ```
 
-## The entire code for the first version
+## 第1版の全コード
 
-Here's all the code in one module:
+以下が1つのモジュールにまとめた全コードです。
 
 ```fsharp
 module RomanNumeralsV1 =
 
     // ==========================================
-    // Types
+    // 型
     // ==========================================
 
     type RomanDigit = I | V | X | L | C | D | M
     type RomanNumeral = RomanNumeral of RomanDigit list 
 
     // ==========================================
-    // Output logic
+    // 出力ロジック
     // ==========================================
 
-    /// Converts a single RomanDigit to an integer
+    /// 1つのRomanDigitを整数に変換する
     let digitToInt =
         function
         | I -> 1
@@ -454,28 +454,28 @@ module RomanNumeralsV1 =
         | D -> 500
         | M -> 1000
 
-    /// converts a list of digits to an integer
+    /// 数字のリストを整数に変換する
     let rec digitsToInt =
         function
         
-        // empty is 0
+        // 空リストは0
         | [] -> 0
 
-        // special case when a smaller comes before larger
-        // convert both digits and add the difference to the sum 
-        // Example: "IV" and "CM"
+        // 小さい数字が大きい数字の前にある特殊ケース
+        // 両方の数字を変換し、その差を合計に加える 
+        // 例： "IV" と "CM"
         | smaller::larger::ns when smaller < larger -> 
             (digitToInt larger - digitToInt smaller)  + digitsToInt ns
 
-        // otherwise convert the digit and add to the sum 
+        // それ以外の場合は数字を変換して合計に加える 
         | digit::ns -> 
             digitToInt digit + digitsToInt ns
 
-    /// converts a RomanNumeral to an integer
+    /// RomanNumeralを整数に変換する
     let toInt (RomanNumeral digits) = digitsToInt digits
 
     // ==========================================
-    // Input logic
+    // 入力ロジック
     // ==========================================
 
     type ParsedChar = 
@@ -498,8 +498,8 @@ module RomanNumeralsV1 =
         |> List.ofArray 
         |> List.map charToRomanDigit
 
-    /// Convert a string to a RomanNumeral
-    /// Does not validate the input.E.g. "IVIV" would be valid
+    /// 文字列をRomanNumeralに変換する
+    /// 入力の検証は行わない。たとえば、"IVIV"は有効となる
     let toRomanNumeral s = 
         toRomanDigitList s
         |> List.choose (
@@ -507,13 +507,13 @@ module RomanNumeralsV1 =
             | Digit digit -> 
                 Some digit 
             | BadChar ch -> 
-                eprintfn "%c is not a valid character" ch
+                eprintfn "%cは無効な文字です" ch
                 None
             )
         |> RomanNumeral
 
     // ==========================================
-    // Validation logic
+    // 検証ロジック
     // ==========================================
 
     let runsAllowed = 
@@ -523,30 +523,30 @@ module RomanNumeralsV1 =
 
     let noRunsAllowed  = runsAllowed >> not 
 
-    // check for validity
+    // 有効性のチェック
     let rec isValidDigitList digitList =
         match digitList with
 
-        // empty list is valid
+        // 空リストは有効
         | [] -> true
 
-        // A run of 5 or more anything is invalid
-        // Example:  XXXXX
+        // 5つ以上の連続は無効
+        // 例：  XXXXX
         | d1::d2::d3::d4::d5::_ 
             when d1=d2 && d1=d3 && d1=d4 && d1=d5 -> 
                 false
 
-        // 2 or more non-runnable digits is invalid
-        // Example:  VV
+        // 連続不可の数字が2つ以上は無効
+        // 例：  VV
         | d1::d2::_ 
             when d1=d2 && noRunsAllowed d1 -> 
                 false
 
-        // runs of 2,3,4 in the middle are invalid if next digit is higher
-        // Example:  IIIX
+        // 中間の2,3,4の連続は、次の数字がより大きい場合無効
+        // 例：  IIIX
         | d1::d2::d3::d4::higher::ds 
             when d1=d2 && d1=d3 && d1=d4 
-            && runsAllowed d1 // not really needed because of the order of matching
+            && runsAllowed d1 // マッチングの順序により実際には不要
             && higher > d1 -> 
                 false
 
@@ -562,41 +562,41 @@ module RomanNumeralsV1 =
             && higher > d1 -> 
                 false
 
-        // three ascending numbers in a row is invalid
-        // Example:  IVX
+        // 3つの昇順の数字の連続は無効
+        // 例：  IVX
         | d1::d2::d3::_  when d1<d2 && d2<= d3 -> 
             false
 
-        // A single digit with no runs is always allowed
+        // 連続のない単一の数字は常に許可
         | _::ds -> 
-            // check the remainder of the list
+            // リストの残りをチェック
             isValidDigitList ds 
 
-    // top level check for validity
+    // 有効性チェックのトップレベル関数
     let isValid (RomanNumeral digitList) =
         isValidDigitList digitList
 
 ```
 
-## Second version
+## 第2版
 
-The code works, but there is something that's bugging me about it. The validation logic seems very complicated. Surely the Romans didn't have to think about all of this?
+コードは動きますが、気になる点があります。検証ロジックが非常に複雑に見えます。ローマ人がこれほど複雑なことを考えていたはずがありません。
 
-And also, I can think of examples that should fail validation, but pass, such as "VIV":
+また、「VIV」のように、検証に失敗すべきなのに、成功してしまう例が考えられます。
 
 ```fsharp
 "VIV" |> toRomanNumeral |> isValid
 ```
 
-We could try to tighten up our validation rules, but let's try another tack. Complicated logic is often a sign that you don't quite understand the domain properly.
+検証ルールをさらに厳しくすることもできますが、別のアプローチを試してみましょう。複雑なロジックは、多くの場合、ドメインを正しく理解していないサインです。
 
-In other words -- could we change the internal model to make everything simpler?
+つまり、内部モデルを変えてすべてをシンプルにできないでしょうか？
 
-What about if we stopped trying to map letters to digits, and created a domain that mapped how the Romans thought it.  In this model "I", "II", "III", "IV" and so on would each be a separate digit.
+文字を数字に対応させようとするのではなく、ローマ人がどう考えていたかを反映したドメインを作ってはどうでしょうか。このモデルでは、「I」、「II」、「III」、「IV」などがそれぞれ別の数字となります。
 
-Let's run with it and see what happens.
+この考えに基づいて進めてみましょう。
 
-Here's the new types for the domain. I now have a digit type for every possible digit. The `RomanNumeral` type stays the same.
+ドメインの新しい型は以下のようになります。今回は、可能なすべての数字に対して数字型を用意しました。 `RomanNumeral` 型は同じままです。
 
 ```fsharp
 type RomanDigit = 
@@ -610,12 +610,12 @@ type RomanDigit =
 type RomanNumeral = RomanNumeral of RomanDigit list 
 ```
 
-### Output: second version
+### 出力：第2版
 
-Next, converting a single `RomanDigit` to an integer is the same as before, but with more cases:
+次に、1つの `RomanDigit` を整数に変える部分は以前と同じですが、ケースが増えています。
 
 ```fsharp
-/// Converts a single RomanDigit to an integer
+/// 1つのRomanDigitを整数に変換する
 let digitToInt =
     function
     | I -> 1 | II -> 2 | III -> 3 | IIII -> 4 
@@ -626,21 +626,21 @@ let digitToInt =
     | CD -> 400 | D -> 500 
     | CM -> 900 | M -> 1000 | MM -> 2000 | MMM -> 3000 | MMMM -> 4000
 
-// tests
+// テスト
 I  |> digitToInt
 III  |> digitToInt
 V  |> digitToInt
 CM  |> digitToInt
 ```
 
-Calculating the sum of the digits is now trivial. No special cases needed:
+数字の合計を計算する部分は今やシンプルです。特別なケースは必要ありません。
 
 ```fsharp
-/// converts a list of digits to an integer
+/// 数字のリストを整数に変換する
 let digitsToInt list = 
     list |> List.sumBy digitToInt 
 
-// tests
+// テスト
 [IIII]  |> digitsToInt
 [IV]  |> digitsToInt
 [V;I]  |> digitsToInt
@@ -649,23 +649,23 @@ let digitsToInt list =
 [M;CM;XL;IV] |> digitsToInt // 1944
 ```
 
-Finally, the top level function is identical:
+最後に、トップレベルの関数は同じです。
 
 ```fsharp
-/// converts a RomanNumeral to an integer
+/// RomanNumeralを整数に変換する
 let toInt (RomanNumeral digits) = digitsToInt digits
 
-// test
+// テスト
 let x = RomanNumeral [M;CM;LX;X;IX]
 x |> toInt
 ```
 
-### Input: second version
+### 入力：第2版
 
-For the input parsing, we'll keep the `ParsedChar` type. But this time, we have to match 1,2,3, or 4 chars at a time.
-That means we can't just pull off one character like we did in the first version -- we have to match in the main loop. This means the loop now has to be recursive.
+入力の解析については、 `ParsedChar` 型を保持します。しかし今回は、1、2、3、または4文字を一度にマッチさせる必要があります。
+つまり、第1版のように1文字ずつ取り出すのではなく、メインループでマッチさせる必要があります。これはループが再帰的になることを意味します。
 
-Also, we want to convert IIII into a single `IIII` digit rather than 4 separate `I` digits, so we put the longest matches at the front.
+また、IIIIを4つの別々の `I` という数字ではなく、1つの `IIII` という数字に変えたいので、最も長いマッチを先頭に置きます。
 
 ```fsharp
 type ParsedChar = 
@@ -674,9 +674,9 @@ type ParsedChar =
 
 let rec toRomanDigitListRec charList = 
     match charList with
-    // match the longest patterns first
+    // 最長のパターンを最初に照合
 
-    // 4 letter matches
+    // 4文字照合
     | 'I'::'I'::'I'::'I'::ns -> 
         Digit IIII :: (toRomanDigitListRec ns)
     | 'X'::'X'::'X'::'X'::ns -> 
@@ -686,7 +686,7 @@ let rec toRomanDigitListRec charList =
     | 'M'::'M'::'M'::'M'::ns -> 
         Digit MMMM :: (toRomanDigitListRec ns)
 
-    // 3 letter matches
+    // 3文字照合
     | 'I'::'I'::'I'::ns -> 
         Digit III :: (toRomanDigitListRec ns)
     | 'X'::'X'::'X'::ns -> 
@@ -696,7 +696,7 @@ let rec toRomanDigitListRec charList =
     | 'M'::'M'::'M'::ns -> 
         Digit MMM :: (toRomanDigitListRec ns)
 
-    // 2 letter matches
+    // 2文字照合
     | 'I'::'I'::ns -> 
         Digit II :: (toRomanDigitListRec ns)
     | 'X'::'X'::ns -> 
@@ -719,7 +719,7 @@ let rec toRomanDigitListRec charList =
     | 'C'::'M'::ns -> 
         Digit CM :: (toRomanDigitListRec ns)
 
-    // 1 letter matches
+    // 1文字照合
     | 'I'::ns -> 
         Digit I :: (toRomanDigitListRec ns)
     | 'V'::ns -> 
@@ -735,19 +735,19 @@ let rec toRomanDigitListRec charList =
     | 'M'::ns -> 
         Digit M :: (toRomanDigitListRec ns)
 
-    // bad letter matches
+    // 不正な文字照合
     | badChar::ns -> 
         BadChar badChar :: (toRomanDigitListRec ns)
 
-    // 0 letter matches
+    // 0文字照合
     | [] -> 
         []
 
 ```
 
-Well, this is much longer than the first version, but otherwise basically the same.
+この部分は第1版よりもかなり長くなりましたが、基本的には同じです。
 
-The top level functions are unchanged.
+トップレベルの関数は変わっていません。
 
 ```fsharp
 let toRomanDigitList (s:string) = 
@@ -755,7 +755,7 @@ let toRomanDigitList (s:string) =
     |> List.ofArray 
     |> toRomanDigitListRec
 
-/// Convert a string to a RomanNumeral
+/// 文字列をRomanNumeralに変換する
 let toRomanNumeral s = 
     toRomanDigitList s
     |> List.choose (
@@ -763,12 +763,12 @@ let toRomanNumeral s =
         | Digit digit -> 
             Some digit 
         | BadChar ch -> 
-            eprintfn "%c is not a valid character" ch
+            eprintfn "%cは無効な文字です" ch
             None
         )
     |> RomanNumeral
 
-// test good cases
+// 正常系のテスト
 "IIII"  |> toRomanNumeral
 "IV"  |> toRomanNumeral
 "VI"  |> toRomanNumeral
@@ -777,67 +777,67 @@ let toRomanNumeral s =
 "MCMXLIV" |> toRomanNumeral
 "" |> toRomanNumeral
 
-// error cases
+// エラーケース
 "MC?I" |> toRomanNumeral
 "abc" |> toRomanNumeral
 ```
 
-### Validation: second version
+### 検証：第2版
 
-Finally, let's see how the new domain model affects the validation rules.  Now, the rules are *much* simpler. In fact, there is only one.
+最後に、新しいドメインモデルが検証ルールにどう影響するか見てみましょう。今回、ルールは*はるかに*シンプルになりました。実際、ルールは1つだけです。
 
-* Each digit must be smaller than the preceding digit
+* 各数字は前の数字より小さくなければならない
 
 ```fsharp
-// check for validity
+// 有効性のチェック
 let rec isValidDigitList digitList =
     match digitList with
 
-    // empty list is valid
+    // 空リストは有効
     | [] -> true
 
-    // a following digit that is equal or larger is an error
+    // 次の数字が等しいかより大きい場合はエラー
     | d1::d2::_ 
         when d1 <= d2  -> 
             false
 
-    // A single digit is always allowed
+    // 単一の数字は常に許可
     | _::ds -> 
-        // check the remainder of the list
+        // リストの残りをチェック
         isValidDigitList ds 
 
-// top level check for validity
+// 有効性チェックのトップレベル関数
 let isValid (RomanNumeral digitList) =
     isValidDigitList digitList
 
-// test good cases
+// 正常系のテスト
 "IIII"  |> toRomanNumeral |> isValid
 "IV"  |> toRomanNumeral |> isValid
 "" |> toRomanNumeral |> isValid
 
-// error cases
+// エラーケース
 "IIXX" |> toRomanNumeral |> isValid
 "VV" |> toRomanNumeral |> isValid
 
 ```
 
-Alas, after all that, we still didn't fix the bad case that triggered the rewrite!
+残念ながら、これだけの作業をしても、書き直しのきっかけとなった悪いケースはまだ直っていません！
 
 ```fsharp
 "VIV" |> toRomanNumeral |> isValid
 ```
 
-There is a not-too-complicated fix for this, but I think it's time to leave it alone now!
+これを直すためのそれほど複雑でない方法はあるのですが、もう放置しておこうと思います！
 
-## The entire code for the second version
+## 第2版の全コード
 
-Here's all the code in one module for the second version:
+以下が第2版の全コードを1つのモジュールにまとめたものです。
 
 ```fsharp
 module RomanNumeralsV2 =
 
     // ==========================================
-    // Types
+    // 型
     // ==========================================
 
     type RomanDigit = 
@@ -851,10 +851,10 @@ module RomanNumeralsV2 =
     type RomanNumeral = RomanNumeral of RomanDigit list 
 
     // ==========================================
-    // Output logic
+    // 出力ロジック
     // ==========================================
 
-    /// Converts a single RomanDigit to an integer
+    /// 1つのRomanDigitを整数に変換する
     let digitToInt =
         function
         | I -> 1 | II -> 2 | III -> 3 | IIII -> 4 
@@ -865,11 +865,11 @@ module RomanNumeralsV2 =
         | CD -> 400 | D -> 500 
         | CM -> 900 | M -> 1000 | MM -> 2000 | MMM -> 3000 | MMMM -> 4000
 
-    /// converts a RomanNumeral to an integer
+    /// RomanNumeralを整数に変換する
     let toInt (RomanNumeral digits) = digitsToInt digits
 
     // ==========================================
-    // Input logic
+    // 入力ロジック
     // ==========================================
 
     type ParsedChar = 
@@ -878,9 +878,9 @@ module RomanNumeralsV2 =
 
     let rec toRomanDigitListRec charList = 
         match charList with
-        // match the longest patterns first
+        // 最長のパターンを最初に照合
 
-        // 4 letter matches
+        // 4文字照合
         | 'I'::'I'::'I'::'I'::ns -> 
             Digit IIII :: (toRomanDigitListRec ns)
         | 'X'::'X'::'X'::'X'::ns -> 
@@ -890,7 +890,7 @@ module RomanNumeralsV2 =
         | 'M'::'M'::'M'::'M'::ns -> 
             Digit MMMM :: (toRomanDigitListRec ns)
 
-        // 3 letter matches
+        // 3文字照合
         | 'I'::'I'::'I'::ns -> 
             Digit III :: (toRomanDigitListRec ns)
         | 'X'::'X'::'X'::ns -> 
@@ -900,7 +900,7 @@ module RomanNumeralsV2 =
         | 'M'::'M'::'M'::ns -> 
             Digit MMM :: (toRomanDigitListRec ns)
 
-        // 2 letter matches
+        // 2文字照合
         | 'I'::'I'::ns -> 
             Digit II :: (toRomanDigitListRec ns)
         | 'X'::'X'::ns -> 
@@ -923,7 +923,7 @@ module RomanNumeralsV2 =
         | 'C'::'M'::ns -> 
             Digit CM :: (toRomanDigitListRec ns)
 
-        // 1 letter matches
+        // 1文字照合
         | 'I'::ns -> 
             Digit I :: (toRomanDigitListRec ns)
         | 'V'::ns -> 
@@ -939,11 +939,11 @@ module RomanNumeralsV2 =
         | 'M'::ns -> 
             Digit M :: (toRomanDigitListRec ns)
 
-        // bad letter matches
+        // 不正な文字照合
         | badChar::ns -> 
             BadChar badChar :: (toRomanDigitListRec ns)
 
-        // 0 letter matches
+        // 0文字照合
         | [] -> 
             []
 
@@ -952,8 +952,8 @@ module RomanNumeralsV2 =
         |> List.ofArray 
         |> toRomanDigitListRec
 
-    /// Convert a string to a RomanNumeral
-    /// Does not validate the input.E.g. "IVIV" would be valid
+    /// 文字列をRomanNumeralに変換する
+    /// 入力の検証は行わない。たとえば、"IVIV"は有効となる
     let toRomanNumeral s = 
         toRomanDigitList s
         |> List.choose (
@@ -961,57 +961,57 @@ module RomanNumeralsV2 =
             | Digit digit -> 
                 Some digit 
             | BadChar ch -> 
-                eprintfn "%c is not a valid character" ch
+                eprintfn "%cは無効な文字です" ch
                 None
             )
         |> RomanNumeral
 
     // ==========================================
-    // Validation logic
+    // 検証ロジック
     // ==========================================
 
-    // check for validity
+    // 有効性のチェック
     let rec isValidDigitList digitList =
         match digitList with
 
-        // empty list is valid
+        // 空リストは有効
         | [] -> true
 
-        // a following digit that is equal or larger is an error
+        // 次の数字が等しいかより大きい場合はエラー
         | d1::d2::_ 
             when d1 <= d2  -> 
                 false
 
-        // A single digit is always allowed
+        // 単一の数字は常に許可
         | _::ds -> 
-            // check the remainder of the list
+            // リストの残りをチェック
             isValidDigitList ds 
 
-    // top level check for validity
+    // 有効性チェックのトップレベル関数
     let isValid (RomanNumeral digitList) =
         isValidDigitList digitList
 
 
 ```
 
-## Comparing the two versions
+## 2つのバージョンの比較
 
-Which version did you like better?  The second one is more longwinded because it has many more cases, but on the other hand, the actual logic is the same or simpler in all areas, with no special cases.
-And as a result, the total number of lines of code is about the same for both versions.
+どちらのバージョンが好みですか？第2版はケースが多いため長くなっていますが、一方で実際のロジックは全ての領域で同じかより単純で、特別なケースはありません。
+結果として、両バージョンのコードの総行数はほぼ同じです。
 
-Overall, I prefer the second implementation because of the lack of special cases.
+全体として、特別なケースがないため、私は第2の実装の方が好みです。
 
-As a fun experiment, try writing the same code in C# or your favorite imperative language!
+面白い実験として、同じコードをC#や好きな命令型言語で書いてみてください！
 
-## Making it object-oriented
+## オブジェクト指向にする
 
-Finally, let's see how we might make this object oriented. We don't care about the helper functions, so we probably just need three methods:
+最後に、これをオブジェクト指向にする方法を見てみましょう。ヘルパー関数は気にしないので、おそらく3つのメソッドだけが必要です。
 
-* A static constructor
-* A method to convert to a int
-* A method to convert to a string
+* 静的コンストラクタ
+* 整数に変換するメソッド
+* 文字列に変換するメソッド
 
-And here they are:
+以下がそれらです。
 
 ```fsharp
 type RomanNumeral with
@@ -1026,9 +1026,9 @@ type RomanNumeral with
         sprintf "%A" this
 ```
 
-*Note: you can ignore the compiler warning about deprecated overrides.*
+*注：非推奨のオーバーライドに関するコンパイラの警告は無視してください。*
 
-Let's use this in an object oriented way now:
+では、これをオブジェクト指向的に使ってみましょう。
 
 ```fsharp
 let r = RomanNumeral.FromString "XXIV"
@@ -1037,12 +1037,12 @@ let i = r.ToInt()
 ```
 
 
-## Summary
+## まとめ
 
-In this post we've seen lots and lots of pattern matching!
+この記事では、たくさんのパターンマッチングを見てきました！
 
-But again, as with the last post, what's equally important is that we've seen how easy it is to create a properly designed internal model for very trivial domains.
-And again, our internal model used no primitive types -- there is no excuse not to create lots of little types in order to represent the domain better. For example, the `ParsedChar` type -- would you have bothered to create that in C#?
+しかし、前回の記事と同様に、同じくらい重要なのは、非常に小さなドメインに対しても、適切に設計された内部モデルを簡単に作れることを見てきたことです。
+そして今回も、内部モデルにはプリミティブ型を使いませんでした。ドメインをより良く表現するために、小さな型をたくさん作ることをためらう理由はありません。たとえば、 `ParsedChar` 型について、C#でこれを作ろうと思いましたか？
 
-And as should be clear, the choice of an internal model can make a lot of difference to the complexity of the design. But if and when we do refactor, the compiler will almost always warn us if we have forgotten something.
+そして明らかなように、内部モデルの選び方は設計の複雑さに大きな影響を与える可能性があります。しかし、リファクタリングをする場合でも、何かを忘れていればコンパイラがほぼ常に警告してくれるでしょう。
 
