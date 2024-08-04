@@ -1,36 +1,36 @@
 ---
 layout: post
-title: "Understanding F# types: Introduction"
-description: "A new world of types"
+title: "F#の型を理解する：イントロダクション"
+description: "型の新しい世界"
 nav: fsharp-types
-seriesId: "Understanding F# types"
+seriesId: "F#の型を理解する"
 seriesOrder: 1
 ---
 
-*NOTE: Before reading this series, I suggest that you read the ["thinking functionally"](../series/thinking-functionally.md) and ["式と構文"](../series/expressions-and-syntax.md) series as a prerequisite.* 
+*注意：このシリーズを読む前に、「[関数型思考](../series/thinking-functionally.md)」と「[式と構文](../series/expressions-and-syntax.md)」シリーズを前提知識として読むことをおすすめします。*
 
 
-F# is not just about functions; the powerful type system is another key ingredient.  And just as with functions, understanding the type system is critical to being fluent and comfortable in the language.
+F#は関数だけでなく、強力な型システムも重要な特徴です。関数と同じく、型システムを理解することが、この言語に習熟し快適に扱うためのカギとなります。
 
-Now, so far we have seen some basic types that can be used as input and output to functions:
+これまでに、関数の入出力に使える基本的な型をいくつか見てきました。
 
-* 	Primitive types such as `int`, `float`, `string`, and `bool`
-* 	Simple function types such as `int->int`
-* 	The `unit` type
-* 	Generic types.
+* `int` 、 `float` 、 `string` 、 `bool` などのプリミティブ型
+* `int->int` のような単純な関数型
+* `unit` 型
+* ジェネリック型
 
-None of these types should be unfamiliar. Analogues of these are available in C# and other imperative languages. 
+これらの型は、どれも見慣れないものではないでしょう。C#や他の命令型言語にも、似たような型があります。
 
-But in this series we are going to introduce some new kinds of types that are very common in functional languages but uncommon in imperative languages. 
+しかし、このシリーズでは、関数型言語では一般的だけれど命令型言語ではあまり見かけない、新しい種類の型を紹介します。
 
-The extended types we will look at in this series are:
+このシリーズで取り上げる拡張型は以下の通りです：
 
-* 	Tuples
-* 	Records
-* 	Unions
-* 	The Option type
-* 	Enum types
+* タプル
+* レコード
+* 判別共用体
+* オプション型
+* 列挙型
 
-For all these types, we will discuss both the abstract principles and the details of how to use them in practice. 
+これらの型について、抽象的な原理と実践的な使い方の両方を説明します。
 
-Lists and other recursive data types are also very important types, but there is so much to say about them that they will need their own series!
+リストや他の再帰的なデータ型も非常に重要ですが、説明することが多いので、別のシリーズで扱う予定です！

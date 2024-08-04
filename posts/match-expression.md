@@ -330,11 +330,11 @@ let x =
 let y = 
     match [1;2;3] with 
     // 明示的な位置への束縛
-    // 角括弧を使う！
+    // 角かっこを使う！
     | [1;x;y] -> printfn "x=%A y=%A" x y
 
     // head::tailへの束縛 
-    // 角括弧は使わない！
+    // 角かっこは使わない！
     | 1::tail -> printfn "tail=%A" tail 
 
     // 空のリスト

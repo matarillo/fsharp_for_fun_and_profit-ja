@@ -407,7 +407,7 @@ Async.RunSynchronously sleepWorkflow
 
 
 // 他の非同期ワークフローがネストされているワークフロー。
-/// 中括弧内で、let! または use! 構文を使ってネストされたワークフローをブロックできます。
+/// 中かっこ内で、let! または use! 構文を使ってネストされたワークフローをブロックできます。
 let nestedWorkflow  = async{
 
     printfn "Starting parent"

@@ -1,25 +1,25 @@
 ---
 layout: series_index
-title: "The 'Understanding F# types' series"
-seriesIndexId: "Understanding F# types"
+title: "「F#の型を理解する」シリーズ"
+seriesIndexId: "F#の型を理解する"
 ---
 
-F# is not just about functions; the powerful type system is another key ingredient.  And just as with functions, understanding the type system is critical to being fluent and comfortable in the language. 
+F#は関数だけが特徴ではありません。強力な型システムもまた、重要な要素です。関数と同じように、型システムを理解することが、この言語を使いこなす鍵となります。
 
-In addition to the common .NET types. F# has some other types that are very common in functional languages but not available in imperative languages like C# or Java.
+F#には、一般的な.NETの型に加えて、関数型言語では当たり前の型がいくつかあります。これらは、C#やJavaのような命令型言語では見られないものです。
 
-This series introduces these types and how to use them.
+このシリーズでは、そういった型とその使い方を紹介します。
 
 
 
-* [Understanding F# types: Introduction](../posts/types-intro.md). A new world of types.
-* [Overview of types in F#](../posts/overview-of-types-in-fsharp.md). A look at the big picture.
-* [Type abbreviations](../posts/type-abbreviations.md). Also known as aliases.
-* [Tuples](../posts/tuples.md). Multiplying types together.
-* [Records](../posts/records.md). Extending tuples with labels.
-* [Discriminated Unions](../posts/discriminated-unions.md). Adding types together.
-* [The Option type](../posts/the-option-type.md). And why it is not null or nullable.
-* [Enum types](../posts/enum-types.md). Not the same as a union type.
-* [Built-in .NET types](../posts/cli-types.md). Ints, strings, bools, etc.
-* [Units of measure](../posts/units-of-measure.md). Type safety for numerics.
-* [Understanding type inference](../posts/type-inference.md). Behind the magic curtain.
+* [F#の型を理解する：はじめに](../posts/types-intro.md)。型の新しい世界へ。
+* [F#の型の概要](../posts/overview-of-types-in-fsharp.md)。全体像をつかむ。
+* [型略称](../posts/type-abbreviations.md)。エイリアスとも呼ばれる。
+* [タプル](../posts/tuples.md)。型をかけ合わせる。
+* [レコード](../posts/records.md)。ラベル付きタプルを拡張。
+* [判別共用体](../posts/discriminated-unions.md)。型を足し合わせる。
+* [オプション型](../posts/the-option-type.md)。nullやnullable型との違い。
+* [列挙型](../posts/enum-types.md)。共用体型とは別物。
+* [組み込みの.NET型](../posts/cli-types.md)。int、string、bool型など。
+* [測定単位](../posts/units-of-measure.md)。数値の型安全性を確保。
+* [型推論を理解する](../posts/type-inference.md)。魔法の裏側を覗く。
