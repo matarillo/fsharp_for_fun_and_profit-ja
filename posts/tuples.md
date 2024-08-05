@@ -1,172 +1,172 @@
 ---
 layout: post
-title: "Tuples"
-description: "Multiplying types together"
+title: "タプル"
+description: "型の掛け算"
 nav: fsharp-types
-seriesId: "Understanding F# types"
+seriesId: "F#の型を理解する"
 seriesOrder: 4
-categories: [Types]
+categories: [型]
 ---
 
 
-We're ready for our first extended type -- the tuple.
+いよいよ最初の拡張型であるタプルについて学びましょう。
 
-Let's start by stepping back again and looking at a type such as "int". As we hinted at before, rather than thinking of "int" as a abstract thing, you can think of it as concrete collection of all its possible values, namely the set {...,-3, -2, -1, 0, 2, 3, ...}.  
+まずは一歩下がって、「int」のような型について考えてみましょう。以前に少し触れたように、「int」を抽象的なものとして考えるのではなく、取り得るすべての値の具体的な集合として考えられます。つまり、{...、-3、-2、-1、0、2、3、...}という集合です。
 
-So next, imagine two copies of this "int" collection. We can "multiply" them together by taking the Cartesian product of them; that is, making a new list of objects by picking every possible combination of the two "int" lists, as shown below:
- 
-![int*int tuple](../assets/img/tuple_int_int.png)
- 
-As we have already seen, these pairs are called tuples in F#. And now you can see why they have the type signature that they do. In this example, the "int times int" type is called "`int * int`", and the star symbol means "multiply" of course! The valid instances of this new type are all the pairs: (-2,2),(-1,0), (2,2) and so on.
+次に、この「int」の集合を2組用意したと想像してください。これらの直積（デカルト積）を取ることで「掛け算」できます。つまり、2つの「int」リストのあらゆる組み合わせを選んで、新しいオブジェクトのリストを作るのです。以下の図のようになります。
 
-Let's see how they might be used in practice:
+![int*int タプル](../assets/img/tuple_int_int.png)
+
+ご覧の通り、F# ではこのようなペアをタプルと呼びます。そして、タプルの型シグネチャがこのような形をしているのも、納得できるかと思います。この例では、「intとintの積」の型は「`int * int`」となります。アスタリスク記号は当然「掛け算」を表しています。この新しい型の有効なインスタンスは、(-2,2)、(-1,0)、(2,2) などのすべてのペアです。
+
+実際にどのように使うか見てみましょう。
 
 ```fsharp
 let t1 = (2,3)
 let t2 = (-2,7)
 ```
 
-Now if you evaluate the code above you will see that the types of t1 and t2 are `int*int` as expected. 
+上のコードを評価すると、t1 と t2 の型が期待通り `int*int` になっていることがわかります。
 
 ```fsharp
 val t1 : int * int = (2, 3)
 val t2 : int * int = (-2, 7)
 ```
 
-This "product" approach can be used to make tuples out of any mixture of types. Here is one for "int times bool".
- 
-![int*bool tuple](../assets/img/tuple_int_bool.png)
+この「積」のアプローチは、任意の型の組み合わせでタプルを作るのに使えます。「intとboolの積」の例を見てみましょう。
 
-And here is the usage in F#. The tuple type above has the signature "`int*bool`".
+![int*bool タプル](../assets/img/tuple_int_bool.png)
+
+F# での使い方はこうです。上のタプル型は `int*bool` というシグネチャを持ちます。
 
 ```fsharp
 let t3 = (2,true)
 let t4 = (7,false)
 
-// the signatures are:
+// シグネチャは以下のようになります
 val t3 : int * bool = (2, true)
 val t4 : int * bool = (7, false)
 ```
 
-Strings can be used as well, of course. The universe of all possible strings is very large, but conceptually it is the same thing. The tuple type below has the signature "`string*int`".
+もちろん、文字列も使えます。ありとあらゆる文字列の集合は非常に大きいですが、概念的には同じことです。以下のタプル型は「`string*int`」というシグネチャを持ちます。
 
-![string*int tuple](../assets/img/tuple_str_int.png)
+![string*int タプル](../assets/img/tuple_str_int.png)
 
-Test the usage and signatures:
+使い勝手とシグネチャを確認してみましょう。
 
 ```fsharp
 let t5 = ("hello",42)
 let t6 = ("goodbye",99)
 
-// the signatures are:
+// シグネチャは以下のようになります。
 val t5 : string * int = ("hello", 42)
 val t6 : string * int = ("goodbye", 99)
 ```
 
-And there is no reason to stop at multiplying just two types together. Why not three? Or four?  For example, here is the type `int * bool * string`.
+そして、2つの型を掛け合わせるだけに留める理由はありません。3つでも4つでも構いません。例えば、`int * bool * string` という型もできます。
 
-![int*bool*string tuple](../assets/img/tuple_int_bool_str.png)
- 
-Test the usage and signatures:
- 
+![int*bool*string タプル](../assets/img/tuple_int_bool_str.png)
+
+使い勝手とシグネチャを確認してみましょう。
+
 ```fsharp
 let t7 = (42,true,"hello")
 
-// the signature is:
+// シグネチャは以下のようになります。
 val t7 : int * bool * string = (42, true, "hello")
 ```
 
-## Generic tuples
+## ジェネリックタプル
 
-Generics can be used in tuples too.
- 
-!['a*'b tuple](../assets/img/tuple_a_b.png)
+タプルでもジェネリック型を使えます。
 
-The usage is normally associated with functions:
+!['a*'b タプル](../assets/img/tuple_a_b.png)
+
+ジェネリックタプルの使い方は通常、関数と関連しています。
 
 ```fsharp
 let genericTupleFn aTuple = 
    let (x,y) = aTuple
-   printfn "x is %A and y is %A" x y
+   printfn "xは%A、yは%A" x y
 ```
 
-And the function signature is:
+この関数のシグネチャは以下のようになります。
 
 ```fsharp
 val genericTupleFn : 'a * 'b -> unit
 ```
 
-which means that "`genericTupleFn`" takes a generic tuple `('a * 'b)` and returns a `unit`
+つまり、 `genericTupleFn` はジェネリックタプル `('a * 'b)` を受け取り、 `unit` を返します。
 
-## Tuples of complex types
+## 複雑な型のタプル
 
-Any kind of type can be used in a tuple: other tuples, classes, function types, etc.  Here are some examples:
+タプルにはあらゆる種類の型を使えます。他のタプル、クラス、関数型などです。いくつか例を見てみましょう。
 
 ```fsharp
-// define some types
-type Person = {First:string; Last:string}
+// いくつかの型を定義します
+type Person = {First:string、 Last:string}
 type Complex = float * float
 type ComplexComparisonFunction = Complex -> Complex -> int
 
-// define some tuples using them
+// これらを使っていくつかのタプルを定義します
 type PersonAndBirthday = Person * System.DateTime
 type ComplexPair = Complex * Complex
 type ComplexListAndSortFunction = Complex list * ComplexComparisonFunction
 type PairOfIntFunctions = (int->int) * (int->int) 
 ```
 
-## Key points about tuples
+## タプルに関する重要なポイント
 
-Some key things to know about tuples are:
+タプルについて知っておくべき重要事項はいくつかあります。
 
-* 	A particular instance of a tuple type is a *single object*, similar to a two-element array in C#, say. When using them with functions they count as a *single* parameter. 
-* 	Tuple types cannot be given explicit names. The "name" of the tuple type is determined by the combination of types that are multiplied together. 
-* 	The order of the multiplication is important. So `int*string` is not the same tuple type as `string*int`.
-* 	The comma is the critical symbol that defines tuples, not the parentheses. You can define tuples without the parentheses, although it can sometimes be confusing. In F#, if you see a comma, it is probably part of a tuple.
+* タプル型の特定のインスタンスは、C# で言うところの2要素配列のような*単一のオブジェクト*です。関数で使う場合、*単一の*パラメータとして扱われます。
+* タプル型には明示的な名前を付けられません。タプル型の「名前」は、掛け合わされた型の組み合わせによって決まります。
+* 掛け算の順序は重要です。つまり、 `int*string` と `string*int` は異なるタプル型です。
+* タプルを定義する重要な記号はカンマであり、かっこではありません。かっこなしでもタプルを定義できますが、混乱を招く可能性があります。F#では、カンマを見かけたら、それはおそらくタプルの一部です。
 
-These points are very important -- if you don't understand them you will get confused quite quickly!  
+これらのポイントは非常に重要です。理解していないと、すぐに混乱してしまうでしょう。
 
-And it is worth re-iterating the point made in [previous posts](../posts/defining-functions.md): *don't mistake tuples for multiple parameters in a function*.
+そして、[以前の投稿](../posts/defining-functions.md)でも触れたことですが、*関数の複数のパラメータをタプルと間違えないでください*。
 
 ```fsharp
-// a function that takes a single tuple parameter 
-// but looks like it takes two ints
+// 単一のタプルパラメータを取る関数ですが、
+// 2つのintを取るように見えます
 let addConfusingTuple (x,y) = x + y
 ```
 
-## Making and matching tuples 
+## タプルの作成とマッチング
 
-The tuple types in F# are somewhat more primitive than the other extended types. As you have seen, you don't need to explicitly define them, and they have no name.
+F#のタプル型は、他の拡張型よりもやや原始的です。先ほど見たように、明示的に定義する必要はなく、名前もありません。
 
-It is easy to make a tuple -- just use a comma!
+タプルを作るのは簡単です。カンマを使うだけです。
 
 ```fsharp
 let x = (1,2)                 
-let y = 1,2        // it's the comma you need, not the parentheses!      
-let z = 1,true,"hello",3.14   // create arbitrary tuples as needed
+let y = 1,2        // かっこではなく、カンマが必要です。      
+let z = 1,true,"hello",3.14   // 必要に応じて任意のタプルを作れます
 ```
 
-And as we have seen, to "deconstruct" a tuple, use the same syntax:
+そして、先ほど見たように、タプルを「分解」するには、同じ構文を使います。
 
 ```fsharp
-let z = 1,true,"hello",3.14   // "construct"
-let z1,z2,z3,z4 = z           // "deconstruct"
+let z = 1,true,"hello",3.14   // "構築"
+let z1,z2,z3,z4 = z           // "分解"
 ```
 
-When pattern matching like this, you must have the same number of elements, otherwise you will get an error:
+このようなパターンマッチングを行うときは、要素数が同じでなければエラーになります。
 
 ```fsharp
-let z1,z2 = z     // error FS0001: Type mismatch. 
-                  // The tuples have differing lengths
+let z1,z2 = z     // error FS0001: 型が一致しません。
+                  // 型の長さ 2 のタプルが必要です
 ```
 
-If you don't need some of the values, you can use the "don't care" symbol (the underscore) as a placeholder.
+一部の値が不要な場合は、「無視」記号（アンダースコア）をプレースホルダーとして使えます。
 
 ```fsharp
-let _,z5,_,z6 = z     // ignore 1st and 3rd elements
+let _,z5,_,z6 = z     // 1番目と3番目の要素を無視します
 ```
 
-As you might guess, a two element tuple is commonly called a "pair" and a three element tuple is called a "triple" and so on.  In the special case of pairs, there are functions `fst` and `snd` which extract the first and second element. 
+想像できるかもしれませんが、2要素のタプルは「ペア」、3要素のタプルは「トリプル」などと呼ばれます。ペアには特別に `fst` と `snd` という関数があり、それぞれ最初の要素と2番目の要素を取り出します。
 
 ```fsharp
 let x = 1,2
@@ -174,76 +174,76 @@ fst x
 snd x
 ```
 
-They only work on pairs. Trying to use `fst` on a triple will give an error.
+これらはペアでのみ機能します。トリプルに `fst` を使おうとするとエラーになります。
 
 ```fsharp
 let x = 1,2,3
-fst x              // error FS0001: Type mismatch. 
-                   // The tuples have differing lengths of 2 and 3
+fst x              // error FS0001: 型が一致しません。
+                   // 型の長さ 2 のタプルが必要です
 ```
 
-## Using tuples in practice
+## タプルの実践的な使い方
 
-Tuples have a number of advantages over other more complex types. They can be used on the fly because they are always available without being defined, and thus are perfect for small, temporary, lightweight structures.
+タプルは、他のより複雑な型に比べていくつかの利点があります。定義せずにすぐに使えるため、小さくて一時的な軽量な構造体に最適です。
 
-### Using tuples for returning multiple values
+### 複数の値を返すためにタプルを使用する
 
-It is a common scenario that you want to return two values from a function rather than just one.  For example, in the `TryParse` style functions, you want to return (a) whether the value was parsed and (b) if parsed, what the parsed value was.  
+関数から1つではなく2つの値を返したい状況はよくあります。たとえば、 `TryParse` スタイルの関数では、(a) 値が解析されたかどうか、(b) 解析された場合はその解析された値、の2つを返したいでしょう。
 
-Here is an implementation of `TryParse` for integers (assuming it did not already exist, of course):
+以下は整数のための `TryParse` の実装例です（もちろん、まだ存在しないと仮定しています）。
 
 ```fsharp
 let tryParse intStr = 
    try
       let i = System.Int32.Parse intStr
       (true,i)
-   with _ -> (false,0)  // any exception
+   with _ -> (false,0)  // どんな例外でも
 
-//test it
+//テスト
 tryParse "99"
 tryParse "abc"
 ```
 
-Here's another simple example that returns a pair of numbers:
+別の簡単な例として、数値のペアを返すものはこちらです。
 
 ```fsharp
-// return word count and letter count in a tuple
+// 単語数と文字数をタプルで返す
 let wordAndLetterCount (s:string) = 
    let words = s.Split [|' '|]
    let letterCount = words |> Array.sumBy (fun word -> word.Length ) 
    (words.Length, letterCount)
 
-//test
+//テスト
 wordAndLetterCount "to be or not to be"
 ```
 
-### Creating tuples from other tuples
+### 他のタプルからタプルを作成する
 
-As with most F# values, tuples are immutable and the elements within them cannot be assigned to.  So how do you change a tuple? The short answer is that you can't -- you must always create a new one. 
+ほとんどのF#の値と同様に、タプルは不変であり、要素を変更することはできません。では、タプルを変更するにはどうすればよいでしょうか。簡単な答えは、「できない」です。常に新しいタプルを作る必要があります。
 
-Say that you need to write a function that, given a tuple, adds one to each element. Here's an obvious implementation:
+たとえば、タプルを受け取って、各要素に1を加算する関数を書く必要があるとしましょう。以下はわかりやすい実装です。
 
 ```fsharp
 let addOneToTuple aTuple =
    let (x,y,z) = aTuple
-   (x+1,y+1,z+1)   // create a new one
+   (x+1,y+1,z+1)   // 新しいタプルを作成
 
-// try it
+// 試してみる
 addOneToTuple (1,2,3)
 ```
 
-This seems a bit long winded -- is there a more compact way?  Yes, because you can deconstruct a tuple directly in the parameters of a function, so that the function becomes a one liner:
+これは少し長ったらしく見えます。もっとコンパクトな方法はないでしょうか？あります。関数のパラメータでタプルを直接分解できるので、関数を1行にできます。
 
 ```fsharp
 let addOneToTuple (x,y,z) = (x+1,y+1,z+1)
 
-// try it
+// 試してみる
 addOneToTuple (1,2,3)
 ```
 
-### Equality
+### 等価性
 
-Tuples have an automatically defined equality operation: two tuples are equal if they have the same length and the values in each slot are equal.
+タプルには自動的に定義された等価比較演算があります。2つのタプルは、長さが同じで、各スロットの値が等しい場合に等しいとみなされます。
 
 ```fsharp
 (1,2) = (1,2)                      // true
@@ -251,29 +251,29 @@ Tuples have an automatically defined equality operation: two tuples are equal if
 (1,(2,3),4) = (1,(2,3),4)          // true
 ```
 
-Trying to compare tuples of different lengths is a type error:
+長さの異なるタプルを比較しようとすると型エラーになります。
 
 ```fsharp
-(1,2) = (1,2,3)                    // error FS0001: Type mismatch
+(1,2) = (1,2,3)                    // error FS0001: 型が一致しません。
 ```
 
-And the types in each slot must be the same as well:
+また、各スロットの型も同じでなければなりません。
 
 ```fsharp
-(1,2,3) = (1,2,"hello")   // element 3 was expected to have type
-                          // int but here has type string    
-(1,(2,3),4) = (1,2,(3,4)) // elements 2 & 3 have different types
+(1,2,3) = (1,2,"hello")   // 要素3はint型であることが期待されていますが、
+                          // ここではstring型です    
+(1,(2,3),4) = (1,2,(3,4)) // 要素2と3の型が異なります
 ```
 
-Tuples also have an automatically defined hash value based on the values in the tuple, so that tuples can be used as dictionary keys without problems.
+タプルには、タプル内の値に基づいて自動的に定義されたハッシュ値もあります。そのため、タプルを辞書のキーとして問題なく使えます。
 
 ```fsharp
 (1,2,3).GetHashCode()
 ```
 
-### Tuple representation
+### タプルの表現
 
-And as noted in a [previous post](../posts/convenience-types.md), tuples have a nice default string representation, and can be serialized easily.
+[以前の投稿](../posts/convenience-types.md)で述べたように、タプルには便利なデフォルトの文字列表現があり、簡単にシリアライズできます。
 
 ```fsharp
 (1,2,3).ToString()
