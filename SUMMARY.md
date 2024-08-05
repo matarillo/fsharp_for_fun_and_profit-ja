@@ -85,7 +85,7 @@
 * [「F# の型を理解する」 シリーズ](series/understanding-fsharp-types.md)            
   * [F# の型を理解する: はじめに](posts/types-intro.md)
   * [F# の型概要](posts/overview-of-types-in-fsharp.md)
-  * [型省略](posts/type-abbreviations.md)
+  * [型略称](posts/type-abbreviations.md)
   * [タプル](posts/tuples.md)
   * [レコード](posts/records.md)
   * [識別共用体](posts/discriminated-unions.md)

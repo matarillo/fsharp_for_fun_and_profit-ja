@@ -1,23 +1,23 @@
 ---
 layout: post
-title: "Type abbreviations"
-description: "Also known as aliases"
+title: "型略称"
+description: "エイリアスとしても知られています"
 nav: fsharp-types
-seriesId: "Understanding F# types"
+seriesId: "F#の型を理解する"
 seriesOrder: 3
 ---
 
-Let's start with the simplest type definition, a type abbreviation or alias.
+最も単純な型定義として、型略称（エイリアス）があります。
 
-It has the form:
+形式は以下の通りです。
 
 ```fsharp
-type [typename] = [existingType]
+type [型名] = [既存の型]
 ```
 
-where "existing type" can be any type: one of the basic types we have already seen, or one of the extended types we will be seeing soon.
+「既存の型」には、すでに見た基本的な型や、これから見ていく拡張された型など、どんな型でも使えます。
 
-Some examples:
+例をいくつか挙げてみましょう。
 
 ```fsharp
 type RealNumber = float
@@ -29,26 +29,26 @@ type ComplexAdditionFunction =
        ComplexNumber-> ComplexNumber -> ComplexNumber
 ```
 
-And so on -- pretty straightforward.  
+とても分かりやすいですね。
 
-Type abbreviations are useful to provide documentation and avoid writing a signature repeatedly.  In the above examples, `ComplexNumber` and `AdditionFunction` demonstrate this.  
+型略称には二つの利点があります。一つ目は、ドキュメントの役割を果たし、型シグネチャを何度も書く手間を省けることです。上の例では、 `ComplexNumber` と `AdditionFunction` がその例です。
 
-Another use is to provide some degree of decoupling between the usage of a type and the actual implementation of a type. In the above examples, `ProductCode` and `CustomerId` demonstrate this.  I could easily change `CustomerId` to be a string without changing (most of) my code.
+二つ目は、型の使い方と実際の実装をある程度切り離せることです。上の例では、 `ProductCode` と `CustomerId` がこれに該当します。`CustomerId` を簡単に文字列に変更しても、コードの大部分は変更する必要がありません。
 
-However, one thing is to note is that this really is just an alias or abbreviation; you are not actually creating a new type. So if I define a function that I explicitly say is an `AdditionFunction`:
+しかし、重要なのは、これはあくまでエイリアスや略称であり、新しい型を作成しているわけではないということです。したがって、明示的に `AdditionFunction` 型の関数として定義しても、
 
 ```fsharp
 type AdditionFunction = int->int->int
 let f:AdditionFunction = fun a b -> a + b
 ```
 
-the compiler will erase the alias and return a plain `int->int->int` as the function signature.
+コンパイラはエイリアスを無視して、単純な `int->int->int` という関数シグネチャを返します。
 
-In particular, there is no true encapsulation. I could use an explicit `int` anywhere I used a `CustomerId` and the compiler would not complain. And if I had attempted to create safe versions of entity ids such as this:
+特に、本当のカプセル化はできません。 `CustomerId` の代わりに `int` をどこでも使用できますし、コンパイラは警告しません。また、次のようにエンティティIDの安全なバージョンを作ろうとしても、
 
 ```fsharp
 type CustomerId = int
 type OrderId = int
 ```
 
-then I would be disappointed. There would be nothing preventing me from using an `OrderId` in place of a `CustomerId` and vice versa.  To get true encapsulated types like this, we will need to use single case union types, as described in a later post.
+期待通りにはいきません。 `OrderId` を `CustomerId` の代わりに使ったり、その逆をすることも可能です。本当にカプセル化された型を得るには、後の記事で説明する単一ケースのユニオン型を使う必要があります。
