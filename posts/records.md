@@ -1,97 +1,97 @@
 ---
 layout: post
-title: "Records"
-description: "Extending tuples with labels"
+title: "レコード"
+description: "ラベル付きタプルの拡張"
 nav: fsharp-types
-seriesId: "Understanding F# types"
+seriesId: "F#の型を理解する"
 seriesOrder: 5
-categories: [Types]
+categories: [型]
 ---
 
-As we noted in the previous post, plain tuples are useful in many cases. But they have some disadvantages too. Because all tuple types are pre-defined, you can't distinguish between a pair of floats used for geographic coordinates say, vs. a similar tuple used for complex numbers.  And when tuples have more than a few elements, it is easy to get confused about which element is in which place.
+前回の投稿で述べたように、単純なタプルは多くの場面で役立ちます。しかし、欠点もあります。すべてのタプル型はあらかじめ定義されているため、地理座標に使う浮動小数点のペアと、複素数に使う似たようなタプルを区別できません。また、タプルの要素が数個を超えると、どの要素がどの位置にあるのかわかりにくくなります。
 
-In these situations, what you would like to do is *label* each slot in the tuple, which will both document what each element is for and force a distinction between tuples made from the same types.
+こういった状況では、タプルの各スロットに*ラベル*を付けたくなるでしょう。これで、各要素の用途を文書化し、同じ型のタプルを区別することができます。
 
-Enter the "record" type. A record type is exactly that, a tuple where each element is labeled.
+ここで「レコード」型の出番です。レコード型はまさにそのもので、各要素にラベルが付いたタプルです。
 
 ```fsharp
 type ComplexNumber = { real: float; imaginary: float }
 type GeoCoord = { lat: float; long: float }
 ```
 
-A record type has the standard preamble: `type [typename] =` followed by curly braces. Inside the curly braces is a list of `label: type` pairs, separated by semicolons (remember, all lists in F# use semicolon separators -- commas are for tuples). 
+レコード型は標準的な前置き `type [型名] =` に続いて波かっこを使います。波かっこの中には `ラベル: 型` のペアがセミコロンで区切られてリストになっています（F#のすべてのリストはセミコロンで区切られることを覚えておいてください。カンマはタプル用です）。
 
-Let's compare the "type syntax" for a record type with a tuple type:
+レコード型とタプル型の「型構文」を比べてみましょう。
 
 ```fsharp
 type ComplexNumberRecord = { real: float; imaginary: float }
 type ComplexNumberTuple = float * float
 ```
 
-In the record type, there is no "multiplication", just a list of labeled types.
+レコード型には「乗算」はなく、ラベル付きの型がリストになっています。
 
 <div class="alert alert-info">
-Relational database theory uses a similar "record type" concept. In the relational model, a relation is a (possibly empty) finite set of tuples all having the same finite set of attributes. This set of attributes is familiarly referred to as the set of column names.
+リレーショナルデータベース理論では、似たような「レコード型」の概念を使います。リレーショナルモデルでは、関係 (リレーション) は同じ有限の属性集合を持つタプルの（空かもしれない）有限集合です。この属性の集合は、普通、列名 (カラム名) の集合と呼ばれています。
 </div>
 
-## Making and matching records
+## レコードの作成とマッチング
 
-To create a record value, use a similar format to the type definition, but using equals signs after the labels. This is called a "record expression."
+レコード値を作るには、型定義と似た形式を使いますが、ラベルの後に等号を使います。これは「レコード式」と呼ばれます。
 
 ```fsharp
 type ComplexNumberRecord = { real: float; imaginary: float }
-let myComplexNumber = { real = 1.1; imaginary = 2.2 } // use equals!
+let myComplexNumber = { real = 1.1; imaginary = 2.2 } // 等号を使う！
 
-type GeoCoord = { lat: float; long: float } // use colon in type
-let myGeoCoord = { lat = 1.1; long = 2.2 }  // use equals in let
+type GeoCoord = { lat: float; long: float } // 型ではコロンを使う
+let myGeoCoord = { lat = 1.1; long = 2.2 }  // letでは等号を使う
 ```
 
-And to "deconstruct" a record, use the same syntax:
+レコードを「分解」するには、同じ構文を使います。
 
 ```fsharp
-let myGeoCoord = { lat = 1.1; long = 2.2 }   // "construct"
-let { lat=myLat; long=myLong } = myGeoCoord  // "deconstruct"
+let myGeoCoord = { lat = 1.1; long = 2.2 }   // "構築"
+let { lat=myLat; long=myLong } = myGeoCoord  // "分解"
 ```
 
-As always, if you don't need some of the values, you can use the underscore as a placeholder; or more cleanly, just leave off the unwanted label altogether.
+いつものように、一部の値が要らない場合はアンダースコアをプレースホルダーとして使えます。あるいは、もっと簡単に、要らないラベルを完全に省略することもできます。
 
 ```fsharp
-let { lat=_; long=myLong2 } = myGeoCoord  // "deconstruct"
-let { long=myLong3 } = myGeoCoord         // "deconstruct"
+let { lat=_; long=myLong2 } = myGeoCoord  // "分解"
+let { long=myLong3 } = myGeoCoord         // "分解"
 ```
 
-If you just need a single property, you can use dot notation rather than pattern matching.
+単一のプロパティだけが必要な場合は、パターンマッチングの代わりにドット表記を使えます。
 
 ```fsharp
 let x = myGeoCoord.lat
 let y = myGeoCoord.long
 ```
 
-Note that you can leave a label off when deconstructing, but not when constructing:
+分解時にはラベルを省略できますが、構築時には省略できないことに注意してください。
 
 ```fsharp
-let myGeoCoord = { lat = 1.1; }  // error FS0764: No assignment
-                                 // given for field 'long' 
+let myGeoCoord = { lat = 1.1; }  // error FS0764: 型 'GeoCoord' のフィールド 'long' に
+                                 // 割り当てが指定されていません
 ```
 
 <div class="alert alert-info">
-One of the most noticeable features of record types is use of curly braces. Unlike C-style languages, curly braces are rarely used in F# -- only for records, sequences, computation expressions (of which sequences are a special case), and object expressions (creating implementations of interfaces on the fly). These other uses will be discussed later.
+レコード型の最も目立つ特徴の1つは波かっこの使用です。C言語系の言語とは違い、F#では波かっこはほとんど使いません。レコード、シーケンス、コンピュテーション式（シーケンスはその特殊な場合）、およびオブジェクト式（インターフェースの実装をその場で作る）にのみ使います。これらの他の用途については後で説明します。
 </div>
 
-### Label order
+### ラベルの順序
 
-Unlike tuples, the order of the labels is not important. So the following two values are the same:
+タプルとは違い、レコードではラベルの順序は重要ではありません。したがって、以下の2つの値は同じです。
 
 ```fsharp
 let myGeoCoordA = { lat = 1.1; long = 2.2 }    
-let myGeoCoordB = { long = 2.2; lat = 1.1 }   // same as above
+let myGeoCoordB = { long = 2.2; lat = 1.1 }   // 上と同じ
 ```
 
-### Naming conflicts
+### 名前の衝突
 
-In the examples above, we could construct a record by just using the label names "`lat`" and "`long`". Magically, the compiler knew what record type to create. (Well, in truth, it was not really that magical, as only one record type had those exact labels.)
+上記の例では、ラベル名 `lat` と `long` だけでレコードを構築できました。不思議なことに、コンパイラはどのレコード型を作るべきか知っていました（実際には、それほど不思議ではありません。正確に一致するラベルを持つレコード型は1つしかなかっただけです）。
 
-But what happens if there are two record types with the same labels? How can the compiler know which one you mean?  The answer is that it can't -- it will use the most recently defined type, and in some cases, issue a warning.  Try evaluating the following:
+でも、同じラベルを持つレコード型が 2 つ存在した場合はどうなるでしょうか？コンパイラは、どちらを意味しているのか区別できるでしょうか？答えは、区別できない、です。コンパイラは最後に定義された型を使い、場合によっては警告を出します。以下を評価してみてください。
 
 ```fsharp
 type Person1 = {first:string; last:string}
@@ -99,22 +99,22 @@ type Person2 = {first:string; last:string}
 let p = {first="Alice"; last="Jones"}  
 ```
 
-What type is `p`?  Answer: `Person2`, which was the last type defined with those labels.
+`p` の型は何でしょうか？答えは `Person2` です。これは、そのラベルを持つ最後に定義された型です。
 
-And if you try to deconstruct, you will get a warning about ambiguous field labels.
+そして、分解しようとすると、あいまいなフィールドラベルに関する警告が出ます。
 
 ```fsharp
 let {first=f; last=l} = p
 ```
 
-How can you fix this? Simply by adding the type name as a qualifier to at least one of the labels. 
+これを修正するには、少なくとも1つのラベルに型名を修飾子として加えるだけです。
 
 ```fsharp
 let p = {Person1.first="Alice"; last="Jones"}
 let { Person1.first=f; last=l} = p
 ```
 
-If needed, you can even add a fully qualified name (with namespace). Here's an example using [modules](../posts/organizing-functions.md).
+必要なら、完全修飾名（名前空間付き）を追加することもできます。以下は[モジュール](../posts/organizing-functions.md)を使った例です。
 
 ```fsharp
 module Module1 = 
@@ -128,59 +128,59 @@ module Module3 =
            Module1.Person.last="Jones"}
 ```
 
-Of course, if you can ensure there is only one version in the local namespace, you can avoid having to do this at all.
+もちろん、ローカル名前空間に1つのバージョンしかないことが確認できれば、これを一切行う必要はありません。
 
 ```fsharp
 module Module3b = 
-  open Module1                   // bring into the local namespace
-  let p = {first="Alice"; last="Jones"}  // will be Module1.Person
+  open Module1                   // ローカル名前空間に取り込む
+  let p = {first="Alice"; last="Jones"}  // Module1.Personになる
 ```
 
-The moral of the story is that when defining record types, you should try to use unique labels if possible, otherwise you will get ugly code at best, and unexpected behavior at worst.
+要するに、レコード型を定義する際には、できるだけ一意のラベルを使うべきということです。そうしないと、コードの見栄えが悪くなるか、最悪の場合は予期しない動作をすることになります。
 
 <div class="alert alert-info">
-Note that in F#, unlike some other functional languages, two types with exactly the same structural definition are not the same type. This is called a "nominal" type system, where two types are only equal if they have the same name, as opposed to a "structural" type system, where definitions with identical structures will be the same type regardless of what they are called.
+F#では、他の一部の関数型言語とは違い、構造がまったく同じ 2 つの型は同じ型ではありません。これは「公称型システム」と呼ばれ、2つの型は名前が同じ場合にのみ等しくなります。これに対して、「構造的型システム」では、同一の構造を持つ定義は、名前が異なっていても同じ型になります。
 </div>
 
-## Using records in practice
+## レコード型の実践的な使い方
 
-How can we use records? Let us count the ways...
+レコード型はどのように使えるでしょうか？いくつか見ていきましょう。
 
-### Using records for function results
+### 関数の戻り値としてレコードを使う
 
-Just like tuples, records are useful for passing back multiple values from a function. Let's revisit the tuple examples described earlier, rewritten to use records instead:
+タプルと同じく、レコードは関数から複数の値を返すのに便利です。先ほど説明したタプルの例を、レコードを使って書き直してみましょう。
 
 ```fsharp
-// the tuple version of TryParse
+// TryParseのタプルバージョン
 let tryParseTuple intStr = 
    try
       let i = System.Int32.Parse intStr
       (true,i)
-   with _ -> (false,0)  // any exception
+   with _ -> (false,0)  // どんな例外でも
 
-// for the record version, create a type to hold the return result
+// レコードバージョンでは、戻り値を保持する型を作る
 type TryParseResult = {success:bool; value:int} 
 
-// the record version of TryParse
+// TryParseのレコードバージョン
 let tryParseRecord intStr = 
    try
       let i = System.Int32.Parse intStr
       {success=true;value=i}
    with _ -> {success=false;value=0}  
 
-//test it
+// テスト
 tryParseTuple "99"
 tryParseRecord "99"
 tryParseTuple "abc"
 tryParseRecord "abc"
 ```
 
-You can see that having explicit labels in the return value makes it much easier to understand (of course, in practice we would probably use an `Option` type, discussed later).
+戻り値に明示的なラベルがあると、理解がとても簡単になることがわかります（もちろん、実際には後で説明する `Option` 型を使うでしょう）。
 
-And here's the word and letter count example using records rather than tuples:
+そして、タプルではなくレコードを使った、単語と文字数のカウントの例です。
 
 ```fsharp
-//define return type
+// 戻り値の型を定義
 type WordAndLetterCountResult = {wordCount:int; letterCount:int} 
 
 let wordAndLetterCount (s:string) = 
@@ -188,85 +188,85 @@ let wordAndLetterCount (s:string) =
    let letterCount = words |> Array.sumBy (fun word -> word.Length ) 
    {wordCount=words.Length; letterCount=letterCount}
 
-//test
+// テスト
 wordAndLetterCount "to be or not to be"
 ```
 
-### Creating records from other records
+### 他のレコードからレコードを作る
 
-Again, as with most F# values, records are immutable and the elements within them cannot be assigned to.  So how do you change a record? Again the answer is that you can't -- you must always create a new one. 
+ほとんどの F# の値と同じく、レコードは不変で、要素を変更することはできません。では、レコードを変更するにはどうすればいいでしょうか？ここでも答えは「変更できない」です。常に新しいレコードを作る必要があります。
 
-Say that you need to write a function that, given a `GeoCoord` record, adds one to each element. Here it is:
+例えば、 `GeoCoord` レコードを受け取って、各要素に1を加える関数を書くとしましょう。 以下のようにできます。
 
 ```fsharp
 let addOneToGeoCoord aGeoCoord =
    let {lat=x; long=y} = aGeoCoord
-   {lat = x + 1.0; long = y + 1.0}   // create a new one
+   {lat = x + 1.0; long = y + 1.0}   // 新しいものを作る
 
-// try it
+// 試してみる
 addOneToGeoCoord {lat=1.1; long=2.2}
 ```
 
-But again you can simplify by deconstructing directly in the parameters of a function, so that the function becomes a one liner:
+ここでも、関数のパラメータで直接分解することで簡単にでき、関数は1行になります。
 
 ```fsharp
 let addOneToGeoCoord {lat=x; long=y} = {lat=x+1.0; long=y+1.0}
 
-// try it
+// 試してみる
 addOneToGeoCoord {lat=1.0; long=2.0}
 ```
 
-or depending on your taste, you can also use dot notation to get the properties:
+または、好みに応じてドット表記を使ってプロパティを取得することもできます。
 
 ```fsharp
 let addOneToGeoCoord aGeoCoord =
    {lat=aGeoCoord.lat + 1.0; long= aGeoCoord.long + 1.0}   
 ```
 
-In many cases, you just need to tweak one or two fields and leave all the others alone. To make life easier, there is a special syntax for this common case, the "`with`" keyword. You start with the original value, followed by "with" and then the fields you want to change. Here are some examples:
+多くの場合、1つか2つのフィールドだけを調整し、他のすべてをそのままにしておく必要があります。このよくあるケースを簡単にするために、特別な構文があります。それが `with` キーワードです。元の値から始まり、"with" が続き、その後に変更したいフィールドを指定します。例をいくつか示します。
 
 ```fsharp
 let g1 = {lat=1.1; long=2.2}
-let g2 = {g1 with lat=99.9}   // create a new one
+let g2 = {g1 with lat=99.9}   // 新しいものを作る
 
 let p1 = {first="Alice"; last="Jones"}  
 let p2 = {p1 with last="Smith"}  
 ```
 
-The technical term for "with" is a copy-and-update record expression.
+"with" の技術用語は、「コピーおよび更新のレコード式」です。
 
-### Record equality
+### レコードの等価性
 
-Like tuples, records have an automatically defined equality operation: two records are equal if they have the same type and the values in each slot are equal.
+タプルと同じく、レコードには自動的に定義された等価比較演算があります。2つのレコードは、同じ型を持ち、各スロットの値が等しい場合に等しいとみなされます。
 
-And records also have an automatically defined hash value based on the values in the record, so that records can be used as dictionary keys without problems.
+また、レコードには自動的に定義されたハッシュ値もあり、これはレコード内の値に基づいています。そのため、レコードを辞書のキーとして問題なく使えます。
 
 ```fsharp
 {first="Alice"; last="Jones"}.GetHashCode()
 ```
 
-### Record representation
+### レコードの表現
 
-As noted in a [previous post](../posts/convenience-types.md), records have a nice default string representation, and can be serialized easily. But unlike tuples, the `ToString()` representation is unhelpful.
+[以前の投稿](../posts/convenience-types.md)で述べたように、レコードにはデフォルトできれいな文字列表現があり、簡単にシリアル化できます。しかし、タプルとは違い、`ToString()` の表現は役に立ちません。
 
 ```fsharp
-printfn "%A" {first="Alice"; last="Jones"}   // nice
-{first="Alice"; last="Jones"}.ToString()     // ugly
-printfn "%O" {first="Alice"; last="Jones"}   // ugly
+printfn "%A" {first="Alice"; last="Jones"}   // 良い
+{first="Alice"; last="Jones"}.ToString()     // 醜い
+printfn "%O" {first="Alice"; last="Jones"}   // 醜い
 ```
 
-## Sidebar: %A vs. %O in print format strings
+## サブコーナー：print フォーマット文字列での %A vs. %O
 
-We just saw that print format specifiers `%A` and `%O` produce very different results for the same record:
+先ほど、同じレコードに対して print フォーマット指定子 `%A` と `%O` がまったく違う結果を生むことを確認しました。
 
 ```fsharp
 printfn "%A" {first="Alice"; last="Jones"}
 printfn "%O" {first="Alice"; last="Jones"}
 ```
 
-So why the difference?
+なぜこんな違いがあるのでしょうか？
 
-`%A` prints the value using the same pretty printer that is used for interactive output. But `%O` uses `Object.ToString()`, which means that if the `ToString` method is not overridden, `%O` will give the default (and generally unhelpful) output.  So in general, you should try to use `%A` to `%O` where possible, because the core F# types do have pretty-printing by default.  
+`%A` は、対話式出力に使うのと同じプリティプリンターを使って値を出力します。一方、 `%O` は `Object.ToString()` を使います。これは、`ToString` メソッドをオーバーライドしていない場合、 `%O` はデフォルトの（通常は役に立たない）出力を生むことを意味します。したがって、普通は `%O` より `%A` を使うようにしてください。コアの F# 型はデフォルトでプリティプリントを持っているからです。
 
-But note that the F# "class" types do *not* have a standard pretty printed format, so `%A` and `%O` are equally uncooperative unless you override `ToString`.
+ただし、F# の「クラス」型は標準のプリティプリント形式を持たないため、 `ToString` をオーバーライドしない限り、 `%A` と `%O` は同様に非協力的だということに注意してください。
 
