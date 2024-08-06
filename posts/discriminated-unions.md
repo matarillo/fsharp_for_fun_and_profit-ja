@@ -1,31 +1,31 @@
 ---
 layout: post
-title: "Discriminated Unions"
-description: "Adding types together"
+title: "判別共用体"
+description: "型を足し合わせる"
 nav: fsharp-types
-seriesId: "Understanding F# types"
+seriesId: "F#の型を理解する"
 seriesOrder: 6
-categories: [Types]
+categories: [型]
 ---
 
 
-Tuples and records are examples of creating new types by "multiplying" existing types together.  At the beginning of the series, I mentioned that the other way of creating new types was by "summing" existing types. What does this mean?
+タプルやレコードは、既存の型を「掛け合わせる」ことで新しい型を作る例です。このシリーズの冒頭で、新しい型を作るもう一つの方法は、既存の型を「足し合わせる」ことだと述べました。これはどういう意味でしょうか。
 
-Well, let's say that we want to define a function that works with integers OR booleans, maybe to convert them into strings.  But we want to be strict and not accept any other type (such as floats or strings). Here's a diagram of such as function:
+例えば、整数またはブール値を処理して文字列に変換する関数を定義したいとします。ただし、厳密に整数と真偽値だけを受け入れ、浮動小数点数や文字列などは受け入れたくありません。このような関数を図で表すと次のようになります。
 
-![function from int union bool](../assets/img/fun_int_union_bool.png)
- 
-How could we represent the domain of this function?
+![整数または真偽値を受け取る関数](../assets/img/fun_int_union_bool.png)
 
-What we need is a type that represents all possible integers PLUS all possible booleans. 
- 
-![int union bool](../assets/img/int_union_bool.png)
- 
-In other words, a "sum" type. In this case the new type is the "sum" of the integer type plus the boolean type.
+この関数の定義域はどう表現できるでしょうか。
 
-In F#, a sum type is called a "discriminated union" type.  Each component type (called a *union case*) must be tagged with a label (called a *case identifier* or *tag*) so that they can be told apart ("discriminated"). The labels can be any identifier you like, but must start with an uppercase letter.
+必要なのは、取り得るすべての整数と、取り得るすべての真偽値を合わせた型です。
 
-Here's how we might define the type above:
+![整数と真偽値の和集合](../assets/img/int_union_bool.png)
+
+つまり、「直和」の型です。この場合、新しい型は整数型と真偽値型を「足し合わせた」ものになります。
+
+F#では、直和型を「判別共用体」型と呼びます。各構成要素（共用体の*ケース*と呼ばれます）の型には、区別（判別）できるようにラベル（*ケース識別子* または *タグ*と呼ばれます）を付ける必要があります。ラベルには任意の識別子を使えますが、大文字で始める必要があります。
+
+上記の型は次のように定義できます。
 
 ```fsharp
 type IntOrBool = 
@@ -33,101 +33,101 @@ type IntOrBool =
   | B of bool
 ```
 
-The "I" and the "B" are just arbitrary labels; we could have used any other labels that were meaningful.
+「I」と「B」は任意のラベルです。意味のあるラベルを使うこともできます。
 
-For small types, we can put the definition on one line:
+小さな型の場合は、定義を1行で書くこともできます。
 
 ```fsharp
 type IntOrBool = I of int | B of bool
 ```
 
-The component types can be any other type you like, including tuples, records, other union types, and so on.
+構成要素の型には、タプル、レコード、他の共用体型など、好きな型を使えます。
 
 ```fsharp
-type Person = {first:string; last:string}  // define a record type 
+type Person = {first:string; last:string}  // レコード型の定義
 type IntOrBool = I of int | B of bool
 
 type MixedType = 
-  | Tup of int * int  // a tuple
-  | P of Person       // use the record type defined above
-  | L of int list     // a list of ints
-  | U of IntOrBool    // use the union type defined above
+  | Tup of int * int  // タプル
+  | P of Person       // 上で定義したレコード型を使う
+  | L of int list     // 整数のリスト
+  | U of IntOrBool    // 上で定義した共用体型を使う
 ```
 
-You can even have types that are recursive, that is, they refer to themselves. This is typically how tree structures are defined. Recursive types will be discussed in more detail shortly.
+自身を参照する再帰的な型を定義することもできます。これは通常、ツリー構造を定義する際に使います。再帰型については後ほど詳しく説明します。
 
-### Sum types vs. C++ unions and VB variants
+### 直和型 vs C++のunionとVBのvariant
 
-At first glance, a sum type might seem similar to a union type in C++ or a variant type in Visual Basic, but there is a key difference. The union type in C++ is not type-safe and the data stored in the type can be accessed using any of the possible tags.  An F# discriminated union type is safe, and the data can only be accessed one way.  It really is helpful to think of it as a sum of two types (as shown in the diagram), rather than as just an overlay of data.
+一見すると、直和型はC++のunion型やVisual BasicのVariant型に似ているように見えるかもしれません。しかし、重要な違いがあります。C++のunion型は型安全ではなく、格納されたデータは可能なタグのどれを使ってもアクセスできます。一方、F#の判別共用体型は安全であり、データには一つの方法でしかアクセスできません。直和型を（図に示したように）二つの型の和と考える方が、単なるデータのオーバーレイと考えるよりも実際には役に立ちます。
 
-## Key points about union types
+## 共用体型に関する重要なポイント
 
-Some key things to know about union types are:
+共用体型について知っておくべき重要な点は次のとおりです。
 
-* 	The vertical bar is optional before the first component, so that the following definitions are all equivalent, as you can see by examining the output of the interactive window:
+* 最初の構成要素の前の縦棒は省略できます。以下の定義はすべて同等です。インタラクティブウィンドウの出力を見れば分かります。
 
 ```fsharp
-type IntOrBool = I of int | B of bool     // without initial bar
-type IntOrBool = | I of int | B of bool   // with initial bar
+type IntOrBool = I of int | B of bool     // 最初の縦棒なし
+type IntOrBool = | I of int | B of bool   // 最初の縦棒あり
 type IntOrBool = 
    | I of int 
-   | B of bool      // with initial bar on separate lines
+   | B of bool      // 別々の行に書いた場合の最初の縦棒
 ```
 
-* 	The tags or labels must start with an uppercase letter. So the following will give an error:
+* タグまたはラベルは大文字で始める必要があります。次の例はエラーになります。
 
 ```fsharp
 type IntOrBool = int of int| bool of bool
-//  error FS0053: Discriminated union cases 
-//                must be uppercase identifiers
+//  error FS0053: 小文字で区別される和集合のケースは、
+//                RequireQualifiedAccess 属性を使用する場合にのみ許可されます
 ```
 
-* 	Other named types (such as `Person` or `IntOrBool`) must be pre-defined outside the union type.  You can't define them "inline" and write something like this:
+* 他の名前付き型（ `Person` や `IntOrBool` など）は、共用体型の外部であらかじめ定義されている必要があります。「インライン」で定義することはできません。
 
 ```fsharp
 type MixedType = 
-  | P of  {first:string; last:string}  // error
+  | P of  {first:string; last:string}  // エラー
 ```
 
-or
+または
 
 ```fsharp
 type MixedType = 
-  | U of (I of int | B of bool)  // error
+  | U of (I of int | B of bool)  // エラー
 ```
 
-* 	The labels can be any identifier, including the names of the component type themselves, which can be quite confusing if you are not expecting it. For example, if the `Int32` and `Boolean` types (from the `System` namespace) were used instead, and the labels were named the same, we would have this perfectly valid definition:
+* ラベルには任意の識別子を使えます。構成要素の型の名前自体をラベルとして使うこともできますが、予想していなかった場合は混乱する可能性があります。例えば、`System`名前空間から`Int32`型と`Boolean`型を使い、ラベルも同じ名前にした場合、次のような完全に有効な定義になります。
 
 ```fsharp
 open System
 type IntOrBool = Int32 of Int32 | Boolean of Boolean
 ```
 
-This "duplicate naming" style is actually quite common, because it documents exactly what the component types are.
+この「重複する名前付け」スタイルは実際によく使用されます。構成要素の型が何であるかを正確に文書化できるためです。
 
-## Constructing a value of a union type
+## 共用体型の値の構築
 
-To create a value of a union type, you use a "constructor" that refers to only one of the possible union cases. The constructor then follows the form of the definition, using the case label as if it were a function. In the `IntOrBool` example, you would write:
+共用体型の値を作るには、ひとつのケースだけを参照する「コンストラクタ」を使います。コンストラクタは、定義されている形式に沿って、ケースラベルをあたかも関数のように使って値を作成します。 `IntOrBool` の例では、次のように書きます。
 
 ```fsharp
 type IntOrBool = I of int | B of bool
 
-let i  = I 99    // use the "I" constructor
+let i  = I 99    // "I"コンストラクタを使う
 // val i : IntOrBool = I 99
 
-let b  = B true  // use the "B" constructor
+let b  = B true  // "B"コンストラクタを使う
 // val b : IntOrBool = B true
 ```
 
-The resulting value is printed out with the label along with the component type:
+結果の値は、ラベルと構成要素の型とともに次のように表示されます。
 
 ```fsharp
-val [value name] : [type]    = [label] [print of component type]
-val i            : IntOrBool = I       99
-val b            : IntOrBool = B       true
+val [値の名前]: [型]      = [ラベル] [構成要素の型の表示]
+val i         : IntOrBool = I        99
+val b         : IntOrBool = B        true
 ```
 
-If the case constructor has more than one "parameter", you construct it in the same way that you would call a function:
+ケースコンストラクタに複数の「パラメータ」がある場合も、関数を呼び出すのと同じ方法で作成します。
 
 ```fsharp
 type Person = {first:string; last:string}
@@ -136,14 +136,14 @@ type MixedType =
   | Tup of int * int
   | P of Person
 
-let myTup  = Tup (2,99)    // use the "Tup" constructor
+let myTup  = Tup (2,99)    // "Tup"コンストラクタを使う
 // val myTup : MixedType = Tup (2,99)
 
-let myP  = P {first="Al"; last="Jones"} // use the "P" constructor
-// val myP : MixedType = P {first = "Al";last = "Jones";}
+let myP  = P {first="太郎"; last="山田"} // "P"コンストラクタを使う
+// val myP : MixedType = P {first = "太郎";last = "山田"; }
 ```
 
-The case constructors for union types are normal functions, so you can use them anywhere a function is expected. For example, in `List.map`:
+共用体型のケースコンストラクタは通常の関数なので、関数が使える場所ならどこでも使えます。例えば、 `List.map` の中で使うことができます。
 
 ```fsharp
 type C = Circle of int | Rectangle of int * int
@@ -156,31 +156,31 @@ type C = Circle of int | Rectangle of int * int
 |> List.map Rectangle
 ```
 
-### Naming conflicts
+### 名前の競合
 
-If a particular case has a unique name, then the type to construct will be unambiguous. 
+ケースに固有の名前が付けられていれば、作成する型は明確になります。
 
-But what happens if you have two types which have cases with the same labels? 
+しかし、異なる型で同じラベルを持つケースがある場合はどうなるでしょうか。
 
 ```fsharp
 type IntOrBool1 = I of int | B of bool
 type IntOrBool2 = I of int | B of bool
 ```
 
-In this case, the last one defined is generally used:
+この場合、一般的には最後に定義されたものが使われます。
 
 ```fsharp
-let x = I 99                // val x : IntOrBool2 = I 99
+let x = I 99                // val x: IntOrBool2 = I 99
 ```
 
-But it is much better to explicitly qualify the type, as shown:
+ですが、明示的に型を修飾するのがより望ましい方法です。
 
 ```fsharp
 let x1 = IntOrBool1.I 99    // val x1 : IntOrBool1 = I 99
 let x2 = IntOrBool2.B true  // val x2 : IntOrBool2 = B true
 ```
 
-And if the types come from different modules, you can use the module name as well:
+型が異なるモジュールから来ている場合は、モジュール名も使えます。
 
 ```fsharp
 module Module1 = 
@@ -194,71 +194,71 @@ module Module3 =
 ```
 
 
-### Matching on union types
+### 共用体型のパターンマッチング
 
-For tuples and records, we have seen that "deconstructing" a value uses the same model as constructing it.  This is also true for union types, but we have a complication: which case should we deconstruct?
+タプルやレコードでは、値の「分解」は作成と同じモデルを使うことを見てきました。これは共用体型でも同様ですが、どのケースを分解すべきかが問題になります。
 
-This is exactly what the "match" expression is designed for. As you should now realize, the match expression syntax has parallels to how a union type is defined.
+これこそが、**match 式**が設計された目的です。ご存じのように、match式の構文は共用体型の定義と似ています。
 
 ```fsharp
-// definition of union type
+// 共用体型の定義
 type MixedType = 
   | Tup of int * int
   | P of Person
 
-// "deconstruction" of union type
+// 共用体型の「分解」
 let matcher x = 
   match x with
   | Tup (x,y) -> 
-        printfn "Tuple matched with %i %i" x y
+        printfn "タプルがマッチしました。%i %i" x y
   | P {first=f; last=l} -> 
-        printfn "Person matched with %s %s" f l
+        printfn "Personがマッチしました。%s %s" f l
 
-let myTup = Tup (2,99)                 // use the "Tup" constructor
+let myTup = Tup (2,99)                 // "Tup"コンストラクタを使う
 matcher myTup  
 
-let myP = P {first="Al"; last="Jones"} // use the "P" constructor
+let myP = P {first="太郎"; last="山田"} // "P"コンストラクタを使う
 matcher myP
 ```
 
-Let's analyze what is going on here:  
+ここで何が起こっているか分析してみましょう。
 
-* 	Each "branch" of the overall match expression is a pattern expression that is designed to match the corresponding case of the union type.
-* 	The pattern starts with the tag for the particular case, and then the rest of the pattern deconstructs the type for that case in the usual way.
-* 	The pattern is followed by an arrow "->" and then the code to execute.
+* match式の「分岐」は、共用体型の各ケースにマッチするように設計されたパターン式です。
+* パターンは、特定のケースのタグで始まり、その後、通常の方法でそのケースの型を分解します。
+* パターンの後には矢印 ( `->` ) が続き、その後に実行するコードが来ます。
 
 
-## Empty cases
+## 空のケース
 
-The label for a union case does not have to have to have any type after it. The following are all valid union types:
+共用体のケースラベルの後には、型がなくても構いません。以下はすべて有効な共用体型です。
 
 ```fsharp
 type Directory = 
-  | Root                   // no need to name the root
-  | Subdirectory of string // other directories need to be named 
+  | Root                   // ルートに名前は不要
+  | Subdirectory of string // 他のディレクトリには名前が必要
 
 type Result = 
-  | Success                // no string needed for success state
-  | ErrorMessage of string // error message needed 
+  | Success                // 成功状態に文字列は不要
+  | ErrorMessage of string // エラーメッセージが必要
 ```
 
-If *all* the cases are empty, then we have an "enum style" union:
+すべてのケースが空の場合、「列挙型スタイル」の共用体になります。
 
 ```fsharp
 type Size = Small | Medium | Large
 type Answer = Yes | No | Maybe
 ```
 
-Note that this "enum style" union is *not* the same as a true C# enum type, discussed later.
+ただし、この「列挙型スタイル」の共用体は、後で説明する真の C# 列挙型とは異なります。
 
-To create an empty case, just use the label as a constructor without any parameters:
+空のケースを作るには、パラメータなしでラベルをコンストラクタとして使うだけです。
 
 ```fsharp
 let myDir1 = Root
 let myDir2 = Subdirectory "bin"
 
 let myResult1 = Success
-let myResult2 = ErrorMessage "not found"
+let myResult2 = ErrorMessage "見つかりません"
 
 let mySize1 = Small
 let mySize2 = Medium
@@ -266,83 +266,83 @@ let mySize2 = Medium
 
 <a id="single-case"></a>
 
-## Single cases
+## 単一ケース
 
-Sometimes it is useful to create union types with only one case. This might be seem useless, because you don't seem to be adding value. But in fact, this a very useful practice that can enforce type safety*.
+時には、1つのケースだけを持つ共用体型を作ると便利な場合があります。これは一見無意味に思えるかもしれません。価値を追加しているようには見えないからです。しかし実際には、型安全性を強化できる非常に便利な手法です*。
 
-<sub>* And in a future series we'll see that, in conjuction with module signatures, single case unions can also help with data hiding and capability based security.<sub>
+<sub>* 今後のシリーズでは、モジュールシグネチャと組み合わせることで、単一ケースの共用体がデータ隠蔽やケイパビリティベースのセキュリティにも役立つことを見ていきます。</sub>
 
-For example, let's say that we have customer ids and order ids which are both represented by integers, but that they should never be assigned to each other.
+たとえば、整数で表される顧客 ID と注文 ID があり、それらが互いに割り当てるべきではないという場合を考えてみましょう。
 
-As we saw before, a type alias approach will not work, because an alias is just a synonym and doesn't create a distinct type.  Here's how you might try to do it with aliases:
+前述のように、型エイリアスのアプローチでは機能しません。エイリアスは単なる同義語であり、独立した型を作らないからです。以下は、エイリアスを使って試す方法です。
 
 ```fsharp
-type CustomerId = int   // define a type alias
-type OrderId = int      // define another type alias
+type CustomerId = int   // 型エイリアスを定義
+type OrderId = int      // 別の型エイリアスを定義
 
 let printOrderId (orderId:OrderId) = 
-   printfn "The orderId is %i" orderId
+   printfn "注文IDは %i です" orderId
 
-//try it
-let custId = 1          // create a customer id
-printOrderId custId   // Uh-oh! 
+// 試してみる
+let custId = 1          // 顧客IDを作る
+printOrderId custId   // おっと！ 
 ```
 
-But even though I explicitly annotated the `orderId` parameter to be of type `OrderId`, I can't ensure that customer ids are not accidentally passed in.
+`orderId` パラメータを明示的に `OrderId` 型として注釈を付けましたが、顧客IDが誤って渡されるのを防げません。
 
-On the other hand, if we create simple union types, we can easily enforce the type distinctions.
+一方、単純な共用体型を作れば、型の区別を簡単に強制できます。
 
 ```fsharp
-type CustomerId = CustomerId of int   // define a union type 
-type OrderId = OrderId of int         // define another union type 
+type CustomerId = CustomerId of int   // 共用体型を定義 
+type OrderId = OrderId of int         // 別の共用体型を定義 
 
-let printOrderId (OrderId orderId) =  // deconstruct in the param
-   printfn "The orderId is %i" orderId
+let printOrderId (OrderId orderId) =  // パラメータで分解
+   printfn "注文IDは %i です" orderId
 
-//try it
-let custId = CustomerId 1             // create a customer id
-printOrderId custId                   // Good! A compiler error now.
+// 試してみる
+let custId = CustomerId 1             // 顧客IDを作る
+printOrderId custId                   // 良い！ コンパイラエラーになります
 ```
 
-This approach is feasible in C# and Java as well, but is rarely used because of the overhead of creating and managing the special classes for each type.  In F# this approach is lightweight and therefore quite common.
+このアプローチは C# や Java でも可能ですが、各型用に特別なクラスを作り管理するオーバーヘッドがあるため、あまり使いません。F#ではこのアプローチが軽量であるため、かなり一般的です。
 
-A convenient thing about single case union types is you can pattern match directly against a value without having to use a full `match-with` expression.
+単一ケースの共用体型の便利な点は、完全な `match-with` 式を使わずに、値に対して直接パターンマッチングができることです。
 
 ```fsharp
-// deconstruct in the param
+// パラメータで分解
 let printCustomerId (CustomerId customerIdInt) =     
-   printfn "The CustomerId is %i" customerIdInt
+   printfn "顧客IDは %i です" customerIdInt
 
-// or deconstruct explicitly through let statement
+// または、letステートメントで明示的に分解
 let printCustomerId2 custId =     
-   let (CustomerId customerIdInt) = custId  // deconstruct here
-   printfn "The CustomerId is %i" customerIdInt
+   let (CustomerId customerIdInt) = custId  // ここで分解
+   printfn "顧客IDは %i です" customerIdInt
 
-// try it
-let custId = CustomerId 1             // create a customer id
+// 試してみる
+let custId = CustomerId 1             // 顧客IDを作る
 printCustomerId custId                   
 printCustomerId2 custId                   
 ```
 
-But a common "gotcha" is that in some cases, the pattern match must have parens around it, otherwise the compiler will think you are defining a function!
+ただし、よくある「落とし穴」として、場合によってはパターンマッチにかっこが必要です。そうしないと、コンパイラは関数を定義していると勘違いしてしまいます！
 
 ```fsharp
 let custId = CustomerId 1                
-let (CustomerId customerIdInt) = custId  // Correct pattern matching
-let CustomerId customerIdInt = custId    // Wrong! New function?
+let (CustomerId customerIdInt) = custId  // 正しいパターンマッチング
+let CustomerId customerIdInt = custId    // 間違い！ 新しい関数？
 ```
 
-Similarly, if you ever do need to create an enum-style union type with a single case, you will have to start the case with a vertical bar in the type definition; otherwise the compiler will think you are creating an alias.
+同様に、単一ケースの列挙型スタイルの共用体型を作る必要がある場合は、型定義でケースを縦棒で始める必要があります。そうしないと、コンパイラはエイリアスを作っていると勘違いします。
 
 ```fsharp
-type TypeAlias = A     // type alias!
-type SingleCase = | A   // single case union type
+type TypeAlias = A     // 型エイリアス！
+type SingleCase = | A   // 単一ケースの共用体型
 ```
 
 
-## Union equality ##
+## 共用体の等価性
 
-Like other core F# types, union types have an automatically defined equality operation: two unions are equal if they have the same type and the same case and the values for that case is equal.
+他のF#のコア型と同様に、共用体型には自動的に定義された等価比較演算子があります。二つの共用体は、同じ型で同じケースを持ち、そのケースの値が等しい場合に等しいとみなされます。
 
 ```fsharp
 type Contact = Email of string | Phone of int
@@ -354,14 +354,14 @@ let areEqual = (email1=email2)
 ```
 
 
-## Union representation ##
+## 共用体の表現
 
-Union types have a nice default string representation, and can be serialized easily. But unlike tuples, the ToString() representation is unhelpful.
+共用体型には、デフォルトで適切な文字列表現があり、簡単にシリアル化できます。しかし、タプルとは異なり、ToString()の表現は役に立ちません。
 
 ```fsharp
 type Contact = Email of string | Phone of int
 let email = Email "bob@example.com"
-printfn "%A" email    // nice
-printfn "%O" email    // ugly!
+printfn "%A" email    // 良い
+printfn "%O" email    // 醜い！
 ```
 
