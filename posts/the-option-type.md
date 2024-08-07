@@ -1,101 +1,101 @@
 ---
 layout: post
-title: "The Option type"
-description: "And why it is not null or nullable"
+title: "`Option` 型"
+description: "そしてなぜそれがnullやnullable型ではないのか"
 nav: fsharp-types
-seriesId: "Understanding F# types"
+seriesId: "F#の型を理解する"
 seriesOrder: 7
-categories: [Types]
+categories: [型]
 ---
 
-Now let's look at a particular union type, the Option type. It is so common and so useful that it is actually built into the language.
+さて、特別な共用体型である `Option` 型を見てみましょう。この型は非常によく使われ、便利なので、言語に組み込まれています。
 
-You have already seen the option type discussed in passing, but let's go back to basics and understand how it fits into the type system.
+`Option` 型についてすでに簡単に説明しましたが、基本に立ち返って、型システムにおける `Option` 型の位置づけを理解しましょう。
 
-A very common situation is when you want to represent missing or invalid values. Using a diagram, the domain would look like this:
+欠損値や無効な値を表したいという状況はよくあります。図で表すと、定義域は次のようになります。
 
 ![int option](../assets/img/int_option.png)
  
-Obviously this calls for some kind of union type!  
+これは明らかに何らかの共用体型を使うべき状況です！
 
-In F#, it is called the `Option` type, and is defined as union type with two cases: `Some` and `None`.  A similar type is common in functional languages: OCaml and Scala also call it `Option`, while Haskell calls it `Maybe`.
+F#では、これを `Option` 型と呼び、 `Some` と `None` の2つのケースを持つ共用体型として定義しています。同様の型は関数型言語でよく見られます。OCamlやScalaでも `Option` と呼び、Haskellでは `Maybe` と呼びます。
 
-Here is a definition:
+以下がその定義です。
 
 ```fsharp
-type Option<'a> =       // use a generic definition  
-   | Some of 'a           // valid value
-   | None                 // missing
+type Option<'a> =       // ジェネリックな定義を使う  
+   | Some of 'a           // 有効な値
+   | None                 // 欠損値
 ```
 
 <div class="alert alert-error">
-IMPORTANT: if you evaluate this in the interactive window, be sure to reset the session afterwards, so that the built-in type is restored.
+<strong>重要</strong>: これをインタラクティブウィンドウで評価する場合は、その後必ずセッションをリセットして、組み込み型を復元してください。
 </div>
 
-The option type is used in the same way as any union type in construction, by specifying one of the two cases, the `Some` case or the `None` case:
+`Option` 型は、他の共用体型と同じように使います。構築時には、 `Some` ケースか `None` ケースのいずれかを指定します。
 
 ```fsharp
 let validInt = Some 1
 let invalidInt = None
 ```
 
-and when pattern matching, as with any union type, you must always match all the cases:
+パターンマッチングでは、他の共用体型と同様に、常にすべてのケースをマッチさせる必要があります。
 
 ```fsharp
 match validInt with 
-| Some x -> printfn "the valid value is %A" x
-| None -> printfn "the value is None" 
+| Some x -> printfn "有効な値は %A です" x
+| None -> printfn "値はNoneです" 
 ```
 
-When defining a type that references the Option type, you must specify the generic type to use.  You can do this in an explicit way, with angle brackets, or use the built-in "`option`" keyword which comes after the type. The following examples are identical:
+`Option` 型を参照する型を定義する際は、使うジェネリック型を指定する必要があります。これは、山かっこを使って明示的に行うか、型の後に組み込みの `option` キーワードを使って行います。以下の例は同じ意味です。
 
 ```fsharp
-type SearchResult1 = Option<string>  // Explicit C#-style generics 
-type SearchResult2 = string option   // built-in postfix keyword
+type SearchResult1 = Option<string>  // 明示的なC#スタイルのジェネリクス 
+type SearchResult2 = string option   // 組み込みの後置キーワード
 ```
 
 
 
 
-## Using the Option type 
+## `Option` 型の使い方 
 
-The option type is widely used in the F# libraries for values that might be missing or otherwise invalid.
+`Option` 型は、F#ライブラリで欠損値や無効な値を表すためによく使われています。
 
-For example, the `List.tryFind` function returns an option, with the `None` case used indicate that nothing matches the search predicate.
+例えば、 `List.tryFind` 関数は `Option` 型を返し、検索条件に一致するものがない場合に `None` ケースを使って示します。
 
 ```fsharp
 [1;2;3;4]  |> List.tryFind (fun x-> x = 3)  // Some 3
 [1;2;3;4]  |> List.tryFind (fun x-> x = 10) // None
 ```
 
-Let's revisit the same example we used for tuples and records, and see how options might be used instead:
+タプルとレコードで使ったのと同じ例を再度見て、代わりに `Option` 型をどのように使えるかを見てみましょう。
 
 ```fsharp
-// the tuple version of TryParse
+// TryParseのタプルバージョン
 let tryParseTuple intStr = 
    try
       let i = System.Int32.Parse intStr
       (true,i)
-   with _ -> (false,0)  // any exception
+   with _ -> (false,0)  // どの例外でも
 
-// for the record version, create a type to hold the return result
+// レコードバージョンでは、戻り値を保持する型を作る
 type TryParseResult = {success:bool; value:int} 
 
-// the record version of TryParse
+// TryParseのレコードバージョン
 let tryParseRecord intStr = 
    try
       let i = System.Int32.Parse intStr
       {success=true;value=i}
    with _ -> {success=false;value=0}  
 
-// the option version of TryParse
+// TryParseのOptionバージョン
 let tryParseOption intStr = 
    try
       let i = System.Int32.Parse intStr
       Some i
    with _ -> None
 
-//test it
+// テスト
 tryParseTuple "99"
 tryParseRecord "99"
 tryParseOption "99"
@@ -104,13 +104,13 @@ tryParseRecord "abc"
 tryParseOption "abc"
 ```
 
-Of these three approaches, the "option" version is generally preferred; no new types need to be defined and for simple cases, the meaning of `None` is obvious from the context.
+これら3つのアプローチの中で、一般的には "option" バージョンが好まれます。新しい型を定義する必要がなく、単純なケースでは `None` の意味が文脈から明らかだからです。
 
-*NOTE: The `tryParseOption` code is just an example. A similar function `tryParse` is built into the .NET core libraries and should be used instead.*
+*注: `tryParseOption` コードは単なる例です。同様の `tryParse` 関数が.NETコアライブラリに組み込まれているので、代わりにそちらを使うべきです。*
 
-### Option equality 
+### Optionの等価性 
 
-Like other union types, option types have an automatically defined equality operation
+他の共用体型と同様に、 `Option` 型には自動的に定義された等価演算子があります。
 
 ```fsharp
 let o1 = Some 42
@@ -120,62 +120,62 @@ let areEqual = (o1=o2)
 ```
 
 
-### Option representation
+### Optionの表現
 
-Option types have a nice default string representation, and unlike other union types, the `ToString()` representation is also nice.
+`Option` 型には優れたデフォルトの文字列表現があります。他の共用体型とは異なり、 `ToString()` 表現も良好です。
 
 ```fsharp
 let o = Some 42
-printfn "%A" o   // nice
-printfn "%O" o   // nice
+printfn "%A" o   // 良い
+printfn "%O" o   // 良い
 ```
 
-### Options are not just for primitive types
+### Optionはプリミティブ型だけのものではない
 
-The F# option is a true first class type (it's just a normal union type, after all). You can use it with *any* type.  For example, you can have an option of a complex type like Person,
-or a tuple type like `int*int`, or a function type like `int->bool`, or even an option of an option type.
+F#の `Option` は真の第一級型です。つまり、通常の共用体型にすぎないので、*どんな*型にも使えます。
+例えば、 `Person` のような複雑な型の `Option` 、 `int*int` のようなタプル型の `Option` 、 `int->bool` のような関数型の `Option` 、さらには `Option` 型の `Option` などを持つことができます。
 
 ```fsharp
 type OptionalString = string option 
-type OptionalPerson = Person option       // optional complex type
+type OptionalPerson = Person option       // 複雑な型のOption
 type OptionalTuple = (int*int) option       
-type OptionalFunc = (int -> bool) option  // optional function
-type NestedOptionalString = OptionalString option //nested options!
+type OptionalFunc = (int -> bool) option  // 関数のOption
+type NestedOptionalString = OptionalString option // ネストしたOption！
 type StrangeOption = string option option option
 ```
 
-## How the Option type should not be used
+## `Option` 型の正しい使い方
 
-The option type has functions such as `IsSome`, `IsNone` and `Value`, which allow you to access the "wrapped" value without doing pattern matching. Don't use them! Not only it is not idiomatic, but it is dangerous and can cause exceptions.
+`Option` 型は `IsSome` 、 `IsNone` 、 `Value` などの関数を使って、パターンマッチングせずに「ラップされた」値にアクセスできますが、これらを使わないようにしましょう！これは慣用的な使い方ではなく、危険で例外を引き起こす可能性があります。
 
-Here is how not to do it:
+以下は、やってはいけない例です。
 
 ```fsharp
 let x = Some 99
 
-// testing using IsSome
-if x.IsSome then printfn "x is %i" x.Value   // ugly!!
+// IsSomeを使ってテスト
+if x.IsSome then printfn "xは %i です" x.Value   // 醜い！！
 
-// no matching at all
-printfn "x is %i" x.Value   // ugly and dangerous!!
+// まったくマッチングしない
+printfn "xは %i です" x.Value   // 醜くて危険！！
 ```
 
-Here is how to do it properly:
+そして、こちらが正しい使い方です。
 
 ```fsharp
 let x = Some 99
 match x with 
-| Some i -> printfn "x is %i" i
-| None -> () // what to do here?
+| Some i -> printfn "xは %i です" i
+| None -> () // ここで何をすべきか？
 ```
 
-The pattern matching approach also forces you to think about and document what happens in the `None` case, which you might easily overlook when using `IsSome`.
+パターンマッチングを行うと、`None` ケースで何が起こるかを考えたり、ドキュメント化したりする必要が出てきます。 `IsSome` を使うと、この点を見落としがちです。
 
-## The Option module
+## Option モジュール
 
-If you are doing a lot of pattern matching on options, look into the `Option` module, as it has some useful helper functions like `map`, `bind`, `iter` and so on.
+Optionに対して多くのパターンマッチングを行っている場合は、`Option` モジュールを利用しましょう。このモジュールには、 `map` 、 `bind` 、 `iter` など、便利なヘルパー関数があります。
 
-For example, say that I want to multiply the value of an option by 2 if it is valid. Here's the pattern matching way:
+例えば、Optionの値が有効な場合に値を2倍したいとします。パターンマッチングによる方法はこちらです。
 ```fsharp
 let x = Some 99
 let result = match x with 
@@ -183,14 +183,14 @@ let result = match x with
 | None -> None
 ```
 
-And here's a more compact version written using `Option.map`:
+そして、 `Option.map` を使ったよりコンパクトな書き方がこちらです。
 
 ```fsharp
 let x = Some 99
 x |> Option.map (fun v -> v * 2)
 ```
 
-Or perhaps I want to multiply the value of an option by 2 if it is valid but return 0 if it is `None`. Here's the pattern matching way:
+さらに、Optionの値が有効なら2倍して、 `None` なら0を返したいとします。パターンマッチングによる方法はこちらです。
 
 ```fsharp
 let x = Some 99
@@ -199,14 +199,14 @@ let result = match x with
 | None -> 0
 ```
 
-And here's the same thing as a one-liner using `Option.fold`:
+そして、同じことを `Option.fold` を使って一行で書くこともできます。
 
 ```fsharp
 let x = Some 99
 x |> Option.fold (fun _ v -> v * 2) 0 
 ```
 
-In simple cases like the one above, the `defaultArg` function can be used as well.
+上記のような単純なケースでは、 `defaultArg` 関数も使えます。
 
 ```fsharp
 let x = Some 99
@@ -217,13 +217,15 @@ defaultArg x 0
 <a id="option-is-not-null"></a>
 ## Option vs. Null vs. Nullable
 
-The option type often causes confusion to people who are used to dealing with nulls and nullables in C# and other languages. This section will try to clarify the differences.
+`Option` 型は、C#やその他の言語で null やヌル許容型を扱ってきた人たちにとっては混乱の原因になることがよくあります。このセクションでは、それらの違いを説明します。
 
-### Type safety of Option vs. null 
+### Optionと null の型安全性 
 
-In a language like C# or Java, "null" means a reference or pointer to an object that doesn't exist.  The "null" has *exactly the same type* as the object, so you can't tell from the type system that you have a null. 
+C#やJavaのような言語では、 "null" は存在しないオブジェクトへの参照やポインタを意味します。 "null" はオブジェクトと*まったく同じ型*を持つので、型システムからは nullになりえるかどうかを判断できません。*
 
-For example, in the C# code below we create two string variables, one with a valid string and one with a null string. 
+*訳注: C# 8.0以降には「null許容参照型」が追加されているため、オブジェクトがnullになりえるかを型で区別できるようになっています。
+
+例えば、以下のC#コードでは、有効な文字列を持つ変数と、null文字列を持つ変数の2つの文字列変数を作ります。
 
 ```csharp
 string s1 = "abc";
@@ -233,107 +235,107 @@ string s2 = null;
 var len2 = s2.Length;
 ```
 
-This compiles perfectly, of course. The compiler cannot tell the difference between the two variables.
-The `null` is exactly the same type as the valid string, so all the `System.String` methods and properties can be used on it, including the `Length` property. 
+これはもちろん、問題なくコンパイルされます。コンパイラは2つの変数の違いを判断できません。
+`null` は有効な文字列と **まったく同じ型** なので、`System.String` のメソッドやプロパティをすべて使えます。 `Length` プロパティも使えます。
 
-Now, we know that this code will fail by just looking at it, but the compiler can't help us.  Instead, as we all know, you have to tediously test for nulls constantly.
+この時点で、このコードがエラーになることは明らかですが、コンパイラは助けてくれません。そのため、皆さんご存知の通り、常に null をチェックする必要が出てきます。
 
-Now let's look at the nearest F# equivalent of the C# example above. In F#, to indicate missing data, you would use an option type and set it to `None`. (In this artificial example we have to use an ugly explicitly typed `None` -- normally this would not be necessary.)
+では、上記のC#の例に最も近いF#の例を見てみましょう。F#では、欠損データを示すために`Option` 型を使い、 `None` に設定します。（この例では、わざと明示的に型付けされた`None`を使っていますが、通常は必要ありません。）
 
 ```fsharp
 let s1 = "abc"
-var len1 = s1.Length
+let len1 = s1.Length
 
-// create a string option with value None
+// Noneの値を持つstring optionを作る
 let s2 = Option<string>.None
 let len2 = s2.Length
 ```
 
-In the F# version, we get a *compile-time* error immediately.  The `None` is *not* a string, it's a different type altogether, so you can't call `Length` on it directly.
-And to be clear, `Some [string]` is *also* not the same type as `string`, so you can't call `Length` on it either!  
+F#のバージョンでは、*コンパイル時*エラーがすぐに発生します。 `None` は文字列ではなく、まったく別の型なので、直接`Length`を呼び出せません。
+さらに補足すると、 `Some [string]` *も* `string` と異なる型なので、こちらも `Length` を呼び出せません！
 
-So if `Option<string>` is not a string, but you want to do something with the string it (might) contain, you are forced to have to pattern match on it (assuming you don't do bad things as described earlier).
+つまり、 `Option<string>` が文字列ではなく、その中に（もしかしたら）含まれている文字列で何かをしたい場合、パターンマッチングを強制されます（前述の悪い方法を使わない限り）。
 
 ```fsharp
 let s2 = Option<string>.None
 
-//which one is it?
+// どちらのケースか？
 let len2 = match s2 with
 | Some s -> s.Length
 | None -> 0
 ```
 
-You always have to pattern match, because given a value of type `Option<string>`, you can't tell whether it is Some or None.
+`Option<string>` 型の値が与えられた場合、それがそれが `Some` なのか `None` なのかを判断できないため、常にパターンマッチングを行う必要があります。
 
-In just the same way `Option<int>` is not the same type as `int`, `Option<bool>` is not the same type as `bool`, and so on. 
+同様に、 `Option<int>` は `int` とは異なる型であり、`Option<bool>` は `bool` とは異なる型です。
 
-To summarize the critical points:
+要点をまとめます。
 
-* The type "`string option`" is not at all the same type as "`string`". You cannot cast from `string option` to `string` -- they do not have the same properties.
-  A function that works with `string` will not work with `string option`, and vice versa.  So the type system will prevent any errors.
-* On the other hand, a "null string" in C# is exactly the same type as "string". You cannot tell them apart at compile time, only at run time. A "null string" appears to have all the same properties and functions as a valid string, except that your code will blow up when you try to use it!
+* `string option` 型は `string` 型とまったく異なるものです。 `string option` から `string` へのキャストはできません。両者は同じプロパティを持っていません。
+  `string` を扱う関数は `string option` では動きません。その逆も然りです。型システムがエラーを防いでくれます。
+* 一方、C#の「null文字列」は `string` 型とまったく同じ型です。コンパイル時には区別できず、実行時にのみ判断できます。「null文字列」は有効な文字列と同じプロパティや関数を持っているように見えますが、使おうとするとコードがクラッシュします！
 
-### Nulls vs. missing data
+### Nullと欠損データ
 
-A "null" as used in C# is completely different from the concept of "missing" data, which is a valid part of modeling any system in any language.
+C#で使うnullは、あらゆるシステムのモデル化において、言語にかかわらず有効な概念である「欠損」データの概念とはまったく異なります。
 
-In a true functional language there can be a concept of missing data, but there can be no such thing as "null", because the concepts of "pointers" or "uninitialized variables" do not exist in the functional way of thinking.  
+真の関数型言語では、欠損データの概念は存在しますが、「null」のようなものは存在しません。「ポインタ」や「初期化されていない変数」の概念は関数型の考え方には存在しないからです。
 
-For example, consider a value bound to the result of an expression like this:
+例えば、次のような式の結果に束縛された値を考えてみましょう。
 
 ```fsharp
 let x = "hello world"
 ```
 
-How can that value ever be uninitialized, or become null, or even become any other value at all? 
+この値が初期化されていない状態になったり、nullになったり、あるいは他の値になったりするでしょうか？
 
-Unfortunately, additional confusion has been caused because in some cases API designers have used null to indicate the concept of "missing" data as well!  For example, the .NET library method `StreamReader.ReadLine` returns null to indicate that there is no more data in a file.
+残念ながら、APIの設計者が「欠損」データの概念を示すためにnullを使ったケースもあり、混乱が生じています！ 例えば、.NETライブラリの `StreamReader.ReadLine` メソッドは、ファイルにこれ以上データがないことを示すためにnullを返します。
 
 
-### F# and null ###
+### F#とnull ###
 
-F# is not a pure functional language, and has to interact with the .NET languages that *do* have the concept of null. Therefore, F# does include a `null` keyword in its design, but makes it hard to use and treats it as an abnormal value.
+F#は純粋な関数型言語ではなく、nullの概念を持つ.NET言語と相互作用する必要があります。そのため、F# の設計には `null` キーワードが含まれていますが、使いにくく異常な値として扱われます。
 
-As a general rule, nulls are never created in "pure" F#, but only by interacting with the .NET libraries or other external systems. 
+一般的なルールとして、「純粋な」F#ではnullは決して作られず、.NETライブラリや他の外部システムとの相互作用でのみ現れます。
 
-Here are some examples:
+以下に例を示します。
 
 ```fsharp
-// pure F# type is not allowed to be null (in general)
+// 純粋なF#型は（一般的に）nullにはできません
 type Person = {first:string; last:string}  
-let p : Person = null                      // error! 
+let p : Person = null                      // エラー！ 
 
-// type defined in CLR, so is allowed to be null
-let s : string = null                      // no error! 
-let line = streamReader.ReadLine()         // no error if null 
+// CLRで定義された型なので、nullが許可されています
+let s : string = null                      // エラーなし！ 
+let line = streamReader.ReadLine()         // nullでもエラーなし 
 ```
 
-In these cases, it is good practice to immediately check for nulls and convert them into an option type!  
+このような場合、すぐにnullをチェックして `Option` 型に変換するのが良い習慣です！
 
 ```fsharp
-// streamReader example
-let line = match streamReader.ReadLine()  with
+// streamReaderの例
+let line = match streamReader.ReadLine() with
            | null -> None
            | line -> Some line
 
-// environment example
+// 環境変数の例
 let GetEnvVar var = 
     match System.Environment.GetEnvironmentVariable(var) with
     | null -> None
     | value -> Some value
 
-// try it
+// 試してみる
 GetEnvVar "PATH"
 GetEnvVar "TEST"
 ```
 
-And on occasion, you may need to pass a null to an external library. You can do this using the `null` keyword as well.
+また、場合によっては、外部ライブラリに null を渡す必要があるかもしれません。その場合は `null` キーワードが使えます。
 
 ### Option vs. Nullable
 
-In addition to null, C# has the concept of a Nullable type, such as `Nullable<int>`, which seems similar to the option type. So what's the difference?
+C#には null に加えて、 `Nullable<int>` のようなNullable型があり、 `Option` 型に似ているように見えます。では、どこが違うのでしょうか？
 
-The basic idea is the same, but Nullable is much weaker.  It only works on value types such as `Int` and `DateTime`, not on reference types such as strings or classes or functions. You can't nest Nullables, and they don't have much special behavior. 
+基本的な考え方は同じですが、Nullableははるかに弱いものです。`Int` や`DateTime` のような値型でのみ動き、文字列やクラス、関数のような参照型では動きません。Nullableをネストすることはできず、特別な振る舞いもほとんどありません。
 
-On the other hand, the F# option is a true first class type and can be used consistently across all types in the same way. (See the examples above in the "Options are not just for primitive types" section.)
+一方、F#のOptionは真の第一級型であり、すべての型で一貫して同じように使えます（「Optionはプリミティブ型だけのものではない」セクションの例を参照してください）。
 
