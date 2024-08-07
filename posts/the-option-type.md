@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "`Option` 型"
-description: "そしてなぜそれがnullやnullable型ではないのか"
+description: "そしてなぜそれがnullやnull許容型ではないのか"
 nav: fsharp-types
 seriesId: "F#の型を理解する"
 seriesOrder: 7
@@ -217,7 +217,7 @@ defaultArg x 0
 <a id="option-is-not-null"></a>
 ## Option vs. Null vs. Nullable
 
-`Option` 型は、C#やその他の言語で null やヌル許容型を扱ってきた人たちにとっては混乱の原因になることがよくあります。このセクションでは、それらの違いを説明します。
+`Option` 型は、C#やその他の言語で null やnull許容型を扱ってきた人たちにとっては混乱の原因になることがよくあります。このセクションでは、それらの違いを説明します。
 
 ### Optionと null の型安全性 
 

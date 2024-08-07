@@ -796,7 +796,7 @@ let loopAndSum3 aList = List.fold (fun sum i -> sum+i) 0 aList
 [1..10] |> loopAndSum3 
 ```
 
-同様に、[こちらの記事](../posts/the-option-type.html)で詳しく説明した Option 型には、多くの便利な関数を持つ `Option` モジュールが関連付けられています。
+同様に、[こちらの記事](../posts/the-option-type.html)で詳しく説明したオプション型には、多くの便利な関数を持つ `Option` モジュールが関連付けられています。
 
 たとえば、 `Some` と `None` に対してマッチングする関数は、 `Option.map` で置き換えられます。
 

@@ -356,13 +356,13 @@ let generateEmail() =
 
 ここまでは順調です。
 
-次に`age`カラムに移りますが、これはnullable（null許容）です。これは、ランダムな`int`を生成するのではなく、
+次に`age`カラムに移りますが、これはnull許容型です。これは、ランダムな`int`を生成するのではなく、
 ランダムな`Nullable<int>`を生成する必要があることを意味します。ここで型チェックが本当に役立ちます - コンパイラがそれを考慮するよう強制してくれます。
 すべてのケースをカバーするために、20回に1回の割合でnull値を生成することにします。
 
 ```fsharp
-// ランダムなnullable ageを生成。
-// ageがnullableであるため、
+// ランダムなnull許容 ageを生成。
+// ageがnull許容型であるため、
 // コンパイラはそれを考慮するよう強制する
 let generateAge() = 
     let nonNullAgeGenerator = 

@@ -89,7 +89,7 @@
   * [タプル](posts/tuples.md)
   * [レコード](posts/records.md)
   * [判別共用体](posts/discriminated-unions.md)
-  * [Option 型](posts/the-option-type.md)
+  * [オプション型](posts/the-option-type.md)
   * [列挙型](posts/enum-types.md)
   * [組み込みの .NET 型](posts/cli-types.md)
   * [測定単位](posts/units-of-measure.md)

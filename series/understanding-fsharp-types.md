@@ -18,7 +18,7 @@ F#には、一般的な.NETの型に加えて、関数型言語では当たり�
 * [タプル](../posts/tuples.md)。型をかけ合わせる。
 * [レコード](../posts/records.md)。ラベル付きタプルを拡張。
 * [判別共用体](../posts/discriminated-unions.md)。型を足し合わせる。
-* [オプション型](../posts/the-option-type.md)。nullやnullable型との違い。
+* [オプション型](../posts/the-option-type.md)。nullやnull許容型との違い。
 * [列挙型](../posts/enum-types.md)。共用体型とは別物。
 * [組み込みの.NET型](../posts/cli-types.md)。int、string、bool型など。
 * [測定単位](../posts/units-of-measure.md)。数値の型安全性を確保。
