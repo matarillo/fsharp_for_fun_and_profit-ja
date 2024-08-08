@@ -1,19 +1,19 @@
 ---
 layout: post
-title: "Units of measure"
-description: "Type safety for numerics"
+title: "測定単位"
+description: "数値型の型安全性"
 nav: fsharp-types
-seriesId: "Understanding F# types"
+seriesId: "F#の型を理解する"
 seriesOrder: 11
 ---
 
-As we mentioned [earlier in the "F# を使う理由" series](../posts/correctness-type-checking.md#units-of-measure), F# has a very cool feature which allows you to add extra unit-of-measure information to as metadata to numeric types. 
+以前の「[F#を使う理由](../posts/correctness-type-checking.md#units-of-measure)」シリーズで触れたように、F#には数値型にメタデータとして測定単位情報を加えられる、とても便利な機能があります。
 
-The F# compiler will then make sure that only numerics with the same unit-of-measure can be combined. This can be very useful to stop accidental mismatches and to make your code safer.
+F#コンパイラは、同じ測定単位を持つ数値だけを組み合わせられるようにします。これにより、誤った組み合わせを防ぎ、コードの安全性を高めます。
 
-## Defining units of measure
+## 測定単位の定義
 
-A unit of measure definition consists of the attribute `[<Measure>]`, followed by the `type` keyword and then a name. For example:
+測定単位の定義は、 `[<Measure>]` 属性に続けて `type` キーワードと名前を指定します。
 
 ```fsharp
 [<Measure>] 
@@ -23,14 +23,14 @@ type cm
 type inch
 ```
 
-Often you will see the whole definition written on one line instead:
+多くの場合、定義は 1 行で記述されます。
 
 ```fsharp
 [<Measure>] type cm
 [<Measure>] type inch
 ```
 
-Once you have a definition, you can associate a measure type with a numeric type by using angle brackets with measure name inside:
+定義ができたら、数値型と測定単位を関連付けるには、山かっこ内に測定単位名を入れます。
 
 ```fsharp
 let x = 1<cm>    // int
@@ -38,7 +38,7 @@ let y = 1.0<cm>  // float
 let z = 1.0m<cm> // decimal 
 ```
 
-You can even combine measures within the angle brackets to create compound measures:
+山かっこ内で測定単位を組み合わせて、複合単位を作ることもできます。
 
 ```fsharp
 [<Measure>] type m
@@ -52,9 +52,9 @@ let acceleration = 2.0<m/sec^2>
 let force = 5.0<kg m/sec^2>    
 ```
 
-### Derived units of measure
+### 派生の測定単位
 
-If you use certain combinations of units a lot, you can define a *derived* measure and use that instead.
+特定の単位の組み合わせをよく使う場合、*派生*の測定単位を定義して使えます。
 
 ```fsharp
 [<Measure>] type N = kg m/sec^2
@@ -65,17 +65,18 @@ let force2 = 5.0<N>
 force1 = force2 // true
 ```
 
-### SI units and constants
+### SI単位と定数
 
-If you are using the units-of-measure for physics or other scientific applications, you will definitely want to use the SI units and related constants. You don't need to define all these yourself! These are predefined for you and available as follows:
+物理学やその他の科学系アプリケーションで測定単位を使うなら、SI単位と関連する定数を利用したいでしょう。これらをすべて自分で定義する必要はありません。以下のように、あらかじめ定義されています。
 
-* In F# 3.0 and higher (which shipped with Visual Studio 2012), these are built into the core F# libraries in the `Microsoft.FSharp.Data.UnitSystems.SI` namespace (see the [MSDN page](http://msdn.microsoft.com/en-us/library/hh289707.aspx)). 
-* In F# 2.0 (which shipped with Visual Studio 2010), you will have to install the F# powerpack to get them. (The F# powerpack is on Codeplex at http://fsharppowerpack.codeplex.com).
+* F# 4.1以降（Visual Studio 2017に同梱）では、これらはコアF#ライブラリの `FSharp.Data.UnitSystems.SI` 名前空間に組み込まれています（F# Core Library Documentationの[UnitNames](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-data-unitsystems-si-unitnames.html)と[UnitSymbols](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-data-unitsystems-si-unitsymbols.html)を参照）。
+* F# 3.0（Visual Studio 2012に同梱）では、これらはコアF#ライブラリの `Microsoft.FSharp.Data.UnitSystems.SI` 名前空間に組み込まれています（GitHubの[MicrosoftDocs/visualfsharpdocs アーカイブ](https://github.com/MicrosoftDocs/visualfsharpdocs/blob/main/docs/conceptual/microsoft.fsharp.data.unitsystems.si-namespace-%5Bfsharp%5D.md)を参照）。
+* F# 2.0（Visual Studio 2010に同梱）では、F# powerpackをインストールして入手する必要があります（F# powerpackは https://github.com/fsprojects-archive/zzarchive-powerpack にアーカイブされています）。
 
 
-## Type checking and type inference
+## 型チェックと型推論
 
-The units-of-measure are just like proper types; you get static checking *and* type inference.
+測定単位は通常の型と同じように扱います。静的チェック*と*型推論の両方が行われます。
 
 ```fsharp
 [<Measure>] type foot
@@ -83,28 +84,28 @@ The units-of-measure are just like proper types; you get static checking *and* t
 
 let distance = 3.0<foot>    
 
-// type inference for result
+// 結果の型推論
 let distance2 = distance * 2.0
 
-// type inference for input and output
+// 入力と出力の型推論
 let addThreeFeet ft = 
     ft + 3.0<foot>    
 ```
 
-And of course, when using them, the type checking is strict:
+もちろん、使う時には厳密な型チェックが行われます。
 
 ```fsharp
-addThreeFeet 1.0        //error
-addThreeFeet 1.0<inch>  //error
-addThreeFeet 1.0<foot>  //OK
+addThreeFeet 1.0        // エラー
+addThreeFeet 1.0<inch>  // エラー
+addThreeFeet 1.0<foot>  // OK
 ```
 
 
 
-### Type annotations
+### 型注釈
 
-If you want to be explicit in specifying a unit-of-measure type annotation, you can do so in the usual way. 
-The numeric type must have angle brackets with the unit-of-measure.
+測定単位の型注釈を明示的に指定したい場合は、通常の方法で行えます。
+数値型には山かっこで測定単位を付ける必要があります。
 
 ```fsharp
 let untypedTimesThree (ft:float) = 
@@ -115,10 +116,10 @@ let footTimesThree (ft:float<foot>) =
 ```
 
     
-### Combining units of measure with multiplication and division
+### 乗算と除算による測定単位の組み合わせ
 
-The compiler understands how units of measure transform when individual values are multiplied or divided.  
-For example, in the following, the `speed` value has been automatically given the measure `<m/sec>`.
+コンパイラは、個々の値が乗算または除算されたとき、測定単位がどう変換されるかを理解します。
+たとえば以下の例では、 `speed` 値には自動的に `<m/sec>` という測定単位が割り当てられます。
 
 ```fsharp
 [<Measure>] type m
@@ -133,57 +134,57 @@ let mass = 5.0<kg>
 let force = mass * speed/time
 ```
 
-Look at the types of the `acceleration` and `force` values above to see other examples of how this works.
+上記の `acceleration` と `force` の型を見ると、この仕組みの他の例を理解できるでしょう。
 
 
-## Dimensionless values
+## 無次元の値
 
-A numeric value without any specific unit of measure is called *dimensionless*. If you want to be explicit that a value is dimensionless, you can use the measure called `1`.
+特定の測定単位を持たない数値は*無次元*と呼びます。値が無次元であることを明示したい場合は、 `1` という測定単位を使えます。
 
 ```fsharp
-// dimensionless
+// 無次元
 let x = 42
 
-// also dimensionless
+// これも無次元
 let x = 42<1>
 ```
 
-### Mixing units of measure with dimensionless values
+### 測定単位と無次元の値の混在
 
-Note that you cannot *add* a dimensionless value to a value with a unit of measure, but you can *multiply or divide* by dimensionless values.
+無次元の値を測定単位を持つ値に*足す*ことはできませんが、無次元の値を*掛けたり割ったり*することはできます。
 
 ```fsharp
-// test addition
+// 加算のテスト
 3.0<foot> + 2.0<foot>  // OK
-3.0<foot> + 2.0        // error
+3.0<foot> + 2.0        // エラー
 
-// test multiplication
+// 乗算のテスト
 3.0<foot> * 2.0        // OK   
 ```
 
-But see the section on "generics" below for an alternative approach.
+ただし、ジェネリクスを使用した別の方法については、後述の「ジェネリックな測定単位」のセクションを参照してください。
 
-## Conversion between units 
+## 単位間の変換
 
-What if you need to convert between units?
+単位の変換が必要な場合はどうすればよいでしょうか。
 
-It's straightforward. You first need to define a conversion value that uses *both* units, and then multiply the source value by the conversion factor.
+簡単です。まず、*両方の*単位を使った変換値を定義し、次に元の値にその変換係数を掛けます。
 
-Here's an example with feet and inches:
+フィートとインチの例を示します。
 
 ```fsharp
 [<Measure>] type foot
 [<Measure>] type inch
 
-//conversion factor
+// 変換係数
 let inchesPerFoot = 12.0<inch/foot>    
 
-// test    
+// テスト    
 let distanceInFeet = 3.0<foot>    
 let distanceInInches = distanceInFeet * inchesPerFoot 
 ```
 
-And here's an example with temperature:
+そして、こちらは温度の例です。
 
 ```fsharp
 [<Measure>] type degC
@@ -192,105 +193,105 @@ And here's an example with temperature:
 let convertDegCToF c = 
     c * 1.8<degF/degC> + 32.0<degF>
 
-// test    
+// テスト    
 let f = convertDegCToF 0.0<degC>    
 ```
 
-The compiler correctly inferred the signature of the conversion function.
+コンパイラは変換関数のシグネチャを正しく推論しました。
 
 ```fsharp
 val convertDegCToF : float<degC> -> float<degF>
 ```
 
-Note that the constant `32.0<degF>` was explicitly annotated with the `degF` so that the result would be in `degF` as well. If you leave off this annotation, the result is a plain float, and the function signature changes to something much stranger! Try it and see:
+定数 `32.0<degF>` に明示的に `degF` の注釈を付けたことで、結果も `degF` になります。この注釈を省くと、結果は単なるfloatになり、関数のシグネチャがかなり奇妙なものに変わってしまいます。試してみてください。
 
 ```fsharp
 let badConvertDegCToF c = 
     c * 1.8<degF/degC> + 32.0
 ```
 
-### Conversion between dimensionless values and unit-of-measure values
+### 無次元の値と測定単位付きの値の間の変換
 
-To convert from a dimensionless numeric value to a value with a measure type, just multiply it by one, but with the one annotated with the appropriate unit.
+無次元の数値から測定単位付きの値に変換するには、単に1を掛けますが、その1には適切な単位の注釈を付けます。
 
 ```fsharp
 [<Measure>] type foot
 
-let ten = 10.0   // normal
+let ten = 10.0   // 通常の値
 
-//converting from non-measure to measure 
-let tenFeet = ten * 1.0<foot>  // with measure
+// 無次元から測定単位を持つ値への変換
+let tenFeet = ten * 1.0<foot>  // 測定単位を持つ値
 ```
 
-And to convert the other way, either divide by one, or multiply with the inverse unit.
+逆方向に変換するには、1で割るか、逆単位を掛けます。
 
 ```fsharp
-//converting from measure to non-measure
-let tenAgain = tenFeet / 1.0<foot>  // without measure
-let tenAnotherWay = tenFeet * 1.0<1/foot>  // without measure
+// 測定単位を持つ値から無次元への変換
+let tenAgain = tenFeet / 1.0<foot>  // 測定単位なし
+let tenAnotherWay = tenFeet * 1.0<1/foot>  // 測定単位なし
 ```
 
-The above methods are type safe, and will cause errors if you try to convert the wrong type. 
+上記の方法は型安全で、間違った型を変換しようとするとエラーが出ます。
 
-If you don't care about type checking, you can do the conversion with the standard casting functions instead:
+型チェックが必要ない場合は、代わりに標準のキャスト関数を使って変換できます。
 
 ```fsharp
-let tenFeet = 10.0<foot>  // with measure
-let tenDimensionless = float tenFeet // without measure
+let tenFeet = 10.0<foot>  // 測定単位を持つ値
+let tenDimensionless = float tenFeet // 測定単位なし
 ```
 
-## Generic units of measure
+## ジェネリックな測定単位
 
-Often, we want to write functions that will work with any value, no matter what unit of measure is associated with it.
+多くの場合、測定単位に関係なく、どんな値でも扱える関数を書きたいものです。
 
-For example, here is our old friend `square`. But when we try to use it with a unit of measure, we get an error.
+たとえば、以下はおなじみの `square` 関数です。しかし、測定単位を持つ値で使おうとすると、エラーが出ます。
 
 ```fsharp
 let square x = x * x
 
-// test
-square 10<foot>   // error
+// テスト
+square 10<foot>   // エラー
 ```
 
-What can we do? We don't want to specify a particular unit of measure, but on the other hand we must specify *something*, because the simple definition above doesn't work.
+どうすればよいでしょうか。特定の測定単位を指定したくはありませんが、かといって上記の単純な定義では機能しません。
 
-The answer is to use *generic* units of measure, indicated with an underscore where the measure name normally is.
+答えは、測定単位名が通常入る箇所にアンダースコアを使って、*ジェネリックな*測定単位を示すことです。
 
 ```fsharp
 let square (x:int<_>) = x * x
 
-// test
+// テスト
 square 10<foot>   // OK
-square 10<sec>   // OK
+square 10<sec>    // OK
 ```
 
-Now the `square` function works as desired, and you can see that the function signature has used the letter `'u` to indicate a generic unit of measure. 
-And also note that the compiler has inferred that the return value is of type "unit squared".
+これで `square` 関数は望み通りに動きます。関数のシグネチャではジェネリックな測定単位を示すのに文字 `'u` が使われていることがわかります。
+また、コンパイラが戻り値の型を「単位の2乗」と推論していることにも注目してください。
 
 ```fsharp
 val square : int<'u> -> int<'u ^ 2>
 ```
 
 
-Indeed, you can specify the generic type using letters as well if you like:
+実際、ジェネリックな型を指定するときに好きな文字を使うこともできます。
 
 ```fsharp
-// with underscores
+// アンダースコアを使う
 let square (x:int<_>) = x * x
 
-// with letters
+// 文字を使う
 let square (x:int<'u>) = x * x
 
-// with underscores
+// アンダースコアを使う
 let speed (distance:float<_>) (time:float<_>) = 
     distance / time
 
-// with letters
+// 文字を使う
 let speed (distance:float<'u>) (time:float<'v>) = 
     distance / time
 ```
 
-You may need to use letters sometimes to explicitly indicate that the units are the same:
+単位が同じであることを明示的に示すために、文字を使う必要がある場合もあります。
 
 ```fsharp
 let ratio (distance1:float<'u>) (distance2:float<'u>) = 
@@ -298,41 +299,41 @@ let ratio (distance1:float<'u>) (distance2:float<'u>) =
 ```
 
 
-### Using generic measures with lists
+### リストでのジェネリックな測定単位の使用
 
-You cannot always use a measure directly. For example, you cannot define a list of feet directly:
+測定単位を直接使えない場合があります。たとえば、フィートのリストを直接定義することはできません。
 
 ```fsharp
-//error
+// エラー
 [1.0<foot>..10.0<foot>]
 ```
 
-Instead, you have to use the "multiply by one" trick mentioned above:
+代わりに、上で説明した「1を掛ける」トリックを使う必要があります。
 
 ```fsharp
-//converting using map -- OK
-[1.0..10.0] |> List.map (fun i-> i * 1.0<foot>)
+// mapを使った変換 -- OK
+[1.0..10.0] |> List.map (fun i -> i * 1.0<foot>)
 
-//using a generator -- OK
+// ジェネレータを使う -- OK
 [ for i in [1.0..10.0] -> i * 1.0<foot> ]
 ```
 
 
-### Using generic measures for constants
+### 定数でのジェネリックな測定単位の使用
 
-Multiplication by constants is OK (as we saw above), but if you try to do addition, you will get an error.
-
-```fsharp
-let x = 10<foot> + 1  // error
-```
-
-The fix is to add a generic type to the constant, like this:
+定数との乗算は（上で見たように）OKですが、加算しようとするとエラーが出ます。
 
 ```fsharp
-let x = 10<foot> + 1<_>  // ok
+let x = 10<foot> + 1  // エラー
 ```
 
-A similar situation occurs when passing in constants to a higher order function such as `fold`.
+修正方法は、定数にジェネリックな型を加えることです。
+
+```fsharp
+let x = 10<foot> + 1<_>  // OK
+```
+
+同じような状況が、`fold`のような高階関数に定数を渡す際にも起こります。
 
 ```fsharp
 let feet = [ for i in [1.0..10.0] -> i * 1.0<foot> ]
@@ -340,62 +341,62 @@ let feet = [ for i in [1.0..10.0] -> i * 1.0<foot> ]
 // OK
 feet |> List.sum  
 
-// Error
+// エラー
 feet |> List.fold (+) 0.0   
 
-// Fixed with generic 0
+// ジェネリックな0を使って修正
 feet |> List.fold (+) 0.0<_>  
 ```
 
-### Issues with generic measures with functions
+### 関数でのジェネリックな測定単位の問題
 
-There are some cases where type inference fails us. For example, let's try to create a simple `add1` function that uses units.
+いくつかのケースで型推論が失敗します。たとえば、測定単位を使った簡単な `add1` 関数を作ってみましょう。
 
 ```fsharp
-// try to define a generic function
+// ジェネリックな関数を定義しようとする
 let add1 n = n + 1.0<_>
-// warning FS0064: This construct causes code to be less generic than 
-// indicated by the type annotations. The unit-of-measure variable 'u 
-// has been constrained to be measure '1'.
+// warning FS0064: このコンストラクトによって、
+// コードの総称性は型の注釈よりも低くなります。
+// 型変数 ''u' は型 ''1' に制約されました
  
-// test
+// テスト
 add1 10.0<foot>   
-// error FS0001: This expression was expected to have type float    
-// but here has type float<foot>    
+// error FS0001: error FS0001: この式に必要な型は 'float' ですが、
+// ここでは次の型が指定されています 'float<foot>'
 ```
 
-The warning message has the clue. The input parameter `n` has no measure, so the measure for `1<_>` will always be ignored. The `add1` function does not have a unit of measure so when you try to call it with a value that does have a measure, you get an error.
+警告メッセージにヒントがあります。入力パラメータ `n` には測定単位がないため、 `1<_>` の測定単位が無視されます。`add1`関数には測定単位がなくなるので、測定単位を持つ値で呼び出そうとするとエラーが出ます。
 
-So maybe the solution is to explicitly annotate the measure type, like this:
+では、測定単位の型を明示的に注釈することで解決できるでしょうか。
 
 ```fsharp
-// define a function with explicit type annotation
+// 明示的な型注釈を持つ関数を定義
 let add1 (n:float<'u>) : float<'u> =  n + 1.0<_>
 ```
 
-But no, you get the same warning FS0064 again.
+しかし、同じ警告 FS0064 が再び表示されます。
 
-Maybe we can replace the underscore with something more explicit such as `1.0<'u>`?
+アンダースコアを `1.0<'u>` のようなより明示的なものに置き換えてみましょうか？
 
 ```fsharp
 let add1 (n:float<'u>) : float<'u> = n + 1.0<'u>  
-// error FS0634: Non-zero constants cannot have generic units. 
+// error FS0634: ゼロではない定数に汎用ユニットを含めることはできません。
 ```
 
-But this time we get a compiler error!
+今度はコンパイラエラーが出ました。
 
-The answer is to use one of the helpful utility functions in the LanguagePrimitives module: `FloatWithMeasure`, `Int32WithMeasure`, etc.
+答えは、LanguagePrimitivesモジュールの便利なユーティリティ関数を使うことです。 `FloatWithMeasure` 、 `Int32WithMeasure` などです。
 
 ```fsharp
-// define the function
+// 関数を定義
 let add1 n  = 
     n + (LanguagePrimitives.FloatWithMeasure 1.0)
 
-// test
-add1 10.0<foot>   // Yes!
+// テスト
+add1 10.0<foot>   // やった！
 ```
 
-And for generic ints, you can use the same approach:
+ジェネリックな整数についても、同じアプローチを使えます。
 
 ```fsharp
 open LanguagePrimitives
@@ -406,44 +407,44 @@ let add2Int n  =
 add2Int 10<foot>   // OK
 ```
 
-### Using generic measures with type definitions
+### 型定義でのジェネリックな測定単位の使用
 
-That takes care of functions. What about when we need to use a unit of measure in a type definition?
+これで関数の問題は解決しました。では、型定義で測定単位を使いたい場合はどうでしょうか。
 
-Say we want to define a generic coordinate record that works with an unit of measure. Let's start with a naive approach:
+たとえば、任意の測定単位で動作するジェネリックな座標レコードを定義したいとします。まずは、素朴なアプローチから始めましょう。
 
 ```fsharp
 type Coord = 
     { X: float<'u>; Y: float<'u>; }
-// error FS0039: The type parameter 'u' is not defined
+// error FS0039: 型パラメーター 'u が定義されていません。
 ```
 
-That didn't work, so what about adding the measure as a type parameter:
+これではうまくいきませんでした。では、測定単位を型パラメータとして追加してみましょう。
 
 ```fsharp
 type Coord<'u> = 
     { X: float<'u>; Y: float<'u>; }
-// error FS0702: Expected unit-of-measure parameter, not type parameter.
-// Explicit unit-of-measure parameters must be marked with the [<Measure>] attribute.
+// error FS0702: 必要なのは型パラメーターではなく測定単位パラメーターです。
+// 明示的な測定単位パラメーターは、[<Measure>] 属性でマークされている必要があります。
 ```
 
-That didn't work either, but the error message tells us what to do. Here is the final, correct version, using the `Measure` attribute:
+これもうまくいきませんでしたが、エラーメッセージが何をすべきかを教えてくれています。以下が最終的な正しいバージョンで、 `Measure` 属性を使っています。
 
 ```fsharp
 type Coord<[<Measure>] 'u> = 
     { X: float<'u>; Y: float<'u>; }
 
-// Test
+// テスト
 let coord = {X=10.0<foot>; Y=2.0<foot>}
 ```
 
-In some cases, you might need to define more than one measure. In the following example, the currency exchange rate is defined as the ratio of two currencies, and so needs two generic measures to be defined.
+場合によっては、複数の測定単位を定義する必要があるかもしれません。次の例では、通貨の換算レートは2つの通貨の比率として定義されているため、ジェネリックな測定単位を2つ定義する必要があります。
  
 ```fsharp
-type CurrencyRate<[<Measure>]'u, [<Measure>]'v> = 
+type CurrencyRate<[<Measure>]'u、[<Measure>]'v> = 
     { Rate: float<'u/'v>; Date: System.DateTime}
 
-// test
+// テスト
 [<Measure>] type EUR
 [<Measure>] type USD
 [<Measure>] type GBP
@@ -456,23 +457,23 @@ let tenEur = 10.0<EUR>
 let tenEurInUsd = eurToUsdOnMar1.Rate * tenEur 
 ```
 
-And of course, you can mix regular generic types with unit of measure types. 
+もちろん、通常のジェネリック型と測定単位の型を混ぜることもできます。
 
-For example, a product price might consist of a generic product type, plus a price with a currency:
+たとえば、製品価格はジェネリックな製品型と通貨付きの価格で構成されるかもしれません。
 
 ```fsharp
-type ProductPrice<'product, [<Measure>] 'currency> = 
-    { Product: 'product; Price: float<'currency>; }
+type ProductPrice<'product; [<Measure>] 'currency> = 
+    { Product: 'product、Price: float<'currency>; }
 ```
     
-### Units of measure at runtime
+### 実行時の測定単位
 
-An issue that you may run into is that units of measure are not part of the .NET type system.  
+遭遇するかもしれない問題の1つは、測定単位が.NETの型システムの一部ではないということです。
 
-F# does stores extra metadata about them in the assembly, but this metadata is only understood by F#.
+F#はアセンブリに測定単位に関する追加のメタデータを格納しますが、このメタデータはF#でしか理解されません。
 
-This means that there is no (easy) way at runtime to determine what unit of measure a value has, nor any way to dynamically assign a unit of measure at runtime.
+つまり、実行時に値がどの測定単位を持っているかを判断する（簡単な）方法も、実行時に動的に測定単位を割り当てる方法もありません。
 
-It also means that there is no way to expose units of measure as part of a public API to another .NET language (except other F# assemblies).
+また、測定単位をパブリックAPIの一部として他の.NET言語（F#アセンブリを除く）に公開する方法もありません。
 
 
