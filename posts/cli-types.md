@@ -1,42 +1,42 @@
 ---
 layout: post
-title: "Built-in .NET types"
-description: "Ints, strings, bools, etc"
+title: "F#の組み込み型"
+description: "整数、文字列、真偽値など"
 nav: fsharp-types
-seriesId: "Understanding F# types"
+seriesId: "F#の型を理解する"
 seriesOrder: 10
 ---
 
-In this post we'll take a quick look at how F# handles the [standard types that are built into .NET](http://msdn.microsoft.com/en-us/library/hfa3fa08%28VS.80%29.aspx).
+この記事では、[.NETに組み込まれている標準的な型](https://learn.microsoft.com/ja-jp/dotnet/standard/class-library-overview)をF#がどう扱うかを簡単に見ていきます。
 
-## Literals 
+## リテラル
 
-F# uses the same syntax for literals that C# does, with a few exceptions.
+F# では、C# と同じ構文を使用してリテラルを表しますが、いくつかの例外があります。
 
-I'll divide the built-in types into the following groups:
+組み込み型は以下のように分類できます。
 
-* miscellaneous types (`bool`, `char`, etc. )
-* string types 
-* integer types (`int`, `uint` and `byte`, etc)
-* float types (`float`, `decimal`, etc)
-* pointer types (`IntPtr`, etc)
+* その他の型 (`bool`, `char` など)
+* 文字列型
+* 整数型 ( `int` 、 `uint` 、 `byte` など)
+* 浮動小数点型 ( `float` 、 `decimal` など)
+* ポインタ型 ( `IntPtr` など)
 
-The following tables list the primitive types, with their F# keywords, their suffixes if any, an example, and the corresponding .NET CLR type.
+以下の表は、プリミティブ型とそのF#キーワード、接尾辞（ある場合）、例、対応する.NET CLR型を示しています。
 
-### Miscellaneous types
+### その他の型
 
 <table class="table table-condensed table-striped">
 <col width=5em></col>
 <tr>
 <th></th>
-<th>Object</th>
-<th>Unit</th>
-<th>Bool</th>
-<th>Char<br>(Unicode)</th>
-<th>Char<br>(Ascii)</th>
+<th>オブジェクト</th>
+<th>ユニット</th>
+<th>真偽値</th>
+<th>文字<br>（Unicode）</th>
+<th>文字<br>（ASCII）</th>
 </tr>
 <tr>
-<td>Keyword</td>
+<td>キーワード</td>
 <td>obj</td>
 <td>unit</td>
 <td>bool</td>
@@ -44,7 +44,7 @@ The following tables list the primitive types, with their F# keywords, their suf
 <td>byte</td>
 </tr>
 <tr>
-<td>Suffix</td>
+<td>接尾辞</td>
 <td></td>
 <td></td>
 <td></td>
@@ -52,7 +52,7 @@ The following tables list the primitive types, with their F# keywords, their suf
 <td>B</td>
 </tr>
 <tr>
-<td>Example</td>
+<td>例</td>
 <td>let o = obj()</td>
 <td>let u = ()</td>
 <td>true false</td>
@@ -60,51 +60,51 @@ The following tables list the primitive types, with their F# keywords, their suf
 <td>'a'B</td>
 </tr>
 <tr>
-<td>.NET Type</td>
+<td>.NET型</td>
 <td>Object</td>
-<td>(no equivalent)</td>
+<td>（相当なし）</td>
 <td>Boolean</td>
 <td>Char</td>
 <td>Byte</td>
 </tr>
 </table>
 
-Object and unit are not really .NET primitive types, but I have included them for the sake of completeness.
+オブジェクトとユニットは厳密には.NETのプリミティブ型ではありませんが、網羅性のために含めました。
 
-### String types
+### 文字列型
 
 <table class="table table-condensed table-striped">
 <col width=5em></col>
 <tr>
 <th></th>
-<th>String<br>(Unicode)</th>
-<th>Verbatim string<br>(Unicode)</th>
-<th>Triple quoted string<br>(Unicode)</th>
-<th>String<br>(Ascii)</th>
+<th>文字列<br>（Unicode）</th>
+<th>逐語的文字列<br>（Unicode）</th>
+<th>三重引用符文字列<br>（Unicode）</th>
+<th>文字列<br>（ASCII）</th>
 </tr>
 <tr>
-<td>Keyword</td>
+<td>キーワード</td>
 <td>string</td>
 <td>string</td>
 <td>string</td>
 <td>byte[]</td>
 </tr>
 <tr>
-<td>Suffix</td>
+<td>接尾辞</td>
 <td></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>Example</td>
+<td>例</td>
 <td>"first\nsecond line"</td>
 <td>@"C:\name"</td>
 <td>"""can "contain"" special chars"""</td>
 <td>"aaa"B</td>
 </tr>
 <tr>
-<td>.NET Type</td>
+<td>.NET型</td>
 <td>String</td>
 <td>String</td>
 <td>String</td>
@@ -112,30 +112,30 @@ Object and unit are not really .NET primitive types, but I have included them fo
 </tr>
 </table>
 
-The usual special characters can be used inside normal strings, such as `\n`, `\t`, `\\`, etc. Quotes must be escaped with a backslash: `\'` and `\"`.
+通常の文字列内では、 `\n` 、 `\t` 、 `\\` などの特殊文字を使えます。引用符はバックスラッシュでエスケープする必要があります。 `\'` と `\"` がその例です。
 
-In verbatim strings, backslashes are ignored (good for Windows filenames and regex patterns). But quotes need to be doubled.
+逐語的文字列では、バックスラッシュは無視されます。これはWindowsのファイル名や正規表現パターンに便利です。ただし、引用符は2つ重ねる必要があります。
 
-Triple-quoted strings are new in VS2012. They are useful because special characters do not need to be escaped at all, and so they can handle embedded quotes nicely (great for XML).
+三重引用符文字列は、VS2012で新しく導入されました。特殊文字をエスケープする必要がないため、埋め込み引用符を簡単に扱えます。XMLに最適です。
 
-### Integer types
+### 整数型
 
 <table class="table table-condensed table-striped">
 <col width=5em></col>
 <tr>
 <th></th>
-<th>8 bit<br>(Signed)</th>
-<th>8 bit<br>(Unsigned)</th>
-<th>16 bit<br>(Signed)</th>
-<th>16 bit<br>(Unsigned)</th>
-<th>32 bit<br>(Signed)</th>
-<th>32 bit<br>(Unsigned)</th>
-<th>64 bit<br>(Signed)</th>
-<th>64 bit<br>(Unsigned)</th>
-<th>Unlimited<br>precision</th>
+<th>8ビット<br>（符号付き）</th>
+<th>8ビット<br>（符号なし）</th>
+<th>16ビット<br>（符号付き）</th>
+<th>16ビット<br>（符号なし）</th>
+<th>32ビット<br>（符号付き）</th>
+<th>32ビット<br>（符号なし）</th>
+<th>64ビット<br>（符号付き）</th>
+<th>64ビット<br>（符号なし）</th>
+<th>任意<br>精度</th>
 </tr>
 <tr>
-<td>Keyword</td>
+<td>キーワード</td>
 <td>sbyte</td>
 <td>byte</td>
 <td>int16</td>
@@ -147,7 +147,7 @@ Triple-quoted strings are new in VS2012. They are useful because special charact
 <td>bigint</td>
 </tr>
 <tr>
-<td>Suffix</td>
+<td>接尾辞</td>
 <td>y</td>
 <td>uy</td>
 <td>s</td>
@@ -159,7 +159,7 @@ Triple-quoted strings are new in VS2012. They are useful because special charact
 <td>I</td>
 </tr>
 <tr>
-<td>Example</td>
+<td>例</td>
 <td>99y</td>
 <td>99uy</td>
 <td>99s</td>
@@ -171,7 +171,7 @@ Triple-quoted strings are new in VS2012. They are useful because special charact
 <td>99I</td>
 </tr>
 <tr>
-<td>.NET Type</td>
+<td>.NET型</td>
 <td>SByte</td>
 <td>Byte</td>
 <td>Int16</td>
@@ -185,215 +185,215 @@ Triple-quoted strings are new in VS2012. They are useful because special charact
 </table>
 
 
-`BigInteger` is available in all versions of F#. From .NET 4 it is included as part of the .NET base library.
+`BigInteger` は、すべてのバージョンのF#で使えます。.NET 4以降では、.NETの基本ライブラリの一部として含まれています。
 
-Integer types can also be written in hex and octal.  
+整数型は16進数や8進数でも表せます。
 
-* The hex prefix is `0x`. So `0xFF` is hex for 255. 
-* The octal prefix is `0o`. So `0o377` is octal for 255.
+* 16進数の接頭辞は `0x` です。たとえば、 `0xFF` は16進数で255を表します。
+* 8進数の接頭辞は `0o` です。たとえば、 `0o377` は8進数で255を表します。
 
 
-### Floating point types
+### 浮動小数点型
 
 <table class="table table-condensed table-striped">
 <col width="5em"></col>
 <tr>
 <th></th>
-<th>32 bit<br>floating point</th>
-<th>64 bit (default)<br>floating point</th>
-<th>High precision<br>floating point</th>
+<th>32ビット<br>浮動小数点</th>
+<th>64ビット（デフォルト）<br>浮動小数点</th>
+<th>高精度<br>浮動小数点</th>
 </tr>
 <tr>
-<td>Keyword</td>
+<td>キーワード</td>
 <td>float32, single</td>
 <td>float, double</td>
 <td>decimal</td>
 </tr>
 <tr>
-<td>Suffix</td>
+<td>接尾辞</td>
 <td>f</td>
 <td></td>
 <td>m</td>
 </tr>
 <tr>
-<td>Example</td>
+<td>例</td>
 <td>123.456f</td>
 <td>123.456</td>
 <td>123.456m</td>
 </tr>
 <tr>
-<td>.NET Type</td>
+<td>.NET型</td>
 <td>Single</td>
 <td>Double</td>
 <td>Decimal</td>
 </tr>
 </table>
 
-Note that F# natively uses `float` instead of `double`, but both can be used.
+F#ではデフォルトで `float` を使いますが、 `double` も使えることに注意してください。
 
-### Pointer types
+### ポインタ型
 
 <table class="table table-condensed table-striped">
 <col width="5em"></col>
 <tr>
 <th></th>
-<th>Pointer/handle<br>(signed)</th>
-<th>Pointer/handle<br>(unsigned)</th>
+<th>ポインタ/ハンドル<br>（符号付き）</th>
+<th>ポインタ/ハンドル<br>（符号なし）</th>
 </tr>
 <tr>
-<td>Keyword</td>
+<td>キーワード</td>
 <td>nativeint</td>
 <td>unativeint</td>
 </tr>
 <tr>
-<td>Suffix</td>
+<td>接尾辞</td>
 <td>n</td>
 <td>un</td>
 </tr>
 <tr>
-<td>Example</td>
+<td>例</td>
 <td>0xFFFFFFFFn</td>
 <td>0xFFFFFFFFun</td>
 </tr>
 <tr>
-<td>.NET Type</td>
+<td>.NET型</td>
 <td>IntPtr</td>
 <td>UIntPtr</td>
 </tr>
 </table>
 
 
-## Casting between built-in primitive types
+## 組み込みプリミティブ型間のキャスト
 
-*Note: this section only covers casting of primitive types. For casting between classes see the series on [object-oriented programming](../posts/casting.md).*
+*注：このセクションではプリミティブ型のキャストのみを扱います。クラス間のキャストについては、[オブジェクト指向プログラミングのシリーズ](../posts/casting.md)を参照してください。*
 
 
-There is no direct "cast" syntax in F#, but there are helper functions to cast between types. These helper functions have the same name as the type (you can see them in the `Microsoft.FSharp.Core` namespace).
+F#には直接的な「キャスト」構文はありませんが、型間のキャストを行うヘルパー関数があります。これらのヘルパー関数は型と同じ名前を持ちます。 `Microsoft.FSharp.Core` 名前空間で見つけることができます。
 
-So for example, in C# you might write:
+たとえば、C#では次のように書きます。
 
 ```csharp
 var x = (int)1.23
 var y = (double)1   
 ```
 
-In F# the equivalent would be:
+F#では次のように書きます。
 
 ```fsharp
 let x = int 1.23
 let y = float 1
 ```
 
-In F# there are only casting functions for numeric types. In particular, there is no cast for bool, and you must use `Convert` or similar.
+F#では、数値型に対するキャスト関数しかありません。特に、 `bool` に対するキャストはなく、 `Convert` などを使う必要があります。
 
 ```fsharp
-let x = bool 1  //error
-let y = System.Convert.ToBoolean(1)  // ok
+let x = bool 1  // エラー
+let y = System.Convert.ToBoolean(1)  // OK
 ```
 
 
 <a name="boxing"></a>
-## Boxing and unboxing
+## ボクシングとアンボクシング
 
-Just as in C# and other .NET languages, the primitive int and float types are value objects, not classes. Although this is normally transparent, there are certain
-occasions where it can be an issue.
+C#や他の.NET言語と同様に、プリミティブなintやfloat型は値型であり、クラスではありません。
+通常はあまり意識しませんが、特定の状況では問題になることがあります。
 
-First, lets look at the transparent case. In the example below, we define a function that takes a parameter of type `Object`, and simply returns it.
-If we pass in an `int`, it is silently boxed into an object, as can be seen from the test code, which returns an `object` not an `int`.
+まず、単純な例を見てみましょう。以下の例では、 `Object` 型のパラメータを受け取り、そのまま返す関数を定義します。
+`int` を渡すと、暗黙的にオブジェクトにボクシングされます。テストコードから分かるように、結果は `int` ではなく `object` を返します。
 
 ```fsharp
-// create a function with parameter of type Object
+// Object型のパラメータを持つ関数を作る
 let objFunction (o:obj) = o
 
-// test: call with an integer
+// テスト：整数を渡して呼び出す
 let result = objFunction 1
 
-// result is
+// 結果は
 // val result : obj = 1
 
 ```
 
-The fact that `result` is an object, not an int, can cause type errors if you are not careful. For example, the result cannot be directly compared with the original value:
+`result` が整数ではなくオブジェクトであることは、注意しないと型エラーの原因になることがあります。たとえば、結果を元の値と直接比較することはできません。
  
 ```fsharp
 let resultIsOne = (result = 1)
-// error FS0001: This expression was expected to have type obj 
-// but here has type int    
+// error FS0001: この式に必要な型は 'obj' ですが、
+// ここでは次の型が指定されています 'int'
 ```
 
-To work with this situation, and other similar ones, you can convert a primitive type to an object directly, by using the `box` keyword:
+この状況や似たような状況に対処するため、 `box` キーワードを使ってプリミティブ型を直接オブジェクトに変換できます。
 ```fsharp
 let o = box 1
 
-// retest the comparison example above, but with boxing
+// 上の比較例を再テストし、ボクシングを使う
 let result = objFunction 1
 let resultIsOne = (result = box 1)  // OK
 ```
 
-To convert an object back to an primitive type, use the `unbox` keyword, but unlike `box`, you must either supply a specific type to unbox to, or be sure that the compiler has enough information to make an accurate type inference.
+オブジェクトをプリミティブ型に戻すには、 `unbox` キーワードを使います。ただし、 `box` とは異なり、アンボクシング先の型を指定するか、コンパイラが正確に型推論できるよう十分な情報が必要となります。
 
 ```fsharp
-// box an int
+// intをボクシング
 let o = box 1
 
-// type known for target value
+// 対象の値の型が分かっている場合
 let i:int = unbox o  // OK 
 
-// explicit type given in unbox
+// unboxで明示的に型を指定
 let j = unbox<int> o  // OK 
 
-// type inference, so no type annotation needed
+// 型推論が可能なので、型注釈は不要
 let k = 1 + unbox o  // OK 
 ```
 
-So the comparison example above could also be done with `unbox`. No explicit type annotation is needed because it is being compared with an int. 
+したがって、先ほどの比較の例も `unbox` を使って行えます。 `int` 型との比較なので、明示的な型注釈は必要ありません。
 
 ```fsharp
 let result = objFunction 1
 let resultIsOne = (unbox result = 1)  // OK
 ```
 
-A common problem occurs if you do not specify enough type information -- you will encounter the infamous "Value restriction" error, as shown below:
+しかし、十分な型情報を指定しないと、悪名高き「値制限」エラーに遭遇します。
 
 ```fsharp
 let o = box 1
 
-// no type specified
-let i = unbox o  // FS0030: Value restriction error
+// 型が指定されていない
+let i = unbox o  // error FS0030: 値の制限
 ```
 
-The solution is to reorder the code to help the type inference, or when all else fails, add an explicit type annotation. See [the post on type inference for more tips](../posts/type-inference.md#troubleshooting-summary).
+解決方法は、型推論を助けるようにコードを並べ替えるか、どうしても駄目な場合は明示的な型注釈を追加することです。詳しくは[型推論に関する記事のトラブルシューティングのまとめ](../posts/type-inference.md#troubleshooting-summary)を参照してください。
 
-### Boxing in combination with type detection
+### 型検出とボクシングの組み合わせ
 
-Let's say that you want to have a function that matches based on the type of the parameter, using the `:?` operator:
+パラメータの型に基づいてマッチングを行う関数を、 `:?` 演算子を使って作りたいとします。
 
 ```fsharp
 let detectType v =
     match v with
-        | :? int -> printfn "this is an int"
-        | _ -> printfn "something else"
+        | :? int -> printfn "これは整数です"
+        | _ -> printfn "それ以外です"
 ```
 
-Unfortunately, this code will fail to compile, with the following error:
+残念ながら、このコードはコンパイルに失敗し、次のエラーが出ます。
 
 ```fsharp
-// error FS0008: This runtime coercion or type test from type 'a to int    
-// involves an indeterminate type based on information prior to this program point. 
-// Runtime type tests are not allowed on some types. Further type annotations are needed.
+// error FS0008: この型 'a から型 int へのランタイム型変換またはランタイム型テストには、
+// このプログラムの場所の前方にある情報に基づく不確定の型が使用されています。
+// 実行時の型テストは一部の型では許可されていません。さらなる型注釈が必要です。
 ```
 
-The message tells you the problem: "runtime type tests are not allowed on some types".  
+「実行時の型テストは一部の型では許可されていません。」というメッセージが問題を示しています。
 
-The answer is to "box" the value which forces it into a reference type, and then you can type check it:
+解決方法は、値を「ボクシング」して参照型に換し、その後で型チェックを行うことです。
 
 ```fsharp
 let detectTypeBoxed v =
-    match box v with      // used "box v" 
-        | :? int -> printfn "this is an int"
-        | _ -> printfn "something else"
+    match box v with      // "box v"を使う 
+        | :? int -> printfn "これは整数です"
+        | _ -> printfn "それ以外です"
 
-//test
+// テスト
 detectTypeBoxed 1
 detectTypeBoxed 3.14
 ```
