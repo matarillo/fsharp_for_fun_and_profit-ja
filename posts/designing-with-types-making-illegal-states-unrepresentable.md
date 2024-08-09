@@ -1,16 +1,16 @@
 ---
 layout: post
-title: "Designing with types: Making illegal states unrepresentable"
-description: "Encoding business logic in types"
+title: "型を使った設計：不正な状態を表現不可能にする"
+description: "型にビジネスロジックを組み込む"
 nav: thinking-functionally
-seriesId: "Designing with types"
+seriesId: "型を使った設計"
 seriesOrder: 3
-categories: [Types, DDD]
+categories: [型, DDD]
 ---
 
-In this post, we look at a key benefit of F#, which using the type system to "make illegal states unrepresentable" (a phrase borrowed from [Yaron Minsky](https://ocaml.janestreet.com/?q=node/85)).
+この記事では、F#の重要な利点の1つを見ていきます。それは型システムを使って「不正な状態を表現不可能にする」ことです。この表現は[Yaron Minsky](https://ocaml.janestreet.com/?q=node/85)から借りました。
 
-Let's look at our `Contact` type. Thanks to the previous refactoring, it is quite simple:
+まず、 `Contact` （連絡先）型を見てみましょう。前回のリファクタリングのおかげで、かなりシンプルになっています。
 
 ```fsharp
 type Contact = 
@@ -21,11 +21,11 @@ type Contact =
     }
 ```
 
-Now let's say that we have the following simple business rule: *"A contact must have an email or a postal address"*. Does our type conform to this rule?
+ここで、「*連絡先にはメールアドレスまたは郵便住所のどちらかが必要*」という簡単なビジネスルールがあるとします。この型は、ルールに適合しているでしょうか。
 
-The answer is no. The business rule implies that a contact might have an email address but no postal address, or vice versa. But as it stands, our type requires that a contact must always have *both* pieces of information. 
+答えは「いいえ」です。このビジネスルールは、連絡先がメールアドレスだけの場合や、郵便住所だけの場合があることを示しています。しかし、現状の型では、連絡先が常に *両方の* 情報を持つことを求めています。
 
-The answer seems obvious -- make the addresses optional, like this:
+解決方法は明らかに思えます。アドレスをどちらもオプション型にしてみましょう。
 
 ```fsharp
 type Contact = 
@@ -36,19 +36,19 @@ type Contact =
     }
 ```
 
-But now we have gone too far the other way. In this design, it would be possible for a contact to have neither type of address at all. But the business rule says that at least one piece of information *must* be present.
+しかし、今度は行き過ぎました。この設計では、連絡先がどちらの種類のアドレスも持たない可能性があります。しかし、ビジネスルールでは、少なくともどちらかの情報が *必須* だと言っています。
 
-What's the solution?
-   
-## Making illegal states unrepresentable 
+では、どう解決すればいいのでしょうか。
 
-If we think about the business rule carefully, we realize that there are three possibilities:
+## 不正な状態を表現不可能にする
 
-* A contact only has an email address
-* A contact only has a postal address
-* A contact has both a email address and a postal address
+ビジネスルールをよく考えると、3つの可能性があることがわかります。
 
-Once it is put like this, the solution becomes obvious -- use a union type with a case for each possibility.
+* 連絡先にメールアドレスだけがある
+* 連絡先に郵便住所だけがある
+* 連絡先にメールアドレスと郵便住所の両方がある
+
+このように考えると、解決方法は明らかです。各可能性に対応するケースを持つ共用体型を使いましょう。
 
 ```fsharp
 type ContactInfo = 
@@ -63,18 +63,18 @@ type Contact =
     }
 ```
 
-This design meets the requirements perfectly. All three cases are explictly represented, and the fourth possible case (with no email or postal address at all) is not allowed.
+この設計は完璧に要件を満たしています。3つのケースを明示的に表現し、4つ目の可能性（メールアドレスも郵便住所も持たない）は許していません。
 
-Note that for the "email and post" case, I just used a tuple type for now. It's perfectly adequate for what we need.
+なお、「メールと郵便住所の両方」のケースでは、とりあえずタプル型を使いました。ニーズは十分満たしています。
 
-### Constructing a ContactInfo
+### ContactInfoの構築
 
-Now let's see how we might use this in practice. We'll start by creating a new contact:
+では、これを実際にどう使うか見てみましょう。まず、新しい連絡先を作ります。
 
 ```fsharp
 let contactFromEmail name emailStr = 
     let emailOpt = EmailAddress.create emailStr
-    // handle cases when email is valid or invalid
+    // メールが有効か無効かのケースを処理する
     match emailOpt with
     | Some email -> 
         let emailContactInfo = 
@@ -87,18 +87,18 @@ let name = {FirstName = "A"; MiddleInitial=None; LastName="Smith"}
 let contactOpt = contactFromEmail name "abc@example.com"
 ```
 
-In this code, we have created a simple helper function `contactFromEmail` to create a new contact by passing in a name and email.
-However, the email might not be valid, so the function has to handle both cases, which it doesn't by returning a `Contact option`, not a `Contact`
+このコードでは、名前とメールアドレスを渡して新しい連絡先を作る簡単なヘルパー関数 `contactFromEmail` を作りました。
+ただし、メールアドレスが有効でない可能性があるので、関数は両方のケースを処理する必要があります。これは `Contact option` を返すことで行っています（ `Contact` をそのまま返すのは適切ではありません）。
 
-### Updating a ContactInfo
+### ContactInfoの更新
 
-Now if we need to add a postal address to an existing `ContactInfo`, we have no choice but to handle all three possible cases:
+既存の `ContactInfo` に郵便住所を追加する必要がある場合、3つの可能性すべてを処理しなければなりません。
 
-* If a contact previously only had an email address, it now has both an email address and a postal address, so return a contact using the `EmailAndPost` case.
-* If a contact previously only had a postal address, return a contact using the `PostOnly` case, replacing the existing address.
-* If a contact previously had both an email address and a postal address, return a contact with using the `EmailAndPost` case, replacing the existing address.
+* 連絡先に以前はメールアドレスしか存在しなかった場合、現在はメールアドレスと郵便住所の両方があることになります。そのため、 `EmailAndPost` ケースを使って連絡先を返します。
+* 連絡先に以前は郵便住所しか存在しなかった場合、 `PostOnly` ケースを使って連絡先を返し、既存の連絡先を置き換えます。
+* 連絡先に以前はメールアドレスと郵便住所の両方が存在していた場合、 `EmailAndPost` ケースを使って連絡先を返し、既存の連絡先を置き換えます。
 
-So here's a helper method that updates the postal address. You can see how it explicitly handles each case.
+以下は、郵便住所を更新するヘルパーメソッドです。各ケースを明示的に処理していることがわかります。
 
 ```fsharp
 let updatePostalAddress contact newPostalAddress = 
@@ -107,18 +107,18 @@ let updatePostalAddress contact newPostalAddress =
         match contactInfo with
         | EmailOnly email ->
             EmailAndPost (email,newPostalAddress) 
-        | PostOnly _ -> // ignore existing address
+        | PostOnly _ -> // 既存のアドレスを無視する
             PostOnly newPostalAddress 
-        | EmailAndPost (email,_) -> // ignore existing address
+        | EmailAndPost (email,_) -> // 既存のアドレスを無視する
             EmailAndPost (email,newPostalAddress) 
-    // make a new contact
+    // 新しい連絡先を作る
     {Name=name; ContactInfo=newContactInfo}
 ```
 
-And here is the code in use:
+そして、コードの使用例がこちらです。
 
 ```fsharp
-let contact = contactOpt.Value   // see warning about option.Value below
+let contact = contactOpt.Value   // option.Valueの使用に関する警告は以下を参照
 let newPostalAddress = 
     let state = StateCode.create "CA"
     let zip = ZipCode.create "97210"
@@ -128,24 +128,24 @@ let newPostalAddress =
             Address1= "123 Main";
             Address2="";
             City="Beverly Hills";
-            State=state.Value; // see warning about option.Value below
-            Zip=zip.Value;     // see warning about option.Value below
+            State=state.Value; // option.Valueの使用に関する警告は以下を参照
+            Zip=zip.Value;     // option.Valueの使用に関する警告は以下を参照
             }; 
         IsAddressValid=false
     }
 let newContact = updatePostalAddress contact newPostalAddress
 ```
 
-*WARNING: I am using `option.Value` to extract the contents of an option in this code. 
-This is ok when playing around interactively but is extremely bad practice in production code! You should always use matching to handle both cases of an option.*
+*警告。このコードでは、オプションの内容を取り出すのに `option.Value` を使っています。
+インタラクティブな操作中には問題ありませんが、本番コードではとても悪い習慣です。常にマッチングを使って、オプション型の両方のケースを処理するようにしましょう。*
 
-## Why bother to make these complicated types? 
+## なぜこんな複雑な型を作る必要があるのか
 
-At this point, you might be saying that we have made things unnecessarily complicated. I would answer with these points:
+この時点で、必要以上に複雑にしたのではないかと思うかもしれません。これに対しては、次のように答えたいと思います。
 
-First, the business logic *is* complicated. There is no easy way to avoid it. If your code is not this complicated, you are not handling all the cases properly.
+まず、ビジネスロジック *自体* が複雑なのです。これを避ける簡単な方法はありません。もしコードがこれほど複雑でないなら、すべてのケースを適切に処理していない可能性があります。
 
-Second, if the logic is represented by types, it is automatically self documenting. You can look at the union cases below and immediate see what the business rule is. You do not have to spend any time trying to analyze any other code.
+次に、ロジックを型で表現すれば、自動的に自己文書化されます。以下の共用体ケースを見るだけで、ビジネスルールが何かすぐにわかります。他のコードを分析するのに時間を費やす必要はありません。
 
 ```fsharp
 type ContactInfo = 
@@ -154,7 +154,7 @@ type ContactInfo =
     | EmailAndPost of EmailContactInfo * PostalContactInfo
 ```
 
-Finally, if the logic is represented by a type, any changes to the business rules will immediately create breaking changes, which is a generally a good thing. 
+最後に、ロジックを型で表現すれば、ビジネスルールの変更はすぐに破壊的な変更を引き起こします。これは一般的に良いことです。
 
-In the next post, we'll dig deeper into the last point. As you try to represent business logic using types, you may suddenly find that can gain a whole new insight into the domain.
+次の投稿では、最後の点についてさらに深く掘り下げます。型を使ってビジネスロジックを表現しようとすると、突然、ドメインに関する全く新しい洞察を得られることがあります。
 
