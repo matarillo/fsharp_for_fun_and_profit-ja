@@ -1,24 +1,24 @@
 ---
 layout: series_index
-title: "The 'designing with types' series"
-seriesIndexId: "Designing with types"
+title: "'型を使って設計する'シリーズ"
+seriesIndexId: "型を使って設計する"
 ---
 
-In this series, we'll look at some of the ways we can use types as part of the design process. 
-In particular, the thoughtful use of types can make a design more transparent and improve correctness at the same time.
+このシリーズでは、設計プロセスの一部として型を活用する方法について見ていきます。
+特に、型を慎重に使うと、設計がより分かりやすくなり、同時に正確性も高められます。
 
-This series will be focused on the "micro level" of design. That is, working at the lowest level of individual types and functions. 
-Higher level design approaches, and the associated decisions about using functional or object-oriented style, will be discussed in another series.
+このシリーズは、設計の「ミクロレベル」に焦点を当てています。つまり、個々の型や関数の最も具体的なレベルで作業します。
+より抽象的な設計アプローチや、関数型とオブジェクト指向スタイルの選択といった判断については、別のシリーズで議論します。
 
-Many of the suggestions are also feasable in C# or Java, but the lightweight nature of F# types means that it is much more likely that we will do this kind of refactoring.
+提案内容の多くはC#やJavaでも実現できますが、F#は型が軽量なので、このようなリファクタリングをやりやすいでしょう。
 
 
 
-* [Designing with types: Introduction](../posts/designing-with-types-intro.md). Making design more transparent and improving correctness.
-* [Designing with types: Single case union types](../posts/designing-with-types-single-case-dus.md). Adding meaning to primitive types.
-* [Designing with types: Making illegal states unrepresentable](../posts/designing-with-types-making-illegal-states-unrepresentable.md). Encoding business logic in types.
-* [Designing with types: Discovering new concepts](../posts/designing-with-types-discovering-the-domain.md). Gaining deeper insight into the domain.
-* [Designing with types: Making state explicit](../posts/designing-with-types-representing-states.md). Using state machines to ensure correctness.
-* [Designing with types: Constrained strings](../posts/designing-with-types-more-semantic-types.md). Adding more semantic information to a primitive type.
-* [Designing with types: Non-string types](../posts/designing-with-types-non-strings.md). Working with integers and dates safely.
-* [Designing with types: Conclusion](../posts/designing-with-types-conclusion.md). A before and after comparison.
+* [型を使って設計する：はじめに](../posts/designing-with-types-intro.md)。設計を分かりやすくし、正確性を高める。
+* [型を使って設計する：単一ケース共用体型](../posts/designing-with-types-single-case-dus.md)。プリミティブ型に意味を持たせる。
+* [型を使って設計する：不正な状態を表現できないようにする](../posts/designing-with-types-making-illegal-states-unrepresentable.md)。ビジネスロジックを型で表現する。
+* [型を使って設計する：新しい概念を見つける](../posts/designing-with-types-discovering-the-domain.md)。ドメインをより深く理解する。
+* [型を使って設計する：状態を明確にする](../posts/designing-with-types-representing-states.md)。ステートマシンを使って正確性を確保する。
+* [型を使って設計する：制約付き文字列](../posts/designing-with-types-more-semantic-types.md)。プリミティブ型にさらに意味情報を持たせる。
+* [型を使って設計する：文字列以外の型](../posts/designing-with-types-non-strings.md)。整数や日付を安全に扱う。
+* [型を使って設計する：まとめ](../posts/designing-with-types-conclusion.md)。変更前と変更後を比較する。

@@ -126,7 +126,7 @@
 
 * [「型を使って設計する」 シリーズ](series/designing-with-types.md)           
   * [型を使って設計する: はじめに](posts/designing-with-types-intro.md)
-  * [シングルケース共用体型](posts/designing-with-types-single-case-dus.md)
+  * [単一ケース共用体型](posts/designing-with-types-single-case-dus.md)
   * [不正な状態を表現できないようにする](posts/designing-with-types-making-illegal-states-unrepresentable.md)
   * [新しい概念を発見する](posts/designing-with-types-discovering-the-domain.md)
   * [状態を明示的にする](posts/designing-with-types-representing-states.md)
