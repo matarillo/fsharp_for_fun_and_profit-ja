@@ -1,18 +1,18 @@
 ---
 layout: post
-title: "Designing with types: Making state explicit"
-description: "Using state machines to ensure correctness"
+title: "型を使った設計：状態を明示的にする"
+description: "ステートマシンで正確性を確保する"
 nav: thinking-functionally
-seriesId: "Designing with types"
+seriesId: "型を使った設計"
 seriesOrder: 5
-categories: [Types, DDD]
+categories: [型, DDD]
 ---
 
-In this post we will look at making implicit states explicit by using state machines, and then modelling these state machines with union types.
+この記事では、ステートマシンを使って暗黙的な状態を明示的にする方法と、ステートマシンを判別共用体でモデル化する方法を見ていきます。
 
-## Background ##
+## 背景 ##
 
-In an [earlier post](../posts/designing-with-types-single-case-dus.md) in this series, we looked at single case unions as a wrapper for types such as email addresses.
+このシリーズの[前の記事](../posts/designing-with-types-single-case-dus.md)で、メールアドレスなどの型をラップする単一ケース判別共用体について説明しました。
 
 ```fsharp
 module EmailAddress = 
@@ -25,11 +25,11 @@ module EmailAddress =
             else None
 ```
 
-This code assumes that either an address is valid or it is not. If it is not, we reject it altogether and return `None` instead of a valid value.
+このコードは、アドレスが有効か無効かのどちらかだと想定しています。無効な場合は完全に拒否し、有効な値の代わりに `None` を返します。
 
-But there are degrees of validity. For example, what happens if we want to keep an invalid email address around rather than just rejecting it?  In this case, as usual, we want to use the type system to make sure that we don't get a valid address mixed up with an invalid address.
+しかし、有効性の度合いはさまざまです。たとえば、無効なメールアドレスを拒否するのではなく、保持したい場合はどうでしょうか。この場合も、いつものように型システムを使って、有効なアドレスと無効なアドレスが混ざらないようにしたいものです。
 
-The obvious way to do this is with a union type:
+これを達成する最も簡単な方法は、判別共用体を使うことです。
 ```fsharp
 module EmailAddress = 
 
@@ -39,172 +39,172 @@ module EmailAddress =
 
     let create (s:string) = 
         if System.Text.RegularExpressions.Regex.IsMatch(s,@"^\S+@\S+\.\S+$") 
-            then ValidEmailAddress s    // change result type 
-            else InvalidEmailAddress s  // change result type
+            then ValidEmailAddress s    // 結果の型を変更
+            else InvalidEmailAddress s  // 結果の型を変更
 
-    // test
+    // テスト
     let valid = create "abc@example.com"
     let invalid = create "example.com"
 ```
 
-and with these types we can ensure that only valid emails get sent:
+このような型を使えば、有効なメールだけが送信されることを保証できます。
 
 ```fsharp
 let sendMessageTo t = 
     match t with 
     | ValidEmailAddress email ->
-         // send email
+         // メールを送信
     | InvalidEmailAddress _ -> 
-         // ignore
+         // 無視
 ```
 
-So far, so good. This kind of design should be obvious to you by now.  
+ここまで理解できたかと思います。このような設計は、もう当たり前に思えるでしょう。
 
-But this approach is more widely applicable than you might think.  In many situations, there are similar "states" that are not made explicit, and handled with flags, enums, or conditional logic in code.
+しかし、このアプローチは思っている以上に広く適用できます。多くの状況で、似たような「状態」が明示的にされておらず、フラグや列挙型、コード内の条件分岐ロジックで処理されています。
 
-## State machines ##
+## ステートマシン ##
 
-In the example above, the "valid" and "invalid" cases are mutually incompatible. That is, a valid email can never become invalid, and vice versa. 
+上記の例では、「有効」と「無効」のケースは互いに排他的です。つまり、有効なメールが無効になることはなく、その逆もありません。
 
-But in many cases, it is possible to go from one case to another, triggered by some kind of event. At which point we have a ["state machine"](http://en.wikipedia.org/wiki/Finite-state_machine), where each case represents a "state", and moving from one state to another is a "transition".
+しかし、多くの場合、何らかのイベントをきっかけに、一つのケースから別のケースに移ることができます。このような場合、「[ステートマシン](https://ja.wikipedia.org/wiki/%E6%9C%89%E9%99%90%E3%82%AA%E3%83%BC%E3%83%88%E3%83%9E%E3%83%88%E3%83%B3)」が登場します。ステートマシンでは、各ケースが「状態」を表し、ある状態から別の状態への移動を「遷移」と呼びます。
 
-Some examples:
+いくつか例を挙げましょう。
 
-* A email address might have states "Unverified" and "Verified", where you can transition from the "Unverified" state to the "Verified" state by asking the user to click on a link in a confirmation email.
-![State transition diagram: Verified Email](../assets/img/State_VerifiedEmail.png)
+* メールアドレスには「未確認」と「確認済み」の状態があります。確認メールのリンクをユーザーにクリックしてもらうことで、「未確認」状態から「確認済み」状態に遷移できます。
+![状態遷移図。確認済みメール](../assets/img/State_VerifiedEmail.png)
 
-* A shopping cart might have states "Empty", "Active" and "Paid", where you can transition from the "Empty" state to the "Active" state by adding an item to the cart, and to the "Paid" state by paying.
-![State transition diagram: Shopping Cart](../assets/img/State_ShoppingCart.png)
+* ショッピングカートには「空」、「アクティブ」、「支払い済み」の状態があります。カートに商品を追加すると「空」状態から「アクティブ」状態に遷移し、支払いを行うと「支払い済み」状態に遷移します。
+![状態遷移図。ショッピングカート](../assets/img/State_ShoppingCart.png)
 
-* A game such as chess might have states "WhiteToPlay", "BlackToPlay" and "GameOver", where you can transition from the "WhiteToPlay" state to the "BlackToPlay" state by White making a non-game-ending move, or transition to the "GameOver" state by playing a checkmate move. 
-![State transition diagram: Chess game](../assets/img/State_Chess.png)
+* チェスのようなゲームには「白の手番」、「黒の手番」、「ゲーム終了」の状態があります。白が終局でない手を指すと「白の手番」状態から「黒の手番」状態に遷移します。チェックメイトの手を指すと「ゲーム終了」状態に遷移します。
+![状態遷移図。チェスゲーム](../assets/img/State_Chess.png)
 
-In each of these cases, we have a set of states, a set of transitions, and events that can trigger a transition.  
-State machines are often represented by a table, like this one for a shopping cart:
+このような場合、それぞれに状態の集合、遷移の集合、そして遷移をトリガーするイベントがあります。
+ステートマシンは、しばしばテーブルで表現されます。以下はショッピングカートの例です。
 
 <table class="table table-condensed">
 <thead>
 <tr>
-<th>Current State</th>
-<th>Event-></th>
-<th>Add Item</th>
-<th>Remove Item</th>
-<th>Pay</th>
+<th>現在の状態</th>
+<th>イベント-></th>
+<th>商品追加</th>
+<th>商品削除</th>
+<th>支払い</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<th>Empty</th>
+<th>空</th>
 <td></td>
-<td>new state = Active</td>
-<td>n/a</td>
-<td>n/a</td>
+<td>新しい状態 = アクティブ</td>
+<td>該当なし</td>
+<td>該当なし</td>
 </tr>
 <tr>
-<th>Active</th>
+<th>アクティブ</th>
 <td></td>
-<td>new state = Active</td>
-<td>new state = Active or Empty,<br> depending on the number of items</td>
-<td>new state = Paid</td>
+<td>新しい状態 = アクティブ</td>
+<td>新しい状態 = アクティブまたは空<br>（商品の数による）</td>
+<td>新しい状態 = 支払い済み</td>
 </tr>
 <tr>
-<th>Paid</th>
+<th>支払い済み</th>
 <td></td>
-<td>n/a</td>
-<td>n/a</td>
-<td>n/a</td>
+<td>該当なし</td>
+<td>該当なし</td>
+<td>該当なし</td>
 </tr>
 </tbody>
 </table>
-  
-With a table like this, you can quickly see exactly what should happen for each event when the system is in a given state.  
 
-<a name="why-use"></a>  
+このようなテーブルを使えば、システムが特定の状態にあるときに、それぞれのイベントで何が起こるべきかを素早く確認できます。
 
-## Why use state machines? 
+<a name="why-use"></a>
 
-There are a number of benefits to using state machines in these cases:
+## なぜステートマシンを使うのか ##
 
-**Each state can have different allowable behavior.**
+これらの場合、ステートマシンを使う利点はいくつかあります。
 
-In the verified email example, there is probably a business rule that says that you can only send password resets to verified email addresses, not to unverified addresses. 
-And in the shopping cart example, only an active cart can be paid for, and a paid cart cannot be added to. 
+**各状態は異なる動作を許容できる**
 
-**All the states are explicitly documented.**
+確認済みメールの例では、おそらくパスワードリセットメールは確認済みのメールアドレスにのみ送信でき、未確認のアドレスには送信できないという業務ルールがあるでしょう。
+また、ショッピングカートの例では、アクティブなカートのみ支払いができ、支払い済みのカートには商品を追加できません。
 
-It is all too easy to have important states that are implicit but never documented.
+**すべての状態が明示的に文書化される**
 
-For example, the "empty cart" has different behavior from the "active cart" but it would be rare to see this documented explicitly in code.
+暗黙的な状態が存在し、決して文書化されない、ということもあまりにもよくある話です。
 
-**It is a design tool that forces you to think about every possibility that could occur.**
+たとえば、「空のカート」は「アクティブなカート」とは異なる動作をしますが、コード内で明示的に文書化されていることは稀です。
 
-A common cause of errors is that certain edge cases are not handled, but a state machine forces all cases to be thought about. 
+**あらゆる可能性を考えることを強制する設計ツールである**
 
-For example, what should happen if we try to verify an already verified email? 
-What happens if we try to remove an item from an empty shopping cart? 
-What happens if white tries to play when the state is "BlackToPlay"? And so on.
+エラーのよくある原因は、特定のエッジケースが処理されていないことですが、ステートマシンはすべてのケースについて考えることを強制します。
 
-## How to implement simple state machines in F# ##
+たとえば、すでに確認済みのメールを再度確認しようとしたらどうなるべきでしょうか？
+空のショッピングカートから商品を削除しようとしたらどうなりますか？
+「黒の手番」の状態で白が指そうとしたらどうなりますか？などです。
 
-You are probably familiar with complex state machines, such as those used in language parsers and regular expressions.  Those kinds of state machines are generated from rule sets or grammars, and are quite complicated.
+## F#で単純なステートマシンを実装する方法 ##
 
-The kinds of state machines that I'm talking about are much, much simpler. Just a few cases at the most, with a small number of transitions, so we don't need to use complex generators.
+言語パーサーや正規表現で使われる複雑なステートマシンに慣れている方も多いでしょう。こうしたステートマシンは、ルールセットや文法から生成され、非常に複雑です。
 
-So what is the best way implement these simple state machines?
+ここで扱うステートマシンは、はるかに単純なものです。多くても数ケースで、遷移の数も少ないので、複雑な生成器は必要ありません。
 
-Typically, each state will have its own type, to store the data that is relevant to that state (if any), and then the entire set of states will be represented by a union class. 
+では、これらの単純なステートマシンを最適な方法で実装するにはどうすればよいでしょうか。
 
-Here's an example using the shopping cart state machine:
+一般的に、各状態には、その状態に関連するデータ（もしあれば）を格納するための独自の型が定義され、状態全体の集合は共用体型で表現されます。
+
+以下は、ショッピングカートのステートマシンを例としたものです。
 
 ```fsharp
 type ActiveCartData = { UnpaidItems: string list }
 type PaidCartData = { PaidItems: string list; Payment: float }
 
 type ShoppingCart = 
-    | EmptyCart  // no data
+    | EmptyCart  // データなし
     | ActiveCart of ActiveCartData
     | PaidCart of PaidCartData
 ```
 
-Note that the `EmptyCart` state has no data, so no special type is needed.
+`EmptyCart` 状態にはデータがないので、特別な型は必要ありません。
 
-Each event is then represented by a function that accepts the entire state machine (the union type) and returns a new version of the state machine (again, the union type).
+各イベントは、ステートマシン全体（判別共用体型）を受け取り、新しいステートマシン（同じく判別共用体型）を返す関数として表現されます。
 
-Here's an example using two of the shopping cart events:
+以下は、ショッピングカートのイベントの例です。
 
 ```fsharp
 let addItem cart item = 
     match cart with
     | EmptyCart -> 
-        // create a new active cart with one item
+        // 1つの商品を持つ新しいアクティブカートを作る
         ActiveCart {UnpaidItems=[item]}
     | ActiveCart {UnpaidItems=existingItems} -> 
-        // create a new ActiveCart with the item added
+        // 商品を追加した新しいActiveCartを作る
         ActiveCart {UnpaidItems = item :: existingItems}
     | PaidCart _ ->  
-        // ignore
+        // 無視
         cart
 
 let makePayment cart payment = 
     match cart with
     | EmptyCart -> 
-        // ignore
+        // 無視
         cart
     | ActiveCart {UnpaidItems=existingItems} -> 
-        // create a new PaidCart with the payment
+        // 支払いを含む新しいPaidCartを作る
         PaidCart {PaidItems = existingItems; Payment=payment}
     | PaidCart _ ->  
-        // ignore
+        // 無視
         cart
 ```
 
-You can see that from the caller's point of view, the set of states is treated as "one thing" for general manipulation (the `ShoppingCart` type), but when processing the events internally, each state is treated separately.
+呼び出し元から見ると、状態の集合は「一つのもの」（`ShoppingCart`型）として扱われ、汎用的に処理されます。しかし内部のイベント処理では、各状態が個別に扱われることがわかります。
 
-### Designing event handling functions 
+### イベント処理関数の設計 
 
-Guideline: *Event handling functions should always accept and return the entire state machine*
+ガイドライン：*イベント処理関数は常にステートマシン全体を受け取り、返すべきです*
 
-You might ask: why do we have to pass in the whole shopping cart to the event-handling functions? For example, the `makePayment` event only has relevance when the cart is in the Active state, so why not just explicitly pass it the ActiveCart type, like this:
+なぜイベント処理関数にショッピングカート全体を渡さなければならないか、疑問が生じるかもしれません。たとえば、 `makePayment` イベントはカートが `Active` 状態の時のみ関連するので、次のように `ActiveCart` 型を直接渡せば十分ではないでしょうか？
 
 ```fsharp
 let makePayment2 activeCart payment = 
@@ -212,46 +212,46 @@ let makePayment2 activeCart payment =
     {PaidItems = existingItems; Payment=payment}
 ```
 
-Let's compare the function signatures:
+関数のシグネチャを比較してみましょう。
 
 ```fsharp
-// the original function 
+// 元の関数 
 val makePayment : ShoppingCart -> float -> ShoppingCart
 
-// the new more specific function
+// 新しいより具体的な関数
 val makePayment2 :  ActiveCartData -> float -> PaidCartData
 ```
 
-You will see that the original `makePayment` function takes a cart and results in a cart, while the new function takes an `ActiveCartData` and results in a `PaidCartData`, which seems to be much more relevant.
+元の `makePayment` 関数はカートを受け取ってカートを返します。新しい関数は `ActiveCartData` を受け取って `PaidCartData` を返すため、より適切に見えるかもしれません。
 
-But if you did this, how would you handle the same event when the cart was in a different state, such as empty or paid?  Someone has to handle the event for all three possible states somewhere, and it is much better to encapsulate this business logic inside the function than to be at the mercy of the caller.
+しかし、このようにした場合、カートが空や支払い済みなど、異なる状態にあるときに、同じイベントをどのように処理するでしょうか？どこかで3つの状態すべてに対してイベントを処理する必要があります。この業務ロジックを関数内にカプセル化する方が、呼び出し元に任せるよりもはるかに適切です。
 
-### Working with "raw" states
+### 「生の」状態を扱う
 
-Occasionally you do genuinely need to treat one of the states as a separate entity in its own right and use it independently. Because each state is a type as well, this is normally straightforward.  
+時には、ある状態を独立したエンティティとして扱い、単独で使いたい場合があります。各状態も型であるため、通常は簡単です。
 
-For example, if I need to report on all paid carts, I can pass it a list of `PaidCartData`.
+たとえば、支払い済みカートすべてのレポートを作る必要がある場合、 `PaidCartData` のリストを渡せます。
 
 ```fsharp
 let paymentReport paidCarts = 
     let printOneLine {Payment=payment} = 
-        printfn "Paid %f for items" payment
+        printfn "商品に対して %f を支払いました" payment
     paidCarts |> List.iter printOneLine
 ```
 
-By using a list of `PaidCartData` as the parameter rather than `ShoppingCart` itself, I ensure that I cannot accidentally report on unpaid carts.
+パラメータとして `ShoppingCart` 自体ではなく `PaidCartData` のリストを使うことで、誤って未払いのカートについてレポートを作ることを防ぎます。
 
-If you do this, it should be in a supporting function to the event handlers, never the event handlers themselves.
+このような処理は、イベントハンドラーではなく、イベントハンドラーの補助関数で行うべきです。
 
 <a name="replace-flags"></a>  
 
 
-## Using explicit states to replace boolean flags ##
+## ブール値フラグを明示的な状態に置き換える ##
 
-Let's look at how we can apply this approach to a real example now.  
+それでは、このアプローチを実際の例に当てはめてみましょう。
 
-In the `Contact` example from an [earlier post](../posts/designing-with-types-intro.md) we had a flag that was used to indicate whether a customer had verified their email address. 
-The type looked like this:
+[前の記事](../posts/designing-with-types-intro.md)で使った `Contact` の例では、顧客がメールアドレスを確認したかどうかを示すフラグがありました。
+型の定義は以下のようになっていました。
 
 ```fsharp
 type EmailContactInfo = 
@@ -261,113 +261,113 @@ type EmailContactInfo =
     }
 ```
 
-Any time you see a flag like this, chances are you are dealing with state. In this case, the boolean is used to indicate that we have two states: "Unverified" and "Verified". 
+このようなフラグを見かけるときは、おそらく状態を扱っているのでしょう。この場合、ブール値は「未確認」と「確認済み」という2つの状態を示すのに使われています。
 
-As mentioned above, there will probably be various business rules associated with what is permissible in each state. For example, here are two:
+先ほど述べたように、各状態で許可される操作ににはさまざまな業務ルールが関連しているでしょう。たとえば、次のような 2 つのルールが考えられます。
 
-* Business rule: *"Verification emails should only be sent to customers who have unverified email addresses"*
-* Business rule: *"Password reset emails should only be sent to customers who have verified email addresses"*
+* 業務ルール：*「確認メールは、未確認のメールアドレスを持つ顧客にのみ送るべきだ」*
+* 業務ルール：*「パスワードリセットメールは、確認済みのメールアドレスを持つ顧客にのみ送るべきだ」*
 
-As before, we can use types to ensure that code conforms to these rules.
+これまでと同じように、コードがこれらのルールに従うことを型を使って保証できます。
 
-Let's rewrite the `EmailContactInfo` type using a state machine. We'll put it in an module as well.
+`EmailContactInfo` 型をステートマシンを使って書き直してみましょう。モジュールに入れることにします。
 
-We'll start by defining the two states. 
+まず、2つの状態を定義します。
 
-* For the "Unverified" state, the only data we need to keep is the email address. 
-* For the "Verified" state, we might want to keep some extra data in addition to the email address, such as the date it was verified, the number of recent password resets, on so on. This data is not relevant (and should not even be visible) to the "Unverified" state.
+* 「未確認」状態では、必要なデータはメールアドレスだけです。
+* 「確認済み」状態では、メールアドレスに加えて、確認された日付や最近のパスワードリセットの回数など、追加のデータを保持したい場合があります。このデータは「未確認」状態には関係がなく、見えるべきでもありません。
 
 ```fsharp
 module EmailContactInfo = 
     open System
 
-    // placeholder
+    // プレースホルダー
     type EmailAddress = string
 
-    // UnverifiedData = just the email
+    // UnverifiedData = メールアドレスのみ
     type UnverifiedData = EmailAddress
 
-    // VerifiedData = email plus the time it was verified
+    // VerifiedData = メールアドレスと確認された時刻
     type VerifiedData = EmailAddress * DateTime 
 
-    // set of states
+    // 状態の集合
     type T = 
         | UnverifiedState of UnverifiedData
         | VerifiedState of VerifiedData
 
 ```
 
-Note that for the `UnverifiedData` type I just used a type alias. No need for anything more complicated right now, but using a type alias makes the purpose explicit and helps with refactoring.
+`UnverifiedData` 型には、今回は型エイリアスを使いました。今のところこれ以上複雑なことはしませんが、型エイリアスを使うことで目的が明確になり、リファクタリングにも役立ちます。
 
-Now let's handle the construction of a new state machine, and then the events.
+次に、新しいステートマシンの構築と、イベントの処理を見てみましょう。
 
-* Construction *always* results in an unverified email, so that is easy.
-* There is only one event that transitions from one state to another: the "verified" event.
+* 構築は*常に*未確認のメールになるので、これは簡単です。
+* 状態を遷移させるイベントは、「確認済み」イベントだけです。
 
 ```fsharp
 module EmailContactInfo = 
 
-    // types as above
-    
+    // 上記の型定義
+
     let create email = 
-        // unverified on creation
+        // 作成時は未確認
         UnverifiedState email
 
-    // handle the "verified" event
+    // 「確認済み」イベントを処理
     let verified emailContactInfo dateVerified = 
         match emailContactInfo with
         | UnverifiedState email ->
-            // construct a new info in the verified state
+            // 確認済み状態の新しい情報を構築
             VerifiedState (email, dateVerified) 
         | VerifiedState _ ->
-            // ignore
+            // 無視
             emailContactInfo
 ```
 
-Note that, as [discussed here](../posts/match-expression.md), every branch of the match must return the same type, so when ignoring the verified state we must still return something, such as the object that was passed in.
+[ここで説明した](../posts/match-expression.md)ように、match 式のすべての分岐が同じ型を返す必要があることに注意してください。そのため、「確認済み」状態を無視する場合でも、渡されたオブジェクトなど、何かを返す必要があります。
 
-Finally, we can write the two utility functions `sendVerificationEmail` and `sendPasswordReset`.
+最後に、`sendVerificationEmail` と `sendPasswordReset` という2つのユーティリティ関数を書くことができます。
 
 ```fsharp
 module EmailContactInfo = 
 
-    // types and functions as above
+    // 上記の型と関数定義
     
     let sendVerificationEmail emailContactInfo = 
         match emailContactInfo with
         | UnverifiedState email ->
-            // send email
-            printfn "sending email"
+            // メールを送信
+            printfn "メールを送信中"
         | VerifiedState _ ->
-            // do nothing
+            // 何もしない
             ()
 
     let sendPasswordReset emailContactInfo = 
         match emailContactInfo with
         | UnverifiedState email ->
-            // ignore
+            // 無視
             ()
         | VerifiedState _ ->
-            // ignore
-            printfn "sending password reset"
+            // パスワードリセットを送信
+            printfn "パスワードリセットを送信中"
 ```
 
-## Using explicit cases to replace case/switch statements ##
+## 明示的なケースを使ってcase/switch文を置き換える ##
 
-Sometimes it is not just a simple boolean flag that is used to indicate state.  In C# and Java it is common to use a `int` or an `enum` to represent a set of states.
+C# や Java では、状態を示すのに単純なブール値フラグだけでなく、 `int` や `enum` を使うこともよくあります。
 
-For example, here's a simple state diagram of a package status for a delivery system, where a package has three possible states:
+たとえば、配送システムにおける荷物の状態を表す簡単な状態遷移図を考えてみましょう。荷物には3つの状態があります。
 
-![State transition diagram: Package Delivery](../assets/img/State_Delivery.png)
+![状態遷移図。荷物配送](../assets/img/State_Delivery.png)
 
-There are some obvious business rules that come out of this diagram:
+この図からは、明らかな業務ルールがいくつか読み取れます。
 
-* *Rule: "You can't put a package on a truck if it is already out for delivery"*
-* *Rule: "You can't sign for a package that is already delivered"*
+* *ルール：「配達中の荷物をトラックに積むことはできない」*
+* *ルール：「すでに配達済みの荷物に署名することはできない」*
 
-and so on.
+などです。
 
-Now, without using union types, we might represent this design by using an enum to represent the state, like this:
+判別共用体を使わずにこの設計を表現する場合、次のように列挙体を使って状態を表すのが一般的です。
 
 ```fsharp
 open System
@@ -386,7 +386,7 @@ type Package =
     }
 ```
 
-And then the code to handle the "putOnTruck" and "signedFor" events might look like this:
+そして、「トラックに積む」と「署名済み」イベントを処理するコードは以下のようになるかもしれません。
 
 ```fsharp
 let putOnTruck package = 
@@ -396,7 +396,7 @@ let signedFor package signature =
     let {PackageStatus=packageStatus} = package 
     if (packageStatus = Undelivered) 
     then 
-        failwith "package not out for delivery"
+        failwith "荷物が配達中ではありません"
     else if (packageStatus = OutForDelivery) 
     then 
         {package with 
@@ -405,16 +405,16 @@ let signedFor package signature =
             DeliverySignature=signature;
             }
     else
-        failwith "package already delivered"
+        failwith "荷物はすでに配達済みです"
 ```
 
-This code has some subtle bugs in it.
+このコードには微妙なバグがいくつかあります。
 
-* When handling the "putOnTruck" event, what should happen in the case that the status is *already* `OutForDelivery` or `Delivered`. The code is not explicit about it.
-* When handling the "signedFor" event, we do handle the other states, but the last else branch assumes that we only have three states, and therefore doesn't bother to be explicit about testing for it. This code would be incorrect if we ever added a new status.
-* Finally, because the `DeliveryDate` and `DeliverySignature` are in the basic structure, it would be possible to set them accidentally, even though the status was not `Delivered`.
+* 「トラックに積む」イベントを処理する際、状態が*すでに* `OutForDelivery` や `Delivered` の場合、何が起こるべきかが明示的ではありません。
+* 「署名済み」イベントを処理しているとき、他の状態も処理していますが、最後の `else` ブロックでは状態が3つしかないと仮定しており、明示的にテストしていません。新しい状態を追加した場合、このコードは正しく動作しません。
+* 最後に、 `DeliveryDate` と `DeliverySignature` が基本構造の中に含まれているため、状態が `Delivered` でなくても、誤って設定できてしまいます。
 
-But as usual, the idiomatic and more type-safe F# approach is to use an overall union type rather than embed a status value inside a data structure.
+しかし、F#の慣用的で型安全なアプローチは、データ構造の中に状態値を埋め込むのではなく、全体的な共用体型を使うことです。
 
 ```fsharp
 open System
@@ -442,7 +442,7 @@ type Package =
     | Delivered of DeliveredData 
 ```
 
-And then the event handlers *must* handle every case.
+そして、イベントハンドラーは*必ず*すべてのケースを処理しなければなりません。
 
 ```fsharp
 let putOnTruck package = 
@@ -450,14 +450,14 @@ let putOnTruck package =
     | Undelivered {PackageId=id} ->
         OutForDelivery {PackageId=id}
     | OutForDelivery _ ->
-        failwith "package already out"
+        failwith "荷物はすでに配達中です"
     | Delivered _ ->
-        failwith "package already delivered"
+        failwith "荷物はすでに配達済みです"
 
 let signedFor package signature = 
     match package with
     | Undelivered _ ->
-        failwith "package not out"
+        failwith "荷物は配達中ではありません"
     | OutForDelivery {PackageId=id} ->
         Delivered {
             PackageId=id; 
@@ -465,17 +465,17 @@ let signedFor package signature =
             DeliverySignature=signature;
             }
     | Delivered _ ->
-        failwith "package already delivered"
+        failwith "荷物はすでに配達済みです"
 ```
 
-*Note: I am using `failWith` to handle the errors. In a production system, this code should be replaced by client driven error handlers.
-See the discussion of handling constructor errors in the [post about single case DUs](../posts/designing-with-types-single-case-dus.md) for some ideas.*
+*注：ここではエラー処理に `failwith` を使っています。実際のシステムでは、クライアント側でエラー処理を行うようにコードを修正するべきです。
+コンストラクターエラーの処理については、[単一ケース判別共用体に関する記事](../posts/designing-with-types-single-case-dus.md)の議論を参照してください。*
 
-## Using explicit cases to replace implicit conditional code ##
+## 明示的なケースを使って暗黙的な条件分岐コードを置き換える ##
 
-Finally, there are often cases where a system has states, but they are implicit in conditional code. 
+最後に、システムに状態があるものの、暗黙的に条件分岐コードに組み込まれている場合がよくあります。
 
-For example, here is a type that represents an order. 
+たとえば、注文を表す以下の型があるとします。
 
 ```fsharp
 open System
@@ -493,19 +493,19 @@ type Order =
     }
 ```
 
-You can guess that Orders can be "new", "paid", "shipped" or "returned", and have timestamps and extra information for each transition, but this is not made explicit in the structure.
+注文には「新規」、「支払い済み」、「発送済み」、「返品」の状態があり、それぞれの遷移にはタイムスタンプや追加情報があることが想像できます。しかし、構造上は明示的に示されていません。
 
-The option types are a clue that this type is trying to do too much.  At least F# forces you to use options -- in C# or Java these might just be nulls, and you would have no idea from the type definition whether they were required or not. 
+オプション型は、この型が多機能になりすぎていることを示唆しています。少なくともF#ではオプション型を使うことを強制されますが、C#やJavaでは `null` が使われるため、型定義からは必須かどうかわかりません。
 
-And now let's look at the kind of ugly code that might test these option types to see what state the order is in.
+それでは、このようなオプション型をテストして注文の状態を調べるような、見栄えの悪いコードを見てみましょう。
 
-Again, there is some important business logic that depends on the state of the order, but nowhere is it explicitly documented what the various states and transitions are.
+ここでも、注文の状態に依存する重要なビジネスロジックがありますが、さまざまな状態や遷移がどこにも明示的に文書化されていません。
 
 ```fsharp
 let makePayment order payment = 
     if (order.PaidDate.IsSome)
-    then failwith "order is already paid"
-    //return an updated order with payment info
+    then failwith "注文はすでに支払い済みです"
+    // 支払い情報を含む更新された注文を返す
     {order with 
         PaidDate=Some DateTime.UtcNow
         PaidAmount=Some payment
@@ -513,17 +513,17 @@ let makePayment order payment =
 
 let shipOrder order shippingMethod = 
     if (order.ShippedDate.IsSome)
-    then failwith "order is already shipped"
-    //return an updated order with shipping info
+    then failwith "注文はすでに発送済みです"
+    // 発送情報を含む更新された注文を返す
     {order with 
         ShippedDate=Some DateTime.UtcNow
         ShippingMethod=Some shippingMethod
         }
 ```
 
-*Note: I added `IsSome` to test for option values being present as a direct port of the way that a C# program would test for `null`. But `IsSome` is both ugly and dangerous.  Don't use it!*
+*注：C#プログラムで `null` をテストするやりかたを直接的に移植したため、 `IsSome` を追加してオプション値が存在することをテストしています。しかし、 `IsSome` は見栄えが悪く危険です。使わないでください！*
 
-Here is a better approach using types that makes the states explicit.
+より良いアプローチは、型を使って状態を明示的にすることです。
 
 ```fsharp
 open System
@@ -556,81 +556,81 @@ type Order =
     | Returned of InitialOrderData * PaidOrderData * ShippedOrderData * ReturnedOrderData
 ```
 
-And here are the event handling methods:
+そして、イベント処理メソッドは次のような形になります。
 
 ```fsharp
 let makePayment order payment = 
     match order with
     | Unpaid i -> 
         let p = {Date=DateTime.UtcNow; Amount=payment}
-        // return the Paid order
+        // 支払い済みの注文を返す
         Paid (i,p)
     | _ ->
-        printfn "order is already paid"
+        printfn "注文はすでに支払い済みです"
         order
 
 let shipOrder order shippingMethod = 
     match order with
     | Paid (i,p) -> 
         let s = {Date=DateTime.UtcNow; Method=shippingMethod}
-        // return the Shipped order
+        // 発送済みの注文を返す
         Shipped (i,p,s)
     | Unpaid _ ->
-        printfn "order is not paid for"
+        printfn "注文は支払われていません"
         order
     | _ ->
-        printfn "order is already shipped"
+        printfn "注文はすでに発送済みです"
         order
 ```
 
-*Note: Here I am using `printfn` to handle the errors. In a production system, do use a different approach.*
+*注：ここではエラー処理に `printfn` を使っています。実際のシステムでは、別のアプローチを使ってください。*
 
 
-## When not to use this approach  
+## このアプローチを使うべきでない場合
 
-As with any technique we learn, we have to be careful of treating it like a [golden hammer](http://en.wikipedia.org/wiki/Law_of_the_instrument).
+どんな手法もそうですが、習得したものを[万能ツール](http://en.wikipedia.org/wiki/Law_of_the_instrument)のように扱わないよう注意する必要があります。
 
-This approach does add complexity, so before you start using it, be sure that benefits will outweigh the costs.
+このアプローチは複雑さを増やすので、使い始める前に、メリットがデメリットを上回るかどうかを検討してください。
 
-To recap, here are the conditions where using simple state machines might be benficial:
+改めて、単純なステートマシンを使うのがメリットをもたらしそうな条件をまとめます。
 
-* You have a set of mutually exclusive states with transitions between them.
-* The transitions are triggered by external events. 
-* The states are exhaustive. That is, there are no other choices and you must always handle all cases.
-* Each state might have associated data that should not be accessable when the system is in another state.
-* There are static business rules that apply to the states.
+* 相互に排他的な状態があり、それらの間に遷移がある。
+* 遷移は外部イベントによってトリガーされる。
+* 状態は網羅的である。つまり、他の選択肢はなく、常にすべてのケースを処理しなければならない。
+* 各状態に関連するデータがあり、システムが別の状態にあるときにはアクセスできないようにすべきである。
+* 状態に適用される静的なビジネスルールがある。
 
-Let's look at some examples where these guidelines *don't* apply.
+これらのガイドラインが当てはまらない例をいくつか見てみましょう。
 
-**States are not important in the domain.**
+**ドメインにおいて状態が重要でない場合**
 
-Consider a blog authoring application. Typically, each blog post can be in a state such as "Draft", "Published", etc. And there are obviously transitions between these states driven by events (such as clicking a "publish" button).
+ブログ投稿アプリケーションを考えてみましょう。通常、各ブログ投稿は「下書き」、「公開済み」などの状態を持ち、イベント（「公開」ボタンをクリックするなど）によって状態遷移がトリガーされます。
 
-But is it worth creating a state machine for this? Generally, I would say not.
+しかし、このためにわざわざステートマシンを作る価値はあるでしょうか。一般的には、ないでしょう。
 
-Yes, there are state transitions, but is there really any change in logic because of this?  From the authoring point of view, most blogging apps don't have any restrictions based on the state.
-You can author a draft post in exactly the same way as you author a published post.
+確かに状態遷移はありますが、このためになにかロジックに変化はあるでしょうか。投稿者の観点からは、ほとんどのブログアプリは状態に基づいた制限を設けていません。
+下書きの投稿も、公開済みの投稿と全く同じ方法で作れます。
 
-The only part of the system that *does* care about the state is the display engine, and that filters out the drafts in the database layer before it ever gets to the domain. 
+システムの中で状態を気にするのは表示エンジンだけで、ドメイン層に到達する前にデータベース層で下書きをフィルタリングします。
 
-Since there is no special domain logic that cares about the state, it is probably unnecessary.
+ドメインロジックで状態を状態を特に意識する必要がないのであれば、ステートマシンは不要でしょう。
 
-**State transitions occur outside the application**
+**状態遷移がアプリケーション外で発生する場合**
 
-In a customer management application, it is common to classify customers as "prospects", "active", "inactive", etc.
+顧客管理アプリケーションでは、顧客を「見込み客」、「アクティブ」、「非アクティブ」などに分類するのが一般的です。
 
-![State transition diagram: Customer states](../assets/img/State_Customer.png)
+![状態遷移図。顧客の状態](../assets/img/State_Customer.png)
 
-In the application, these states have business meaning and should be represented by the type system (such as a union type).  But the state *transitions* generally do not occur within the application itself. For example, we might classify a customer as inactive if they haven't ordered anything for 6 months. And then this rule might be applied to customer records in a database by a nightly batch job, or when the customer record is loaded from the database.  But from our application's point of view, the transitions do not happen *within* the application, and so we do not need to create a special state machine.
+アプリケーションでは、これらの状態にビジネス上の意味があり、型システム（判別共用体など）で表現されるべきです。しかし、状態*遷移*は通常、アプリケーション自体の中では起こりません。たとえば、顧客が 6 か月間何も注文しなかった場合に非アクティブとして分類するかもしれません。そして、このルールは夜間のバッチジョブや、顧客レコードをデータベースから読み込む際に、データベース内の顧客レコードに適用されるでしょう。しかし、アプリケーションの観点からは、遷移はアプリケーション*内部*で起こるわけではないので、特別なステートマシンを作る必要はありません。
 
-**Dynamic business rules**
+**動的なビジネスルール**
 
-The last bullet point in the list above refers to "static" business rules. By this I mean that the rules change slowly enough that they should be embedded into the code itself. 
+上記のリストの最後の項目は、「静的な」ビジネスルールを指しています。つまり、ルールはゆっくりとしか変更されないので、コード自体に埋め込んでも問題ないということです。
 
-On the other hand, if the rules are dynamic and change frequently, it is probably not worth going to the trouble of creating static types.
+一方、ルールが動的で頻繁に変わる場合は、静的な型を作る手間をかける価値はないでしょう。
 
-In these situations, you should consider using active patterns, or even a proper rules engine.
+このような状況では、アクティブパターンや、専用のルールエンジンを使うことを検討してください。
 
-## Summary
+## まとめ
 
-In this post, we've seen that if you have data structures with explicit flags ("IsVerified") or status fields ("OrderStatus"), or implicit state (clued by an excessive number of nullable or option types), it is worth considering using a simple state machine to model the domain objects.  In most cases the extra complexity is compensated for by the explicit documention of the states and the elimination of errors due to not handling all possible cases.
+この記事では、データ構造に明示的なフラグ（「IsVerified」）やステータスフィールド（「OrderStatus」）がある場合、または暗黙的な状態（多数のヌル許容型やオプション型で示唆される）がある場合、単純なステートマシンを使ってドメインオブジェクトをモデル化することを検討する価値があると説明しました。追加される複雑さについては、ほとんどの場合、状態を明示的に文書化し、すべてのケースを処理しないことによるエラーを排除することで埋め合わせることができます。

@@ -1,18 +1,18 @@
 ---
 layout: post
-title: "Designing with types: Discovering new concepts"
-description: "Gaining deeper insight into the domain"
+title: "型を使った設計：新しい概念の発見"
+description: "ドメインへのより深い洞察を得る"
 nav: thinking-functionally
-seriesId: "Designing with types"
+seriesId: "型を使った設計"
 seriesOrder: 4
-categories: [Types, DDD]
+categories: [型, DDD]
 ---
 
-In the last post, we looked at how we could represent a business rule using types. 
+前回の記事では、型を使ってビジネスルールを表現する方法を見てきました。
 
-The rule was: *"A contact must have an email or a postal address"*. 
+そのルールは「*連絡先には、メールアドレスまたは郵便住所が必要*」でした。
 
-And the type we designed was:
+そして、設計した型は次のようなものでした。
 
 ```fsharp
 type ContactInfo = 
@@ -21,17 +21,17 @@ type ContactInfo =
     | EmailAndPost of EmailContactInfo * PostalContactInfo
 ```
 
-Now let's say that the business decides that phone numbers need to be supported as well.  The new business rule is: *"A contact must have at least one of the following: an email, a postal address, a home phone, or a work phone"*. 
+さて、ここで企業が電話番号のサポートも必要だと決めたとします。新しいビジネスルールは、「*連絡先には、メールアドレス、郵便住所、自宅電話、または勤務先電話のうち、少なくとも1つが必要*」となります。
 
-How can we represent this now?  
+これをどのように表現すればよいでしょうか。
 
-A little thought reveals that there are 15 possible combinations of these four contact methods. Surely we don't want to create a union case with 15 choices? Is there a better way?
+少し考えてみると、この4つの連絡方法の組み合わせは 15 通りあります。15個の選択肢を持つ判別共用体を作るのは望ましくないはずです。もっと良い方法はないでしょうか。
 
-Let's hold that thought and look at a different but related problem.
+この疑問はひとまず保留にして、関連する別の問題を見てみましょう。
 
-## Forcing breaking changes when requirements change 
+## 要件が変更されたときに破壊的変更を強制する
 
-Here's the problem. Say that you have a contact structure which contains a list of email addresses and also a list of postal addresses, like so:
+ここで問題となるのは、次のような状況です。メールアドレスのリストと郵便住所のリストを含む連絡先構造があるとします。
 
 ```fsharp
 type ContactInformation = 
@@ -41,16 +41,16 @@ type ContactInformation =
     }
 ```
 
-And, also let's say that you have created a `printReport` function that loops through the information and prints it out in a report:
+そして、情報をループ処理してレポートに出力する `printReport` 関数を作ったとします。
 
 ```fsharp
-// mock code            
+// モックコード            
 let printEmail emailAddress = 
-    printfn "Email Address is %s" emailAddress 
+    printfn "メールアドレス：%s" emailAddress 
 
-// mock code
+// モックコード
 let printPostalAddress postalAddress = 
-    printfn "Postal Address is %s" postalAddress 
+    printfn "郵便住所：%s" postalAddress 
 
 let printReport contactInfo = 
     let {
@@ -63,12 +63,12 @@ let printReport contactInfo =
          printPostalAddress postalAddress 
 ```
 
-Crude, but simple and understandable.
+シンプルですが、わかりやすいコードです。
 
-Now if the new business rule comes into effect, we might decide to change the structure to have some new lists for the phone numbers.  The updated structure will now look something like this:
+ここで新しいビジネスルールが適用されると、構造を変更して電話番号用の新しいリストを追加することにするかもしれません。更新された構造は次のようになります。
 
 ```fsharp
-type PhoneContactInfo = string // dummy for now
+type PhoneContactInfo = string // 仮の定義
 
 type ContactInformation = 
     {
@@ -79,11 +79,11 @@ type ContactInformation =
     }
 ```
 
-If you make this change, you also want to make sure that all the functions that process the contact infomation are updated to handle the new phone cases as well.
+この変更を行う場合、連絡先情報を処理するすべての関数を更新して、新しい電話番号のケースも処理できるようにしたいものです。
 
-Certainly, you will be forced to fix any pattern matches that break. But in many cases, you would *not* be forced to handle the new cases.
+確かに、壊れてしまうパターンマッチは修正しなければなりません。しかし、多くの場合、新しいケースを処理するように**強制**はされません。
 
-For example, here's `printReport` updated to work with the new lists:
+たとえば、新しいリストに対応するように更新された `printReport` 関数を見てみましょう。
 
 ```fsharp
 let printReport contactInfo = 
@@ -97,21 +97,21 @@ let printReport contactInfo =
          printPostalAddress postalAddress 
 ```
 
-Can you see the deliberate mistake? Yes, I forgot to change the function to handle the phones. The new fields in the record have not caused the code to break at all. There is no guarantee that you will remember to handle the new cases. It would be all too easy to forget.  
+意図的なミスがあるのがわかりますか？そう、電話に対応するように関数を変更することを忘れています。レコードの新しいフィールドはコードをまったく壊していないので、新しいケースを処理することを覚えている保証はありません。忘れてしまうことは簡単です。
 
-Again, we have the challenge: can we design types such that these situations cannot easily happen?
+ここでも、このような状況が簡単に起こらないように型を設計できるのかという課題が残ります。
 
-## Deeper insight into the domain
+## ドメインへのより深い洞察
 
-If you think about this example a bit more deeply, you will realize that we have missed the forest for the trees.
+この例についてもう少し深く考えてみると、木を見て森を見ていなかったことに気づきます。
 
-Our initial concept was: *"to contact a customer, there will be a list of possible emails, and a list of possible addresses, etc"*.
+当初の概念は、「*顧客に連絡するには、メールアドレスのリスト、住所のリストなどがある*」というものでした。
 
-But really, this is all wrong. A much better concept is: *"To contact a customer, there will be a list of contact methods. Each contact method could be an email OR a postal address OR a phone number"*.
+しかし、実際にはこれはまったく正しくありません。もっと良い概念は、「*顧客に連絡するには、連絡方法のリストがある。各連絡方法は、メールアドレス *または* 郵便住所 *または* 電話番号のいずれかである*」というものです。
 
-This is a key insight into how the domain should be modelled.  It creates a whole new type, a "ContactMethod", which resolves our problems in one stroke.
+これは、ドメインをモデル化する方法についての重要な洞察です。これにより、「ContactMethod（連絡方法）」というまったく新しい型が生まれ、一気に問題が解決します。
 
-We can immediately refactor the types to use this new concept:
+この新しい概念を使って、型をすぐにリファクタリングできます。
 
 ```fsharp
 type ContactMethod = 
@@ -126,20 +126,20 @@ type ContactInformation =
     }
 ```
 
-And the reporting code must now be changed to handle the new type as well:
+そして、レポート作成のコードも新しい型に対応するように変える必要があります。
 
 ```fsharp
-// mock code            
+// モックコード            
 let printContactMethod cm = 
     match cm with
     | Email emailAddress -> 
-        printfn "Email Address is %s" emailAddress 
+        printfn "メールアドレス：%s" emailAddress 
     | PostalAddress postalAddress -> 
-         printfn "Postal Address is %s" postalAddress 
+         printfn "郵便住所：%s" postalAddress 
     | HomePhone phoneNumber -> 
-        printfn "Home Phone is %s" phoneNumber 
+        printfn "自宅電話：%s" phoneNumber 
     | WorkPhone phoneNumber -> 
-        printfn "Work Phone is %s" phoneNumber 
+        printfn "勤務先電話：%s" phoneNumber 
 
 let printReport contactInfo = 
     let {
@@ -149,21 +149,21 @@ let printReport contactInfo =
     |> List.iter printContactMethod
 ```
 
-These changes have a number of benefits.
+これらの変更には多くの利点があります。
 
-First, from a modelling point of view, the new types represent the domain much better, and are more adaptable to changing requitements.  
+まず、モデリングの観点から、新しい型はドメインをより適切に表現しており、要件の変更にも対応しやすくなっています。
 
-And from a development point of view, changing the type to be a union means that any new cases that we add (or remove) will break the code in a very obvious way, and it will be much harder to accidentally forget to handle all the cases.
+そして、開発の観点からは、型を判別共用体に変えることで、新しいケースを追加（または削除）した場合に、非常に明確な形でコードが壊れるため、すべてのケースを処理するのをうっかり忘れることが難しくなります。
 
-## Back to the business rule with 15 possible combinations 
+## 組み合わせが15 通りあるビジネスルールに戻る
 
-So now back to the original example. We left it thinking that, in order to encode the business rule, we might have to create 15 possible combinations of various contact methods.
+では、元の例に戻りましょう。ビジネスルールをエンコードするために、さまざまな連絡方法について15通りの組み合わせを作る必要があるかもしれないと考えていました。
 
-But the new insight from the reporting problem also affects our understanding of the business rule.
+しかし、レポート作成の問題から得た新しい洞察は、ビジネスルールの理解にも影響を与えます。
 
-With the "contact method" concept in our heads, we can rephase the requirement as: *"A customer must have at least one contact method. A contact method could be an email OR a postal addresses OR a phone number"*. 
+「連絡方法」という概念を念頭に置くと、要件は「*顧客は少なくとも 1 つの連絡方法を持つ必要がある。連絡方法は、メールアドレス *または* 郵便住所 *または* 電話番号のいずれかである*」と言い換えられます。
 
-So let's redesign the `Contact` type to have a list of contact methods:
+そこで、 `Contact` 型を連絡方法のリストを持つように再設計しましょう。
 
 ```fsharp
 type Contact = 
@@ -173,9 +173,9 @@ type Contact =
     }
 ```
 
-But this is still not quite right. The list could be empty.  How can we enforce the rule that there must be *at least* one contact method?
+しかし、これでもまだ完全ではありません。リストが空である可能性があります。 *少なくとも* 1つの連絡方法が必要であるというルールをどのように強制できるでしょうか。
 
-The simplest way is to create a new field that is required, like this:
+最も簡単な方法は、必須の新しいフィールドを作ることです。
 
 ```fsharp
 type Contact = 
@@ -186,17 +186,17 @@ type Contact =
     }
 ```
 
-In this design, the `PrimaryContactMethod` is required, and the secondary contact methods are optional, which is exactly what the business rule requires!
+この設計では、 `PrimaryContactMethod` は必須で、二次的な連絡方法はオプションです。これはまさにビジネスルールが求めていることです。
 
-And this refactoring too, has given us some insight.  It may be that the concepts of "primary" and "secondary" contact methods might, in turn, clarify code in other areas, creating a cascading change of insight and refactoring.
+このリファクタリングも、私たちに洞察を与えてくれました。「主要な」連絡方法と「二次的な」連絡方法という概念が、他のドメインのコードをも明確にする可能性があり、洞察とリファクタリングの連鎖的な変化を引き起こすかもしれません。
 
-## Summary
+## まとめ
 
-In this post, we've seen how using types to model business rules can actually help you to understand the domain at a deeper level.
+この投稿では、型を使ってビジネスルールをモデリングすることで、ドメインをより深く理解することができることを説明しました。
 
-In the *Domain Driven Design* book, Eric Evans devotes a whole section and two chapters in particular (chapters 8 and 9) to discussing the importance of [refactoring towards deeper insight](http://dddcommunity.org/wp-content/uploads/files/books/evans_pt03.pdf).  The example in this post is simple in comparison, but I hope that it shows that how an insight like this can help improve both the model and the code correctness.  
+*エリック・エヴァンス著の『ドメイン駆動設計』では、1つのセクション全体と特に2つの章（第8章と第9章）を割いて、[より深い洞察に向けたリファクタリング](https://www.dddcommunity.org/wp-content/uploads/files/books/evans_pt03.pdf)の重要性を議論しています。この投稿の例は比較的単純ですが、このような洞察がモデルとコードの正確性の両方を良くするのに役立つことを示せたと思います。
 
-In the next post, we'll see how types can help with representing fine-grained states. 
+次の投稿では、細かい状態を表現するのに型がどのように役立つかを見ていきます。
 
 
 
