@@ -1,21 +1,21 @@
 ---
 layout: post
-title: "Designing with types: Constrained strings"
-description: "Adding more semantic information to a primitive type"
+title: "型を使った設計：制約付き文字列"
+description: "プリミティブ型にさらに多くの意味情報を加える"
 nav: thinking-functionally
-seriesId: "Designing with types"
+seriesId: "型を使った設計"
 seriesOrder: 6
-categories: [Types, DDD]
+categories: [型, DDD]
 ---
 
-In a [previous post](../posts/designing-with-types-single-case-dus.md), I talked about avoiding using plain primitive strings for email addresses, zip codes, states, etc.
-By wrapping them in a single case union, we could (a) force the types to be distinct and (b) add validation rules.
+[前回の投稿](../posts/designing-with-types-single-case-dus.md)では、メールアドレスや郵便番号、州名などに単純な文字列型を使わないようにする話をしました。
+単一ケースの共用体でラップすることで、(a)型をはっきり区別し、(b)検証ルールを加えられるようになりました。
 
-In this post, we'll look at whether we can extend that concept to an even more fine grained level.
+今回は、この考え方をもっと細かいレベルまで広げられないか考えてみます。
 
-## When is a string not a string?
+## 文字列が文字列でないとき
 
-Let's look a simple `PersonalName` type.
+簡単な `PersonalName` 型を見てみましょう。
 
 ```fsharp
 type PersonalName = 
@@ -25,33 +25,33 @@ type PersonalName =
     }
 ```
 
-The type says that the first name is a `string`. But really, is that all it is?  Are there any other constraints that we might need to add to it?
+この型では、名前が `string` だと定義しています。でも、本当にそれだけでしょうか？他に加えるべき制約はないでしょうか？
 
-Well, OK, it must not be null. But that is assumed in F#.
+もちろん、`null` ではあってはならないでしょう。でもそれはF#では当たり前です。
 
-What about the length of the string? Is it acceptable to have a name which is 64K characters long? If not, then is there some maximum length allowed?
+文字列の長さはどうでしょう？64KBもの長さの名前は許容できるでしょうか？そうでないなら、最大長はどれくらいでしょうか？
 
-And can a name contain linefeed characters or tabs?  Can it start or end with whitespace?
+名前に改行文字やタブを含めてもいいのでしょうか？先頭や末尾の空白文字はどうでしょう？
 
-Once you put it this way, there are quite a lot of constraints even for a "generic" string. Here are some of the obvious ones:
+こう考えると、「一般的な」文字列にもかなりの制約があることがわかります。明らかなものをいくつか挙げてみましょう。
 
-* What is its maximum length?
-* Can it cross over multiple lines?
-* Can it have leading or trailing whitespace?
-* Can it contain non-printing characters?
+* 最大長は？
+* 複数行にまたがってもいい？
+* 先頭や末尾の空白文字は許す？
+* 非表示文字を含んでもいい？
 
-## Should these constraints be part of the domain model?
+## これらの制約はドメインモデルの一部であるべき？
 
-So we might acknowledge that some constraints exist, but should they really be part of the domain model (and the corresponding types derived from it)? 
-For example, the constraint that a last name is limited to 100 characters -- surely that is specific to a particular implementation and not part of the domain at all.
+制約の存在は認めるとして、それらを本当にドメインモデル（およびそこから導かれる型）の一部にすべきでしょうか？
+たとえば、姓が100文字に制限されるという制約は、特定の実装に固有のもので、ドメインの一部ではないのではないでしょうか。
 
-I would answer that there is a difference between a logical model and a physical model.  In a logical model some of these constraints might not be relevant, but in a physical model they most certainly are. And when we are writing code, we are always dealing with a physical model anyway.
+これに対する私の答えは、論理モデルと物理モデルには違いがあるというものです。論理モデルではこれらの制約の一部は関係ないかもしれません。しかし、物理モデルでは間違いなく関係します。そして、コードを書くときは常に、物理モデルを扱っているのです。
 
-Another reason for incorporating the constraints into the model is that often the model is shared across many separate applications. For example, a personal name may be created in a e-commerce application, which writes it into a database table and then puts it on a message queue to be picked up by a CRM application, which in turn calls an email templating service, and so on.
+モデルに制約を組み込むもう一つの理由は、多くの場合、モデルが複数の独立したアプリケーション間で共有されるからです。たとえば、個人名はeコマースアプリケーションで作られ、データベーステーブルに書き込まれ、メッセージキューに投入され、CRMアプリケーションがそれを取り出し、そこからメールテンプレートサービスが呼び出される、などということが考えられます。
 
-It is important that all these applications and services have the *same* idea of what a personal name is, including the length and other constraints. If the model does not make the constraints explicit, then it is easy to have a mismatch when moving across service boundaries.
+これらすべてのアプリケーションやサービスが、個人名について（長さやその他の制約を含めて） *同じ* 認識を持つことが重要です。モデルが制約をはっきり示していないと、サービスの境界を越えるときにミスマッチが生じやすくなります。
 
-For example, have you ever written code that checks the length of a string before writing it to a database? 
+たとえば、データベースに書き込む前に文字列の長さをチェックするコードを書いたことはありませんか？
 
 ```csharp
 void SaveToDatabase(PersonalName personalName)
@@ -59,27 +59,27 @@ void SaveToDatabase(PersonalName personalName)
    var first = personalName.First;
    if (first.Length > 50)
    {    
-        // ensure string is not too long
+        // 文字列が長すぎないようにする
         first = first.Substring(0,50);
    }
    
-   //save to database
+   //データベースに保存
 }
 ```
 
-If the string *is* too long at this point, what should you do? Silently truncate it? Throw an exception?
+この時点で文字列が *長すぎる* 場合、どうすべきでしょうか？黙って切り詰めますか？例外を投げますか？
 
-A better answer is to avoid the problem altogether if you can. By the time the string gets to the database layer it is too late -- the database layer should not be making these kinds of decisions.
+より良い答えは、可能であれば問題を最初から回避することです。文字列がデータベース層に到達する頃にはもう手遅れです。データベース層がこのような決定をすべきではありません。
 
-The problem should be dealt with when the string was *first created*, not when it is *used*.  In other words, it should have been part of the validation of the string.
+問題は文字列が*使われる*ときではなく、*最初に作られる*ときに対処されるべきです。つまり、文字列の検証の一部であるべきだったのです。
 
-But how can we trust that the validation has been done correctly for all possible paths?  I think you can guess the answer...
+しかし、すべての可能な経路で検証が正しく行われていることをどうやって信頼できるでしょうか？答えは想像がつくと思います。
 
-## Modeling constrained strings with types
+## 制約付き文字列を型でモデリングする
 
-The answer, of course, is to create wrapper types which have the constraints built into the type.  
+答えは、もちろん、制約を組み込んだラッパー型を作ることです。
 
-So let's knock up a quick prototype using the single case union technique we used [before](../posts/designing-with-types-single-case-dus.md).
+[前回](../posts/designing-with-types-single-case-dus.md)使った単一ケース共用体の手法を使って、簡単なプロトタイプを作ってみましょう。
 
 ```fsharp
 module String100 = 
@@ -110,26 +110,26 @@ module String2 =
     let value s = apply id s
 ```
 
-Note that we immediately have to deal with the case when the validation fails by using an option type as the result.  It makes creation more painful, but we can't avoid it if we want the benefits later.
+注目すべきは、結果にオプション型を使っているため、検証が失敗した場合には、処理をすぐに行う必要があることです。作成は少し面倒になりますが、後々メリットを得るためには避けて通れません。
 
-For example, here is a good string and a bad string of length 2.
+たとえば、以下は長さ2の適切な文字列と不適切な文字列の例です。
 
 ```fsharp
 let s2good = String2.create "CA"
 let s2bad = String2.create "California"
 
 match s2bad with
-| Some s2 -> // update domain object
-| None -> // handle error
+| Some s2 -> // ドメインオブジェクトを更新
+| None -> // エラー処理
 ```
 
-In order to use the `String2` value we are forced to check whether it is `Some` or `None` at the time of creation.
+`String2` の値を使うには、作成時に `Some` か `None` かをチェックせざるを得ません。
 
-### Problems with this design 
+### この設計の問題点 
 
-One problem is that we have a lot of duplicated code. In practice a typical domain only has a few dozen string types, so there won't be that much wasted code. But still, we can probably do better.
+一つ目の問題は、重複コードが多くなることです。実際には、典型的なドメインにはせいぜい数十個の文字列型しかないので、無駄になるコードはそれほど多くはありません。しかし、もっと良くできるはずです。
 
-Another more serious problem is that comparisons become harder. A `String50` is a different type from a `String100` so that they cannot be compared directly. 
+もう一つ、より深刻な問題は、比較が難しくなることです。`String50`と`String100`は異なる型なので、直接比較できません。
 
 ```fsharp
 let s50 = String50.create "John"
@@ -138,27 +138,27 @@ let s100 = String100.create "Smith"
 let s50' = s50.Value
 let s100' = s100.Value
 
-let areEqual = (s50' = s100')  // compiler error
+let areEqual = (s50' = s100')  // コンパイルエラー
 ```
 
-This kind of thing will make working with dictionaries and lists harder.
+このようなことは、辞書やリストの扱いを難しくします。
 
-### Refactoring
+### リファクタリング
 
-At this point we can exploit F#'s support for interfaces, and create a common interface that all wrapped strings have to support, and also some standard functions:
+ここで、F#のインターフェースサポートを活用し、すべてのラップされた文字列が実装する共通インターフェースと、いくつかの標準関数を定義できます。
 
 ```fsharp
 module WrappedString = 
 
-    /// An interface that all wrapped strings support
+    /// すべてのラップされた文字列がサポートするインターフェース
     type IWrappedString = 
         abstract Value : string
 
-    /// Create a wrapped value option
-    /// 1) canonicalize the input first
-    /// 2) If the validation succeeds, return Some of the given constructor
-    /// 3) If the validation fails, return None
-    /// Null values are never valid.
+    /// ラップされた値のオプションを作る
+    /// 1) まず入力を正規化
+    /// 2) 検証に成功したら、指定されたコンストラクタのSomeを返す
+    /// 3) 検証に失敗したら、Noneを返す
+    /// null値は決して有効ではない
     let create canonicalize isValid ctor (s:string) = 
         if s = null 
         then None
@@ -168,75 +168,75 @@ module WrappedString =
             then Some (ctor s') 
             else None
 
-    /// Apply the given function to the wrapped value
+    /// ラップされた値に指定された関数を適用
     let apply f (s:IWrappedString) = 
         s.Value |> f 
 
-    /// Get the wrapped value
+    /// ラップされた値を取得
     let value s = apply id s
 
-    /// Equality test
+    /// 等価性テスト
     let equals left right = 
         (value left) = (value right)
         
-    /// Comparison
+    /// 比較
     let compareTo left right = 
         (value left).CompareTo (value right)
 ```
 
-The key function is `create`, which takes a constructor function and creates new values using it only when the validation passes.
+キーとなる関数は`create`で、コンストラクタ関数を受け取り、検証に通った場合のみ新しい値を作ります。
 
-With this in place it is a lot easier to define new types:
+これで、新しい型の定義がずっと簡単になります。
 
 ```fsharp
 module WrappedString = 
 
-    // ... code from above ...
+    // ... 上のコード ...
 
-    /// Canonicalizes a string before construction
-    /// * converts all whitespace to a space char
-    /// * trims both ends
+    /// 構築前に文字列を正規化
+    /// * すべての空白文字をスペース文字に変換
+    /// * 両端をトリム
     let singleLineTrimmed s =
         System.Text.RegularExpressions.Regex.Replace(s,"\s"," ").Trim()
 
-    /// A validation function based on length
+    /// 長さに基づく検証関数
     let lengthValidator len (s:string) =
         s.Length <= len 
 
-    /// A string of length 100
+    /// 長さ100の文字列
     type String100 = String100 of string with
         interface IWrappedString with
             member this.Value = let (String100 s) = this in s
 
-    /// A constructor for strings of length 100
+    /// 長さ100の文字列のコンストラクタ
     let string100 = create singleLineTrimmed (lengthValidator 100) String100 
 
-    /// Converts a wrapped string to a string of length 100
+    /// ラップされた文字列を長さ100の文字列に変換
     let convertTo100 s = apply string100 s
 
-    /// A string of length 50
+    /// 長さ50の文字列
     type String50 = String50 of string with
         interface IWrappedString with
             member this.Value = let (String50 s) = this in s
 
-    /// A constructor for strings of length 50
+    /// 長さ50の文字列のコンストラクタ
     let string50 = create singleLineTrimmed (lengthValidator 50)  String50
 
-    /// Converts a wrapped string to a string of length 50
+    /// ラップされた文字列を長さ50の文字列に変換
     let convertTo50 s = apply string50 s
 ```
 
-For each type of string now, we just have to:
+各文字列型について必要なことは、以下の3つになりました。
 
-* create a type (e.g. `String100`) 
-* an implementation of `IWrappedString` for that type
-* and a public constructor (e.g. `string100`) for that type.  
+* 型の作成（例： `String100` ）
+* その型に対する `IWrappedString` の実装
+* その型のパブリックコンストラクタ（例： `string100` ）
 
-(In the sample above I have also thrown in a useful `convertTo` to convert from one type to another.)
+（上のサンプルには、型の変換に便利な `convertTo` 関数も追加しました。）
 
-The type is a simple wrapped type as we have seen before.
+型は、これまで見てきたような単純なラップ型です。
 
-The implementation of the `Value` method of the IWrappedString could have been written using multiple lines, like this:
+IWrappedStringの `Value` メソッドの実装は、複数行で書くこともできます。
 
 ```fsharp
 member this.Value = 
@@ -244,37 +244,37 @@ member this.Value =
     s
 ```
 
-But I chose to use a one liner shortcut:
+しかし、私は一行のショートカットにしました。
 
 ```fsharp
 member this.Value = let (String100 s) = this in s
 ```
 
-The constructor function is also very simple. The canonicalize function is `singleLineTrimmed`, the validator function checks the length, and the constructor is the `String100` function (the function associated with the single case, not to be confused with the type of the same name). 
+コンストラクタ関数も非常に簡単です。正規化関数は `singleLineTrimmed` 、検証関数は長さをチェックし、コンストラクタは `String100` 関数です。（単一ケースに関連付けられた関数です。同名の型とは混同しないでください。）
 
 ```fsharp
 let string100 = create singleLineTrimmed (lengthValidator 100) String100
 ```
 
-If you want to have other types with different constraints, you can easily add them. For example you might want to have a `Text1000` type that supports multiple lines and embedded tabs and is not trimmed.
+他の制約を持つ型が必要な場合は、簡単に追加できます。たとえば、複数行と埋め込みタブをサポートし、トリムされない `Text1000` 型が必要になるかもしれません。
 
 ```fsharp
 module WrappedString = 
 
-    // ... code from above ...
+    // ... 上のコード ...
 
-    /// A multiline text of length 1000
-    type Text1000 = Text1000 of string with
+    /// 長さ1000の複数行テキスト
+    type Text1000 = Text1000 of string with 
         interface IWrappedString with
             member this.Value = let (Text1000 s) = this in s
 
-    /// A constructor for multiline strings of length 1000
+    /// 長さ1000の複数行文字列のコンストラクタ
     let text1000 = create id (lengthValidator 1000) Text1000 
 ```
 
-### Playing with the WrappedString module 
+### WrappedStringモジュールを使ってみる 
 
-We can now play with the module interactively to see how it works:
+では、このモジュールをインタラクティブに操作して、どのように動くか見てみましょう。
 
 ```fsharp
 let s50 = WrappedString.string50 "abc" |> Option.get
@@ -284,26 +284,26 @@ printfn "bad is %A" bad
 let s100 = WrappedString.string100 "abc" |> Option.get
 printfn "s100 is %A" s100
 
-// equality using module function is true
+// モジュール関数を使った等価性比較は真
 printfn "s50 is equal to s100 using module equals? %b" (WrappedString.equals s50 s100)
 
-// equality using Object method is false
+// Objectメソッドを使った等価性比較は偽
 printfn "s50 is equal to s100 using Object.Equals? %b" (s50.Equals s100)
 
-// direct equality does not compile
-printfn "s50 is equal to s100? %b" (s50 = s100) // compiler error
+// 直接的な等価性比較はコンパイルされない
+printfn "s50 is equal to s100? %b" (s50 = s100) // コンパイルエラー
 ```
 
-When we need to interact with types such as maps that use raw strings, it is easy to compose new helper functions.
+生の文字列を使うマップのような型とやり取りする必要がある場合、新しいヘルパー関数を簡単に作れます。
 
-For example, here are some helpers to work with maps:
+たとえば、マップを扱うためのヘルパー関数はこのようになります。
 
 ```fsharp
 module WrappedString = 
 
-    // ... code from above ...
+    // ... 上のコード ...
 
-    /// map helpers
+    /// マップヘルパー
     let mapAdd k v map = 
         Map.add (value k) v map    
 
@@ -314,7 +314,7 @@ module WrappedString =
         Map.tryFind (value k) map    
 ```
 
-And here is how these helpers might be used in practice:
+そして、これらのヘルパー関数は実際にはこのように使います。
 
 ```fsharp
 let abc = WrappedString.string50 "abc" |> Option.get
@@ -330,11 +330,11 @@ let xyz = WrappedString.string100 "xyz" |> Option.get
 printfn "Found xyz in map? %A" (WrappedString.mapTryFind xyz map)
 ```
 
-So overall, this "WrappedString" module allows us to create nicely typed strings without interfering too much. Now let's use it in a real situation.
+このように、この「WrappedString」モジュールを使えば、あまり邪魔にならない形で適切に型付けされた文字列を作れます。では、実際の状況でこれを使ってみましょう。
 
-## Using the new string types in the domain
+## 新しい文字列型をドメインで使う
 
-Now we have our types, we can change the definition of the `PersonalName` type to use them.
+新しい型ができたので、これらを使うように `PersonalName` 型の定義を変更してみましょう。
 
 ```fsharp
 module PersonalName = 
@@ -346,7 +346,7 @@ module PersonalName =
         LastName: String100;
         }
 
-    /// create a new value
+    /// 新しい値を作る
     let create first last = 
         match (string50 first),(string100 last) with
         | Some f, Some l ->
@@ -358,72 +358,72 @@ module PersonalName =
             None
 ```
 
-We have created a module for the type and added a creation function that converts a pair of strings into a `PersonalName`. 
+型のためのモジュールを作り、文字列のペアを `PersonalName` に変換する作成関数を加えました。
 
-Note that we have to decide what to do if *either* of the input strings are invalid. Again, we cannot postpone the issue till later, we have to deal with it at construction time.
+ここで注意しなければならないのは、**どちらか**の入力文字列が無効だった場合の処理です。これも、後で対処するのではなく、作成時に対処する必要があります。
 
-In this case we use the simple approach of creating an option type with None to indicate failure.
+今回は、失敗を `None` で示す単純なオプション型のアプローチを使っています。
 
-Here it is in use:
+使用例はこのようになります。
 
 ```fsharp
 let name = PersonalName.create "John" "Smith"
 ```
 
-We can also provide additional helper functions in the module. 
+モジュールにはさらにヘルパー関数も用意できます。
 
-Let's say, for example, that we want to create a `fullname` function that will return the first and last names joined together.
+たとえば、名と姓を結合して返す `fullname` 関数を作りたいとします。
 
-Again, more decisions to make.  
+ここでも、いくつかの判断が必要です。
 
-* Should we return a raw string or a wrapped string?
-  The advantage of the latter is that the callers know exactly how long the string will be, and it will be compatible with other similar types.
+* 生の文字列を返すべきか、それともラップされた文字列を返すべきか？
+  後者の利点は、呼び出し側が文字列の長さを正確に把握でき、他の同様の型と互換性があることです。
 
-* If we do return a wrapped string (say a `String100`), then how do we handle the the case when the combined length is too long? (It could be up to 151 chars, based on the length of the first and last name types.). We could either return an option, or force a truncation if the combined length is too long.
+* ラップされた文字列（たとえば `String100` ）を返す場合、結合後の長さが長すぎる場合にどう対処するか？（名と姓の型の長さによっては、最大で 151文字になる可能性があります）オプション値を返すか、結合後の長さが長すぎる場合に強制的に切り詰めるかのどちらかです。
 
-Here's code that demonstrates all three options.
+以下のコードは、これら3つのオプションすべてを示しています。
 
 ```fsharp
 module PersonalName = 
 
-    // ... code from above ...
+    // ... 上のコード ...
 
-    /// concat the first and last names together        
-    /// and return a raw string
+    /// 名と姓を結合し、        
+    /// 生の文字列を返す
     let fullNameRaw personalName = 
         let f = personalName.FirstName |> value 
         let l = personalName.LastName |> value 
         f + " " + l 
 
-    /// concat the first and last names together        
-    /// and return None if too long
+    /// 名と姓を結合し、        
+    /// 長すぎる場合はNoneを返す
     let fullNameOption personalName = 
         personalName |> fullNameRaw |> string100
 
-    /// concat the first and last names together        
-    /// and truncate if too long
+    /// 名と姓を結合し、        
+    /// 長すぎる場合は切り詰める
     let fullNameTruncated personalName = 
-        // helper function
+        // ヘルパー関数
         let left n (s:string) = 
             if (s.Length > n) 
             then s.Substring(0,n)
             else s
 
         personalName 
-        |> fullNameRaw  // concat
-        |> left 100     // truncate
-        |> string100    // wrap
-        |> Option.get   // this will always be ok
+        |> fullNameRaw  // 結合
+        |> left 100     // 切り詰め
+        |> string100    // ラップ
+        |> Option.get   // これは常にOK
 
 ```
 
-Which particular approach you take to implementing `fullName` is up to you.  But it demonstrates a key point about this style of type-oriented design: these decisions have to be taken *up front*, when creating the code.  You cannot postpone them till later.
+`fullName` の具体的な実装方法は、あなた次第です。しかし、このタイプの型指向設計の重要なポイントが示されています。これらの決定は、コードを作る際に *前もって* 行う必要があります。後回しにはできません。
 
-This can be very annoying at times, but overall I think it is a good thing.
+時には面倒に感じるかもしれませんが、全体的には良いことだと私は考えています。
 
-## Revisiting the email address and zip code types
+## EmailAddressとZipCode型の再考
 
-We can use this WrappedString module to reimplement the `EmailAddress` and `ZipCode` types.
+この `WrappedString` モジュールを使って、 `EmailAddress` 型と `ZipCode` 型を再実装できます。
 
 ```fsharp
 module EmailAddress = 
@@ -439,7 +439,7 @@ module EmailAddress =
             System.Text.RegularExpressions.Regex.IsMatch(s,@"^\S+@\S+\.\S+$") 
         WrappedString.create canonicalize isValid EmailAddress
 
-    /// Converts any wrapped string to an EmailAddress
+    /// ラップされた任意の文字列をEmailAddressに変換
     let convert s = WrappedString.apply create s
 
 module ZipCode = 
@@ -454,28 +454,28 @@ module ZipCode =
             System.Text.RegularExpressions.Regex.IsMatch(s,@"^\d{5}$") 
         WrappedString.create canonicalize isValid ZipCode
 
-    /// Converts any wrapped string to a ZipCode
+    /// ラップされた任意の文字列をZipCodeに変換
     let convert s = WrappedString.apply create s
 ```
 
-## Other uses of wrapped strings
+## ラップされた文字列のその他の用途
 
-This approach to wrapping strings can also be used for other scenarios where you don't want to mix string types together accidentally. 
+文字列をラップするこのアプローチは、異なる文字列型を混在させてしまうような事故を避けたいシナリオでも使えます。
 
-One case that leaps to mind is ensuring safe quoting and unquoting of strings in web applications. 
+すぐに思い浮かぶのは、Webアプリケーションの文字列をエスケープとエスケープ解除する時の、安全性の保証です。
 
-For example, let's say that you want to output a string to HTML.  Should the string be escaped or not?  
-If it is already escaped, you want to leave it alone but if it is not, you do want to escape it.
+たとえば、文字列をHTMLに出力したいとします。エスケープすべきでしょうか、それともそのままでいいでしょうか？
+すでにエスケープされている場合はそのままにし、そうでない場合はエスケープする必要があります。
 
-This can be a tricky problem. Joel Spolsky discusses using a naming convention [here](http://www.joelonsoftware.com/articles/Wrong.html), but of course, in F#, we want a type-based solution instead.
+これは厄介な問題になりがちです。Joel Spolskyは「[間違ったコードは間違って見えるようにする](https://web.archive.org/web/20190723080235/http://local.joelonsoftware.com/wiki/%E9%96%93%E9%81%95%E3%81%A3%E3%81%9F%E3%82%B3%E3%83%BC%E3%83%89%E3%81%AF%E9%96%93%E9%81%95%E3%81%A3%E3%81%A6%E8%A6%8B%E3%81%88%E3%82%8B%E3%82%88%E3%81%86%E3%81%AB%E3%81%99%E3%82%8B)」で命名規則を使う方法について論じていますが、もちろん、F#では型ベースの解決策が望ましいでしょう。
 
-A type-based solution will probably use a type for "safe" (already escaped) HTML strings (`HtmlString` say), and one for safe Javascript strings (`JsString`), one for safe SQL strings (`SqlString`), etc.
-Then these strings can be mixed and matched safely without accidentally causing security issues.
+型ベースの解決策では、おそらく「安全な」（すでにエスケープされた）HTML文字列用の型（たとえば `HtmlString` ）や、安全なJavaScript文字列用の型（ `JsString` ）、安全なSQL文字列用の型（ `SqlString` ）などを使うことになるでしょう。
+そうすれば、これらの文字列を安全に混ぜ合わせられ、誤ってセキュリティの問題を引き起こすことはありません。
 
-I won't create a solution here (and you will probably be using something like Razor anyway), but if you are interested you can read about a [Haskell approach here](http://blog.moertel.com/articles/2006/10/18/a-type-based-solution-to-the-strings-problem) and a [port of that to F#](http://stevegilham.blogspot.co.uk/2011/12/approximate-type-based-solution-to.html).
+ここでは具体的な解決策は作りません（おそらくRazorのようなものを使うことになるでしょう）が、興味があれば[Haskellでのアプローチ](https://blog.moertel.com/posts/2006-10-18-a-type-based-solution-to-the-strings-problem.html)を読めます。また、[それをF#に移植したもの](https://stevegilham.blogspot.com/2011/12/approximate-type-based-solution-to.html)もあります。
 
 
-## Update ##
+## 追記 ##
 
-Many people have asked for more information on how to ensure that constrained types such as `EmailAddress` are only created through a special constructor that does the validation.
-So I have created a [gist here](https://gist.github.com/swlaschin/54cfff886669ccab895a) that has some detailed examples of other ways of doing it.
+多くの人が、 `EmailAddress` のような制約付き型を、検証を行う特別なコンストラクタを通じてのみ作る方法についてもっと知りたいと求めてきました。
+そこで、いくつかの詳細な例を示した [gist](https://gist.github.com/swlaschin/54cfff886669ccab895a)を作りました。

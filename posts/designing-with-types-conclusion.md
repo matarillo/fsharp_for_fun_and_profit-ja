@@ -1,27 +1,27 @@
 ---
 layout: post
-title: "Designing with types: Conclusion"
-description: "A before and after comparison"
+title: "型を使った設計：結論"
+description: "変更前と変更後の比較"
 nav: thinking-functionally
-seriesId: "Designing with types"
+seriesId: "型を使った設計"
 seriesOrder: 8
-categories: [Types, DDD]
+categories: [型, DDD]
 ---
 
-In this series, we've looked at some of the ways we can use types as part of the design process, including:
+このシリーズでは、設計プロセスの一部として型を使う方法をいくつか見てきました。具体的には次のようなものです。
 
-* Breaking large structures down into small "atomic" components.
-* Using single case unions to add semantic meaning and validation to key domain types such `EmailAddress` and `ZipCode`.
-* Ensuring that the type system can only represent valid data ("making illegal states unrepresentable").
-* Using types as an analysis tool to uncover hidden requirements 
-* Replacing flags and enums with simple state machines 
-* Replacing primitive strings with types that guarantee various constraints 
+* 大きな構造を小さい「原子的な」部品に分ける。
+* 単一ケースの共用体を使って、 `EmailAddress` や `ZipCode` などの重要なドメイン型に意味と検証を加える。
+* 型システムで有効なデータだけを表せるようにする（「不正な状態を表現できなくする」）。
+* 型を分析ツールとして使い、隠れた要件を明らかにする。
+* フラグや列挙型を簡単なステートマシンに置き換える。
+* プリミティブな文字列を、さまざまな制約を保証する型に置き換える。
 
-For this final post, let's see them all applied together. 
+最終回となる今回は、これらをすべてまとめて適用してみましょう。
 
-## The "before" code ##
+## 「変更前」のコード ##
 
-Here's the original example we started off with in the [first post](../posts/designing-with-types-intro.md) in the series:
+シリーズの[最初の投稿](../posts/designing-with-types-intro.md)で使用した、最初の例を見てみましょう。
 
 ```fsharp
 type Contact = 
@@ -31,7 +31,7 @@ type Contact =
     LastName: string;
 
     EmailAddress: string;
-    //true if ownership of email address is confirmed
+    //メールアドレスの所有権が確認されている場合はtrue
     IsEmailVerified: bool;
 
     Address1: string;
@@ -39,34 +39,34 @@ type Contact =
     City: string;
     State: string;
     Zip: string;
-    //true if validated against address service
+    //住所サービスで検証された場合はtrue
     IsAddressValid: bool; 
     }
 ```
 
-And how does that compare to the final result after applying all the techniques above?
+上記のテクニックをすべて適用した後の最終結果は、どのように異なるでしょうか？
 
-## The "after" code ##
+## 「変更後」のコード ##
 
-First, let's start with the types that are not application specific.  These types could probably be reused in many applications.
+まず、アプリケーション固有ではない型から始めましょう。これらの型は、おそらく多くのアプリケーションで再利用できるでしょう。
 
 ```fsharp
 // ========================================
 // WrappedString 
 // ========================================
 
-/// Common code for wrapped strings
+/// ラップされた文字列の共通コード
 module WrappedString = 
 
-    /// An interface that all wrapped strings support
+    /// すべてのラップされた文字列がサポートするインターフェース
     type IWrappedString = 
         abstract Value : string
 
-    /// Create a wrapped value option
-    /// 1) canonicalize the input first
-    /// 2) If the validation succeeds, return Some of the given constructor
-    /// 3) If the validation fails, return None
-    /// Null values are never valid.
+    /// ラップされた値オプションを作る
+    /// 1) まず入力を正規化する
+    /// 2) 検証が成功した場合、与えられたコンストラクタのSomeを返す
+    /// 3) 検証が失敗した場合、Noneを返す
+    /// null値は決して有効ではない
     let create canonicalize isValid ctor (s:string) = 
         if s = null 
         then None
@@ -76,54 +76,54 @@ module WrappedString =
             then Some (ctor s') 
             else None
 
-    /// Apply the given function to the wrapped value
+    /// ラップされた値に指定された関数を適用する
     let apply f (s:IWrappedString) = 
         s.Value |> f 
 
-    /// Get the wrapped value
+    /// ラップされた値を取得する
     let value s = apply id s
 
-    /// Equality 
+    /// 等価性 
     let equals left right = 
         (value left) = (value right)
 
-    /// Comparison
+    /// 比較
     let compareTo left right = 
         (value left).CompareTo (value right)
 
-    /// Canonicalizes a string before construction
-    /// * converts all whitespace to a space char
-    /// * trims both ends
+    /// 構築前に文字列を正規化する
+    /// * すべての空白文字をスペース文字に変える
+    /// * 両端をトリムする
     let singleLineTrimmed s =
         System.Text.RegularExpressions.Regex.Replace(s,"\s"," ").Trim()
 
-    /// A validation function based on length
+    /// 長さに基づく検証関数
     let lengthValidator len (s:string) =
         s.Length <= len 
 
-    /// A string of length 100
+    /// 長さ100の文字列
     type String100 = String100 of string with
         interface IWrappedString with
             member this.Value = let (String100 s) = this in s
 
-    /// A constructor for strings of length 100
+    /// 長さ100の文字列のコンストラクタ
     let string100 = create singleLineTrimmed (lengthValidator 100) String100 
 
-    /// Converts a wrapped string to a string of length 100
+    /// ラップされた文字列を長さ100の文字列に変える
     let convertTo100 s = apply string100 s
 
-    /// A string of length 50
+    /// 長さ50の文字列
     type String50 = String50 of string with
         interface IWrappedString with
             member this.Value = let (String50 s) = this in s
 
-    /// A constructor for strings of length 50
+    /// 長さ50の文字列のコンストラクタ
     let string50 = create singleLineTrimmed (lengthValidator 50)  String50
 
-    /// Converts a wrapped string to a string of length 50
+    /// ラップされた文字列を長さ50の文字列に変える
     let convertTo50 s = apply string50 s
 
-    /// map helpers
+    /// マップヘルパー
     let mapAdd k v map = 
         Map.add (value k) v map    
 
@@ -134,7 +134,7 @@ module WrappedString =
         Map.tryFind (value k) map    
 
 // ========================================
-// Email address (not application specific)
+// メールアドレス（アプリケーション固有ではない）
 // ========================================
 
 module EmailAddress = 
@@ -150,11 +150,11 @@ module EmailAddress =
             System.Text.RegularExpressions.Regex.IsMatch(s,@"^\S+@\S+\.\S+$") 
         WrappedString.create canonicalize isValid EmailAddress
 
-    /// Converts any wrapped string to an EmailAddress
+    /// ラップされた任意の文字列をEmailAddressに変える
     let convert s = WrappedString.apply create s
 
 // ========================================
-// ZipCode (not application specific)
+// ZipCode（アプリケーション固有ではない）
 // ========================================
 
 module ZipCode = 
@@ -169,11 +169,11 @@ module ZipCode =
             System.Text.RegularExpressions.Regex.IsMatch(s,@"^\d{5}$") 
         WrappedString.create canonicalize isValid ZipCode
 
-    /// Converts any wrapped string to a ZipCode
+    /// ラップされた任意の文字列をZipCodeに変える
     let convert s = WrappedString.apply create s
 
 // ========================================
-// StateCode (not application specific)
+// StateCode（アプリケーション固有ではない）
 // ========================================
 
 module StateCode = 
@@ -184,17 +184,17 @@ module StateCode =
 
     let create = 
         let canonicalize = WrappedString.singleLineTrimmed 
-        let stateCodes = ["AZ";"CA";"NY"] //etc
+        let stateCodes = ["AZ";"CA";"NY"] //など
         let isValid s = 
             stateCodes |> List.exists ((=) s)
 
         WrappedString.create canonicalize isValid StateCode
 
-    /// Converts any wrapped string to a StateCode
+    /// ラップされた任意の文字列をStateCodeに変える
     let convert s = WrappedString.apply create s
 
 // ========================================
-// PostalAddress (not application specific)
+// PostalAddress（アプリケーション固有ではない）
 // ========================================
 
 module PostalAddress = 
@@ -231,7 +231,7 @@ module PostalAddress =
         | GenericPostalAddress of GenericPostalAddress 
 
 // ========================================
-// PersonalName (not application specific)
+// PersonalName（アプリケーション固有ではない）
 // ========================================
 
 module PersonalName = 
@@ -244,7 +244,7 @@ module PersonalName =
         LastName: String100;
         }
 
-    /// create a new value
+    /// 新しい値を作る
     let create first middle last = 
         match (string50 first),(string100 last) with
         | Some f, Some l ->
@@ -256,8 +256,8 @@ module PersonalName =
         | _ -> 
             None
 
-    /// concat the names together        
-    /// and return a raw string
+    /// 名前を連結して
+    /// 生の文字列を返す
     let fullNameRaw personalName = 
         let f = personalName.FirstName |> value 
         let l = personalName.LastName |> value 
@@ -267,111 +267,111 @@ module PersonalName =
             | Some middle -> [| f; (value middle); l |]
         System.String.Join(" ", names)
 
-    /// concat the names together        
-    /// and return None if too long
+    /// 名前を連結して
+    /// 長すぎる場合はNoneを返す
     let fullNameOption personalName = 
         personalName |> fullNameRaw |> string100
 
-    /// concat the names together        
-    /// and truncate if too long
+    /// 名前を連結して
+    /// 長すぎる場合は切り詰める
     let fullNameTruncated personalName = 
-        // helper function
+        // ヘルパー関数
         let left n (s:string) = 
             if (s.Length > n) 
             then s.Substring(0,n)
             else s
 
         personalName 
-        |> fullNameRaw  // concat
-        |> left 100     // truncate
-        |> string100    // wrap
-        |> Option.get   // this will always be ok
+        |> fullNameRaw  // 連結
+        |> left 100     // 切り詰め
+        |> string100    // ラップ
+        |> Option.get   // これは常にOKのはず
 ```
 
-And now the application specific types.  
- 
+次に、アプリケーションに固有な型の定義に移ります。
+
 ```fsharp
 
 // ========================================
-// EmailContactInfo -- state machine
+// EmailContactInfo -- ステートマシン
 // ========================================
 
 module EmailContactInfo = 
     open System
 
-    // UnverifiedData = just the EmailAddress
+    // UnverifiedData = メールアドレスのみ
     type UnverifiedData = EmailAddress.T
 
-    // VerifiedData = EmailAddress plus the time it was verified
+    // VerifiedData = メールアドレスと検証された時刻
     type VerifiedData = EmailAddress.T * DateTime 
 
-    // set of states
+    // 状態の集合
     type T = 
         | UnverifiedState of UnverifiedData
         | VerifiedState of VerifiedData
 
     let create email = 
-        // unverified on creation
+        // 作成時は未検証
         UnverifiedState email
 
-    // handle the "verified" event
+    // "verified" イベントを処理
     let verified emailContactInfo dateVerified = 
         match emailContactInfo with
         | UnverifiedState email ->
-            // construct a new info in the verified state
+            // 検証済み状態で新しい情報を構築
             VerifiedState (email, dateVerified) 
         | VerifiedState _ ->
-            // ignore
+            // 無視
             emailContactInfo
 
     let sendVerificationEmail emailContactInfo = 
         match emailContactInfo with
         | UnverifiedState email ->
-            // send email
-            printfn "sending email"
+            // メールを送る
+            printfn "メールを送信中"
         | VerifiedState _ ->
-            // do nothing
+            // 何もしない
             ()
 
     let sendPasswordReset emailContactInfo = 
         match emailContactInfo with
         | UnverifiedState email ->
-            // ignore
+            // 無視
             ()
         | VerifiedState _ ->
-            // ignore
-            printfn "sending password reset"
+            // 無視
+            printfn "パスワードリセットを送信中"
 
 // ========================================
-// PostalContactInfo -- state machine
+// PostalContactInfo -- ステートマシン
 // ========================================
 
 module PostalContactInfo = 
     open System
 
-    // InvalidData = just the PostalAddress
+    // InvalidData = 郵便住所のみ
     type InvalidData = PostalAddress.T
 
-    // ValidData = PostalAddress plus the time it was verified
+    // ValidData = 郵便住所と検証された時刻
     type ValidData = PostalAddress.T * DateTime 
 
-    // set of states
+    // 状態の集合
     type T = 
         | InvalidState of InvalidData
         | ValidState of ValidData
 
     let create address = 
-        // invalid on creation
+        // 作成時は無効
         InvalidState address
 
-    // handle the "validated" event
+    // "validated" イベントを処理
     let validated postalContactInfo dateValidated = 
         match postalContactInfo with
         | InvalidState address ->
-            // construct a new info in the valid state
+            // 有効な状態で新しい情報を構築
             ValidState (address, dateValidated) 
         | ValidState _ ->
-            // ignore
+            // 無視
             postalContactInfo 
 
     let contactValidationService postalContactInfo = 
@@ -380,15 +380,15 @@ module PostalContactInfo =
 
         match postalContactInfo with
         | InvalidState address ->
-            printfn "contacting the address validation service"
+            printfn "住所検証サービスに問い合わせ中"
         | ValidState (address,date) when date |> dateIsTooLongAgo  ->
-            printfn "last checked a long time ago."
-            printfn "contacting the address validation service again"
+            printfn "最後のチェックから長時間が経過しています"
+            printfn "住所検証サービスに再度問い合わせ中"
         | ValidState  _ ->
-            printfn "recently checked. Doing nothing."
+            printfn "最近チェック済み。何もしません"
 
 // ========================================
-// ContactMethod and Contact
+// ContactMethodとContact
 // ========================================
 
 type ContactMethod = 
@@ -404,39 +404,39 @@ type Contact =
 
 ```
 
-## Conclusion ##
+## 結論 ##
 
-Phew!  The new code is much, much longer than the original code. Granted, it has a lot of supporting functions that were not needed in the original version, but even so it seems like a lot of extra work. So was it worth it?
+ふう！ 新しいコードは元のコードよりもずっと長くなりました。確かに、元のバージョンでは必要なかったサポート関数がたくさん含まれています。それでもかなり手間がかかったように見えます。では、この作業は本当に価値があったのでしょうか？
 
-I think the answer is yes. Here are some of the reasons why:
+私の答えは「はい」です。以下に、その理由をいくつか挙げます。
 
-**The new code is more explicit**
+**新しいコードはより明示的です**
 
-If we look at the original example, there was no atomicity between fields, no validation rules, no length constraints, nothing to stop you updating flags in the wrong order, and so on.
+元の例を見ると、フィールド間の原子性がなく、検証ルールもなく、長さの制約もありませんでした。フラグを間違った順序で更新するのを止めるものも何もありませんでした。
 
-The data structure was "dumb" and all the business rules were implicit in the application code.
-Chances are that the application would have lots of subtle bugs that might not even show up in unit tests.  (*Are you sure the application reset the `IsEmailVerified` flag to false in every place the email address was updated?*)
+データ構造は「単純」で、すべてのビジネスルールはアプリケーションコードに暗黙的に埋め込まれていました。
+おそらく、アプリケーションには単体テストでさえ現れないような微妙なバグがたくさんあったでしょう。（*メールアドレスが更新されるたびに、アプリケーションが `IsEmailVerified` フラグをfalseにリセットすることを確実に行っていますか？*）
 
-On the other hand, the new code is extremely explicit about every little detail. If I stripped away everything but the types themselves, you would have a very good idea of what the business rules and domain constraints were.
+一方、新しいコードは細部に至るまで非常に明示的です。型だけを取り出しても、ビジネスルールやドメインの制約がどのようなものかをかなり正確に把握できるでしょう。
 
-**The new code won't let you postpone error handling**
+**新しいコードはエラー処理の先送りを許しません**
 
-Writing code that works with the new types means that you are forced to handle every possible thing that could go wrong, from dealing with a name that is too long, to failing to supply a contact method.
-And you have to do this up front at construction time. You can't postpone it till later. 
+新しい型を使ってコードを書くということは、長すぎる名前の処理から、連絡先が提供されていない場合のエラー処理まで、あらゆる問題に対処することを余儀なくされます。
+そして、これらはあらかじめ、構築時に行わなければなりません。後回しにすることはできません。
 
-Writing such error handling code can be annoying and tedious, but on the other hand, it pretty much writes itself. There is really only one way to write code that actually compiles with these types.
+このようなエラー処理コードを書くのは面倒で退屈かもしれません。一方で、コードはほとんど自動的に書けてしまいます。これらの型でコンパイルが通るコードを書く方法は、実質的に一つしかありません。
 
-**The new code is more likely to be correct**
+**新しいコードはより正確である可能性が高いです**
 
-The *huge* benefit of the new code is that it is probably bug free. Without even writing any unit tests, I can be quite confident that a first name will never be truncated when written to a `varchar(50)` in a database, and that I can never accidentally send out a verification email twice.  
+新しいコードの*大きな*利点は、おそらくバグがないということです。単体テストを書くまでもなく、ファーストネームがデータベースの `varchar(50)` に書き込まれる際に切り詰められることは決してないし、確認メールを誤って2回送ることもないと、かなり自信を持って言えます。
 
-And in terms of the code itself, many of the things that you as a developer have to remember to deal with (or forget to deal with) are completely absent. No null checks, no casting, no worrying about what the default should be in a `switch` statement. And if you like to use cyclomatic complexity as a code quality metric, you might note that there are only three `if` statements in the entire 350 odd lines. 
+そして、コード自体に関しては、開発者として対処しなければならない（あるいは対処し忘れる）多くのことが完全に不要になります。nullチェックも、キャストも、 `switch` 文のデフォルト値を心配することもありません。そして、サイクロマティック複雑度をコード品質の指標として使うなら、350行ほどのコード全体で `if` 文が3つしかないことに気づくかもしれません。
 
-**A word of warning...**
+**警告**
 
-Finally, beware! Getting comfortable with this style of type-based design will have an insidious effect on you. You will start to develop paranoia whenever you see code that isn't typed strictly enough. (*How long should an email address be, exactly?*) and you will be unable to write the simplest python script without getting anxious. When this happens, you will have been fully inducted into the cult. Welcome!
+最後に、注意が必要です！ このような型ベースの設計スタイルに慣れてしまうと、十分に厳密に型付けされていないコードを見るたびに、あなたは徐々に偏屈になっていきます。（*メールアドレスの長さは正確にどれくらいの長さにするべきか？*）そして、最も簡単なPythonスクリプトを書くときでさえ、不安になってしまうでしょう。このようになったとき、あなたは完全に「カルト」に仲間入りしたことになります。ようこそ！
  
 
-*If you liked this series, here is a slide deck that covers many of the same topics. There is [a video as well (here)](http://fsharpforfunandprofit.com/ddd/)*
+*このシリーズが気に入ったなら、同じようなトピックをカバーしているスライドデッキがあります。[こちらに動画もあります](https://fsharpforfunandprofit.com/ddd/)*
 
 <iframe src="//www.slideshare.net/slideshow/embed_code/32418451" width="627" height="556" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px 1px 0; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="https://www.slideshare.net/ScottWlaschin/domain-driven-design-with-the-f-type-system-functional-londoners-2014" title="Domain Driven Design with the F# type System -- F#unctional Londoners 2014" target="_blank">Domain Driven Design with the F# type System -- F#unctional Londoners 2014</a> </strong> from <strong><a href="http://www.slideshare.net/ScottWlaschin" target="_blank">my slideshare page</a></strong> </div>
