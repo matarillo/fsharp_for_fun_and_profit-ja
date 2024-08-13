@@ -2,7 +2,7 @@
 layout: post
 title: "Catamorphism examples"
 description: "Applying the rules to other domains"
-seriesId: "Recursive types and folds"
+seriesId: "再帰型と畳み込み"
 seriesOrder: 2
 categories: [Folds, Patterns]
 ---

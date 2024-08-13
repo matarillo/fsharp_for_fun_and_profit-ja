@@ -1,68 +1,68 @@
 ---
 layout: post
-title: "Introduction to recursive types"
-description: "Don't fear the catamorphism..."
-seriesId: "Recursive types and folds"
+title: "再帰型入門"
+description: "カタモーフィズムを恐れるな"
+seriesId: "再帰型と畳み込み"
 seriesOrder: 1
 categories: [Folds, Patterns]
 ---
 
-In this series, we'll look at recursive types and how to use them, and on the way, we'll look at
-catamorphisms, tail recursion, the difference between left and right folds, and more.
+このシリーズでは、再帰型とその使い方について説明します。
+その中で、カタモーフィズム、末尾再帰、左畳み込みと右畳み込みの違いなどについても取り上げます。
 
-## Series contents
+## シリーズの内容
 
-Here's the contents of this series:
+シリーズの内容は次の通りです。
 
-* **Part 1: Introduction to recursive types and catamorphisms**
-  * [A simple recursive type](../posts/recursive-types-and-folds.md#basic-recursive-type)
-  * [Parameterize all the things](../posts/recursive-types-and-folds.md#parameterize)
-  * [Introducing catamorphisms](../posts/recursive-types-and-folds.md#catamorphisms)
-  * [Benefits of catamorphisms](../posts/recursive-types-and-folds.md#benefits)
-  * [Rules for creating a catamorphism](../posts/recursive-types-and-folds.md#rules)
-* **Part 2: Catamorphism examples**  
-  * [Catamorphism example: File system domain](../posts/recursive-types-and-folds-1b.md#file-system)
-  * [Catamorphism example: Product domain](../posts/recursive-types-and-folds-1b.md#product)
-* **Part 3: Introducing folds**    
-  * [A flaw in our catamorphism implementation](../posts/recursive-types-and-folds-2.md#flaw)
-  * [Introducing `fold`](../posts/recursive-types-and-folds-2.md#fold)
-  * [Problems with fold](../posts/recursive-types-and-folds-2.md#problems)
-  * [Using functions as accumulators](../posts/recursive-types-and-folds-2.md#functions)
-  * [Introducing `foldback`](../posts/recursive-types-and-folds-2.md#foldback)
-  * [Rules for creating a fold](../posts/recursive-types-and-folds-2.md#rules)
-* **Part 4: Understanding folds**      
-  * [Iteration vs. recursion](../posts/recursive-types-and-folds-2b.md#iteration)
-  * [Fold example: File system domain](../posts/recursive-types-and-folds-2b.md#file-system)  
-  * [Common questions about "fold"](../posts/recursive-types-and-folds-2b.md#questions)
-* **Part 5: Generic recursive types**  
-  * [LinkedList: A generic recursive type](../posts/recursive-types-and-folds-3.md#linkedlist)
-  * [Making the Gift domain generic](../posts/recursive-types-and-folds-3.md#revisiting-gift)
-  * [Defining a generic Container type](../posts/recursive-types-and-folds-3.md#container)
-  * [A third way to implement the gift domain](../posts/recursive-types-and-folds-3.md#another-gift)
-  * [Abstract or concrete? Comparing the three designs](../posts/recursive-types-and-folds-3.md#compare)
-* **Part 6: Trees in the real world**  
-  * [Defining a generic Tree type](../posts/recursive-types-and-folds-3b.md#tree)
-  * [The Tree type in the real world](../posts/recursive-types-and-folds-3b.md#reuse)
-  * [Mapping the Tree type](../posts/recursive-types-and-folds-3b.md#map)
-  * [Example: Creating a directory listing](../posts/recursive-types-and-folds-3b.md#listing)
-  * [Example: A parallel grep](../posts/recursive-types-and-folds-3b.md#grep)
-  * [Example: Storing the file system in a database](../posts/recursive-types-and-folds-3b.md#database)
-  * [Example: Serializing a Tree to JSON](../posts/recursive-types-and-folds-3b.md#tojson)
-  * [Example: Deserializing a Tree from JSON](../posts/recursive-types-and-folds-3b.md#fromjson)
-  * [Example: Deserializing a Tree from JSON - with error handling](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
+* **パート1: 再帰型とカタモーフィズム入門**
+  * [シンプルな再帰型](../posts/recursive-types-and-folds.md#basic-recursive-type)
+  * [すべてをパラメーター化](../posts/recursive-types-and-folds.md#parameterize)
+  * [カタモーフィズムの紹介](../posts/recursive-types-and-folds.md#catamorphisms)
+  * [カタモーフィズムの利点](../posts/recursive-types-and-folds.md#benefits)
+  * [カタモーフィズム作成のルール](../posts/recursive-types-and-folds.md#rules)
+* **パート2: カタモーフィズムの例**
+  * [カタモーフィズムの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-1b.md#file-system)
+  * [カタモーフィズムの例: 製品ドメイン](../posts/recursive-types-and-folds-1b.md#product)
+* **パート3: 畳み込みの紹介**
+  * [カタモーフィズム実装の欠陥](../posts/recursive-types-and-folds-2.md#flaw)
+  * [`fold` 関数の紹介](../posts/recursive-types-and-folds-2.md#fold)
+  * [`fold` 関数の問題点](../posts/recursive-types-and-folds-2.md#problems)
+  * [関数としての蓄積器の使用](../posts/recursive-types-and-folds-2.md#functions)
+  * [`foldback` 関数の紹介](../posts/recursive-types-and-folds-2.md#foldback)
+  * [畳み込み作成のルール](../posts/recursive-types-and-folds-2.md#rules)
+* **パート4: 畳み込みの理解**
+  * [反復 vs. 再帰](../posts/recursive-types-and-folds-2b.md#iteration)
+  * [畳み込みの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-2b.md#file-system)
+  * [「fold」に関するよくある質問](../posts/recursive-types-and-folds-2b.md#questions)
+* **パート5: ジェネリック再帰型**
+  * [ジェネリック再帰型: リンクドリスト](../posts/recursive-types-and-folds-3.md#linkedlist)
+  * [ギフトドメインをジェネリックにする](../posts/recursive-types-and-folds-3.md#revisiting-gift)
+  * [ジェネリックなコンテナ型の定義](../posts/recursive-types-and-folds-3.md#container)
+  * [ギフトドメイン実装の別の方法](../posts/recursive-types-and-folds-3.md#another-gift)
+  * [抽象型か具体型か? 3つの設計の比較](../posts/recursive-types-and-folds-3.md#compare)
+* **パート6: 実世界の木構造**
+  * [ジェネリックな木構造型の定義](../posts/recursive-types-and-folds-3b.md#tree)
+  * [実世界の木構造型](../posts/recursive-types-and-folds-3b.md#reuse)
+  * [木構造型のマッピング](../posts/recursive-types-and-folds-3b.md#map)
+  * [例: ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.md#listing)
+  * [例: 並列 grep](../posts/recursive-types-and-folds-3b.md#grep)
+  * [例: ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.md#database)
+  * [例: 木構造の JSON シリアライズ](../posts/recursive-types-and-folds-3b.md#tojson)
+  * [例: JSON からの木構造のデシリアライズ](../posts/recursive-types-and-folds-3b.md#fromjson)
+  * [例: エラー処理付きの JSON からの木構造のデシリアライズ]
 
   
 <a id="basic-recursive-type"></a>
 <hr>
 
-## A basic recursive type
+## 基本的な再帰型
 
-Let's start with a simple example -- how to model a gift.  
+まずは簡単な例として、ギフトをモデル化してみましょう。
 
-As it happens, I'm a very lazy gift-giver.  I always give people a book or chocolates. I generally wrap them,
-and sometimes, if I'm feeling particularly extravagant, I put them in a gift box and add a card too.
+筆者はギフト選びが苦手なので、いつも本かチョコレートを渡しています。
+いつもは包装紙で包みますが、気合が入っているときは箱に入れてカードも添えます。
 
-Let's see how I might model this in types:
+これを型で表現してみましょう。
 
 ```fsharp
 type Book = {title: string; price: decimal}
@@ -83,22 +83,22 @@ type Gift =
     | WithACard of Gift * message:string
 ```
 
-You can see that three of the cases are "containers" that refer to another `Gift`. The `Wrapped` case has some paper and a inner gift, as does the `Boxed` case, as does the
-`WithACard` case. The two other cases, `Book` and `Chocolate`, do not refer to a gift and can be considered "leaf" nodes or terminals.
+ご覧の通り、3 つのケースは別の `Gift` を参照する「コンテナ」になっています。`Wrapped` ケースには包装紙と中身のギフトがあり、`Boxed` ケースや `WithACard` ケースも同様です。
+残りの 2 つ、`Book` と `Chocolate` は別のギフトを参照しておらず、「リーフ」ノードまたは終端と見なすことができます。
 
-The presence of a reference to an inner `Gift` in those three cases makes `Gift` a *recursive type*.
-Note that, unlike functions, the `rec` keyword is *not* needed for defining recursive types.
+この 3 つのケースが内部で `Gift` を参照しているため、`Gift` は**再帰型** になります。
+関数とは異なり、再帰型を定義するのに `rec` キーワードは必要ありません。
 
-Let's create some example values:
+では、値の例をいくつか作ってみましょう。
 
 ```fsharp
-// a Book
+// 本
 let wolfHall = {title="Wolf Hall"; price=20m}
 
-// a Chocolate
+// チョコレート
 let yummyChoc = {chocType=SeventyPercent; price=5m}
 
-// A Gift
+// ギフト
 let birthdayPresent = WithACard (Wrapped (Book wolfHall, HappyBirthday), "Happy Birthday")
 //  WithACard (
 //    Wrapped (
@@ -106,7 +106,7 @@ let birthdayPresent = WithACard (Wrapped (Book wolfHall, HappyBirthday), "Happy 
 //      HappyBirthday),
 //    "Happy Birthday")
 
-// A Gift
+// ギフト
 let christmasPresent = Wrapped (Boxed (Chocolate yummyChoc), HappyHolidays)
 //  Wrapped (
 //    Boxed (
@@ -114,14 +114,14 @@ let christmasPresent = Wrapped (Boxed (Chocolate yummyChoc), HappyHolidays)
 //    HappyHolidays)
 ```
 
-Before we start working with these values, a word of advice...
+値を使い始める前に、アドバイスを一言...
 
-### Guideline: Avoid infinitely recursive types
+### ガイドライン：無限に再帰する型を避ける
 
-I suggest that, in F#, every recursive type should consist of a mix of recursive and non-recursive cases.
-If there were no non-recursive elements, such as `Book`, all values of the type would have to be infinitely recursive. 
+F# では、すべての再帰型は、再帰的なケースと非再帰的なケースを混ぜて定義することをおすすめします。
+もし `Book` のような非再帰的な要素がないと、その型のすべての値が無限に再帰的になってしまいます。
 
-For example, in the `ImpossibleGift` type below, all the cases are recursive. To construct any one of the cases you need an inner gift, and that needs to be constructed too, and so on.
+たとえば、以下の `ImpossibleGift` 型では、すべてのケースが再帰的です。どのケースを作るにも内側のギフトが必要で、そのギフトも作る必要があり、きりがないのです。
 
 ```fsharp
 type ImpossibleGift =
@@ -129,20 +129,20 @@ type ImpossibleGift =
     | WithACard of ImpossibleGift * message:string
 ```
 
-It is possible to create such types if you allow [laziness](https://wiki.haskell.org/Tying_the_Knot), mutation, or reflection.
-But in general, in a non-lazy language like F#, it's a good idea to avoid such types.
+[遅延評価](https://wiki.haskell.org/Tying_the_Knot)、可変、またはリフレクションを許可すれば、このような型を作ることもできます。
+しかし、F# のような遅延評価でない言語では、このような型は避けるのが良いでしょう。
 
-### Working with recursive types
+**再帰型の使い方**
 
-End of public service announcement -- let's get coding!
+注意報はここで終了です。それでは、いよいよコードを書いてみましょう！
 
-First, say that we want a description of the gift. The logic will be:
+まず、ギフトには説明が欲しいとします。ロジックは次の通りです。
 
-* For the two non-recursive cases, return a string describing that case.
-* For the three recursive cases, return a string that describes the case, but also includes the description of the inner gift.
-  This means that `description` function is going to refer to itself, and therefore it must be marked with the `rec` keyword.
+* 非再帰的な 2 つのケースでは、そのケースを説明する文字列を返します。
+* 3 つの再帰的なケースでは、ケースの説明に加え、内側のギフトの説明も返します。
+  つまり、`description` 関数は自分自身を参照するため、`rec` キーワードでマークする必要があります。
 
-Here's an example implementation:  
+実装例はこちらです。
 
 ```fsharp
 let rec description gift =
@@ -159,15 +159,15 @@ let rec description gift =
         sprintf "%s with a card saying '%s'" (description innerGift) message
 ```
 
-Note the recursive calls like this one in the `Boxed` case:
+`Boxed` ケースのような再帰呼び出しに注目してください。
 
 ```fsharp
     | Boxed innerGift -> 
         sprintf "%s in a box" (description innerGift) 
-                               ~~~~~~~~~~~ <= recursive call
+                               ~~~~~~~~~~~ <= 再帰呼び出し
 ```
 
-If we try this with our example values, let's see what we get:
+さっきの値の例で試してみるとどうなるでしょうか。
 
 ```fsharp
 birthdayPresent |> description  
@@ -177,16 +177,16 @@ christmasPresent |> description
 // "SeventyPercent chocolate in a box wrapped in HappyHolidays paper"
 ```
 
-That looks pretty good to me. Things like `HappyHolidays` look a bit funny without spaces, but it's good enough to demonstrate the idea.
+かなり良さそうです。 `HappyHolidays` はスペースがないので少し変ですが、概念を説明するには十分でしょう。
 
-What about creating another function?  For example, what is the total cost of a gift?
+では、別の関数を作成してみましょう。ギフトの合計金額を計算する関数はどうでしょうか。
 
-For `totalCost`, the logic will be:
+`totalCost` のロジックは次の通りです。
 
-* Books and chocolate capture the price in the case-specific data, so use that.
-* Wrapping adds `0.5` to the cost.
-* A box adds `1.0` to the cost.
-* A card adds `2.0` to the cost.
+* 本とチョコレートはケース固有のデータに価格が含まれているので、それをそのまま使います。
+* 包装紙は、金額に `0.5` を加えます。
+* 箱は、金額に `1.0` を加えます。
+* カードは、金額に `2.0` を加えます。
 
 ```fsharp
 let rec totalCost gift =
@@ -203,7 +203,7 @@ let rec totalCost gift =
         (totalCost innerGift) + 2.0m
 ```
 
-And here are the costs for the two examples:
+2 つの例の合計金額は以下の通りです。
 
 ```fsharp
 birthdayPresent |> totalCost 
@@ -213,8 +213,8 @@ christmasPresent |> totalCost
 // 6.5m
 ```
 
-Sometimes, people ask what is inside the box or wrapping paper.  A `whatsInside` function is easy to implement -- just ignore the container cases
-and return something for the non-recursive cases.
+箱や包装紙の中には何が入っているのか気になる人もいるでしょう。`whatsInside` 関数は実装が簡単です。
+コンテナのケースは無視して、非再帰的なケースには何かを返せばいいだけです。
 
 ```fsharp
 let rec whatsInside gift =
@@ -231,7 +231,7 @@ let rec whatsInside gift =
         whatsInside innerGift
 ```
 
-And the results:
+結果はこうなります。
 
 ```fsharp
 birthdayPresent |> whatsInside 
@@ -241,22 +241,22 @@ christmasPresent |> whatsInside
 // "Some chocolate"
 ```
 
-So that's a good start -- three functions, all quite easy to write.
+以上のように、3 つの関数をどれも簡単に書くことができました。
 
 <a id="parameterize"></a>
 
-## Parameterize all the things
+## すべてをパラメータ化する
 
-However, these three functions have some duplicate code.
-In addition to the unique application logic, each function is doing its own pattern matching and its own logic for recursively visiting the inner gift.
+この 3 つの関数にはいくつか重複したコードがあります。
+固有の処理ロジックに加えて、各関数は独自のパターンマッチングを行い、内部のギフトを再帰的に処理するロジックがあります。
 
-How can we separate the navigation logic from the application logic?
+ナビゲーションロジックとアプリケーションロジックを分離するにはどうすればいいでしょうか？
 
-Answer: Parameterize all the things!
+答えはすべてをパラメータ化することです！
 
-As always, we can parameterize the application logic by passing in functions.  In this case, we will need *five* functions, one for each case.
+いつものように、関数を渡すことでアプリケーションロジックをパラメータ化できます。今回のケースでは、各ケースに対応する関数が**5つ**必要になります。
 
-Here is the new, parameterized version -- I'll explain why I have called it `cataGift` shortly.
+新しい、パラメータ化されたバージョンがこちらです。なぜ `cataGift` と名付けたのかはすぐに説明します。
 
 ```fsharp
 let rec cataGift fBook fChocolate fWrapped fBox fCard gift =
@@ -276,15 +276,15 @@ let rec cataGift fBook fChocolate fWrapped fBox fCard gift =
         fCard (innerGiftResult,message) 
 ```
 
-You can see this function is created using a purely mechanical process:
+この関数は完全に機械的なプロセスで作られていることがわかります。
 
-* Each function parameter (`fBook`, `fChocolate`, etc) corresponds to a case.
-* For the two non-recursive cases, the function parameter is passed all the data associated with that case.
-* For the three recursive cases, there are two steps:
-  * First, the `cataGift` function is called recursively on the `innerGift` to get an `innerGiftResult`
-  * Then the appropriate handler is passed all the data associated with that case, but with `innerGiftResult` replacing `innerGift`.
+* 各関数パラメータ（ `fBook` 、 `fChocolate` など）は、ケースに対応しています。
+* 非再帰的な 2 つのケースでは、そのケースに関連するすべてのデータが関数パラメータに渡されます。
+* 再帰的な 3 つのケースでは、 2 つのステップがあります。
+  * 最初に、 `innerGift` に対して `cataGift` 関数を 再帰的に呼び出し、 `innerGiftResult` を取得します。
+  * その後、適切なハンドラーにそのケースに関連するすべてのデータが渡されますが、 `innerGift` は `innerGiftResult` に置き換えられます。
 
-Let's rewrite total cost using the generic `cataGift` function.
+ジェネリックな `cataGift` 関数を使って合計金額を書き直してみましょう。
 
 ```fsharp
 let totalCostUsingCata gift =
@@ -298,23 +298,23 @@ let totalCostUsingCata gift =
         innerCost + 1.0m
     let fCard (innerCost,message) = 
         innerCost + 2.0m
-    // call the catamorphism
+    // カタモーフィズムを呼び出す
     cataGift fBook fChocolate fWrapped fBox fCard gift
 ```
 
-Notes: 
+注意点：
 
-* The `innerGiftResult` is now the total cost of the inner gift, so I have renamed it to `innerCost`.
-* The `totalCostUsingCata` function itself is not recursive, because it uses the `cataGift` function, and so no longer needs the `rec` keyword.
+* `innerGiftResult` は内側のギフトの合計金額になったので、`innerCost` に名前変更しました。
+* `totalCostUsingCata` 関数自体は再帰的ではなくなりました。 `cataGift` 関数を使うため、`rec` キーワードが不要になりました。
 
-And this function gives the same result as before:
+この関数は、以前と同じ結果を返します。
 
 ```fsharp
 birthdayPresent |> totalCostUsingCata 
 // 22.5m
 ```
 
-We can rewrite the `description` function using `cataGift` in the same way, changing `innerGiftResult` to `innerText`.
+`description` 関数も同様に `cataGift` を使って書き直すことができます。 `innerGiftResult` を `innerText` に変更しています。
 
 ```fsharp
 let descriptionUsingCata gift =
@@ -328,11 +328,11 @@ let descriptionUsingCata gift =
         sprintf "%s in a box" innerText
     let fCard (innerText,message) = 
         sprintf "%s with a card saying '%s'" innerText message
-    // call the catamorphism
+    // カタモーフィズムを呼び出す
     cataGift fBook fChocolate fWrapped fBox fCard gift
 ```
 
-And the results are the same as before:
+結果は以前と同じです。
 
 ```fsharp
 birthdayPresent |> descriptionUsingCata  
@@ -344,35 +344,35 @@ christmasPresent |> descriptionUsingCata
 
 <a id="catamorphisms"></a>
 
-## Introducing catamorphisms
+## カタモーフィズムの紹介
 
-The `cataGift` function we wrote above is called a "[catamorphism](https://en.wikipedia.org/wiki/Catamorphism)", from the Greek components "down + shape".
-In normal usage, a catamorphism is a function that "collapses" a recursive type into a new value based on its *structure*.
-In fact, you can think of a catamorphism as a sort of "visitor pattern".
+上で書いた `cataGift` 関数は「[カタモーフィズム](https://en.wikipedia.org/wiki/Catamorphism)」と呼ばれます。これはギリシャ語の「下向き + 形状」を組み合わせた言葉です。
+一般的に、カタモーフィズムは、再帰型をその**構造**に基づいて新しい値に「折りたたむ」関数です。
+実際、カタモーフィズムは「ビジターパターン」の一種と考えられます。
 
-A catamorphism is very powerful concept,
-because it is the most fundamental function that you can define for a structure like this. *Any other function* can be defined in terms of it.
+カタモーフィズムは非常に強力な概念です。
+なぜなら、このような構造に対して定義できる最も基本的な関数だからです。**他のどんな関数も**、カタモーフィズムを使って定義することができます。
 
-That is, if we want to create a function with signature `Gift -> string` or `Gift -> int`,
-we can use a catamorphism to create it by specifying a function for each case in the `Gift` structure.
+つまり、 `Gift -> string` や `Gift -> int` というシグネチャの関数を作りたい場合、
+`Gift` 構造の各ケースに対して関数を指定することで、カタモーフィズムを使って作成できます。
 
-We saw above how we could rewrite `totalCost` as `totalCostUsingCata` using the catamorphism, and we'll see lots of other examples later.
+先ほど、カタモーフィズムを使って `totalCost` を `totalCostUsingCata` として書き直しましたが、他にもたくさんの例を見ていきます。
 
 
-### Catamorphisms and folds
+### カタモーフィズムと畳み込み
 
-Catamorphisms are often called "folds", but there is more than one kind of fold, so I will tend to use
-"catamorphism" to refer the *concept* and "fold" to refer to a specific kind of implementation.
+カタモーフィズムは「畳み込み」とも呼ばれますが、畳み込みには種類があるので、
+「カタモーフィズム」は**概念**を表し、「畳み込み」は特定の実装方法を表すようにしています。
 
-I will talk in detail about the various kinds of folds in a [subsequent post](../posts/recursive-types-and-folds-2.md),
-so for the rest of this post I will just use "catamorphism".
+さまざまな種類の畳み込みについては[次の記事](../posts/recursive-types-and-folds-2.md)で詳しく説明するので、
+この記事では「カタモーフィズム」だけを使います。
 
-### Tidying up the implementation
+### 実装の整理
 
-The `cataGift` implementation above was deliberately long-winded so that you could see each step. Once you understand what is going on though,
-you can simplify it somewhat.
+先ほどの `cataGift` の実装は、各ステップを理解しやすいようにわざと冗長にしてありました。
+ですが、処理の流れを理解できたのであれば、もう少し簡潔にすることができます。
 
-First, the `cataGift fBook fChocolate fWrapped fBox fCard` crops up three times, once for each recursive case. Let's assign it a name like `recurse`:
+まず、 `cataGift fBook fChocolate fWrapped fBox fCard` が再帰ケースごとに3回出てきます。これに `recurse` という名前をつけてみましょう。
 
 ```fsharp
 let rec cataGift fBook fChocolate fWrapped fBox fCard gift =
@@ -393,15 +393,15 @@ let rec cataGift fBook fChocolate fWrapped fBox fCard gift =
         fCard (innerGiftResult,message) 
 ```
 
-The `recurse` function has the simple signature `Gift -> 'a` -- that is, it converts a `Gift` to the return type we need, and so we can use it
-to work with the various `innerGift` values.
+この `recurse` 関数は、単純なシグネチャ `Gift -> 'a` を持ちます。つまり、`Gift` を必要な戻り型に変換してくれるので、
+さまざまな `innerGift` の値を処理するのに使えます。
 
-The other thing is to replace `innerGift` with just `gift` in the recursive cases -- this is called "shadowing".
-The benefit is that the "outer" `gift` is no longer visible to the case-handling code, and so we can't accidentally recurse into it, which would cause an infinite loop.
+もう一つのポイントは、再帰ケースで `innerGift` を単に `gift` に置き換えることです。これは「シャドーイング」と呼ばれます。
+利点は、外側の `gift` がケースを処理するコードからは見えなくなるので、同じギフトに対してうっかり再帰処理をしてしまい、無限ループを引き起こすのを防げる点です。
 
-Generally I avoid shadowing, but this is one case where it actually is a good practice, because it eliminates a particularly nasty kind of bug.
+一般的にはシャドーイングは避けますが、今回のように特に厄介なバグを回避できる場合は、好ましい手法と言えます。
 
-Here's the version after the clean up:
+整理後のバージョンは次のとおりです。
 
 ```fsharp
 let rec cataGift fBook fChocolate fWrapped fBox fCard gift =
@@ -419,15 +419,15 @@ let rec cataGift fBook fChocolate fWrapped fBox fCard gift =
         fCard (recurse gift,message) 
 ```
 
-One more thing. I'm going to explicitly annotate the return type and call it `'r`. Later on in this series we'll be dealing with other
-generic types such as `'a` and `'b`, so it will be helpful to be consistent and always have a standard name for the return type.
+最後に、戻り型を明示的に `'r` と指定しておきます。このシリーズの後半では、 `'a` や `'b` といった他のジェネリック型も扱いますが、
+一貫性を保つために、戻り型に常に標準的な名前をつけると便利です。
 
 ```fsharp
 let rec cataGift fBook fChocolate fWrapped fBox fCard gift :'r =
-//                                name the return type =>  ~~~~ 
+//                                戻り型に名前をつける =>  ~~~~ 
 ```
 
-Here's the final version:
+こちらが最終バージョンです。
 
 ```fsharp
 let rec cataGift fBook fChocolate fWrapped fBox fCard gift :'r =
@@ -446,13 +446,13 @@ let rec cataGift fBook fChocolate fWrapped fBox fCard gift :'r =
 ```
 
 
-It's much simpler than the original implementation, and also demonstrates the symmetry between a case constructor like `Wrapped (gift,style)`
-and the corresponding handler `fWrapped (recurse gift,style)`. Which leads us nicely to...
+元の実装よりもずっとシンプルになり、 `Wrapped (gift, style)` のような型コンストラクタと、対応するハンドラー `fWrapped (recurse gift, style)` との対称性が示されています。
+これが、次のトピックへの良い導入となります。
 
-### The relationship between the type constructors and the handlers
+### 型コンストラクタとハンドラーの関係
 
-Here is the signature for the `cataGift` function. You can see that each case handler function (`fBook`, `fBox`, etc.) has the same pattern:
-an input which contains all the data for that case, and a common output type `'r`.  
+`cataGift` 関数のシグネチャを見てみましょう。各ケースのハンドラー関数（ `fBook` 、 `fBox` など）は、同じパターンを持っていることがわかります。
+つまり、そのケースに必要なすべてのデータを含む入力値と、共通の出力型 `'r` です。
 
 ```fsharp
 val cataGift :
@@ -461,71 +461,71 @@ val cataGift :
   fWrapped:('r * WrappingPaperStyle -> 'r) ->
   fBox:('r -> 'r) ->
   fCard:('r * string -> 'r) -> 
-  // input value
+  // 入力値
   gift:Gift -> 
-  // return value
+  // 戻り値
   'r
 ```
 
-Another way to think about this is that: everywhere that there is a `Gift` type in the constructor, it has been replaced with an `'r`.
+別の見方をすれば、コンストラクタの中の `Gift` 型はすべて `'r` に置き換わったと考えられます。
 
-For example:
+たとえば：
 
-* The `Gift.Book` constructor takes a `Book` and returns a `Gift`. The `fBook` handler takes a `Book` and returns an `'r`.
-* The `Gift.Wrapped` constructor takes a `Gift * WrappingPaperStyle` and returns a `Gift`. The `fWrapped` handler takes an `'r * WrappingPaperStyle` as input and returns an `'r`.
+* `Gift.Book` コンストラクタは `Book` を取り、`Gift` を返します。 `fBook` ハンドラーは `Book` を取り、`'r` を返します。
+* `Gift.Wrapped` コンストラクタは `Gift * WrappingPaperStyle` を取り、`Gift` を返します。 `fWrapped` ハンドラーは `'r * WrappingPaperStyle` を入力とし、`'r` を返します。
 
-Here is that relationship expressed through type signatures:
+この関係を型シグネチャで表すと、以下のようになります。
 
 ```fsharp
-// The Gift.Book constructor 
+// Gift.Bookコンストラクタ
 Book -> Gift
 
-// The fBook handler
+// fBookハンドラ
 Book -> 'r
 
-// The Gift.Wrapped constructor 
+// Gift.Wrappedコンストラクタ
 Gift * WrappingPaperStyle -> Gift
 
-// The fWrapped handler
+// fWrappedハンドラ
 'r   * WrappingPaperStyle -> 'r
 
-// The Gift.Boxed constructor 
+// Gift.Boxedコンストラクタ
 Gift -> Gift
 
-// The fBox handler
+// fBoxハンドラ
 'r   -> 'r
 ```
 
-and so on for all of the rest. 
+その他のケースについても同様です。
 
 <a id="benefits"></a>
 
-## Benefits of catamorphisms 
+## カタモーフィズムの利点
 
-There is a lot of theory behind catamorphisms, but what are the benefits in practice?
+カタモーフィズムには多くの理論がありますが、実際にはどのような利点があるのでしょうか。
 
-Why bother to create a special function like `cataGift`? Why not just leave the original functions alone?
+なぜ `cataGift` のような特別な関数を作成するのでしょうか？ 元の関数のままにしておけばよいのではないでしょうか。
 
-There are number of reasons, including:
+これにはいくつかの理由があります。
 
-* **Reuse**. Later, we will be creating quite complex catamorphisms. It's nice if you only have to get the logic right once.
-* **Encapsulation**. By exposing functions only, you hide the internal structure of the data type.
-* **Flexibility**. Functions are more flexible than pattern matching -- they can be composed, partially applied, etc.
-* **Mapping**. With a catamorphism in hand you can easily create functions that map the various cases to new structures.
+* **再利用性**：後でかなり複雑なカタモーフィズムを作成することになります。ロジックを一度だけ正確に記述すればよいというのは、便利なことです。
+* **カプセル化**：関数だけを公開することで、データ型の内部構造を隠すことができます。
+* **柔軟性**：関数はパターンマッチングよりも柔軟で、合成や部分適用などが可能です。
+* **マッピング**：カタモーフィズムがあれば、さまざまなケースを新しい構造にマッピングする関数を簡単に作成できます。
 
-It's true that most of these benefits apply to non-recursive types as well, but recursive types tend to be more complex so the benefits of
-encapsulation, flexibility, etc. are correspondingly stronger.
- 
-In the following sections, we'll look at the last three points in more detail.
+これらの利点のほとんどは再帰的でない型にも当てはまりますが、再帰的型はより複雑になりがちなので、
+カプセル化や柔軟性などの利点はそれだけ強力になります。
 
-### Using function parameters to hide internal structure 
+次のセクションでは、最後の3点について詳しく見ていきます。
 
-The first benefit is that a catamorphism abstracts out the internal design. By using functions, the client code is somewhat isolated from the internal
-structure. Again, you can think of the Visitor pattern as analogous in the OO world. 
+### 関数パラメータを使って内部構造を隠す
 
-For example, if all the clients used the catamorphism function rather than pattern matching, I could safely rename cases, and even, with a bit of care, add or remove cases.
+最初の利点は、カタモーフィズムが内部設計を抽象化することです。関数を使うことで、呼び出し側コードは内部構造からある程度分離されます。
+これはオブジェクト指向の世界におけるビジターパターンに類似しています。
 
-Here's an example. Let's say that I had a earlier design for `Gift` that didn't have the `WithACard` case. I'll call it version 1:
+たとえば、すべての呼び出し側がパターンマッチングではなくカタモーフィズム関数を使った場合、ケースの名前を安全に変更したり、慎重に行えばケースを追加・削除したりできます。
+
+例として、以前の `Gift` の設計では、`WithACard` ケースがなかったとしましょう。これをバージョン1と呼びます。
 
 ```fsharp
 type Gift =
@@ -535,7 +535,7 @@ type Gift =
     | Boxed of Gift 
 ```
 
-And say that we built and published a catamorphism function for that structure:
+そして、その構造のためのカタモーフィズム関数を作成して公開したとします。
 
 ```fsharp
 let rec cataGift fBook fChocolate fWrapped fBox gift :'r =
@@ -551,9 +551,9 @@ let rec cataGift fBook fChocolate fWrapped fBox gift :'r =
         fBox (recurse gift)
 ```
 
-Note that this has only *four* function parameters.
+これには*4つ*の関数パラメータしかありません。
 
-Now suppose that version 2 of `Gift` comes along, which adds the `WithACard` case:
+次に、`WithACard` ケースを追加して、 `Gift` がバージョン2になったとします。
 
 ```fsharp
 type Gift =
@@ -564,14 +564,14 @@ type Gift =
     | WithACard of Gift * message:string
 ```
 
-and now there are five cases.
+ケースは5つになりました。
 
-Often, when we add a new case, we *want* to break all the clients and force them to deal with the new case.
+新しいケースを追加するときは、多くの場合、すべての呼び出し側を壊し、新しいケースに対応させたいでしょう。
 
-But sometimes, we don't. And so we can stay compatible with the original `cataGift` by handling the extra case silently, like this:
+しかし、時にはそうしたくないこともあります。その場合は、次のように、余分なケースを黙って処理することで、元の `cataGift` と互換性を保つことができます。
 
 ```fsharp
-/// Uses Gift_V2 but is still backwards compatible with the earlier "cataGift".
+/// Gift_V2を使いますが、以前の "cataGift" との後方互換性を維持します。
 let rec cataGift fBook fChocolate fWrapped fBox gift :'r =
     let recurse = cataGift fBook fChocolate fWrapped fBox 
     match gift with 
@@ -583,21 +583,21 @@ let rec cataGift fBook fChocolate fWrapped fBox gift :'r =
         fWrapped (recurse gift,style)
     | Boxed gift -> 
         fBox (recurse gift)
-    // pass through the new case silently        
+    // 新しいケースを静かに通過させる        
     | WithACard (gift,message) -> 
         recurse gift
 ```
 
-This function still has only four function parameters -- there is no special behavior for the `WithACard` case.
+この関数のパラメータは依然として4つで、 `WithACard` ケースに対する特別な動作はありません。
 
-There are a number of alternative ways of being compatible, such as returning a default value.
-The important point is that the clients are not aware of the change.
+デフォルト値を返すなど、互換性を保つための代替方法はいくつかあります。
+重要な点は、呼び出し側が変更に気付かないことです。
 
-**Aside: Using active patterns to hide data**
+**補足: アクティブパターンを使ってデータを隠す**
 
-While we're on the topic of hiding the structure of a type, I should mention that you can also use active patterns to do this.
+型の構造を隠すという話題なので、アクティブパターンを使う方法にも触れておきます。
 
-For example, we could create a active pattern for the first four cases, and ignore the `WithACard` case.
+たとえば、最初の4つのケースに対してアクティブパターンを作成し、 `WithACard` ケースを無視することができます。
 
 ```fsharp
 let rec (|Book|Chocolate|Wrapped|Boxed|) gift =
@@ -611,11 +611,11 @@ let rec (|Book|Chocolate|Wrapped|Boxed|) gift =
     | Gift.Boxed gift -> 
         Boxed gift
     | Gift.WithACard (gift,message) -> 
-        // ignore the message and recurse into the gift
+        // メッセージを無視し、ギフトに対して再帰的に処理する
         (|Book|Chocolate|Wrapped|Boxed|) gift
 ```
 
-The clients can pattern match on the four cases without knowing that the new case even exists:
+呼び出し側は、新しいケースの存在を知らずに、4つのケースでパターンマッチングできます。
 
 ```fsharp
 let rec whatsInside gift =
@@ -630,11 +630,11 @@ let rec whatsInside gift =
         whatsInside gift
 ```
 
-### Case-handling functions vs. pattern matching
+### ケース処理関数とパターンマッチング
 
-Catamorphisms use function parameters, and as noted above, functions are more flexible than pattern matching due to tools such composition, partial application, etc.
+カタモーフィズムは関数パラメータを使います。前述のように、関数には合成や部分適用などのツールが使えるため、パターンマッチングよりも柔軟です。
 
-Here's an example where all the "container" cases are ignored, and only the "content" cases are handled. 
+ここでは、すべての「コンテナ」ケースを無視し、「コンテンツ」ケースだけを処理する例を示します。
 
 ```fsharp
 let handleContents fBook fChocolate gift =
@@ -645,41 +645,41 @@ let handleContents fBook fChocolate gift =
     let fCard (innerGiftResult,message) = 
         innerGiftResult
 
-    // call the catamorphism
+    // カタモーフィズムを呼び出す
     cataGift fBook fChocolate fWrapped fBox fCard gift
 ```
 
-And here it is in use, with the two remaining cases handled "inline" using piping:
+パイプラインを使って、残りの2つのケースをインラインで処理したものが以下です。
 
 ```fsharp
 birthdayPresent 
 |> handleContents 
     (fun book -> "The book you wanted for your birthday") 
     (fun choc -> "Your fave chocolate")
-// Result => "The book you wanted for your birthday"
+// 結果 => "The book you wanted for your birthday"
 
 christmasPresent 
 |> handleContents 
     (fun book -> "The book you wanted for Christmas") 
     (fun choc -> "Don't eat too much over the holidays!")
-// Result => "Don't eat too much over the holidays!"
+// 結果 => "Don't eat too much over the holidays!"
 ```
 
-Of course this could be done with pattern matching, but being able to work with the existing `cataGift` function directly makes life easier.
+もちろん、パターンマッチングでもできますが、既存の `cataGift` 関数をそのまま使える方が簡単です。
 
-### Using catamorphisms for mapping
+### カタモーフィズムを使用したマッピング
 
-I said above that a catamorphism is a function that "collapses" a recursive type into a new value.
-For example, in `totalCost`, the recursive gift structure was collapsed into a single cost value. 
+前述のように、カタモーフィズムは再帰的な型を新しい値に「折りたたむ」関数です。
+たとえば、`totalCost` では、再帰的なギフト構造が単一の金額に折りたたまれました。
 
-But a "single value" can be more than just a primitive -- it can be a complicated structure too, such as a another recursive structure.
+しかし、「単一の値」はプリミティブなものだけではありません。別の再帰的な構造など、複雑な構造になることもあります。
 
-In fact, catamorphisms are great for mapping one kind of structure onto another, especially if they are very similar.
+実際、カタモーフィズムは、特に構造が非常に似ている場合、ある種の構造を別の構造にマッピングするのに最適です。
 
-For example, let's say that I have a chocolate-loving room-mate who will stealthily remove and devour any chocolate in a gift, leaving the wrapping untouched,
-but discarding the box and gift card.
+たとえば、チョコレートが大好きなルームメイトがいて、こっそりとギフトからチョコレートを取り出して食べ、
+包装紙はそのままにして、箱とギフトカードは捨ててしまうとしましょう。
 
-What's left at the end is a "gift minus chocolate" that we can model as follows:
+最後に残るのは「チョコレート抜きのギフト」です。次のようにモデル化できます。
 
 ```fsharp
 type GiftMinusChocolate =
@@ -688,14 +688,14 @@ type GiftMinusChocolate =
     | Wrapped of GiftMinusChocolate * WrappingPaperStyle
 ```
 
-We can easily map from a `Gift` to a `GiftMinusChocolate`, because the cases are almost parallel. 
+`Gift` から `GiftMinusChocolate` へのマッピングは、ケースがほぼ平行しているため、簡単にできます。
 
-* A `Book` is passed through untouched.
-* `Chocolate` is eaten and replaced with an `Apology`.
-* The `Wrapped` case is passed through untouched.
-* The `Box` and `WithACard` cases are ignored.
+* `Book` はそのまま渡されます。
+* `Chocolate` は食べられ、 `Apology` に置き換えられます。
+* `Wrapped` ケースはそのまま渡されます。
+* `Box` と `WithACard` ケースは無視されます。
 
-Here's the code:
+コードは以下のとおりです。
 
 ```fsharp
 let removeChocolate gift =
@@ -709,11 +709,11 @@ let removeChocolate gift =
         innerGiftResult
     let fCard (innerGiftResult,message) = 
         innerGiftResult
-    // call the catamorphism
+    // カタモーフィズムを呼び出す
     cataGift fBook fChocolate fWrapped fBox fCard gift
 ```
 
-And if we test...
+テストすると...
 
 ```fsharp
 birthdayPresent |> removeChocolate
@@ -725,13 +725,13 @@ christmasPresent |> removeChocolate
 //     Wrapped (Apology "sorry I ate your chocolate", HappyHolidays)
 ```
 
-### Deep copying
+### ディープコピー
 
-One more thing. Remember that each case-handling function takes the data associated with that case?
-That means that we can just use *the original case constructors* as the functions!
+もう一つ。各ケースのハンドリング関数は、そのケースに関連付けられたデータを受け取ることを覚えていますか？
+つまり、*元のケースコンストラクタ*を関数として使用できるのです。
 
-To see what I mean, let's define a function called `deepCopy` that clones the original value.
-Each case handler is just the corresponding case constructor:
+どういう意味かを理解するために、元の値を複製する `deepCopy` という関数を定義してみましょう。
+各ケースハンドラは対応するケースコンストラクタにすぎません。
 
 ```fsharp
 let deepCopy gift =
@@ -745,11 +745,11 @@ let deepCopy gift =
         Boxed innerGiftResult
     let fCard (innerGiftResult,message) = 
         WithACard (innerGiftResult,message) 
-    // call the catamorphism
+    // カタモーフィズムを呼び出す
     cataGift fBook fChocolate fWrapped fBox fCard gift
 ```
 
-We can simplify this further by removing the redundant parameters for each handler:
+各ハンドラの冗長なパラメータを削除して、さらに簡略化できます。
 
 ```fsharp
 let deepCopy gift =
@@ -758,30 +758,30 @@ let deepCopy gift =
     let fWrapped = Wrapped 
     let fBox = Boxed 
     let fCard = WithACard 
-    // call the catamorphism
+    // カタモーフィズムを呼び出す
     cataGift fBook fChocolate fWrapped fBox fCard gift
 ```
 
-You can test that this works yourself:
+これがうまく動作するかどうかは、あなた自身でテストできます。
 
 ```fsharp
 christmasPresent |> deepCopy
-// Result => 
+// 結果 => 
 //   Wrapped ( 
 //    Boxed (Chocolate {chocType = SeventyPercent; price = 5M;}),
 //    HappyHolidays)
 ```
 
-So that leads to another way of thinking about a catamorphism: 
+これにより、カタモーフィズムについて別の考え方が生まれます。
 
-* A catamorphism is a function for a recursive type such that
-  when you pass in the type's case constructors, you get a "clone" function. 
+* カタモーフィズムは再帰型に対する関数で、
+  型のケースコンストラクタを渡すと、「クローン」関数が得られます。
 
-### Mapping and transforming in one pass
+### マッピングと変換を一度に行う
   
-A slight variant on `deepCopy` allows us to recurse through an object and change bits of it as we do so. 
+`deepCopy` 関数をちょっと変形して、オブジェクト内を再帰的に処理しながら一部を変更する方法を紹介します。
 
-For example, let's say I don't like milk chocolate. Well, I can write a function that upgrades the gift to better quality chocolate and leaves all the other cases alone.
+たとえば、私はミルクチョコレートが好きではないとしましょう。ギフトのチョコレートをより高級なものにアップグレードし、他のケースはそのままにする関数を書けます。
 
 ```fsharp
 let upgradeChocolate gift =
@@ -791,51 +791,51 @@ let upgradeChocolate gift =
     let fWrapped = Wrapped 
     let fBox = Boxed 
     let fCard = WithACard 
-    // call the catamorphism
+    // カタモーフィズムを呼び出す
     cataGift fBook fChocolate fWrapped fBox fCard gift
 ```
 
-And here it is in use:
+実際に使ってみましょう。
 ```fsharp
-// create some chocolate I don't like
+// 好きではないチョコレートを作成
 let cheapChoc = Boxed (Chocolate {chocType=Milk; price=5m})
 
-// upgrade it!
+// アップグレード！
 cheapChoc |> upgradeChocolate
-// Result =>
+// 結果 =>
 //   Boxed (Chocolate {chocType = SeventyPercent; price = 5M})
 ```
 
-If you are thinking that this is beginning to smell like a `map`, you'd be right.
-We'll look at generic maps in the [sixth post, as part of a discussion of generic recursive types](../posts/recursive-types-and-folds-3b.md#map).
+この処理は `map` 関数に似ているように思えるかもしれませんが、その通りです。
+ジェネリックな `map` 関数については、[連載第6回](../posts/recursive-types-and-folds-3b.md#map) でジェネリックな再帰型について議論する際に取り上げます。
   
   
 <a id="rules"></a>
   
-## Rules for creating catamorphisms
+## カタモーフィズムを作成するためのルール
 
-We saw above that creating a catamorphism is a mechanical process:
+前述したように、カタモーフィズムの作成は機械的なプロセスです。
 
-* Create a function parameter to handle each case in the structure.
-* For non-recursive cases, pass the function parameter all the data associated with that case.
-* For recursive cases, perform two steps:
-  * First, call the catamorphism recursively on the nested value.
-  * Then pass the handler all the data associated with that case, but with the result of the catamorphism replacing the original nested value.
+* 構造体内の各ケースを処理する関数パラメータを作成します。
+* 非再帰的なケースについては、そのケースに関連するすべてのデータを関数パラメータに渡します。
+* 再帰的なケースについては、以下の 2 ステップを実行します。
+  * まず、ネストされた値に対して再帰的にカタモーフィズムを呼び出します。
+  * 次に、カタモーフィズムの結果で元のネストされた値を置き換えて、ケースに関連するすべてのデータをハンドラーに渡します。
 
-Let's now see if we can apply these rules to create catamorphisms in other domains.
+それでは、これらのルールを適用して、他のドメインでカタモーフィズムを作成できるか見てみましょう。
 
 <hr>
     
-## Summary 
+## まとめ
 
-We've seen in this post how to define a recursive type, and been introduced to catamorphisms.
+この投稿では、再帰型の定義方法と、カタモーフィズムの概念を紹介しました。
 
-In the [next post](../posts/recursive-types-and-folds-1b.md)
-we'll uses these rules to create catamorphisms for some other domains.
+[次の投稿](../posts/recursive-types-and-folds-1b.md) では、
+これらのルールを使って、他のドメインに対してカタモーフィズムを作成します。
 
-See you then!
+それでは、また次回お会いしましょう！
 
-*The source code for this post is available at [this gist](https://gist.github.com/swlaschin/60938b4417d12cfa0a97).*
+*この投稿のソースコードは[このgist](https://gist.github.com/swlaschin/60938b4417d12cfa0a97)で入手できます。*
 
 
 

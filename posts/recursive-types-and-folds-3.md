@@ -2,7 +2,7 @@
 layout: post
 title: "Generic recursive types"
 description: "Implementing a domain in three ways"
-seriesId: "Recursive types and folds"
+seriesId: "再帰型と畳み込み"
 seriesOrder: 5
 categories: [Folds, Patterns]
 ---

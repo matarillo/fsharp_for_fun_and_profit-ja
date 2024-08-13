@@ -2,7 +2,7 @@
 layout: post
 title: "Understanding Folds"
 description: "Recursion vs. iteration"
-seriesId: "Recursive types and folds"
+seriesId: "再帰型と畳み込み"
 seriesOrder: 4
 categories: [Folds, Patterns]
 ---

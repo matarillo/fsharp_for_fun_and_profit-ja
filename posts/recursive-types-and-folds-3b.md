@@ -2,7 +2,7 @@
 layout: post
 title: "Trees in the real world"
 description: "Examples using databases, JSON and error handling"
-seriesId: "Recursive types and folds"
+seriesId: "再帰型と畳み込み"
 seriesOrder: 6
 categories: [Folds, Patterns]
 ---

@@ -2,7 +2,7 @@
 layout: post
 title: "Introducing Folds"
 description: "Threading state through a recursive data structure"
-seriesId: "Recursive types and folds"
+seriesId: "再帰型と畳み込み"
 seriesOrder: 3
 categories: [Folds, Patterns]
 ---
