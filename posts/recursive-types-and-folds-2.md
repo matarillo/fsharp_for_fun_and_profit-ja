@@ -1,70 +1,70 @@
 ---
 layout: post
-title: "Introducing Folds"
-description: "Threading state through a recursive data structure"
+title: "畳み込みの紹介"
+description: "再帰的データ構造を通じた状態の伝播"
 seriesId: "再帰型と畳み込み"
 seriesOrder: 3
 categories: [Folds, Patterns]
 ---
 
-This post is the third in a series.
+この記事はシリーズの 3 番目です。
 
-In the [first post](../posts/recursive-types-and-folds.md), I introduced "catamorphisms", a way of creating functions for recursive types,
-and in the [second post](../posts/recursive-types-and-folds-1b.md), we created a few catamorphism implementations.
+[最初の記事](../posts/recursive-types-and-folds.md)では、再帰型のための関数を作成する方法である「カタモーフィズム」を紹介しました。
+[2番目の記事](../posts/recursive-types-and-folds-1b.md)では、いくつかのカタモーフィズムの実装を作成しました。
 
-But at the end of the previous post, I noted that all the catamorphism implementations so far have had a potentially serious flaw.
+しかし、以前の記事の終わりで、これまでのカタモーフィズムの実装には、潜在的に深刻な欠陥があると指摘しました。
 
-In this post, we'll look at the flaw and how to work around it, and in the process look at folds, tail-recursion and the difference between "left fold" and "right fold".
+この記事では、その欠陥と対処法について説明します。その過程で、畳み込み、末尾再帰、「左畳み込み」と「右畳み込み」の違いについても見ていきます。
 
-## Series contents
+## シリーズの内容
 
-Here's the contents of this series:
+シリーズの内容は次の通りです。
 
-* **Part 1: Introduction to recursive types and catamorphisms**
-  * [A simple recursive type](../posts/recursive-types-and-folds.md#basic-recursive-type)
-  * [Parameterize all the things](../posts/recursive-types-and-folds.md#parameterize)
-  * [Introducing catamorphisms](../posts/recursive-types-and-folds.md#catamorphisms)
-  * [Benefits of catamorphisms](../posts/recursive-types-and-folds.md#benefits)
-  * [Rules for creating a catamorphism](../posts/recursive-types-and-folds.md#rules)
-* **Part 2: Catamorphism examples**  
-  * [Catamorphism example: File system domain](../posts/recursive-types-and-folds-1b.md#file-system)
-  * [Catamorphism example: Product domain](../posts/recursive-types-and-folds-1b.md#product)
-* **Part 3: Introducing folds**    
-  * [A flaw in our catamorphism implementation](../posts/recursive-types-and-folds-2.md#flaw)
-  * [Introducing `fold`](../posts/recursive-types-and-folds-2.md#fold)
-  * [Problems with fold](../posts/recursive-types-and-folds-2.md#problems)
-  * [Using functions as accumulators](../posts/recursive-types-and-folds-2.md#functions)
-  * [Introducing `foldback`](../posts/recursive-types-and-folds-2.md#foldback)
-  * [Rules for creating a fold](../posts/recursive-types-and-folds-2.md#rules)
-* **Part 4: Understanding folds**      
-  * [Iteration vs. recursion](../posts/recursive-types-and-folds-2b.md#iteration)
-  * [Fold example: File system domain](../posts/recursive-types-and-folds-2b.md#file-system)  
-  * [Common questions about "fold"](../posts/recursive-types-and-folds-2b.md#questions)
-* **Part 5: Generic recursive types**  
-  * [LinkedList: A generic recursive type](../posts/recursive-types-and-folds-3.md#linkedlist)
-  * [Making the Gift domain generic](../posts/recursive-types-and-folds-3.md#revisiting-gift)
-  * [Defining a generic Container type](../posts/recursive-types-and-folds-3.md#container)
-  * [A third way to implement the gift domain](../posts/recursive-types-and-folds-3.md#another-gift)
-  * [Abstract or concrete? Comparing the three designs](../posts/recursive-types-and-folds-3.md#compare)
-* **Part 6: Trees in the real world**  
-  * [Defining a generic Tree type](../posts/recursive-types-and-folds-3b.md#tree)
-  * [The Tree type in the real world](../posts/recursive-types-and-folds-3b.md#reuse)
-  * [Mapping the Tree type](../posts/recursive-types-and-folds-3b.md#map)
-  * [Example: Creating a directory listing](../posts/recursive-types-and-folds-3b.md#listing)
-  * [Example: A parallel grep](../posts/recursive-types-and-folds-3b.md#grep)
-  * [Example: Storing the file system in a database](../posts/recursive-types-and-folds-3b.md#database)
-  * [Example: Serializing a Tree to JSON](../posts/recursive-types-and-folds-3b.md#tojson)
-  * [Example: Deserializing a Tree from JSON](../posts/recursive-types-and-folds-3b.md#fromjson)
-  * [Example: Deserializing a Tree from JSON - with error handling](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
+* **パート1: 再帰型とカタモーフィズム入門**
+  * [シンプルな再帰型](../posts/recursive-types-and-folds.md#basic-recursive-type)
+  * [すべてをパラメーター化](../posts/recursive-types-and-folds.md#parameterize)
+  * [カタモーフィズムの紹介](../posts/recursive-types-and-folds.md#catamorphisms)
+  * [カタモーフィズムの利点](../posts/recursive-types-and-folds.md#benefits)
+  * [カタモーフィズム作成のルール](../posts/recursive-types-and-folds.md#rules)
+* **パート2: カタモーフィズムの例**
+  * [カタモーフィズムの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-1b.md#file-system)
+  * [カタモーフィズムの例: 製品ドメイン](../posts/recursive-types-and-folds-1b.md#product)
+* **パート3: 畳み込みの紹介**
+  * [カタモーフィズム実装の欠陥](../posts/recursive-types-and-folds-2.md#flaw)
+  * [`fold` の導入](../posts/recursive-types-and-folds-2.md#fold)
+  * [foldの問題点](../posts/recursive-types-and-folds-2.md#problems)
+  * [関数をアキュムレーターとして使う](../posts/recursive-types-and-folds-2.md#functions)
+  * [`foldback` の導入](../posts/recursive-types-and-folds-2.md#foldback)
+  * [畳み込みの作成ルール](../posts/recursive-types-and-folds-2.md#rules)
+* **パート4: 畳み込みを理解する**
+  * [反復 vs. 再帰](../posts/recursive-types-and-folds-2b.md#iteration)
+  * [畳み込みの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-2b.md#file-system)
+  * [「fold」に関するよくある質問](../posts/recursive-types-and-folds-2b.md#questions)
+* **パート5: ジェネリック再帰型**
+  * [ジェネリック再帰型: リンクドリスト](../posts/recursive-types-and-folds-3.md#linkedlist)
+  * [ギフトドメインをジェネリックにする](../posts/recursive-types-and-folds-3.md#revisiting-gift)
+  * [ジェネリックなコンテナ型の定義](../posts/recursive-types-and-folds-3.md#container)
+  * [ギフトドメイン実装の別の方法](../posts/recursive-types-and-folds-3.md#another-gift)
+  * [抽象型か具体型か? 3つの設計の比較](../posts/recursive-types-and-folds-3.md#compare)
+* **パート6: 実世界の木構造**
+  * [ジェネリックな木構造型の定義](../posts/recursive-types-and-folds-3b.md#tree)
+  * [実世界の木構造型](../posts/recursive-types-and-folds-3b.md#reuse)
+  * [木構造型のマッピング](../posts/recursive-types-and-folds-3b.md#map)
+  * [例: ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.md#listing)
+  * [例: 並列 grep](../posts/recursive-types-and-folds-3b.md#grep)
+  * [例: ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.md#database)
+  * [例: 木構造の JSON シリアライズ](../posts/recursive-types-and-folds-3b.md#tojson)
+  * [例: JSON からの木構造のデシリアライズ](../posts/recursive-types-and-folds-3b.md#fromjson)
+  * [例: エラー処理付きの JSON からの木構造のデシリアライズ](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
 
 <a id="flaw"></a>
 <hr>
 
-## A flaw in our catamorphism implementation
+## カタモーフィズム実装の欠陥
 
-Before we look at the flaw, let's first review the recursive type `Gift` and the associated catamorphism `cataGift` that we created for it.
+欠陥について説明する前に、まず前回作成した再帰型 `Gift` とそれに関連するカタモーフィズム `cataGift` を復習しましょう。
 
-Here's the domain:
+ドメインは以下の通りです。
 
 ```fsharp
 type Book = {title: string; price: decimal}
@@ -85,20 +85,20 @@ type Gift =
     | WithACard of Gift * message:string
 ```
 
-Here are some example values that we'll be using in this post:
+この投稿で使用するサンプル値は以下の通りです。
 
 ```fsharp
-// A Book
+// 本
 let wolfHall = {title="Wolf Hall"; price=20m}
-// A Chocolate
+// チョコレート
 let yummyChoc = {chocType=SeventyPercent; price=5m}
-// A Gift
+// ギフト
 let birthdayPresent = WithACard (Wrapped (Book wolfHall, HappyBirthday), "Happy Birthday")
-// A Gift
+// ギフト
 let christmasPresent = Wrapped (Boxed (Chocolate yummyChoc), HappyHolidays)
 ```
 
-Here's the catamorphism:
+こちらがカタモーフィズムです。
 
 ```fsharp
 let rec cataGift fBook fChocolate fWrapped fBox fCard gift :'r =
@@ -116,7 +116,7 @@ let rec cataGift fBook fChocolate fWrapped fBox fCard gift :'r =
         fCard (recurse gift,message) 
 ```
 
-and here is a `totalCostUsingCata` function built using `cataGift`:
+そして、`cataGift` を使って構築された `totalCostUsingCata` 関数は以下の通りです。
 
 ```fsharp
 let totalCostUsingCata gift =
@@ -130,17 +130,17 @@ let totalCostUsingCata gift =
         innerCost + 1.0m
     let fCard (innerCost,message) = 
         innerCost + 2.0m
-    // call the catamorphism
+    // カタモーフィズムを呼び出す
     cataGift fBook fChocolate fWrapped fBox fCard gift
 ```
 
-### What's the flaw?
+### 欠陥とは？
 
-So what is wrong with this implementation?  Let's stress test it and find out!
+この実装の何が問題なのでしょうか？ストレステストをして調べてみましょう！
 
-What we'll do is create a `Box` inside a `Box` inside a `Box` a very large number of times, and see what happens.
+`Box` の中に `Box` を入れ、その中にさらに `Box` を入れるという操作を何度もして、何が起こるかを見てみます。
 
-Here's a little helper function to create nested boxes:
+ネストしたギフトボックスを作成する小さなヘルパー関数を以下に示します。
 
 ```fsharp
 let deeplyNestedBox depth =
@@ -151,7 +151,7 @@ let deeplyNestedBox depth =
     loop depth (Book wolfHall)
 ```
 
-Let's try it to make sure it works:
+動作確認のために試してみましょう。
 
 ```fsharp
 deeplyNestedBox 5
@@ -162,7 +162,7 @@ deeplyNestedBox 10
 //   (Boxed(Boxed(Boxed(Boxed(Boxed(Book {title = "Wolf Hall";price = 20M}))))))))))
 ```
 
-Now try running `totalCostUsingCata` with these deeply nested boxes:
+次に、この深くネストしたギフトボックスで `totalCostUsingCata` を実行してみましょう。
 
 ```fsharp
 deeplyNestedBox 10 |> totalCostUsingCata       // OK     30.0M
@@ -170,24 +170,24 @@ deeplyNestedBox 100 |> totalCostUsingCata      // OK    120.0M
 deeplyNestedBox 1000 |> totalCostUsingCata     // OK   1020.0M
 ```
 
-So far so good.
+ここまでは問題ありません。
 
-But if we use much larger numbers, we soon run into a stack overflow exception:
+しかし、もっと大きな数を使うと、すぐにスタックオーバーフロー例外が発生します。
 
 ```fsharp
-deeplyNestedBox 10000 |> totalCostUsingCata  // Stack overflow?
-deeplyNestedBox 100000 |> totalCostUsingCata // Stack overflow?
+deeplyNestedBox 10000 |> totalCostUsingCata  // スタックオーバーフロー？
+deeplyNestedBox 100000 |> totalCostUsingCata // スタックオーバーフロー？
 ```
 
-The exact number which causes an error depends on the environment, available memory, and so on.
-But it is a certainty that you will run into it when you start using largish numbers.
+エラーが発生する正確な数は、環境、使用可能なメモリなどによって異なります。
+しかし、大きな数を使い始めると、確実に遭遇することになります。
 
-Why is this happening?
+なぜこのようなことが起こるのでしょうか？
 
-### The problem with deep recursion 
+### 深い再帰の問題
 
-Recall that the definition of the cost for the Boxed case (`fBox`) was `innerCost + 1.0m`.
-And what is the inner cost?  That's another box too, so we end up with a chain of calculations looking like this:
+`Boxed` ケースの価格の定義 ( `fBox` ) が `innerCost + 1.0m` だったことを思い出してください。
+そして、その `innerCost` とは何でしょうか？ それもまた別の `Box` なので、計算の連鎖は次のような形になります：
 
 ```fsharp
 innerCost + 1.0m where innerCost = 
@@ -200,17 +200,17 @@ innerCost + 1.0m where innerCost =
             book.price
 ```
 
-In other words, `innerCost1000` has to be calculated before `innerCost999` can be calculated,
-and 999 other inner costs have to be calculated before the top level `innerCost` can be calculated.
+つまり、`innerCost999` を計算する前に `innerCost1000` を計算する必要があり、
+最上位の `innerCost` を計算する前に他の 999 個の `innerCost` を計算する必要があります。
 
-Every level is waiting for its inner cost to be calculated before doing the calculation for that level.
+各レベルは、そのレベルの計算を行う前に、内部価格が計算されるのを待っています。
 
-All these unfinished calculations are stacked up waiting for the inner one to complete. And when you have too many? Boom! Stack overflow!
+これらの未完了の計算は、内部の計算が完了するのを待ってスタックに積み重なっています。そして、それが多すぎると？ バン！ スタックオーバーフローです！
 
-### The solution to stack overflows
+### スタックオーバーフローの解決策
 
-The solution to this problem is simple. Rather than each level waiting for the inner cost to be calculated, each level calculates the cost so far, using an accumulator,
-and passes that down to the next inner level. When we get to the bottom level, we have the final answer.
+この問題の解決策は簡単です。各レベルが内部の価格の計算を待つのではなく、各レベルがアキュムレーター（累積器）を使ってこれまでの価格を計算し、それを次の内部レベルに渡します。
+最下層に到達すると、最終的な答えが得られます。
 
 ```fsharp
 costSoFar = 1.0m; evaluate calcInnerCost with costSoFar: 
@@ -220,25 +220,25 @@ costSoFar = 1.0m; evaluate calcInnerCost with costSoFar:
         ...
         costSoFar = costSoFar + 1.0m; evaluate calcInnerCost with costSoFar: 
           costSoFar = costSoFar + 1.0m; evaluate calcInnerCost with costSoFar: 
-            finalCost = costSoFar + book.price   // final answer
+            finalCost = costSoFar + book.price   // 最終的な答え
 ```
 
-The big advantange of this approach is that all calculations at a particular level are *completely finished* before the next lowel level is called.
-Which means that the level and its associated data can be safely discarded from the stack. Which means no stack overflow!
+このアプローチの大きな利点は、特定のレベルでのすべての計算が、次の下位レベルが呼び出される前に *完全に終了* することです。
+したがって、そのレベルとその関連データはスタックから安全に破棄できます。つまり、スタックオーバーフローが発生しません！
 
-An implementation like this, where the higher levels can be safely discarded, is called *tail recursive*.
+上位レベルを安全に破棄できるこのような実装は、 *末尾再帰* と呼びます。
 
-### Reimplementating the `totalCost` function with an accumulator
+### アキュムレーターを使った `totalCost` 関数の再実装
 
-Let's rewrite the total cost function from scratch, using an accumulator called `costSoFar`:
+アキュムレーター `costSoFar` を使って、`totalCost` 関数を最初から書き直しましょう。
 
 ```fsharp
 let rec totalCostUsingAcc costSoFar gift =
     match gift with 
     | Book book -> 
-        costSoFar + book.price  // final result
+        costSoFar + book.price  // 最終結果
     | Chocolate choc -> 
-        costSoFar + choc.price  // final result
+        costSoFar + choc.price  // 最終結果
     | Wrapped (innerGift,style) -> 
         let newCostSoFar = costSoFar + 0.5m
         totalCostUsingAcc newCostSoFar innerGift 
@@ -250,14 +250,14 @@ let rec totalCostUsingAcc costSoFar gift =
         totalCostUsingAcc newCostSoFar innerGift 
 ```
 
-A few things to note:
+注意すべき点がいくつかあります。
 
-* The new version of the function has an extra parameter (`costSoFar`). We will have to provide an initial value for this (such as zero) when we call it at the top level.
-* The non-recursive cases (`Book` and `Chocolate`) are the end points. The take the cost so far and add it to their price, and then that is the final result.
-* The recursive cases calculate a new `costSoFar` based on the parameter that is passed in. The new `costSoFar` is then passed down to the next lower level,
-  just as in the example above.
+* 新しいバージョンの関数には、追加のパラメータ ( `costSoFar` ) があります。 最上位レベルで呼び出すときは、初期値（ゼロなど）を提供する必要があります。
+* 非再帰的なケース ( `Book` と `Chocolate` ) は終了点です。 これまでの価格に自身の価格を加算し、それが最終結果となります。
+* 再帰的なケースでは、渡されたパラメータに基づいて新しい `costSoFar` を計算します。
+  新しい `costSoFar` は、上の例と同様に、次の下位レベルに渡されます。
 
-Let's stress test this version:
+このバージョンをストレステストしてみましょう。
 
 ```fsharp
 deeplyNestedBox 1000 |> totalCostUsingAcc 0.0m     // OK    1020.0M
@@ -266,16 +266,16 @@ deeplyNestedBox 100000 |> totalCostUsingAcc 0.0m   // OK  100020.0M
 deeplyNestedBox 1000000 |> totalCostUsingAcc 0.0m  // OK 1000020.0M
 ```
 
-Excellent. Up to one million nested levels without a hiccup.
+素晴らしい。 100 万レベルのネストでも問題なく動作します。
 
 <a id="fold"></a>
 
-## Introducing "fold"
+## `fold` の導入
 
-Now let's apply the same design principle to the catamorphism implementation. 
+同じ設計原則をカタモーフィズムの実装にも適用してみましょう。
 
-We'll create a new function `foldGift`.
-We'll introduce an accumulator `acc` that we will thread through each level, and the non-recursive cases will return the final accumulator.
+新しい関数 `foldGift` を作成します。
+各レベルを伝播するアキュムレーター `acc` を導入し、再帰でないケースでは最終的なアキュムレーターを返します。
 
 ```fsharp
 let rec foldGift fBook fChocolate fWrapped fBox fCard acc gift :'r =
@@ -283,10 +283,10 @@ let rec foldGift fBook fChocolate fWrapped fBox fCard acc gift :'r =
     match gift with 
     | Book book -> 
         let finalAcc = fBook acc book
-        finalAcc     // final result
+        finalAcc     // 最終結果
     | Chocolate choc -> 
         let finalAcc = fChocolate acc choc
-        finalAcc     // final result
+        finalAcc     // 最終結果
     | Wrapped (innerGift,style) -> 
         let newAcc = fWrapped acc style
         recurse newAcc innerGift 
@@ -298,8 +298,8 @@ let rec foldGift fBook fChocolate fWrapped fBox fCard acc gift :'r =
         recurse newAcc innerGift
 ```
 
-If we look at the type signature, we can see that it is subtly different. The type of the accumulator `'a` is being used everywhere now.
-The only time where the final return type is used is in the two non-recursive cases (`fBook` and `fChocolate`).
+型シグネチャを見ると、微妙な違いがあることがわかります。アキュムレーターの型 `'a` がどこでも使用されるようになりました。
+最終的な戻り値の型が使用されるのは、再帰でない2つのケース ( `fBook` と `fChocolate` ) だけです。
 
 ```fsharp
 val foldGift :
@@ -308,20 +308,20 @@ val foldGift :
   fWrapped:('a -> WrappingPaperStyle -> 'a) ->
   fBox:('a -> 'a) ->
   fCard:('a -> string -> 'a) -> 
-  // accumulator
+  // アキュムレーター
   acc:'a -> 
-  // input value
+  // 入力値
   gift:Gift -> 
-  // return value
+  // 戻り値
   'r
 ```
 
-Let's look at this more closely, and compare the signatures of the original catamorphism from the last post with the signatures of the new `fold` function.
+これを詳しく見て、前回の記事のカタモーフィズムのシグネチャと新しい `fold` （畳み込み）関数のシグネチャを比較しましょう。
 
-First of all, the non-recursive cases:
+まず、再帰でないケースについて見てみます。
 
 ```fsharp
-// original catamorphism
+// オリジナルのカタモーフィズム
 fBook:(Book -> 'r)
 fChocolate:(Chocolate -> 'r)
 
@@ -330,15 +330,15 @@ fBook:('a -> Book -> 'r)
 fChocolate:('a -> Chocolate -> 'r)
 ```
 
-As you can see, with "fold", the non-recursive cases take an extra parameter (the accumulator) and return the `'r` type.
+ご覧のように、「fold（畳み込み）」では、再帰でないケースは追加のパラメータ（アキュムレーター）を受け取り、`'r` 型を返します。
 
-This is a very important point: *the type of the accumulator does not need to be the same as the return type.*
-We will need to take advantage of this shortly.
+これは非常に重要なポイントなのですが、*アキュムレーターの型は戻り値の型と同じである必要はありません*。
+この点は後ほど重要になります。
 
-What about the recursive cases? How did their signature change?
+再帰的なケースはどうでしょうか？シグネチャはどのように変化したでしょうか？
 
 ```fsharp
-// original catamorphism
+// オリジナルのカタモーフィズム
 fWrapped:('r -> WrappingPaperStyle -> 'r) 
 fBox:('r -> 'r) 
 
@@ -347,12 +347,12 @@ fWrapped:('a -> WrappingPaperStyle -> 'a)
 fBox:('a -> 'a)
 ```
 
-For the recursive cases, the structure is identical but all use of the `'r` type has been replaced with the `'a` type.
-The recursive cases do not use the `'r` type at all.
+再帰的なケースでは、構造は同じですが、`'r` 型がすべて `'a` 型に置き換えられています。
+再帰的なケースでは、`'r` 型はまったく使われません。
   
-### Reimplementating the `totalCost` function using fold
+### foldを使った `totalCost` 関数の再実装
 
-Once again, we can reimplement the total cost function, but this time using the `foldGift` function:
+ここでも、 `foldGift` 関数を使って `totalCost` 関数を再実装できます。
 
 ```fsharp
 let totalCostUsingFold gift =  
@@ -368,35 +368,35 @@ let totalCostUsingFold gift =
     let fCard costSoFar message = 
         costSoFar + 2.0m
 
-    // initial accumulator
+    // 初期アキュムレーター
     let initialAcc = 0m
 
-    // call the fold
+    // foldを呼び出す
     foldGift fBook fChocolate fWrapped fBox fCard initialAcc gift 
 ```
 
-And again, we can process very large numbers of nested boxes without a stack overflow:
+そして再び、何重にも入れ子になったギフトボックスをスタックオーバーフローなしで処理できます。
 
 ```fsharp
-deeplyNestedBox 100000 |> totalCostUsingFold  // no problem   100020.0M
-deeplyNestedBox 1000000 |> totalCostUsingFold // no problem  1000020.0M
+deeplyNestedBox 100000 |> totalCostUsingFold  // 問題なし   100020.0M
+deeplyNestedBox 1000000 |> totalCostUsingFold // 問題なし  1000020.0M
 ```
 
 <a id="problems"></a>
 
-## Problems with fold
+## foldの問題点
 
-So using fold solves all our problems, right? 
+さて、foldを使えばすべての問題が解決するのでしょうか？
 
-Unfortunately, no. 
+残念ながら、そうではありません。
 
-Yes, there are no more stack overflows, but we have another problem now.
+スタックオーバーフローはなくなりましたが、今度は別の問題が生じています。
 
-### Reimplementation of the `description` function
+### `description`関数の再実装
 
-To see what the problem is, let's revisit the `description` function that we created in the first post.
+問題点を見るために、最初の投稿で作成した`description`関数を見直しましょう。
 
-The original one was not tail-recursive, so let's make it safer and reimplement it using `foldGift`.
+元の関数は末尾再帰ではなかったので、安全にするために `foldGift` を使って再実装します。
 
 ```fsharp
 let descriptionUsingFold gift =
@@ -415,14 +415,14 @@ let descriptionUsingFold gift =
     let fCard descriptionSoFar message = 
         sprintf "%s with a card saying '%s'" descriptionSoFar message
 
-    // initial accumulator
+    // 初期アキュムレーター
     let initialAcc = ""
 
-    // main call
+    // メイン呼び出し
     foldGift fBook fChocolate fWrapped fBox fCard initialAcc gift 
 ```
 
-Let's see what the output is:
+出力を見てみましょう。
 
 ```fsharp
 birthdayPresent |> descriptionUsingFold  
@@ -432,54 +432,54 @@ christmasPresent |> descriptionUsingFold
 // "SeventyPercent chocolate  wrapped in HappyHolidays paper in a box"
 ```
 
-These outputs are wrong! The order of the decorations has been mixed up.
+これらの出力は間違っています！ 装飾の順番が入れ替わっています。
 
-It's supposed to be a wrapped book with a card, not a book and a card wrapped together.
-And it's supposed to be chocolate in a box, then wrapped, not wrapped chocolate in a box!
+本来は、本を包装してからカードを付けるべきですが、本とカードを一緒に包装してしまっています。
+また、チョコレートを箱に入れてから包装するべきですが、包装されたチョコレートが箱に入っています！
 
 ```fsharp
-// OUTPUT: "'Wolf Hall'  with a card saying 'Happy Birthday' wrapped in HappyBirthday paper"
-// CORRECT "'Wolf Hall' wrapped in HappyBirthday paper with a card saying 'Happy Birthday'"
+// 出力： "'Wolf Hall'  with a card saying 'Happy Birthday' wrapped in HappyBirthday paper"
+// 正解： "'Wolf Hall' wrapped in HappyBirthday paper with a card saying 'Happy Birthday'"
 
-// OUTPUT: "SeventyPercent chocolate  wrapped in HappyHolidays paper in a box"
-// CORRECT "SeventyPercent chocolate in a box wrapped in HappyHolidays paper"
+// 出力： "SeventyPercent chocolate  wrapped in HappyHolidays paper in a box"
+// 正解： "SeventyPercent chocolate in a box wrapped in HappyHolidays paper"
 ```
 
-What has gone wrong?
+何が間違っているのでしょうか？
 
-The answer is that the correct description for each layer depends on the description of the layer below. We can't "pre-calculate" the description for a layer
-and pass it down to the next layer using a `descriptionSoFar` accumulator.
+答えは、各層の正しい説明が下の層の説明に依存しているということです。 
+`descriptionSoFar` アキュムレーターを使って、ある層の説明を「事前に計算」して次の層に渡すことはできません。
 
-But now we have a dilemma: a layer depends on information from the layer below, but we want to avoid a stack overflow.
+しかし、ここでジレンマが生じます。層は下の層の情報に依存していますが、スタックオーバーフローは避けたいのです。
 
 <a id="functions"></a>
 
-## Using functions as accumulators
+## 関数をアキュムレーターとして使う
 
-Remember that the accumulator type does not have to be the same as the return type. We can use anything as an accumulator, even a function!
+アキュムレーターの型は、必ずしも返り値の型と同じである必要はありません。アキュムレーターには何でも使用でき、関数もその例外ではありません。
 
-So what we'll do is, rather than passing a `descriptionSoFar` as the accumulator, we'll pass a function (`descriptionGenerator` say)
-that will build the appropriate description given the value of the next layer down.
+そこで、`descriptionSoFar` をアキュムレーターとして渡す代わりに、
+下の階層の値が与えられたときに適切な説明を構築する関数（`descriptionGenerator` としましょう）を渡すことにします。
 
-Here's the implementation for the non-recursive cases:
+非再帰的なケースの実装は次のようになります。
 
 ```fsharp
 let fBook descriptionGenerator (book:Book) = 
     descriptionGenerator (sprintf "'%s'" book.title)
-//  ~~~~~~~~~~~~~~~~~~~~  <= a function as an accumulator!
+//  ~~~~~~~~~~~~~~~~~~~~  <= アキュムレーターとしての関数！
 
 let fChocolate descriptionGenerator (choc:Chocolate) = 
     descriptionGenerator (sprintf "%A chocolate" choc.chocType)
 ```
 
-The implementation for recursive cases is a bit more complicated:
+再帰的なケースの実装は少し複雑です。
 
-* We are given an accumulator (`descriptionGenerator`) as a parameter.
-* We need to create a new accumulator (a new `descriptionGenerator`) to pass down to the next lower layer.
-* The *input* to the description generator will be all the data accumulated from the lower layers.
-  We manipulate that to make a new description and then call the `descriptionGenerator` passed in from the higher layer.
+* アキュムレーター（`descriptionGenerator`）がパラメータとして渡されます。
+* 新しいアキュムレーター（新しい `descriptionGenerator` ）を作成して、次の下層に渡す必要があります。
+* 説明ジェネレータへの *入力* は、下層から集められたすべてのデータになります。
+  それを操作して新しい説明を作り、上層から渡された `descriptionGenerator` を呼び出します。
 
-It's more complicated to talk about than to demonstrate, so here are implementations for two of the cases:
+説明するよりも実際に示す方がわかりやすいので、2 つのケースの実装を見てみましょう。
 
 ```fsharp
 let fWrapped descriptionGenerator style = 
@@ -495,7 +495,7 @@ let fBox descriptionGenerator =
     newDescriptionGenerator 
 ```
 
-We can simplify that code a little by using a lambda directly:
+ラムダ式を直接使用することで、コードを少し簡略化できます。
 
 ```fsharp
 let fWrapped descriptionGenerator style = 
@@ -509,9 +509,9 @@ let fBox descriptionGenerator =
         descriptionGenerator newInnerText 
 ```
 
-We could continue to make it more compact using piping and other things, but I think that what we have here is a good balance between conciseness and obscurity.
+パイプラインやその他の方法を使ってさらにコンパクトにすることもできますが、現在の状態が簡潔さとわかりやすさのバランスが取れていると思います。
 
-Here is the entire function:
+関数の全体は以下のようになります。
 
 ```fsharp
 let descriptionUsingFoldWithGenerator gift =
@@ -537,35 +537,35 @@ let descriptionUsingFoldWithGenerator gift =
             let newInnerText = sprintf "%s with a card saying '%s'" innerText message 
             descriptionGenerator newInnerText 
 
-    // initial DescriptionGenerator
+    // 初期DescriptionGenerator
     let initialAcc = fun innerText -> innerText 
 
-    // main call
+    // メイン呼び出し
     foldGift fBook fChocolate fWrapped fBox fCard initialAcc gift 
 ```
 
-Again, I'm using overly descriptive intermediate values to make it clear what is going on.
+繰り返しますが、何が起こっているのかを明確にするために、わざと説明的な中間値を使用しています。
 
-If we try `descriptionUsingFoldWithGenerator` now, we get the correct answers again:
+ここで `descriptionUsingFoldWithGenerator` を試してみると、正しい答えが得られるようになりました。
 
 ```fsharp
 birthdayPresent |> descriptionUsingFoldWithGenerator  
-// CORRECT "'Wolf Hall' wrapped in HappyBirthday paper with a card saying 'Happy Birthday'"
+// 正解 "'Wolf Hall' wrapped in HappyBirthday paper with a card saying 'Happy Birthday'"
 
 christmasPresent |> descriptionUsingFoldWithGenerator  
-// CORRECT "SeventyPercent chocolate in a box wrapped in HappyHolidays paper"
+// 正解 "SeventyPercent chocolate in a box wrapped in HappyHolidays paper"
 ```
 
 <a id="foldback"></a>
 
-## Introducing "foldback"
+## `foldback` の導入
 
-Now that we understand what to do, let's make a generic version that that handles the generator function logic for us.
-This one we will call "foldback":
+さて、やるべきことが分かったので、ジェネレータ関数のロジックを処理してくれるジェネリックなバージョンを作ってみましょう。
+これを「foldback（反対からの畳み込み）」と呼ぶことにします。
 
-*By the way, I'm going to use term "generator" here. In other places, it is commonly referred to as a "continuation" function, often abbreviated to just "k".*
+*ちなみに、ここでは「ジェネレータ」という用語を使います。他の場所では一般的に「継続」関数と呼ばれ、しばしば「k」と略されます。*
 
-Here's the implementation:
+実装は次のようになります。
 
 ```fsharp
 let rec foldbackGift fBook fChocolate fWrapped fBox fCard generator gift :'r =
@@ -592,10 +592,10 @@ let rec foldbackGift fBook fChocolate fWrapped fBox fCard generator gift :'r =
         recurse newGenerator innerGift 
 ```
 
-You can see that it is just like the `descriptionUsingFoldWithGenerator` implementation, except that we are using generic `newInnerVal` and `generator` values.
+ご覧のように、これは `descriptionUsingFoldWithGenerator` の実装と似ていますが、ジェネリックな `newInnerVal` と `generator` 値を使用しています。
 
-The type signatures are similar to the original catamorphism, except that every case works with `'a` only now.
-The only time `'r` is used is in the generator function itself!
+型シグネチャは元のカタモーフィズムと似ていますが、すべてのケースが `'a` のみを扱います。
+`'r` が使用されるのはジェネレータ関数だけです！
 
 ```fsharp
 val foldbackGift :
@@ -604,17 +604,17 @@ val foldbackGift :
   fWrapped:('a -> WrappingPaperStyle -> 'a) ->
   fBox:('a -> 'a) ->
   fCard:('a -> string -> 'a) ->
-  // accumulator
+  // アキュムレーター
   generator:('a -> 'r) -> 
-  // input value
+  // 入力値
   gift:Gift -> 
-  // return value
+  // 戻り値
   'r
 ```
 
-*The `foldback` implementation above is written from scratch. If you want a fun exercise, see if you can write `foldback` in terms of `fold`.*
+*上の `foldback` の実装はゼロから書かれています。練習として、 `fold` を使って `foldback` を書けるかどうか試してみてください。*
 
-Let's rewrite the `description` function using `foldback`: 
+`foldback` を使って `description` 関数を書き直してみましょう。
 
 ```fsharp
 let descriptionUsingFoldBack gift =
@@ -628,27 +628,27 @@ let descriptionUsingFoldBack gift =
         sprintf "%s in a box" innerText 
     let fCard innerText message = 
         sprintf "%s with a card saying '%s'" innerText message 
-    // initial DescriptionGenerator
+    // 初期DescriptionGenerator
     let initialAcc = fun innerText -> innerText 
-    // main call
+    // メイン呼び出し
     foldbackGift fBook fChocolate fWrapped fBox fCard initialAcc gift 
 ```
 
-And the results are still correct:
+結果は依然として正しいです。
 
 ```fsharp
 birthdayPresent |> descriptionUsingFoldBack
-// CORRECT "'Wolf Hall' wrapped in HappyBirthday paper with a card saying 'Happy Birthday'"
+// 正解 "'Wolf Hall' wrapped in HappyBirthday paper with a card saying 'Happy Birthday'"
 
 christmasPresent |> descriptionUsingFoldBack
-// CORRECT "SeventyPercent chocolate in a box wrapped in HappyHolidays paper"
+// 正解 "SeventyPercent chocolate in a box wrapped in HappyHolidays paper"
 ```
 
-### Comparing `foldback` to the original catamorphism
+### foldback と元のカタモーフィズムの比較
 
-The implementation of `descriptionUsingFoldBack` is almost identical to the version in the last post that used the original catamorphism `cataGift`.
+`descriptionUsingFoldBack` の実装は、前回の記事で元のカタモーフィズム `cataGift` を使ったバージョンとほぼ同じです。
 
-Here's the version using `cataGift`:
+`cataGift` を使ったバージョンは次のようになります。
 
 ```fsharp
 let descriptionUsingCata gift =
@@ -662,11 +662,11 @@ let descriptionUsingCata gift =
         sprintf "%s in a box" innerText
     let fCard (innerText,message) = 
         sprintf "%s with a card saying '%s'" innerText message
-    // call the catamorphism
+    // カタモーフィズムを呼び出す
     cataGift fBook fChocolate fWrapped fBox fCard gift
 ```
 
-And here's the version using `foldbackGift`:
+`foldbackGift` を使ったバージョンは次のようになります。
 
 ```fsharp
 let descriptionUsingFoldBack gift =
@@ -680,45 +680,45 @@ let descriptionUsingFoldBack gift =
         sprintf "%s in a box" innerText 
     let fCard innerText message = 
         sprintf "%s with a card saying '%s'" innerText message 
-    // initial DescriptionGenerator
-    let initialAcc = fun innerText -> innerText    // could be replaced with id
-    // main call
+    // 初期DescriptionGenerator
+    let initialAcc = fun innerText -> innerText    // idに置き換えられます
+    // メイン呼び出し
     foldbackGift fBook fChocolate fWrapped fBox fCard initialAcc gift 
 ```
 
-All the handler functions are basically identical. The only change is the addition of an initial generator function, which is just `id` in this case.
+すべてのハンドラ関数は基本的に同じです。唯一の違いは、初期ジェネレータ関数が追加されていることで、この場合は単なる `id` です。
 
-However, although the code looks the same in both cases, they differ in their recursion safety.  The `foldbackGift` version is still tail recursive, and can handle
-very large nesting depths, unlike the `cataGift` version.  
+しかし、コードは両方のケースで同じように見えますが、再帰の安全性は異なります。 `foldbackGift` バージョンは依然として末尾再帰であり、
+`cataGift` バージョンとは異なり、非常に深いネストにも対応できます。
 
-But this implementation is not perfect either. The chain of nested functions can get very slow and generate a lot of garbage, and for this particular example, there is an even
-faster way, which we'll look at in the next post.
+ただし、この実装も完璧ではありません。ネストされた関数の連鎖は非常に遅くなり、多くのガベージを生成する可能性があります。
+この特定の例では、さらに高速な方法があり、それについては次の記事で見ていきます。
 
-### Changing the type signature of `foldback` to avoid a mixup 
+### 混乱を避けるための `foldback` 関数の型シグネチャの変更
 
-In `foldGift` the signature for `fWrapped` is:
-
-```fsharp
-fWrapped:('a -> WrappingPaperStyle -> 'a) 
-```
-
-But in `foldbackGift` the signature for `fWrapped` is:
+`foldGift` 関数における `fWrapped` 関数の型シグネチャは、次のようなものです。
 
 ```fsharp
 fWrapped:('a -> WrappingPaperStyle -> 'a) 
 ```
 
-Can you spot the difference? No, me neither.
+一方、`foldbackGift` 関数における `fWrapped` 関数の型シグネチャは、以下の通りです。
 
-The two functions are very similar, yet work very differently. In the `foldGift` version, the first parameter is the accumulator from the *outer* levels,
-while in `foldbackGift` version, the first parameter is the accumulator from the *inner* levels. Quite an important distinction!
+```fsharp
+fWrapped:('a -> WrappingPaperStyle -> 'a) 
+```
 
-It is therefore common to change the signature of the `foldBack` version so that the accumulator
-always comes *last*, while in the normal `fold` function, the accumulator always comes *first*.
+一見すると、違いがわかりづらいですね。
+
+実は、この 2 つの関数は似ていますが、動作が大きく異なります。 `foldGift` の場合、最初のパラメータは *外側の* レベルからの蓄積値を受け取ります。
+一方、`foldbackGift` では、最初のパラメータは *内側の* レベルからの蓄積値を受け取ります。この違いは非常に重要です！
+
+そのため、`foldBack` バージョンの型シグネチャを変更して、蓄積値が常に *最後* に来るようにするのが一般的です。
+一方、通常の `fold` 関数では、蓄積値は常に *最初* に受け取ります。
 
 ```fsharp
 let rec foldbackGift fBook fChocolate fWrapped fBox fCard gift generator :'r =
-//swapped =>                                              ~~~~~~~~~~~~~~ 
+//入れ替え =>                                              ~~~~~~~~~~~~~~ 
 
     let recurse = foldbackGiftWithAccLast fBook fChocolate fWrapped fBox fCard 
 
@@ -731,28 +731,28 @@ let rec foldbackGift fBook fChocolate fWrapped fBox fCard gift generator :'r =
     | Wrapped (innerGift,style) -> 
         let newGenerator innerVal =
             let newInnerVal = fWrapped style innerVal 
-//swapped =>                           ~~~~~~~~~~~~~~ 
+//入れ替え =>                           ~~~~~~~~~~~~~~ 
             generator newInnerVal 
         recurse innerGift newGenerator  
-//swapped =>    ~~~~~~~~~~~~~~~~~~~~~~ 
+//入れ替え =>    ~~~~~~~~~~~~~~~~~~~~~~ 
 
     | Boxed innerGift -> 
         let newGenerator innerVal =
             let newInnerVal = fBox innerVal 
             generator newInnerVal 
         recurse innerGift newGenerator  
-//swapped =>    ~~~~~~~~~~~~~~~~~~~~~~ 
+//入れ替え =>    ~~~~~~~~~~~~~~~~~~~~~~ 
 
     | WithACard (innerGift,message) -> 
         let newGenerator innerVal =
             let newInnerVal = fCard message innerVal 
-//swapped =>                        ~~~~~~~~~~~~~~~~ 
+//入れ替え =>                        ~~~~~~~~~~~~~~~~ 
             generator newInnerVal 
         recurse innerGift newGenerator 
-//swapped =>    ~~~~~~~~~~~~~~~~~~~~~~ 
+//入れ替え =>    ~~~~~~~~~~~~~~~~~~~~~~ 
 ```
 
-This change shows up in the type signature. The `Gift` value comes before the accumulator now:
+この変更は型シグネチャに現れます。 `Gift` 値がアキュムレーターの前に来るようになります。
 
 ```fsharp
 val foldbackGift :
@@ -761,15 +761,15 @@ val foldbackGift :
   fWrapped:(WrappingPaperStyle -> 'a -> 'a) ->
   fBox:('a -> 'a) ->
   fCard:(string -> 'a -> 'a) ->
-  // input value
+  // 入力値
   gift:Gift -> 
-  // accumulator
+  // アキュムレーター
   generator:('a -> 'r) -> 
-  // return value
+  // 戻り値
   'r
 ```
 
-and now we *can* tell the two versions apart easily.
+これで、2 つのバージョンを簡単に区別できるようになりました。
 
 ```fsharp
 // fold
@@ -782,32 +782,32 @@ fWrapped:(WrappingPaperStyle -> 'a -> 'a)
 
 <a id="rules"></a>
 
-## Rules for creating a fold
+## 畳み込みの作成ルール
 
-To finish up this post, let's summarize the rules for creating a fold.
+最後に、畳み込み関数を作成するためのルールをまとめます。
 
-In the first post we saw that creating a catamorphism is a mechanical process that [follows rules](../posts/recursive-types-and-folds.md#rules).
-The same is true for creating a iterative top-down fold. The process is:
+前回の投稿では、カタモーフィズムの作成は[ルールに従った](../posts/recursive-types-and-folds.md#rules)機械的なプロセスであることを説明しました。
+反復的なトップダウン畳み込みの作成も同様です。プロセスは以下の通りです。
 
-* Create a function parameter to handle each case in the structure.
-* Add an additional parameter as an accumulator.
-* For non-recursive cases, pass the function parameter the accumulator plus all the data associated with that case.
-* For recursive cases, perform two steps:
-  * First, pass the handler the accumulator plus all the data associated with that case (except the inner recursive data). The result is a new accumulator value.
-  * Then, call the fold recursively on the nested value using the new accumulator value.
+* 構造の各ケースを処理する関数パラメータを作成します。
+* アキュムレーターのパラメータを追加します。
+* 非再帰的なケースでは、関数パラメータにアキュムレーターと、そのケースに関連するすべてのデータを渡します。
+* 再帰的なケースでは、2 つのステップを実行します。
+  * まず、ハンドラーにアキュムレーターと、そのケースに関連するすべてのデータ (内部の再帰的データを除く) を渡します。結果は新しいアキュムレーター値になります。
+  * 次に、新しいアキュムレーター値を使って、ネストされた値に対して fold 関数を再帰的に呼び出します。
 
-Note that each handler only "sees" (a) the data for that case, and (b) the accumulator passed to it from the outer level.
-It does not have access to the results from the inner levels.
-  
+各ハンドラーは、(a) そのケースのデータと、(b) 外部レベルから渡されたアキュムレーターのみを見ることができます。
+内部レベルからの結果は見ることができません。
+
 <hr>
-    
-## Summary 
 
-We've seen in this post how to define a tail-recursive implementation of a catamorphism, called "fold" and the reverse version "foldback".
+## まとめ
 
-In the [next post](../posts/recursive-types-and-folds-2b.md) we'll step back a bit and spend some time understanding what "fold" really means,
-and at some guidelines for choosing between `fold`, `foldback` and `cata`.
+この記事では、「fold（畳み込み）」と呼ばれる、末尾再帰によるカタモーフィズムの実装方法と、その逆の「foldback（反対からの畳み込み）」について見てきました。
 
-We'll then see if we can apply these rules to another domain.
+[次の記事](../posts/recursive-types-and-folds-2b.md)では、少し立ち戻って「畳み込み」の本当の意味を理解し、
+`fold` 、 `foldback` 、 `cata` のどれを選ぶべきかという指針について少し時間をかけて考えてみましょう。
 
-*The source code for this post is available at [this gist](https://gist.github.com/swlaschin/df4427d0043d7146e592).*
+そして、これらのルールを別のドメインに適用できるかどうかを検討します。
+
+*この記事のソースコードは、[このgist](https://gist.github.com/swlaschin/df4427d0043d7146e592)です。*

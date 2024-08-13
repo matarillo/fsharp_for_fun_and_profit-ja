@@ -28,12 +28,12 @@ categories: [Folds, Patterns]
   * [カタモーフィズムの例: 製品ドメイン](../posts/recursive-types-and-folds-1b.md#product)
 * **パート3: 畳み込みの紹介**
   * [カタモーフィズム実装の欠陥](../posts/recursive-types-and-folds-2.md#flaw)
-  * [`fold` 関数の紹介](../posts/recursive-types-and-folds-2.md#fold)
-  * [`fold` 関数の問題点](../posts/recursive-types-and-folds-2.md#problems)
-  * [関数としての蓄積器の使用](../posts/recursive-types-and-folds-2.md#functions)
-  * [`foldback` 関数の紹介](../posts/recursive-types-and-folds-2.md#foldback)
-  * [畳み込み作成のルール](../posts/recursive-types-and-folds-2.md#rules)
-* **パート4: 畳み込みの理解**
+  * [`fold` の導入](../posts/recursive-types-and-folds-2.md#fold)
+  * [foldの問題点](../posts/recursive-types-and-folds-2.md#problems)
+  * [関数をアキュムレーターとして使う](../posts/recursive-types-and-folds-2.md#functions)
+  * [`foldback` の導入](../posts/recursive-types-and-folds-2.md#foldback)
+  * [畳み込みの作成ルール](../posts/recursive-types-and-folds-2.md#rules)
+* **パート4: 畳み込みを理解する**
   * [反復 vs. 再帰](../posts/recursive-types-and-folds-2b.md#iteration)
   * [畳み込みの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-2b.md#file-system)
   * [「fold」に関するよくある質問](../posts/recursive-types-and-folds-2b.md#questions)
