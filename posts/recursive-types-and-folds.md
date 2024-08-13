@@ -49,7 +49,7 @@ categories: [Folds, Patterns]
   * [例: ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.md#database)
   * [例: 木構造の JSON シリアライズ](../posts/recursive-types-and-folds-3b.md#tojson)
   * [例: JSON からの木構造のデシリアライズ](../posts/recursive-types-and-folds-3b.md#fromjson)
-  * [例: エラー処理付きの JSON からの木構造のデシリアライズ]
+  * [例: エラー処理付きの JSON からの木構造のデシリアライズ](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
 
   
 <a id="basic-recursive-type"></a>
