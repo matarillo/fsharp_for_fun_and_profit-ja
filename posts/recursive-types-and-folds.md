@@ -35,11 +35,11 @@ categories: [Folds, Patterns]
   * [畳み込みの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-2b.md#file-system)
   * [「畳み込み」に関するよくある質問](../posts/recursive-types-and-folds-2b.md#questions)
 * **パート5: ジェネリック再帰型**
-  * [ジェネリック再帰型: リンクドリスト](../posts/recursive-types-and-folds-3.md#linkedlist)
+  * [ジェネリック再帰型 LinkedList](../posts/recursive-types-and-folds-3.md#linkedlist)
   * [ギフトドメインをジェネリックにする](../posts/recursive-types-and-folds-3.md#revisiting-gift)
   * [ジェネリックなコンテナ型の定義](../posts/recursive-types-and-folds-3.md#container)
-  * [ギフトドメイン実装の別の方法](../posts/recursive-types-and-folds-3.md#another-gift)
-  * [抽象型か具体型か? 3つの設計の比較](../posts/recursive-types-and-folds-3.md#compare)
+  * [ギフトドメインを実装する3つ目の方法](../posts/recursive-types-and-folds-3.md#another-gift)
+  * [抽象か具象か？3通りの設計の比較](../posts/recursive-types-and-folds-3.md#compare)
 * **パート6: 実世界の木構造**
   * [ジェネリックな木構造型の定義](../posts/recursive-types-and-folds-3b.md#tree)
   * [実世界の木構造型](../posts/recursive-types-and-folds-3b.md#reuse)

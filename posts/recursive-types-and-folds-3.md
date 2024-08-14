@@ -1,78 +1,78 @@
 ---
 layout: post
-title: "Generic recursive types"
-description: "Implementing a domain in three ways"
+title: "ジェネリック再帰型"
+description: "ドメインを3つの方法で実装する"
 seriesId: "再帰型と畳み込み"
 seriesOrder: 5
 categories: [Folds, Patterns]
 ---
 
 
-This post is the fifth in a series.
+これはシリーズ記事の第5回目です。
 
-In the [previous post](../posts/recursive-types-and-folds-2b.md), we spent some time understanding folds for specific domain types.
+[前回](../posts/recursive-types-and-folds-2b.md)では、特定のドメイン型に対する畳み込みを理解するために時間を費やしました。
 
-In this post, we'll broaden our horizons and look at how to use generic recursive types.
+今回は視野を広げ、ジェネリック再帰型の使い方を見ていきます。
 
-## Series contents
+## シリーズの内容
 
-Here's the contents of this series:
+シリーズの内容は次の通りです。
 
-* **Part 1: Introduction to recursive types and catamorphisms**
-  * [A simple recursive type](../posts/recursive-types-and-folds.md#basic-recursive-type)
-  * [Parameterize all the things](../posts/recursive-types-and-folds.md#parameterize)
-  * [Introducing catamorphisms](../posts/recursive-types-and-folds.md#catamorphisms)
-  * [Benefits of catamorphisms](../posts/recursive-types-and-folds.md#benefits)
-  * [Rules for creating a catamorphism](../posts/recursive-types-and-folds.md#rules)
-* **Part 2: Catamorphism examples**  
-  * [Catamorphism example: File system domain](../posts/recursive-types-and-folds-1b.md#file-system)
-  * [Catamorphism example: Product domain](../posts/recursive-types-and-folds-1b.md#product)
-* **Part 3: Introducing folds**    
-  * [A flaw in our catamorphism implementation](../posts/recursive-types-and-folds-2.md#flaw)
-  * [Introducing `fold`](../posts/recursive-types-and-folds-2.md#fold)
-  * [Problems with fold](../posts/recursive-types-and-folds-2.md#problems)
-  * [Using functions as accumulators](../posts/recursive-types-and-folds-2.md#functions)
-  * [Introducing `foldback`](../posts/recursive-types-and-folds-2.md#foldback)
-  * [Rules for creating a fold](../posts/recursive-types-and-folds-2.md#rules)
-* **Part 4: Understanding folds**      
-  * [Iteration vs. recursion](../posts/recursive-types-and-folds-2b.md#iteration)
-  * [Fold example: File system domain](../posts/recursive-types-and-folds-2b.md#file-system)  
-  * [Common questions about "fold"](../posts/recursive-types-and-folds-2b.md#questions)
-* **Part 5: Generic recursive types**  
-  * [LinkedList: A generic recursive type](../posts/recursive-types-and-folds-3.md#linkedlist)
-  * [Making the Gift domain generic](../posts/recursive-types-and-folds-3.md#revisiting-gift)
-  * [Defining a generic Container type](../posts/recursive-types-and-folds-3.md#container)
-  * [A third way to implement the gift domain](../posts/recursive-types-and-folds-3.md#another-gift)
-  * [Abstract or concrete? Comparing the three designs](../posts/recursive-types-and-folds-3.md#compare)
-* **Part 6: Trees in the real world**  
-  * [Defining a generic Tree type](../posts/recursive-types-and-folds-3b.md#tree)
-  * [The Tree type in the real world](../posts/recursive-types-and-folds-3b.md#reuse)
-  * [Mapping the Tree type](../posts/recursive-types-and-folds-3b.md#map)
-  * [Example: Creating a directory listing](../posts/recursive-types-and-folds-3b.md#listing)
-  * [Example: A parallel grep](../posts/recursive-types-and-folds-3b.md#grep)
-  * [Example: Storing the file system in a database](../posts/recursive-types-and-folds-3b.md#database)
-  * [Example: Serializing a Tree to JSON](../posts/recursive-types-and-folds-3b.md#tojson)
-  * [Example: Deserializing a Tree from JSON](../posts/recursive-types-and-folds-3b.md#fromjson)
-  * [Example: Deserializing a Tree from JSON - with error handling](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
+* **パート1: 再帰型とカタモーフィズム入門**
+  * [シンプルな再帰型](../posts/recursive-types-and-folds.md#basic-recursive-type)
+  * [すべてをパラメーター化](../posts/recursive-types-and-folds.md#parameterize)
+  * [カタモーフィズムの紹介](../posts/recursive-types-and-folds.md#catamorphisms)
+  * [カタモーフィズムの利点](../posts/recursive-types-and-folds.md#benefits)
+  * [カタモーフィズム作成のルール](../posts/recursive-types-and-folds.md#rules)
+* **パート2: カタモーフィズムの例**
+  * [カタモーフィズムの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-1b.md#file-system)
+  * [カタモーフィズムの例: 製品ドメイン](../posts/recursive-types-and-folds-1b.md#product)
+* **パート3: 畳み込みの紹介**
+  * [カタモーフィズム実装の欠陥](../posts/recursive-types-and-folds-2.md#flaw)
+  * [`fold` の導入](../posts/recursive-types-and-folds-2.md#fold)
+  * [foldの問題点](../posts/recursive-types-and-folds-2.md#problems)
+  * [関数をアキュムレーターとして使う](../posts/recursive-types-and-folds-2.md#functions)
+  * [`foldback` の導入](../posts/recursive-types-and-folds-2.md#foldback)
+  * [畳み込みの作成ルール](../posts/recursive-types-and-folds-2.md#rules)
+* **パート4: 畳み込みを理解する**
+  * [反復 vs. 再帰](../posts/recursive-types-and-folds-2b.md#iteration)
+  * [畳み込みの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-2b.md#file-system)
+  * [「畳み込み」に関するよくある質問](../posts/recursive-types-and-folds-2b.md#questions)
+* **パート5: ジェネリック再帰型**
+  * [ジェネリック再帰型 LinkedList](../posts/recursive-types-and-folds-3.md#linkedlist)
+  * [ギフトドメインをジェネリックにする](../posts/recursive-types-and-folds-3.md#revisiting-gift)
+  * [ジェネリックなコンテナ型の定義](../posts/recursive-types-and-folds-3.md#container)
+  * [ギフトドメインを実装する3つ目の方法](../posts/recursive-types-and-folds-3.md#another-gift)
+  * [抽象か具象か？3通りの設計の比較](../posts/recursive-types-and-folds-3.md#compare)
+* **パート6: 実世界の木構造**
+  * [ジェネリックな木構造型の定義](../posts/recursive-types-and-folds-3b.md#tree)
+  * [実世界の木構造型](../posts/recursive-types-and-folds-3b.md#reuse)
+  * [木構造型のマッピング](../posts/recursive-types-and-folds-3b.md#map)
+  * [例: ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.md#listing)
+  * [例: 並列 grep](../posts/recursive-types-and-folds-3b.md#grep)
+  * [例: ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.md#database)
+  * [例: 木構造の JSON シリアライズ](../posts/recursive-types-and-folds-3b.md#tojson)
+  * [例: JSON からの木構造のデシリアライズ](../posts/recursive-types-and-folds-3b.md#fromjson)
+  * [例: エラー処理付きの JSON からの木構造のデシリアライズ](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
 
 <a id="linkedlist"></a>
 <hr>
 
-## LinkedList: A generic recursive type
+## ジェネリック再帰型 LinkedList
 
-Here's a question: if you only have algebraic types, and you can only combine them as products ([tuples](../posts/tuples.md), [records](../posts/records.md))
-or sums ([discriminated unions](../posts/discriminated-unions.md)), then how can you make a list type just by using these operations?
+ここで質問です。代数型しかなく、それらを積（[タプル](../posts/tuples.md)、[レコード](../posts/records.md)）
+または和（[判別共用体](../posts/discriminated-unions.md)）としてしか組み合わせられない場合、これらの操作だけでリスト型を作成するにはどうすればよいでしょうか？
 
-The answer is, of course, recursion!
+答えは、もちろん再帰です！
 
-Let's start with the most basic recursive type: the list.
+最も基本的な再帰型であるリストから始めましょう。
 
-I'm going to call my version `LinkedList`, but it is basically the same as the `list` type in F#.
+今回定義する型を `LinkedList` と呼ぶことにしますが、基本的に F# の `list` 型と同じものです。
 
-So, how do you define a list in a recursive way? 
+では、リストを再帰的に定義するにはどうすればよいでしょうか？
 
-Well, it's either empty, or it consists of an element plus another list.
-In other words we can define it as a choice type ("discriminated union") like this:
+リストは空か、要素と別のリストで構成されます。
+言い換えれば、次のような選択型（判別共用体）として定義できます。
 
 ```fsharp
 type LinkedList<'a> = 
@@ -80,26 +80,26 @@ type LinkedList<'a> =
     | Cons of head:'a * tail:LinkedList<'a>
 ```
 
-The `Empty` case represents an empty list. The `Cons` case has a tuple: the head element, and the tail, which is another list.
+`Empty` ケースは空のリストを表します。`Cons` ケースはタプルを持ちます。 
+タプルは先頭要素と、別のリストである末尾で構成されます。
 
-We can then define a particular `LinkedList` value like this:
+そして、個別の `LinkedList` 値は次のように定義できます。
 
 ```fsharp
 let linkedList = Cons (1, Cons (2, Cons(3, Empty)))  
 ```
 
-Using the native F# list type, the equivalent definition would be:
+ネイティブな F# リスト型を使った同等の定義は次のようになります。
 
 ```fsharp
 let linkedList = 1 :: 2 :: 3 :: []
 ```
 
-which is just `[1; 2; 3]`
+これは単に `[1; 2; 3]` です。
 
-### `cata` for LinkedList
+### LinkedList用の `cata`
 
-Following the rules in the [first post in this series](../posts/recursive-types-and-folds.md#rules),
-we can mechanically create a `cata` function by replacing `Empty` and `Cons` with `fEmpty` and `fCons`:
+[このシリーズの最初の記事](../posts/recursive-types-and-folds.md#rules) のルールに従って、`Empty` と `Cons` をそれぞれ `fEmpty` と `fCons` に置き換えることで、`cata` 関数を機械的に作成できます。
 
 ```fsharp
 module LinkedList = 
@@ -113,9 +113,9 @@ module LinkedList =
             fCons element (recurse list)
 ```
 
-*Note: We will be putting all the functions associated with `LinkedList<'a>` in a module called `LinkedList`. One nice thing about using generic types is that the type name does not clash with a similar module name!*
+*注: `LinkedList<'a>` に関連するすべての関数を `LinkedList` というモジュールにまとめます。 ジェネリック型を使用する利点の一つとして、型名が類似するモジュール名と競合しないことが挙げられます！*
 
-As always, the signatures of the case handling functions are parallel to the signatures of the type constructors, with `LinkedList` replaced by `'r`.
+いつものように、ケース処理関数のシグネチャは、型コンストラクタのシグネチャと平行しており、`LinkedList` が `'r` に置き換わっています。
 
 ```fsharp
 val cata : 
@@ -125,9 +125,9 @@ val cata :
     -> 'r
 ```
 
-### `fold` for LinkedList
+### LinkedList用の `fold`
 
-We can also create a top-down iterative `fold` function using the rules in the [earlier post](../posts/recursive-types-and-folds-2.md#rules).
+[以前の記事](../posts/recursive-types-and-folds-2.md#rules)のルールを使って、トップダウンの反復的な `fold` 関数も作成できます。
 
 ```fsharp
 module LinkedList = 
@@ -144,8 +144,8 @@ module LinkedList =
             recurse newAcc list
 ```
 
-This `foldWithEmpty` function is not quite the same as the standard `List.fold` function, because it has an extra function parameter for the empty case (`fEmpty`).
-However, if we eliminate that parameter and just return the accumulator we get this variant:
+この `foldWithEmpty` 関数は標準の `List.fold` 関数とは少し異なり、空のリストに対する処理（`fEmpty`）をするための追加のパラメータを持っています。
+しかし、そのパラメータを削除してアキュムレータを返すだけにすれば、次のようなバリエーションになります。
 
 ```fsharp
 module LinkedList = 
@@ -160,8 +160,8 @@ module LinkedList =
             recurse newAcc list
 ```
 
-If we compare the signature with the [List.fold documentation](https://msdn.microsoft.com/en-us/library/ee353894.aspx) we can see that they are equivalent,
-with `'State` replaced by `'r` and `'T list` replaced by `LinkedList<'a>`:
+シグネチャを [List.fold ドキュメント](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-listmodule.html#fold)と比べてみれば、等価であることがわかります。
+`'State` は `'r` に、`'T list` は `LinkedList<'a>` に置き換えられています。
 
 ```fsharp
 LinkedList.fold : ('r     -> 'a -> 'r    ) -> 'r      -> LinkedList<'a> -> 'r
@@ -169,7 +169,7 @@ List.fold       : ('State -> 'T -> 'State) -> 'State -> 'T list         -> 'Stat
 ```
 
 
-Let's test that `fold` works by doing a small sum:
+`fold` 関数の動作を確認するために、小さなリストで合計を計算してみましょう。
 
 ```fsharp
 let linkedList = Cons (1, Cons (2, Cons(3, Empty)))  
@@ -177,9 +177,9 @@ linkedList |> LinkedList.fold (+) 0
 // Result => 6
 ```
 
-### `foldBack` for LinkedList
+### LinkedList用の `foldback`
 
-Finally we can create a `foldBack` function, using the "function accumulator" approach described in the previous post:
+最後に、以前の記事で説明した「関数アキュムレーター」のアプローチを使って `foldBack` 関数を作成できます。
 
 ```fsharp
 module LinkedList = 
@@ -199,21 +199,21 @@ module LinkedList =
         foldWithEmpty fCons' fEmpty' initialGenerator  list 
 ```
 
-Again, if we compare the signature with the [List.foldBack documentation](https://msdn.microsoft.com/en-us/library/ee353846.aspx), they are also equivalent,
-with `'State` replaced by `'r` and `'T list` replaced by `LinkedList<'a>`:
+ここでも、シグネチャを [List.foldBack ドキュメント](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-listmodule.html#foldBack)と比べてみれば、等価であることがわかります。
+`'State` は `'r` に、`'T list` は `LinkedList<'a>` に置き換えられています。
 
 ```fsharp
 LinkedList.foldBack : ('a -> 'r     -> 'r    ) -> LinkedList<'a> -> 'r     -> 'r
 List.foldBack       : ('T -> 'State -> 'State) -> 'T list        -> 'State -> 'State
 ```
 
-### Using `foldBack` to convert between list types
+### `foldBack` を使ったリスト型の変換
 
-In the [first post](../posts/recursive-types-and-folds.md#benefits) we noted that catamorphisms could be used for converting between types of similar structure.
+[最初の記事](../posts/recursive-types-and-folds.md#benefits)で、カタモーフィズムは構造が似た型同士の変換に使えることを説明しました。
 
-Let's demonstrate that now by creating some functions that convert from `LinkedList` to the native `list` type and back again.
+それでは、 `LinkedList` からネイティブな `list` 型への変換と、その逆の変換を行う関数を作成して、それを示してみましょう。
 
-To convert a `LinkedList` to a native `list` all we need to do is replace `Cons` with `::` and `Empty` with `[]`:
+`LinkedList` からネイティブな `list` へ変換するには、 `Cons` を `::` に、`Empty` を `[]` に置き換えるだけです。
 
 ```fsharp
 module LinkedList = 
@@ -224,7 +224,7 @@ module LinkedList =
         foldBack fCons linkedList initialState 
 ```
 
-To convert the other way, we need to replace `::` with `Cons` and `[]` with `Empty`:
+逆の変換を行うには、`::` を `Cons` に、`[]` を `Empty` に置き換えればよいです。
 
 ```fsharp
 module LinkedList = 
@@ -235,7 +235,7 @@ module LinkedList =
         List.foldBack fCons list initialState 
 ```
 
-Simple!  Let's test `toList`:
+簡単ですね！ `toList` をテストしてみましょう。
 
 ```fsharp
 let linkedList = Cons (1, Cons (2, Cons(3, Empty)))  
@@ -243,7 +243,7 @@ linkedList |> LinkedList.toList
 // Result => [1; 2; 3]
 ```
 
-and `ofList`:
+そして `ofList` もテストしてみましょう。
 
 ```fsharp
 let list = [1;2;3]
@@ -251,29 +251,29 @@ list |> LinkedList.ofList
 // Result => Cons (1,Cons (2,Cons (3,Empty)))
 ```
 
-Both work as expected.
+どちらも期待通りに動作します。
 
-### Using `foldBack` to implement other functions
+### `foldBack`を使った他の関数の実装
 
-I said earlier that a catamorphism function (for linear lists, `foldBack`) is the most basic function available for a recursive type, and in fact is the *only* function you need!
+以前、カタモーフィズム関数（線形リストの場合は `foldBack` ）が再帰型で使用できる最も基本的な関数であり、実際には唯一必要な関数であると述べました。
 
-Let's see for ourselves by implementing some other common functions using `foldBack`.
+実際に、いくつかの一般的な関数を`foldBack`を使って実装してみましょう。
 
-Here's `map` defined in terms of `foldBack`:
+以下は`foldBack`を使った`map`の定義です。
 
 ```fsharp
 module LinkedList = 
 
-    /// map a function "f" over all elements
+    /// 関数"f"をすべての要素にマップする
     let map f list = 
-        // helper function    
+        // ヘルパー関数    
         let folder head tail =
             Cons(f head,tail)
             
         foldBack folder list Empty
 ```
 
-And here's a test:
+テストしてみましょう。
 
 ```fsharp
 let linkedList = Cons (1, Cons (2, Cons(3, Empty)))  
@@ -282,14 +282,14 @@ linkedList |> LinkedList.map (fun i -> i+10)
 // Result => Cons (11,Cons (12,Cons (13,Empty)))
 ```
 
-Here's `filter` defined in terms of `foldBack`:
+以下は`foldBack`を使った`filter`の定義です。
 
 ```fsharp
 module LinkedList = 
 
-    /// return a new list of elements for which "pred" is true
+    /// "pred"が真である要素の新しいリストを返す
     let filter pred list = 
-        // helper function
+        // ヘルパー関数
         let folder head tail =
             if pred head then 
                 Cons(head,tail)
@@ -299,7 +299,7 @@ module LinkedList =
         foldBack folder list Empty
 ```
 
-And here's a test:
+テストしてみましょう。
 
 ```fsharp
 let isOdd n = (n%2=1)
@@ -309,19 +309,19 @@ linkedList |> LinkedList.filter isOdd
 // Result => Cons (1,Cons (3,Empty))
 ```
 
-Finally, here's `rev` defined in terms of `fold`:
+最後に、`fold`を使った`rev`の定義です。
 
 ```fsharp
-/// reverse the elements of the list
+/// リストの要素を逆順にする
 let rev list = 
-    // helper function
+    // ヘルパー関数
     let folder tail head =
         Cons(head,tail)
 
     fold folder Empty list 
 ```
 
-And here's a test:
+テストしてみましょう。
 
 ```fsharp
 let linkedList = Cons (1, Cons (2, Cons(3, Empty)))  
@@ -329,37 +329,37 @@ linkedList |> LinkedList.rev
 // Result => Cons (3,Cons (2,Cons (1,Empty)))
 ```
 
-So, I hope you're convinced!
+これで納得していただけたでしょうか？
 
-### Avoiding generator functions
+### ジェネレータ関数の回避
 
-I mentioned earlier that there was an alternative and (sometimes) more efficient way to implement `foldBack` without using generators or continuations.
+以前、ジェネレータや継続を使わずに`foldBack`を実装する（場合によってはより効率的な）方法があると述べました。
 
-As we have seen, `foldBack` is reverse iteration, which means that it is the same as `fold` applied to a reversed list!
+見てきたように、`foldBack`は逆方向の反復であり、つまり逆順のリストに`fold`を適用するのと同じです！
 
-So we could implement it like this:
+そのため、以下のように実装できます。
 
 ```fsharp
 let foldBack_ViaRev fCons list acc :'r=
     let fCons' acc element = 
-        // just swap the params!
+        // パラメータを入れ替えるだけ！
         fCons element acc 
     list
     |> rev
     |> fold fCons' acc 
 ```
 
-It involves making an extra copy of the list, but on the other hand there is no longer a large set of pending continuations. It might
-be worth comparing the profile of the two versions in your environment if performance is an issue.
+これはリストのコピーを余計に作成しますが、その代わりに保留中の継続が大量になることを防げます。
+パフォーマンスが問題になる場合は、実際の環境で、2つのバージョンのプロファイルを比較する価値があるかもしれません。
 
 
 <a id="revisiting-gift"></a>
 
-## Making the Gift domain generic
+## ギフトドメインをジェネリックにする
 
-In the rest of this post, we'll look at the `Gift` type and see if we can make it more generic.
+この記事の残りの部分では、`Gift` 型を見直し、さらに汎用的にできるかどうかを検討します。
 
-As a reminder, here is the original design:
+おさらいとして、元の設計は次のとおりです。
 
 ```fsharp
 type Gift =
@@ -370,41 +370,41 @@ type Gift =
     | WithACard of Gift * message:string
 ```
 
-Three of the cases are recursive and two are non-recursive.  
+3つのケースは再帰的で、2つは再帰的ではありません。
 
-Now, the focus of this particular design was on modelling the domain, which is why there are so many separate cases.
+さて、この設計の焦点はドメインのモデリングにあったため、個別のケースが多く存在します。
 
-But if we want to focus on *reusability* instead of domain modelling, then we should simplify the design to the essentials, and all these special cases now become a hindrance.
+しかし、ドメインモデリングではなく *再利用性* に焦点を当てたい場合、設計を本質的なものに単純化するべきです。個別なケースはすべて妨げになります。
 
-To make this ready for reuse, then, let's collapse all the non-recursive cases into one case, say `GiftContents`,
-and all the recursive cases into another case, say `GiftDecoration`, like this:  
+再利用できるようにするために、すべての非再帰的なケースを1つのケース、たとえば `GiftContents` にまとめ、
+すべての再帰的なケースを別のケース、たとえば `GiftDecoration` にまとめましょう。
 
 ```fsharp
-// unified data for non-recursive cases
+// 非再帰的なケースのための統一データ
 type GiftContents = 
     | Book of Book
     | Chocolate of Chocolate 
 
-// unified data for recursive cases
+// 再帰的なケースのための統一データ
 type GiftDecoration = 
     | Wrapped of WrappingPaperStyle
     | Boxed 
     | WithACard of string
 
 type Gift =
-    // non-recursive case
+    // 非再帰的なケース
     | Contents of GiftContents
-    // recursive case
+    // 再帰的なケース
     | Decoration of Gift * GiftDecoration
 ```
 
-The main `Gift` type has only two cases now: the non-recursive one and the recursive one.
+メインの `Gift` 型には、非再帰的なものと再帰的なものの2つのケースしか残りません。
 
 <a id="container"></a>
 
-## Defining a generic Container type 
+## ジェネリックなコンテナ型の定義
 
-Now that the type is simplified, we can "genericize" it by allowing *any* kind of contents *and* any kind of decoration.
+型が単純化されたので、*任意の*コンテンツと*任意の*装飾を許可することで「ジェネリック化」できます。
 
 ```fsharp
 type Container<'ContentData,'DecorationData> =
@@ -412,7 +412,7 @@ type Container<'ContentData,'DecorationData> =
     | Decoration of 'DecorationData * Container<'ContentData,'DecorationData> 
 ```
 
-And as before, we can mechanically create a `cata` and `fold` and `foldBack` for it, using the standard process:
+以前と同様に、標準的なプロセスを使用して、機械的に `cata`、`fold`、`foldBack` を作成できます。
 
 ```fsharp
 module Container = 
@@ -427,12 +427,12 @@ module Container =
             
     (*
     val cata :
-        // function parameters
+        // 関数パラメータ
         fContents:('ContentData -> 'r) ->
         fDecoration:('DecorationData -> 'r -> 'r) ->
-        // input
+        // 入力
         container:Container<'ContentData,'DecorationData> -> 
-        // return value
+        // 戻り値
         'r
     *)
             
@@ -447,14 +447,14 @@ module Container =
             
     (*
     val fold :
-        // function parameters
+        // 関数パラメータ
         fContents:('a -> 'ContentData -> 'r) ->
         fDecoration:('a -> 'DecorationData -> 'a) ->
-        // accumulator
+        // アキュムレータ
         acc:'a -> 
-        // input
+        // 入力
         container:Container<'ContentData,'DecorationData> -> 
-        // return value
+        // 戻り値
         'r
     *)
             
@@ -470,26 +470,26 @@ module Container =
             
     (*
     val foldBack :
-        // function parameters
+        // 関数パラメータ
         fContents:('ContentData -> 'r) ->
         fDecoration:('DecorationData -> 'r -> 'r) ->
-        // input
+        // 入力
         container:Container<'ContentData,'DecorationData> -> 
-        // return value
+        // 戻り値
         'r
     *)
 ```
 
 
-### Converting the gift domain to use the Container type 
+### ギフトドメインをコンテナ型に変換する
 
-Let's convert the gift type to this generic Container type:
+ギフト型をこのジェネリックコンテナ型に変換しましょう。
 
 ```fsharp
 type Gift = Container<GiftContents,GiftDecoration>
 ```
 
-Now we need some helper methods to construct values while hiding the "real" cases of the generic type:
+次に、ジェネリック型の「実際の」ケースを隠しながら値を構築するためのヘルパーメソッドが必要です。
 
 ```fsharp
 let fromBook book = 
@@ -511,7 +511,7 @@ let withCard message innerGift =
     Decoration (container, innerGift)
 ```
 
-Finally we can create some test values:
+これで、テスト値を作成できます。
 
 ```fsharp
 let wolfHall = {title="Wolf Hall"; price=20m}
@@ -531,14 +531,14 @@ let christmasPresent =
 ```
 
 
-### The `totalCost` function using the Container type
+### コンテナ型を使った`totalCost`関数
 
-The "total cost" function can be written using `fold`, since it doesn't need any inner data.
+「合計金額」関数は、内部データが必要ないため、`fold`を使って書くことができます。
 
-Unlike the earlier implementations, we only have two function parameters, `fContents` and `fDecoration`, so each of these
-will need some pattern matching to get at the "real" data.
+これまでの実装とは異なり、関数のパラメータは `fContents` と `fDecoration` の2つしかないので、
+それぞれに対してパターンマッチングを行い、実際のデータを取り出す必要があります。
 
-Here's the code:
+コードは以下の通りです。
 
 ```fsharp
 let totalCost gift =  
@@ -559,14 +559,14 @@ let totalCost gift =
         | WithACard message ->
             costSoFar + 2.0m
 
-    // initial accumulator
+    // 初期アキュムレータ
     let initialAcc = 0m
 
-    // call the fold
+    // foldを呼び出す
     Container.fold fContents fDecoration initialAcc gift 
 ```
 
-And the code works as expected:
+期待通りに動作します。
 
 ```fsharp
 birthdayPresent |> totalCost 
@@ -576,10 +576,10 @@ christmasPresent |> totalCost
 // 6.5m
 ```
 
-### The `description` function using the Container type
+### コンテナ型を使った`description`関数
 
-The "description" function needs to be written using `foldBack`, since it *does* need the inner data. As with the code above,
-we need some pattern matching to get at the "real" data for each case.
+「説明」関数は、内部データが必要なので、`foldBack`を使って書く必要があります。
+上記のコードと同様に、各ケースで実際のデータを取得するためにパターンマッチングが必要です。
 
 ```fsharp
 let description gift =
@@ -600,11 +600,11 @@ let description gift =
         | WithACard message ->
             sprintf "%s with a card saying '%s'" innerText message 
 
-    // main call
+    // メイン呼び出し
     Container.foldBack fContents fDecoration gift  
 ```
 
-And again the code works as we want:
+やはり、コードは期待通りに動作します。
 
 ```fsharp
 birthdayPresent |> description
@@ -616,27 +616,27 @@ christmasPresent |> description
 
 <a id="another-gift"></a>
 
-## A third way to implement the gift domain 
+## ギフトドメインを実装する3つ目の方法
 
-That all looks quite nice, doesn't it?
+かなり良さそうに見えますね。
 
-But I have to confess that I have been holding something back.
+しかし、実は隠していたことがあります。
 
-None of that code above was strictly necessary, because it turns out that there is yet *another* way to model a `Gift`,
-without creating any new generic types at all!
+実は、上記のコードは必要ありませんでした。
+ジェネリック型を新しく作成することなく、`Gift`をモデル化する方法が*もう一つ*あるのです！
 
-The `Gift` type is basically a linear sequence of decorations, with some content as the final step. We can just model this as a pair -- a `Content` and a list of `Decoration`.
-Or to make it a little friendlier, a record with two fields: one for the content and one for the decorations.
+`Gift`型は基本的に、装飾の線形シーケンスで、最後にコンテンツが来るものです。 これを単にペア（ `Content` と `Decoration` のリスト）としてモデル化できます。
+もしくは、もう少し扱いやすくするために、コンテンツ用のフィールドと装飾用のフィールドを持つレコードとしてモデル化することもできます。
 
 ```fsharp
 type Gift = {contents: GiftContents; decorations: GiftDecoration list}
 ```
 
-That's it! No other new types needed!
+以上です！他の新しい型は必要ありません！
 
-### Building values using the record type
+### レコード型を使った値の構築
 
-As before, let's create some helpers to construct values using this type:
+前と同じように、この型を使って値を構築するヘルパー関数を作成しましょう。
 
 ```fsharp
 let fromBook book = 
@@ -658,7 +658,7 @@ let withCard message innerGift =
     { innerGift with decorations = decoration::innerGift.decorations }
 ```
 
-With these helper functions, the way the values are constructed is *identical* to the previous version. This is why it is good to hide your raw constructors, folks!
+これらのヘルパー関数を使うと、値の構築方法は前のバージョンと*まったく同じ*です。 本来のコンストラクタを隠しておくほうがいいのは、こういう理由です！
 
 ```fsharp
 let wolfHall = {title="Wolf Hall"; price=20m}
@@ -677,9 +677,9 @@ let christmasPresent =
     |> wrapInPaper HappyHolidays
 ```
 
-### The `totalCost` function using the record type
+### レコード型を使った `totalCost` 関数
 
-The `totalCost` function is even easier to write now. 
+`totalCost` 関数は、さらに簡単に書けるようになりました。
 
 ```fsharp
 let totalCost gift =  
@@ -703,13 +703,13 @@ let totalCost gift =
     let decorationCost = 
         gift.decorations |> List.fold decorationFolder 0m
 
-    // total cost
+    // 合計コスト
     contentCost + decorationCost 
 ```
 
-### The `description` function using the record type
+### レコード型を使った `description` 関数
 
-Similarly, the `description` function is also easy to write.
+同様に、 `description` 関数も簡単に書けます。
 
 ```fsharp
 let description gift =
@@ -735,13 +735,13 @@ let description gift =
 
 <a id="compare"></a>
 
-## Abstract or concrete? Comparing the three designs 
+### 抽象か具象か？3通りの設計の比較
 
-If you are confused by this plethora of designs, I don't blame you!
+いきなり多くの選択肢が出てきて困惑しているかもしれませんが、当然のことです！
 
-But as it happens, the three different definitions are actually interchangable:
+しかし、この 3 つの定義は相互に変換可能です。
 
-**The original version**
+**オリジナル版**
 
 ```fsharp
 type Gift =
@@ -752,7 +752,7 @@ type Gift =
     | WithACard of Gift * message:string
 ```
 
-**The generic container version**
+**ジェネリックコンテナ版**
 
 ```fsharp
 type Container<'ContentData,'DecorationData> =
@@ -771,7 +771,7 @@ type GiftDecoration =
 type Gift = Container<GiftContents,GiftDecoration>
 ```
 
-**The record version**
+**レコード版**
 
 ```fsharp
 type GiftContents = 
@@ -786,37 +786,37 @@ type GiftDecoration =
 type Gift = {contents: GiftContents; decorations: GiftDecoration list}
 ```
 
-If this is not obvious, it might be helpful to read my post on [data type sizes](../posts/type-size-and-design.md). It explains how two types can be "equivalent",
-even though they appear to be completely different at first glance.
+直感的に理解できない場合は、[データ型のサイズ](../posts/type-size-and-design.md) に関する記事を読むとよいでしょう。
+一見まったく異なるように見える型でも、「等価」になりえることを説明しています。
 
-### Picking a design 
+### 設計の選択
 
-So which design is best?  The answer is, as always, "it depends".
+では、どの設計が最適なのでしょうか？ 答えはいつものように「状況次第」です。
 
-For modelling and documenting a domain, I like the first design with the five explicit cases. 
-Being easy for other people to understand is more important to me than introducing abstraction for the sake of reusability.
+ドメインのモデリングとドキュメント化のためには、5 つの明示的なケースを持つ最初の設計が好ましいです。
+他の人が理解しやすいことは、再利用性のために抽象化を導入することよりも重要です。
 
-If I wanted a reusable model that was applicable in many situations, I'd probably choose the second ("Container") design. It seems to me that this type
-does represent a commonly encountered situation, where the contents are one kind of thing and the wrappers are another kind of thing.
-This abstraction is therefore likely to get some use.  
+多くの状況に適用できる、再利用性の高いモデルが欲しい場合は、2 番目の「コンテナ」の設計を選択するでしょう。
+この型は、コンテンツが特定の一種類で、ラッパーが別の一種類であるという、よくある状況を表現しているように思えます。
+したがって、この抽象化は再利用できるはずです。
 
-The final "pair" model is fine, but by separating the two components, we've over-abstracted the design for this scenario. In other situations, this
-design might be a great fit (e.g. the decorator pattern), but not here, in my opinion.
+最後の「ペア」モデルは悪くはありませんが、2 つの要素を分離することで、このシナリオにとっては過剰な抽象化になっています。
+（デコレータパターンのような）他の状況ではこの設計が最適かもしれませんが、この場合はそうではないと思います。
 
-There is one further choice which gives you the best of all worlds.
+さらに、すべての利点を得る選択肢が 1 つあります。
 
-As I noted above, all the designs are logically equivalent, which means there are "lossless" mappings between them.
-In that case, your "public" design can be the domain-oriented one, like the first one, but behind the scenes you can map it to a more efficient and reusable "private" type.
+前述のように、すべての設計は論理的に等価であるため、相互に「損失のない」マッピングがあります。
+その場合、公開する設計は、最初のようなドメイン指向のものにして、内部的にはより効率的で再利用可能な「プライベート」型にマップできます。
 
-Even the F# list implementation itself does this.
-For example, some of the functions in the `List` module, such `foldBack` and `sort`, convert the list into an array, do the operations, and then convert it back to a list again.
+F# のリスト実装自体もこれを採用しています。
+たとえば、`List` モジュール内の一部の関数（`foldBack` や `sort` など）は、リストを配列に変換し、操作を行った後、再びリストに戻します。
 
 <hr>
     
-## Summary 
+## まとめ
 
-In this post we looked at some ways of modelling the `Gift` as a generic type, and the pros and cons of each approach.
+この記事では、`Gift`をジェネリック型としてモデル化するいくつかの方法と、各アプローチの長所と短所を見てきました。
 
-In the [next post](../posts/recursive-types-and-folds-3b.md) we'll look at real-world examples of using a generic recursive type.
+[次の記事](../posts/recursive-types-and-folds-3b.md)では、ジェネリックな再帰型の実用的な例を見ていきます。
 
-*The source code for this post is available at [this gist](https://gist.github.com/swlaschin/c423a0f78b22496a0aff).*
+*この記事のソースコードは[このgist](https://gist.github.com/swlaschin/c423a0f78b22496a0aff)です。*
