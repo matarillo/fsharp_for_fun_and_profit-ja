@@ -36,7 +36,7 @@ categories: [Folds, Patterns]
 * **パート4: 畳み込みを理解する**
   * [反復 vs. 再帰](../posts/recursive-types-and-folds-2b.md#iteration)
   * [畳み込みの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-2b.md#file-system)
-  * [「fold」に関するよくある質問](../posts/recursive-types-and-folds-2b.md#questions)
+  * [「畳み込み」に関するよくある質問](../posts/recursive-types-and-folds-2b.md#questions)
 * **パート5: ジェネリック再帰型**
   * [ジェネリック再帰型: リンクドリスト](../posts/recursive-types-and-folds-3.md#linkedlist)
   * [ギフトドメインをジェネリックにする](../posts/recursive-types-and-folds-3.md#revisiting-gift)
@@ -624,7 +624,7 @@ twoPack |> mostUsedVendor
 しかし、カタモーフィズムの世界は完璧ではありません。 このページにあるカタモーフィズムの実装にはすべて、潜在的に深刻な欠陥があります。
 
 [次回の記事](../posts/recursive-types-and-folds-2.md) では、
-何がうまくいかないのか、どのように修正すればいいのか、そしてその過程で様々な種類の「fold」を見ていきます。
+何がうまくいかないのか、どのように修正すればいいのか、そしてその過程で様々な種類の「畳み込み」を見ていきます。
 
 それでは、また次回お会いしましょう！
 

@@ -10,5 +10,5 @@ seriesIndexId: "再帰型と畳み込み"
 * [カタモーフィズムの例](../posts/recursive-types-and-folds-1b.md)。ルールを他のドメインに適用する。
 * [畳み込みの紹介](../posts/recursive-types-and-folds-2.md)。再帰的データ構造を通じて状態を伝播させる。
 * [畳み込みを理解する](../posts/recursive-types-and-folds-2b.md)。再帰と反復の比較。
-* [汎用再帰型](../posts/recursive-types-and-folds-3.md)。3つの方法でドメインを実装する。
-* [実世界のツリー構造](../posts/recursive-types-and-folds-3b.md)。データベース、JSON、エラー処理を使った例。
+* [ジェネリック再帰型](../posts/recursive-types-and-folds-3.md)。3つの方法でドメインを実装する。
+* [実世界の木構造](../posts/recursive-types-and-folds-3b.md)。データベース、JSON、エラー処理を使った例。
