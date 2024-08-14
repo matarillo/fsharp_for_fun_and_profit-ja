@@ -1,68 +1,68 @@
 ---
 layout: post
-title: "Trees in the real world"
-description: "Examples using databases, JSON and error handling"
+title: "現実世界の木構造"
+description: "データベース、JSONとエラーハンドリングの例"
 seriesId: "再帰型と畳み込み"
 seriesOrder: 6
 categories: [Folds, Patterns]
 ---
 
-This post is the sixth in a series.
+この記事はシリーズの第6弾です。
 
-In the [previous post](../posts/recursive-types-and-folds-3.md), we briefly looked at some generic types.
+[前回の記事](../posts/recursive-types-and-folds-3.md)では、ジェネリック型について簡単に見てきました。
 
-In this post, we'll do some deeper dives into some real-world examples of using trees and folds.
+この記事では、実際の場面で木構造と畳み込みを使う例をいくつか掘り下げていきます。
 
-## Series contents
+## シリーズの内容
 
-Here's the contents of this series:
+シリーズの内容は次の通りです。
 
-* **Part 1: Introduction to recursive types and catamorphisms**
-  * [A simple recursive type](../posts/recursive-types-and-folds.md#basic-recursive-type)
-  * [Parameterize all the things](../posts/recursive-types-and-folds.md#parameterize)
-  * [Introducing catamorphisms](../posts/recursive-types-and-folds.md#catamorphisms)
-  * [Benefits of catamorphisms](../posts/recursive-types-and-folds.md#benefits)
-  * [Rules for creating a catamorphism](../posts/recursive-types-and-folds.md#rules)
-* **Part 2: Catamorphism examples**  
-  * [Catamorphism example: File system domain](../posts/recursive-types-and-folds-1b.md#file-system)
-  * [Catamorphism example: Product domain](../posts/recursive-types-and-folds-1b.md#product)
-* **Part 3: Introducing folds**    
-  * [A flaw in our catamorphism implementation](../posts/recursive-types-and-folds-2.md#flaw)
-  * [Introducing `fold`](../posts/recursive-types-and-folds-2.md#fold)
-  * [Problems with fold](../posts/recursive-types-and-folds-2.md#problems)
-  * [Using functions as accumulators](../posts/recursive-types-and-folds-2.md#functions)
-  * [Introducing `foldback`](../posts/recursive-types-and-folds-2.md#foldback)
-  * [Rules for creating a fold](../posts/recursive-types-and-folds-2.md#rules)
-* **Part 4: Understanding folds**      
-  * [Iteration vs. recursion](../posts/recursive-types-and-folds-2b.md#iteration)
-  * [Fold example: File system domain](../posts/recursive-types-and-folds-2b.md#file-system)  
-  * [Common questions about "fold"](../posts/recursive-types-and-folds-2b.md#questions)
-* **Part 5: Generic recursive types**  
-  * [LinkedList: A generic recursive type](../posts/recursive-types-and-folds-3.md#linkedlist)
-  * [Making the Gift domain generic](../posts/recursive-types-and-folds-3.md#revisiting-gift)
-  * [Defining a generic Container type](../posts/recursive-types-and-folds-3.md#container)
-  * [A third way to implement the gift domain](../posts/recursive-types-and-folds-3.md#another-gift)
-  * [Abstract or concrete? Comparing the three designs](../posts/recursive-types-and-folds-3.md#compare)
-* **Part 6: Trees in the real world**  
-  * [Defining a generic Tree type](../posts/recursive-types-and-folds-3b.md#tree)
-  * [The Tree type in the real world](../posts/recursive-types-and-folds-3b.md#reuse)
-  * [Mapping the Tree type](../posts/recursive-types-and-folds-3b.md#map)
-  * [Example: Creating a directory listing](../posts/recursive-types-and-folds-3b.md#listing)
-  * [Example: A parallel grep](../posts/recursive-types-and-folds-3b.md#grep)
-  * [Example: Storing the file system in a database](../posts/recursive-types-and-folds-3b.md#database)
-  * [Example: Serializing a Tree to JSON](../posts/recursive-types-and-folds-3b.md#tojson)
-  * [Example: Deserializing a Tree from JSON](../posts/recursive-types-and-folds-3b.md#fromjson)
-  * [Example: Deserializing a Tree from JSON - with error handling](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
+* **パート1: 再帰型とカタモーフィズム入門**
+  * [シンプルな再帰型](../posts/recursive-types-and-folds.md#basic-recursive-type)
+  * [すべてをパラメーター化](../posts/recursive-types-and-folds.md#parameterize)
+  * [カタモーフィズムの紹介](../posts/recursive-types-and-folds.md#catamorphisms)
+  * [カタモーフィズムの利点](../posts/recursive-types-and-folds.md#benefits)
+  * [カタモーフィズム作成のルール](../posts/recursive-types-and-folds.md#rules)
+* **パート2: カタモーフィズムの例**
+  * [カタモーフィズムの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-1b.md#file-system)
+  * [カタモーフィズムの例: 製品ドメイン](../posts/recursive-types-and-folds-1b.md#product)
+* **パート3: 畳み込みの紹介**
+  * [カタモーフィズム実装の欠陥](../posts/recursive-types-and-folds-2.md#flaw)
+  * [`fold` の導入](../posts/recursive-types-and-folds-2.md#fold)
+  * [foldの問題点](../posts/recursive-types-and-folds-2.md#problems)
+  * [関数をアキュムレーターとして使う](../posts/recursive-types-and-folds-2.md#functions)
+  * [`foldback` の導入](../posts/recursive-types-and-folds-2.md#foldback)
+  * [畳み込みの作成ルール](../posts/recursive-types-and-folds-2.md#rules)
+* **パート4: 畳み込みを理解する**
+  * [反復 vs. 再帰](../posts/recursive-types-and-folds-2b.md#iteration)
+  * [畳み込みの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-2b.md#file-system)
+  * [「畳み込み」に関するよくある質問](../posts/recursive-types-and-folds-2b.md#questions)
+* **パート5: ジェネリック再帰型**
+  * [ジェネリック再帰型 LinkedList](../posts/recursive-types-and-folds-3.md#linkedlist)
+  * [ギフトドメインをジェネリックにする](../posts/recursive-types-and-folds-3.md#revisiting-gift)
+  * [ジェネリックなコンテナ型の定義](../posts/recursive-types-and-folds-3.md#container)
+  * [ギフトドメインを実装する3つ目の方法](../posts/recursive-types-and-folds-3.md#another-gift)
+  * [抽象か具象か？3通りの設計の比較](../posts/recursive-types-and-folds-3.md#compare)
+* **パート6: 実世界の木構造**
+  * [ジェネリックな木構造型の定義](../posts/recursive-types-and-folds-3b.md#tree)
+  * [実世界の木構造型](../posts/recursive-types-and-folds-3b.md#reuse)
+  * [木構造型のマッピング](../posts/recursive-types-and-folds-3b.md#map)
+  * [例: ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.md#listing)
+  * [例: 並列 grep](../posts/recursive-types-and-folds-3b.md#grep)
+  * [例: ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.md#database)
+  * [例: 木構造の JSON シリアライズ](../posts/recursive-types-and-folds-3b.md#tojson)
+  * [例: JSON からの木構造のデシリアライズ](../posts/recursive-types-and-folds-3b.md#fromjson)
+  * [例: エラー処理付きの JSON からの木構造のデシリアライズ](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
 
 
 <a id="tree"></a>
 <hr>
 
-## Defining a generic Tree type
+## ジェネリックな Tree 型の定義
 
-In this post, we'll be working with a generic `Tree` inspired by the `FileSystem` domain that we explored earlier.
+今回は、以前検討したファイルシステムドメインに着想を得たジェネリックな `Tree` 型を使って作業を進めます。
 
-Here was the original design:
+元の設計は次のようでした。
 
 ```fsharp
 type FileSystemItem =
@@ -72,7 +72,7 @@ and FileInfo = {name:string; fileSize:int}
 and DirectoryInfo = {name:string; dirSize:int; subitems:FileSystemItem list}
 ```
 
-We can separate out the data from the recursion, and create a generic `Tree` type like this:
+データと再帰を分離し、次のようなジェネリックな `Tree` 型を作れます。
 
 ```fsharp
 type Tree<'LeafData,'INodeData> =
@@ -80,9 +80,9 @@ type Tree<'LeafData,'INodeData> =
     | InternalNode of 'INodeData * Tree<'LeafData,'INodeData> seq
 ```
 
-Notice that I have used `seq` to represent the subitems rather than `list`. The reason for this will become apparent shortly.
+サブアイテムを表すのに `list` ではなく `seq` を使っていることに注目してください。その理由はすぐに明らかになります。
 
-The file system domain can then be modelled using `Tree` by specifying `FileInfo` as data associated with a leaf node and `DirectoryInfo` as data associated with an internal node:
+ファイルシステムドメインは、`Tree` を使って次のようにモデル化できます。リーフノードには `FileInfo` を、内部ノードには `DirectoryInfo` を関連付けます。
 
 ```fsharp
 type FileInfo = {name:string; fileSize:int}
@@ -91,9 +91,9 @@ type DirectoryInfo = {name:string; dirSize:int}
 type FileSystemItem = Tree<FileInfo,DirectoryInfo>
 ```
 
-### `cata` and `fold` for Tree
+### Tree 向けの `cata` と `fold`
 
-We can define `cata` and `fold` in the usual way:
+いつものように `cata` と `fold` を定義できます。
 
 ```fsharp
 module Tree = 
@@ -112,20 +112,20 @@ module Tree =
         | LeafNode leafInfo -> 
             fLeaf acc leafInfo 
         | InternalNode (nodeInfo,subtrees) -> 
-            // determine the local accumulator at this level
+            // このレベルでのローカルな累積値を決定
             let localAccum = fNode acc nodeInfo
-            // thread the local accumulator through all the subitems using Seq.fold
+            // Seq.foldを使ってすべてのサブアイテムにローカルな累積値を通す
             let finalAccum = subtrees |> Seq.fold recurse localAccum 
-            // ... and return it
+            // ...そして返す
             finalAccum 
 ```
 
-Note that I am *not* going to implement `foldBack` for the `Tree` type, because it's unlikely that the tree will get so deep as to cause a stack overflow.
-Functions that need inner data can use `cata`.
+今回は `Tree` 型に対して `foldBack` を実装しません。スタックオーバーフローを引き起こすほどツリーが深くなることは考えにくいからです。
+内部データが必要な関数は `cata` を使えます。
 
-### Modelling the File System domain with Tree
+### Tree を使ったファイルシステムドメインのモデリング
 
-Let's test it with the same values that we used before:
+前回の例と同じ値を使ってテストしてみましょう。
 
 ```fsharp
 let fromFile (fileInfo:FileInfo) = 
@@ -142,7 +142,7 @@ let bin = fromDir {name="bin"; dirSize=10} []
 let root = fromDir {name="root"; dirSize=5} [src; bin]
 ```
 
-The `totalSize` function is almost identical to the one in the previous post:
+`totalSize` 関数は、前回の記事とほぼ同じです。
 
 ```fsharp
 let totalSize fileSystemItem =
@@ -157,7 +157,7 @@ src |> totalSize     // 16 = 10 + (1 + 2 + 3)
 root |> totalSize    // 31 = 5 + 16 + 10
 ```
 
-And so is the `largestFile` function:
+`largestFile` 関数も同様です。
 
 ```fsharp
 let largestFile fileSystemItem =
@@ -174,7 +174,7 @@ let largestFile fileSystemItem =
     let fDir largestSoFarOpt dirInfo = 
         largestSoFarOpt
 
-    // call the fold
+    // foldを呼び出す
     Tree.fold fFile fDir None fileSystemItem
 
 readme |> largestFile  
@@ -190,14 +190,14 @@ root |> largestFile
 // Some {name = "build.bat"; fileSize = 3}
 ```
 
-The source code for this section is available at [this gist](https://gist.github.com/swlaschin/1ef784481bae91b63a36).
+このセクションのソースコードは [このgist](https://gist.github.com/swlaschin/1ef784481bae91b63a36) で入手できます。
 
 <a id="reuse"></a>
 
-## The Tree type in the real world
+## 現実世界での木構造型
 
-We can use the `Tree` to model the *real* file system too!  To do this,
-just set the leaf node type to `System.IO.FileInfo` and the internal node type to `System.IO.DirectoryInfo`.
+`Tree` 型は、実際のファイルシステムもモデル化できます！
+リーフノードの型を `System.IO.FileInfo` に、内部ノードの型を `System.IO.DirectoryInfo` に設定するだけです。
 
 ```fsharp
 open System
@@ -206,7 +206,7 @@ open System.IO
 type FileSystemTree = Tree<IO.FileInfo,IO.DirectoryInfo>
 ```
 
-And let's create some helper methods to create the various nodes:
+さまざまなノードを作成するヘルパーメソッドも用意しましょう。
 
 ```fsharp
 let fromFile (fileInfo:FileInfo) = 
@@ -220,10 +220,10 @@ let rec fromDir (dirInfo:DirectoryInfo) =
     InternalNode (dirInfo,subItems)
 ```
 
-Now you can see why I used `seq` rather than `list` for the subitems. The `seq` is lazy, which means that we can create nodes 
-without actually hitting the disk.
+サブアイテムに `list` ではなく `seq` を理由がこれでわかります。
+`seq` は遅延評価なので、実際にディスクにアクセスしなくてもノードを作成できるのです。
 
-Here's the `totalSize` function again, this time using the real file information:
+次は、実際のファイル情報を使った `totalSize` 関数です。
 
 ```fsharp
 let totalSize fileSystemItem =
@@ -234,20 +234,20 @@ let totalSize fileSystemItem =
     Tree.fold fFile fDir 0L fileSystemItem 
 ```
 
-Let's see what the size of the current directory is:
+現在のディレクトリのサイズを確認してみましょう。
 
 ```fsharp
-// set the current directory to the current source directory
+// カレントディレクトリを現在のソースディレクトリに設定
 Directory.SetCurrentDirectory __SOURCE_DIRECTORY__
 
-// get the current directory as a Tree
+// カレントディレクトリをTreeとして取得
 let currentDir = fromDir (DirectoryInfo("."))
 
-// get the size of the current directory 
+// カレントディレクトリのサイズを取得
 currentDir  |> totalSize  
 ```
 
-Similarly, we can get the largest file:
+同様に、一番大きなファイルを取得できます。
 
 ```fsharp
 let largestFile fileSystemItem =
@@ -264,34 +264,34 @@ let largestFile fileSystemItem =
     let fDir largestSoFarOpt dirInfo = 
         largestSoFarOpt
 
-    // call the fold
+    // foldを呼び出す
     Tree.fold fFile fDir None fileSystemItem
 
 currentDir |> largestFile  
 ```
 
-So that's one big benefit of using generic recursive types. If we can turn a real-world hierarchy into our tree structure, we can get all the benefits of fold "for free".
+これが、ジェネリックな再帰型を使う大きな利点の一つです。現実世界の階層構造をツリー構造に変換できれば、畳み込みのメリットをすべて「無料で」得られるのです。
 
 <a id="map"></a>
 
-## Mapping with generic types
+## ジェネリック型を使ったマッピング
 
-One other advantage of using generic types is that you can do things like `map` -- converting every element to a new type without changing the structure.
+ジェネリック型を使うもう一つの利点は、`map` 関数のような操作ができることです。`map` は、構造を変えずにすべての要素を新しい型に変換します。
 
-We can see this in action with the real world file system. But first we need to define `map` for the `Tree` type!
+実際のファイルシステムでこれを見てみましょう。まずは、`Tree` 型の `map` 関数を定義しましょう。
 
-The implementation of `map` can also be done mechanically, using the following rules:
+`map` 関数の実装は、以下のルールに従って機械的に行うことができます。
 
-* Create a function parameter to handle each case in the structure.
-* For non-recursive cases
-  * First, use the function parameter to transform the non-recursive data associated with that case
-  * Then wrap the result in the same case constructor
-* For recursive cases, perform two steps:
-  * First, use the function parameter to transform the non-recursive data associated with that case
-  * Next, recursively `map` the nested values.
-  * Finally, wrap the results in the same case constructor
+* 構造内の各ケースを処理する関数パラメータを作成する
+* 再帰しないケースの場合
+  * まず、関数パラメータを使ってそのケースに関連する非再帰データを変換する
+  * 次に、結果を同じケースコンストラクタでラップする
+* 再帰的なケースの場合、以下のステップを実行する
+  * まず、関数パラメータを使ってそのケースに関連する非再帰データを変換する
+  * 次に、ネストされた値を再帰的に `map` する
+  * 最後に、結果を同じケースのコンストラクタでラップする
 
-Here's the implementation of `map` for `Tree`, created by following those rules:
+これらのルールに従って作成した `Tree` 型の `map` 関数の実装は次のとおりです。
   
 ```fsharp
 module Tree = 
@@ -312,8 +312,8 @@ module Tree =
             InternalNode (newNodeInfo, newSubtrees)
 ```
 
-If we look at the signature of `Tree.map`, we can see that all the leaf data is transformed to type `'a`, all the node data is transformed to type `'b`,
-and the final result is a `Tree<'a,'b>`.
+`Tree.map` のシグネチャを見ると、すべてのリーフのデータが型 `'a` に、すべてのノードのデータが型 `'b` に変換され、
+最終的な結果は `Tree<'a,'b>` になることがわかります。
 
 ```fsharp
 val map :
@@ -323,7 +323,7 @@ val map :
   Tree<'a,'b>
 ```
 
-We can define `Tree.iter` in a similar way:
+`Tree.iter` 関数も同様の方法で定義できます。
 
 ```fsharp
 module Tree = 
@@ -344,10 +344,10 @@ module Tree =
 <a id="listing"></a>
 <hr>
 
-## Example: Creating a directory listing
+## 例：ディレクトリ一覧の作成
 
-Let's say we want to use `map` to transform the file system into a directory listing - a tree of strings where each string has information
-about the corresponding file or directory. Here's how we could do it:
+`map` 関数を使ってファイルシステムをディレクトリ一覧に変換してみましょう。ディレクトリ一覧とは、各ファイルやディレクトリの情報を含む文字列の木構造のことです。
+コードは以下のようになります。
 
 ```fsharp
 let dirListing fileSystemItem =
@@ -359,7 +359,7 @@ let dirListing fileSystemItem =
     Tree.map mapFile mapDir fileSystemItem
 ```
 
-And then we can print the strings out like this:
+変換された文字列は次のように出力することができます。
 
 ```fsharp
 currentDir 
@@ -367,7 +367,7 @@ currentDir
 |> Tree.iter (printfn "%s") (printfn "\n%s")
 ```
 
-The results will look something like this:
+結果はこのようになります。
 
 ```text
   8315  10/08/2015 23:37:41  Fold.fsx
@@ -377,33 +377,33 @@ The results will look something like this:
     79  11/08/2015 01:21:54  LinkedList.fsx
 ```
 
-*The source code for this example is available at [this gist](https://gist.github.com/swlaschin/77fadc19acb8cc850276).*
+*この例のソースコードは、[このgist](https://gist.github.com/swlaschin/77fadc19acb8cc850276) で入手できます。*
 
 <a id="grep"></a>
 <hr>
 
-## Example: Creating a parallel grep
+## 例：並列 grep
 
-Let's look at a more complex example. I'll demonstrate how to create a parallel "grep" style search using `fold`.
+もっと複雑な例として、「grep」コマンドのような並列検索機能を `fold` 関数を使って作成してみます。
 
-The logic will be like this:
+ロジックは以下の通りです。
 
-* Use `fold` to iterate through the files.
-* For each file, if its name doesn't match the desired file pattern, return `None`.
-* If the file is to be processed, then return an async that returns all the line matches in the file.
-* Next, all these asyncs -- the output of the fold -- are aggregated into a sequence.
-* The sequence of asyncs is transformed into a single one using `Async.Parallel` which returns a list of results.
+* `fold` 関数を使ってファイルを反復処理します。
+* 各ファイルに対して、名前が指定のパターンに一致しなければ、 `None` を返します。
+* 処理対象のファイルであれば、ファイル内のマッチした行をすべて返す非同期処理を返します。
+* これらの非同期処理 (fold の出力) をすべて集約してシーケンスにします。
+* 非同期処理のシーケンスを `Async.Parallel` 関数を使って単一の非同期処理に変換し、結果の一覧を取得します。
 
-Before we start writing the main code, we'll need some helper functions. 
+メインのコードを書く前に、ヘルパー関数が必要です。
 
-First, a generic function that folds over the lines in a file asynchronously.
-This will be the basis of the pattern matching.
+まず、ファイル内の行を非同期で畳み込むジェネリック関数を作成します。
+これがパターンマッチングの基盤となります。
 
 ```fsharp
-/// Fold over the lines in a file asynchronously
-/// passing in the current line and line number tothe folder function.
+/// ファイル内の行を非同期で畳み込む
+/// 現在の行と行番号をフォルダ関数に渡す。
 ///
-/// Signature:
+/// シグネチャ：
 ///   folder:('a -> int -> string -> 'a) -> 
 ///   acc:'a -> 
 ///   fi:FileInfo -> 
@@ -421,7 +421,7 @@ let foldLinesAsync folder acc (fi:FileInfo) =
     }
 ```
 
-Next, a little helper that allows us to `map` over `Async` values:
+次に、`Async` 値に対して `map` を行うヘルパー関数を作成します。
 
 ```fsharp
 let asyncMap f asyncX = async { 
@@ -429,61 +429,61 @@ let asyncMap f asyncX = async {
     return (f x)  }
 ```
 
-Now for the central logic. We will create a function that, given a `textPattern` and a `FileInfo`, will return a list of lines that match the textPattern, but asynchronously:
+いよいよ本題のロジックです。 `textPattern` と `FileInfo` が与えられたとき、 `textPattern` に一致する行のリストを非同期で返す関数を作ります。
 
 ```fsharp
-/// return the matching lines in a file, as an async<string list>
+/// ファイル内の一致する行を、async<string list>として返す
 let matchPattern textPattern (fi:FileInfo) = 
-    // set up the regex
+    // 正規表現を設定
     let regex = Text.RegularExpressions.Regex(pattern=textPattern)
     
-    // set up the function to use with "fold"
+    // "fold"で使う関数を設定
     let folder results lineNo lineText =
         if regex.IsMatch lineText then
             let result = sprintf "%40s:%-5i   %s" fi.Name lineNo lineText
             result :: results
         else
-            // pass through
+            // そのまま通過
             results
     
-    // main flow
+    // メインのフロー
     fi
     |> foldLinesAsync folder []
-    // the fold output is in reverse order, so reverse it
+    // foldの出力は逆順なので、反転させる
     |> asyncMap List.rev
 ```
 
-And now for the `grep` function itself:
+そして、いよいよ `grep` 関数の実装です。
 
 ```fsharp
 let grep filePattern textPattern fileSystemItem =
     let regex = Text.RegularExpressions.Regex(pattern=filePattern)
 
-    /// if the file matches the pattern
-    /// do the matching and return Some async, else None
+    /// ファイルがパターンに一致する場合
+    /// マッチングを行い、Some asyncを返す、そうでなければNone
     let matchFile (fi:FileInfo) =
         if regex.IsMatch fi.Name then
             Some (matchPattern textPattern fi)
         else
             None
 
-    /// process a file by adding its async to the list
+    /// ファイルを処理し、その非同期処理をリストに追加
     let fFile asyncs (fi:FileInfo) = 
-        // add to the list of asyncs
+        // 非同期処理のリストに追加
         (matchFile fi) :: asyncs 
 
-    // for directories, just pass through the list of asyncs
+    // ディレクトリの場合、非同期処理のリストをそのまま通過
     let fDir asyncs (di:DirectoryInfo)  = 
         asyncs 
 
     fileSystemItem
-    |> Tree.fold fFile fDir []    // get the list of asyncs
-    |> Seq.choose id              // choose the Somes (where a file was processed)
-    |> Async.Parallel             // merge all asyncs into a single async
-    |> asyncMap (Array.toList >> List.collect id)  // flatten array of lists into a single list
+    |> Tree.fold fFile fDir []    // 非同期処理のリストを取得
+    |> Seq.choose id              // Someを選択（ファイルが処理された場所）
+    |> Async.Parallel             // すべての非同期処理を一つの非同期処理にマージ
+    |> asyncMap (Array.toList >> List.collect id)  // 配列のリストを一つのリストにフラット化
 ```
 
-Let's test it!
+実際に動かしてみましょう！
 
 ```fsharp
 currentDir 
@@ -491,7 +491,7 @@ currentDir
 |> Async.RunSynchronously
 ```
 
-The result will look something like this:
+結果はこのようになります。
 
 ```text
 "                  SizeOfTypes.fsx:120     type LinkedList<'a> = ";
@@ -505,29 +505,29 @@ The result will look something like this:
 "      RecursiveTypesAndFold-3.fsx:64              list:LinkedList<'a> -> ";
 ```
 
-That's not bad for about 40 lines of code. This conciseness is because we are using various kinds of `fold` and `map` which hide the recursion, allowing
-us to focus on the pattern matching logic itself.
+およそ40行のコードでこのような機能を実現できました。簡潔に書けるのは、さまざまな種類の `fold` と `map` 関数を使うことで再帰処理を隠し、
+パターンマッチングロジックだけに集中できるからです。
 
-Of course, this is not at all efficient or optimized (an async for every line!), and so I wouldn't use it as a real implementation, but it does give you an idea of the power of fold.
+もちろん、この実装は効率的ではなく最適化されていません（各行に対して非同期処理を生成するため）。実用的な grep としては使えませんが、`fold` 関数の持つ力を示す良い例です。
 
-*The source code for this example is available at [this gist](https://gist.github.com/swlaschin/137c322b5a46b97cc8be).*
+*この例のソースコードは、[このgist](https://gist.github.com/swlaschin/137c322b5a46b97cc8be) で入手できます。*
 
 <a id="database"></a>
 <hr>
 
-## Example: Storing the file system in a database
+## 例：ファイルシステムをデータベースに保存する
 
-For the next example, let's look at how to store a file system tree in a database. I don't really know why you would want to do that, but
-the principles would work equally well for storing any hierarchical structure, so I will demonstrate it anyway!
+次の例では、ファイルシステムのツリーをデータベース内に保存する方法を見ていきます。正直なところ、そんなことをする理由は特にありませんが、
+階層構造を保存するのと同じ仕組みが使えるので、ひとまず実演してみましょう。
 
-To model the file system hierarchy in the database, say that we have four tables:
+データベースでファイルシステムの階層構造を表現するために、4 つのテーブルを用意します。
 
-* `DbDir` stores information about each directory.
-* `DbFile` stores information about each file.
-* `DbDir_File` stores the relationship between a directory and a file.
-* `DbDir_Dir` stores the relationship between a parent directory and a child directory.
+* `DbDir` は、各ディレクトリの情報を保存します。
+* `DbFile`は、各ファイルの情報を保存します。
+* `DbDir_File`は、ディレクトリとファイルの関係を保存します。
+* `DbDir_Dir`は、親ディレクトリと子ディレクトリの関係を保存します。
 
-Here are the database table definitions:
+データベーステーブルの定義は次のとおりです。
 
 ```text
 CREATE TABLE DbDir (
@@ -552,24 +552,24 @@ CREATE TABLE DbDir_Dir (
 )
 ```
 
-That's simple enough. But note that in order to save a directory completely along with its relationships to its child items, we first need the ids of all its children,
-and each child directory needs the ids of its children, and so on.
+とてもシンプルですね。しかし、ディレクトリとその子アイテムとの関係すべてを保存するには、まずすべての子アイテムの ID が必要であり、
+さらに各子ディレクトリもそれぞれの子の ID を必要とし、以下同様に階層が続いていきます。
 
-This implies that we should use `cata` instead of `fold`, so that we have access to the data from the lower levels of the hierarchy.
+そのため、階層下位のデータにアクセスできるように `cata` を使用する必要があります（ `fold` は使えません）。
 
-### Implementing the database functions
+### データベース関数の実装
 
-We're not wise enough to be using the [SQL Provider](https://fsprojects.github.io/SQLProvider/) and so we have written our
-own table insertion functions, like this dummy one:
+今回は [SQL Provider](https://fsprojects.github.io/SQLProvider/) を使いません。代わりに、次のようなダミー関数をはじめとして、
+独自のテーブル挿入関数を作成しました。
 
 ```fsharp
-/// Insert a DbFile record 
+/// DbFileレコードを挿入 
 let insertDbFile name (fileSize:int64) =
     let id = nextIdentity()
     printfn "%10s: inserting id:%i name:%s size:%i" "DbFile" id name fileSize
 ```
 
-In a real database, the identity column would be automatically generated for you, but for this example, I'll use a little helper function `nextIdentity`:
+実際のデータベースでは、IDENTITYカラムは自動生成されますが、この例では `nextIdentity` という小さなヘルパー関数を使用します。
 
 ```fsharp
 let nextIdentity =
@@ -578,37 +578,37 @@ let nextIdentity =
         id := !id + 1
         !id
         
-// test
+// テスト
 nextIdentity() // 1
 nextIdentity() // 2
 nextIdentity() // 3
 ```
 
-Now in order to insert a directory, we need to first know all the ids of the files in the directory. This implies that the `insertDbFile` function should
-return the id that was generated.
+ディレクトリを挿入するには、まずディレクトリ内のすべてのファイルの ID を知る必要があります。
+つまり、`insertDbFile` 関数は生成された ID を返すようにする必要があります。
 
 ```fsharp
-/// Insert a DbFile record and return the new file id
+/// DbFileレコードを挿入し、新しいファイルIDを返す
 let insertDbFile name (fileSize:int64) =
     let id = nextIdentity()
     printfn "%10s: inserting id:%i name:%s size:%i" "DbFile" id name fileSize
     id
 ```
 
-But that logic applies to the directories too:
+同じことがディレクトリにも当てはまります。
 
 ```fsharp
-/// Insert a DbDir record and return the new directory id
+/// DbDirレコードを挿入し、新しいディレクトリIDを返す
 let insertDbDir name =
     let id = nextIdentity()
     printfn "%10s: inserting id:%i name:%s" "DbDir" id name
     id
 ```
 
-But that's still not good enough. When the child ids are passed to the parent directory, it needs to distinguish between files and directories, because
-the relations are stored in different tables.
+しかし、まだ不十分です。子 ID を親ディレクトリに渡す際、ファイルとディレクトリを区別する必要があります。
+関係は異なるテーブルに保存されるからです。
 
-No problem -- we'll just use a choice type to distinguish between them!
+問題ありません。選択型を使って、両者を区別しましょう。
 
 ```fsharp
 type PrimaryKey =
@@ -616,55 +616,55 @@ type PrimaryKey =
     | DirId of int
 ```
 
-With this in place, we can complete the implementation of the database functions:
+これで、データベース関数の実装を完成させられます。
 
 ```fsharp
-/// Insert a DbFile record and return the new PrimaryKey
+/// DbFileレコードを挿入し、新しいPrimaryKeyを返す
 let insertDbFile name (fileSize:int64) =
     let id = nextIdentity()
     printfn "%10s: inserting id:%i name:%s size:%i" "DbFile" id name fileSize
     FileId id
 
-/// Insert a DbDir record and return the new PrimaryKey
+/// DbDirレコードを挿入し、新しいPrimaryKeyを返す
 let insertDbDir name =
     let id = nextIdentity()
     printfn "%10s: inserting id:%i name:%s" "DbDir" id name
     DirId id
 
-/// Insert a DbDir_File record
+/// DbDir_Fileレコードを挿入
 let insertDbDir_File dirId fileId =
     printfn "%10s: inserting parentDir:%i childFile:%i" "DbDir_File" dirId fileId 
 
-/// Insert a DbDir_Dir record
+/// DbDir_Dirレコードを挿入
 let insertDbDir_Dir parentDirId childDirId =
     printfn "%10s: inserting parentDir:%i childDir:%i" "DbDir_Dir" parentDirId childDirId
 ```
 
-### Working with the catamorphism
+### カタモーフィズムによる処理
 
-As noted above, we need to use `cata` instead of `fold`, because we need the inner ids at each step.
+前述のとおり、各ステップで内部 ID が必要なので、`fold` ではなく `cata` を使う必要があります。
 
-The function to handle the `File` case is easy -- just insert it and return the `PrimaryKey`.
+`File` ケースを処理する関数は簡単です。挿入して、`PrimaryKey` を返します。
 
 ```fsharp
 let fFile (fi:FileInfo) = 
     insertDbFile fi.Name fi.Length
 ```
 
-The function to handle the `Directory` case will be passed the `DirectoryInfo` and a sequence of `PrimaryKey`s from the children that have already been inserted.
+`Directory` ケースを処理する関数は、`DirectoryInfo` と、すでに挿入された子の `PrimaryKey` のシーケンスを受け取ります。
 
-It should insert the main directory record, then insert the children, and then return the `PrimaryKey` for the next higher level:
+この関数は、まずメインのディレクトリレコードを挿入し、次に子要素を挿入して、上位レベルの `PrimaryKey` を返します。
 
 ```fsharp
 let fDir (di:DirectoryInfo) childIds  = 
     let dirId = insertDbDir di.Name
-    // insert the children
-    // return the id to the parent
+    // 子を挿入
+    // 親にIDを返す
     dirId
 ```
 
-After inserting the directory record and getting its id, for each child id, we insert either into the `DbDir_File` table or the `DbDir_Dir`,
-depending on the type of the `childId`.
+ディレクトリレコードを挿入して ID を取得した後、子 ID ごとに、`childId` の種類に応じて
+`DbDir_File` テーブルまたは `DbDir_Dir` テーブルに挿入します。
 
 ```fsharp
 let fDir (di:DirectoryInfo) childIds  = 
@@ -675,13 +675,13 @@ let fDir (di:DirectoryInfo) childIds  =
         | FileId fileId -> insertDbDir_File parentPK fileId 
         | DirId childDirId -> insertDbDir_Dir parentPK childDirId 
     )
-    // return the id to the parent
+    // 親にIDを返す
     dirId
 ```
 
-Note that I've also created a little helper function `pkToInt` that extracts the integer id from the `PrimaryKey` type.
+また、`PrimaryKey` 型から整数 ID を抽出する小さなヘルパー関数 `pkToInt` も作成しました。
 
-Here is all the code in one chunk:
+すべてのコードをまとめて以下に示します。
 
 ```fsharp
 open System
@@ -697,23 +697,23 @@ type PrimaryKey =
     | FileId of int
     | DirId of int
 
-/// Insert a DbFile record and return the new PrimaryKey
+/// DbFileレコードを挿入し、新しいPrimaryKeyを返す
 let insertDbFile name (fileSize:int64) =
     let id = nextIdentity()
     printfn "%10s: inserting id:%i name:%s size:%i" "DbFile" id name fileSize
     FileId id
 
-/// Insert a DbDir record and return the new PrimaryKey
+/// DbDirレコードを挿入し、新しいPrimaryKeyを返す
 let insertDbDir name =
     let id = nextIdentity()
     printfn "%10s: inserting id:%i name:%s" "DbDir" id name
     DirId id
 
-/// Insert a DbDir_File record
+/// DbDir_Fileレコードを挿入
 let insertDbDir_File dirId fileId =
     printfn "%10s: inserting parentDir:%i childFile:%i" "DbDir_File" dirId fileId 
 
-/// Insert a DbDir_Dir record
+/// DbDir_Dirレコードを挿入
 let insertDbDir_Dir parentDirId childDirId =
     printfn "%10s: inserting parentDir:%i childDir:%i" "DbDir_Dir" parentDirId childDirId
     
@@ -735,25 +735,25 @@ let insertFileSystemTree fileSystemItem =
             | FileId fileId -> insertDbDir_File parentPK fileId 
             | DirId childDirId -> insertDbDir_Dir parentPK childDirId 
         )
-        // return the id to the parent
+        // 親にIDを返す
         dirId
 
     fileSystemItem
     |> Tree.cata fFile fDir 
 ```
 
-Now let's test it:
+それでは、テストしてみましょう。
 
 ```fsharp
-// get the current directory as a Tree
+// カレントディレクトリをTreeとして取得
 let currentDir = fromDir (DirectoryInfo("."))
 
-// insert into the database
+// データベースに挿入
 currentDir 
 |> insertFileSystemTree
 ```
 
-The output should look something like this:
+出力は次のようなものになるはずです。
 
 ```text
      DbDir: inserting id:41 name:FoldAndRecursiveTypes
@@ -770,23 +770,23 @@ DbDir_File: inserting parentDir:41 childFile:44
  DbDir_Dir: inserting parentDir:41 childDir:57
 ```
 
-You can see that the ids are being generated as the files are iterated over, and that each `DbFile` insert is followed by a `DbDir_File` insert.
+ファイルが反復処理されるにつれて ID が生成され、各 `DbFile` の挿入後に `DbDir_File` の挿入が続くことがわかります。
 
-*The source code for this example is available at [this gist](https://gist.github.com/swlaschin/3a416f26d873faa84cde).*
+*この例のソースコードは [このgist](https://gist.github.com/swlaschin/3a416f26d873faa84cde) で入手できます。*
 
 
 <a id="tojson"></a>
 <hr>
 
-## Example: Serializing a Tree to JSON
+## 例：木構造をJSONにシリアライズする
 
-Let's look at another common challenge: serializing and deserializing a tree to JSON, XML, or some other format.
+別のよくある課題として、木構造をJSON、XML、またはその他の形式にシリアライズおよびデシリアライズすることが挙げられます。
 
-Let's use the Gift domain again, but this time, we'll model the `Gift` type as a tree.  That means we get to put more than one thing in a box!
+ここでもGiftドメインを使いますが、今回は、`Gift`型を木構造としてモデル化してみます。つまり、一つの箱に複数のものを入れられるようになります。
 
-### Modelling the Gift domain as a tree
+### Giftドメインを木構造としてモデル化する
 
-Here are the main types again, but notice that the final `Gift` type is defined as a tree:
+主要な型はこれまでと変わりませんが、最後の`Gift`型が木構造として定義されている点に注目してください。
 
 ```fsharp
 type Book = {title: string; price: decimal}
@@ -798,12 +798,12 @@ type WrappingPaperStyle =
     | HappyHolidays
     | SolidColor
 
-// unified data for non-recursive cases
+// 非再帰的なケースのための統一データ
 type GiftContents = 
     | Book of Book
     | Chocolate of Chocolate 
 
-// unified data for recursive cases
+// 再帰的なケースのための統一データ
 type GiftDecoration = 
     | Wrapped of WrappingPaperStyle
     | Boxed 
@@ -812,7 +812,7 @@ type GiftDecoration =
 type Gift = Tree<GiftContents,GiftDecoration>
 ```
 
-As usual, we can create some helper functions to assist with constructing a `Gift`:
+いつものように、`Gift`の構築を補助するヘルパー関数を作成できます。
 
 ```fsharp
 let fromBook book = 
@@ -838,7 +838,7 @@ let putTwoThingsInBox innerGift innerGift2 =
     InternalNode (container, [innerGift;innerGift2])
 ```
 
-And we can create some sample data:
+そして、サンプルデータを生成することができます。
 
 ```fsharp
 let wolfHall = {title="Wolf Hall"; price=20m}
@@ -868,7 +868,7 @@ let twoWrappedPresentsInBox =
     putTwoThingsInBox thing1 thing2 
 ```
 
-Functions like `description` now need to handle a *list* of inner texts, rather than one. We'll just concat the strings together with an `&` separator:
+`description` のような関数は、内部テキストの **リスト** を処理する必要があります。そこで、文字列を `&` で連結します。
 
 ```fsharp
 let description gift =
@@ -890,11 +890,11 @@ let description gift =
         | WithACard message ->
             sprintf "%s with a card saying '%s'" innerText message 
 
-    // main call
+    // メイン呼び出し
     Tree.cata fLeaf fNode gift  
 ```
 
-Finally, we can check that the function still works as before, and that multiple items are handled correctly:
+最後に、この関数が以前と同様に動作し、複数のアイテムを正しく処理できることを確認します。
 
 ```fsharp
 birthdayPresent |> description
@@ -913,79 +913,79 @@ twoWrappedPresentsInBox |> description
 //   in a box"
 ```
 
-### Step 1: Defining `GiftDto` 
+### ステップ1: `GiftDto` の定義
 
-Our `Gift` type consists of many discriminated unions. In my experience, these do not serialize well. In fact, most complex types do not serialize well!
+`Gift` 型は、さまざまな判別共用体で構成されています。経験上、このような型はシリアライゼーションにあまり向いていません。複雑な型は大抵そうなのです。
 
-So what I like to do is define [DTO](https://en.wikipedia.org/wiki/Data_transfer_object) types that are explicitly designed to be serialized well.
-In practice this means that the DTO types are constrained as follows:
+そこで、シリアライゼーションに最適化された [DTO](https://en.wikipedia.org/wiki/Data_transfer_object)型を定義するのが一般的です。
+具体的には、以下の制約を守って DTO 型を設計します。
 
-* Only record types should be used.
-* The record fields should consist only primitive values such as `int`, `string` and `bool`.
+* レコード型のみ使用する
+* レコードのフィールドは、`int`、`string`、`bool` などのプリミティブな値のみ使用する
 
-By doing this, we also get some other advantages:
+これにより、次のような利点も得られます。
 
-**We gain control of the serialization output.** These kinds of data types are handled the same by most serializers, while
-"strange" things such as unions can be interpreted differently by different libraries.
+**シリアライゼーションの出力を制御できます。** このようなデータ型は、ほとんどのシリアライザーで同じように扱われます。
+一方、 判別共用体のような特殊な型は、ライブラリによって解釈が異なる場合があります。
 
-**We have better control of error handling.** My number one rule when dealing with serialized data is "trust no one".
-It's very common that the data is structured correctly but is invalid for the domain: supposedly non-null strings are null,
-strings are too long, integers are outside the correct bounds, and so on.
+**エラー処理をより良くコントロールできます。** シリアライズされたデータを取り扱う際の鉄則は、「信用しない」です。
+データ自体は正しい構造を持っていても、ドメイン的におかしなことがよくあります。
+たとえば、本来 null ではありえない文字列が null だったり、文字列の長さがオーバーしたり、整数値が範囲外だったりします。
 
-By using DTOs, we can be sure that the deserialization step itself will work. Then, when we convert the DTO to a domain type, we can
-do proper validation.
+DTO を使うことで、デシリアライゼーション処理自体は確実に機能するようになります。その後、DTO をドメイン型に変換する際に、
+適切なバリデーションを行うことができます。
 
-So, let's define some DTO types for out domain. Each DTO type will correspond to a domain type, so let's start with `GiftContents`.
-We'll define a corresponding DTO type called `GiftContentsDto` as follows:
+では、ドメイン用の DTO 型を定義してみましょう。各 DTO 型はドメイン型に対応するので、まずは `GiftContents` から始めます。
+対応する DTO 型として、`GiftContentsDto` を以下のように定義します。
 
 ```fsharp
 [<CLIMutableAttribute>]
 type GiftContentsDto = {
-    discriminator : string // "Book" or "Chocolate"
-    // for "Book" case only
+    discriminator : string // "Book" または "Chocolate"
+    // "Book"ケースのみ
     bookTitle: string    
-    // for "Chocolate" case only
-    chocolateType : string // one of "Dark" "Milk" "SeventyPercent"
-    // for all cases
+    // "Chocolate"ケースのみ
+    chocolateType : string // "Dark" "Milk" "SeventyPercent"のいずれか
+    // すべてのケース
     price: decimal
     }
 ```
 
-Obviously, this quite different from the original `GiftContents`, so let's look at the differences:
+ご覧の通り、元の `GiftContents` とは大きく異なります。違いを見てみましょう。
 
-* First, it has the `CLIMutableAttribute`, which allows deserializers to construct them using reflection.
-* Second, it has a `discriminator` which indicates which case of the original union type is being used. Obviously, this string could be set to anything,
-  so when converting from the DTO back to the domain type, we'll have to check that carefully!
-* Next is a series of fields, one for every possible item of data that needs to be stored. For example, in the `Book` case, we need a `bookTitle`,
-  while in the `Chocolate` case, we need the chocolate type. And finally the `price` field which is in both types.
-  Note that the chocolate type is stored as a string as well, and so will also need special treatment when we convert from DTO to domain.
+* まず、`CLIMutableAttribute` が付与されています。これにより、デシリアライザーはリフレクションを使ってオブジェクトを構築できるようになります。
+* 次に、`discriminator` (判別子) があり、元の判別共用体のどのケースが使用されているかを判別します。
+  この文字列はどんな値でも設定できるので、DTO からドメイン型に戻す際には慎重にチェックする必要があります。
+* その次は、保存が必要なデータ項目ごとに 1 つずつフィールドが用意されています。たとえば、`Book` のケースでは `bookTitle` が必要ですが、`Chocolate` のケースではチョコレートの種類が必要です。
+  最後に、どちらのケースにも存在する `price` フィールドがあります。
+  なお、チョコレートの種類も文字列として保持されるので、DTO からドメインに変換する際に特別な扱いが必要になります。
 
-The `GiftDecorationDto` type is created in the same way, with a discriminator and strings rather than unions.
+`GiftDecorationDto` 型も同様に、判別子と文字列を使って作成されます。判別共用体は使われません。
 
 ```fsharp
 [<CLIMutableAttribute>]
 type GiftDecorationDto = {
-    discriminator: string // "Wrapped" or "Boxed" or "WithACard"
-    // for "Wrapped" case only
-    wrappingPaperStyle: string  // "HappyBirthday" or "HappyHolidays" or "SolidColor"   
-    // for "WithACard" case only
+    discriminator: string // "Wrapped" または "Boxed" または "WithACard"
+    // "Wrapped"ケースのみ
+    wrappingPaperStyle: string  // "HappyBirthday" または "HappyHolidays" または "SolidColor"   
+    // "WithACard"ケースのみ
     message: string  
     }
 ```
 
-Finally, we can define a `GiftDto` type as being a tree that is composed of the two DTO types:
+最後に、2 つの DTO 型で構成された木構造を持つ `GiftDto` 型を定義します。
 
 ```fsharp
 type GiftDto = Tree<GiftContentsDto,GiftDecorationDto>
 ```
 
-### Step 2: Transforming a `Gift` to a `GiftDto` 
+### ステップ 2: `Gift` から `GiftDto` への変換
 
-Now that we have this DTO type, all we need to do is use `Tree.map` to convert from a `Gift` to a `GiftDto`.
-And in order to do that, we need to create two functions: one that converts from `GiftContents` to `GiftContentsDto` and one
-that converts from `GiftDecoration` to `GiftDecorationDto`.
+DTO 型を定義したので、
+次に、`Tree.map` 関数を使って `Gift` を `GiftDto` へ変換します。
+変換を行うには、`GiftContents` から `GiftContentsDto` へ、`GiftDecoration` から `GiftContentsDto` へ変換する関数をそれぞれ用意する必要があります。
 
-Here's the complete code for `giftToDto`, which should be self-explanatory:
+以下は `giftToDto` 関数のコードです。コード自体はわかりやすいので、詳細な説明は省略します。
 
 ```fsharp
 let giftToDto (gift:Gift) :GiftDto =
@@ -1008,27 +1008,27 @@ let giftToDto (gift:Gift) :GiftDto =
         | WithACard message ->
             {discriminator= "WithACard"; wrappingPaperStyle=null; message=message}
 
-    // main call
+    // メイン呼び出し
     Tree.map fLeaf fNode gift  
 ```
 
-You can see that the case (`Book`, `Chocolate`, etc.) is turned into a `discriminator` string and the `chocolateType` is also turned into a string, just
-as explained above.
+コードを見ると、`Book` や `Chocolate` などのケースは `discriminator` 文字列に変換され、`chocolateType` も同様に文字列に変換されていることがわかります。
+これは、上で説明した通りです。
 
-### Step 3: Defining a `TreeDto` 
+### ステップ 3: `TreeDto` の定義
 
-I said above that a good DTO should be a record type. Well we have converted the nodes of the tree, but the tree *itself* is a union type!
-We need to transform the `Tree` type as well, into say a `TreeDto` type.
+適切な DTO はレコード型であるべきだと説明しました。木のノードは変換しましたが、木*自体*はまだ共用体型です。
+したがって、`Tree` 型も `TreeDto` 型のようなものに変換する必要があります。
 
-How can we do this? Just as for the gift DTO types, we will create a record type which contains all the data for both cases. We could use a discriminator
-field as we did before, but this time, since there are only two choices, leaf and internal node, I'll just check whether the values are null or not when deserializing.
-If the leaf value is not null, then the record must represent the `LeafNode` case, otherwise the record must represent the `InternalNode` case.
+変換方法は、ギフトの DTO 型と同様に、すべてのデータを含むレコード型を作成します。
+前と同じように `discriminator` フィールドを使用することもできますが、今回はリーフノードと内部ノードの 2 種類しかないため、デシリアライズ時に値が null かどうかをチェックするだけで十分です。
+リーフ値が null でない場合は、レコードが `LeafNode` ケースを表し、そうでない場合は `InternalNode` ケースを表します。
 
-Here's the definition of the data type:
+データ型の定義は以下の通りです。
 
 ```fsharp
-/// A DTO that represents a Tree
-/// The Leaf/Node choice is turned into a record
+/// ツリーを表すDTO
+/// Leaf/Nodeの選択はレコードに変換される
 [<CLIMutableAttribute>]
 type TreeDto<'LeafData,'NodeData> = {
     leafData : 'LeafData
@@ -1036,13 +1036,13 @@ type TreeDto<'LeafData,'NodeData> = {
     subtrees : TreeDto<'LeafData,'NodeData>[] }
 ```
 
-As before, the type has the `CLIMutableAttribute`. And as before, the type has fields to store the data from all possible choices.
-The `subtrees` are stored as an array rather than a seq -- this makes the serializer happy! 
+以前と同じように、この型には `CLIMutableAttribute` が適用されています。また、すべての選択肢のデータを格納するためのフィールドも備えています。
+`subtrees` は、シリアライザーが扱いやすいように、シーケンスではなく配列として格納されています。
 
-To create a `TreeDto`, we use our old friend `cata` to assemble the record from a regular `Tree`.
+`TreeDto` を作成するには、お馴染みの `cata` 関数を使って通常の `Tree` からレコードを組み立てます。
 
 ```fsharp
-/// Transform a Tree into a TreeDto
+/// ツリーをTreeDtoに変換する
 let treeToDto tree : TreeDto<'LeafData,'NodeData> =
     
     let fLeaf leafData  = 
@@ -1055,24 +1055,24 @@ let treeToDto tree : TreeDto<'LeafData,'NodeData> =
         let subtrees = subtrees |> Seq.toArray 
         {leafData=leafData; nodeData=nodeData; subtrees=subtrees}
 
-    // recurse to build up the TreeDto
+    // 再帰的にTreeDtoを構築
     Tree.cata fLeaf fNode tree 
 ```
 
-Note that in F#, records are not nullable, so I am using `Unchecked.defaultof<'NodeData>` rather than `null` to indicate missing data.
+F# ではレコードは null を許容しないため、欠けているデータを示すには `null` ではなく `Unchecked.defaultof<'NodeData'>` を使っています。
 
-Note also that I am assuming that `LeafData` or `NodeData` are reference types.
-If `LeafData` or `NodeData` are ever value types like `int` or `bool`, then this approach will break down, because you won't be able to
-tell the difference between a default value and a missing value. In which case, I'd switch to a discriminator field as before.
+また、`LeafData` や `NodeData` は参照型であることを前提としています。
+もし `LeafData` や `NodeData` が `int` や `bool` といった値型である場合、このアプローチは機能しなくなります。なぜなら、既定値と欠けている値を区別できなくなるからです。
+そのような場合は、前のように `discriminator` フィールドを使ってください。
 
-Alternatively, I could have used an `IDictionary`. That would be less convenient to deserialize, but would avoid the need for null-checking.
+あるいは、`IDictionary` を使うこともできます。この場合、デシリアライズは少し面倒になりますが、null チェックの必要性はなくなります。
 
-### Step 4: Serializing a `TreeDto` 
+### ステップ 4: `TreeDto` のシリアライズ
 
-Finally we can serialize the `TreeDto` using a JSON serializer. 
+最後に、JSON シリアライザーを使って `TreeDto` をシリアライズできます。
 
-For this example, I am using the built-in `DataContractJsonSerializer` so that I don't need to take
-a dependency on a NuGet package. There are other JSON serializers that might be better for a serious project.
+この例では、NuGet パッケージに依存しなくて済むように、組み込みの `DataContractJsonSerializer` を使っています。
+本格的なプロジェクトでは、より適したシリアライザーを使用することもできます。
 
 ```fsharp
 #r "System.Runtime.Serialization.dll"
@@ -1089,23 +1089,23 @@ let toJson (o:'a) =
     encoding.GetString(stream.ToArray())
 ```
 
-### Step 5: Assembling the pipeline
+###  ステップ 5: パイプラインの組み立て
 
-So, putting it all together, we have the following pipeline:
+ここまでの手順をまとめると、次のようなパイプラインになります。
 
-* Transform `Gift` to `GiftDto` using `giftToDto`,<br>
-  that is, use `Tree.map` to go from `Tree<GiftContents,GiftDecoration>` to `Tree<GiftContentsDto,GiftDecorationDto>`
-* Transform `Tree` to `TreeDto` using `treeToDto`,<br>
-  that is, use `Tree.cata` to go from `Tree<GiftContentsDto,GiftDecorationDto>` to `TreeDto<GiftContentsDto,GiftDecorationDto>`
-* Serialize `TreeDto` to a JSON string
+* `giftToDto` 関数を使って `Gift` を `GiftDto` に変換します。<br>
+   つまり、`Tree<GiftContents, GiftDecoration>` から `Tree<GiftContentsDto, GiftDecorationDto>` へ変換するために `Tree.map` 関数を使います。
+* `treeToDto` 関数を使って `Tree` を `TreeDto` に変換します。<br>
+   つまり、`Tree<GiftContentsDto, GiftDecorationDto>` から `TreeDto<GiftContentsDto, GiftDecorationDto>` へ変換するために `Tree.cata` 関数を使います。 
+* `TreeDto` を JSON 文字列にシリアライズします。
 
-Here's some example code:
+コード例は次のとおりです。
 
 ```fsharp
 let goodJson = christmasPresent |> giftToDto |> treeToDto |> toJson  
 ```
 
-And here is what the JSON output looks like:
+生成される JSON 出力は次のようになります。
 
 ```text
 {
@@ -1140,30 +1140,30 @@ And here is what the JSON output looks like:
 }
 ```
 
-The ugly `@` signs on the field names are an artifact of serializing the F# record type.
-This can be corrected with a bit of effort, but I'm not going to bother right now!
+フィールド名の前にある見栄えの悪い `@` 記号は、F# のレコード型をシリアライズする際の副作用です。
+少しの手間で修正できますが、今回は割愛します。
 
-*The source code for this example is available at [this gist](https://gist.github.com/swlaschin/bbe70c768215b209c06c)*
+*この例のソースコードは [このgist](https://gist.github.com/swlaschin/bbe70c768215b209c06c) で入手できます。*
 
 <a id="fromjson"></a>
 <hr>
 
-## Example: Deserializing a Tree from JSON
+## 例：JSONを木構造にデシリアライズする
 
-Now that we have created the JSON, what about going the other way and loading it into a `Gift`?
+JSON を作成したので、今度は逆に JSON を読み込んで `Gift` に変換してみましょう。
 
-Simple! We just need to reverse the pipeline:
+簡単です。パイプラインを逆にするだけです。
 
-* Deserialize a JSON string into a `TreeDto`.
-* Transform a `TreeDto` into a `Tree` to  using `dtoToTree`,<br>
-  that is, go from `TreeDto<GiftContentsDto,GiftDecorationDto>` to `Tree<GiftContentsDto,GiftDecorationDto>`.
-    We can't use `cata` for this -- we'll have to create a little recursive loop.
-* Transform `GiftDto` to `Gift` using `dtoToGift`,<br>
-  that is, use `Tree.map` to go from `Tree<GiftContentsDto,GiftDecorationDto>` to `Tree<GiftContents,GiftDecoration>`.
+* JSON 文字列を `TreeDto` にデシリアライズします。
+* `dtoToTree` 関数を使って `TreeDto` を `Tree` に変換します。<br>
+   つまり、`TreeDto<GiftContentsDto, GiftDecorationDto>` から `Tree<GiftContentsDto, GiftDecorationDto>` へ変換します。
+   ここでは `cata` は使えず、小さな再帰ループを作成する必要があります。
+* `dtoToGift` 関数を使って `GiftDto` を `Gift` に変換します。<br>
+   つまり、`Tree<GiftContentsDto, GiftDecorationDto>` から `Tree<GiftContents, GiftDecoration>` へ変換するために `Tree.map` 関数を使います。
 
-### Step 1: Deserializing a `TreeDto` 
+### ステップ 1: `TreeDto` のデシリアライズ
 
-We can deserialize the `TreeDto` using a JSON serializer.
+JSON シリアライザーを使って `TreeDto` をデシリアライズできます。
 
 ```fsharp
 let fromJson<'a> str = 
@@ -1174,61 +1174,61 @@ let fromJson<'a> str =
     obj :?> 'a
 ```
 
-What if the deserialization fails? For now, we will ignore any error handling and let the exception propagate.
+デシリアライズに失敗した場合どうなるでしょうか。今回はエラー処理を無視して、例外を伝播させます。
 
-### Step 2: Transforming a `TreeDto` into a `Tree`
+### ステップ 2: `TreeDto` から `Tree` への変換
 
-To transform a `TreeDto` into a `Tree` we recursively loop through the record and its subtrees, turning each one into a `InternalNode`
-or a `LeafNode`, based on whether the appropriate field is null or not.
+`TreeDto` を `Tree` に変換するには、レコードとそのサブツリーを再帰的にループ処理し、
+適切なフィールドが null かどうかによってそれぞれを `InternalNode` または `LeafNode` に変換します。
 
 ```fsharp
 let rec dtoToTree (treeDto:TreeDto<'Leaf,'Node>) :Tree<'Leaf,'Node> =
     let nullLeaf = Unchecked.defaultof<'Leaf>
     let nullNode = Unchecked.defaultof<'Node>
     
-    // check if there is nodeData present
+    // nodeDataが存在するかチェック
     if treeDto.nodeData <> nullNode then
         if treeDto.subtrees = null then
-            failwith "subtrees must not be null if node data present"
+            failwith "ノードデータが存在する場合、subtreesはnullであってはいけません"
         else
             let subtrees = treeDto.subtrees |> Array.map dtoToTree 
             InternalNode (treeDto.nodeData,subtrees)
-    // check if there is leafData present
+    // leafDataが存在するかチェック
     elif treeDto.leafData <> nullLeaf then
         LeafNode (treeDto.leafData) 
-    // if both missing then fail
+    // 両方が欠けている場合は失敗
     else
-        failwith "expecting leaf or node data"
+        failwith "リーフまたはノードデータが必要です"
 ```
 
-As you can see, a number of things could go wrong:
+ご覧のように、いくつかの問題が発生する可能性があります。
 
-* What if the `leafData` and `nodeData` fields are both null?
-* What if the `nodeData` field is not null but the `subtrees` field *is* null?
+* `leafData` フィールドと `nodeData` フィールドがどちらも null だった場合
+* `nodeData` フィールドが null ではなく、`subtrees` フィールドが null だった場合
 
-Again, we will ignore any error handling and just throw exceptions (for now).
+ここでも、エラー処理は無視して例外をスローするだけにします (今のところ)。
 
-*Question: Could we create a `cata` for `TreeDto` that would make this code simpler? Would it be worth it?*
+*質問: `TreeDto` 用の `cata` を作成して、このコードを簡潔にできますか？作成する価値はありますか？*
 
-### Step 3: Transforming a `GiftDto` into `Gift`
+### ステップ 3: `GiftDto` から `Gift` への変換
 
-Now we have a proper tree, we can use `Tree.map` again to convert each leaf and internal node from a DTO to the proper domain type.
+適切な木構造が得られたら、`Tree.map` 関数を使って、各リーフノードと内部ノードを DTO 型から実際のドメイン型に変換します。
 
-That means we need functions that map a `GiftContentsDto` into a `GiftContents` and a `GiftDecorationDto` into a `GiftDecoration`.
+そのためには、`GiftContentsDto` を `GiftContents` に、`GiftDecorationDto` を `GiftDecoration` に変換する関数が必要です。
 
-Here's the complete code -- it's a lot more complicated than going in the other direction!
+コード全体は以下の通りです。逆方向の変換よりもかなり複雑になっています。
 
-The code can be grouped as follows:
+コードは次のようにグループ化されています。
 
-* Helper methods (such as `strToChocolateType`) that convert a string into a proper domain type and throw an exception if the input is invalid.
-* Case converter methods (such as `bookFromDto`) that convert an entire DTO into a case.
-* And finally, the `dtoToGift` function itself.  It looks at the `discriminator` field to see which case converter to call,
-  and throws an exception if the discriminator value is not recognized.
+* 文字列を適切なドメイン型に変換し、入力が不正な場合は例外をスローするヘルパー関数（たとえば、`strToChocolateType`）
+* DTO 全体を変換するケース変換関数（たとえば、`bookFromDto`）
+* 最後に、`dtoToGift` 関数自体です。この関数は `discriminator` フィールドを見て、呼び出すべきケース変換関数を選択し、
+  `discriminator` の値が認識されない場合は例外をスローします。
 
 ```fsharp
 let strToBookTitle str =
     match str with
-    | null -> failwith "BookTitle must not be null" 
+    | null -> failwith "BookTitleはnullであってはいけません" 
     | _ -> str
 
 let strToChocolateType str =
@@ -1236,18 +1236,18 @@ let strToChocolateType str =
     | "Dark" -> Dark
     | "Milk" -> Milk
     | "SeventyPercent" -> SeventyPercent
-    | _ -> failwithf "ChocolateType %s not recognized" str
+    | _ -> failwithf "ChocolateType %s は認識されません" str
 
 let strToWrappingPaperStyle str =
     match str with
     | "HappyBirthday" -> HappyBirthday
     | "HappyHolidays" -> HappyHolidays
     | "SolidColor" -> SolidColor
-    | _ -> failwithf "WrappingPaperStyle %s not recognized" str
+    | _ -> failwithf "WrappingPaperStyle %s は認識されません" str
 
 let strToCardMessage str =
     match str with
-    | null -> failwith "CardMessage must not be null" 
+    | null -> failwith "CardMessageはnullであってはいけません" 
     | _ -> str
 
 let bookFromDto (dto:GiftContentsDto) =
@@ -1269,80 +1269,80 @@ let withACardFromDto (dto:GiftDecorationDto) =
     let message = strToCardMessage dto.message
     WithACard message 
 
-/// Transform a GiftDto to a Gift
+/// GiftDtoをGiftに変換する
 let dtoToGift (giftDto:GiftDto) :Gift=
 
     let fLeaf (leafDto:GiftContentsDto) = 
         match leafDto.discriminator with
         | "Book" -> bookFromDto leafDto
         | "Chocolate" -> chocolateFromDto leafDto
-        | _ -> failwithf "Unknown leaf discriminator '%s'" leafDto.discriminator 
+        | _ -> failwithf "不明なリーフディスクリミネータ '%s'" leafDto.discriminator 
 
     let fNode (nodeDto:GiftDecorationDto)  = 
         match nodeDto.discriminator with
         | "Wrapped" -> wrappedFromDto nodeDto
         | "Boxed" -> boxedFromDto nodeDto
         | "WithACard" -> withACardFromDto nodeDto
-        | _ -> failwithf "Unknown node discriminator '%s'" nodeDto.discriminator 
+        | _ -> failwithf "不明なノードディスクリミネータ '%s'" nodeDto.discriminator 
 
-    // map the tree
+    // ツリーをマップする
     Tree.map fLeaf fNode giftDto  
 ```
 
-### Step 4: Assembling the pipeline
+### ステップ 4: パイプラインの組み立て
 
-We can now assemble the pipeline that takes a JSON string and creates a `Gift`.
+これで、JSON 文字列を受け取って `Gift` オブジェクトを作成するパイプラインを組み立てることができます。
 
 ```fsharp
 let goodGift = goodJson |> fromJson |> dtoToTree |> dtoToGift
 
-// check that the description is unchanged
+// 説明が変わっていないか確認
 goodGift |> description
 // "SeventyPercent chocolate in a box wrapped in HappyHolidays paper"
 ```
 
-This works fine, but the error handling is terrible!
+この方法でも動作しますが、エラーハンドリングがひどいものです。
 
-Look what happens if we corrupt the JSON a little:
+JSON を少し壊してみましょう。
 
 ```fsharp
 let badJson1 = goodJson.Replace("leafData","leafDataXX")
 
 let badJson1_result = badJson1 |> fromJson |> dtoToTree |> dtoToGift
-// Exception "The data contract type 'TreeDto' cannot be deserialized because the required data member 'leafData@' was not found."
+// 例外 "データ契約型'TreeDto'は必要なデータメンバー'leafData@'が見つからなかったためデシリアライズできません。"
 ```
 
-We get an ugly exception.
+すると、見栄えの悪い例外が発生します。
 
-Or what if a discriminator is wrong?
+または、判別子が間違っていたらどうでしょうか？
 
 ```fsharp
 let badJson2 = goodJson.Replace("Wrapped","Wrapped2")
 
 let badJson2_result = badJson2 |> fromJson |> dtoToTree |> dtoToGift
-// Exception "Unknown node discriminator 'Wrapped2'"
+// 例外 "不明なノードディスクリミネータ 'Wrapped2'"
 ```
 
-or one of the values for the WrappingPaperStyle DU?
+あるいは、WrappingPaperStyleの値が間違っていたら？
 
 ```fsharp
 let badJson3 = goodJson.Replace("HappyHolidays","HappyHolidays2")
 let badJson3_result = badJson3 |> fromJson |> dtoToTree |> dtoToGift
-// Exception "WrappingPaperStyle HappyHolidays2 not recognized"
+// 例外 "WrappingPaperStyle HappyHolidays2 は認識されません"
 ```
 
-We get lots of exceptions, and as as functional programmers, we should try to remove them whenever we can.
+多くの例外が発生しますが、関数型プログラミングでは、可能な限り例外を排除するように努めるべきです。
 
-How we can do that will be discussed in the next section.
+その方法については、次のセクションで説明します。
 
-*The source code for this example is available at [this gist](https://gist.github.com/swlaschin/bbe70c768215b209c06c).*
+*この例のソースコードは [このgist](https://gist.github.com/swlaschin/bbe70c768215b209c06c) で入手できます。*
 
 <a id="json-with-error-handling"></a>
 <hr>
 
-## Example: Deserializing a Tree from JSON - with error handling
+## 例：JSON からのツリーのデシリアライズ - エラーハンドリング付き
 
-To address the error handling issue, we're going use the `Result` type shown below:
+エラーハンドリングの問題に対処するために、以下のような `Result` 型を使用します。
 
 ```fsharp
 type Result<'a> = 
@@ -1350,14 +1350,14 @@ type Result<'a> =
     | Failure of string list
 ```
 
-I'm not going to explain how it works here.
-If you are not familar with this approach, please [read my post](../posts/recipe-part2.md) or [watch my talk](http://fsharpforfunandprofit.com/rop/) on the topic of functional error handling.
+ここでは、この型がどのように機能するかは説明しません。
+このアプローチに慣れていない場合は、[私の記事](../posts/recipe-part2.md) または関数型エラーハンドリングに関する[私の講演資料](https://fsharpforfunandprofit.com/rop/) を参照してください。
 
-Let's revisit all the steps from the previous section, and use `Result` rather than throwing exceptions.
+前のセクションのすべてのステップをもう一度見直して、例外をスローする代わりに `Result` 型を使ってみましょう。
 
-### Step 1: Deserializing a `TreeDto` 
+### ステップ 1: `TreeDto` のデシリアライズ
 
-When we deserialize the `TreeDto` using a JSON serializer we will trap exceptions and turn them into a `Result`.
+JSON シリアライザーを使って `TreeDto` をデシリアライズする際、例外を捕捉して `Result` に変換します。
 
 ```fsharp
 let fromJson<'a> str = 
@@ -1373,67 +1373,67 @@ let fromJson<'a> str =
         Result.failWithMsg ex.Message
 ```
 
-The signature of `fromJson` is now `string -> Result<'a>`.
+これで、`fromJson` 関数のシグネチャは `string -> Result<'a>` になりました。
 
-### Step 2: Transforming a `TreeDto` into a `Tree`
+### ステップ2: `TreeDto` から `Tree` へ
 
-As before, we transform a `TreeDto` into a `Tree` by recursively looping through the record and its subtrees, turning each one into a `InternalNode`
-or a `LeafNode`. This time, though, we use `Result` to handle any errors.
+前回の変換処理と同様に、レコードとそのサブツリーを再帰的にループ処理して、 `TreeDto` を `Tree` に変換します。各要素は `InternalNode` または `LeafNode` に変換します。
+今回は、エラー処理のために `Result` 型を使用します。
 
 ```fsharp
 let rec dtoToTreeOfResults (treeDto:TreeDto<'Leaf,'Node>) :Tree<Result<'Leaf>,Result<'Node>> =
     let nullLeaf = Unchecked.defaultof<'Leaf>
     let nullNode = Unchecked.defaultof<'Node>
     
-    // check if there is nodeData present
+    // nodeDataが存在するかチェック
     if treeDto.nodeData <> nullNode then
         if treeDto.subtrees = null then
-            LeafNode <| Result.failWithMsg "subtrees must not be null if node data present"
+            LeafNode <| Result.failWithMsg "ノードデータが存在する場合、subtreesはnullであってはいけません"
         else
             let subtrees = treeDto.subtrees |> Array.map dtoToTreeOfResults 
             InternalNode (Result.retn treeDto.nodeData,subtrees) 
-    // check if there is leafData present
+    // leafDataが存在するかチェック
     elif treeDto.leafData <> nullLeaf then
         LeafNode <| Result.retn (treeDto.leafData) 
-    // if both missing then fail
+    // 両方が欠けている場合は失敗
     else
-        LeafNode <| Result.failWithMsg "expecting leaf or node data"
+        LeafNode <| Result.failWithMsg "リーフまたはノードデータが必要です"
         
 // val dtoToTreeOfResults : 
 //   treeDto:TreeDto<'Leaf,'Node> -> Tree<Result<'Leaf>,Result<'Node>>
 ```
 
-But uh-oh, we now have a `Tree` where every internal node and leaf is wrapped in a `Result`.  It's a tree of `Results`!
-The actual ugly signature is this: `Tree<Result<'Leaf>,Result<'Node>>`.
+しかし、これではすべての内部ノードとリーフノードが `Result` でラップされてしまい、結果的に `Result` の木構造になってしまいます。
+型としては `Tree<Result<'Leaf>, Result<'Node>>` になり、見栄えが悪いです。
 
-But this type is useless as it stands -- what we *really* want is to merge all the errors together and return a `Result` containing a `Tree`. 
+このままでは使えません。**本来**欲しいのは、すべてのエラーをまとめて `Tree` を含む `Result` を返すことです。
 
-How can we transform a Tree of Results into a Result of Tree?
+では、「 `Result` の木構造」 を 「木構造 の `Result` 」へ変換するにはどうすればよいでしょうか？
 
-The answer is to use a `sequence` function which "swaps" the two types.
-You can read much more about `sequence` in [my series on elevated worlds](../posts/elevated-world-4.md#sequence).
+答えは `sequence` 関数を使うことです。
+`sequence` 関数は、二つの型を「入れ替える」ような働きをします。`sequence` については、[持ち上げられた世界に関するシリーズ](../posts/elevated-world-4.md#sequence) で詳しく説明されています。
 
-*Note that we could also use the slightly more complicated `traverse` variant to combine the `map` and `sequence` into one step,
-but for the purposes of this demonstration, it's easier to understand if the steps are kept separate.*
+*注: 少し複雑な `traverse` 関数を使えば `map` と `sequence` を一度のステップで結合することもできますが、
+今回の例ではステップを分けることで理解しやすくしています。*
 
-We need to create our own `sequence` function for the Tree/Result combination. Luckily the creation of a sequence function
-is a mechanical process:
+`Tree` と `Result` の組み合わせのための `sequence` 関数を作成する必要があります。
+幸い、`sequence` 関数の作成は機械的なプロセスで行えます。
 
-* For the lower type (`Result`) we need to define `apply` and `return` functions. See [here for more details](../posts/elevated-world.md#apply) on what `apply` means.
-* For the higher type (`Tree`) we need to have a `cata` function, which we do.
-* In the catamorphism, each constructor of the higher type (`LeafNode` and `InternalNode` in this case) is replaced by an equivalent that is "lifted" to the `Result` type (e.g. `retn LeafNode <*> data`)
+* 下位の型（`Result`）には `apply` と `return` 関数を定義する必要があります。 `apply` の意味は[こちら](../posts/elevated-world.md#apply)を参照してください。
+* 上位の型（`Tree`）には `cata` 関数が必要です。これは既にあります。
+* カタモーフィズムでは、上位型の各コンストラクタ（`LeafNode` と `InternalNode`）を `Result` 型に「持ち上げる」（例： `retn LeafNode <*> data`）ように置き換えます。
 
-Here is the actual code -- don't worry if you can't understand it immediately. Luckily, we only need to write it once for each combination
-of types, so for any kind of Tree/Result combination in the future, we're set!
+これが実際のコードです。すぐには理解できなくても心配しないでください。一度この関数を定義すれば、
+以降の `Tree` と `Result` の組み合わせでも同じように使えます。
 
 ```fsharp
-/// Convert a tree of Results into a Result of tree
+/// ResultのツリーをツリーのResultに変換する
 let sequenceTreeOfResult tree =
-    // from the lower level
+    // 下位レベルから
     let (<*>) = Result.apply 
     let retn = Result.retn
 
-    // from the traversable level
+    // 走査可能なレベルから
     let fLeaf data = 
         retn LeafNode <*> data
 
@@ -1442,15 +1442,15 @@ let sequenceTreeOfResult tree =
         let subItems = Result.sequenceSeq subitems 
         retn makeNode <*> data <*> subItems
 
-    // do the traverse
+    // 走査を行う
     Tree.cata fLeaf fNode tree
     
 // val sequenceTreeOfResult :
 //    tree:Tree<Result<'a>,Result<'b>> -> Result<Tree<'a,'b>>
 ```
 
-Finally, the actual `dtoToTree` function is simple -- just send the `treeDto` through `dtoToTreeOfResults` and then use `sequenceTreeOfResult` to
-convert the final result into a `Result<Tree<..>>`, which is just what we need.
+最後に、実際の `dtoToTree` 関数はとても簡単です。`treeDto` を `dtoToTreeOfResults` に渡し、`sequenceTreeOfResult` を使って最終結果を `Result<Tree<..>>` に変換するだけです。
+これがまさに我々が求めていたものです。
 
 ```fsharp
 let dtoToTree treeDto =
@@ -1459,21 +1459,21 @@ let dtoToTree treeDto =
 // val dtoToTree : treeDto:TreeDto<'a,'b> -> Result<Tree<'a,'b>>    
 ```
 
-### Step 3: Transforming a `GiftDto` into a `Gift`
+### ステップ3: `GiftDto` から `Gift` へ
 
-Again we can use `Tree.map` to convert each leaf and internal node from a DTO to the proper domain type.
+こちらも `Tree.map` を使って、リーフノードと内部ノードをそれぞれ DTO から適切なドメイン型に変換します。
 
-But our functions will handle errors, so they need to map a `GiftContentsDto` into a `Result<GiftContents>`
-and a `GiftDecorationDto` into a `Result<GiftDecoration>`. This results in a Tree of Results again, and so we'll have to
-use `sequenceTreeOfResult` again to get it back into the correct `Result<Tree<..>>` shape.
+ただし、今回の関数はエラー処理を行うため、`GiftContentsDto` を `Result<GiftContents>` に、`GiftDecorationDto` を `Result<GiftDecoration>` に変換する必要があります。
+結果として、またしても「 `Result` の木構造」になってしまうため、
+`sequenceTreeOfResult` を再び使って正しい `Result<Tree<..>>` の形に戻す必要があります。
 
-Let's start with the helper methods (such as `strToChocolateType`) that convert a string into a proper domain type.
-This time, they return a `Result` rather than throwing an exception.
+まずは、文字列を適切なドメイン型に変換するヘルパーメソッド (`strToChocolateType` など) を作成します。
+今回は例外をスローするのではなく、`Result` を返します。
 
 ```fsharp
 let strToBookTitle str =
     match str with
-    | null -> Result.failWithMsg "BookTitle must not be null"
+    | null -> Result.failWithMsg "BookTitleはnullであってはいけません"
     | _ -> Result.retn str
 
 let strToChocolateType str =
@@ -1481,24 +1481,24 @@ let strToChocolateType str =
     | "Dark" -> Result.retn Dark
     | "Milk" -> Result.retn Milk
     | "SeventyPercent" -> Result.retn SeventyPercent
-    | _ -> Result.failWithMsg (sprintf "ChocolateType %s not recognized" str)
+    | _ -> Result.failWithMsg (sprintf "ChocolateType %s は認識されません" str)
 
 let strToWrappingPaperStyle str =
     match str with
     | "HappyBirthday" -> Result.retn HappyBirthday
     | "HappyHolidays" -> Result.retn HappyHolidays
     | "SolidColor" -> Result.retn SolidColor
-    | _ -> Result.failWithMsg (sprintf "WrappingPaperStyle %s not recognized" str)
+    | _ -> Result.failWithMsg (sprintf "WrappingPaperStyle %s は認識されません" str)
 
 let strToCardMessage str =
     match str with
-    | null -> Result.failWithMsg "CardMessage must not be null" 
+    | null -> Result.failWithMsg "CardMessageはnullであってはいけません" 
     | _ -> Result.retn str
 ```
 
-The case converter methods have to build a `Book` or `Chocolate` from parameters that are `Result`s rather than normal values. This is
-where lifting functions like `Result.lift2` can help.
-For details on how this works, see [this post on lifting](../posts/elevated-world.md#lift) and [this one on validation with applicatives](../posts/elevated-world-3.md#validation).
+ケース変換メソッドは、通常の値ではなく `Result` である引数から、`Book` や `Chocolate` を構築する必要があります。
+このような場合に、`Result.lift2` のような「持ち上げ」関数が役立ちます。
+持ち上げの仕組みについては、[持ち上げに関する記事](../posts/elevated-world.md#lift)と[アプリカティブを使った検証に関する記事](../posts/elevated-world-3.md#validation) を参照してください。 
   
 ```fsharp
 let bookFromDto (dto:GiftContentsDto) =
@@ -1529,127 +1529,127 @@ let withACardFromDto (dto:GiftDecorationDto) =
     Result.map WithACard message 
 ```
 
-And finally, the `dtoToGift` function itself is changed to return a `Result` if the `discriminator` is invalid.  
+そして最後に、`dtoToGift` 関数自体が、`discriminator` が不正な場合に `Result` を返すように変更されています。
 
-As before, this mapping creates a Tree of Results, so we pipe the output of the `Tree.map` through `sequenceTreeOfResult` ...
+変換処理によりやはり `Result` の木構造が生成されるため、`Tree.map` の出力を `sequenceTreeOfResult` に渡して ... 
 
 ```fsharp
 `Tree.map fLeaf fNode giftDto |> sequenceTreeOfResult`
 ```
 
-... to return a Result of Tree.
+... 木構造の `Result` を返します。
 
-Here's the complete code for `dtoToGift`:
+`dtoToGift` の完全なコードは次のとおりです。
 
 ```fsharp
 open TreeDto_WithErrorHandling
 
-/// Transform a GiftDto to a Result<Gift>
+/// GiftDtoをResult<Gift>に変換する
 let dtoToGift (giftDto:GiftDto) :Result<Gift>=
     
     let fLeaf (leafDto:GiftContentsDto) = 
         match leafDto.discriminator with
         | "Book" -> bookFromDto leafDto
         | "Chocolate" -> chocolateFromDto leafDto
-        | _ -> Result.failWithMsg (sprintf "Unknown leaf discriminator '%s'" leafDto.discriminator) 
+        | _ -> Result.failWithMsg (sprintf "不明なリーフディスクリミネータ '%s'" leafDto.discriminator) 
 
     let fNode (nodeDto:GiftDecorationDto)  = 
         match nodeDto.discriminator with
         | "Wrapped" -> wrappedFromDto nodeDto
         | "Boxed" -> boxedFromDto nodeDto
         | "WithACard" -> withACardFromDto nodeDto
-        | _ -> Result.failWithMsg (sprintf "Unknown node discriminator '%s'" nodeDto.discriminator)
+        | _ -> Result.failWithMsg (sprintf "不明なノードディスクリミネータ '%s'" nodeDto.discriminator)
 
-    // map the tree
+    // ツリーをマップする
     Tree.map fLeaf fNode giftDto |> sequenceTreeOfResult   
 ```
 
-The type signature of `dtoToGift` has changed -- it now returns a `Result<Gift>` rather than just a `Gift`.
+`dtoToGift` の型シグネチャが変更されました。以前は単に `Gift` を返していましたが、今回からは `Result<Gift>` を返すようになりました。
 
 ```fsharp
 // val dtoToGift : GiftDto -> Result<GiftUsingTree.Gift>
 ```
 
 
-### Step 4: Assembling the pipeline
+### ステップ4: パイプラインの組み立て
 
-We can now reassemble the pipeline that takes a JSON string and creates a `Gift`. 
+JSON 文字列を受け取って `Gift` オブジェクトを作成するパイプラインを、再度組み立てましょう。
 
-But changes are needed to work with the new error handling code:
+ただし、新しいエラー処理コードを使用するために、以下の変更が必要です。
 
-* The `fromJson` function returns a `Result<TreeDto>` but the next function in the pipeline (`dtoToTree`) expects a regular `TreeDto` as input. 
-* Similarly `dtoToTree` returns a `Result<Tree>` but the next function in the pipeline (`dtoToGift`) expects a regular `Tree` as input. 
+* `fromJson` 関数は `Result<TreeDto>` を返しますが、パイプラインの次の関数 (`dtoToTree`) は通常の `TreeDto` を入力として想定しています。
+* 同様に、`dtoToTree` は `Result<Tree>` を返しますが、次の関数 (`dtoToGift`) は通常の `Tree` を入力として想定しています。
 
-In both case, `Result.bind` can be used to solve that problem of mis-matched output/input. See [here for a more detailed discussion of bind](../posts/elevated-world-2.md#bind).
+どちらの場合も、`Result.bind` を使って、この出力/入力の不一致の問題を解決できます。[bindの詳細な説明はこちら](../posts/elevated-world-2.md#bind)を参照してください。
 
-Ok, let's try deserializing the `goodJson` string we created earlier.
+それでは、以前作成した `goodJson` 文字列のデシリアライズを試してみましょう。
 
 ```fsharp
 let goodGift = goodJson |> fromJson |> Result.bind dtoToTree |> Result.bind dtoToGift
 
-// check that the description is unchanged
+// 説明が変わっていないか確認
 goodGift |> description
 // Success "SeventyPercent chocolate in a box wrapped in HappyHolidays paper"
 ```
 
-That's fine. 
+問題ありません。
 
-Let's see if the error handling has improved now.
-We'll corrupt the JSON again:
+エラー処理が改善されたかどうかを確認しましょう。
+もう一度 JSON を不正な形式にしてみます。
 
 ```fsharp
 let badJson1 = goodJson.Replace("leafData","leafDataXX")
 
 let badJson1_result = badJson1 |> fromJson |> Result.bind dtoToTree |> Result.bind dtoToGift
-// Failure ["The data contract type 'TreeDto' cannot be deserialized because the required data member 'leafData@' was not found."]
+// Failure ["'TreeDto'型のデータ契約を必要なデータメンバー'leafData@'が見つからなかったためデシリアライズできません。"]
 ```
 
-Great! We get an nice `Failure` case.
+素晴らしい！ きちんと `Failure` ケースが得られました。
 
-Or what if a discriminator is wrong?
+では、判別子が間違っていたらどうでしょうか？
 
 ```fsharp
 let badJson2 = goodJson.Replace("Wrapped","Wrapped2")
 let badJson2_result = badJson2 |> fromJson |> Result.bind dtoToTree |> Result.bind dtoToGift
-// Failure ["Unknown node discriminator 'Wrapped2'"]
+// Failure ["不明なノードディスクリミネータ 'Wrapped2'"]
 ```
 
-or one of the values for the WrappingPaperStyle DU?
+あるいは、 `WrappingPaperStyle` の値のいずれかが間違っていたら？
 
 ```fsharp
 let badJson3 = goodJson.Replace("HappyHolidays","HappyHolidays2")
 let badJson3_result = badJson3 |> fromJson |> Result.bind dtoToTree |> Result.bind dtoToGift
-// Failure ["WrappingPaperStyle HappyHolidays2 not recognized"]
+// Failure ["WrappingPaperStyle HappyHolidays2 は認識されません"]
 ```
 
-Again, nice `Failure` cases. 
+ここでも、`Failure` ケースが正しく動作しています。
 
-What's very nice (and this is something that the exception handling approach can't offer) is that if there is
-more than one error, the various errors can be aggregated so that we get a list of *all* the things that went wrong, rather than just one error at a time.
+非常に重要な点として（例外処理アプローチでは提供できませんが）、複数のエラーが存在する場合、
+さまざまなエラーを集約して、一度に 1 つのエラーではなく、*すべての*問題点をリスト化することができます。
 
-Let's see this in action by introducing two errors into the JSON string:
+この動作を確認しましょう。2 つのエラーを JSON 文字列に導入してみます。
 
 ```fsharp
-// create two errors
+// 2つのエラーを作成
 let badJson4 = goodJson.Replace("HappyHolidays","HappyHolidays2")
                        .Replace("SeventyPercent","SeventyPercent2")
 let badJson4_result = badJson4 |> fromJson |> Result.bind dtoToTree |> Result.bind dtoToGift
-// Failure ["WrappingPaperStyle HappyHolidays2 not recognized"; 
-//          "ChocolateType SeventyPercent2 not recognized"]
+// Failure ["WrappingPaperStyle HappyHolidays2 は認識されません"; 
+//          "ChocolateType SeventyPercent2 は認識されません"]
 ```
 
-So overall, I'd say that's a success!
+以上のように、今回の取り組みは成功だったと言えるでしょう。
 
-*The source code for this example is available at [this gist](https://gist.github.com/swlaschin/2b06fe266e3299a656c1).*
+*この例のソースコードは [このgist](https://gist.github.com/swlaschin/2b06fe266e3299a656c1) で入手できます。*
 
 <hr>
     
-## Summary 
+## まとめ
 
-We've seen in this series how to define catamorphisms, folds, and in this post in particular, how to use them to solve real world problems.
-I hope these posts have been useful, and have provided you with some tips and insights that you can apply to your own code.
+このシリーズでは、カタモーフィズムと畳み込みの定義方法、そして特に今回の記事においては、それらを現実世界の問題解決に適用する方法を解説しました。
+このシリーズが皆様にとって有用なものであり、ご自身のコードに適用できるヒントや洞察を提供できたことを願っています。
 
-This series turned out to be a lot longer that I intended, so thanks for making it to the end! Cheers!
+シリーズは当初の予定よりも長くなってしまいましたが、最後までお読みいただきありがとうございました！ ではまた！
 
 
 
