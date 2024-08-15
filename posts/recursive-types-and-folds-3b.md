@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "現実世界の木構造"
-description: "データベース、JSONとエラーハンドリングの例"
+title: "木構造の実践的な利用"
+description: "データベース、JSON、エラー処理の例"
 seriesId: "再帰型と畳み込み"
 seriesOrder: 6
 categories: [Folds, Patterns]
@@ -11,7 +11,7 @@ categories: [Folds, Patterns]
 
 [前回の記事](../posts/recursive-types-and-folds-3.md)では、ジェネリック型について簡単に見てきました。
 
-この記事では、実際の場面で木構造と畳み込みを使う例をいくつか掘り下げていきます。
+この記事では、現実的な場面で木構造と畳み込みを使う例をいくつか掘り下げていきます。
 
 ## シリーズの内容
 
@@ -43,16 +43,16 @@ categories: [Folds, Patterns]
   * [ジェネリックなコンテナ型の定義](../posts/recursive-types-and-folds-3.md#container)
   * [ギフトドメインを実装する3つ目の方法](../posts/recursive-types-and-folds-3.md#another-gift)
   * [抽象か具象か？3通りの設計の比較](../posts/recursive-types-and-folds-3.md#compare)
-* **パート6: 実世界の木構造**
-  * [ジェネリックな木構造型の定義](../posts/recursive-types-and-folds-3b.md#tree)
-  * [実世界の木構造型](../posts/recursive-types-and-folds-3b.md#reuse)
-  * [木構造型のマッピング](../posts/recursive-types-and-folds-3b.md#map)
-  * [例: ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.md#listing)
-  * [例: 並列 grep](../posts/recursive-types-and-folds-3b.md#grep)
-  * [例: ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.md#database)
-  * [例: 木構造の JSON シリアライズ](../posts/recursive-types-and-folds-3b.md#tojson)
-  * [例: JSON からの木構造のデシリアライズ](../posts/recursive-types-and-folds-3b.md#fromjson)
-  * [例: エラー処理付きの JSON からの木構造のデシリアライズ](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
+* **パート6: 木構造の実践的な利用**
+  * [ジェネリックな Tree 型の定義](../posts/recursive-types-and-folds-3b.md#tree)
+  * [Tree 型の実践的な利用](../posts/recursive-types-and-folds-3b.md#reuse)
+  * [Tree 型の写像](../posts/recursive-types-and-folds-3b.md#map)
+  * [例：ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.md#listing)
+  * [例：並列 grep](../posts/recursive-types-and-folds-3b.md#grep)
+  * [例：ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.md#database)
+  * [例：Tree から JSON へシリアライズ](../posts/recursive-types-and-folds-3b.md#tojson)
+  * [例：JSON から Tree へデシリアライズ](../posts/recursive-types-and-folds-3b.md#fromjson)
+  * [例：JSON から Tree へデシリアライズ - エラー処理版](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
 
 
 <a id="tree"></a>
@@ -120,7 +120,7 @@ module Tree =
             finalAccum 
 ```
 
-今回は `Tree` 型に対して `foldBack` を実装しません。スタックオーバーフローを引き起こすほどツリーが深くなることは考えにくいからです。
+今回は `Tree` 型に対して `foldBack` を実装しません。スタックオーバーフローを引き起こすほど木が深くなることは考えにくいからです。
 内部データが必要な関数は `cata` を使えます。
 
 ### Tree を使ったファイルシステムドメインのモデリング
@@ -194,7 +194,7 @@ root |> largestFile
 
 <a id="reuse"></a>
 
-## 現実世界での木構造型
+## Tree 型の実践的な利用
 
 `Tree` 型は、実際のファイルシステムもモデル化できます！
 リーフノードの型を `System.IO.FileInfo` に、内部ノードの型を `System.IO.DirectoryInfo` に設定するだけです。
@@ -270,13 +270,13 @@ let largestFile fileSystemItem =
 currentDir |> largestFile  
 ```
 
-これが、ジェネリックな再帰型を使う大きな利点の一つです。現実世界の階層構造をツリー構造に変換できれば、畳み込みのメリットをすべて「無料で」得られるのです。
+これが、ジェネリックな再帰型を使う大きな利点の一つです。現実世界の階層構造を木構造に変換できれば、畳み込みのメリットをすべて「無料で」得られるのです。
 
 <a id="map"></a>
 
-## ジェネリック型を使ったマッピング
+## Tree 型の写像
 
-ジェネリック型を使うもう一つの利点は、`map` 関数のような操作ができることです。`map` は、構造を変えずにすべての要素を新しい型に変換します。
+ジェネリック型を使うもう一つの利点は、`map` 関数のような操作ができることです。`mHap` は、構造を変えずにすべての要素を新しい型に変換します。
 
 実際のファイルシステムでこれを見てみましょう。まずは、`Tree` 型の `map` 関数を定義しましょう。
 
@@ -515,10 +515,10 @@ currentDir
 <a id="database"></a>
 <hr>
 
-## 例：ファイルシステムをデータベースに保存する
+## 例：ファイルシステムのデータベースへの保存
 
-次の例では、ファイルシステムのツリーをデータベース内に保存する方法を見ていきます。正直なところ、そんなことをする理由は特にありませんが、
-階層構造を保存するのと同じ仕組みが使えるので、ひとまず実演してみましょう。
+次の例では、ファイルシステムの木構造をデータベースに保存する方法を見ていきます。正直なところ、そんなことをする理由は特にありませんが、
+ここで示す仕組みは、どんな階層構造を保存ときにも使えるので、ひとまず実演してみましょう。
 
 データベースでファイルシステムの階層構造を表現するために、4 つのテーブルを用意します。
 
@@ -778,7 +778,7 @@ DbDir_File: inserting parentDir:41 childFile:44
 <a id="tojson"></a>
 <hr>
 
-## 例：木構造をJSONにシリアライズする
+## 例：Tree から JSON へシリアライズ
 
 別のよくある課題として、木構造をJSON、XML、またはその他の形式にシリアライズおよびデシリアライズすることが挙げられます。
 
@@ -1027,7 +1027,7 @@ let giftToDto (gift:Gift) :GiftDto =
 データ型の定義は以下の通りです。
 
 ```fsharp
-/// ツリーを表すDTO
+/// 木構造を表すDTO
 /// Leaf/Nodeの選択はレコードに変換される
 [<CLIMutableAttribute>]
 type TreeDto<'LeafData,'NodeData> = {
@@ -1042,7 +1042,7 @@ type TreeDto<'LeafData,'NodeData> = {
 `TreeDto` を作成するには、お馴染みの `cata` 関数を使って通常の `Tree` からレコードを組み立てます。
 
 ```fsharp
-/// ツリーをTreeDtoに変換する
+/// TreeをTreeDtoに変換する
 let treeToDto tree : TreeDto<'LeafData,'NodeData> =
     
     let fLeaf leafData  = 
@@ -1148,7 +1148,7 @@ let goodJson = christmasPresent |> giftToDto |> treeToDto |> toJson
 <a id="fromjson"></a>
 <hr>
 
-## 例：JSONを木構造にデシリアライズする
+## 例：JSON から Tree へデシリアライズ
 
 JSON を作成したので、今度は逆に JSON を読み込んで `Gift` に変換してみましょう。
 
@@ -1178,7 +1178,7 @@ let fromJson<'a> str =
 
 ### ステップ 2: `TreeDto` から `Tree` への変換
 
-`TreeDto` を `Tree` に変換するには、レコードとそのサブツリーを再帰的にループ処理し、
+`TreeDto` を `Tree` に変換するには、レコードとその部分木を再帰的にループ処理し、
 適切なフィールドが null かどうかによってそれぞれを `InternalNode` または `LeafNode` に変換します。
 
 ```fsharp
@@ -1285,7 +1285,7 @@ let dtoToGift (giftDto:GiftDto) :Gift=
         | "WithACard" -> withACardFromDto nodeDto
         | _ -> failwithf "不明なノードディスクリミネータ '%s'" nodeDto.discriminator 
 
-    // ツリーをマップする
+    // Treeを写像する
     Tree.map fLeaf fNode giftDto  
 ```
 
@@ -1301,7 +1301,7 @@ goodGift |> description
 // "SeventyPercent chocolate in a box wrapped in HappyHolidays paper"
 ```
 
-この方法でも動作しますが、エラーハンドリングがひどいものです。
+この方法でも動作しますが、エラー処理がひどいものです。
 
 JSON を少し壊してみましょう。
 
@@ -1340,9 +1340,9 @@ let badJson3_result = badJson3 |> fromJson |> dtoToTree |> dtoToGift
 <a id="json-with-error-handling"></a>
 <hr>
 
-## 例：JSON からのツリーのデシリアライズ - エラーハンドリング付き
+## 例：JSON から Tree へデシリアライズ - エラー処理版
 
-エラーハンドリングの問題に対処するために、以下のような `Result` 型を使用します。
+エラー処理の問題に対処するために、以下のような `Result` 型を使用します。
 
 ```fsharp
 type Result<'a> = 
@@ -1351,7 +1351,7 @@ type Result<'a> =
 ```
 
 ここでは、この型がどのように機能するかは説明しません。
-このアプローチに慣れていない場合は、[私の記事](../posts/recipe-part2.md) または関数型エラーハンドリングに関する[私の講演資料](https://fsharpforfunandprofit.com/rop/) を参照してください。
+このアプローチに慣れていない場合は、[私の記事](../posts/recipe-part2.md) または関数型エラー処理に関する[私の講演資料](https://fsharpforfunandprofit.com/rop/) を参照してください。
 
 前のセクションのすべてのステップをもう一度見直して、例外をスローする代わりに `Result` 型を使ってみましょう。
 
@@ -1377,7 +1377,7 @@ let fromJson<'a> str =
 
 ### ステップ2: `TreeDto` から `Tree` へ
 
-前回の変換処理と同様に、レコードとそのサブツリーを再帰的にループ処理して、 `TreeDto` を `Tree` に変換します。各要素は `InternalNode` または `LeafNode` に変換します。
+前回の変換処理と同様に、レコードとその部分木を再帰的にループ処理して、 `TreeDto` を `Tree` に変換します。各要素は `InternalNode` または `LeafNode` に変換します。
 今回は、エラー処理のために `Result` 型を使用します。
 
 ```fsharp
@@ -1427,7 +1427,7 @@ let rec dtoToTreeOfResults (treeDto:TreeDto<'Leaf,'Node>) :Tree<Result<'Leaf>,Re
 以降の `Tree` と `Result` の組み合わせでも同じように使えます。
 
 ```fsharp
-/// ResultのツリーをツリーのResultに変換する
+/// ResultのTreeをTreeのResultに変換する
 let sequenceTreeOfResult tree =
     // 下位レベルから
     let (<*>) = Result.apply 
@@ -1560,7 +1560,7 @@ let dtoToGift (giftDto:GiftDto) :Result<Gift>=
         | "WithACard" -> withACardFromDto nodeDto
         | _ -> Result.failWithMsg (sprintf "不明なノードディスクリミネータ '%s'" nodeDto.discriminator)
 
-    // ツリーをマップする
+    // Treeを写像する
     Tree.map fLeaf fNode giftDto |> sequenceTreeOfResult   
 ```
 
@@ -1646,7 +1646,7 @@ let badJson4_result = badJson4 |> fromJson |> Result.bind dtoToTree |> Result.bi
     
 ## まとめ
 
-このシリーズでは、カタモーフィズムと畳み込みの定義方法、そして特に今回の記事においては、それらを現実世界の問題解決に適用する方法を解説しました。
+このシリーズでは、カタモーフィズムと畳み込みの定義方法、そして特に今回の記事においては、現実的な問題解決に使う方法を解説しました。
 このシリーズが皆様にとって有用なものであり、ご自身のコードに適用できるヒントや洞察を提供できたことを願っています。
 
 シリーズは当初の予定よりも長くなってしまいましたが、最後までお読みいただきありがとうございました！ ではまた！

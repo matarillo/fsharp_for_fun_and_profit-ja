@@ -40,16 +40,16 @@ categories: [Folds, Patterns]
   * [ジェネリックなコンテナ型の定義](../posts/recursive-types-and-folds-3.md#container)
   * [ギフトドメインを実装する3つ目の方法](../posts/recursive-types-and-folds-3.md#another-gift)
   * [抽象か具象か？3通りの設計の比較](../posts/recursive-types-and-folds-3.md#compare)
-* **パート6: 実世界の木構造**
-  * [ジェネリックな木構造型の定義](../posts/recursive-types-and-folds-3b.md#tree)
-  * [実世界の木構造型](../posts/recursive-types-and-folds-3b.md#reuse)
-  * [木構造型のマッピング](../posts/recursive-types-and-folds-3b.md#map)
-  * [例: ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.md#listing)
-  * [例: 並列 grep](../posts/recursive-types-and-folds-3b.md#grep)
-  * [例: ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.md#database)
-  * [例: 木構造の JSON シリアライズ](../posts/recursive-types-and-folds-3b.md#tojson)
-  * [例: JSON からの木構造のデシリアライズ](../posts/recursive-types-and-folds-3b.md#fromjson)
-  * [例: エラー処理付きの JSON からの木構造のデシリアライズ](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
+* **パート6: 木構造の実践的な利用**
+  * [ジェネリックな Tree 型の定義](../posts/recursive-types-and-folds-3b.md#tree)
+  * [Tree 型の実践的な利用](../posts/recursive-types-and-folds-3b.md#reuse)
+  * [Tree 型の写像](../posts/recursive-types-and-folds-3b.md#map)
+  * [例：ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.md#listing)
+  * [例：並列 grep](../posts/recursive-types-and-folds-3b.md#grep)
+  * [例：ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.md#database)
+  * [例：Tree から JSON へシリアライズ](../posts/recursive-types-and-folds-3b.md#tojson)
+  * [例：JSON から Tree へデシリアライズ](../posts/recursive-types-and-folds-3b.md#fromjson)
+  * [例：JSON から Tree へデシリアライズ - エラー処理版](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
 
   
 <a id="basic-recursive-type"></a>
@@ -807,7 +807,7 @@ cheapChoc |> upgradeChocolate
 ```
 
 この処理は `map` 関数に似ているように思えるかもしれませんが、その通りです。
-ジェネリックな `map` 関数については、[連載第6回](../posts/recursive-types-and-folds-3b.md#map) でジェネリックな再帰型について議論する際に取り上げます。
+ジェネリックな `map` 関数については、[シリーズの第6回](../posts/recursive-types-and-folds-3b.md#map) でジェネリックな再帰型について議論する際に取り上げます。
   
   
 <a id="rules"></a>

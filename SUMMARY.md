@@ -170,7 +170,7 @@
   * [畳み込みの紹介](posts/recursive-types-and-folds-2.md)
   * [畳み込みを理解する](posts/recursive-types-and-folds-2b.md)
   * [ジェネリック再帰型](posts/recursive-types-and-folds-3.md)
-  * [実世界の木構造](posts/recursive-types-and-folds-3b.md)
+  * [木構造の実践的な利用](posts/recursive-types-and-folds-3b.md)
 * [「認可の関数型アプローチ」 シリーズ](series/a-functional-approach-to-authorization.md)       
   * [認可の関数型アプローチ](posts/capability-based-security.md)
   * [ID とロールに基づく機能の制約](posts/capability-based-security-2.md)
