@@ -78,7 +78,7 @@ F#は構文がよりコンパクトなだけでなく、テスト名をより読
 
 ## 10. 読みやすい名前の単体テストをF#で書く
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithNUnit.fs)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithNUnit.fs)です。*
 
 C#と同様に、F#でもNUnit、MsUnit、xUnitなどの標準的なフレームワークを使って標準的な単体テストを書くことができます。
 
@@ -128,7 +128,7 @@ Result: Success
 しばしば、単体テストをプログラムで実行したいことがあります。これにはさまざまな理由があり、
 カスタムフィルターの使用、カスタムログの記録、テストマシンにNUnitをインストールしたくない場合などがあります。
 
-これを行う簡単な方法の1つは、[Fuchuライブラリ](http://github.com/mausch/Fuchu)を使うことです。Fuchuを使うと、複雑なテスト属性を使わずに、
+これを行う簡単な方法の1つは、[Fuchuライブラリ](https://github.com/mausch/Fuchu)を使うことです。Fuchuを使うと、複雑なテスト属性を使わずに、
 特にパラメータ化されたテストを直接整理することができます。
 
 以下は例です：
@@ -168,7 +168,7 @@ let tests =
    ]
 ```
 
-*上記のコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/OrganizeTestsWithFuchu.fs)です。*
+*上記のコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/OrganizeTestsWithFuchu.fs)です。*
 
 最後に、Fuchuを使うと、テストアセンブリが独自のテストランナーになります。アセンブリをライブラリではなくコンソールアプリにし、`program.fs`ファイルに次のコードを追加するだけです：
 
@@ -184,7 +184,7 @@ let main args =
     exitCode 
 ```
 
-[Fuchuの詳細はこちら](http://bugsquash.blogspot.co.uk/2012/06/fuchu-functional-test-library-for-net.html)。
+[Fuchuの詳細はこちら](https://bugsquash.blogspot.com/2012/06/fuchu-functional-test-library-for-net.html)。
 
 ### NUnitテストランナーを使う
 
@@ -291,7 +291,7 @@ do
     // 対話セッションから実行している場合、MyUnitTests.dllを再コンパイルする前にセッションをリセット
 ```
 
-*上記のコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/nunit-test-runner.fsx)です。*
+*上記のコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/nunit-test-runner.fsx)です。*
 
 <a name="test-other"></a>
 
@@ -301,7 +301,7 @@ do
 異なるスタイルでコーディングすることを学ぶことは、レパートリーに新しいテクニックを追加し、一般的に思考を広げる素晴らしい方法です。
 そのうちのいくつかを簡単に見てみましょう。
 
-まず最初は[FsUnit](http://github.com/fsharp/FsUnit)です。これは`Assert`をより流暢で慣用的なアプローチ（自然言語とパイピング）に置き換えます。
+まず最初は[FsUnit](https://github.com/fsharp/FsUnit)です。これは`Assert`をより流暢で慣用的なアプローチ（自然言語とパイピング）に置き換えます。
 
 以下は簡単な例です：
 
@@ -324,9 +324,9 @@ let ``When ToLower(), expect lowercase letters``() =
     "FSHARP".ToLower() |> should startWith "fs"
 ```
 
-*上記のコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithFsUnit.fs)です。*
+*上記のコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithFsUnit.fs)です。*
  
-非常に異なるアプローチを使うのが[Unquote](http://code.google.com/p/unquote/)です。
+非常に異なるアプローチを使うのが[Unquote](https://github.com/swensensoftware/unquote)です。
 Unquoteのアプローチは、任意のF#式を[F#クォーテーション](https://learn.microsoft.com/ja-jp/dotnet/fsharp/language-reference/code-quotations)でラップしてから評価することです。
 テスト式が例外をスローすると、テストは失敗し、例外だけでなく、例外が発生するまでの各ステップも出力します。
 この情報は、アサートが失敗した理由をより深く理解するのに役立つ可能性があります。
@@ -354,11 +354,11 @@ let ``2 + 2 is bigger than 5``() =
 ```
 <a name="test-fscheck"></a>
 
-*上記のコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithUnquote.fs)です。*
+*上記のコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithUnquote.fs)です。*
 
 ## 13. FsCheckを使ってより良い単体テストを書く
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithFsCheck.fs)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithFsCheck.fs)です。*
 
 数字をローマ数字に変換する関数を書いたとして、そのテストケースを作成したいとします。
 
@@ -376,7 +376,7 @@ let ``Test that 497 is CDXCVII``() =
 
 例えば、ローマ数字の例では、「すべてのローマ数字には最大で1つの'V'文字がある」や「すべてのローマ数字には最大で3つの'X'文字がある」というプロパティがあると言えます。そして、このプロパティが実際に真であることをチェックするテストを構築できます。
 
-ここで[FsCheck](http://github.com/fsharp/FsCheck)が役立ちます。
+ここで[FsCheck](https://github.com/fsharp/FsCheck)が役立ちます。
 FsCheckはまさにこの種のプロパティベースのテスティングのために設計されたフレームワークです。F#で書かれていますが、C#コードのテストにも同様に適しています。
 
 では、ローマ数字にFsCheckをどのように使うか見てみましょう。
@@ -458,30 +458,30 @@ Falsifiable, after 33 tests
   より一般的には、2つの異なる経路で計算する場合、同じ答えが得られるはずです（[モノイド準同型！](../posts/monoids-part2.md#monoid-homomorphism)）
 * **丸め**。レシピに材料を追加する場合、材料のパーセンテージの合計（小数点以下2桁の精度）は常に正確に100%になるはずです。
   同様のルールは、株式、税金計算などのほとんどの分割ロジックに必要です。
-  （例：[DDDブックの「シェアパイ」の例](http://books.google.co.uk/books?id=xColAAPGubgC&pg=PA198&lpg=PA198&dq=%22domain+driven+design%22+%22share+pie%22&source=bl&ots=q9-HdfTK4p&sig=IUnHGFUdwQv2p0tuWVbrqqwdAk4&hl=en&sa=X&ei=IdFbU5bLK8SMOPLFgfgC&ved=0CC8Q6AEwAA#v=onepage&q=%22domain%20driven%20design%22%20%22share%20pie%22&f=false)）。
+  （例：[DDDブックの「シェアパイ」の例](https://books.google.co.uk/books?id=xColAAPGubgC&pg=PA198&lpg=PA198&dq=%22domain+driven+design%22+%22share+pie%22&source=bl&ots=q9-HdfTK4p&sig=IUnHGFUdwQv2p0tuWVbrqqwdAk4&hl=en&sa=X&ei=IdFbU5bLK8SMOPLFgfgC#v=onepage&q=%22domain%20driven%20design%22%20%22share%20pie%22&f=false)）。
   このような状況で丸めを正しく行うことを確認するのは、FsCheckが真価を発揮する場面です。
   
-他のアイデアについては、この[SOの質問](http://stackoverflow.com/questions/2446242/difficulty-thinking-of-properties-for-fscheck?rq=1)を参照してください。
+他のアイデアについては、この[SOの質問](https://stackoverflow.com/questions/2446242/difficulty-thinking-of-properties-for-fscheck?rq=1)を参照してください。
 
 FsCheckはリファクタリングにも非常に役立ちます。テストが非常に徹底的であると信頼できれば、自信を持って微調整や最適化に取り組むことができます。
 
 FsCheckに関するその他のリンク：
 
-* [プロパティベーステストの入門](http://fsharpforfunandprofit.com/posts/property-based-testing/)と[プロパティベーステストのプロパティ選択に関するフォローアップ](http://fsharpforfunandprofit.com/posts/property-based-testing-2/)を書きました。
-* [FsCheckのドキュメント](http://github.com/fsharp/FsCheck/blob/master/Docs/Documentation.md)。
-* [実践でのFsCheckの使用に関する記事](http://www.clear-lines.com/blog/post/FsCheck-and-XUnit-is-The-Bomb.aspx)。
+* [プロパティベーステストの入門](../posts/property-based-testing.md)と[プロパティベーステストのプロパティ選択に関するフォローアップ](../posts/property-based-testing-2.md)を書きました。
+* [FsCheckのドキュメント](https://github.com/fsharp/FsCheck/blob/master/Docs/Documentation.md)。
+* [実践でのFsCheckの使用に関する記事](https://brandewinder.com/2014/03/22/fscheck-and-xunit-is-the-bomb/)。
 * [FsCheckに言及しているローマ数字kata](../posts/roman-numeral-kata.md)に関する私の投稿。
 
 プロパティベーステスト一般については、QuickCheckに関する記事やビデオを探してください。
 
-* [John HughesによるQuickCheckの紹介](http://www.cs.utexas.edu/~ragerdl/fmcad11/slides/tutorial-a.pdf)（PDF）
-* [QuickCheckを使ってRiakのバグを見つける](https://skillsmatter.com/skillscasts/4505-quickchecking-riak)に関する興味深い講演（[別バージョン](http://www.cs.utexas.edu/~ragerdl/fmcad11/slides/tutorial-a.pdf)）（ビデオ）
+* [John HughesによるQuickCheckの紹介](https://www.researchgate.net/publication/254051198_Specification_based_testing_with_QuickCheck)
+* [QuickCheckを使ってRiakのバグを見つける](https://web.archive.org/web/20140703090110/https://skillsmatter.com/skillscasts/4505-quickchecking-riak)に関する興味深い講演（ビデオ）
 
 <a name="test-dummy"></a>
 
 ## 14. FsCheckを使ってランダムなダミーデータを作成する
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/RandomDataWithFsCheck.fs)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/RandomDataWithFsCheck.fs)です。*
 
 テストに加えて、FsCheckはランダムなダミーデータの作成にも使えます。
 
@@ -591,8 +591,8 @@ let printRandomCustomers() =
 
 C#で書かれたコードのテストケースをF#で書く場合、インターフェースのモックやスタブを作成したいかもしれません。
 
-C#では[Moq](http://github.com/Moq/moq4)や[NSubstitute](http://nsubstitute.github.io/)を使うかもしれません。
-F#ではオブジェクト式を使ってインターフェースを直接作成するか、[Foqライブラリ](http://foq.codeplex.com/)を使うことができます。
+C#では[Moq](https://github.com/Moq/moq4)や[NSubstitute](https://nsubstitute.github.io/)を使うかもしれません。
+F#ではオブジェクト式を使ってインターフェースを直接作成するか、[Foqライブラリ](https://github.com/fsprojects/Foq?tab=readme-ov-file)を使うことができます。
 
 どちらも簡単に行えて、Moqと似た方法で使えます。
 
@@ -631,26 +631,26 @@ F#でのモックについての詳細は以下を参照してください：
 
 * [F# as a Unit Testing Language](http://trelford.com/blog/post/fstestlang.aspx)
 * [Mocking with Foq](http://trelford.com/blog/post/Foq.aspx)
-* [Testing and mocking your C# code with F#](http://www.clear-lines.com/blog/post/Testing-and-mocking-your-C-sharp-code-with-F-sharp.aspx)
+* [Testing and mocking your C# code with F#](https://brandewinder.com/2013/01/27/Testing-and-mocking-your-C-sharp-code-with-F-sharp/)
 
-また、ネットワーク越しのSMTPなどの外部サービスをモックする必要がある場合、[mountebank](http://www.mbtest.org/)という興味深いツールがあります。
-これは[F#で簡単に対話できます](http://nikosbaxevanis.com/blog/2014/04/22/mountebank-mocks-with-f-number/)。
+また、ネットワーク越しのSMTPなどの外部サービスをモックする必要がある場合、[mountebank](https://www.mbtest.org/)という興味深いツールがあります。
+これは[F#で簡単に対話できます](https://blog.nikosbaxevanis.com/2014/04/22/mountebank-mocks-with-fsharp/)。
 
 <a name="test-canopy"></a>
 
 ## 16. F#を使って自動化されたブラウザテストを行う
 
-単体テストに加えて、[Selenium](http://docs.seleniumhq.org/)や[WatiN](http://watin.sourceforge.net/)を使ってブラウザを操作する、
+単体テストに加えて、[Selenium](https://www.selenium.dev/)や[WatiN](https://github.com/dev4s/WatiN)を使ってブラウザを操作する、
 何らかの自動化されたWebテストを行うべきです。
 
 しかし、自動化をどの言語で書くべきでしょうか？Ruby？Python？C#？答えはもうわかっていますね！
 
-さらに簡単にするには、F#で書かれたSelenium上に構築されたWebテストフレームワーク[Canopy](http://lefthandedgoat.github.io/canopy/)を試してみてください。
+さらに簡単にするには、F#で書かれたSelenium上に構築されたWebテストフレームワーク[Canopy](https://lefthandedgoat.github.io/canopy/)を試してみてください。
 彼らのサイトでは*「すぐに学べます。UIの自動化をしたことがなく、F#を知らなくても大丈夫です。」*と主張しており、私もそう信じています。
 
 以下はCanopyサイトから抜粋したスニペットです。ご覧の通り、コードは簡単で理解しやすいです。
 
-また、FAKEはCanopyと統合されているので、[CIビルドの一部として自動化されたブラウザテストを実行できます](http://fsharp.github.io/FAKE/canopy.html)。
+また、FAKEはCanopyと統合されているので、[CIビルドの一部として自動化されたブラウザテストを実行できます](https://web.archive.org/web/20170204031005/http://fsharp.github.io/FAKE/canopy.html)。
 
 ```fsharp
 //firefoxブラウザのインスタンスを開始
@@ -686,7 +686,7 @@ run()
 <a name="test-bdd"></a>
 ## 17. 振る舞い駆動開発にF#を使う
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TickSpec.StepDefinitions.fs)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TickSpec.StepDefinitions.fs)です。*
 
 振る舞い駆動開発（BDD）に馴染みがない場合、アイデアは要件を人間が読めると同時に*実行可能*な方法で表現することです。
 
@@ -702,9 +702,9 @@ run()
 	Then 私は在庫に4着の黒いセーターを持っているはずである
 ```
 
-.NETですでにBDDを使っているなら、おそらく[SpecFlow](http://www.specflow.org/)か同様のものを使っているでしょう。
+.NETですでにBDDを使っているなら、おそらく[SpecFlow](https://specflow.org/)か同様のものを使っているでしょう。
 
-代わりに[TickSpec](http://tickspec.codeplex.com/)の使用を検討すべきです。
+代わりに[TickSpec](https://github.com/fsprojects/TickSpec)の使用を検討すべきです。
 なぜなら、F#のすべてのものと同様に、構文がはるかに軽量だからです。
 
 例えば、以下は上記のシナリオの完全な実装です。
@@ -744,11 +744,11 @@ public void GivenIHaveNBlackJumpersLeftInStock(int n)
 }
 ```
 
-*例は[TickSpec](http://tickspec.codeplex.com/)サイトから取られています。*
+*例は[TickSpec](https://github.com/fsprojects/TickSpec)サイトから取られています。*
 
 ## F#でのテストのまとめ ##
 
-もちろん、これまで見てきたすべてのテスト技術を組み合わせることができます（[このスライドデッキが示すように](http://www.slideshare.net/bartelink/testing-cinfdublinaltnet2013)）：
+もちろん、これまで見てきたすべてのテスト技術を組み合わせることができます（[このスライドデッキが示すように](https://www.slideshare.net/slideshow/testing-cinfdublinaltnet2013/27590095)）：
 
 * 単体テスト（FsUnit、Unquote）とプロパティベーステスト（FsCheck）。
 * BDD（TickSpec）で書かれた自動化された受け入れテスト（または少なくともスモークテスト）をブラウザ自動化（Canopy）で駆動。

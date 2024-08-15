@@ -588,7 +588,7 @@ let shipOrder order shippingMethod =
 
 ## このアプローチを使うべきでない場合
 
-どんな手法もそうですが、習得したものを[万能ツール](http://en.wikipedia.org/wiki/Law_of_the_instrument)のように扱わないよう注意する必要があります。
+どんな手法もそうですが、習得したものを[万能ツール](https://en.wikipedia.org/wiki/Law_of_the_instrument)のように扱わないよう注意する必要があります。
 
 このアプローチは複雑さを増やすので、使い始める前に、メリットがデメリットを上回るかどうかを検討してください。
 

@@ -219,7 +219,7 @@ public static NameAndSize MaxNameAndSize(IList<NameAndSize> list)
 
 ```
 
-LINQでこれを効率的に（つまり、1回のパスで）行うのは難しいように見え、[Stack Overflowの質問](http://stackoverflow.com/questions/1101841/linq-how-to-perform-max-on-a-property-of-all-objects-in-a-collection-and-ret)として取り上げられています。Jon Skeetさんも[この問題について記事を書いています](http://codeblog.jonskeet.uk/2005/10/02/a-short-case-study-in-linq-efficiency/)。
+LINQでこれを効率的に（つまり、1回のパスで）行うのは難しいように見え、[Stack Overflowの質問](https://stackoverflow.com/questions/1101841/how-to-perform-max-on-a-property-of-all-objects-in-a-collection-and-return-th)として取り上げられています。Jon Skeetさんも[この問題について記事を書いています](https://codeblog.jonskeet.uk/2005/10/02/a-short-case-study-in-linq-efficiency/)。
 
 ここでも、foldが救世主です！
 

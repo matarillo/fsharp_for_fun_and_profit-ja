@@ -298,11 +298,11 @@ let fetchUrl url =
 
 ```fsharp
 // 取得するサイトのリスト
-let sites = ["http://www.bing.com";
-             "http://www.google.com";
-             "http://www.microsoft.com";
-             "http://www.amazon.com";
-             "http://www.yahoo.com"]
+let sites = ["https://www.bing.com/";
+             "https://www.google.com/";
+             "https://www.microsoft.com/";
+             "https://www.amazon.com/";
+             "https://www.yahoo.com/"]
 
 #time                     // インタラクティブタイマーをオン
 sites                     // サイトのリストから開始
@@ -353,11 +353,11 @@ let fetchUrlAsync url =
 
 ```fsharp
 // 取得するサイトのリスト
-let sites = ["http://www.bing.com";
-             "http://www.google.com";
-             "http://www.microsoft.com";
-             "http://www.amazon.com";
-             "http://www.yahoo.com"]
+let sites = ["https://www.bing.com/";
+             "https://www.google.com/";
+             "https://www.microsoft.com/";
+             "https://www.amazon.com/";
+             "https://www.yahoo.com/"]
 
 #time                      // インタラクティブタイマーをオン
 sites 

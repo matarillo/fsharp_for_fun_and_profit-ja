@@ -70,7 +70,7 @@ F#が初めての方は、前回の投稿の[はじめに](../posts/low-risk-way
 次の提案は、開発活動に関連するさまざまなスクリプト（ビルド、継続的インテグレーション、デプロイメントなど）にF#を使うことに関するものです。
 
 このような小規模なタスクには、REPLを備えた優れたスクリプト言語が必要です。
-PowerShellや[ScriptCS](http://scriptcs.net/)、あるいはPythonを使うこともできますが、F#を試してみてはいかがでしょうか？
+PowerShellや[ScriptCS](https://scriptcs.net/)、あるいはPythonを使うこともできますが、F#を試してみてはいかがでしょうか？
 
 * F#はPythonのように軽量です（型宣言がほとんどまたは全くありません）。
 * F#は.NETライブラリ（コアライブラリとNuGetでダウンロードしたライブラリの両方）にアクセスできます。
@@ -81,7 +81,7 @@ PowerShellや[ScriptCS](http://scriptcs.net/)、あるいはPythonを使うこ�
 このような低リスクなアプローチに対して、マネージャーからの抵抗はないはずです - 最悪の場合でも、別のツールに簡単に切り替えることができます。
 
 もちろん、隠れた目的として、同僚の開発者がF#を使う機会を得れば、彼らはF#にはまり、
-[F#をエンドツーエンドで使う](http://colinbul.wordpress.com/2013/02/23/f-end-to-end/)一歩近づくことができるでしょう！
+[F#をエンドツーエンドで使う](http://www.colinbull.net/2013/02/23/FSharp-end-to-end/)一歩近づくことができるでしょう！
 
 ### F#スクリプトで何ができますか？
 
@@ -97,15 +97,15 @@ PowerShellや[ScriptCS](http://scriptcs.net/)、あるいはPythonを使うこ�
   .NET 4.5を使っている場合は、新しい[System.IO.Compression.ZipArchive](https://learn.microsoft.com/ja-jp/dotnet/api/system.io.compression.zipfileextensions.createentryfromfile)
   クラスを使って、サードパーティのライブラリを必要とせずにZIP圧縮と解凍を行うことができます。
 * JSONを扱う作業。既知の形式
-  （[JSON Type Provider](http://fsharp.github.io/FSharp.Data/library/JsonProvider.html)を使用）
-  または未知の形式（[JSONパーサー](http://fsharp.github.io/FSharp.Data/library/JsonValue.html)を使用）。
-* [Octokit](http://www.nuget.org/packages/Octokit/)を使ってGitHubと対話する。
+  （[JSON Type Provider](https://fsprojects.github.io/FSharp.Data/library/JsonProvider.html)を使用）
+  または未知の形式（[JSONパーサー](https://fsprojects.github.io/FSharp.Data/library/JsonValue.html)を使用）。
+* [Octokit](https://www.nuget.org/packages/Octokit/)を使ってGitHubと対話する。
 * Excelからデータを抽出したり、Excelのデータを操作したりする。F#はOffice自動化用のCOMをサポートしています。または、型プロバイダーやライブラリを使うこともできます。
-* [Math.NET](http://numerics.mathdotnet.com/)を使って数値計算を行う。
+* [Math.NET](https://numerics.mathdotnet.com/)を使って数値計算を行う。
 * Webクローリング、リンクチェック、スクリーンスクレイピング。組み込みの非同期ワークフローとエージェントにより、この種の「マルチスレッド」コードを非常に簡単に書くことができます。
-* [Quartz.NET](http://www.quartz-scheduler.net/)を使ってスケジューリングを行う。
+* [Quartz.NET](https://www.quartz-scheduler.net/)を使ってスケジューリングを行う。
 
-これらの提案があなたの興味を刺激し、F#をもっと使いたいと思ったら、[F#コミュニティプロジェクト](http://fsharp.org/community/projects/)のページをチェックしてください。
+これらの提案があなたの興味を刺激し、F#をもっと使いたいと思ったら、[F#コミュニティプロジェクト](https://fsharp.org/community/projects/)のページをチェックしてください。
 F#用に書かれている有用なライブラリの優れた情報源であり、そのほとんどがF#スクリプティングでうまく機能します。
 
 ### F#スクリプトのデバッグ
@@ -116,8 +116,8 @@ F#スクリプトを使う大きな利点は、プロジェクト全体を作成
 
 * まず、`printfn`を使ってコンソールに出力する従来の方法を使えます。
   通常、これを簡単な`log`関数でラップし、フラグでログ出力のオン/オフを切り替えられるようにします。
-* [FsEye](http://code.google.com/p/fseye/)ツールを使って、対話セッションで変数を検査し、監視できます。
-* 最後に、Visual Studioのデバッガーを使うこともできます。コツは、[デバッガーをアタッチする](http://stackoverflow.com/a/9337016/1136133)ことです。
+* [FsEye](https://github.com/swensensoftware/fseye)ツールを使って、対話セッションで変数を検査し、監視できます。
+* 最後に、Visual Studioのデバッガーを使うこともできます。コツは、[デバッガーをアタッチする](https://stackoverflow.com/questions/9336353/can-i-run-fsx-files-from-within-visual-studio-without-setting-up-a-project/9337016#9337016)ことです。
   fsi.exeプロセスに対して行い、その後[`Debugger.Break`](https://learn.microsoft.com/ja-jp/dotnet/api/system.diagnostics.debugger.break)
   を使って特定のポイントで停止できます。
 
@@ -125,22 +125,22 @@ F#スクリプトを使う大きな利点は、プロジェクト全体を作成
 
 ## 5. ビルドとCIスクリプトにFAKEを使う
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/fake.fsx)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/fake.fsx)です。*
 
-まずは[FAKE](http://fsharp.github.io/FAKE/)から始めましょう。FAKEはF#で書かれたクロスプラットフォームのビルド自動化ツールで、Rubyの[Rake](http://rake.rubyforge.org/)に相当するものです。
+まずは[FAKE](https://fake.build/)から始めましょう。FAKEはF#で書かれたクロスプラットフォームのビルド自動化ツールで、Rubyの[Rake](https://ruby.github.io/rake/)に相当するものです。
 
 FAKEには、git、NuGet、単体テスト、Octopus Deploy、Xamarinなどの組み込みサポートがあり、依存関係のある複雑なスクリプトを簡単に開発できます。
 
 [TFSでXAMLの使用を避ける](http://blog.ctaggart.com/2014/01/code-your-tfs-builds-in-f-instead-of.html)ためにも使えます。
 
 FAKEをRakeのようなものではなく使う理由の1つは、ツールチェーン全体で.NETコードを標準化できることです。
-理論的には[NAnt](http://en.wikipedia.org/wiki/NAnt)を代わりに使えますが、実際には、XMLのためにお勧めしません。
-[PSake](http://github.com/psake/psake)も可能性はありますが、FAKEよりも複雑だと思います。
+理論的には[NAnt](https://en.wikipedia.org/wiki/NAnt)を代わりに使えますが、実際には、XMLのためにお勧めしません。
+[PSake](https://github.com/psake/psake)も可能性はありますが、FAKEよりも複雑だと思います。
 
 また、FAKEを使って特定のビルドサーバーへの依存を取り除くこともできます。例えば、TeamCityの統合を使ってテストやその他のタスクを実行する代わりに、
-[FAKEで実行する](http://www.jamescrowley.co.uk/2014/04/22/code-coverage-using-dotcover-and-f-make/)ことを検討できます。これにより、TeamCityをインストールせずに完全なビルドを実行できます。
+[FAKEで実行する](https://www.jamescrowley.net/2014/04/22/code-coverage-using-dotcover-and-f-make/)ことを検討できます。これにより、TeamCityをインストールせずに完全なビルドを実行できます。
 
-以下は、非常に簡単なFAKEスクリプトの例で、[FAKEサイトのより詳細な例](http://fsharp.github.io/FAKE/gettingstarted.html)から取られています。
+以下は、非常に簡単なFAKEスクリプトの例で、[FAKEサイトのより詳細な例](https://v5.fake.build/fake-gettingstarted.html)から取られています。
 
 ```fsharp
 // Include Fake lib
@@ -172,15 +172,15 @@ RunTargetOrDefault "Default"
 
 FAKEに関するさらなる読み物：
 
-* [FAKEへの移行](http://bugsquash.blogspot.co.uk/2010/11/migrating-to-fake.html)
-* [HanselmanのFAKEについて](http://www.hanselman.com/blog/ExploringFAKEAnFBuildSystemForAllOfNET.aspx)。多くのコメントは実際にFAKEを使っている人々からのものです。
-* [NAntユーザーがFAKEを試す](http://putridparrot.com/blog/trying-fake-out/)
+* [FAKEへの移行](https://bugsquash.blogspot.com/2010/11/migrating-to-fake.html)
+* [HanselmanのFAKEについて](https://www.hanselman.com/blog/exploring-fake-an-f-build-system-for-all-of-net)。多くのコメントは実際にFAKEを使っている人々からのものです。
+* [NAntユーザーがFAKEを試す](https://putridparrot.com/blog/trying-fake-out/)
 
 <a name="dev-website-responding"></a>
 
 ## 6. Webサイトの応答をチェックするF#スクリプト
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/dev-website-responding.fsx)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/dev-website-responding.fsx)です。*
 
 このスクリプトは、Webサイトが200で応答しているかをチェックします。
 これは、例えばデプロイメント後のスモークテストの基礎として役立つかもしれません。
@@ -212,8 +212,8 @@ let checkServer (uri,queryParams) =
         sendAlert uri "No response"
 
 // test the sites    
-let google = "http://google.com", ["q","fsharp"]
-let bad = "http://example.bad", []
+let google = "https://google.com", ["q","fsharp"]
+let bad = "https://example.bad", []
 
 [google;bad]
 |> List.iter checkServer 
@@ -222,18 +222,18 @@ let bad = "http://example.bad", []
 結果は次のようになります：
 
 ```text
-Response for http://google.com is 200
-Error for http://example.bad. Message=No response
+Response for https://google.com is 200
+Error for https://example.bad. Message=No response
 ```
 
 ここでは`Fsharp.Data`のHttp utilitiesコードを使っていますが、これは`HttpClient`の便利なラッパーを提供しています。
-[HttpUtilitiesの詳細はこちら](http://fsharp.github.io/FSharp.Data/library/Http.html)。
+[HttpUtilitiesの詳細はこちら](https://fsprojects.github.io/FSharp.Data/library/Http.html)。
 
 <a name="dev-rss-to-csv"></a>
 
 ## 7. RSSフィードをCSVに変換するF#スクリプト
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/dev-rss-to-csv.fsx)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/dev-rss-to-csv.fsx)です。*
 
 これは、Xml型プロバイダーを使ってRSSフィード（この場合は[StackOverflowのF#質問](https://stackoverflow.com/questions/tagged/f%23?sort=newest&pageSize=10)）を解析し、
 後で分析するためにCSVファイルに変換する小さなスクリプトです。
@@ -251,7 +251,7 @@ System.IO.Directory.SetCurrentDirectory (__SOURCE_DIRECTORY__)
 #r "System.Xml.Linq.dll"
 open FSharp.Data
 
-type Rss = XmlProvider<"http://stackoverflow.com/feeds/tag/f%23">
+type Rss = XmlProvider<"https://stackoverflow.com/feeds/tag/f%23">
 
 // prepare a string for writing to CSV            
 let prepareStr obj =
@@ -296,13 +296,13 @@ do
 "How does function [x] -> ... work","egerhard","19/04/2014"
 ```
 
-XML型プロバイダーの詳細については、[FSharp.Dataのページ](http://fsharp.github.io/FSharp.Data/library/XmlProvider.html)を参照してください。
+XML型プロバイダーの詳細については、[FSharp.Dataのページ](https://fsprojects.github.io/FSharp.Data/library/XmlProvider.html)を参照してください。
     
 <a name="dev-wmi-stats"></a>
     
 ## 8. WMIを使ってプロセスの統計をチェックするF#スクリプト
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/dev-wmi-stats.fsx)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/dev-wmi-stats.fsx)です。*
 
 Windowsを使っている場合、WMIにアクセスできることは非常に便利です。
 幸いなことに、WMI用のF#型プロバイダーがあり、使いやすくなっています。
@@ -361,7 +361,7 @@ PageFileBytesPeak=312565760
 
 ![](../assets/img/fsharp-wmi-dropdown.png)
 
-[WMI型プロバイダーの詳細はこちら](http://fsprojects.github.io/FSharp.Management/WMIProvider.html)。
+[WMI型プロバイダーの詳細はこちら](https://fsprojects.github.io/FSharp.Management/WMIProvider.html)。
 
 
 <a name="dev-cloud"></a>
@@ -369,9 +369,9 @@ PageFileBytesPeak=312565760
 ## 9. クラウドの設定と管理にF#を使う
 
 特に言及に値する領域の1つは、クラウドサービスの設定と管理にF#を使うことです。
-fsharp.orgの[クラウドページ](http://fsharp.org/cloud/)には多くの役立つリンクがあります。
+fsharp.orgの[クラウドページ](https://fsharp.org/guides/cloud/)には多くの役立つリンクがあります。
 
-簡単なスクリプティングには、[Fog](http://dmohl.github.io/Fog/)がAzure用の素晴らしいラッパーです。
+簡単なスクリプティングには、[Fog](https://dmohl.github.io/Fog/)がAzure用の素晴らしいラッパーです。
 
 例えば、blobをアップロードするコードは以下のように簡単です：
 

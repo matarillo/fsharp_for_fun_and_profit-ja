@@ -79,51 +79,51 @@ F#はML由来の言語であり、簡単な正規表現から本格的なパー�
 
 TickSpecは、Given/When/Thenのいわゆる「Gherkin」形式をパースする必要があります。別のライブラリに依存するよりも、
 [Phil](http://trelford.com/blog/post/TickSpec.aspx)にとっては、数百行で独自のパーサーを書く方が簡単（そして楽しい）だったのではないかと想像します。
-[ソースコードの一部はこちら](http://tickspec.codeplex.com/SourceControl/latest#TickSpec/LineParser.fs)で見ることができます。
+[ソースコードの一部はこちら](https://github.com/fsprojects/TickSpec/blob/master/TickSpec/LineParser.fs)で見ることができます。
 
 独自のパーサーを書く価値があるもう一つの状況は、ひどいXML設定形式を持つ複雑なシステム（ルールエンジンなど）がある場合です。
 設定を手動で編集する代わりに、非常に単純なドメイン固有言語（DSL）を作成し、それをパースして複雑なXMLに変換することができます。
 
-Martin Fowlerは[DSLに関する彼の本](http://ptgmedia.pearsoncmg.com/images/9780321712943/samplepages/0321712943.pdf)で、
-この例を挙げています。[ステートマシンを作成するためにパースされるDSL](http://www.informit.com/articles/article.aspx?p=1592379&seqNum=3)です。
-そして、こちらがそのDSLの[F#実装](http://www.fssnip.net/5h)です。
+Martin Fowlerは[DSLに関する彼の本](https://ptgmedia.pearsoncmg.com/images/9780321712943/samplepages/0321712943.pdf)で、
+この例を挙げています。[ステートマシンを作成するためにパースされるDSL](https://www.informit.com/articles/article.aspx?p=1592379&seqNum=3)です。
+そして、こちらがそのDSLの[F#実装](https://www.fssnip.net/5h)です。
 
-より複雑なパーシングタスクには、[FParsec](http://www.quanttec.com/fparsec/)の使用を強くお勧めします。これはこの種のことに完璧に適しています。
+より複雑なパーシングタスクには、[FParsec](https://www.quanttec.com/fparsec/)の使用を強くお勧めします。これはこの種のことに完璧に適しています。
 例えば、以下のパーシングに使われています：
-[FogCreekの検索クエリ](http://blog.fogcreek.com/fparsec/)、
-[CSVファイル](http://blog.jb55.com/post/4247991875/f-csv-parsing-with-fparsec)、
-[チェス表記](http://github.com/iigorr/pgn.net)、
-[負荷テストシナリオ用のカスタムDSL](http://www.frenk.com/2012/01/real-world-f-my-experience-part-two/)。
+[FogCreekの検索クエリ](https://web.archive.org/web/20130430065730/http://blog.fogcreek.com/fparsec/)、
+[CSVファイル](https://blog.jb55.com/post/4247991875/f-csv-parsing-with-fparsec)、
+[チェス表記](https://github.com/iigorr/pgn.net)、
+[負荷テストシナリオ用のカスタムDSL](https://web.archive.org/web/20120228172540/http://www.frenk.com/2012/01/real-world-f-my-experience-part-two/)。
 
 <a name="other-diagramming"></a>
 ## 24. ダイアグラムと可視化にF#を使う
 
 何かをパースまたは分析した後、データでいっぱいの表よりも、結果を視覚的に表示できると常に良いです。
 
-例えば、[以前の投稿](../posts/cycles-and-modularity-in-the-wild.md)で、[GraphViz](http://www.graphviz.org/)と組み合わせてF#を使い、
+例えば、[以前の投稿](../posts/cycles-and-modularity-in-the-wild.md)で、[GraphViz](https://www.graphviz.org/)と組み合わせてF#を使い、
 依存関係のダイアグラムを作成しました。以下にサンプルを示します：
 
 ![](../assets/img/tickspec_svg.png)
 
 ダイアグラム自体を生成するコードは短く、約60行だけでした。
-[こちら](http://gist.github.com/swlaschin/5742974#file-type-dependency-graph-fsx-L428)で見ることができます。
+[こちら](https://gist.github.com/swlaschin/5742974#file-type-dependency-graph-fsx-L428)で見ることができます。
 
-GraphVizの代替として、[FSGraph](http://github.com/piotrosz/FSGraph)の使用も検討できます。
+GraphVizの代替として、[FSGraph](https://github.com/piotrosz/FSGraph)の使用も検討できます。
 
 より数学的またはデータ中心の可視化には、いくつかの優れたライブラリがあります：
 
-* [FSharp.Charting](http://fsharp.github.io/FSharp.Charting/) - F#スクリプティングとよく統合されたデスクトップ向け可視化。
-* [FsPlot](http://github.com/TahaHachana/FsPlot) - HTMLでのインタラクティブな可視化。
-* [VegaHub](http://github.com/panesofglass/VegaHub) - [Vega](http://trifacta.github.io/vega/)と連携するF#ライブラリ。
-* [F# for Visualization](http://www.ffconsultancy.com/products/fsharp_for_visualization/index.html) 
+* [FSharp.Charting](https://fslab.org/FSharp.Charting/) - F#スクリプティングとよく統合されたデスクトップ向け可視化。
+* [FsPlot](https://github.com/TahaHachana/FsPlot) - HTMLでのインタラクティブな可視化。
+* [VegaHub](https://github.com/panesofglass/VegaHub) - [Vega](https://vega.github.io/vega/)と連携するF#ライブラリ。
+* [F# for Visualization](https://web.archive.org/web/20210616224725/www.ffconsultancy.com/products/fsharp_for_visualization/index.html) 
 
 そして最後に、800ポンドのゴリラ - Excelがあります。
 
 利用可能であれば、Excelの組み込み機能を使うのは素晴らしいです。そしてF#スクリプティングはExcelとうまく連携します。
 
 [Excelでチャートを作成](https://learn.microsoft.com/ja-jp/previous-versions/visualstudio/visual-studio-2010/hh297098%28v=vs.100%29)したり、
-[Excelで関数をプロットしたり](http://www.clear-lines.com/blog/post/Plot-functions-from-FSharp-to-Excel.aspx)できます。さらにパワフルな統合のために、
-[FCell](http://fcell.io/)や[Excel-DNA](http://excel-dna.net/)プロジェクトがあります。
+[Excelで関数をプロットしたり](https://brandewinder.com/2013/02/06/Plot-functions-from-FSharp-to-Excel/)できます。さらにパワフルな統合のために、
+[FCell](https://web.archive.org/web/20161003070717/http://fcell.io/)や[Excel-DNA](https://excel-dna.net/)プロジェクトがあります。
 
 <a name="other-data-access"></a>
 ## 25. WebベースのデータストアへのアクセスにF#を使う
@@ -132,18 +132,18 @@ Web上には、引き出して愛されるのを待っている多くの公開�
 型プロバイダーの魔法により、F#はこれらのWeb規模のデータストアをワークフローに直接統合するのに適しています。
 
 ここでは、FreebaseとWorld Bankという2つのデータストアを見ていきます。
-近々さらに多くのものが利用可能になる予定です - 最新情報は[fsharp.orgのデータアクセスページ](http://fsharp.org/data-access/)を参照してください。
+近々さらに多くのものが利用可能になる予定です - 最新情報は[fsharp.orgのデータアクセスページ](https://fsharp.org/guides/data-access/)を参照してください。
 
 ## Freebase 
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/freebase.fsx)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/freebase.fsx)です。*
 
-[Freebase](http://en.wikipedia.org/wiki/Freebase)は、多くのソースから収集された構造化データの大規模な協力型知識ベースとオンラインコレクションです。
+[Freebase](https://en.wikipedia.org/wiki/Freebase_(database))は、多くのソースから収集された構造化データの大規模な協力型知識ベースとオンラインコレクションです。
 
 始めるには、これまで見てきたように型プロバイダーのDLLをリンクするだけです。
 
 このサイトはスロットル制限があるため、頻繁に使う場合はAPIキーが必要になるでしょう
-（[APIの詳細はこちら](http://developers.google.com/console/help/?csw=1#activatingapis)）
+（[APIの詳細はこちら](https://developers.google.com/freebase/usage-limits?hl=ja)）
 
 ```fsharp
 // 現在のディレクトリをスクリプトディレクトリと同じに設定
@@ -215,14 +215,14 @@ data.``Arts and Entertainment``.Film.Films.IndividualsAZ.C.Casablanca.``Awards W
 
 以上がFreebaseです。役立つものもあれば些細なものもある、たくさんの良い情報があります。
 
-[Freebase型プロバイダーの使い方の詳細](http://fsharp.github.io/FSharp.Data/library/Freebase.html)。
+[Freebase型プロバイダーの使い方の詳細](https://yukitos.github.io/FSharp.Data/ja/library/Freebase.html)。
 
 ## Freebaseを使って現実的なテストデータを生成する
 
 FsCheckを使って[テストデータを生成する](../posts/low-risk-ways-to-use-fsharp-at-work-3.md#test-dummy)方法を見てきました。
 同様に、Freebaseからデータを取得することで、より現実的なデータを得ることができます。
 
-[Kit Eason](http://twitter.com/kitlovesfsharp)が[ツイート](http://twitter.com/kitlovesfsharp/status/296240699735695360)でこの方法を示しました。
+[Kit Eason](https://x.com/kitlovesfsharp)が[ツイート](https://x.com/kitlovesfsharp/status/296240699735695360)でこの方法を示しました。
 以下は彼のコードに基づく例です：
 
 ```fsharp
@@ -268,9 +268,9 @@ Seq.init 10 ( fun _ ->
 
 ## 世界銀行
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/world-bank.fsx)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/world-bank.fsx)です。*
 
-Freebaseとは対照的に、[世界銀行オープンデータ](http://data.worldbank.org/)は、世界中の詳細な経済・社会情報を多く持っています。
+Freebaseとは対照的に、[世界銀行オープンデータ](https://data.worldbank.org/)は、世界中の詳細な経済・社会情報を多く持っています。
 
 セットアップはFreebaseと同じですが、APIキーは必要ありません。
 
@@ -347,7 +347,7 @@ United Kingdom -- Maternal mortality ratio (modeled estimate, per 100,000 live b
 United States -- Maternal mortality ratio (modeled estimate, per 100,000 live births) 2010 21.0 
 ```
 
-[世界銀行型プロバイダーの使い方の詳細](http://fsharp.github.io/FSharp.Data/library/WorldBank.html)。
+[世界銀行型プロバイダーの使い方の詳細](https://fsprojects.github.io/FSharp.Data/library/WorldBank.html)。
 
 <a name="other-data-science"></a>
 ## 26. データサイエンスと機械学習にF#を使う
@@ -362,17 +362,15 @@ Webサービスから外部データを取得しています。これらのデ�
 コードは型チェックされるので、2時間の処理ジョブの途中で例外によってコードが失敗することはありません！
 
 PythonのPandasライブラリやRの'tseries'パッケージに馴染みがあれば、
-[Deedle](http://bluemountaincapital.github.io/Deedle/)を真剣に検討すべきです。これは使いやすく、高品質なデータおよび時系列操作用のパッケージです。
+[Deedle](https://bluemountaincapital.github.io/Deedle/)を真剣に検討すべきです。これは使いやすく、高品質なデータおよび時系列操作用のパッケージです。
 DeedleはREPLを使った探索的プログラミングに適していますが、効率的にコンパイルされた.NETコードでも使えます。
 
-そして、Rをよく使う場合は、[R型プロバイダー](http://bluemountaincapital.github.io/FSharpRProvider)（もちろん）があります。
+そして、Rをよく使う場合は、[R型プロバイダー](https://bluemountaincapital.github.io/FSharpRProvider)（もちろん）があります。
 これは、RパッケージをあたかもNETライブラリであるかのように使えることを意味します。素晴らしいですね！
 
 他にもF#フレンドリーなパッケージがたくさんあります。fsharp.orgでそれらについて知ることができます。
 
-* [データサイエンス](http://fsharp.org/data-science/)
-* [数学](http://fsharp.org/math/)
-* [機械学習](http://fsharp.org/machine-learning)
+* [データサイエンス/数学/機械学習](https://fsharp.org/guides/data-science/)
 
 ----------
 
@@ -398,7 +396,7 @@ F#は単なる数学的または金融的な言語ではありません - 実用
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 Simonの実世界でのF#の使用（発電用）について、[彼のブログ](https://web.archive.org/web/20160712051833/http://simontylercousins.net/does-the-language-you-use-make-a-difference-revisited)でもっと読むことができます。
-[fsharp.org](http://fsharp.org/testimonials/)にはF#についてのさらなる証言があります。
+[fsharp.org](https://fsharp.org/testimonials/)にはF#についてのさらなる証言があります。
 
 
 

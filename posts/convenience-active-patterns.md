@@ -64,18 +64,18 @@ let (|FirstRegexGroup|_|) pattern input =
 // パターンを呼び出す関数を作成
 let testRegex str = 
     match str with
-    | FirstRegexGroup "http://(.*?)/(.*)" host -> 
+    | FirstRegexGroup "https?://(.*?)/(.*)" host -> 
            printfn "この値はURLで、ホストは %s です" host
     | FirstRegexGroup ".*?@(.*)" host -> 
            printfn "この値はメールアドレスで、ホストは %s です" host
     | _ -> printfn "値 '%s' は他の何かです" str
    
 // テスト
-testRegex "http://google.com/test"
+testRegex "https://google.com/test"
 testRegex "alice@hotmail.com"
 ```
 
-そして楽しみのために、もう1つ例を挙げましょう。有名な[FizzBuzzチャレンジ](http://www.codinghorror.com/blog/2007/02/why-cant-programmers-program.html)をアクティブパターンを使って書いたものです。
+そして楽しみのために、もう1つ例を挙げましょう。有名な[FizzBuzzチャレンジ](http://www.aoky.net/articles/jeff_atwood/why_cant_programmers_program.htm)をアクティブパターンを使って書いたものです。
 
 ```fsharp
 // アクティブパターンを設定

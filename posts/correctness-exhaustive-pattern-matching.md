@@ -66,7 +66,7 @@ if (myObject != null)
 ```
 
 残念ながら、このテストはコンパイラによって要求されるわけではありません。一つのコードがこれを忘れただけで、プログラムがクラッシュする可能性があります。
-長年にわたり、nullを扱うために膨大なプログラミングの労力が費やされてきました。nullの発明は[10億ドルの過ち](http://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare)とさえ呼ばれています！
+長年にわたり、nullを扱うために膨大なプログラミングの労力が費やされてきました。nullの発明は[10億ドルの過ち](https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/)とさえ呼ばれています！
 
 純粋なF#では、nullが偶発的に存在することはありません。文字列やオブジェクトは、作成時に必ず何かに割り当てられ、その後は不変です。
 

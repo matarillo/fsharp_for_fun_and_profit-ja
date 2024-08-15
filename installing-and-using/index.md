@@ -9,9 +9,9 @@ image: "/assets/img/fsharp_eval2.png"
 ---
 
 F# コンパイラは無料でオープンソースのツールで、Windows、Mac、Linux (Mono 経由) で利用できます。
-F# の詳細とインストール方法については、[F# Foundation](http://fsharp.org/) をご覧ください。
+F# の詳細とインストール方法については、[F# Foundation](https://fsharp.org/) をご覧ください。
 
-IDE (Visual Studio、MonoDevelop) や好きなエディタ (特に Visual Studio Code と Atom は、[Ionide](http://ionide.io/) を使用することで F# を強力にサポートしています) で利用したり、スタンドアロンのコマンドラインコンパイラとしても使用できます。
+IDE (Visual Studio、MonoDevelop) や好きなエディタ (特に Visual Studio Code と Atom は、[Ionide](https://ionide.io/) を使用することで F# を強力にサポートしています) で利用したり、スタンドアロンのコマンドラインコンパイラとしても使用できます。
 
 何もインストールしたくない場合は、Webブラウザ上で F# を試せるインタラクティブな環境である [.NET Fiddle](https://dotnetfiddle.net/) サイトを利用できます。このサイトの大部分のコードを実行できるはずです。
 
@@ -63,7 +63,7 @@ F# ビルド自動化システムである「[FAKE](https://github.com/fsharp/FA
 //   指定された URL をダウンロードし、タイムスタンプ付きのファイルとして保存します
 //
 // コマンドラインの例: 
-//    fsi ShellScriptExample.fsx http://google.com google
+//    fsi ShellScriptExample.fsx https://www.google.com/ google
 // ================================
 
 // "open" は .NET 名前空間を可視状態にします
@@ -96,7 +96,7 @@ match fsi.CommandLineArgs with
 このスクリプトを実行するには、同じディレクトリでコマンド プロンプトを開き、次のように入力します。
 
 ```
-fsi ShellScriptExample.fsx http://google.com google_homepage
+fsi ShellScriptExample.fsx https://www.google.com/ google_homepage
 ```
 
 このサイトのコードを触ってみて、そのついでに簡単なスクリプトをいくつか作成してみるのも面白いでしょう。

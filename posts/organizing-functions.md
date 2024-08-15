@@ -329,7 +329,7 @@ let result = MathStuff.FloatLib.add 1.0 2.0
 ### アクセス制御
 
 F#は、 `public` 、 `private` 、 `internal` などの標準的な.NETアクセス制御キーワードを使えます。
-詳しくは、[MSDNのドキュメント](http://msdn.microsoft.com/en-us/library/dd233188)を見てください。
+詳しくは、[Microsoft Learnのドキュメント](https://learn.microsoft.com/ja-jp/dotnet/fsharp/language-reference/access-control)を見てください。
 
 * これらのアクセス指定子は、モジュール内のトップレベル（「let束縛」された）関数、値、型、その他の宣言に付けられます。また、モジュール自体にも指定できます（例えば、プライベートな入れ子モジュールが必要な場合など）。
 * デフォルトではすべてpublicです（いくつかの例外を除く）ので、それらを守りたい場合は `private` や `internal` を使う必要があります。

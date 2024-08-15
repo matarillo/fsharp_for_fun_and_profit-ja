@@ -82,7 +82,7 @@ let myCallback (reader:IO.StreamReader) url =
     html      // すべてのhtmlを返す
 
 //テスト
-let google = fetchUrl myCallback "http://google.com"
+let google = fetchUrl myCallback "https://google.com"
 ```
 
 最後に、readerパラメータの型宣言（`reader:IO.StreamReader`）が必要になります。これはF#コンパイラが "reader" パラメータの型を自動的に判断できないためです。
@@ -95,13 +95,13 @@ F#の非常に便利な機能の1つは、関数のパラメータを「焼き�
 let fetchUrl2 = fetchUrl myCallback 
 
 // テスト
-let google = fetchUrl2 "http://www.google.com"
-let bbc    = fetchUrl2 "http://news.bbc.co.uk"
+let google = fetchUrl2 "https://www.google.com"
+let bbc    = fetchUrl2 "https://news.bbc.co.uk"
 
 // サイトのリストでテスト
-let sites = ["http://www.bing.com";
-             "http://www.google.com";
-             "http://www.yahoo.com"]
+let sites = ["https://www.bing.com";
+             "https://www.google.com";
+             "https://www.yahoo.com"]
 
 // リスト内の各サイトを処理
 sites |> List.map fetchUrl2 
@@ -126,14 +126,14 @@ public void TestFetchUrlWithCallback()
     };
 
     var downloader = new WebPageDownloader();
-    var google = downloader.FetchUrl("http://www.google.com",
+    var google = downloader.FetchUrl("https://www.google.com",
                                       myCallback);
             
     // サイトのリストでテスト
     var sites = new List<string> {
-        "http://www.bing.com",
-        "http://www.google.com",
-        "http://www.yahoo.com"};
+        "https://www.bing.com",
+        "https://www.google.com",
+        "https://www.yahoo.com"};
 
     // リスト内の各サイトを処理
     sites.ForEach(site => downloader.FetchUrl(site, myCallback));

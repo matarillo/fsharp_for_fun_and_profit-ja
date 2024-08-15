@@ -65,7 +65,7 @@ let square x = x * x
 let sumOfSquares n = [1..n] |> List.map square |> List.sum
 ```
 
-That's 17 lines vs. only 2 lines.  [Imagine that difference multiplied over a whole project!](http://fpbridge.co.uk/why-fsharp.html#conciseness)  
+That's 17 lines vs. only 2 lines.  [Imagine that difference multiplied over a whole project!](https://fpbridge.co.uk/why-fsharp.html#conciseness)  
 
 If I did use this approach, my productivity would drop drastically. I'm sorry -- I just can't afford it.
 

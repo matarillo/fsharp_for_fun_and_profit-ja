@@ -15,13 +15,13 @@ seriesOrder: 1
 職場には「C#のみ」というポリシーがあり、F#の使用が認められないのです。
 
 典型的な企業環境で働いているなら、新しい言語の承認を得るのは長い道のりになるでしょう。
-チームメイト、QA担当者、運用担当者、上司、上司の上司、そして[廊下の奥にいる謎の人物](http://www.joelonsoftware.com/articles/fog0000000018.html)（今まで話したことのない人）を説得する必要があります。
-その過程を始めることをお勧めします（[マネージャーに役立つリンク](http://fpbridge.co.uk/why-fsharp.html)）が、それでもあなたは焦れて「今すぐに何ができるだろう？」と考えているはずです。
+チームメイト、QA担当者、運用担当者、上司、上司の上司、そして[廊下の奥にいる謎の人物](https://www.joelonsoftware.com/2001/04/21/dont-let-architecture-astronauts-scare-you/)（今まで話したことのない人）を説得する必要があります。
+その過程を始めることをお勧めします（[マネージャーに役立つリンク](https://fpbridge.co.uk/why-fsharp.html)）が、それでもあなたは焦れて「今すぐに何ができるだろう？」と考えているはずです。
 
 一方で、柔軟で自由な職場環境で、好きなことができる立場にいるかもしれません。
 
 しかし、あなたは良心的なので、ミッションクリティカルなシステムをAPLで書き直して姿を消し、後任に頭の痛む暗号のようなコードを残していく、そんな人になりたくはありません。
-決して、チームの[バス係数](http://en.wikipedia.org/wiki/Bus_factor)に影響を与えるようなことはしたくないのです。
+決して、チームの[バス係数](https://en.wikipedia.org/wiki/Bus_factor)に影響を与えるようなことはしたくないのです。
 
 つまり、これらのシナリオでは、仕事でF#を使いたいけれど、コアとなるアプリケーションコードには使えない（または使いたくない）という状況です。
 
@@ -80,7 +80,7 @@ seriesOrder: 1
 
 Visual Studioを使っている場合、F#はすでにインストールされているので、すぐに始められます！誰かの許可を得る必要はありません。
 
-MacまたはLinuxを使っている場合は、残念ながら少し作業が必要です（[Mac](http://fsharp.org/use/mac/)と[Linux](http://fsharp.org/use/linux/)の手順）。
+MacまたはLinuxを使っている場合は、残念ながら少し作業が必要です（[Mac](https://fsharp.org/use/mac/)と[Linux](https://fsharp.org/use/linux/)の手順）。
 
 F#を対話的に使う方法は2つあります：(1) F#対話ウィンドウに直接入力する、または (2) F#スクリプトファイル（.FSX）を作成し、コードスニペットを評価する。
 
@@ -112,7 +112,7 @@ x + y;;
 
 これらのDLLを明示的にダウンロードまたはコンパイルすることもできますが、コマンドラインからNuGetを使う方が簡単だと思います。
 
-1. まず、Chocolately（[chocolatey.org](http://chocolatey.org/)から）をインストールする必要があります。
+1. まず、Chocolately（[chocolatey.org](https://chocolatey.org/)から）をインストールする必要があります。
 2. 次に、`cinst nuget.commandline`を使ってNuGetコマンドラインをインストールします。
 3. 最後に、スクリプトディレクトリに移動し、コマンドラインからNuGetパッケージをインストールします。
    例：`nuget install FSharp.Data -o Packages -ExcludeVersion`
@@ -133,7 +133,7 @@ F#が価値を発揮する最初の領域は、.NETライブラリを対話的�
 
 ## 1. F#を使って.NETフレームワークを対話的に探索する
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-net-interactively.fsx)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-net-interactively.fsx)です。*
 
 コーディングをしていると、.NETライブラリの動作について小さな疑問がよく生じます。
 
@@ -212,7 +212,7 @@ Environment.GetEnvironmentVariable "ProgramFiles" =
 
 ## 2. F#を使って自分のコードを対話的にテストする
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-own-code-interactively.fsx)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-own-code-interactively.fsx)です。*
 
 もちろん、.NETライブラリだけでなく、自分のコードをテストすることもできます。時には自分のコードをテストするのが非常に役立つことがあります。
 
@@ -240,7 +240,7 @@ MyApp.DoSomething()
 
 ## 3. F#を使ってWebサービスを対話的に操作する
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-webservices-interactively.fsx)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-webservices-interactively.fsx)です。*
 
 WebAPIとOwinライブラリを使いたい場合、実行可能ファイルを作成する必要はありません - スクリプトだけで実行できます！
 
@@ -424,14 +424,14 @@ StatusCode: 200, ReasonPhrase: 'OK', Version: 1.1, Content: System.Net.Http.Stre
 
 この例は、OWINとWebApiライブラリを「そのまま」使えることを示すためのものです。
 
-F#にさらにフレンドリーなWebフレームワークについては、[Suave](http://suave.io/)や[WebSharper](http://www.websharper.com)をご覧ください。
-[fsharp.orgにはさらに多くのWeb関連の情報](http://fsharp.org/webstacks/)があります。
+F#にさらにフレンドリーなWebフレームワークについては、[Suave](https://suave.io/)や[WebSharper](https://www.websharper.com)をご覧ください。
+[fsharp.orgにはさらに多くのWeb関連の情報](https://fsharp.org/guides/web/)があります。
 
 <a name="explore-winforms-interactively"></a>
 
 ## 4. F#を使ってUIを対話的に操作する
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-winforms-interactively.fsx)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/explore-winforms-interactively.fsx)です。*
 
 F#インタラクティブのもう一つの使用法は、UIを実行中に - ライブで - 操作することです！
 

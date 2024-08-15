@@ -88,25 +88,25 @@ seriesOrder: 4
 
 ### セットアップ
 
-このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/)です。
+このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/tree/master/SqlInFsharp)です。
 そこには、これらの例で使用するサンプルデータベース、テーブル、ストアドプロシージャを作成するためのいくつかのSQLスクリプトがあります。
 
 したがって、これらの例を実行するには、ローカルまたはアクセス可能な場所でSQL ExpressまたはSQL Serverを実行し、関連するセットアップスクリプトを実行済みである必要があります。
 
 ### どの型プロバイダーを使うべきか？
 
-F#用にいくつかのSQL型プロバイダーがあります - [fsharp.orgのデータアクセスページ](http://fsharp.org/data-access/)を参照してください。これらの例では、
+F#用にいくつかのSQL型プロバイダーがあります - [fsharp.orgのデータアクセスページ](https://fsharp.org/guides/data-access/)を参照してください。これらの例では、
 `FSharp.Data.TypeProviders` DLLの一部である[`SqlDataConnection`型プロバイダー](https://learn.microsoft.com/ja-jp/dotnet/fsharp/tutorials/type-providers/)を使います。
 これは裏で[SqlMetal](https://learn.microsoft.com/ja-jp/dotnet/framework/tools/sqlmetal-exe-code-generation-tool)を使っているため、SQL Serverデータベースでのみ動作します。
 
-[SQLProvider](http://fsprojects.github.io/SQLProvider/)プロジェクトも良い選択肢です - MySql、SQLite、その他の非Microsoftデータベースをサポートしています。
+[SQLProvider](https://fsprojects.github.io/SQLProvider/)プロジェクトも良い選択肢です - MySql、SQLite、その他の非Microsoftデータベースをサポートしています。
 
 <a name="sql-linqpad"></a>
 ## 18. F#を使ってLINQPadを置き換える
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/FsharpInsteadOfLinqpad.fsx)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/tree/master/SqlInFsharpFsharpInsteadOfLinqpad.fsx)です。*
 
-[LINQPad](http://www.linqpad.net/)はデータベースに対するクエリを行うための優れたツールであり、また一般的なC#/VB/F#コードのスクラッチパッドでもあります。
+[LINQPad](https://www.linqpad.net/)はデータベースに対するクエリを行うための優れたツールであり、また一般的なC#/VB/F#コードのスクラッチパッドでもあります。
 
 F#インタラクティブを使って、LINQPadと同様の多くのことを行うことができます - クエリ、オートコンプリートなどが、LINQPadと同じように利用できます。
 
@@ -191,7 +191,7 @@ db.Customer
 <a name="sql-testprocs"></a>
 ## 19. F#を使ってストアドプロシージャの単体テストを行う
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/TestUpsertCustomer.fs)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/tree/master/SqlInFsharpTestUpsertCustomer.fs)です。*
 
 では、型プロバイダーを使ってストアドプロシージャの単体テストを非常に簡単に作成する方法を見てみましょう。
 
@@ -307,7 +307,7 @@ let ``空白の名前でupsert customerが呼ばれた場合、バリデーシ�
 <a name="sql-randomdata"></a>
 ## 20. FsCheckを使ってランダムなデータベースレコードを生成する
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/InsertDummyData.fsx)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/tree/master/SqlInFsharpInsertDummyData.fsx)です。*
 
 前の例で示したように、FsCheckを使ってランダムなデータを生成できます。この場合、データベースにランダムなレコードを生成するために使います。
 
@@ -443,12 +443,12 @@ BCPを使うほど高速ではありませんが、テストには十分適し�
 <a name="sql-etl"></a>
 ## 21. F#を使って簡単なETLを行う
 
-*このセクションのコードは[githubで入手可能](http://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/SqlInFsharp/EtlExample.fsx)です。*
+*このセクションのコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/tree/master/SqlInFsharpEtlExample.fsx)です。*
 
 あるテーブルから別のテーブルにデータを転送する必要があるが、完全に単純なコピーではなく、
 いくつかのマッピングと変換を行う必要があるとします。
 
-これは典型的なETL（抽出/変換/ロード）の状況で、ほとんどの人は[SSIS](http://en.wikipedia.org/wiki/SQL_Server_Integration_Services)を使おうと思うでしょう。
+これは典型的なETL（抽出/変換/ロード）の状況で、ほとんどの人は[SSIS](https://en.wikipedia.org/wiki/SQL_Server_Integration_Services)を使おうと思うでしょう。
 
 しかし、一回限りのインポートや、大量のデータを扱わない場合など、いくつかの状況ではF#を代わりに使えます。見てみましょう。
 
