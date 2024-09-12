@@ -1,24 +1,24 @@
 ---
 layout: post
-title: "Classes"
+title: "クラス"
 description: ""
 nav: fsharp-types
-seriesId: "Object-oriented programming in F#"
+seriesId: "F#におけるオブジェクト指向プログラミング"
 seriesOrder: 2
-categories: [Object-oriented, Classes]
+categories: [オブジェクト指向, クラス]
 ---
 
-This post and the next will cover the basics of creating and using classes and methods in F#.
+この投稿と次の投稿では、F#でクラスやメソッドを作成・使用する基本を説明します。
 
-## Defining a class
+## クラスの定義
 
-Just like all other data types in F#, class definitions start with the `type` keyword.  
+F#の他のデータ型と同様、クラス定義も`type`キーワードで始まります。
 
-The thing that distinguishes them from other types is that classes always have some parameters passed in when they are created -- the constructor -- and so there are *always parentheses after the class name*.
+クラスを他の型と区別する特徴は、作成時に必ずパラメータ（コンストラクタ）を渡すことです。そのため、クラス名の後には*必ずかっこ*が付きます。
 
-Also, unlike other types, classes *must* have functions attached to them as members. This post will explain how you do this for classes, but for a general discussion of attaching functions to other types see [the post on type extensions](../posts/type-extensions.md).
+また、他の型とは異なり、クラスには必ずメンバーとして関数を持たせる必要があります。この投稿ではクラスに関数を持たせる方法を説明しますが、他の型に関数を持たせる一般的な方法については[型拡張に関する投稿](../posts/type-extensions.md)を参照してください。
 
-So, for example, if we want to have a class called `CustomerName` that requires three parameters to construct it, it would be written like this:
+例えば、`CustomerName`という名前のクラスを作成し、3つのパラメータでコンストラクタを定義する場合、次のように書きます。
 
 ```fsharp
 type CustomerName(firstName, middleInitial, lastName) = 
@@ -27,7 +27,7 @@ type CustomerName(firstName, middleInitial, lastName) =
     member this.LastName = lastName  
 ```
 
-Let's compare this with the C# equivalent:
+C#での同等の表現と比較してみましょう。
 
 ```csharp
 public class CustomerName
@@ -46,21 +46,21 @@ public class CustomerName
 }
 ```
 
-You can see that in the F# version, the primary constructor is embedded into the class declaration itself --- it is not a separate method.  That is, the class declaration has the same parameters as the constructor, and the parameters automatically become immutable private fields that store the original values that were passed in.
+F#版では、プライマリコンストラクタがクラス宣言自体に組み込まれています。別のメソッドとしては定義されません。つまり、クラス宣言はコンストラクタと同じパラメータを持ち、これらのパラメータは自動的に不変（イミュータブル）の非公開フィールドとなり、渡された元の値を保持します。
 
-So in the above example, because we declared the `CustomerName` class as:
+上記の例では、`CustomerName`クラスを次のように宣言したため：
 
 ```fsharp
 type CustomerName(firstName, middleInitial, lastName)
 ```
 
-therefore `firstName`, `middleInitial`, and `lastName` automatically became immutable private fields.
+`firstName`、`middleInitial`、`lastName`は自動的に不変の非公開フィールドになります。
 
-### Specifying types in the constructor
+### コンストラクタでの型指定
 
-You might not have noticed, but the `CustomerName` class defined above does not constrain the parameters to be strings, unlike the C# version.  In general, type inference from usage will probably force the values to be strings, but if you do need to specify the types explicitly, you can do so in the usual way with a colon followed by the type name.
+上記の`CustomerName`クラスの定義では、C#版とは異なり、パラメータを文字列に制限していません。一般的に、使用方法から型推論によって値が文字列に強制されますが、明示的に型を指定する必要がある場合は、通常の方法でコロンの後に型名を記述します。
 
-Here's a version of the class with explicit types in the constructor:
+以下は、コンストラクタで明示的に型を指定したバージョンのクラスです。
 
 ```fsharp
 type CustomerName2(firstName:string, 
@@ -70,7 +70,7 @@ type CustomerName2(firstName:string,
     member this.LastName = lastName
 ```
 
-One little quirk about F# is that if you ever need to pass a tuple as a parameter to a constructor, you will have to annotate it explicitly, because the call to the constructor will look identical:
+F#の小さな特徴として、コンストラクタにタプルをパラメータとして渡す必要がある場合、明示的に注釈を付ける必要があります。コンストラクタの呼び出しが同じように見えるためです。
 
 ```fsharp
 type NonTupledConstructor(x:int,y: int) = 
@@ -80,20 +80,20 @@ type TupledConstructor(tuple:int * int) =
     let x,y = tuple
     do printfn "x=%i y=%i" x y    
     
-// calls look identical
+// 呼び出しは同じように見える
 let myNTC = new NonTupledConstructor(1,2)    
 let myTC = new TupledConstructor(1,2)    
 ```
 
-### Class members
+### クラスメンバー
 
-The example class above has three read-only instance properties. In F#, both properties and methods use the `member` keyword.
+上記の例のクラスには、3つの読み取り専用のインスタンスプロパティがあります。F#では、プロパティとメソッドの両方に`member`キーワードを使います。
 
-Also, in the example above, you see the word "`this`" in front of each member name.  This is a "self-identifier" that can be used to refer to the current instance of the class.  Every non-static member must have a self-identifier, even it is not used (as in the properties above). There is no requirement to use a particular word, just as long as it is consistent. You could use "this" or "self" or "me" or any other word that commonly indicates a self reference.
+また、上記の例では各メンバー名の前に「this」という単語が見られます。これは「自己識別子」で、クラスの現在のインスタンスを参照するために使います。静的でないメンバーには必ず自己識別子が必要で、上記のプロパティのように使われていなくても必要です。特定の単語を使う必要はなく、一貫性があればよいです。「this」や「self」、「me」など、自己参照を示す一般的な単語を使えます。
 
-## Understanding class signatures
+## クラスシグネチャの理解
 
-When a class is compiled (or when you over hover the definition in the editor), you see the "class signature" for the class. For example, for the class definition:
+クラスがコンパイルされると（またはエディタで定義にカーソルを合わせると）、クラスの「シグネチャ」が表示されます。例えば、以下のクラス定義の場合：
 
 ```fsharp
 type MyClass(intParam:int, strParam:string) = 
@@ -101,7 +101,7 @@ type MyClass(intParam:int, strParam:string) =
     member this.Square x = x * x
 ```
 
-the corresponding signature is:
+対応するシグネチャは次のようになります。
 
 ```fsharp
 type MyClass =
@@ -112,264 +112,264 @@ type MyClass =
   end
 ```
 
-The class signature contains the signatures for all the constructors, methods and properties in the class.  It is worth understanding what these signatures mean, because, just as with functions, you can 
-understand what the class does by looking at them. It is also important because you will need to write these signatures when creating abstract methods and interfaces.
+クラスシグネチャには、クラス内のすべてのコンストラクタ、メソッド、プロパティのシグネチャが含まれます。これらのシグネチャの意味を理解することは重要です。関数と同様に、シグネチャを見ればクラスの動作を理解できるからです。
+また、抽象メソッドやインターフェースを作成する際にこれらのシグネチャを書く必要があるため、理解しておくことが重要です。
 
-### Method signatures
+### メソッドシグネチャ
 
-Method signatures such as are very similar to the [signatures for standalone functions](../posts/how-types-work-with-functions.md), except that the parameter names are part of the signature itself.
+メソッドシグネチャは、[スタンドアロン関数のシグネチャ](../posts/how-types-work-with-functions.md)とよく似ています。ただし、パラメータ名がシグネチャ自体に含まれる点が異なります。
 
-So in this case, the method signature is:
+この場合、メソッドシグネチャは次のようになります。
 
 ```fsharp
 member Square : x:int -> int
 ```
 
-And for comparison, the corresponding signature for a standalone function would be:
+比較のため、対応するスタンドアロン関数のシグネチャは次のようになります。
 
 ```fsharp
 val Square : int -> int
 ```
 
-### Constructor signatures
+### コンストラクタシグネチャ
 
-Constructor signatures are always called `new`, but other than that, they look like a method signature. 
+コンストラクタシグネチャは常に`new`と呼ばれますが、それ以外はメソッドシグネチャと同じような見た目です。
 
-Constructor signatures always take tuple values as their only parameter. In this case the tuple type is `int * string`, as you would expect. The return type is the class itself, again as you would expect.
+コンストラクタシグネチャは、唯一のパラメータとしてタプル値を取ります。この場合、タプル型は予想通り`int * string`です。戻り値の型はクラス自体で、これも予想通りです。
 
-Again, we can compare the constructor signature with a similar standalone function:
+ここでも、コンストラクタシグネチャと類似のスタンドアロン関数を比較できます。
 
 ```fsharp
-// class constructor signature
+// クラスコンストラクタシグネチャ
 new : intParam:int * strParam:string -> MyClass
 
-// standalone function signature
+// スタンドアロン関数シグネチャ
 val new : int * string -> MyClass
 ```
 
-### Property signatures
+### プロパティシグネチャ
 
-Finally, property signatures such as `member Two : int` are very similar to the signatures for standalone simple values, except that no explicit value is given.
+最後に、`member Two : int`のようなプロパティシグネチャは、スタンドアロンの単純な値のシグネチャとよく似ています。ただし、明示的な値は与えられません。
 
 ```fsharp
-// member property
+// メンバープロパティ
 member Two : int
 
-// standalone value
+// スタンドアロン値
 val Two : int = 2
 ```
 
-## Private fields and functions using "let" bindings
+## `let`バインディングを使用した非公開フィールドと関数
 
-After the class declaration, you can optionally have a set of "let" bindings, typically used for defining private fields and functions.
+クラス宣言の後に、オプションで「let」バインディングのセットを置くことができます。これは通常、非公開フィールドや関数の定義に使います。
 
-Here's some sample code to demonstrate this:
+以下は、これを示すサンプルコードです。
 
 ```fsharp
 type PrivateValueExample(seed) = 
 
-    // private immutable value
+    // 非公開の不変値
     let privateValue = seed + 1
 
-    // private mutable value
+    // 非公開の可変値
     let mutable mutableValue = 42
 
-    // private function definition
+    // 非公開関数の定義
     let privateAddToSeed input = 
         seed + input
 
-    // public wrapper for private function
+    // 非公開関数の公開ラッパー
     member this.AddToSeed x = 
         privateAddToSeed x
 
-    // public wrapper for mutable value
+    // 可変値の公開ラッパー
     member this.SetMutableValue x = 
         mutableValue <- x 
     
-// test
+// テスト
 let instance = new PrivateValueExample(42)
 printf "%i" (instance.AddToSeed 2)
 instance.SetMutableValue 43
 ```
 
-In the example above, there are three let bindings:
+上記の例には3つの`let`バインディングがあります。
 
-* `privateValue` is set to the initial seed plus 1
-* `mutableValue` is set to 42
-* The `privateAddToSeed` function uses the initial seed plus a parameter
+* `privateValue`は初期シードに1を加えた値に設定します
+* `mutableValue`は42に設定します
+* `privateAddToSeed`関数は、初期シードにパラメータを加えます
 
-Because they are let bindings, they are automatically private, so to access them externally, there must be a public member to act as a wrapper.
+`let`バインディングなので、これらは自動的に非公開になります。外部からアクセスするには、公開メンバーをラッパーとして用意する必要があります。
 
-Note that the `seed` value passed into the constructor is also available as a private field, just like the let-bound values.
+コンストラクタに渡された`seed`値も、`let`バインドされた値と同様に非公開フィールドとして利用できることに注意してください。
 
-### Mutable constructor parameters
+### 可変コンストラクタパラメータ
 
-Sometimes, you want a parameter passed to the constructor to be mutable. You cannot specify this in the parameter itself, so the standard technique is to create a mutable let-bound value and assign it from the parameter, as shown below:
+コンストラクタに渡されたパラメータを可変（ミュータブル）にしたい場合があります。パラメータ自体で指定することはできないので、標準的な手法として、可変の`let`バインド値を作成し、パラメータから割り当てます。以下に例を示します。
 
 ```fsharp
 type MutableConstructorParameter(seed) = 
     let mutable mutableSeed = seed 
 
-    // public wrapper for mutable value
+    // 可変値の公開ラッパー
     member this.SetSeed x = 
         mutableSeed <- x 
 ```
 
-In cases, like this, it is quite common to give the mutable value the same name as the parameter itself, like this:
+このような場合、可変値にパラメータと同じ名前を付けるのが一般的です。次のようになります。
 
 ```fsharp
 type MutableConstructorParameter2(seed) = 
-    let mutable seed = seed // shadow the parameter
+    let mutable seed = seed // パラメータをシャドウイング
     
-    // public wrapper for mutable value
+    // 可変値の公開ラッパー
     member this.SetSeed x = 
         seed <- x 
 ```
 
-## Additional constructor behavior with "do" blocks
+## `do`ブロックを使用した追加のコンストラクタ動作
 
-In the `CustomerName` example earlier, the constructor just allowed some values to be passed in but didn't do anything else.  However, in some cases, you might need to execute some code as part of the constructor. This is done using `do` blocks.
+先ほどの`CustomerName`の例では、コンストラクタは単に値を渡すだけで他の処理は行いませんでした。しかし、コンストラクタの一部として何らかのコードを実行する必要がある場合があります。これは`do`ブロックを使って行います。
 
-Here's an example:
+以下に例を示します。
 
 ```fsharp
 type DoExample(seed) = 
     let privateValue = seed + 1
     
-    //extra code to be done at construction time
-    do printfn "the privateValue is now %i" privateValue 
+    // コンストラクション時に実行される追加コード
+    do printfn "privateValueは現在%iです" privateValue 
     
-// test
+// テスト
 new DoExample(42)
 ```
 
-The "do" code can also call any let-bound functions defined before it, as shown in this example:
+「do」コードは、その前に定義された`let`バインド関数も呼び出せます。以下に例を示します。
 
 ```fsharp
 type DoPrivateFunctionExample(seed) =   
     let privateValue = seed + 1
     
-    // some code to be done at construction time
-    do printfn "hello world"
+    // コンストラクション時に実行されるコード
+    do printfn "こんにちは、世界"
 
-    // must come BEFORE the do block that calls it
+    // これを呼び出す「do」ブロックの前に置く必要がある
     let printPrivateValue() = 
-        do printfn "the privateValue is now %i" privateValue 
+        do printfn "privateValueは現在%iです" privateValue 
 
-    // more code to be done at construction time
+    // コンストラクション時に実行される追加コード
     do printPrivateValue()
 
-// test
+// テスト
 new DoPrivateFunctionExample(42)
 ```
 
-### Accessing the instance via "this" in a do block
+### doブロックでのthisを使用したインスタンスへのアクセス
 
-One of the differences between the "do" and "let" bindings is that the "do" bindings can access the instance while "let" bindings cannot. This is because "let" bindings are actually evaluated before the constructor itself (similar to field initializers in C#), so the instance in a sense does not exist yet.
+「do」バインディングと「let」バインディングの違いの1つは、「do」バインディングがインスタンスにアクセスできることです。「let」バインディングはアクセスできません。これは、「let」バインディングがコンストラクタ自体の前に評価される（C#のフィールド初期化子と同様）ため、ある意味でインスタンスがまだ存在しないからです。
 
-If you need to call members of the instance from a "do" block, you need some way to refer to the instance itself. This is again done using a "self-identifier", but this time it is attached to the class declaration itself.
+「do」ブロックからインスタンスのメンバーを呼び出す必要がある場合、インスタンス自体を参照する方法が必要です。これも「自己識別子」を使用しますが、今回はクラス宣言自体に付けます。
 
 ```fsharp
 type DoPublicFunctionExample(seed) as this =   
-    // Note the "this" keyword in the declaration
+    // 宣言での「this」キーワードに注目
 
     let privateValue = seed + 1
     
-    // extra code to be done at construction time
+    // コンストラクション時に実行される追加コード
     do this.PrintPrivateValue()
 
-    // member
+    // メンバー
     member this.PrintPrivateValue() = 
-        do printfn "the privateValue is now %i" privateValue 
+        do printfn "privateValueは現在%iです" privateValue 
 
-// test
+// テスト
 new DoPublicFunctionExample(42)
 ```
 
-In general though, it is not best practice to call members from constructors unless you have to (e.g. calling a virtual method). Better to call private let-bound functions, and if necessary, have the public members call those same private functions.
+一般的に、特に必要がない限り、コンストラクタからメンバーを呼び出すのは良い習慣とは言えません（例えば、仮想メソッドを呼び出す場合など）。代わりに、非公開の`let`バインド関数を呼び出し、必要に応じて公開メンバーから同じ非公開関数を呼び出すようにするのが良いでしょう。
 
-## Methods
+## メソッド
 
-A method definition is very like a function definition, except that it has the `member` keyword and the self-identifier instead of just the `let` keyword.
+メソッド定義は関数定義とよく似ていますが、`let`キーワードの代わりに`member`キーワードと自己識別子を使います。
 
-Here are some examples:
+以下に例を示します。
 
 ```fsharp
 type MethodExample() = 
     
-    // standalone method
+    // スタンドアロンメソッド
     member this.AddOne x = 
         x + 1
 
-    // calls another method
+    // 別のメソッドを呼び出す
     member this.AddTwo x = 
         this.AddOne x |> this.AddOne
 
-    // parameterless method
+    // パラメータのないメソッド
     member this.Pi() = 
         3.14159
 
-// test
+// テスト
 let me = new MethodExample()
 printfn "%i" <| me.AddOne 42
 printfn "%i" <| me.AddTwo 42
 printfn "%f" <| me.Pi()
 ```
     
-You can see that, just like normal functions, methods can have parameters, call other methods, and be parameterless (or to be precise, take a [unit parameter](../posts/how-types-work-with-functions.md#parameterless-functions))
+通常の関数と同様に、メソッドにもパラメータを持たせたり、他のメソッドを呼び出したり、パラメータを持たない（正確には[unitパラメータを取る](../posts/how-types-work-with-functions.md#parameterless-functions)）ようにしたりできます。
 
-### Tuple form vs. curried form
+### タプル形式とカリー化形式
 
-Unlike normal functions, methods with more than one parameter can be defined in two different ways: 
+通常の関数とは異なり、複数のパラメータを持つメソッドは2つの異なる方法で定義できます。
 
-* The curried form, where parameters are separated with spaces, and partial application is supported. (Why "curried"? See the [explanation of currying](../posts/currying.md).)
-* The tuple form, where all the parameters as passed in at the same time, comma-separated, in a single tuple.
+* カリー化形式：パラメータを空白で区切り、部分適用をサポートします。（なぜ「カリー化」と呼ぶのか？[カリー化の説明](../posts/currying.md)を参照してください。）
+* タプル形式：すべてのパラメータを同時に渡し、カンマで区切って1つのタプルにします。
 
-The curried approach is more functional, and the tuple approach is more object-oriented. Here is an example class with a method for each approach:
+カリー化アプローチはより関数型的で、タプルアプローチはよりオブジェクト指向的です。以下は、それぞれのアプローチを用いたメソッドを持つクラスの例です。
 
 ```fsharp
 type TupleAndCurriedMethodExample() = 
     
-    // curried form
+    // カリー化形式
     member this.CurriedAdd x y = 
         x + y
 
-    // tuple form
+    // タプル形式
     member this.TupleAdd(x,y) = 
         x + y
 
-// test
+// テスト
 let tc = new TupleAndCurriedMethodExample()
 printfn "%i" <| tc.CurriedAdd 1 2
 printfn "%i" <| tc.TupleAdd(1,2)
 
-// use partial application
+// 部分適用を使用
 let addOne = tc.CurriedAdd 1  
 printfn "%i" <| addOne 99
 ```
 
-So which approach should you use?
+では、どちらのアプローチを使うべきでしょうか？
 
-The advantages of tuple form are:
+タプル形式の利点は：
 
-* Compatible with other .NET code
-* Supports named parameters and optional parameters
-* Supports method overloads (multiple methods with the same name that differ only in their function signature)
+* 他の.NETコードと互換性がある
+* 名前付きパラメータとオプションパラメータをサポートする
+* メソッドのオーバーロード（関数シグネチャのみが異なる同名の複数のメソッド）をサポートする
 
-On the other hand, the disadvantages of tuple form are:
+一方、タプル形式の欠点は：
 
-* Doesn't support partial application 
-* Doesn't work well with higher order functions 
-* Doesn't work well with type inference
+* 部分適用をサポートしない
+* 高階関数と整合しない部分がある
+* 型推論と整合しない部分がある
 
-For a more detailed discussion on tuple form vs. curried form see the post on [type extensions](../posts/type-extensions.md#tuple-form).
+タプル形式とカリー化形式の詳細な議論については、[型拡張に関する投稿](../posts/type-extensions.md#tuple-form)を参照してください。
 
 
-### Let- bound functions in conjunction with class methods
+### クラスメソッドと組み合わせた`let`バインド関数
 
-A common pattern is to create let-bound functions that do all the heavy lifting, and then have the public methods call these internal functions directly. This has the benefit that the type inference works much better with functional-style code than with methods. 
+一般的なパターンとして、`let`バインド関数で主要な処理を行い、公開メソッドからこれらの内部関数を直接呼び出すというものがあります。これには、関数型スタイルのコードで型推論がメソッドより快適に動作するというメリットがあります。
 
-Here's an example:
+以下に例を示します。
 
 ```fsharp
 type LetBoundFunctions() = 
@@ -383,180 +383,180 @@ type LetBoundFunctions() =
     let sum list = 
         list |> listReduce reduceWithSum 
 
-    // finally a public wrapper 
-    member this.Sum  = sum
+    // 最後に公開ラッパー 
+    member this.Sum = sum
     
-// test
+// テスト
 let lbf = new LetBoundFunctions()
-printfn "Sum is %i" <| lbf.Sum [1..10]
+printfn "合計は%iです" <| lbf.Sum [1..10]
 ```
 
-For more details on how to do this, see [this discussion](../posts/type-extensions.md#attaching-existing-functions).
+これを行う方法の詳細については、[この議論](../posts/type-extensions.md#attaching-existing-functions)を参照してください。
 
-### Recursive methods
+### 再帰的メソッド
 
-Unlike normal let-bound functions, methods that are recursive do not need the special `rec` keyword.  Here's the boringly familiar Fibonacci function as a method:
+通常の`let`バインド関数とは異なり、再帰的なメソッドには特別な`rec`キーワードは必要ありません。以下は、お馴染みのフィボナッチ関数をメソッドとして実装した例です。
 
 ```fsharp
 type MethodExample() = 
     
-    // recursive method without "rec" keyword
+    // 「rec」キーワードなしの再帰的メソッド
     member this.Fib x = 
         match x with
         | 0 | 1 -> 1
         | _ -> this.Fib (x-1) + this.Fib (x-2)
 
-// test
+// テスト
 let me = new MethodExample()
 printfn "%i" <| me.Fib 10
 ```
 
-### Type annotation for methods
+### メソッドの型注釈
 
-As usual, the types for a method's parameters and return value can normally be inferred by the compiler, but if you need to specify them, you do so in the same way that you would for a standard function:
+通常、メソッドのパラメータと戻り値の型はコンパイラによって推論されますが、明示的に指定する必要がある場合は、標準的な関数と同じ方法で行います。
 
 ```fsharp
 type MethodExample() = 
-    // explicit type annotation
+    // 明示的な型注釈
     member this.AddThree (x:int) :int = 
         x + 3
 ```
 
-        
-## Properties
 
-Properties can be divided into three groups:
+## プロパティ
 
-* Immutable properties, where there is a "get" but no "set".
-* Mutable properties, where there is a "get" and also a (possibly private) "set".
-* Write-only properties, where there is a "set" but no "get".  These are so unusual that I won't discuss them here, but the MSDN documentation describes the syntax if you ever need it.
+プロパティは3つのグループに分けられます：
 
-The syntax for immutable and mutable properties is slightly different.
+* 不変プロパティ：「get」はありますが「set」はありません。
+* 可変プロパティ：「get」と（場合によっては非公開の）「set」があります。
+* 書き込み専用プロパティ：「set」はありますが「get」はありません。これはとても珍しいので、ここでは説明しません。必要な場合はMicrosoft learnのドキュメントで構文を確認してください。
 
-For immutable properties, the syntax is simple. There is a "get" member that is similar to a standard "let" value binding. The expression on the right-hand side of the binding can be any standard expression, typically a combination of the constructor parameters, private let-bound fields, and private functions.
+不変プロパティと可変プロパティの構文は少し異なります。
 
-Here's an example:
+不変プロパティの構文は簡単です。標準の「let」値バインディングと似た「get」メンバーがあります。バインディングの右側の式は任意の標準式で、通常はコンストラクタパラメータ、非公開の`let`バインドフィールド、非公開関数の組み合わせです。
+
+以下に例を示します：
 
 ```fsharp
 type PropertyExample(seed) = 
-    // immutable property 
-    // using a constructor parameter
+    // 不変プロパティ 
+    // コンストラクタパラメータを使用
     member this.Seed = seed
 ```
 
-For mutable properties however, the syntax is more complicated. You need to provide two functions, one to get and one to set. This is done by using the syntax:
+しかし、可変プロパティの構文はより複雑です。値を取得する関数と設定する関数の2つを提供する必要があります。これは以下の構文で行います：
 
 ```fsharp
 with get() = ...
 and set(value) = ...
 ```
 
-Here's an example:
+以下に例を示します：
 
 ```fsharp
 type PropertyExample(seed) = 
-    // private mutable value
+    // 非公開の可変値
     let mutable myProp = seed
 
-    // mutable property
-    // changing a private mutable value
+    // 可変プロパティ
+    // 非公開の可変値を変更
     member this.MyProp 
         with get() = myProp 
-        and set(value) =  myProp <- value
+        and set(value) = myProp <- value
 ```
 
-To make the set function private, use the keywords `private set` instead.
+set関数を非公開にするには、`private set`キーワードを使用します。
 
-### Automatic properties
+### 自動プロパティ
 
-Starting in VS2012, F# supports automatic properties, which remove the requirement to create a separate backing store for them.
+VS2012以降、F#は自動プロパティをサポートしており、別のバッキングストアを作成する必要がなくなりました。
 
-To create an immutable auto property, use the syntax:
+不変の自動プロパティを作成するには、以下の構文を使います：
 
 ```fsharp
 member val MyProp = initialValue
 ```
 
-To create a mutable auto property, use the syntax:
+可変の自動プロパティを作成するには、以下の構文を使います：
 
 ```fsharp
 member val MyProp = initialValue with get,set
 ```
 
-Note that in this syntax there is a new keyword `val` and the self-identifier has gone.
+この構文では新しい`val`キーワードが使われ、自己識別子がなくなっていることに注意してください。
 
-### Complete property example
+### プロパティの完全な例
 
-Here's a complete example that demonstrates all the property types:
+以下に、すべてのプロパティタイプを示す完全な例を示します：
 
 ```fsharp
 type PropertyExample(seed) = 
-    // private mutable value
+    // 非公開の可変値
     let mutable myProp = seed
 
-    // private function
+    // 非公開関数
     let square x = x * x
 
-    // immutable property 
-    // using a constructor parameter
+    // 不変プロパティ 
+    // コンストラクタパラメータを使用
     member this.Seed = seed
 
-    // immutable property 
-    // using a private function
+    // 不変プロパティ 
+    // 非公開関数を使用
     member this.SeedSquared = square seed
 
-    // mutable property
-    // changing a private mutable value
+    // 可変プロパティ
+    // 非公開の可変値を変更
     member this.MyProp 
         with get() = myProp 
-        and set(value) =  myProp <- value
+        and set(value) = myProp <- value
 
-    // mutable property with private set
+    // 非公開のsetを持つ可変プロパティ
     member this.MyProp2 
         with get() = myProp 
-        and private set(value) =  myProp <- value
+        and private set(value) = myProp <- value
 
-    // automatic immutable property (in VS2012)
+    // 自動不変プロパティ（VS2012以降）
     member val ReadOnlyAuto = 1
 
-    // automatic mutable property (in VS2012)
+    // 自動可変プロパティ（VS2012以降）
     member val ReadWriteAuto = 1 with get,set
 
-// test 
+// テスト 
 let pe = new PropertyExample(42)
 printfn "%i" <| pe.Seed
 printfn "%i" <| pe.SeedSquared
 printfn "%i" <| pe.MyProp
 printfn "%i" <| pe.MyProp2
 
-// try calling set
-pe.MyProp <- 43    // Ok
+// setの呼び出しを試みる
+pe.MyProp <- 43    // OK
 printfn "%i" <| pe.MyProp
 
-// try calling private set
-pe.MyProp2 <- 43   // Error
+// 非公開のsetの呼び出しを試みる
+pe.MyProp2 <- 43   // エラー
 ```
 
-### Properties vs. parameterless methods
+### プロパティとパラメータなしメソッドの違い
 
-At this point you might be confused by the difference between properties and parameterless methods. They look identical at first glance, but there is a subtle difference -- "parameterless" methods are not really parameterless; they always have a unit parameter. 
+この時点で、プロパティとパラメータなしメソッドの違いが分かりにくいかもしれません。一見同じように見えますが、微妙な違いがあります。「パラメータなし」メソッドは実際にはパラメータがないわけではなく、常にunitパラメータを持ちます。
 
-Here's an example of the difference in both definition and usage:
+以下に、定義と使用の両方における違いの例を示します：
 
 ```fsharp
 type ParameterlessMethodExample() = 
-    member this.MyProp = 1    // No parens!
-    member this.MyFunc() = 1  // Note the ()
+    member this.MyProp = 1    // かっこなし！
+    member this.MyFunc() = 1  // かっこに注目
 
-// in use
+// 使用時
 let x = new ParameterlessMethodExample()
-printfn "%i" <| x.MyProp      // No parens!
-printfn "%i" <| x.MyFunc()    // Note the ()
+printfn "%i" <| x.MyProp      // かっこなし！
+printfn "%i" <| x.MyFunc()    // かっこに注目
 ```
 
-You can also tell the difference by looking at the signature of the class definition 
+クラス定義のシグネチャを見ることでも違いが分かります。
 
-The class definition looks like this:
+クラス定義は以下のようになります：
 
 ```fsharp
 type ParameterlessMethodExample =
@@ -567,104 +567,104 @@ type ParameterlessMethodExample =
   end
 ```
 
-The method has signature `MyFunc : unit -> int` and the property has signature `MyProp : int`.
+メソッドのシグネチャは`MyFunc : unit -> int`で、プロパティのシグネチャは`MyProp : int`です。
 
-This is very similar to what the signatures would be if the function and property were declared standalone, outside of any class:
+これは、関数とプロパティがクラス外で単独で宣言された場合のシグネチャとよく似ています：
 
 ```fsharp
 let MyFunc2() = 1 
 let MyProp2 = 1 
 ```
 
-The signatures for these would look like:
+これらのシグネチャは以下のようになります：
 
 ```fsharp
 val MyFunc2 : unit -> int
 val MyProp2 : int = 1
 ```
 
-which is almost exactly the same.
+これはほぼ同じです。
 
-If you are unclear on the difference and why the unit parameter is needed for the function, please read the [discussion of parameterless methods](../posts/how-types-work-with-functions.md#parameterless-functions).
+違いが分からない場合や、関数にunitパラメータが必要な理由が不明な場合は、[パラメータなしメソッドの議論](../posts/how-types-work-with-functions.md#parameterless-functions)を参照してください。
 
 
-## Secondary constructors
+## 追加コンストラクタ
 
-In addition to the primary constructor embedded in its declaration, a class can have additional constructors.  These are indicated by the `new` keyword and must call the primary constructor as their last expression. 
+宣言に組み込まれたプライマリコンストラクタに加えて、クラスは追加のコンストラクタを持つことができます。これらは`new`キーワードで示され、最後の式としてプライマリコンストラクタを呼び出す必要があります。
 
 ```fsharp
 type MultipleConstructors(param1, param2) =
-    do printfn "Param1=%i Param12=%i" param1 param2
+    do printfn "Param1=%i Param2=%i" param1 param2
 
-    // secondary constructor
+    // 追加コンストラクタ
     new(param1) = 
         MultipleConstructors(param1,-1) 
 
-    // secondary constructor
+    // 追加コンストラクタ
     new() = 
-        printfn "Constructing..."
+        printfn "構築中..."
         MultipleConstructors(13,17) 
 
-// test
+// テスト
 let mc1 = new MultipleConstructors(1,2)
 let mc2 = new MultipleConstructors(42)
 let mc3 = new MultipleConstructors()
 ```
 
-## Static members
+## 静的メンバー
 
-Just as in C#, classes can have static members, and this is indicated with the `static` keyword. The `static` modifier comes before the member keyword.
+C#と同様に、クラスは静的メンバーを持つことができ、これは`static`キーワードで示されます。`static`修飾子はmemberキーワードの前に来ます。
 
-Members which are static cannot have a self-identifier such as "this" because there is no instance for them to refer to.
+静的メンバーは、参照するインスタンスがないため、「this」などの自己識別子を持つことができません。
 
 ```fsharp
 type StaticExample() = 
     member this.InstanceValue = 1
-    static member StaticValue = 2  // no "this"
+    static member StaticValue = 2  // "this"なし
     
-// test
+// テスト
 let instance = new StaticExample()
 printf "%i" instance.InstanceValue
 printf "%i" StaticExample.StaticValue
 ```
 
-## Static constructors
+## 静的コンストラクタ
 
-There is no direct equivalent of a static constructor in F#, but you can create static let-bound values and static do-blocks that are executed when the class is first used.
+F#には静的コンストラクタの直接の同等物はありませんが、クラスが初めて使用されるときに実行される静的な`let`バインド値と静的な`do`ブロックを作成できます。
 
 ```fsharp
 type StaticConstructor() =
     
-    // static field
+    // 静的フィールド
     static let rand = new System.Random()
 
-    // static do
-    static do printfn "Class initialization!"
+    // 静的なdo
+    static do printfn "クラスの初期化！"
 
-    // instance member accessing static field
+    // 静的フィールドにアクセスするインスタンスメンバー
     member this.GetRand() = rand.Next()
 ```
 
-## Accessibility of members
+## メンバーのアクセシビリティ
 
-You can control the accessibility of a member with the standard .NET keywords `public`, `private` and `internal`.  The accessibility modifiers come after the `member` keyword and before the member name.
+メンバーのアクセシビリティは、標準的な.NETキーワードである`public`、`private`、`internal`で制御できます。アクセシビリティ修飾子は`member`キーワードの後、メンバー名の前に来ます。
 
-Unlike C#, all class members are public by default, not private. This includes both properties and methods.  However, non-members (e.g. let declarations) are private and cannot be made public.
+C#とは異なり、F#ではすべてのクラスメンバーがデフォルトで公開されます。これはプロパティとメソッドの両方に当てはまります。ただし、メンバーでないもの（例えば`let`宣言）は非公開で、公開することはできません。
 
-Here's an example:
+以下に例を示します：
 
 ```fsharp
 type AccessibilityExample() = 
     member this.PublicValue = 1
     member private this.PrivateValue = 2
     member internal this.InternalValue = 3
-// test
+// テスト
 let a = new AccessibilityExample();
 printf "%i" a.PublicValue
-printf "%i" a.PrivateValue  // not accessible
+printf "%i" a.PrivateValue  // アクセス不可
 ```
 
-For properties, if the set and get have different accessibilities, you can tag each part with a separate accessibility modifier.
+プロパティの場合、setとgetのアクセシビリティが異なる場合、各部分に別々のアクセシビリティ修飾子を付けることができます。
 
 ```fsharp
 type AccessibilityExample2() = 
@@ -675,27 +675,27 @@ type AccessibilityExample2() =
         and private set(value) = 
             privateValue <- value
 
-// test
+// テスト
 let a2 = new AccessibilityExample2();
-printf "%i" a2.PrivateSetProperty  // ok to read
-a2.PrivateSetProperty <- 43        // not ok to write
+printf "%i" a2.PrivateSetProperty  // 読み取りOK
+a2.PrivateSetProperty <- 43        // 書き込み不可
 ```
 
-In practice, the "public get, private set" combination that is so common in C# is not generally needed in F#, because immutable properties can be defined more elegantly, as described earlier.
+実際には、C#でよく見られる「公開get、非公開set」の組み合わせは、F#ではあまり必要ありません。不変プロパティをより簡潔に定義できるからです。
 
-## Tip: defining classes for use by other .NET code
+## ヒント：他の.NETコードで使用するクラスの定義
 
-If you are defining classes that need to interop with other .NET code, do not define them inside a module! Define them in a namespace instead, outside of any module.
+他の.NETコードと相互運用する必要があるクラスを定義する場合、モジュール内で定義しないでください！代わりに、モジュールの外部の名前空間内で定義してください。
 
-The reason for this is that F# modules are exposed as static classes, and any F# classes defined inside a module are then defined as nested classes within the static class, which can mess up your interop.  For example, some unit test runners don't like static classes.
+この理由は、F#モジュールが静的クラスとして公開され、モジュール内で定義されたF#クラスが静的クラス内のネストされたクラスとして定義されるため、相互運用性に問題が生じる可能性があるからです。例えば、一部の単体テストランナーは静的クラスを好みません。
 
-F# classes which are defined outside a module are generated as normal top-level .NET classes, which is probably what you want.  But remember that (as discussed in a [previous post](../posts/organizing-functions.md)) if you don't declare a namespace specifically, your class will be placed in an automatically generated module, and will be nested without your knowledge.
+モジュールの外部で定義されたF#クラスは、通常の最上位の.NETクラスとして生成されます。これはおそらくあなたが望むものでしょう。ただし、[以前の投稿](../posts/organizing-functions.md)で説明したように、名前空間を明示的に宣言しない場合、クラスは自動生成されたモジュールに配置され、気づかないうちにネストされることになります。
 
-Here's an example of two F# classes, one defined outside a module and one defined inside:
+以下に、モジュールの外部と内部で定義された2つのF#クラスの例を示します：
 
 ```fsharp
-// Note: this code will not work in an .FSX script, 
-// only in an .FS source file.
+// 注意：このコードは.FSXスクリプトでは動作せず、
+// .FSソースファイルでのみ動作します。
 namespace MyNamespace
 
 type TopLevelClass() = 
@@ -707,31 +707,31 @@ module MyModule =
         let nothing = 0
 ```
        
-And here's how the same code might look in C#:
+同じコードをC#で表現すると以下のようになります：
 
 ```csharp
 namespace MyNamespace
 {
   public class TopLevelClass
   {
-  // code
+  // コード
   }
 
   public static class MyModule
   {
     public class NestedClass
     {
-    // code
+    // コード
     }
   }
 }
 ```
 
-## Constructing and using a class
+## クラスの構築と使用
 
-Now that we have defined the class, how do we go about using it? 
+クラスを定義したら、どのように使用すればよいでしょうか？
 
-One way to create an instance of a class is straightfoward and just like C# -- use the `new` keyword and pass in the arguments to the constructor.
+クラスのインスタンスを作成する一つの方法は、C#と同様に簡単です。`new`キーワードを使用し、コンストラクタに引数を渡します。
 
 ```fsharp
 type MyClass(intParam:int, strParam:string) = 
@@ -741,34 +741,34 @@ type MyClass(intParam:int, strParam:string) =
 let myInstance = new MyClass(1,"hello")
 ```
 
-However, in F#, the constructor is considered to be just another function, so you can normally eliminate the `new` and call the constructor function on its own, like this:
+ただし、F#ではコンストラクタは単なる別の関数と見なされるため、通常は`new`を省略してコンストラクタ関数を直接呼び出すことができます：
 
 ```fsharp
 let myInstance2 = MyClass(1,"hello")
-let point = System.Drawing.Point(1,2)   // works with .NET classes too!
+let point = System.Drawing.Point(1,2)   // .NETクラスでも機能します！
 ```
 
-In the case when you are creating a class that implements `IDisposible`, you will get a compiler warning if you do not use `new`. 
+`IDisposable`を実装するクラスを作成する場合、`new`を使用しないとコンパイラ警告が出ます。
 
 ```fsharp
-let sr1 = System.IO.StringReader("")      // Warning
+let sr1 = System.IO.StringReader("")      // 警告
 let sr2 = new System.IO.StringReader("")  // OK
 ```
 
-This can be a useful reminder to use the `use` keyword instead of the `let` keyword for disposables. See [the post on `use`](../posts/let-use-do.md#use) for more.
+これは、破棄可能オブジェクトに対して`let`キーワードの代わりに`use`キーワードを使用するよう注意を促す有用なリマインダーとなります。詳しくは[`use`に関する投稿](../posts/let-use-do.md#use)を参照してください。
 
-### Calling methods and properties
+### メソッドとプロパティの呼び出し
 
-And once you have an instance, you can "dot into" the instance and use any methods and properties in the standard way.
+インスタンスを取得したら、そのインスタンスに「ドット」でアクセスし、標準的な方法でメソッドやプロパティを使用できます。
 
 ```fsharp
 myInstance.Two
 myInstance.Square 2
 ```
 
-We have seen many examples of member usage in the above discussion, and there's not too much to say about it. 
+上記の説明で多くのメンバー使用例を見てきましたが、特に説明することはあまりありません。
 
-Remember that, as discussed above, tuple-style methods and curried-style methods can be called in distinct ways:
+先ほど説明したように、タプルスタイルのメソッドとカリー化スタイルのメソッドは異なる方法で呼び出せることを覚えておいてください：
 
 ```fsharp
 type TupleAndCurriedMethodExample() = 
@@ -776,7 +776,7 @@ type TupleAndCurriedMethodExample() =
     member this.CurriedAdd x y = x + y
 
 let tc = TupleAndCurriedMethodExample()
-tc.TupleAdd(1,2)      // called with parens
-tc.CurriedAdd 1 2     // called without parens
-2 |> tc.CurriedAdd 1  // partial application
+tc.TupleAdd(1,2)      // かっこ付きで呼び出し
+tc.CurriedAdd 1 2     // かっこなしで呼び出し
+2 |> tc.CurriedAdd 1  // 部分適用
 ```

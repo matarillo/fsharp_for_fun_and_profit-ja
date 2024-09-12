@@ -1,17 +1,17 @@
 ---
 layout: series_index
-title: "The 'object-oriented programming in F#' series"
-seriesIndexId: "Object-oriented programming in F#"
+title: "「F#におけるオブジェクト指向プログラミング」シリーズ"
+seriesIndexId: "F#におけるオブジェクト指向プログラミング"
 ---
 
-As has been stressed many times before, F# is fundamentally a functional language at heart, yet the OO features have been nicely integrated and do not have a "tacked-on" feeling. As a result, it is quite viable to use F# just as an OO language, as an alternative to C#, say.
+これまで何度も強調してきたように、F#は根本的に関数型言語です。しかし、オブジェクト指向（OO）の機能がうまく統合されており、後付けの印象はありません。そのため、F#をC#の代替として、OO言語として使うことも十分可能です。
 
-In this series, we'll look at how F# supports object-oriented classes and methods.  
+このシリーズでは、F#がオブジェクト指向のクラスとメソッドをどのようにサポートしているかを見ていきます。
 
 
 
-* [Object-oriented programming in F#: Introduction](../posts/object-oriented-intro.md). .
-* [Classes](../posts/classes.md). .
-* [Inheritance and abstract classes](../posts/inheritance.md). .
-* [Interfaces](../posts/interfaces.md). .
-* [Object expressions](../posts/object-expressions.md). .
+* [F#におけるオブジェクト指向プログラミング：はじめに](../posts/object-oriented-intro.md)
+* [クラス](../posts/classes.md)
+* [継承と抽象クラス](../posts/inheritance.md)
+* [インターフェース](../posts/interfaces.md)
+* [オブジェクト式](../posts/object-expressions.md)

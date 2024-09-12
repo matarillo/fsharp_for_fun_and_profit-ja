@@ -1,26 +1,26 @@
 ---
 layout: post
-title: "Object expressions"
+title: "オブジェクト式"
 description: ""
 nav: fsharp-types
-seriesId: "Object-oriented programming in F#"
+seriesId: "F#におけるオブジェクト指向プログラミング"
 seriesOrder: 5
-categories: [Object-oriented, Interfaces]
+categories: [オブジェクト指向, インターフェース]
 ---
 
-So as we saw in the [previous post](../posts/interfaces.md), implementing interfaces in F# is a bit more awkward than in C#. But F# has a trick up its sleeve, called "object expressions".
+[前回の投稿](../posts/interfaces.md)で見たように、F#でインターフェースを実装するのはC#よりも少し扱いにくいです。しかしF#には「オブジェクト式」という切り札があります。
 
-With object expressions, you can implement an interface on-the-fly, without having to create a class.  
+オブジェクト式を使うと、クラスを作成せずにその場でインターフェースを実装できます。
 
-### Implementing interfaces with object expressions
+### オブジェクト式を使ったインターフェースの実装
 
-Object expressions are most commonly used to implement interfaces. 
-To do this, you use the syntax `new MyInterface with ...`, and the wrap the whole thing in curly braces (one of the few uses for them in F#!)
+オブジェクト式は主にインターフェースの実装に使われます。
+これを行うには、`new MyInterface with ...`という構文を使い、全体を中かっこで囲みます（F#での中かっこの数少ない用途の1つです！）。
 
-Here is some example code that creates a number of objects, each of which implements `IDisposable`.
+以下は、`IDisposable`を実装するオブジェクトを複数作成する例です。
 
 ```fsharp
-// create a new object that implements IDisposable
+// IDisposableを実装する新しいオブジェクトを作成
 let makeResource name = 
    { new System.IDisposable 
      with member this.Dispose() = printfn "%s disposed" name }
@@ -37,7 +37,7 @@ let useAndDisposeResources =
     printfn "done." 
 ```
 
-If you execute this code, you will see the output below. You can see that `Dispose()` is indeed being called when the objects go out of scope. 
+このコードを実行すると、以下の出力が表示されます。オブジェクトがスコープ外になると実際に`Dispose()`が呼び出されていることがわかります。
 
 <pre>
 using first resource
@@ -53,7 +53,7 @@ second resource disposed
 first resource disposed
 </pre>
 
-We can take the same approach with the `IAddingService` and create one on the fly as well.
+同じアプローチを`IAddingService`にも適用し、その場で作成できます。
 
 ```fsharp
 let makeAdder id = 
@@ -69,7 +69,7 @@ let testAdders =
     for i in [1..3] do
         let adder = makeAdder i
         let result = adder.Add i i 
-        () //ignore result
+        () //結果を無視
 ```
 
-Object expressions are extremely convenient, and can greatly reduce the number of classes you need to create if you are interacting with an interface heavy library.
+オブジェクト式は非常に便利で、インターフェースを多用するライブラリと連携する際に、作成するクラスを大幅に減らすことができます。

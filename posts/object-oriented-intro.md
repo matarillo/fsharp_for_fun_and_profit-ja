@@ -1,37 +1,37 @@
 ---
 layout: post
-title: "Object-oriented programming in F#: Introduction"
+title: "F#におけるオブジェクト指向プログラミング：はじめに"
 description: ""
 nav: fsharp-types
-seriesId: "Object-oriented programming in F#"
+seriesId: "F#におけるオブジェクト指向プログラミング"
 seriesOrder: 1
-categories: [Object-oriented]
+categories: [オブジェクト指向]
 ---
 
-In this series, we'll look at how F# supports object-oriented classes and methods.  
+このシリーズでは、F#がオブジェクト指向のクラスとメソッドをどのようにサポートしているかを見ていきます。
 
-## Should you use object-oriented features at all?
+## オブジェクト指向の機能を使うべきか
 
-As has been stressed many times before, F# is fundamentally a functional language at heart, yet the OO features have been nicely integrated and do not have a "tacked-on" feeling. As a result, it is quite viable to use F# just as an OO language, as an alternative to C#, say.
+これまで何度も強調してきたように、F#は根本的に関数型言語です。しかし、オブジェクト指向（OO）の機能がうまく統合されており、後付けの印象はありません。そのため、F#をC#の代替として、純粋にOO言語として使うことも十分可能です。
 
-Whether to use the OO style or the functional style is, of course, up to you.  Here are some arguments for and against.
+OOスタイルと関数型スタイルのどちらを使うかは、もちろんあなた次第です。以下に、賛成と反対の理由をいくつか挙げます。
 
-Reasons in favor of using OO features:
+OO機能を使う理由：
 
-* If you just want to do a direct port from C# without refactoring. (For more on this, there is a [entire series on how to port from C# to F#](../series/porting-from-csharp.md).)
-* If you want to use F# primarily as an OO language, as an alternative to C#.
-* If you need to integrate with other .NET languages
+* リファクタリングせずにC#から直接移植したい場合（これについては、[C#からF#への移植に関する完全なシリーズ](../series/porting-from-csharp.md)があります）。
+* F#を主にOO言語として、C#の代替として使いたい場合。
+* 他の.NET言語と統合する必要がある場合。
 
-Reasons against using OO features:
+OO機能を使わない理由：
 
-* If you are a beginner coming from an imperative language, classes can be a crutch that hinder your understanding of functional programming.
-* Classes do not have the convenient "out of the box" features that the "pure" F# data types have, such as built-in equality and comparison, pretty printing, etc.
-* Classes and methods do not play well with the type inference system and higher order functions (see [discussion here](../posts/type-extensions.md#downsides-of-methods)), so using them heavily means that you are making it harder to benefit from the most powerful parts of F#.
+* 命令型言語から来た初心者の場合、クラスが関数型プログラミングの理解を妨げる杖になる可能性があります。
+* クラスには、「純粋な」F#データ型が持つ便利な「すぐに使える」機能（組み込みの等値性と比較、プリティプリントなど）がありません。
+* クラスとメソッドは型推論システムや高階関数とうまく連携しません（[ここでの議論](../posts/type-extensions.md#downsides-of-methods)を参照）。そのため、これらを多用すると、F#の最も強力な部分を活用しにくくなります。
 
-In most cases, the best approach is a hybrid one, primarily using pure F# types and functions to benefit from type inference, but occasionally using interfaces and classes when polymorphism is needed.
+ほとんどの場合、最良のアプローチはハイブリッド型です。主に純粋なF#の型と関数を使って型推論の利点を活かしつつ、多態性が必要な場合に時々インターフェースとクラスを使います。
 
-## Understanding the object-oriented features of F# ##
+## F#のオブジェクト指向機能を理解する
 
-If you do decide to use the object-oriented features of F#, the following series of posts should cover everything you need to know to be productive with classes and methods in F#.
+F#のオブジェクト指向機能を使うことにした場合、以下の一連の投稿が、F#でクラスとメソッドを生産的に使うために知っておくべきことをすべてカバーしています。
 
-First up, how to create classes!
+まずは、クラスの作り方から始めましょう。

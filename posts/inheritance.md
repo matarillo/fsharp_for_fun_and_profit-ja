@@ -1,27 +1,27 @@
 ---
 layout: post
-title: "Inheritance and abstract classes"
+title: "継承と抽象クラス"
 description: ""
 nav: fsharp-types
-seriesId: "Object-oriented programming in F#"
+seriesId: "F#におけるオブジェクト指向プログラミング"
 seriesOrder: 3
-categories: [Object-oriented, Classes]
+categories: [オブジェクト指向, クラス]
 ---
 
-This is a follow-on from the [previous post on classes](../posts/classes.md). This post will focus on inheritance in F#, and how to define and use abstract classes and interfaces.
+この記事は[前回のクラスに関する投稿](../posts/classes.md)の続きです。今回はF#における継承、抽象クラスやインターフェースの定義と使用方法に焦点を当てます。
 
-## Inheritance
+## 継承
 
-To declare that a class inherits from another class, use the syntax:
+クラスが別のクラスを継承することを宣言するには、次の構文を使います。
 
 ```fsharp
 type DerivedClass(param1, param2) =
    inherit BaseClass(param1)
 ```
 
-The `inherit` keyword signals that `DerivedClass` inherits from `BaseClass`. In addition, some `BaseClass` constructor must be called at the same time.
+`inherit`キーワードは`DerivedClass`が`BaseClass`を継承することを示します。同時に、`BaseClass`のコンストラクタも呼び出す必要があります。
 
-It might be useful to compare F# with C# at this point. Here is some C# code for a very simple pair of classes. 
+ここでF#とC#を比較すると参考になるでしょう。以下は非常にシンプルな2つのクラスのC#コードです。
 
 ```csharp
 public class MyBaseClass
@@ -43,9 +43,9 @@ public class MyDerivedClass: MyBaseClass
 }
 ```
 
-Note that the inheritance declaration `class MyDerivedClass: MyBaseClass` is distinct from the constructor which calls `base(param1)`.
+継承の宣言`class MyDerivedClass: MyBaseClass`が、`base(param1)`を呼び出すコンストラクタとは別になっていることに注目してください。
 
-Now here is the F# version:
+次にF#版を見てみましょう。
 
 ```fsharp
 type BaseClass(param1) =
@@ -55,105 +55,105 @@ type DerivedClass(param1, param2) =
    inherit BaseClass(param1)
    member this.Param2 = param2
 
-// test
+// テスト
 let derived = new DerivedClass(1,2)
 printfn "param1=%O" derived.Param1
 printfn "param2=%O" derived.Param2
 ```
 
-Unlike C#, the inheritance part of the declaration, `inherit BaseClass(param1)`, contains both the class to inherit from *and* its constructor.
+C#とは異なり、F#では継承部分の宣言`inherit BaseClass(param1)`に、継承元のクラスとそのコンストラクタの両方が含まれています。
 
-## Abstract and virtual methods
+## 抽象メソッドと仮想メソッド
 
-Obviously, part of the point of inheritance is to be able to have abstract methods, virtual methods, and so on.
+継承の重要な目的の1つは、抽象メソッドや仮想メソッドなどを持つことができる点です。
 
-### Defining abstract methods in the base class
+### 基底クラスでの抽象メソッドの定義
 
-In C#, an abstract method is indicated by the `abstract` keyword plus the method signature. In F#, it is the same concept, except that the way that function signatures are written in F# is quite different from C#.
+C#では抽象メソッドを`abstract`キーワードとメソッドのシグネチャで示します。F#も同じ概念ですが、関数シグネチャの書き方がC#とは大きく異なります。
 
 ```fsharp
-// concrete function definition
+// 具体的な関数定義
 let Add x y = x + y
 
-// function signature
+// 関数シグネチャ
 // val Add : int -> int -> int
 ```
 
-So to define an abstract method, we use the signature syntax, along with the `abstract member` keywords:
+抽象メソッドを定義するには、シグネチャの構文と`abstract member`キーワードを使います。
 
 ```fsharp
 type BaseClass() =
    abstract member Add: int -> int -> int
 ```
 
-Notice that the equals sign has been replaced with a colon. This is what you would expect, as the equals sign is used for binding values, while the colon is used for type annotation.
+等号がコロンに置き換わっていることに注意してください。これは予想通りで、等号は値の束縛に使われ、コロンは型注釈に使われるためです。
 
-Now, if you try to compile the code above, you will get an error! The compiler will complain that there is no implementation for the method. To fix this, you need to: 
+ただし、上記のコードをコンパイルしようとすると、エラーが発生します。コンパイラはメソッドの実装がないと警告します。これを解決するには次のいずれかが必要です。
 
-* provide a default implementation of the method, or 
-* tell the compiler that the class as whole is also abstract.
+* メソッドのデフォルト実装を提供する
+* クラス全体も抽象であることをコンパイラに伝える
 
-We'll look at both of these alternatives shortly.
+これらの選択肢については後ほど詳しく見ていきます。
 
-### Defining abstract properties
+### 抽象プロパティの定義
 
-An abstract immutable property is defined in a similar way. The signature is just like that of a simple value.
+抽象の不変プロパティも同様に定義します。シグネチャは単純な値のものと同じです。
 
 ```fsharp
 type BaseClass() =
    abstract member Pi : float
 ```
 
-If the abstract property is read/write, you add the get/set keywords.
+抽象プロパティが読み書き可能な場合は、get/setキーワードを追加します。
 
 ```fsharp
 type BaseClass() =
    abstract Area : float with get,set
 ```
 
-### Default implementations (but no virtual methods)
+### デフォルト実装（ただし仮想メソッドはなし）
 
-To provide a default implementation of an abstract method in the base class, use the `default` keyword instead of the `member` keyword:
+基底クラスで抽象メソッドのデフォルト実装を提供するには、`member`キーワードの代わりに`default`キーワードを使います。
 
 ```fsharp
-// with default implementations
+// デフォルト実装付き
 type BaseClass() =
-   // abstract method
+   // 抽象メソッド
    abstract member Add: int -> int -> int
-   // abstract property
+   // 抽象プロパティ
    abstract member Pi : float 
 
-   // defaults
+   // デフォルト
    default this.Add x y = x + y
    default this.Pi = 3.14
 ```
 
-You can see that the default method is defined in the usual way, except for the use of `default` instead of `member`.
+デフォルトメソッドは通常の方法で定義されますが、`member`の代わりに`default`を使う点が異なります。
 
-One major difference between F# and C# is that in C# you can combine the abstract definition and the default implementation into a single method, using the `virtual` keyword. In F#, you cannot. You must declare the abstract method and the default implementation separately. The `abstract member` has the signature, and the `default` has the implementation.
+F#とC#の大きな違いの1つは、C#では`virtual`キーワードを使って抽象定義とデフォルト実装を1つのメソッドにまとめられることです。F#ではこれができません。抽象メソッドとデフォルト実装を別々に宣言する必要があります。`abstract member`がシグネチャを持ち、`default`が実装を持ちます。
 
-### Abstract classes
+### 抽象クラス
 
-If at least one abstract method does *not* have a default implementation, then the entire class is abstract, and you must indicate this by annotating it with the `AbstractClass` attribute. 
+少なくとも1つの抽象メソッドがデフォルト実装を持たない場合、そのクラス全体が抽象クラスとなります。この場合、`AbstractClass`属性でクラスに注釈を付ける必要があります。
 
 ```fsharp
 [<AbstractClass>]
 type AbstractBaseClass() =
-   // abstract method
+   // 抽象メソッド
    abstract member Add: int -> int -> int
 
-   // abstract immutable property
+   // 抽象不変プロパティ
    abstract member Pi : float 
 
-   // abstract read/write property
+   // 抽象読み書き可能プロパティ
    abstract member Area : float with get,set
 ```
 
-If this is done, then the compiler will no longer complain about a missing implementation.
+このように注釈を付けると、コンパイラは実装がないことについて警告しなくなります。
 
-### Overriding methods in subclasses
+### サブクラスでのメソッドのオーバーライド
 
-To override an abstract method or property in a subclass, use the `override` keyword instead of the `member` keyword.  Other than that change, the overridden method is defined in the usual way.
+サブクラスで抽象メソッドやプロパティをオーバーライドするには、`member`キーワードの代わりに`override`キーワードを使います。それ以外は、オーバーライドされたメソッドは通常の方法で定義します。
 
 ```fsharp
 [<AbstractClass>]
@@ -162,15 +162,15 @@ type Animal() =
 
 type Dog() =
    inherit Animal() 
-   override this.MakeNoise () = printfn "woof"
+   override this.MakeNoise () = printfn "ワン"
 
-// test
-// let animal = new Animal()  // error creating ABC
+// テスト
+// let animal = new Animal()  // 抽象クラスのインスタンス化でエラー
 let dog = new Dog()
 dog.MakeNoise()
 ```
 
-And to call a base method, use the `base` keyword, just as in C#.
+基底メソッドを呼び出すには、C#と同様に`base`キーワードを使います。
 
 ```fsharp
 type Vehicle() =
@@ -181,17 +181,17 @@ type Rocket() =
    inherit Vehicle() 
    override this.TopSpeed() = base.TopSpeed() * 10
 
-// test
+// テスト
 let vehicle = new Vehicle()
 printfn "vehicle.TopSpeed = %i" <| vehicle.TopSpeed()
 let rocket = new Rocket()
 printfn "rocket.TopSpeed = %i" <| rocket.TopSpeed()
 ```
 
-### Summary of abstract methods
+### 抽象メソッドのまとめ
 
-Abstract methods are basically straightforward and similar to C#. There are only two areas that might be tricky if you are used to C#:
+抽象メソッドは基本的に単純でC#と似ています。C#に慣れている人にとって、難しいかもしれない点は2つだけです。
 
-* You must understand how function signatures work and what their syntax is!  For a detailed discussion see the [post on function signatures](../posts/function-signatures.md).
-* There is no all-in-one virtual method. You must define the abstract method and the default implementation separately.
+* 関数シグネチャの仕組みとその構文を理解する必要があります。詳しい説明は[関数シグネチャに関する投稿](../posts/function-signatures.md)をご覧ください。
+* 1つにまとまった仮想メソッドがありません。抽象メソッドとデフォルト実装を別々に定義する必要があります。
 
