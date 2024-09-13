@@ -1,48 +1,48 @@
 ---
 layout: post
-title: "Introducing 'bind'"
-description: "Steps towards creating our own 'let!' "
+title: "'bind'の紹介"
+description: "独自の'let!'を作るための段階"
 nav: thinking-functionally
-seriesId: "Computation Expressions"
+seriesId: "コンピュテーション式"
 seriesOrder: 3
 ---
 
-In the last post we talked about how we can think of `let` as a nice syntax for doing continuations behind scenes.
-And we introduced a `pipeInto` function that allowed us to add hooks into the continuation pipeline.
+前回の投稿では、`let`を裏で継続を行うための便利な構文として考える方法について説明しました。
+また、継続のパイプラインにフックを追加できる`pipeInto`関数を紹介しました。
 
-Now we are ready to look at our first builder method, `Bind`, which formalizes this approach and is the core of any computation expression.
+これで、最初のビルダーメソッド`Bind`を見る準備が整いました。このメソッドはこのアプローチを形式化し、あらゆるコンピュテーション式の核心となります。
 
-### Introducing "Bind "
+### "Bind"の紹介
 
-The [MSDN page on computation expressions](http://msdn.microsoft.com/en-us/library/dd233182.aspx) describes the `let!` expression as syntactic sugar for a `Bind` method. Let's look at this again:
+[コンピュテーション式に関するMicrosoft Learnのページ](https://learn.microsoft.com/ja-jp/dotnet/fsharp/language-reference/computation-expressions)では、`let!`式を`Bind`メソッドの糖衣構文として説明しています。もう一度見てみましょう。
 
-Here's the `let!` expression documentation, along with a real example:
+`let!`式のドキュメントと実例です。
 
 ```fsharp
-// documentation
+// ドキュメント
 {| let! pattern = expr in cexpr |}
 
-// real example
-let! x = 43 in some expression
+// 実例
+let! x = 43 in 何らかの式
 ```
 
-And here's the `Bind` method documentation, along with a real example:
+そして`Bind`メソッドのドキュメントと実例です。
 
 ```fsharp
-// documentation
+// ドキュメント
 builder.Bind(expr, (fun pattern -> {| cexpr |}))
 
-// real example
-builder.Bind(43, (fun x -> some expression))
+// 実例
+builder.Bind(43, (fun x -> 何らかの式))
 ```
 
-Notice a few interesting things about this:
+これについて興味深い点がいくつかあります。
 
-* `Bind` takes two parameters, an expression (`43`) and a lambda. 
-* The parameter of the lambda (`x`) is bound to the expression passed in as the first parameter. (In this case at least. More on this later.)
-* The parameters of `Bind` are reversed from the order they are in `let!`.
+* `Bind`は2つのパラメータ、式（`43`）とラムダを取ります。
+* ラムダのパラメータ（`x`）は、最初のパラメータとして渡された式に束縛されます（少なくともこの場合は。後でもっと詳しく説明します）。
+* `Bind`のパラメータは`let!`での順序と逆になっています。
 
-So in other words, if we chain a number of `let!` expressions together like this:
+つまり、複数の`let!`式をこのようにつなげると、
 
 ```fsharp
 let! x = 1
@@ -50,79 +50,79 @@ let! y = 2
 let! z = x + y
 ```
 
-the compiler converts it to calls to `Bind`, like this:
+コンパイラはこれを`Bind`の呼び出しに変換します。
 
 ```fsharp
 Bind(1, fun x ->
 Bind(2, fun y ->
 Bind(x + y, fun z ->
-etc
+など
 ```
 
-I think you can see where we are going with this by now.
+何をしようとしているのか。もうお分かりだと思います。
 
-Indeed, our `pipeInto` function is exactly the same as the `Bind` method. 
+`pipeInto`関数は`Bind`メソッドとまったく同じです。
 
-This is a key insight: *computation expressions are just a way to create nice syntax for something that we could do ourselves*.
+これは重要な洞察です。つまり、*コンピュテーション式は自分たちでできることに対して、きれいな構文を作る方法に過ぎません*。
 
-### A standalone bind function
+### スタンドアロンのbind関数
 
-Having a "bind" function like this is actually a standard functional pattern, and it is not dependent on computation expressions at all.
+このような"bind"関数は実際、標準的な関数型パターンであり、コンピュテーション式に依存しません。
 
-First, why is it called "bind"? Well, as we've seen, a "bind" function or method can be thought of as feeding an input value to a function. This is known as "[binding](../posts/function-values-and-simple-values.md)" a value to the parameter of the function (recall that all functions have only [one parameter](../posts/currying.md)).
+まず、なぜ"bind"と呼ばれるのでしょうか？これまで見てきたように、"bind"関数やメソッドは、入力値を関数に与えると考えることができます。これは関数のパラメータに値を"[束縛する](../posts/function-values-and-simple-values.md)"として知られています（すべての関数は[1つのパラメータ](../posts/currying.md)だけを持つことを思い出してください）。
 
-So when you think of `bind` this this way, you can see that it is similar to piping or composition.
+このように`bind`を考えると、パイプや合成に似ていることがわかります。
 
-In fact, you can turn it into an infix operation like this:
+実際、次のように中置演算子にすることもできます。
 
 ```fsharp
 let (>>=) m f = pipeInto(m,f)
 ```
 
-*By the way, this symbol ">>=" is the standard way of writing bind as an infix operator. If you ever see it used in other F# code, that is probably what it represents.*
+*ちなみに、この記号">>="はbindを中置演算子として書く標準的な方法です。他のF#コードでこの記号を見かけたら、おそらくこれを表しています。*
 
-Going back to the safe divide example, we can now write the workflow on one line, like this:
+安全な除算の例に戻ると、ワークフローを1行で次のように書けます。
 
 ```fsharp
 let divideByWorkflow x y w z = 
     x |> divideBy y >>= divideBy w >>= divideBy z 
 ```
 
-You might be wondering exactly how this is different from normal piping or composition? It's not immediately obvious.
+これが通常のパイプや合成とどう違うのか、疑問に思うかもしれません。一見すると明らかではありません。
 
-The answer is twofold:
+答えは2つあります。
 
-* First, the `bind` function has *extra* customized behavior for each situation. It is not a generic function, like pipe or composition.
+* 第一に、`bind`関数は各状況に合わせた*追加の*カスタマイズされた動作を持ちます。パイプや合成のような汎用的な関数ではありません。
 
-* Second, the input type of the value parameter (`m` above) is not necessarily the same as the output type of the function parameter (`f` above), and so one of the things that bind does is handle this mismatch elegantly so that functions can be chained.
+* 第二に、値パラメータ（上記の`m`）の入力型は、必ずしも関数パラメータ（上記の`f`）の出力型と同じではありません。bindはこの不一致を上手く処理し、関数をつなげられるようにします。
 
-As we will see in the next post, bind generally works with some "wrapper" type. The value parameter might be of `WrapperType<TypeA>`, and then the signature of the function parameter of `bind` function is always `TypeA -> WrapperType<TypeB>`. 
+次の投稿で見るように、bindは一般に何らかの"ラッパー"型と連携します。値パラメータの型は`WrapperType<TypeA>`かもしれませんが、bind関数の関数パラメータの型は常に`TypeA -> WrapperType<TypeB>`です。
 
-In the particular case of the `bind` for safe divide, the wrapper type is `Option`. The type of the value parameter (`m` above) is `Option<int>` and the signature of the function parameter (`f` above) is `int -> Option<int>`.
+安全な除算のbindの場合、ラッパー型は`Option`です。値パラメータ（上記の`m`）の型は`Option<int>`で、関数パラメータ（上記の`f`）の型は`int -> Option<int>`です。
 
-To see bind used in a different context, here is an example of the logging workflow expressed using a infix bind function:
+bindを別の文脈で使用する例として、中置bind関数を使ったログ記録ワークフローを示します。
 
 ```fsharp
 let (>>=) m f = 
-    printfn "expression is %A" m
+    printfn "式は %A" m
     f m
 
 let loggingWorkflow = 
     1 >>= (+) 2 >>= (*) 42 >>= id
 ```
 
-In this case, there is no wrapper type. Everything is an `int`. But even so, `bind` has the special behavior that performs the logging behind the scenes.
+この場合、ラッパー型はありません。すべて`int`です。しかし、bindには裏で記録を行う特殊な動作があります。
 
-## Option.bind and the "maybe" workflow revisited
+## Option.bindと"maybe"ワークフローの再考
 
-In the F# libraries, you will see `Bind` functions or methods in many places. Now you know what they are for!
+F#ライブラリでは、多くの場所で`Bind`関数やメソッドを見かけるでしょう。今や、それらの目的がわかるはずです。
 
-A particularly useful one is `Option.bind`, which does exactly what we wrote by hand above, namely
+特に便利なのは`Option.bind`で、これは先ほど手作業で書いたものとまったく同じことをします。つまり、
 
-* If the input parameter is `None`, then don't call the continuation function.
-* If the input parameter is `Some`, then do call the continuation function, passing in the contents of the `Some`.
+* 入力パラメータが`None`の場合、継続関数を呼び出しません。
+* 入力パラメータが`Some`の場合、継続関数を呼び出し、`Some`の中身を渡します。
 
-Here was our hand-crafted function:
+これが私たちの手作りの関数です。
 
 ```fsharp
 let pipeInto (m,f) =
@@ -133,7 +133,7 @@ let pipeInto (m,f) =
        x |> f
 ```
 
-And here is the implementation of `Option.bind`:
+そして、これが`Option.bind`の実装です。
 
 ```fsharp
 module Option = 
@@ -145,9 +145,9 @@ module Option =
            x |> f 
 ```
 
-There is a moral in this -- don't be too hasty to write your own functions. There may well be library functions that you can reuse.
+この話から得られる教訓は、安易に独自の関数を作らないということです。ライブラリ関数を再利用できるかもしれません。
 
-Here is the "maybe" workflow, rewritten to use `Option.bind`:
+以下は`Option.bind`を使って書き直した"maybe"ワークフローです。
 
 ```fsharp
 type MaybeBuilder() =
@@ -156,13 +156,13 @@ type MaybeBuilder() =
 ```
 
 
-## Reviewing the different approaches so far ##
+## これまでの異なるアプローチの振り返り
 
-We've used four different approaches for the "safe divide" example so far. Let's put them together side by side and compare them once more.
+「安全な除算」の例に対して、これまで4つの異なるアプローチを使ってきました。もう一度並べて比較してみましょう。
 
-*Note: I have renamed the original `pipeInto` function to `bind`, and used `Option.bind` instead of our original custom implementation.*
+*注意：元の`pipeInto`関数を`bind`に名前変更し、オリジналのカスタム実装の代わりに`Option.bind`を使っています。*
 
-First the original version, using an explicit workflow:
+まず、明示的なワークフローを使った元のバージョンです。
 
 ```fsharp
 module DivideByExplicit = 
@@ -175,24 +175,24 @@ module DivideByExplicit =
     let divideByWorkflow x y w z = 
         let a = x |> divideBy y 
         match a with
-        | None -> None  // give up
-        | Some a' ->    // keep going
+        | None -> None  // 諦める
+        | Some a' ->    // 続ける
             let b = a' |> divideBy w
             match b with
-            | None -> None  // give up
-            | Some b' ->    // keep going
+            | None -> None  // 諦める
+            | Some b' ->    // 続ける
                 let c = b' |> divideBy z
                 match c with
-                | None -> None  // give up
-                | Some c' ->    // keep going
-                    //return 
+                | None -> None  // 諦める
+                | Some c' ->    // 続ける
+                    //戻り値
                     Some c'
-    // test
+    // テスト
     let good = divideByWorkflow 12 3 2 1
     let bad = divideByWorkflow 12 3 0 1
 ```
 
-Next, using our own version of "bind"  (a.k.a. "pipeInto")      
+次に、独自バージョンの"bind"（別名"pipeInto"）を使ったものです。
 
 ```fsharp
 module DivideByWithBindFunction = 
@@ -214,12 +214,12 @@ module DivideByWithBindFunction =
         return' c 
         )))
 
-    // test
+    // テスト
     let good = divideByWorkflow 12 3 2 1
     let bad = divideByWorkflow 12 3 0 1
 ```
 
-Next, using a computation expression:
+次に、コンピュテーション式を使ったものです。
 
 ```fsharp
 module DivideByWithCompExpr = 
@@ -244,12 +244,12 @@ module DivideByWithCompExpr =
             return c
             }    
 
-    // test
+    // テスト
     let good = divideByWorkflow 12 3 2 1
     let bad = divideByWorkflow 12 3 0 1
 ```
 
-And finally, using bind as an infix operation:
+最後に、bindを中置演算子として使ったものです。
 
 ```fsharp
 module DivideByWithBindOperator = 
@@ -266,28 +266,28 @@ module DivideByWithBindOperator =
         >>= divideBy w 
         >>= divideBy z 
 
-    // test
+    // テスト
     let good = divideByWorkflow 12 3 2 1
     let bad = divideByWorkflow 12 3 0 1
 ```
 
-Bind functions turn out to be very powerful. In the next post we'll see that combining `bind` with wrapper types creates an elegant way of passing extra information around in the background. 
+bind関数は非常に強力だとわかります。次の投稿では、`bind`をラッパー型と組み合わせることで、背景で追加情報を渡す優雅な方法が作れることを見ていきます。
 
-## Exercise: How well do you understand?
+## 練習問題：どれくらい理解できましたか？
 
-Before you move on to the next post, why don't you test yourself to see if you have understood everything so far?
+次の投稿に進む前に、ここまでの内容をすべて理解できたかどうか、自分でテストしてみませんか？
 
-Here is a little exercise for you.
+ここに小さな練習問題があります。
 
-**Part 1 - create a workflow** 
+**パート1 - ワークフローの作成** 
 
-First, create a function that parses a string into a int:
+まず、文字列をintに変換する関数を作ります。
 
 ```fsharp
 let strToInt str = ???
 ```
 
-and then create your own computation expression builder class so that you can use it in a workflow, as shown below.
+そして、独自のコンピュテーション式ビルダークラスを作成し、以下のようにワークフローで使えるようにします。
 
 ```fsharp
 let stringAddWorkflow x y z = 
@@ -299,21 +299,21 @@ let stringAddWorkflow x y z =
         return a + b + c
         }    
 
-// test
+// テスト
 let good = stringAddWorkflow "12" "3" "2"
 let bad = stringAddWorkflow "12" "xyz" "2"
 ```
 
-**Part 2 -- create a bind function** 
+**パート2 -- bind関数の作成** 
 
-Once you have the first part working, extend the idea by adding two more functions:
+パート1が完成したら、アイデアを拡張して2つの関数を追加します。
 
 ```fsharp
 let strAdd str i = ???
 let (>>=) m f = ???
 ```
 
-And then with these functions, you should be able to write code like this:
+これらの関数を使えば、次のようなコードが書けるはずです。
 
 ```fsharp
 let good = strToInt "1" >>= strAdd "2" >>= strAdd "3"
@@ -321,10 +321,10 @@ let bad = strToInt "1" >>= strAdd "xyz" >>= strAdd "3"
 ```
 
 
-## Summary ##
+## まとめ
 
-Here's a summary of the points covered in this post:
+この投稿で触れた要点をまとめます。
 
-* Computation expressions provide a nice syntax for continuation passing, hiding the chaining logic for us.
-* `bind` is the key function that links the output of one step to the input of the next step.
-* The symbol `>>=` is the standard way of writing bind as an infix operator. 
+* コンピュテーション式は継続渡しのための便利な構文を提供し、連鎖のロジックを隠してくれます。
+* `bind`は1つのステップの出力を次のステップの入力につなぐ鍵となる関数です。
+* 記号`>>=`はbindを中置演算子として書く標準的な方法です。

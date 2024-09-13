@@ -1,50 +1,50 @@
 ---
 layout: post
-title: "Computation expressions: Introduction"
-description: "Unwrapping the enigma..."
+title: "コンピュテーション式：入門編"
+description: "謎を解き明かす"
 nav: thinking-functionally
 seriesId: "Computation Expressions"
 seriesOrder: 1
 ---
 
-By popular request, it is time to talk about the mysteries of computation expressions, what they are, and how they can be useful in practice (and I will try to avoid using the [forbidden m-word](../about/index.md#banned)).
+多くの要望に応え、コンピュテーション式の謎について語る時が来ました。コンピュテーション式とは何か、実践でどのように役立つかを説明します（そして、[禁止されたm-word](https://fsharpforfunandprofit.com/about/#forbidden-words)の使用は避けるよう努めます）。
 
-In this series, you'll learn what computation expressions are, how to make your own, and what some common patterns involving them. In the process, we'll also look at continuations, the bind function, wrapper types, and more.
+このシリーズでは、コンピュテーション式とは何か、独自のコンピュテーション式の作り方、そしてコンピュテーション式に関する一般的なパターンについて学びます。その過程で、継続、bind関数、ラッパー型などについても見ていきます。
 
-## Background ##
+## 背景
 
-Computation expressions seem to have a reputation for being abstruse and difficult to understand.  
+コンピュテーション式は、難解で理解しにくいという評判があるようです。
 
-On one hand, they're easy enough to use. Anyone who has written much F# code has certainly used standard ones like `seq{...}` or `async{...}`.
+一方で、使うのは簡単です。F#コードをある程度書いた人なら、`seq{...}`や`async{...}`のような標準的なコンピュテーション式を使ったことがあるでしょう。
 
-But how do you make a new one of these things? How do they work behind the scenes?
+では、新しいコンピュテーション式をどのように作るのでしょうか？舞台裏ではどのように動いているのでしょうか？
 
-Unfortunately, many explanations seem to make things even more confusing.  There seems to be some sort of mental bridge that you have to cross. 
-Once you are on the other side, it is all obvious, but to someone on this side, it is baffling.
+残念ながら、多くの説明がかえって混乱を招いているようです。ある種の心理的な壁を越える必要があるようです。
+一度その壁を越えてしまえば全てが明らかになりますが、こちら側にいる人にとっては、依然として不可解です。
 
-If we turn for guidance to the [official MSDN documention](http://msdn.microsoft.com/en-us/library/dd233182.aspx), it is explicit, but quite unhelpful to a beginner. 
+[公式のMicrosoft Learnドキュメント](https://learn.microsoft.com/ja-jp/dotnet/fsharp/language-reference/computation-expressions)を参考にしても、明確ではありますが、初心者にはあまり役立ちません。
 
-For example, it says that when you see the following code within a computation expression:
+例えば、コンピュテーション式内で次のようなコードを見かけたとき、
 
 ```fsharp
 {| let! pattern = expr in cexpr |}
 ```
 
-it is simply syntactic sugar for this method call:
+これは単に次のメソッド呼び出しの糖衣構文だと説明しています。
 
 ```fsharp
 builder.Bind(expr, (fun pattern -> {| cexpr |}))
 ```
 
-But... what does this mean exactly?
+しかし...これは正確には何を意味するのでしょうか？
 
-I hope that by the end of this series, the documentation above will become obvious.  Don't believe me? Read on!
+このシリーズの終わりまでに、上記のドキュメントが明白になることを願っています。信じられませんか？続けて読んでみてください！
 
-## Computation expressions in practice ##
+## 実践でのコンピュテーション式
 
-Before going into the mechanics of computation expressions, let's look at a few trivial examples that show the same code before and after using computation expressions.
+コンピュテーション式のメカニズムに入る前に、コンピュテーション式を使う前と後のコードを比較した簡単な例をいくつか見てみましょう。
 
-Let's start with a simple one.  Let's say we have some code, and we want to log each step. So we define a little logging function, and call it after every value is created, like so:
+まずは簡単な例から始めましょう。コードがあり、各ステップをログに記録したいとします。そこで、小さなログ関数を定義し、値が作成されるたびにそれを呼び出します。
 
 ```fsharp
 let log p = printfn "expression is %A" p
@@ -60,7 +60,7 @@ let loggedWorkflow =
     z
 ```
 
-If you run this, you will see the output:
+これを実行すると、次の出力が表示されます。
 
 ```text
 expression is 42
@@ -68,13 +68,13 @@ expression is 43
 expression is 85
 ```
 
-Simple enough.  
+簡単ですね。
 
-But it is annoying to have to explicitly write all the log statements each time. Is there a way to hide them?
+しかし、毎回全てのログステートメントを明示的に書くのは面倒です。これを隠す方法はないでしょうか？
 
-Funny you should ask... A computation expression can do that. Here's one that does exactly the same thing.
+そう尋ねてくれてありがとうございます...コンピュテーション式はまさにそれができます。以下は全く同じことを行うコンピュテーション式です。
 
-First we define a new type called `LoggingBuilder`:
+まず、`LoggingBuilder`という新しい型を定義します。
 
 ```fsharp
 type LoggingBuilder() =
@@ -88,15 +88,15 @@ type LoggingBuilder() =
         x
 ```
 
-*Don't worry about what the mysterious `Bind` and `Return` are for yet -- they will be explained soon.*
+*謎めいた`Bind`と`Return`が何のためにあるのかはまだ気にしないでください。すぐに説明します。*
 
-Next we create an instance of the type, `logger` in this case.
+次に、この型のインスタンス（この場合は`logger`）を作成します。
 
 ```fsharp
 let logger = new LoggingBuilder()
 ```
 
-So with this `logger` value, we can rewrite the original logging example like this:
+これで`logger`値を使って、元のロギング例を次のように書き直せます。
 
 ```fsharp
 let loggedWorkflow = 
@@ -109,20 +109,20 @@ let loggedWorkflow =
         }
 ```
 
-If you run this, you get exactly the same output, but you can see that the use of the `logger{...}` workflow has allowed us to hide the repetitive code.
+これを実行すると、全く同じ出力が得られますが、`logger{...}`ワークフローを使うことで繰り返しのコードを隠せたことがわかります。
 
-### Safe division ###
+### 安全な除算
 
-Now let's look at an old chestnut.
+次に、古典的な例を見てみましょう。
 
-Say that we want to divide a series of numbers, one after another, but one of them might be zero. How can we handle it? Throwing an exception is ugly.  Sounds like a good match for the `option` type though.
+一連の数字を次々に割っていきたいとします。ただし、その中のひとつがゼロかもしれません。どう処理すればいいでしょうか？例外を投げるのは美しくありません。`option`型を使うのが良さそうです。
 
-First we need to create a helper function that does the division and gives us back an `int option`. 
-If everything is OK, we get a `Some` and if the division fails, we get a `None`.
+まず、除算を行い`int option`を返すヘルパー関数を作る必要があります。
+全てうまくいけば`Some`を、除算が失敗すれば`None`を返します。
 
-Then we can chain the divisions together, and after each division we need to test whether it failed or not, and keep going only if it was successful.
+そして、除算を連鎖させ、各除算後に失敗したかどうかをテストし、成功した場合のみ続行します。
 
-Here's the helper function first, and then the main workflow:
+まずはヘルパー関数、そしてメインのワークフローを見てみましょう。
 
 ```fsharp
 let divideBy bottom top =
@@ -131,43 +131,43 @@ let divideBy bottom top =
     else Some(top/bottom)
 ```
 
-Note that I have put the divisor first in the parameter list. This is so we can write an expression like `12 |> divideBy 3`, which makes chaining easier.
+パラメータリストで除数を先に置いていることに注意してください。これにより`12 |> divideBy 3`のような式が書けるので、連鎖が容易になります。
 
-Let's put it to use. Here is a workflow that attempts to divide a starting number three times:
+では、使ってみましょう。これは開始数を3回除算しようとするワークフローです。
 
 ```fsharp
 let divideByWorkflow init x y z = 
     let a = init |> divideBy x
     match a with
-    | None -> None  // give up
-    | Some a' ->    // keep going
+    | None -> None  // 諦める
+    | Some a' ->    // 続行
         let b = a' |> divideBy y
         match b with
-        | None -> None  // give up
-        | Some b' ->    // keep going
+        | None -> None  // 諦める
+        | Some b' ->    // 続行
             let c = b' |> divideBy z
             match c with
-            | None -> None  // give up
-            | Some c' ->    // keep going
+            | None -> None  // 諦める
+            | Some c' ->    // 続行
                 //return 
                 Some c'
 ```
 
-And here it is in use:
+使用例はこうです。
 
 ```fsharp
 let good = divideByWorkflow 12 3 2 1
 let bad = divideByWorkflow 12 3 0 1
 ```
 
-The `bad` workflow fails on the third step and returns `None` for the whole thing.  
+`bad`ワークフローは3番目のステップで失敗し、全体で`None`を返します。
 
-It is very important to note that the *entire workflow* has to return an `int option` as well. It can't just return an `int` because what would it evaluate to in the bad case?
-And can you see how the type that we used "inside" the workflow, the option type, has to be the same type that comes out finally at the end. Remember this point -- it will crop up again later.
+ここで非常に重要な点は、*ワークフロー全体*も`int option`を返さなければならないということです。単なる`int`を返すことはできません。なぜなら、失敗した場合にどう評価すればよいでしょうか？
+そして、ワークフロー「内部」で使用した型（この場合はoption型）が、最終的に出力される型と同じでなければならないことがわかります。この点を覚えておいてください。後でまた出てきます。
 
-Anyway, this continual testing and branching is really ugly! Does turning it into a computation expression help?
+とにかく、この継続的なテストと分岐は本当に醜いですね！コンピュテーション式に変えると改善されるでしょうか？
 
-Once more we define a new type (`MaybeBuilder`) and make an instance of the type (`maybe`).
+再び新しい型（`MaybeBuilder`）を定義し、その型のインスタンス（`maybe`）を作成します。
 
 ```fsharp
 type MaybeBuilder() =
@@ -183,9 +183,9 @@ type MaybeBuilder() =
 let maybe = new MaybeBuilder()
 ```
 
-I have called this one `MaybeBuilder` rather than `divideByBuilder` because the issue of dealing with option types this way, using a computation expression, is quite common, and `maybe` is the standard name for this thing.
+これを`MaybeBuilder`と呼んでいるのは`divideByBuilder`ではなく、option型をこのようにコンピュテーション式で扱う問題が一般的で、`maybe`がこれの標準的な名前だからです。
 
-So now that we have defined the `maybe` workflow, let's rewrite the original code to use it.
+`maybe`ワークフローを定義したので、元のコードを書き直してみましょう。
 
 ```fsharp
 let divideByWorkflow init x y z = 
@@ -198,9 +198,9 @@ let divideByWorkflow init x y z =
         }    
 ```
 
-Much, much nicer. The `maybe` expression has completely hidden the branching logic!
+ずっと、ずっと良くなりました。`maybe`式が分岐ロジックを完全に隠しています！
 
-And if we test it we get the same result as before:
+テストすると、前と同じ結果が得られます。
 
 ```fsharp
 let good = divideByWorkflow 12 3 2 1
@@ -208,13 +208,13 @@ let bad = divideByWorkflow 12 3 0 1
 ```
 
 
-### Chains of "or else" tests
+### "or else"テストの連鎖
 
-In the previous example of "divide by", we only wanted to continue if each step was successful.
+前の「除算」の例では、各ステップが成功した場合にのみ続行したいと考えました。
 
-But sometimes it is the other way around. Sometimes the flow of control depends on a series of "or else" tests. Try one thing, and if that succeeds, you're done. Otherwise try another thing, and if that fails, try a third thing, and so on.
+しかし、逆の場合もあります。時には、一連の「or else」テストに制御の流れが依存することがあります。一つのことを試し、それが成功すれば完了です。失敗した場合は別のことを試し、それも失敗したら第三のことを試す、といった具合です。
 
-Let's look at a simple example. Say that we have three dictionaries and we want to find the value corresponding to a key. Each lookup might succeed or fail, so we need to chain the lookups in a series.
+簡単な例を見てみましょう。3つの辞書があり、キーに対応する値を見つけたいとします。各検索は成功するか失敗する可能性があるので、検索を一連の流れでつなげる必要があります。
 
 ```fsharp
 let map1 = [ ("1","One"); ("2","Two") ] |> Map.ofList
@@ -223,19 +223,19 @@ let map3 = [ ("CA","California"); ("NY","New York") ] |> Map.ofList
 
 let multiLookup key =
     match map1.TryFind key with
-    | Some result1 -> Some result1   // success
-    | None ->   // failure
+    | Some result1 -> Some result1   // 成功
+    | None ->   // 失敗
         match map2.TryFind key with
-        | Some result2 -> Some result2 // success
-        | None ->   // failure
+        | Some result2 -> Some result2 // 成功
+        | None ->   // 失敗
             match map3.TryFind key with
-            | Some result3 -> Some result3  // success
-            | None -> None // failure
+            | Some result3 -> Some result3  // 成功
+            | None -> None // 失敗
 ```
 
-Because everything is an expression in F# we can't do an early return, we have to cascade all the tests in a single expression.
+F#では全てが式なので、早期リターンはできません。全てのテストを積み重ねて一つの式にする必要があります。
                 
-Here's how this might be used:
+使用例はこのようになります。
 
 ```fsharp
 multiLookup "A" |> printfn "Result for A is %A" 
@@ -243,23 +243,23 @@ multiLookup "CA" |> printfn "Result for CA is %A"
 multiLookup "X" |> printfn "Result for X is %A" 
 ```
 
-It works fine, but can it be simplified? 
+うまく動作しますが、簡略化できるでしょうか？
 
-Yes indeed. Here is an "or else" builder that allows us to simplify these kinds of lookups:
+もちろんできます。こちらは「or else」ビルダーで、このような検索を簡略化できます。
 
 ```fsharp
 type OrElseBuilder() =
     member this.ReturnFrom(x) = x
     member this.Combine (a,b) = 
         match a with
-        | Some _ -> a  // a succeeds -- use it
-        | None -> b    // a fails -- use b instead
+        | Some _ -> a  // aが成功 - aを使用
+        | None -> b    // aが失敗 - 代わりにbを使用
     member this.Delay(f) = f()
 
 let orElse = new OrElseBuilder()
 ```
 
-Here's how the lookup code could be altered to use it:
+検索コードをこのように変更できます。
 
 ```fsharp
 let map1 = [ ("1","One"); ("2","Two") ] |> Map.ofList
@@ -273,7 +273,7 @@ let multiLookup key = orElse {
     }
 ```
 
-Again we can confirm that the code works as expected.
+予想通り動作することを確認できます。
 
 ```fsharp
 multiLookup "A" |> printfn "Result for A is %A" 
@@ -281,17 +281,17 @@ multiLookup "CA" |> printfn "Result for CA is %A"
 multiLookup "X" |> printfn "Result for X is %A" 
 ```
 
-### Asynchronous calls with callbacks
+### コールバックを使用した非同期呼び出し
 
-Finally, let's look at callbacks.  The standard approach for doing asynchronous operations in .NET is to use a [AsyncCallback delegate](http://msdn.microsoft.com/en-us/library/ms228972.aspx) which gets called when the async operation is complete.
+最後に、コールバックを見てみましょう。.NETで非同期操作を行う標準的なアプローチは、非同期操作が完了したときに呼び出される[AsyncCallbackデリゲート](https://learn.microsoft.com/ja-jp/dotnet/standard/asynchronous-programming-patterns/using-an-asynccallback-delegate-to-end-an-asynchronous-operation)を使用することです。
 
-Here is an example of how a web page might be downloaded using this technique:
+これは、このテクニックを使用してWebページをダウンロードする例です。
 
 ```fsharp
 open System.Net
-let req1 = HttpWebRequest.Create("http://tryfsharp.org")
-let req2 = HttpWebRequest.Create("http://google.com")
-let req3 = HttpWebRequest.Create("http://bing.com")
+let req1 = HttpWebRequest.Create("https://tryfsharp.org")
+let req2 = HttpWebRequest.Create("https://google.com")
+let req3 = HttpWebRequest.Create("https://bing.com")
 
 req1.BeginGetResponse((fun r1 -> 
     use resp1 = req1.EndGetResponse(r1)
@@ -310,11 +310,11 @@ req1.BeginGetResponse((fun r1 ->
     ),null) |> ignore
 ```
 
-Lots of calls to `BeginGetResponse` and `EndGetResponse`, and the use of nested lambdas, makes this quite complicated to understand. The important code (in this case, just print statements) is obscured by the callback logic.
+`BeginGetResponse`と`EndGetResponse`への多くの呼び出し、そしてネストされたラムダの使用により、これは非常に理解しづらくなっています。重要なコード（この場合は単なるprint文）がコールバックロジックに埋もれています。
 
-In fact, managing this cascading approach is always a problem in code that requires a chain of callbacks; it has even been called the ["Pyramid of Doom"](http://raynos.github.com/presentation/shower/controlflow.htm?full#PyramidOfDoom) (although [none of the solutions are very elegant](http://adamghill.com/callbacks-considered-a-smell/), IMO).
+実際、この階段状のアプローチの管理は、コールバックの連鎖を必要とするコードでは常に問題です。これは「[運命のピラミッド](https://raynos.github.io/presentation/shower/controlflow.htm?full#PyramidOfDoom)」とさえ呼ばれています（ただし、[どの解決策もあまりエレガントではありません](https://web.archive.org/web/20170609232359/http://adamghill.com/callbacks-considered-a-smell/)、個人的な意見ですが）。
 
-Of course, we would never write that kind of code in F#, because F# has the `async` computation expression built in, which both simplifies the logic and flattens the code.
+もちろん、F#ではこのような種類のコードは決して書きません。F#には`async`コンピュテーション式が組み込まれており、ロジックを簡略化し、コードをフラット化します。
 
 ```fsharp
 open System.Net
@@ -335,28 +335,28 @@ async {
     } |> Async.RunSynchronously
 ```
 
-We'll see exactly how the `async` workflow is implemented later in this series.
+`async`ワークフローがどのように実装されているかは、このシリーズの後半で詳しく見ていきます。
 
-## Summary ##
+## まとめ
 
-So we've seen some very simple examples of computation expressions, both "before" and "after",
-and they are quite representative of the kinds of problems that computation expressions are useful for.
+これで、コンピュテーション式の非常に簡単な例について、「使用前」と「使用後」を見てきました。
+これらはコンピュテーション式が役立つ問題の種類を十分に代表しています。
 
-* In the logging example, we wanted to perform some side-effect between each step.
-* In the safe division example, we wanted to handle errors elegantly so that we could focus on the happy path.
-* In the multiple dictionary lookup example, we wanted to return early with the first success.
-* And finally, in the async example, we wanted to hide the use of callbacks and avoid the "pyramid of doom".
+* ロギングの例では、各ステップの間に副作用を実行したいと考えました。
+* 安全な除算の例では、エラーを優雅に処理し、ハッピーパスに集中したいと考えました。
+* 複数の辞書検索の例では、最初の成功で早期リターンしたいと考えました。
+* 最後に、非同期の例では、コールバックを隠し、「運命のピラミッド」を避けたいと考えました。
 
-What all the cases have in common is that the computation expression is "doing something behind the scenes" between each expression. 
+全ての場合に共通しているのは、コンピュテーション式が各式の間で「舞台裏で何かをしている」ということです。
 
-If you want a bad analogy, you can think of a computation expression as somewhat like a post-commit hook for SVN or git, or a database trigger that gets called on every update.
-And really, that's all that a computation expression is: something that allows you to sneak your own code in to be called *in the background*, which in turn allows you to focus on the important code in the foreground. 
+悪い例えかもしれませんが、コンピュテーション式はSVNやgitのポストコミットフック、あるいは更新のたびに呼び出されるデータベーストリガーのようなものと考えることができます。
+実際、コンピュテーション式とはそれだけのものです。*バックグラウンド*で呼び出される独自のコードをこっそり挿入することを可能にし、それによってフォアグラウンドの重要なコードに集中できるようにするものです。
 
-Why are they called "computation expressions"? Well, it's obviously some kind of expression, so that bit is obvious. I believe that the F# team did originally want to call it "expression-that-does-something-in-the-background-between-each-let" but for some reason, people thought that was a bit unwieldy, so they settled on the shorter name "computation expression" instead.
+なぜ「コンピュテーション式」と呼ばれるのでしょうか？明らかに何らかの式なので、そこについては明白です。F#チームは当初、「各letの間でバックグラウンドで何かをする式」と呼びたかったようですが、人々には少し扱いにくいと考えたのか、代わりに短い名前「コンピュテーション式」に落ち着きました。
 
-And as to the difference between a "computation expression" and a "workflow", I use *"computation expression"* to mean the `{...}` and `let!` syntax, and reserve *"workflow"* for particular implementations where appropriate. Not all computation expression implementations are workflows. For example, it is appropriate to talk about the "async workflow" or the "maybe workflow", but the "seq workflow" doesn't sound right.
+そして、「コンピュテーション式」と「ワークフロー」の違いについて、私は`{...}`と`let!`構文を指して*「コンピュテーション式」*という言葉を使い、*「ワークフロー」*は適切な場合の特定の実装のために予約しています。全てのコンピュテーション式の実装がワークフローというわけではありません。例えば、「非同期ワークフロー」や「maybeワークフロー」について話すのは適切ですが、「seqワークフロー」とは言いません。
 
-In other words, in the following code, I would say that `maybe` is the workflow we are using, and the particular chunk of code `{ let! a = .... return c }` is the computation expression.
+言い換えれば、次のコードでは、`maybe`が使用しているワークフローであり、`{ let! a = .... return c }`という特定のコードの塊がコンピュテーション式だと言えます。
 
 ```fsharp
 maybe 
@@ -368,7 +368,7 @@ maybe
     }    
 ```
 
-You probably want to start creating your own computation expressions now, but first we need to take a short detour into continuations. That's up next.
+これで独自のコンピュテーション式を作り始めたくなったかもしれませんが、まず継続について少し回り道をする必要があります。それが次の話題です。
 
 
-*Update on 2015-01-11: I have removed the counting example that used a "state" computation expression. It was too confusing and distracted from the main concepts.*
+*2015-01-11 追記：「状態」コンピュテーション式を使用したカウントの例を削除しました。混乱を招き、主要な概念から注意をそらしていたためです。*
