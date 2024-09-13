@@ -1,32 +1,32 @@
 ---
 layout: post
-title: "Implementing a builder: Delay and Run"
-description: "Controlling when functions execute"
+title: "ビルダーの実装：DelayとRun"
+description: "関数の実行タイミングの制御"
 nav: thinking-functionally
-seriesId: "Computation Expressions"
+seriesId: "コンピュテーション式"
 seriesOrder: 8
 ---
 
-In the last few posts we have covered all the basic methods (Bind, Return, Zero, and Combine) needed to create your own computation expression builder. In this post, we'll look at some of the extra features needed to make the workflow more efficient, by controlling when expressions get evaluated.
+ここ数回の投稿で、独自のコンピュテーション式ビルダーを作成するために必要な基本的なメソッド（Bind、Return、Zero、Combine）をすべて説明してきました。この投稿では、式の評価タイミングを制御することでワークフローをより効率的にするための追加機能を見ていきます。
 
-## The problem: avoiding unnecessary evaluations
+## 問題：不要な評価の回避
 
-Let's say that we have created a "maybe" style workflow as before. But this time we want to use the "return" keyword to return early and stop any more processing being done.
+以前のように「maybe」スタイルのワークフローを作成したとします。しかし今回は、"return"キーワードを使って早期に戻り、それ以上の処理を停止したいと考えています。
 
-Here is our complete builder class. The key method to look at is `Combine`, in which we simply ignore any secondary expressions after the first return.
+以下が完全なビルダークラスです。注目すべき重要なメソッドは`Combine`で、最初のreturnの後の二次的な式を単に無視します。
 
 ```fsharp
 type TraceBuilder() =
     member this.Bind(m, f) = 
         match m with 
         | None -> 
-            printfn "Binding with None. Exiting."
+            printfn "Noneとバインド中。終了します。"
         | Some a -> 
-            printfn "Binding with Some(%A). Continuing" a
+            printfn "Some(%A)とバインド中。続行します" a
         Option.bind f m
 
     member this.Return(x) = 
-        printfn "Return an unwrapped %A as an option" x
+        printfn "ラップされていない%Aをオプションとして返します" x
         Some x
 
     member this.Zero() = 
@@ -34,252 +34,252 @@ type TraceBuilder() =
         None
 
     member this.Combine (a,b) = 
-        printfn "Returning early with %A. Ignoring second part: %A" a b 
+        printfn "%Aで早期に戻ります。2番目の部分を無視します: %A" a b 
         a
 
     member this.Delay(f) = 
         printfn "Delay"
         f()
 
-// make an instance of the workflow                
+// ワークフローのインスタンスを作成                
 let trace = new TraceBuilder()
 ```
 
-Let's see how it works by printing something, returning, and then printing something else:
+何かを出力し、returnし、その後さらに何かを出力することでどのように動作するか見てみましょう。
 
 ```fsharp
 trace { 
-    printfn "Part 1: about to return 1"
+    printfn "パート1: 1を返す直前"
     return 1
-    printfn "Part 2: after return has happened"
-    } |> printfn "Result for Part1 without Part2: %A"  
+    printfn "パート2: returnの後"
+    } |> printfn "パート2なしのパート1の結果: %A"  
 ```
 
-The debugging output should look something like the following, which I have annotated:
+デバッグ出力は以下のようになるはずです。注釈を付けました。
 
 ```text
-// first expression, up to "return"
+// 最初の式、"return"まで
 Delay
-Part 1: about to return 1
-Return an unwrapped 1 as an option
+パート1: 1を返す直前
+ラップされていない1をオプションとして返します
 
-// second expression, up to last curly brace.
+// 2番目の式、最後の中かっこまで
 Delay
-Part 2: after return has happened
-Zero   // zero here because no explicit return was given for this part
+パート2: returnの後
+Zero   // この部分に明示的なreturnがないためzeroがここにある
 
-// combining the two expressions
-Returning early with Some 1. Ignoring second part: <null>
+// 2つの式の結合
+Some 1で早期に戻ります。2番目の部分を無視します: <null>
 
-// final result
-Result for Part1 without Part2: Some 1
+// 最終結果
+パート2なしのパート1の結果: Some 1
 ```
 
-We can see a problem here. The "Part 2: after return" was printed, even though we were trying to return early.  
+ここで問題が見えます。早期に戻ろうとしていたにもかかわらず、「パート2: returnの後」が出力されています。
 
-Why? Well I'll repeat what I said in the last post: **return and yield do *not* generate an early return from a computation expression**. The entire computation expression, all the way to the last curly brace, is *always* evaluated and results in a single value.  
+なぜでしょうか？前回の投稿で述べたことを繰り返しますが、**returnとyieldはコンピュテーション式から早期に戻る*わけではありません***。コンピュテーション式全体、最後の中かっこまでが*常に*評価され、単一の値を生成します。
 
-This is a problem, because you might get unwanted side effects (such as printing a message in this case) and your code is doing something unnecessary, which might cause performance problems. 
+これは問題です。望まない副作用（この場合はメッセージの出力など）が発生する可能性があり、コードが不要な処理を行っているため、パフォーマンスの問題を引き起こす可能性があります。
 
-So, how can we avoid evaluating the second part until we need it?  
+では、必要になるまで2番目の部分の評価を避けるにはどうすればよいでしょうか？
 
-## Introducing "Delay"
+## "Delay"の導入
 
-The answer to the question is straightforward -- simply wrap part 2 of the expression in a function and only call this function when needed, like this.
+この質問への答えは簡単です。式のパート2を関数でラップし、必要な時にのみその関数を呼び出すだけです。次のようになります。
 
 ```fsharp
 let part2 = 
     fun () -> 
-        printfn "Part 2: after return has happened"
-        // do other stuff
-        // return Zero
+        printfn "パート2: returnの後"
+        // その他の処理
+        // Zeroを返す
 
-// only evaluate if needed
+// 必要な場合のみ評価
 if needed then
    let result = part2()        
 ```
 
-Using this technique, part 2 of the computation expression can be processed completely, but because the expression returns a function, nothing actually *happens* until the function is called.  
-But the `Combine` method will never call it, and so the code inside it does not run at all.
+この技法を使うと、コンピュテーション式のパート2を完全に処理できますが、式が関数を返すため、関数が呼び出されるまで実際には何も*起こりません*。
+そして`Combine`メソッドがそれを呼び出すことはないため、その中のコードは全く実行されません。
 
-And this is exactly what the `Delay` method is for.  Any result from `Return` or `Yield` is immediately wrapped in a "delay" function like this, and then you can choose whether to run it or not.
+これがまさに`Delay`メソッドの目的です。`Return`や`Yield`からの結果は即座にこのような「遅延」関数でラップされ、それを実行するかどうかを選択できます。
 
-Let's change the builder to implement a delay:
+ビルダーを変更して遅延を実装してみましょう。
 
 ```fsharp
 type TraceBuilder() =
-    // other members as before
+    // 他のメンバーは以前と同じ
 
     member this.Delay(funcToDelay) = 
         let delayed = fun () ->
-            printfn "%A - Starting Delayed Fn." funcToDelay
+            printfn "%A - 遅延関数の開始。" funcToDelay
             let delayedResult = funcToDelay()
-            printfn "%A - Finished Delayed Fn. Result is %A" funcToDelay delayedResult
-            delayedResult  // return the result 
+            printfn "%A - 遅延関数の終了。結果は %A" funcToDelay delayedResult
+            delayedResult  // 結果を返す 
 
-        printfn "%A - Delaying using %A" funcToDelay delayed
-        delayed // return the new function
+        printfn "%A - %Aを使用して遅延中" funcToDelay delayed
+        delayed // 新しい関数を返す
 ```
 
-As you can see, the `Delay` method is given a function to execute. Previously, we executed it immediately.  What we're doing now is wrapping this function in another function and returning the delayed function instead.  I have added a number of trace statements before and after the function is wrapped.
+ご覧のように、`Delay`メソッドは実行する関数を与えられます。以前はそれをすぐに実行していました。今回行っているのは、この関数を別の関数でラップし、代わりに遅延関数を返すことです。関数がラップされる前後にいくつかのトレースステートメントを追加しました。
 
-If you compile this code, you can see that the signature of `Delay` has changed. Before the change, it returned a concrete value (an option in this case), but now it returns a function.
+このコードをコンパイルすると、`Delay`のシグネチャが変更されているのがわかります。変更前は具体的な値（この場合はオプション）を返していましたが、今は関数を返します。
 
 ```fsharp
-// signature BEFORE the change
+// 変更前のシグネチャ
 member Delay : f:(unit -> 'a) -> 'a
 
-// signature AFTER the change
+// 変更後のシグネチャ
 member Delay : f:(unit -> 'b) -> (unit -> 'b)
 ```
 
-By the way, we could have implemented `Delay` in a much simpler way, without any tracing, just by returning the same function that was passed in, like this:
+ちなみに、トレースを行わずにもっと簡単に`Delay`を実装することもできます。渡された関数をそのまま返すだけです。
 
 ```fsharp
 member this.Delay(f) = 
     f
 ```
 
-Much more concise! But in this case, I wanted to add some detailed tracing information as well.
+はるかに簡潔です！しかし、この場合は詳細なトレース情報も追加したかったのです。
 
-Now let's try again:
+では、もう一度試してみましょう。
 
 ```fsharp
 trace { 
-    printfn "Part 1: about to return 1"
+    printfn "パート1: 1を返す直前"
     return 1
-    printfn "Part 2: after return has happened"
-    } |> printfn "Result for Part1 without Part2: %A"  
+    printfn "パート2: returnの後"
+    } |> printfn "パート2なしのパート1の結果: %A"  
 ```
 
-Uh-oh. This time nothing happens at all! What went wrong?
+おっと。今回は何も起こりません！何が問題だったのでしょうか？
 
-If we look at the output we see this:
+出力を見ると、次のようになっています。
 
 <code>
-Result for Part1 without Part2: &lt;fun:Delay@84-5>
+パート2なしのパート1の結果: &lt;fun:Delay@84-5>
 </code>
 
-Hmmm. The output of the whole `trace` expression is now a *function*, not an option. Why? Because we created all these delays, but we never "undelayed" them by actually calling the function!
+うーん。`trace`式全体の出力が今や*関数*になっています。オプションではありません。なぜでしょうか？これらの遅延をすべて作成しましたが、実際に関数を呼び出して「遅延解除」しなかったからです！
 
-One way to do this is to assign the output of the computation expression to a function value, say `f`, and then evaluate it.
+これを行う一つの方法は、コンピュテーション式の出力を関数値、例えば`f`に割り当て、それを評価することです。
 
 ```fsharp
 let f = trace { 
-    printfn "Part 1: about to return 1"
+    printfn "パート1: 1を返す直前"
     return 1
-    printfn "Part 2: after return has happened"
+    printfn "パート2: returnの後"
     } 
-f() |> printfn "Result for Part1 without Part2: %A"  
+f() |> printfn "パート2なしのパート1の結果: %A"  
 ```
 
-This works as expected, but is there a way to do this from inside the computation expression itself? Of course there is!
+これは期待通りに動作しますが、コンピュテーション式自体の中からこれを行う方法はないでしょうか？もちろんあります！
 
-## Introducing "Run"
+## "Run"の導入
 
-The `Run` method exists for exactly this reason. It is called as the final step in the process of evaluating a computation expression, and can be used to undo the delay.
+`Run`メソッドはまさにこの目的のために存在します。コンピュテーション式の評価プロセスの最終ステップとして呼び出され、遅延を解除するのに使えます。
 
-Here's an implementation:
+以下が実装例です。
 
 ```fsharp
 type TraceBuilder() =
-    // other members as before
+    // 他のメンバーは以前と同じ
 
     member this.Run(funcToRun) = 
-        printfn "%A - Run Start." funcToRun
+        printfn "%A - Run開始。" funcToRun
         let runResult = funcToRun()
-        printfn "%A - Run End. Result is %A" funcToRun runResult
-        runResult // return the result of running the delayed function
+        printfn "%A - Run終了。結果は %A" funcToRun runResult
+        runResult // 遅延関数の実行結果を返す
 ```
 
-Let's try one more time:
+もう一度試してみましょう。
 
 ```fsharp
 trace { 
-    printfn "Part 1: about to return 1"
+    printfn "パート1: 1を返す直前"
     return 1
-    printfn "Part 2: after return has happened"
-    } |> printfn "Result for Part1 without Part2: %A"  
+    printfn "パート2: returnの後"
+    } |> printfn "パート2なしのパート1の結果: %A"  
 ```
 
-And the result is exactly what we wanted. The first part is evaluated, but the second part is not. And the result of the entire computation expression is an option, not a function.
+そして結果は私たちが望んでいたとおりになります。最初の部分は評価されますが、2番目の部分は評価されません。そして、コンピュテーション式全体の結果は関数ではなく、オプションになります。
 
-## When is delay called?
+## 遅延はいつ呼び出されるのか？
 
-The way that `Delay` is inserted into the workflow is straightforward, once you understand it.
+`Delay`がワークフローに挿入される方法は、理解すれば簡単です。
 
-* The bottom (or innermost) expression is delayed.
-* If this is combined with a prior expression, the output of `Combine` is also delayed.
-* And so on, until the final delay is fed into `Run`.
+* 最下部（または最内部）の式が遅延されます。
+* これが前の式と結合される場合、`Combine`の出力も遅延されます。
+* そして、最終的な遅延が`Run`に渡されるまで続きます。
 
-Using this knowledge, let's review what happened in the example above:
+この知識を使って、上の例で何が起こったかを振り返ってみましょう。
 
-* The first part of the expression is the print statement plus `return 1`.
-* The second part of the expression is the print statement without an explicit return, which means that `Zero()` is called
-* The `None` from the `Zero` is fed into `Delay`, resulting in a "delayed option", that is, a function that will evaluate to an `option` when called.
-* The option from part 1 and the delayed option from part 2 are combined in `Combine` and the second one is discarded. 
-* The result of the combine is turned into another "delayed option".
-* Finally, the delayed option is fed to `Run`, which evaluates it and returns a normal option.
+* 式の最初の部分は、print文と`return 1`です。
+* 式の2番目の部分は、明示的なreturnのないprint文で、`Zero()`が呼び出されることを意味します。
+* `Zero`からの`None`は`Delay`に渡され、「遅延オプション」、つまり呼び出されると`option`に評価される関数になります。
+* パート1からのオプションとパート2からの遅延オプションは`Combine`で結合され、2番目のものは破棄されます。
+* 結合の結果は別の「遅延オプション」になります。
+* 最後に、遅延オプションは`Run`に渡され、評価されて通常のオプションを返します。
 
-Here is a diagram that represents this process visually:
+以下の図は、このプロセスを視覚的に表現しています。
 
 ![Delay](../assets/img/ce_delay.png)
 
 
-If we look at the debug trace for the example above, we can see in detail what happened. It's a little confusing, so I have annotated it.
-Also, it helps to remember that working *down* this trace is the same as working *up* from the bottom of the diagram above, because the outermost code is run first.
+上の例のデバッグトレースを見ると、詳細に何が起こったかがわかります。少し混乱するかもしれないので、注釈を付けました。
+また、このトレースを*下に*たどることは、上の図の下から*上に*たどることと同じであることを覚えておくと役立ちます。なぜなら、最も外側のコードが最初に実行されるからです。
 
 ```text
-// delaying the overall expression (the output of Combine)
-<fun:clo@160-66> - Delaying using <fun:delayed@141-3>
+// 全体の式（Combineの出力）を遅延
+<fun:clo@160-66> - <fun:delayed@141-3>を使用して遅延中
 
-// running the outermost delayed expression (the output of Combine)
-<fun:delayed@141-3> - Run Start.
-<fun:clo@160-66> - Starting Delayed Fn.
+// 最も外側の遅延式（Combineの出力）を実行
+<fun:delayed@141-3> - Run開始。
+<fun:clo@160-66> - 遅延関数の開始。
 
-// the first expression results in Some(1)
-Part 1: about to return 1
-Return an unwrapped 1 as an option
+// 最初の式がSome(1)を生成
+パート1: 1を返す直前
+ラップされていない1をオプションとして返します
 
-// the second expression is wrapped in a delay
-<fun:clo@162-67> - Delaying using <fun:delayed@141-3>
+// 2番目の式が遅延でラップされる
+<fun:clo@162-67> - <fun:delayed@141-3>を使用して遅延中
 
-// the first and second expressions are combined
-Combine. Returning early with Some 1. Ignoring <fun:delayed@141-3>
+// 最初と2番目の式が結合される
+Combine。Some 1で早期に戻ります。<fun:delayed@141-3>を無視します
 
-// overall delayed expression (the output of Combine) is complete
-<fun:clo@160-66> - Finished Delayed Fn. Result is Some 1
-<fun:delayed@141-3> - Run End. Result is Some 1
+// 全体の遅延式（Combineの出力）が完了
+<fun:clo@160-66> - 遅延関数の終了。結果は Some 1
+<fun:delayed@141-3> - Run終了。結果は Some 1
 
-// the result is now an Option not a function
-Result for Part1 without Part2: Some 1
+// 結果は関数ではなくOptionになった
+パート2なしのパート1の結果: Some 1
 ```
 
-## "Delay" changes the signature of "Combine"
+## "Delay"は"Combine"のシグネチャを変更する
 
-When `Delay` is introduced into the pipeline like this, it has an effect on the signature of `Combine`.
+このように`Delay`がパイプラインに導入されると、`Combine`のシグネチャに影響を与えます。
 
-When we originally wrote `Combine` we were expecting it to handle `options`.  But now it is handling the output of `Delay`, which is a function.
+当初`Combine`を書いたとき、`option`を扱うことを想定していました。しかし今や`Delay`の出力、つまり関数を扱っています。
 
-We can see this if we hard-code the types that `Combine` expects, with `int option` type annotations like this:
+`Combine`が期待する型を`int option`型アノテーションでハードコードすると、これが分かります。
 
 ```fsharp
 member this.Combine (a: int option,b: int option) = 
-    printfn "Returning early with %A. Ignoring %A" a b 
+    printfn "%Aで早期に戻ります。%Aを無視します" a b 
     a
 ```
 
-If this is done, we get an compiler error in the "return" expression:
+これを行うと、"return"式でコンパイラエラーが発生します。
 
 ```fsharp
 trace { 
-    printfn "Part 1: about to return 1"
+    printfn "パート1: 1を返す直前"
     return 1
-    printfn "Part 2: after return has happened"
-    } |> printfn "Result for Part1 without Part2: %A" 
+    printfn "パート2: returnの後"
+    } |> printfn "パート2なしのパート1の結果: %A" 
 ```
 
-The error is:
+エラーは次のようになります。
 
 <pre>
 error FS0001: This expression was expected to have type
@@ -288,124 +288,124 @@ but here has type
     unit -> 'a    
 </pre>
 
-In other words, the `Combine` is being passed a delayed function (`unit -> 'a`), which doesn't match our explicit signature.
+言い換えると、`Combine`に遅延関数（`unit -> 'a`）が渡されており、これは明示的なシグネチャと一致しません。
 
-So what happens when we *do* want to combine the parameters, but they are passed in as a function instead of as a simple value?
+では、パラメータを結合したい場合、単純な値ではなく関数として渡された場合はどうすればよいでしょうか？
 
-The answer is straightforward: just call the function that was passed in to get the underlying value. 
+答えは簡単です。渡された関数を呼び出して、基礎となる値を取得するだけです。
 
-Let's demonstrate that using the adding example from the previous post.
+前回の投稿の加算例を使ってデモンストレーションしましょう。
 
 ```fsharp
 type TraceBuilder() =
-    // other members as before
+    // 他のメンバーは以前と同じ
 
     member this.Combine (m,f) = 
-        printfn "Combine. Starting second param %A" f
+        printfn "Combine。2番目のパラメータ %A を開始" f
         let y = f()
-        printfn "Combine. Finished second param %A. Result is %A" f y
+        printfn "Combine。2番目のパラメータ %A を終了。結果は %A" f y
 
         match m,y with
         | Some a, Some b ->
-            printfn "combining %A and %A" a b 
+            printfn "%Aと%Aを結合" a b 
             Some (a + b)
         | Some a, None ->
-            printfn "combining %A with None" a 
+            printfn "%AとNoneを結合" a 
             Some a
         | None, Some b ->
-            printfn "combining None with %A" b 
+            printfn "Noneと%Aを結合" b 
             Some b
         | None, None ->
-            printfn "combining None with None"
+            printfn "NoneとNoneを結合"
             None
 ```
 
-In this new version of `Combine`, the *second* parameter is now a function, not an `int option`. So to combine them, we must first evaluate the function before doing the combination logic.
+この新しいバージョンの`Combine`では、*2番目の*パラメータが`int option`ではなく関数になっています。そのため、結合ロジックを行う前に、まず関数を評価する必要があります。
 
-If we test this out:
+これをテストしてみましょう。
 
 ```fsharp
 trace { 
     return 1
     return 2
-    } |> printfn "Result for return then return: %A" 
+    } |> printfn "returnしてからreturnした結果: %A" 
 ```
 
-We get the following (annotated) trace:
+次のような（注釈付きの）トレースが得られます。
 
 ```text
-// entire expression is delayed
-<fun:clo@318-69> - Delaying using <fun:delayed@295-6>
+// 全体の式を遅延
+<fun:clo@318-69> - <fun:delayed@295-6>を使用して遅延中
 
-// entire expression is run
-<fun:delayed@295-6> - Run Start.
+// 全体の式を実行
+<fun:delayed@295-6> - Run開始。
 
-// delayed entire expression is run
-<fun:clo@318-69> - Starting Delayed Fn.
+// 遅延された全体の式を実行
+<fun:clo@318-69> - 遅延関数の開始。
 
-// first return
-Returning a unwrapped 1 as an option
+// 最初のreturn
+ラップされていない1をオプションとして返します
 
-// delaying second return
-<fun:clo@319-70> - Delaying using <fun:delayed@295-6>
+// 2番目のreturnを遅延
+<fun:clo@319-70> - <fun:delayed@295-6>を使用して遅延中
 
-// combine starts
-Combine. Starting second param <fun:delayed@295-6>
+// combine開始
+Combine。2番目のパラメータ <fun:delayed@295-6> を開始
 
-    // delayed second return is run inside Combine
-    <fun:clo@319-70> - Starting Delayed Fn.
-    Returning a unwrapped 2 as an option
-    <fun:clo@319-70> - Finished Delayed Fn. Result is Some 2
-    // delayed second return is complete
+    // 遅延された2番目のreturnがCombine内で実行される
+    <fun:clo@319-70> - 遅延関数の開始。
+    ラップされていない2をオプションとして返します
+    <fun:clo@319-70> - 遅延関数の終了。結果は Some 2
+    // 遅延された2番目のreturnが完了
 
-Combine. Finished second param <fun:delayed@295-6>. Result is Some 2
-combining 1 and 2
-// combine is complete
+Combine。2番目のパラメータ <fun:delayed@295-6> を終了。結果は Some 2
+1と2を結合
+// combineが完了
 
-<fun:clo@318-69> - Finished Delayed Fn. Result is Some 3
-// delayed entire expression is complete
+<fun:clo@318-69> - 遅延関数の終了。結果は Some 3
+// 遅延された全体の式が完了
 
-<fun:delayed@295-6> - Run End. Result is Some 3
-// Run is complete
+<fun:delayed@295-6> - Run終了。結果は Some 3
+// Runが完了
 
-// final result is printed
-Result for return then return: Some 3
+// 最終結果が出力される
+returnしてからreturnした結果: Some 3
 ```
 
-## Understanding the type constraints
+## 型制約の理解
 
-Up to now, we have used only our "wrapped type" (e.g. `int option`) and the delayed version (e.g. `unit -> int option`) in the implementation of our builder. 
+これまで、ビルダーの実装では「ラップされた型」（例：`int option`）とその遅延バージョン（例：`unit -> int option`）のみを使ってきました。
 
-But in fact we can use other types if we like, subject to certain constraints.
-In fact, understanding exactly what the type constraints are in a computation expression can clarify how everything fits together.
+しかし、実際には特定の制約に従えば、他の型も使うことができます。
+コンピュテーション式の型制約を正確に理解することで、すべてがどのように組み合わさるかが明確になります。
 
-For example, we have seen that:
+例えば、以下のことがわかっています。
 
-* The output of `Return` is passed into `Delay`, so they must have compatible types. 
-* The output of `Delay` is passed into the second parameter of `Combine`.
-* The output of `Delay` is also passed into `Run`.
+* `Return`の出力は`Delay`に渡されるので、これらは互換性のある型でなければなりません。
+* `Delay`の出力は`Combine`の2番目のパラメータに渡されます。
+* `Delay`の出力は`Run`にも渡されます。
 
-But the output of `Return` does *not* have to be our "public" wrapped type. It could be an internally defined type instead. 
+しかし、`Return`の出力は必ずしも「公開」されたラップ型である必要はありません。代わりに内部で定義された型でもよいのです。
 
 ![Delay](../assets/img/ce_return.png)
 
-Similarly, the delayed type does not have to be a simple function, it could be any type that satisfies the constraints.
+同様に、遅延型は単純な関数である必要はなく、制約を満たす任意の型でよいのです。
 
-So, given a simple set of return expressions, like this:
+したがって、以下のような単純なreturn式のセットがあるとします。
 
 ```fsharp
     trace { 
         return 1
         return 2
         return 3
-        } |> printfn "Result for return x 3: %A" 
+        } |> printfn "3回returnした結果: %A" 
 ```
 
-Then a diagram that represents the various types and their flow would look like this:
+この場合、さまざまな型とその流れを表す図は次のようになります。
 
 ![Delay](../assets/img/ce_types.png)
 
-And to prove that this is valid, here is an implementation with distinct types for `Internal` and `Delayed`:
+これが有効であることを証明するために、`Internal`と`Delayed`に別個の型を使用した実装を示します。
 
 ```fsharp
 type Internal = Internal of int option
@@ -415,17 +415,17 @@ type TraceBuilder() =
     member this.Bind(m, f) = 
         match m with 
         | None -> 
-            printfn "Binding with None. Exiting."
+            printfn "Noneとバインド中。終了します。"
         | Some a -> 
-            printfn "Binding with Some(%A). Continuing" a
+            printfn "Some(%A)とバインド中。続行します" a
         Option.bind f m
 
     member this.Return(x) = 
-        printfn "Returning a unwrapped %A as an option" x
+        printfn "ラップされていない%Aをオプションとして返します" x
         Internal (Some x) 
 
     member this.ReturnFrom(m) = 
-        printfn "Returning an option (%A) directly" m
+        printfn "オプション(%A)を直接返します" m
         Internal m
 
     member this.Zero() = 
@@ -433,47 +433,47 @@ type TraceBuilder() =
         Internal None
 
     member this.Combine (Internal x, Delayed g) : Internal = 
-        printfn "Combine. Starting %A" g
+        printfn "Combine。%Aを開始" g
         let (Internal y) = g()
-        printfn "Combine. Finished %A. Result is %A" g y
+        printfn "Combine。%Aを終了。結果は%A" g y
         let o = 
             match x,y with
             | Some a, Some b ->
-                printfn "Combining %A and %A" a b 
+                printfn "%Aと%Aを結合" a b 
                 Some (a + b)
             | Some a, None ->
-                printfn "combining %A with None" a 
+                printfn "%AとNoneを結合" a 
                 Some a
             | None, Some b ->
-                printfn "combining None with %A" b 
+                printfn "Noneと%Aを結合" b 
                 Some b
             | None, None ->
-                printfn "combining None with None"
+                printfn "NoneとNoneを結合"
                 None
-        // return the new value wrapped in a Internal
+        // 新しい値をInternalでラップして返す
         Internal o                
 
     member this.Delay(funcToDelay) = 
         let delayed = fun () ->
-            printfn "%A - Starting Delayed Fn." funcToDelay
+            printfn "%A - 遅延関数の開始。" funcToDelay
             let delayedResult = funcToDelay()
-            printfn "%A - Finished Delayed Fn. Result is %A" funcToDelay delayedResult
-            delayedResult  // return the result 
+            printfn "%A - 遅延関数の終了。結果は %A" funcToDelay delayedResult
+            delayedResult  // 結果を返す 
 
-        printfn "%A - Delaying using %A" funcToDelay delayed
-        Delayed delayed // return the new function wrapped in a Delay
+        printfn "%A - %Aを使用して遅延中" funcToDelay delayed
+        Delayed delayed // 新しい関数をDelayでラップして返す
 
     member this.Run(Delayed funcToRun) = 
-        printfn "%A - Run Start." funcToRun
+        printfn "%A - Run開始。" funcToRun
         let (Internal runResult) = funcToRun()
-        printfn "%A - Run End. Result is %A" funcToRun runResult
-        runResult // return the result of running the delayed function
+        printfn "%A - Run終了。結果は %A" funcToRun runResult
+        runResult // 遅延関数の実行結果を返す
 
-// make an instance of the workflow                
+// ワークフローのインスタンスを作成                
 let trace = new TraceBuilder()
 ```
 
-And the method signatures in the builder class methods look like this:
+そして、ビルダークラスのメソッドのシグネチャは次のようになります。
 
 ```fsharp
 type Internal = | Internal of int option
@@ -492,15 +492,15 @@ class
 end
 ```
 
-Creating this artifical builder is overkill of course, but the signatures clearly show how the various methods fit together.
+このような人工的なビルダーを作成するのは過剰ですが、シグネチャを見ると、さまざまなメソッドがどのように組み合わさるかが明確にわかります。
 
-## Summary
+## まとめ
 
-In this post, we've seen that: 
+この投稿では、以下のことを学びました。
 
-* You need to implement `Delay` and `Run` if you want to delay execution within a computation expression.
-* Using `Delay` changes the signature of `Combine`.
-* `Delay` and `Combine` can use internal types that are not exposed to clients of the computation expression.
+* コンピュテーション式内で実行を遅延させたい場合、`Delay`と`Run`を実装する必要があります。
+* `Delay`を使用すると`Combine`のシグネチャが変更されます。
+* `Delay`と`Combine`は、コンピュテーション式のクライアントには公開されない内部型を使用できます。
 
-The next logical step is wanting to delay execution *outside* a computation expression until you are ready, and that will be the topic on the next but one post.
-But first, we'll take a little detour to discuss method overloads.
+次の論理的なステップは、準備が整うまでコンピュテーション式の*外部で*実行を遅延させたいと考えることです。これについては次々回の投稿で取り上げます。
+しかしその前に、メソッドのオーバーロードについて議論するために少し寄り道をします。
