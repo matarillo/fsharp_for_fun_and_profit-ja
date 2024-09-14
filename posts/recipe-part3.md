@@ -1,169 +1,169 @@
 ---
 layout: post
-title: "Organizing modules in a project"
-description: "A recipe for a functional app, Part 3"
-seriesId: "A recipe for a functional app"
+title: "プロジェクトにおけるモジュールの整理"
+description: "関数型アプリケーションのレシピ、パート3"
+seriesId: "関数型アプリケーションのレシピ"
 seriesOrder: 3
-categories: [Modules]
+categories: [モジュール]
 ---
 
-Before we move on to any coding in the recipe, let's look at the overall structure of a F# project. In particular: (a) what code should be in which modules and (b) how the modules should be organized within a project.
+コーディングに進む前に、F#プロジェクトの全体構造を見てみましょう。特に以下の2点に注目します。(a)どのコードをどのモジュールに配置するか、(b)プロジェクト内でモジュールをどう整理するか。
 
-## How not to do it
+## 避けるべき方法
 
-A newcomer to F# might be tempted to organize code in classes just like in C#. One class per file, in alphabetical order. After all, F# supports the same object-oriented features that C# does, right? So surely the F# code can be organized the same way as C# code?
+F#初心者は、C#と同じようにクラスでコードを整理したくなるかもしれません。1ファイルに1クラス、アルファベット順に並べる、といった具合です。F#はC#と同じオブジェクト指向の機能をサポートしているのだから、C#コードと同じように整理できるはずだ、と考えるでしょう。
 
-After a while, this is often followed by the discovery that F# requires files (and code within a file) to be in *dependency order*. That is, you cannot use forward references to code that hasn't been seen by the compiler yet**.  
+しかし、そのうちF#ではファイル（およびファイル内のコード）を*依存関係の順*に並べる必要があることに気づきます。つまり、コンパイラがまだ認識していないコードへの前方参照はできません**。
 
-This is followed by [general annoyance](http://www.sturmnet.org/blog/2008/05/20/f-compiler-considered-too-linear) and swearing. How can F# be so stupid? Surely it impossible to write any kind of large project!
+この発見は[一般的な不満](https://www.oliversturm.com/blog/2008/05/20/f-compiler-considered-too-linear/)と悪態につながります。F#はなんてバカなんだ！大規模なプロジェクトを書くのは不可能だ！
 
-In this post, we'll look at one simple way to organize your code so that this doesn't happen.
+この記事では、このような問題を回避する簡単な方法を紹介します。
 
-<sub>** The `and` keyword can be used in some cases to allow mutual recursion, but is discouraged.</sub>
+<sub>** `and`キーワードを使用して相互再帰を可能にする場合もありますが、推奨されません。</sub>
 
-## The functional approach to layered design
+## 関数型アプローチによるレイヤードアーキテクチャ
 
-A standard way of thinking about code is to group it into layers: a domain layer, a presentation layer, and so on, like this:
+コードを考える標準的な方法は、ドメイン層、プレゼンテーション層などの層（レイヤー）に分けることです。次の図のようになります。
 
-![Design layers](../assets/img/Recipe_DesignLayers1.png)
+![設計のレイヤー](../assets/img/Recipe_DesignLayers1.png)
 
-Each layer contains *only* the code that is relevant to that layer.
+各層には、その層に関連するコード*のみ*が含まれます。
 
-But in practice, it is not that simple, as there are dependencies between each layer.  The domain layer depends on the infrastructure, and the presentation layer depends on the domain.
+しかし実際には、そう単純ではありません。各層間には依存関係があるからです。ドメイン層はインフラストラクチャに依存し、プレゼンテーション層はドメインに依存します。
 
-And most importantly, the domain layer should *not* depend on the persistence layer.  That is, it should be ["persistence agnostic"](http://stackoverflow.com/questions/905498/what-are-the-benefits-of-persistence-ignorance).
+最も重要なのは、ドメイン層が永続化層に依存*しない*ことです。つまり、「[永続化に関して無知](https://stackoverflow.com/questions/905498/what-are-the-benefits-of-persistence-ignorance)」であるべきです。
 
-We therefore need to tweak the layer diagram to look more like this (where each arrow represents a dependency):
+そのため、レイヤーの図を次のように調整する必要があります（矢印は依存関係を表します）。
 
-![Design layers](../assets/img/Recipe_DesignLayers1a.png)
+![設計のレイヤー](../assets/img/Recipe_DesignLayers1a.png)
 
-And ideally this reorganization would be made even more fine grained, with a separate "Service Layer", containing application services, domain services, etc. And when we are finished, the core domain classes are "pure" and have no dependencies on anything else outside the domain.  This is often called a ["hexagonal architecture"](http://alistair.cockburn.us/Hexagonal+architecture) or ["onion architecture"](http://jeffreypalermo.com/blog/the-onion-architecture-part-1/). But this post is not about the subtleties of OO design, so for now, let's just work with the simpler model.
+理想的には、この再編成をさらに細分化し、アプリケーションサービス、ドメインサービスなどを含む別の「サービス層」を設けます。最終的に、コアとなるドメインクラスは「純粋」で、ドメイン外の何にも依存しません。これは「[ヘキサゴナルアーキテクチャ](https://alistair.cockburn.us/hexagonal-architecture/)」や「[オニオンアーキテクチャ](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/)」と呼ばれることがあります。ただし、この記事ではオブジェクト指向設計の微妙な点については触れません。今は、よりシンプルなモデルで考えていきましょう。
 
-## Separating behavior from types
+## 振る舞いと型の分離
 
-*"It is better to have 100 functions operate on one data structure than 10 functions on 10 data structures" -- Alan Perlis*
+*「10個のデータ構造に対して10個の関数を持つよりも、1つのデータ構造に対して100個の関数を持つ方が良い」 -- アラン・パーリス*
 
-In a functional design, it is very important to *separate behavior from data*. The data types are simple and "dumb". And then separately, you have a number of functions that act on those data types.
+関数型設計では、*振る舞いをデータから分離する*ことが非常に重要です。データ型はシンプルで「愚直」です。そして別個に、それらのデータ型に対して動作する多数の関数があります。
 
-This is the exact opposite of an object-oriented design, where behavior and data are meant to be combined. After all, that's exactly what a class is. In a truly object-oriented design in fact, you should have nothing *but* behavior -- the data is private and can only be accessed via methods.  
+これはオブジェクト指向設計とは正反対です。オブジェクト指向では、振る舞いとデータを組み合わせることが意図されています。結局のところ、それがクラスの本質です。実際、真のオブジェクト指向設計では、振る舞い*以外*は何も持つべきではありません。データはプライベートで、メソッドを通じてのみアクセスできます。
 
-In fact, in OOD, not having enough behavior around a data type is considered a Bad Thing, and even has a name: the ["anemic domain model"](http://www.martinfowler.com/bliki/AnemicDomainModel.html).
+事実、オブジェクト指向設計では、データ型の周りに十分な振る舞いがないことは悪いことと考えられ、「[ドメインモデル貧血症](https://bliki-ja.github.io/AnemicDomainModel)」という名前さえついています。
 
-In functional design though, having "dumb data" with transparency is preferred. It is normally fine for the data to be exposed without being encapsulated. The data is immutable, so it can't get "damaged" by a misbehaving function.  And it turns out that the focus on transparent data allows for more code that is more flexible and generic.
+一方、関数型設計では、透明性を持つ「愚直なデータ」が好まれます。通常、データをカプセル化せずに公開しても問題ありません。データは不変なので、誤った関数によって「破壊」されることはありません。そして、透明なデータに焦点を当てることで、より柔軟で汎用的なコードが可能になることがわかります。
 
-If you haven't seen it, I highly recommend [Rich Hickey's excellent talk on "The Value of Values"](http://www.infoq.com/presentations/Value-Values), which explains the benefits of this approach. 
+まだ見ていない方は、[Rich Hickeyの素晴らしい講演「The Value of Values」](https://www.infoq.com/presentations/Value-Values/)をお勧めします。このアプローチの利点が説明されています。
 
-### Type layers and behavior layers
+### 型の層と振る舞いの層
 
-So how does this apply to our layered design from above?
+では、これを先ほどのレイヤードアーキテクチャにどう適用すればよいでしょうか？
 
-First, we must separate each layer into two distinct parts:
+まず、各層を2つの明確な部分に分けます。
 
-* **Data Types**. Data structures that are used by that layer.
-* **Logic**. Functions that are implemented in that layer.
+* **データ型**：その層で使用されるデータ構造。
+* **ロジック**：その層で実装される関数。
 
-Once we have separated these two elements, our diagram will look like this:
+これら2つの要素を分離すると、図は次のようになります。
 
-![Design layers](../assets/img/Recipe_DesignLayers2.png)
+![設計のレイヤー](../assets/img/Recipe_DesignLayers2.png)
 
-Notice though, that we might have some backwards references (shown by the red arrow). For example, a function in the domain layer might depend on a persistence-related type, such as `IRepository`.
+ただし、後方参照（赤い矢印で示す）が生じる可能性があります。例えば、ドメイン層の関数が`IRepository`のような永続化関連の型に依存する場合があります。
 
-In an OO design, we would [add more layers](http://c2.com/cgi/wiki?OneMoreLevelOfIndirection) (e.g. application services) to handle this. But in a functional design, we don't need to -- we can just move the persistence-related types to a different place in the hierarchy, underneath the domain functions, like this:
+オブジェクト指向設計では、これに対処するために[さらに層を追加](https://wiki.c2.com/?OneMoreLevelOfIndirection)（例：アプリケーションサービス）します。しかし関数型設計では、そうする必要はありません。永続化関連の型をレイヤーの別の場所、つまりドメイン関数の下に移動するだけです。次のようになります。
 
-![Design layers](../assets/img/Recipe_DesignLayers2a.png)
+![設計のレイヤー](../assets/img/Recipe_DesignLayers2a.png)
 
-In this design, we have now eliminated all cyclic references between layers. *All the arrows point down*.
+この設計では、レイヤー間の循環参照をすべて排除しました。*すべての矢印が下向きになります*。
 
-And this without having to create any extra layers or overhead.
+そして、これは余分な層やオーバーヘッドを作ることなく実現できます。
 
-Finally, we can translate this layered design into F# files by turning it upside down.  
+最後に、このレイヤードアーキテクチャをF#ファイルに変換するには、上下を反転させます。
 
-* The first file in the project should contain code which has no dependencies. This represents the functionality at the *bottom* of the layer diagram. It is generally a set of types, such the infrastructure or domain types.
-* The next file depends only on the first file. It would represents the functionality at the next-to-bottom layer.
-* And so on. Each file depends only on the previous ones.
+* プロジェクトの最初のファイルには、依存関係のないコードを含めます。これはレイヤー図の*一番下*の機能を表します。通常、インフラストラクチャやドメインの型など、一連の型です。
+* 次のファイルは最初のファイルにのみ依存します。これは下から2番目の層の機能を表します。
+* 以下同様に続きます。各ファイルは前のファイルにのみ依存します。
 
-So, if we refer back to the use case example discussed in [Part 1](../posts/recipe-part1.md):
+[パート1](../posts/recipe-part1.md)で議論したユースケースの例を参照すると：
 
-![Recipe Happy Path](../assets/img/Recipe_HappyPath.png)
+![レシピのハッピーパス](../assets/img/Recipe_HappyPath.png)
 
-then the corresponding code in an F# project might look something like this:
+F#プロジェクトの対応するコードは次のようになるでしょう：
 
-![Design layers](../assets/img/Recipe_DesignLayers_CodeLayout.png)
+![設計のレイヤー](../assets/img/Recipe_DesignLayers_CodeLayout.png)
 
-At the very bottom of the list is the main file, called "main" or "program", which contains the entry point for the program.
+リストの一番下にあるのは、プログラムのエントリポイントを含む「main」または「program」と呼ばれるメインファイルです。
 
-And just above it is the code for the use cases in the application.  The code in this file is where all the functions from all the other modules are "glued together" into a single function that represents a particular use case or service request. (The nearest equivalent of this in an OO design are the ["application services"](http://stackoverflow.com/questions/2268699/domain-driven-design-domain-service-application-service), which serve roughly the same purpose.)
+その直上にあるのは、アプリケーションのユースケースのコードです。このファイルのコードは、他のすべてのモジュールからの関数を「接着」して、特定のユースケースやサービスリクエストを表す単一の関数にまとめる場所です。（オブジェクト指向設計での最も近い等価物は「[アプリケーションサービス](https://stackoverflow.com/questions/2268699/domain-driven-design-domain-service-application-service)」で、ほぼ同じ目的を果たします。）
 
-And then just above that is the "UI layer" and then the "DB layer" and so on, until you get to the top.
+そしてその上に「UI層」があり、その上に「DB層」があり、というように上に向かって続きます。
 
-What's nice about this approach is that, if you are a newcomer to a code base, you always know where to start. The first few files will always be the "bottom layer" of an application and the last few files will always be the "top layer". No folders needed!
+このアプローチの素晴らしい点は、コードベースに初めて触れる人でも、どこから始めればいいかが常にわかることです。最初の数ファイルは常にアプリケーションの「ボトムレイヤー」であり、最後の数ファイルは常に「トップレイヤー」です。フォルダは必要ありません！
 
-## Putting code in modules, not classes
+## コードをクラスではなくモジュールに配置する
 
-A common question from newcomers to F# is "how should I organize my code if I don't use classes?"
+F#初心者からよくある質問は、「クラスを使わないでコードをどう整理すればいいの？」というものです。
 
-The answer is: *modules*.  As you know, in an object oriented program, a data structure and the functions that act on it would be combined in a class. However in functional-style F#, a data structure and the functions that act on it are contained in modules instead.
+答えは：*モジュール*です。ご存知の通り、オブジェクト指向プログラムでは、データ構造とそれに対する関数はクラスにまとめられます。しかし関数型スタイルのF#では、データ構造とそれに対する関数はモジュールに含まれます。
 
-There are three common patterns for mixing types and functions together:
+型と関数を混在させる一般的なパターンは3つあります：
 
-* having the type declared in the same module as the functions.
-* having the type declared separately from the functions but in the same file.
-* having the type declared separately from the functions and in a different file, typically containing type definitions only.
+* 型をその関数と同じモジュールで宣言する。
+* 型を関数とは別に宣言するが、同じファイル内に配置する。
+* 型を関数とは別に宣言し、異なるファイルに配置する。通常、型定義のみを含むファイルになります。
 
-In the first approach, types are defined *inside* the module along with their related functions. If there is only one primary type, it is often given a simple name such as "T" or the name of the module. 
+最初のアプローチでは、型はモジュール*内部*で関連する関数と一緒に定義されます。主要な型が1つだけの場合、「T」やモジュールの名前などのシンプルな名前がつけられることがよくあります。
 
-Here's an example:
+例を示します：
 
 ```fsharp
 namespace Example
 
-// declare a module 
+// モジュールを宣言
 module Person = 
 
     type T = {First:string; Last:string}
 
-    // constructor
+    // コンストラクタ
     let create first last = 
         {First=first; Last=last}
 
-    // method that works on the type
+    // 型に対して動作するメソッド
     let fullName {First=first; Last=last} = 
         first + " " + last
 ```
 
-So the functions are accessed with names like `Person.create` and `Person.fullName` while the type itself is accessed with the name `Person.T`. 
+この場合、関数は`Person.create`や`Person.fullName`のような名前でアクセスされ、型自体は`Person.T`という名前でアクセスされます。
 
-In the second approach, types are declared in the same file, but outside any module:
+2番目のアプローチでは、型は同じファイル内で宣言されますが、モジュールの外部にあります：
 
 ```fsharp
 namespace Example
 
-// declare the type outside the module
+// モジュールの外部で型を宣言
 type PersonType = {First:string; Last:string}
 
-// declare a module for functions that work on the type
+// 型に対して動作する関数のモジュールを宣言
 module Person = 
 
-    // constructor
+    // コンストラクタ
     let create first last = 
         {First=first; Last=last}
 
-    // method that works on the type
+    // 型に対して動作するメソッド
     let fullName {First=first; Last=last} = 
         first + " " + last
 ```
 
-In this case, the functions are accessed with the same names (`Person.create` and `Person.fullName`) while the type itself is accessed with the name such as `PersonType`. 
+この場合、関数は同じ名前（`Person.create`や`Person.fullName`）でアクセスされますが、型自体は`PersonType`のような名前でアクセスされます。
 
-And finally, here's the third approach. The type is declared in a special "types-only" module (typically in a different file):
+最後に、3番目のアプローチを示します。型は特別な「型のみ」モジュールで宣言されます（通常、異なるファイルに配置）：
 
 ```fsharp
 // =========================
-// File: DomainTypes.fs
+// ファイル: DomainTypes.fs
 // =========================
 namespace Example
 
-// "types-only" module
+// "型のみ"モジュール
 [<AutoOpen>]
 module DomainTypes = 
 
@@ -175,79 +175,79 @@ module DomainTypes =
     
 ```
 
-In this particular case, the `AutoOpen` attribute has been used to make the types in this module automatically visible to all the other modules in the project -- making them "global".
+この特定の例では、`AutoOpen`属性が使用されており、このモジュールの型がプロジェクト内の他のすべてのモジュールに自動的に表示されるようになっています。つまり、「グローバル」にしています。
 
-And then a different module contains all the functions that work on, say, the `Person` type.
+そして、別のモジュールに`Person`型に対して動作するすべての関数が含まれています。
 
 
 ```fsharp
 // =========================
-// File: Person.fs
+// ファイル: Person.fs
 // =========================
 namespace Example
 
-// declare a module for functions that work on the type
+// 型に対して動作する関数のモジュールを宣言
 module Person = 
 
-    // constructor
+    // コンストラクタ
     let create first last = 
         {First=first; Last=last}
 
-    // method that works on the type
+    // 型に対して動作するメソッド
     let fullName {First=first; Last=last} = 
         first + " " + last
 ```
-      
-Note that in this example, both the type and the module are called `Person`. This is not normally a problem in practice, as the compiler can normally figure out what you want.
 
-So, if you write this:
+この例では、型とモジュールの両方が`Person`と呼ばれていることに注意してください。実際には、コンパイラは意図を理解できるので、通常は問題になりません。
+
+例えば、次のように書いた場合：
 
 ```fsharp
 let f (p:Person) = p.First
 ```
 
-Then the compiler will understand that you are referring to the `Person` type. 
+コンパイラは`Person`型を参照していると理解します。
 
-On the other hand, if you write this:
+一方、次のように書いた場合：
 
 ```fsharp
 let g () = Person.create "Alice" "Smith"
 ```
 
-Then the compiler will understand that you are referring to the `Person` module. 
+コンパイラは`Person`モジュールを参照していると理解します。
 
-For more on modules, see the post on [organizing functions](../posts/organizing-functions.md).
-      
-## The organization of the modules
+モジュールについての詳細は、[関数の整理](../posts/organizing-functions.md)に関する記事を参照してください。
 
-For our recipe we will use a mixture of approaches, with the following guidelines:
+## モジュールの整理
 
-**Module Guidelines**
+このレシピでは、以下のガイドラインに従ってアプローチを混合して使用します：
 
-*If a type is shared among multiple modules, then put it in a special types-only module.*
+**モジュールのガイドライン**
 
-* For example, if a type is used globally (or to be precise, within a "bounded domain" in DDD-speak), I would put it in a module called `DomainTypes` or `DomainModel`, which comes early in the compilation order.
-* If a type is used only in a subsystem, such as a type shared by a number of UI modules, then I would put it in a module called `UITypes`, which would come just before the other UI modules in the compilation order.
+*型が複数のモジュールで共有されている場合は、特別な型専用モジュールに配置する。*
 
-*If a type is private to a module (or two) then put it in the same module as its related functions.*
+* 例えば、型がグローバルに使用される場合（より正確には、DDDで言う「境界づけられたコンテキスト」内で使用される場合）、`DomainTypes`や`DomainModel`と呼ばれるモジュールに配置します。これはコンパイル順序の早い段階に来ます。
+* 型がサブシステムでのみ使用される場合（例：複数のUIモジュールで共有される型）、`UITypes`と呼ばれるモジュールに配置します。これは他のUIモジュールの直前のコンパイル順序に来ます。
 
-* For example, a type that was used only for validation would be put in the `Validation` module. A type used only for database access would be put in the `Database` module, and so on.
+*型がモジュール（または2つ）に対してプライベートである場合は、関連する関数と同じモジュールに配置する。*
 
-Of course, there are many ways to organize types, but these guidelines act as a good default starting point.
+* 例えば、バリデーションにのみ使用される型は`Validation`モジュールに配置します。データベースアクセスにのみ使用される型は`Database`モジュールに配置します。以下同様です。
 
-### Dude, where are my folders?
+もちろん、型を整理する方法は多数ありますが、これらのガイドラインは良い出発点となります。
 
-A common complaint is that F# projects do not support a folder structure, which supposedly makes it hard to organize large projects. 
+### フォルダはどこ？
 
-If you are doing a pure object-oriented design, then this is a legitimate complaint.  But as you can see from the discussion above, having a linear list of modules is very helpful (if not strictly necessary) to ensure that the dependencies are maintained correctly. Yes, in theory, the files could be scattered about and the compiler might be able to figure out the correct compilation order, but in practice, it's not easy for the compiler to determine this order. 
+よくある不満は、F#プロジェクトがフォルダ構造をサポートしていないことで、これが大規模プロジェクトの整理を困難にしているという主張です。
 
-Even more importantly, it's not easy for a *human* to determine the correct order either, and so it would make maintenance more painful than it needed to be.
+純粋なオブジェクト指向設計を行っている場合、これは正当な不満です。しかし、上記の議論からわかるように、モジュールを線形リストにすることは、依存関係を正しく維持するのに非常に役立ちます（厳密には必要ではありませんが）。理論的には、ファイルを散らばらせてもコンパイラが正しいコンパイル順序を把握できるかもしれませんが、実際にはコンパイラがこの順序を決定するのは簡単ではありません。
 
-In reality, even for large projects, not having folders is not as much of a problem as you might think. There are a number of large F# projects which successfully work within this limitation, such as the F# compiler itself. See the post on [cycles and modularity in the wild](../posts/cycles-and-modularity-in-the-wild.md) for more.
+さらに重要なのは、*人間*が正しい順序を決定するのも簡単ではないということです。そのため、メンテナンスが必要以上に困難になってしまいます。
 
-### Help, I have mutual dependencies between my types
+実際には、大規模プロジェクトであっても、フォルダがないことは思ったほど問題にはなりません。F#コンパイラ自体を含め、この制限内で成功している大規模なF#プロジェクトがいくつかあります。詳細は[実際の循環依存性とモジュール性](../posts/cycles-and-modularity-in-the-wild.md)に関する記事を参照してください。
 
-If you are coming from an OO design, you might run into mutual dependencies between types, such as this example, which won't compile:
+### 型間に相互依存関係がある場合はどうすればいいですか？
+
+オブジェクト指向設計から移行する場合、次の例のような型間の相互依存関係に遭遇するかもしれません。これはコンパイルできません：
 
 ```fsharp
 type Location = {name: string; workers: Employee list}
@@ -255,82 +255,82 @@ type Location = {name: string; workers: Employee list}
 type Employee = {name: string; worksAt: Location}
 ```
 
-How can you fix this to make the F# compiler happy?  
+F#コンパイラを満足させるにはどうすればいいでしょうか？
 
-It's not that hard, but it does requires some more explanation, so I have devoted [another whole post to dealing with cyclic dependencies](../posts/cyclic-dependencies.md).
+それほど難しくはありませんが、さらに説明が必要なので、[循環依存性の扱い](../posts/cyclic-dependencies.md)について別の記事を用意しました。
 
-## Example code
+## サンプルコード
 
-Let's revisit at the code we have so far, but this time organized into modules.  
+これまでのコードを再確認しましょう。今回はモジュールに整理しています。
 
-Each module below would typically become a separate file.  
+以下の各モジュールは、通常別々のファイルになります。
 
-Be aware that this is still a skeleton. Some of the modules are missing, and some of the modules are almost empty.
+これはまだスケルトンにすぎないことに注意してください。いくつかのモジュールが欠けており、一部のモジュールはほとんど空です。
 
-This kind of organization would be overkill for a small project, but there will be lots more code to come!
+この種の整理は小規模プロジェクトでは過剰ですが、今後さらに多くのコードが追加されます！
 
 ```fsharp
 /// ===========================================
-/// Common types and functions shared across multiple projects
+/// 複数のプロジェクトで共有される共通の型と関数
 /// ===========================================
 module CommonLibrary = 
 
-    // the two-track type
+    // 二進型
     type Result<'TSuccess,'TFailure> = 
         | Success of 'TSuccess
         | Failure of 'TFailure
 
-    // convert a single value into a two-track result
+    // 単一の値を二進結果に変換する
     let succeed x = 
         Success x
 
-    // convert a single value into a two-track result
+    // 単一の値を二進結果に変換する
     let fail x = 
         Failure x
 
-    // appy either a success function or failure function
+    // 成功関数または失敗関数のいずれかを適用する
     let either successFunc failureFunc twoTrackInput =
         match twoTrackInput with
         | Success s -> successFunc s
         | Failure f -> failureFunc f
 
 
-    // convert a switch function into a two-track function
+    // スイッチ関数を二進関数に変換する
     let bind f = 
         either f fail
 
-    // pipe a two-track value into a switch function 
+    // 二進値をスイッチ関数にパイプする
     let (>>=) x f = 
         bind f x
 
-    // compose two switches into another switch
+    // 2つのスイッチを別のスイッチに合成する
     let (>=>) s1 s2 = 
         s1 >> bind s2
 
-    // convert a one-track function into a switch
+    // 単進関数をスイッチに変換する
     let switch f = 
         f >> succeed
 
-    // convert a one-track function into a two-track function
+    // 単進関数を二進関数に変換する
     let map f = 
         either (f >> succeed) fail
 
-    // convert a dead-end function into a one-track function
+    // デッドエンド関数を単進関数に変換する
     let tee f x = 
         f x; x 
 
-    // convert a one-track function into a switch with exception handling
+    // 単進関数を例外処理付きのスイッチに変換する
     let tryCatch f exnHandler x =
         try
             f x |> succeed
         with
         | ex -> exnHandler ex |> fail
 
-    // convert two one-track functions into a two-track function
+    // 2つの単進関数を二進関数に変換する
     let doubleMap successFunc failureFunc =
         either (successFunc >> succeed) (failureFunc >> fail)
 
-    // add two switches in parallel
+    // 2つのスイッチを並列に追加する
     let plus addSuccess addFailure switch1 switch2 x = 
         match (switch1 x),(switch2 x) with
         | Success s1,Success s2 -> Success (addSuccess s1 s2)
@@ -340,19 +340,19 @@ module CommonLibrary =
 
 
 /// ===========================================
-/// Global types for this project
+/// このプロジェクトのグローバル型
 /// ===========================================
 module DomainTypes = 
 
     open CommonLibrary 
 
-    /// The DTO for the request
+    /// リクエストのDTO
     type Request = {name:string; email:string}
 
-    // Many more types coming soon!
+    // 今後さらに多くの型が追加されます！
 
 /// ===========================================
-/// Logging functions
+/// ログ記録関数
 /// ===========================================
 module Logger = 
 
@@ -360,12 +360,12 @@ module Logger =
     open DomainTypes
 
     let log twoTrackInput = 
-        let success x = printfn "DEBUG. Success so far: %A" x; x
-        let failure x = printfn "ERROR. %A" x; x
+        let success x = printfn "DEBUG. 現在まで成功: %A" x; x
+        let failure x = printfn "エラー. %A" x; x
         doubleMap success failure twoTrackInput 
 
 /// ===========================================
-/// Validation functions
+/// バリデーション関数
 /// ===========================================
 module Validation = 
 
@@ -373,21 +373,21 @@ module Validation =
     open DomainTypes
 
     let validate1 input =
-       if input.name = "" then Failure "Name must not be blank"
+       if input.name = "" then Failure "名前は空白にできません"
        else Success input
 
     let validate2 input =
-       if input.name.Length > 50 then Failure "Name must not be longer than 50 chars"
+       if input.name.Length > 50 then Failure "名前は50文字以内にしてください"
        else Success input
 
     let validate3 input =
-       if input.email = "" then Failure "Email must not be blank"
+       if input.email = "" then Failure "メールアドレスは空白にできません"
        else Success input
 
-    // create a "plus" function for validation functions
+    // バリデーション関数用の"plus"関数を作成
     let (&&&) v1 v2 = 
-        let addSuccess r1 r2 = r1 // return first
-        let addFailure s1 s2 = s1 + "; " + s2  // concat
+        let addSuccess r1 r2 = r1 // 最初のものを返す
+        let addFailure s1 s2 = s1 + "、" + s2  // 連結
         plus addSuccess addFailure v1 v2 
 
     let combinedValidation = 
@@ -399,7 +399,7 @@ module Validation =
        { input with email = input.email.Trim().ToLower() }
 
 /// ===========================================
-/// Database functions
+/// データベース関数
 /// ===========================================
 module CustomerRepository = 
 
@@ -407,14 +407,14 @@ module CustomerRepository =
     open DomainTypes
 
     let updateDatabase input =
-       ()   // dummy dead-end function for now
+       ()   // 今のところダミーのデッドエンド関数
 
-    // new function to handle exceptions
+    // 例外を処理する新しい関数
     let updateDatebaseStep = 
         tryCatch (tee updateDatabase) (fun ex -> ex.Message)
 
 /// ===========================================
-/// All the use cases or services in one place
+/// すべてのユースケースまたはサービスを一箇所に
 /// ===========================================
 module UseCases = 
 
@@ -430,12 +430,12 @@ module UseCases =
 ```
 
 
-## Summary
+## まとめ
 
-In this post, we looked at organizing code into modules.  In the next post in this series, we'll finally start doing some real coding!
+この記事では、コードをモジュールに整理する方法を見てきました。このシリーズの次の記事では、いよいよ実際のコーディングを始めます！
 
-Meanwhile, you can read more on cyclic dependencies in the follow up posts:
+それまでの間、循環依存性についての続編をお読みください：
 
-* [Cyclic dependencies are evil](../posts/cyclic-dependencies.md).
-* [Refactoring to remove cyclic dependencies](../posts/removing-cyclic-dependencies.md).
-* [Cycles and modularity in the wild](../posts/cycles-and-modularity-in-the-wild.md), which compares some real-world metrics for C# and F# projects.
+* [循環依存性は悪](../posts/cyclic-dependencies.md)
+* [循環依存性を取り除くリファクタリング](../posts/removing-cyclic-dependencies.md)
+* [実際の循環依存性とモジュール性](../posts/cycles-and-modularity-in-the-wild.md)（C#とF#のプロジェクトの実際の指標を比較しています）
