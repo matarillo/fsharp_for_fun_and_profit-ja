@@ -1,7 +1,8 @@
 # F# for Fun and Profit eBook 日本語訳
 
-This site is a Japanese translation of ["F# for Fun and Profit eBook"](https://swlaschin.gitbooks.io/fsharpforfunandprofit/content/). The github repository for the Japanese version is [here](https://github.com/matarillo/fsharp_for_fun_and_profit-ja).
-----
+This is a Japanese translation of ["F# for Fun and Profit eBook"](https://swlaschin.gitbooks.io/fsharpforfunandprofit/content/). The github repository for the Japanese version is [here](https://github.com/matarillo/fsharp_for_fun_and_profit-ja).
+
+---
 
 この電子書籍は、[fsharpforfunandprofit.com](https://fsharpforfunandprofit.com/) サイトのコンテンツをまとめたものです。
 Kindle やスマホを使ってオフラインで読みたいという要望に応えて制作されました。
