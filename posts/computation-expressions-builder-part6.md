@@ -1,163 +1,163 @@
 ---
 layout: post
-title: "Implementing a builder: The rest of the standard methods"
-description: "Implementing While, Using, and exception handling"
+title: "ビルダーの実装：残りの標準メソッド"
+description: "While、Using、例外処理の実装"
 nav: thinking-functionally
-seriesId: "Computation Expressions"
+seriesId: "コンピュテーション式"
 seriesOrder: 11
 ---
 
-We're coming into the home stretch now. There are only a few more builder methods that need to be covered, and then you will be ready to tackle anything! 
+いよいよ最終段階に入りました。実装すべきビルダーメソッドはあと少しです。これらを押さえれば、どんな課題にも取り組む準備が整います。
 
-These methods are:
+残りのメソッドは以下の通りです。
 
-* `While` for repetition.
-* `TryWith` and `TryFinally` for handling exceptions.
-* `Use` for managing disposables
+* 繰り返しのための `While`
+* 例外処理のための `TryWith` と `TryFinally`
+* 破棄可能なリソースを管理するための `Use`
 
-Remember, as always, that not all methods need to be implemented. If `While` is not relevant to you, don't bother with it.
+覚えておいてほしいのは、すべてのメソッドを実装する必要はないということです。`While`が不要なら、無視して構いません。
 
-One important note before we get started: **all the methods discussed here rely on [delays](../posts/computation-expressions-builder-part3.md)** being used. If you are not using delay functions, then none of the methods will give the expected results.
+始める前に重要な注意点があります。**ここで説明するすべてのメソッドは[遅延](../posts/computation-expressions-builder-part3.md)を使っています**。遅延関数を使っていない場合、これらのメソッドは期待通りの結果を生みません。
 
-## Implementing "While"
+## "While"の実装
 
-We all know what "while" means in normal code, but what does it mean in the context of a computation expression?
-To understand, we have to revisit the concept of continuations again. 
+通常のコードでの"while"の意味は知っていますが、コンピュテーション式の文脈では何を意味するのでしょうか？
+理解するには、継続の概念に立ち返る必要があります。
 
-In previous posts, we saw that a series of expressions is converted into a chain of continuations like this:
+以前の記事で、一連の式が次のような継続のチェーンに変換されることを見ました。
 
 ```fsharp
 Bind(1,fun x -> 
    Bind(2,fun y -> 
      Bind(x + y,fun z -> 
-        Return(z)  // or Yield
+        Return(z)  // または Yield
 ```
 
-And this is the key to understanding a "while" loop -- it can be expanded in the same way.  
+これが"while"ループを理解するカギです。同じ方法で展開できるのです。
 
-First, some terminology. A while loop has two parts:
+まず、用語を確認しましょう。whileループには2つの部分があります。
 
-* There is a test at the top of the "while" loop which is evaluated each time to determine whether the body should be run. When it evaluates to false, the while loop is "exited". In computation expressions, the test part is known as the **"guard"**. 
-  The test function has no parameters, and returns a bool, so its signature is `unit -> bool`, of course.
-* And there is the body of the "while" loop, evaluated each time until the "while" test fails. In computation expressions, this is a delay function that evaluates to a wrapped value. Since the body of the while loop is always the same, the same function is evaluated each time. 
-  The body function has no parameters, and returns nothing, and so its signature is just `unit -> wrapped unit`.
+* "while"ループの先頭にある判定部分。本体を実行すべきかどうかを決めるため、毎回評価されます。falseと評価されると、whileループは「終了」します。コンピュテーション式では、この判定部分を**「ガード」**と呼びます。
+  判定関数にパラメータはなく、boolを返します。つまり、シグネチャは当然`unit -> bool`です。
+* whileループの本体部分。判定が失敗するまで毎回評価されます。コンピュテーション式では、これはラップされた値を評価する遅延関数です。whileループの本体は常に同じなので、同じ関数が毎回評価されます。
+  本体関数にはパラメータがなく、何も返しません。そのため、シグネチャは単に`unit -> wrapped unit`です。
 
-With this in place, we can create pseudo-code for a while loop using continuations:
+これを踏まえて、継続を使ったwhileループの疑似コードを作成できます。
 
 ```fsharp
-// evaluate test function
+// 判定関数を評価
 let bool = guard()  
 if not bool 
 then
-    // exit loop
-    return what??
+    // ループを抜ける
+    return 何を？？
 else
-    // evaluate the body function
+    // 本体関数を評価
     body()         
    
-    // back to the top of the while loop 
+    // whileループの先頭に戻る
     
-    // evaluate test function again
+    // 再度判定関数を評価
     let bool' = guard()  
     if not bool' 
     then
-        // exit loop
-        return what??
+        // ループを抜ける
+        return 何を？？
     else 
-        // evaluate the body function again
+        // 再度本体関数を評価
         body()         
         
-        // back to the top of the while loop
+        // whileループの先頭に戻る
         
-        // evaluate test function a third time
+        // 3回目の判定関数評価
         let bool'' = guard()  
         if not bool'' 
         then
-            // exit loop
-            return what??
+            // ループを抜ける
+            return 何を？？
         else
-            // evaluate the body function a third time
+            // 3回目の本体関数評価
             body()         
             
-            // etc
+            // 以下繰り返し
 ```
 
-One question that is immediately apparent is: what should be returned when the while loop test fails?  Well, we have seen this before with `if..then..`, and the answer is of course to use the `Zero` value. 
+すぐに気づく疑問は、whileループの判定が失敗したとき何を返すべきかということです。これは`if..then..`で見た状況と同じで、答えはもちろん`Zero`値を使うことです。
 
-The next thing is that the `body()` result is being discarded. Yes, it is a unit function, so there is no value to return, but even so, in our expressions, we want to be able to hook into this so we can add behavior behind the scenes.  And of course, this calls for using the `Bind` function. 
+次に、`body()`の結果が捨てられています。確かにunit関数なので返す値はありませんが、それでも式の中では、裏で動作を追加できるようにしたいものです。そして当然、これには`Bind`関数を使います。
 
-So here is a revised version of the pseudo-code, using `Zero` and `Bind`:
+ここで、`Zero`と`Bind`を使った改訂版の疑似コードを示します。
 
 ```fsharp
-// evaluate test function
+// 判定関数を評価
 let bool = guard()  
 if not bool 
 then
-    // exit loop
+    // ループを抜ける
     return Zero
 else
-    // evaluate the body function
+    // 本体関数を評価
     Bind( body(), fun () ->  
        
-        // evaluate test function again
+        // 再度判定関数を評価
         let bool' = guard()  
         if not bool' 
         then
-            // exit loop
+            // ループを抜ける
             return Zero
         else 
-            // evaluate the body function again
+            // 再度本体関数を評価
             Bind( body(), fun () ->  
             
-                // evaluate test function a third time
+                // 3回目の判定関数評価
                 let bool'' = guard()  
                 if not bool'' 
                 then
-                    // exit loop
+                    // ループを抜ける
                     return Zero
                 else
-                    // evaluate the body function again
+                    // 再度本体関数を評価
                     Bind( body(), fun () ->  
                     
-                    // etc
+                    // 以下繰り返し
 ```
 
-In this case, the continuation function passed into `Bind` has a unit parameter, because the `body` function does not have a value.
+この場合、`Bind`に渡される継続関数はunitパラメータを持ちます。`body`関数が値を持たないからです。
 
-Finally, the pseudo-code can be simplified by collapsing it into a recursive function like this:
+最後に、疑似コードを次のような再帰関数に縮約できます。
 
 ```fsharp
 member this.While(guard, body) =
-    // evaluate test function
+    // 判定関数を評価
     if not (guard()) 
     then 
-        // exit loop
+        // ループを抜ける
         this.Zero() 
     else
-        // evaluate the body function 
+        // 本体関数を評価
         this.Bind( body(), fun () -> 
-            // call recursively
+            // 再帰的に呼び出す
             this.While(guard, body))  
 ```
 
-And indeed, this is the standard "boiler-plate" implementation for `While` in almost all builder classes. 
+実際、これがほとんどすべてのビルダークラスで使われる標準的な「定型の」`While`実装です。
 
-It is a subtle but important point that the value of `Zero` must be chosen properly. In previous posts, we saw that we could set the value for `Zero` to be `None` or `Some ()` depending on the workflow.  For `While` to work however, the `Zero` *must be* set to `Some ()` and not `None`, because passing `None` into `Bind` will cause the whole thing to aborted early.
+微妙だが重要な点として、`Zero`の値は適切に選ぶ必要があります。以前の記事で、ワークフローに応じて`Zero`の値を`None`や`Some ()`に設定できることを見ました。しかし、`While`が機能するには、`Zero`は`Some ()`でなければならず、`None`であってはいけません。`None`を`Bind`に渡すと、全体が早期に中断されてしまうからです。
 
-Also note that, although this is a recursive function, we didn't need the `rec` keyword. It is only needed for standalone functions that are recursive, not methods.
+また、これは再帰関数ですが、`rec`キーワードは必要ないことに注意してください。再帰的なスタンドアロン関数にのみ必要で、メソッドには必要ありません。
 
-### "While" in use
+### "While"の使用
 
-Let's look at it being used in the `trace` builder.  Here's the complete builder class, with the `While` method:
+`trace`ビルダーでの使用例を見てみましょう。以下は`While`メソッドを含む完全なビルダークラスです。
 
 ```fsharp
 type TraceBuilder() =
     member this.Bind(m, f) = 
         match m with 
         | None -> 
-            printfn "Binding with None. Exiting."
+            printfn "Noneでバインド。終了します。"
         | Some a -> 
-            printfn "Binding with Some(%A). Continuing" a
+            printfn "Some(%A)でバインド。続行します。" a
         Option.bind f m
 
     member this.Return(x) = 
@@ -178,31 +178,31 @@ type TraceBuilder() =
         f()
 
     member this.While(guard, body) =
-        printfn "While: test"
+        printfn "While: 判定"
         if not (guard()) 
         then 
             printfn "While: zero"
             this.Zero() 
         else
-            printfn "While: body"
+            printfn "While: 本体"
             this.Bind( body(), fun () -> 
                 this.While(guard, body))  
 
-// make an instance of the workflow                
+// ワークフローのインスタンスを作成             
 let trace = new TraceBuilder()
 ```
 
-If you look at the signature for `While`, you will see that the `body` parameter is `unit -> unit option`, that is, a delayed function. As noted above, if you don't implement `Delay` properly, you will get unexpected behavior and cryptic compiler errors.
+`While`のシグネチャを見ると、`body`パラメータが`unit -> unit option`、つまり遅延関数であることがわかります。上述の通り、`Delay`を適切に実装していないと、予期せぬ動作や難解なコンパイラエラーが発生します。
 
 ```fsharp
 type TraceBuilder =
-    // other members
+    // 他のメンバー
     member
       While : guard:(unit -> bool) * body:(unit -> unit option) -> unit option
 
 ```
 
-And here is a simple loop using a mutable value that is incremented each time round.
+以下は、毎回増加する可変値を使った簡単なループの例です。
 
 ```fsharp
 let mutable i = 1
@@ -211,111 +211,111 @@ let inc() = i <- i + 1
 
 let m = trace { 
     while test() do
-        printfn "i is %i" i
+        printfn "i は %i です" i
         inc() 
     } 
 ```
 
-## Handling exceptions with "try..with"
+## "try..with"による例外処理
 
-Exception handling is implemented in a similar way.
+例外処理も同様の方法で実装します。
 
-If we look at a `try..with` expression for example, it has two parts:
+例えば`try..with`式を見ると、2つの部分があります。
 
-* There is the body of the "try", evaluated once. In a computation expressions, this will be a delayed function that evaluates to a wrapped value. The body function has no parameters, and so its signature is just `unit -> wrapped type`.
-* The "with" part handles the exception. It has an exception as a parameters, and returns the same type as the "try" part, so its signature is `exception -> wrapped type`.
+* "try"の本体部分。一度だけ評価されます。コンピュテーション式では、これはラップされた値を評価する遅延関数になります。本体関数にパラメータはないので、シグネチャは単に`unit -> wrapped type`です。
+* "with"部分は例外を処理します。例外をパラメータとして受け取り、"try"部分と同じ型を返すので、シグネチャは`exception -> wrapped type`です。
 
-With this in place, we can create pseudo-code for the exception handler:
+これを踏まえて、例外ハンドラの疑似コードを作成できます。
 
 ```fsharp
 try
     let wrapped = delayedBody()  
-    wrapped  // return a wrapped value
+    wrapped  // ラップされた値を返す
 with
 | e -> handlerPart e
 ```
 
-And this maps exactly to a standard implementation:
+これは標準的な実装に直接マッピングされます。
 
 ```fsharp
 member this.TryWith(body, handler) =
     try 
-        printfn "TryWith Body"
+        printfn "TryWith 本体"
         this.ReturnFrom(body())
     with 
         e ->
-            printfn "TryWith Exception handling"
+            printfn "TryWith 例外処理"
             handler e
 ```
 
-As you can see, it is common to use pass the returned value through `ReturnFrom` so that it gets the same treatment as other wrapped values.
+見てのとおり、返される値を`ReturnFrom`を通して渡すのが一般的です。これにより、他のラップされた値と同じ扱いを受けます。
 
-Here is an example snippet to test how the handling works:
+処理の仕組みをテストするための簡単なスニペットを示します。
 
 ```fsharp
 trace { 
     try
-        failwith "bang"
+        failwith "バン"
     with
-    | e -> printfn "Exception! %s" e.Message
-    } |> printfn "Result %A"
+    | e -> printfn "例外発生！ %s" e.Message
+    } |> printfn "結果 %A"
 ```
 
 
-## Implementing "try..finally"
+## "try..finally"の実装
 
-`try..finally` is very similar to `try..with`.
+`try..finally`は`try..with`とよく似ています。
 
-* There is the body of the "try", evaluated once. The body function has no parameters, and so its signature is `unit -> wrapped type`.
-* The "finally" part is always called. It has no parameters, and returns a unit, so its signature is `unit -> unit`.
+* "try"の本体部分。一度だけ評価されます。本体関数にパラメータはないので、シグネチャは`unit -> wrapped type`です。
+* "finally"部分は常に呼び出されます。パラメータはなく、unitを返すので、シグネチャは`unit -> unit`です。
 
-Just as with `try..with`, the standard implementation is obvious.
+`try..with`と同様に、標準的な実装は明白です。
 
 ```fsharp
 member this.TryFinally(body, compensation) =
     try 
-        printfn "TryFinally Body"
+        printfn "TryFinally 本体"
         this.ReturnFrom(body())
     finally 
-        printfn "TryFinally compensation"
+        printfn "TryFinally 補償"
         compensation() 
 ```
 
-Another little snippet:
+もう一つの簡単なスニペットです。
 
 ```fsharp
 trace { 
     try
-        failwith "bang"
+        failwith "バン"
     finally
-        printfn "ok" 
-    } |> printfn "Result %A"
+        printfn "OK" 
+    } |> printfn "結果 %A"
 ```
 
-## Implementing "using"
+## "Using"の実装
 
-The final method to implement is `Using`.  This is the builder method for implementing the `use!` keyword.
+最後に実装するメソッドは`Using`です。これは`use!`キーワードを実装するビルダーメソッドです。
 
-This is what the MSDN documentation says about `use!`:
+Microsoft Learnのドキュメントには`use!`について次のように書かれています。
 
 ```text
 {| use! value = expr in cexpr |} 
 ```
 
-is translated to:
+これは次のように変換されます。
 
 ```text
 builder.Bind(expr, (fun value -> builder.Using(value, (fun value -> {| cexpr |} ))))
 ```
 
-In other words, the `use!` keyword triggers both a `Bind` and a `Using`. First a `Bind` is done to unpack the wrapped value,
-and then the unwrapped disposable is passed into `Using` to ensure disposal, with the continuation function as the second parameter.
+つまり、`use!`キーワードは`Bind`と`Using`の両方をトリガーします。まず`Bind`が行われてラップされた値を解除し、
+その後、解除されたdisposableが`Using`に渡されて破棄を確実にし、2番目のパラメータとして継続関数が渡されます。
 
-Implementing this is straightforward.  Similar to the other methods, we have a body, or continuation part, of the "using" expression, which is evaluated once. This body function has a "disposable" parameter, and so its signature is `#IDisposable -> wrapped type`.   
+これを実装するのは簡単です。他のメソッドと同様に、"using"式の本体または継続部分があり、一度だけ評価されます。この本体関数は"disposable"パラメータを持つので、シグネチャは`#IDisposable -> wrapped type`です。
 
-Of course we want to ensure that the disposable value is always disposed no matter what, so we need to wrap the call to the body function in a `TryFinally`.
+もちろん、disposable値が必ず破棄されるようにしたいので、本体関数の呼び出しを`TryFinally`でラップする必要があります。
 
-Here's a standard implementation:
+標準的な実装は次のとおりです。
 
 ```fsharp
 member this.Using(disposable:#System.IDisposable, body) =
@@ -326,56 +326,56 @@ member this.Using(disposable:#System.IDisposable, body) =
             | disp -> disp.Dispose())
 ```
 
-Notes:
+注意点：
 
-* The parameter to `TryFinally` is a `unit -> wrapped`, with a *unit* as the first parameter, so we created a delayed version of the body that is passed in.
-* Disposable is a class, so it could be `null`, and we have to handle that case specially. Otherwise we just dispose it in the "finally" continuation.
+* `TryFinally`のパラメータは`unit -> wrapped`で、最初のパラメータが*unit*なので、渡される本体の遅延版を作成しました。
+* Disposableはクラスなので`null`の可能性があり、その場合は特別に扱う必要があります。そうでなければ、"finally"継続で単に破棄します。
 
-Here's a demonstration of `Using` in action. Note that the `makeResource` makes a *wrapped* disposable.  If it wasn't wrapped, we wouldn't need the special
-`use!` and could just use a normal `use` instead.
+以下は`Using`の動作デモです。`makeResource`が*ラップされた*disposableを作成していることに注意してください。ラップされていなければ、特別な
+`use!`は必要なく、通常の`use`で十分です。
 
 ```fsharp
 let makeResource name =
     Some { 
     new System.IDisposable with
-    member this.Dispose() = printfn "Disposing %s" name
+    member this.Dispose() = printfn "%s を破棄中" name
     }
 
 trace { 
-    use! x = makeResource "hello"
-    printfn "Disposable in use"
+    use! x = makeResource "こんにちは"
+    printfn "Disposableを使用中"
     return 1
-    } |> printfn "Result: %A" 
+    } |> printfn "結果：%A" 
 ```
 
 
-## "For" revisited
+## "For"の見直し
 
-Finally, we can revisit how `For` is implemented.  In the previous examples, `For` took a simple list parameter. But with `Using` and `While` under our belts, we can change it to accept any `IEnumerable<_>` or sequence.
+最後に、`For`の実装を見直しましょう。以前の例では、`For`は単純なリストパラメータを受け取っていました。しかし、`Using`と`While`を理解したので、任意の`IEnumerable<_>`やシーケンスを受け入れるように変更できます。
 
-Here's the standard implementation for `For` now:
+以下が`For`の現在の標準的な実装です。
 
 ```fsharp
 member this.For(sequence:seq<_>, body) =
        this.Using(sequence.GetEnumerator(),fun enum -> 
             this.While(enum.MoveNext, 
                 this.Delay(fun () -> body enum.Current)))
- {% endhighlight fsharp %}
+```
 
-As you can see, it is quite different from the previous implementation, in order to handle a generic `IEnumerable<_>`.
+見てのとおり、汎用的な`IEnumerable<_>`を扱うため、以前の実装とはかなり異なります。
 
-* We explicitly iterate using an `IEnumerator<_>`.
-* `IEnumerator<_>` implements `IDisposable`, so we wrap the enumerator in a `Using`.
-* We use `While .. MoveNext` to iterate.
-* Next, we pass the `enum.Current` into the body function
-* Finally, we delay the call to the body function using `Delay`
+* `IEnumerator<_>`を明示的に使って反復します。
+* `IEnumerator<_>`は`IDisposable`を実装しているので、列挙子を`Using`でラップします。
+* `While .. MoveNext`を使って反復します。
+* 次に、`enum.Current`を本体関数に渡します。
+* 最後に、`Delay`を使って本体関数の呼び出しを遅延させます。
 
-## Complete code without tracing 
+## トレースなしの完全なコード 
 
-Up to now, all the builder methods have been made more complex than necessary by the adding of tracing and printing expressions. The tracing is helpful to understand what is going on,
-but it can obscure the simplicity of the methods.
+これまで、すべてのビルダーメソッドは、トレースと出力式を追加することで必要以上に複雑になっていました。トレースは何が起こっているかを理解するのに役立ちますが、
+単純なメソッドを分かりにくくする可能性があります。
 
-So as a final step, let's have a look at the complete code for the "trace" builder class, but this time without any extraneous code at all.  Even though the code is cryptic, the purpose and implementation of each method should now be familiar to you.
+そこで最後のステップとして、"trace"ビルダークラスの完全なコードを見てみましょう。今回は余計なコードを一切含まないものです。コードは難解に見えるかもしれませんが、各メソッドの目的と実装はもう馴染みのあるものになっているはずです。
 
 ```fsharp
 type TraceBuilder() =
@@ -425,5 +425,5 @@ type TraceBuilder() =
                 
 ```
 
-After all this discussion, the code seems quite tiny now. And yet this builder implements every standard method, uses delayed functions.
-A lot of functionality in a just a few lines!
+これまでの議論を経て、コードはとてもコンパクトになりました。それでもこのビルダーは、すべての標準メソッドを実装し、遅延関数を使っています。
+わずか数行で多くの機能を実現しています！

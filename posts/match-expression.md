@@ -10,7 +10,7 @@ categories: [パターン,畳み込み]
 
 F#ではパターンマッチングが広く使われています。 `let` で式に値を束縛したり、関数のパラメータを定義したり、 `match..with` 構文で分岐したりするときに活躍します。
 
-値を式に束縛することについては、[「F#を使う理由」シリーズの投稿](../posts/conciseness-pattern-matching.html)で軽く触れました。また、「[型の調査](../posts/overview-of-types-in-fsharp.html)」でも何度か取り上げる予定です。
+値を式に束縛することについては、[「F#を使う理由」シリーズの投稿](../posts/conciseness-pattern-matching.md)で軽く触れました。また、「[型の調査](../posts/overview-of-types-in-fsharp.md)」でも何度か取り上げる予定です。
 
 そのため、この投稿では `match..with` 構文とその制御フローでの使い方に焦点を当てます。
 
@@ -81,7 +81,7 @@ let x =
 
 F#はインデントに敏感なので、この式をどのようにフォーマットするのが最適か疑問に思うかもしれません。整列に関する要素が多いからです。
 
-[F#の構文に関する投稿](../posts/fsharp-syntax)では整列の概要を説明しましたが、 `match..with` 式には以下のような具体的なガイドラインがあります。
+[F#の構文に関する投稿](../posts/fsharp-syntax.md)では整列の概要を説明しましたが、 `match..with` 式には以下のような具体的なガイドラインがあります。
 
 **ガイドライン1： `| expression` 句は `match` の直下に整列させる**
 
@@ -391,7 +391,7 @@ loopAndSum [1..5] 0
 
 ### タプル、レコード、union のマッチング
 
-パターンマッチングは、F#のすべての組み込み型で利用できます。詳細は[型に関するシリーズ](../posts/overview-of-types-in-fsharp.html)を参照してください。
+パターンマッチングは、F#のすべての組み込み型で利用できます。詳細は[型に関するシリーズ](../posts/overview-of-types-in-fsharp.md)を参照してください。
 
 ```fsharp
 // -----------------------
@@ -646,7 +646,7 @@ classifyString "alice@example.com"
 classifyString "google.com"
 ```
 
-アクティブパターンの他の例は[以前の投稿](../posts/convenience-active-patterns.html)で見ることができます。
+アクティブパターンの他の例は[以前の投稿](../posts/convenience-active-patterns.md)で見ることができます。
 
 ## "function"キーワード
 
@@ -709,7 +709,7 @@ let f =
 
 ## try..withを使った例外処理
 
-[前回の投稿](../posts/exceptions.html)では、 `try..with` 式を使った例外のキャッチについて説明しました。
+[前回の投稿](../posts/exceptions.md)では、 `try..with` 式を使った例外のキャッチについて説明しました。
 
 ```fsharp
 try
@@ -796,7 +796,7 @@ let loopAndSum3 aList = List.fold (fun sum i -> sum+i) 0 aList
 [1..10] |> loopAndSum3 
 ```
 
-同様に、[こちらの記事](../posts/the-option-type.html)で詳しく説明したオプション型には、多くの便利な関数を持つ `Option` モジュールが関連付けられています。
+同様に、[こちらの記事](../posts/the-option-type.md)で詳しく説明したオプション型には、多くの便利な関数を持つ `Option` モジュールが関連付けられています。
 
 たとえば、 `Some` と `None` に対してマッチングする関数は、 `Option.map` で置き換えられます。
 
@@ -842,7 +842,7 @@ module Temperature =
 すべての `fold` 関数は、以下の一般的なパターンに従います。
 
 * union 構造の各ケース（またはマッチパターンの各句）に対して1つの関数があります
-* 最後に、実際にマッチングする値が来ます（なぜでしょうか？[「部分適用のための関数設計」](../posts/partial-application.html)の投稿を参照してください）
+* 最後に、実際にマッチングする値が来ます（なぜでしょうか？[「部分適用のための関数設計」](../posts/partial-application.md)の投稿を参照してください）
 
 fold関数ができあがったので、別のコンテキストで使えます。
 

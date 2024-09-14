@@ -8,7 +8,7 @@ seriesOrder: 12
 categories: [パターン, 実例解説]
 ---
 
-[前回](../posts/pattern-matching-command-line.html)はコマンドラインの解析について見ました。今回は別のパターンマッチングの例として、ローマ数字を取り上げます。
+[前回](../posts/pattern-matching-command-line.md)はコマンドラインの解析について見ました。今回は別のパターンマッチングの例として、ローマ数字を取り上げます。
 
 前回と同様に、内部モデルを「純粋」にして、入力から内部モデルへの変換と、内部モデルから出力への変換を別々の段階で行うよう心がけます。
 
@@ -40,8 +40,8 @@ type RomanNumeral = RomanDigit list
 
 いや、ちょっと待ってください！ `RomanDigit` は単なる*任意の*数字ではありません。限られた集合から選ぶべきです。
 
-また、 `RomanNumeral` は単なる数字のリストの[型エイリアス](../posts/type-abbreviations.html)であってはなりません。独自の特別な型である方が良いでしょう。
-これは[単一ケースの判別共用体](../posts/discriminated-unions.html)を作ることで実現できます。
+また、 `RomanNumeral` は単なる数字のリストの[型エイリアス](../posts/type-abbreviations.md)であってはなりません。独自の特別な型である方が良いでしょう。
+これは[単一ケースの判別共用体](../posts/discriminated-unions.md)を作ることで実現できます。
 
 こちらがより良いバージョンです。
 
@@ -143,7 +143,7 @@ let charToRomanDigit =
 
 コンパイラがエラーを吐きました！他の文字が入力された場合はどうなるでしょうか？
 
-これは[網羅的パターンマッチング](../posts/correctness-exhaustive-pattern-matching.html)が不足している要件について考えさせてくれる良い例です。
+これは[網羅的パターンマッチング](../posts/correctness-exhaustive-pattern-matching.md)が不足している要件について考えさせてくれる良い例です。
 
 では、不正な入力に対してはどうすればよいでしょうか。エラーメッセージを表示するのはどうでしょう？
 
@@ -162,7 +162,7 @@ let charToRomanDigit =
 	| ch -> eprintf "%cは無効な文字です" ch
 ```
 
-コンパイラはこれも気に入らないようです！通常のケースは有効な `RomanDigit` を返しますが、エラーケースは `unit` を返します。[以前の投稿](../posts/pattern-matching.html)で見たように、すべての分岐は同じ型を返さなければなりません。
+コンパイラはこれも気に入らないようです！通常のケースは有効な `RomanDigit` を返しますが、エラーケースは `unit` を返します。[以前の投稿](../posts/pattern-matching.md)で見たように、すべての分岐は同じ型を返さなければなりません。
 
 これをどう直せばいいでしょうか？例外を投げることもできますが、それは少し大げさかもしれません。よく考えると、 `charToRomanDigit` が*常に*有効な `RomanDigit` を返すことができるわけではありません。
 返せる場合もあれば、返せない場合もあります。つまり、ここではオプション型のようなものを使う必要があります。

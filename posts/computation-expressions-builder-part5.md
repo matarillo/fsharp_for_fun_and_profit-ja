@@ -1,19 +1,19 @@
 ---
 layout: post
-title: "Implementing a builder: Adding laziness"
-description: "Delaying a workflow externally"
+title: "ビルダーの実装：遅延性の追加"
+description: "ワークフローを外部から遅延させる"
 nav: thinking-functionally
-seriesId: "Computation Expressions"
+seriesId: "コンピュテーション式"
 seriesOrder: 10
 ---
 
-In a [previous post](../posts/computation-expressions-builder-part3.md), we saw how to avoid unnecessary evaluation of expressions in a workflow until needed. 
+[以前の記事](../posts/computation-expressions-builder-part3.md)で、ワークフロー内の式を必要になるまで評価しないようにする方法を見ました。
 
-But that approach was designed for expressions *inside* a workflow. What happens if we want to delay the *whole workflow itself* until needed.
+しかし、その方法はワークフロー*内部*の式を対象としていました。では、*ワークフロー全体*を必要になるまで遅延させたい場合はどうすればよいでしょうか。
 
-## The problem
+## 問題
 
-Here is the code from our "maybe" builder class. This code is based on the `trace` builder from the earlier post, but with all the tracing taken out, so that it is nice and clean.
+以下は「maybe」ビルダークラスのコードです。このコードは以前の記事の`trace`ビルダーを基にしていますが、トレース処理をすべて取り除いて、シンプルにしています。
 
 ```fsharp
 type MaybeBuilder() =
@@ -32,8 +32,8 @@ type MaybeBuilder() =
 
     member this.Combine (a,b) = 
         match a with
-        | Some _ -> a  // if a is good, skip b
-        | None -> b()  // if a is bad, run b
+        | Some _ -> a  // aが正常なら、bをスキップ
+        | None -> b()  // aが不正なら、bを実行
 
     member this.Delay(f) = 
         f
@@ -41,227 +41,227 @@ type MaybeBuilder() =
     member this.Run(f) = 
         f()
 
-// make an instance of the workflow                
+// ワークフローのインスタンスを作成             
 let maybe = new MaybeBuilder()
 ```
 
-Before moving on, make sure that you understand how this works. If we analyze this using the terminology of the earlier post, we can see that the types used are:
+先に進む前に、これがどのように動作するか理解しておいてください。以前の記事の用語を使って分析すると、使われている型は次のようになります。
 
-* Wrapper type: `'a option`
-* Internal type: `'a option`
-* Delayed type: `unit -> 'a option`
+* ラッパー型：`'a option`
+* 内部型：`'a option`
+* 遅延型：`unit -> 'a option`
 
-Now let's check this code and make sure everything works as expected. 
+では、このコードをチェックして、すべてが期待通りに動作するか確認しましょう。
 
 ```fsharp
 maybe { 
-    printfn "Part 1: about to return 1"
+    printfn "パート1：1を返す直前"
     return 1
-    printfn "Part 2: after return has happened"
-    } |> printfn "Result for Part1 but not Part2: %A" 
+    printfn "パート2：returnの後"
+    } |> printfn "パート1の結果（パート2は実行されない）：%A" 
 
-// result - second part is NOT evaluated    
+// 結果 - 2番目の部分は評価されない    
 
 maybe { 
-    printfn "Part 1: about to return None"
+    printfn "パート1：Noneを返す直前"
     return! None
-    printfn "Part 2: after None, keep going"
-    } |> printfn "Result for Part1 and then Part2: %A" 
+    printfn "パート2：Noneの後、続行"
+    } |> printfn "パート1とパート2の結果：%A" 
 
-// result - second part IS evaluated    
+// 結果 - 2番目の部分は評価される    
 ```
 
-But what happens if we refactor the code into a child workflow, like this:
+しかし、コードを子ワークフローにリファクタリングした場合はどうなるでしょうか。
 
 ```fsharp
 let childWorkflow = 
-    maybe {printfn "Child workflow"} 
+    maybe {printfn "子ワークフロー"} 
 
 maybe { 
-    printfn "Part 1: about to return 1"
+    printfn "パート1：1を返す直前"
     return 1
     return! childWorkflow 
-    } |> printfn "Result for Part1 but not childWorkflow: %A" 
+    } |> printfn "パート1の結果（子ワークフローは実行されない）：%A" 
 ```
 
-The output shows that the child workflow was evaluated even though it wasn't needed in the end. This might not be a problem in this case, but in many cases, we may not want this to happen.
+出力を見ると、子ワークフローは結局必要なかったにもかかわらず評価されています。この場合は問題ないかもしれませんが、多くの場合、これを避けたいでしょう。
 
-So, how to avoid it?
+では、どうすれば避けられるでしょうか。
 
-## Wrapping the inner type in a delay
+## 内部型を遅延でラップする
 
-The obvious approach is to wrap the *entire result of the builder* in a delay function, and then to "run" the result, we just evaluate the delay function.
+明らかな方法は、*ビルダーの結果全体*を遅延関数でラップし、結果を「実行」するには単に遅延関数を評価するだけにすることです。
 
-So, here's our new wrapper type:
+そこで、新しいラッパー型を次のように定義します。
 
 ```fsharp
 type Maybe<'a> = Maybe of (unit -> 'a option)
 ```
 
-We've replaced a simple `option` with a function that evaluates to an option, and then wrapped that function in a [single case union](../posts/designing-with-types-single-case-dus.md) for good measure.
+単純な`option`をオプションを評価する関数に置き換え、その関数を[単一ケースユニオン](../posts/designing-with-types-single-case-dus.md)でラップしました。
 
-And now we need to change the `Run` method as well. Previously, it evaluated the delay function that was passed in to it, but now it should leave it unevaluated and wrap it in our new wrapper type:
+そして、`Run`メソッドも変更する必要があります。以前は渡された遅延関数を評価していましたが、今は評価せずに新しいラッパー型でラップするだけにします。
 
 ```fsharp
-// before
+// 変更前
 member this.Run(f) = 
     f()
 
-// after    
+// 変更後    
 member this.Run(f) = 
     Maybe f
 ```
 
-*I've forgotten to fix up another method -- do you know which one? We'll bump into it soon!*
+*他のメソッドも1つ修正し忘れています。どのメソッドか分かりますか？すぐに気づくでしょう！*
 
-One more thing -- we'll need a way to "run" the result now.
+もう1つ、結果を「実行」する方法が必要になります。
 
 ```fsharp
 let run (Maybe f) = f()
 ```
 
-Let's try out our new type on our previous examples:
+前の例で新しい型を試してみましょう。
 
 ```fsharp
 let m1 = maybe { 
-    printfn "Part 1: about to return 1"
+    printfn "パート1：1を返す直前"
     return 1
-    printfn "Part 2: after return has happened"
+    printfn "パート2：returnの後"
     } 
 ```
 
-Running this, we get something like this:
+これを実行すると、次のような結果が得られます。
 
 ```fsharp
 val m1 : Maybe<int> = Maybe <fun:m1@123-7>
 ```
 
-That looks good; nothing else was printed.
+良さそうです。他には何も出力されていません。
 
-And now run it:
+では、実行してみましょう。
 
 ```fsharp
-run m1 |> printfn "Result for Part1 but not Part2: %A" 
+run m1 |> printfn "パート1の結果（パート2は実行されない）：%A" 
 ```
 
-and we get the output:
+出力は次のようになります。
 
 ```text
-Part 1: about to return 1
-Result for Part1 but not Part2: Some 1
+パート1：1を返す直前
+パート1の結果（パート2は実行されない）：Some 1
 ```
 
-Perfect. Part 2 did not run.
+完璧です。パート2は実行されませんでした。
 
-But we run into a problem with the next example:
+しかし、次の例で問題にぶつかります。
 
 ```fsharp
 let m2 = maybe { 
-    printfn "Part 1: about to return None"
+    printfn "パート1：Noneを返す直前"
     return! None
-    printfn "Part 2: after None, keep going"
+    printfn "パート2：Noneの後、続行"
     } 
 ```
 
-Oops! We forgot to fix up `ReturnFrom`!  As we know, that method takes a *wrapped type*, and we have redefined the wrapped type now.
+おっと！`ReturnFrom`の修正を忘れていました！ご存知の通り、このメソッドは*ラップされた型*を受け取りますが、今やラップされた型を再定義しています。
 
-Here's the fix:
+修正は次のとおりです。
 
 ```fsharp
 member this.ReturnFrom(Maybe f) = 
     f()
 ```
 
-We are going to accept a `Maybe` from outside, and then immediately run it to get at the option.
+外部から`Maybe`を受け取り、すぐに実行してオプションを取得します。
 
-But now we have another problem -- we can't return an explicit `None` anymore in `return! None`, we have to return a `Maybe` type instead.  How are we going to create one of these?
+しかし、今度は別の問題が発生します。`return! None`で明示的に`None`を返すことができなくなりました。代わりに`Maybe`型を返す必要があります。どうやってこれを作ればいいのでしょうか？
 
-Well, we could create a helper function that constructs one for us.  But there is a much simpler answer:
-you can create a new `Maybe` type by using a `maybe` expression!  
+ヘルパー関数を作成して`Maybe`型を構築することもできますが、もっと簡単な方法があります。
+`maybe`式を使って新しい`Maybe`型を作れるのです！
 
 ```fsharp
 let m2 = maybe { 
-    return! maybe {printfn "Part 1: about to return None"}
-    printfn "Part 2: after None, keep going"
+    return! maybe {printfn "パート1：Noneを返す直前"}
+    printfn "パート2：Noneの後、続行"
     } 
 ```
 
-This is why the `Zero` method is useful. With `Zero` and the builder instance, you can create new instances of the type even if they don't do anything.
+これが`Zero`メソッドが役立つ理由です。`Zero`とビルダーインスタンスがあれば、何もしない新しい型のインスタンスでも作成できます。
 
-But now we have one more error -- the dreaded "value restriction":
+しかし、ここでもう一つのエラーが発生します。恐ろしい「値の制限」です。
 
 ```text
 Value restriction. The value 'm2' has been inferred to have generic type
 ```
 
-The reason why this has happened is that *both* expressions are returning `None`. But the compiler does not know what type `None` is. The code is using `None` of type `Option<obj>` (presumably because of implicit boxing) yet the compiler knows that the type can be more generic than that.
+これが起こる理由は、*両方の*式が`None`を返しているからです。しかし、コンパイラは`None`がどの型なのか分かりません。コードは`Option<obj>`型の`None`を使っています（おそらく暗黙的なボックス化のため）が、コンパイラはその型がもっとジェネリックになり得ることを知っています。
 
-There are two fixes. One is to make the type explicit:
+2つの解決策があります。1つは型を明示的にすることです。
 
 ```fsharp
 let m2_int: Maybe<int> = maybe { 
-    return! maybe {printfn "Part 1: about to return None"}
-    printfn "Part 2: after None, keep going;"
+    return! maybe {printfn "パート1：Noneを返す直前"}
+    printfn "パート2：Noneの後、続行"
     } 
 ```
 
-Or we can just return some non-None value instead:
+もう1つは、単にNone以外の値を返すことです。
 
 ```fsharp
 let m2 = maybe { 
-    return! maybe {printfn "Part 1: about to return None"}
-    printfn "Part 2: after None, keep going;"
+    return! maybe {printfn "パート1：Noneを返す直前"}
+    printfn "パート2：Noneの後、続行"
     return 1
     } 
 ```
 
-Both of these solutions will fix the problem.
+これらの解決策のどちらでも問題は解決します。
 
-Now if we run the example, we see that the result is as expected. The second part *is* run this time.
+例を実行すると、結果は期待通りになります。今回は2番目の部分*が*実行されます。
 
 ```fsharp
-run m2 |> printfn "Result for Part1 and then Part2: %A" 
+run m2 |> printfn "パート1とパート2の結果：%A" 
 ```
 
-The trace output:
+トレース出力：
 
 ```text
-Part 1: about to return None
-Part 2: after None, keep going;
-Result for Part1 and then Part2: Some 1
+パート1：Noneを返す直前
+パート2：Noneの後、続行
+パート1とパート2の結果：Some 1
 ```
 
-Finally, we'll try the child workflow examples again:
+最後に、子ワークフローの例をもう一度試してみましょう。
 
 ```fsharp
 let childWorkflow = 
-    maybe {printfn "Child workflow"} 
+    maybe {printfn "子ワークフロー"} 
 
 let m3 = maybe { 
-    printfn "Part 1: about to return 1"
+    printfn "パート1：1を返す直前"
     return 1
     return! childWorkflow 
     } 
 
-run m3 |> printfn "Result for Part1 but not childWorkflow: %A" 
+run m3 |> printfn "パート1の結果（子ワークフローは実行されない）：%A" 
 ```
 
-And now the child workflow is not evaluated, just as we wanted.
+これで、望んでいた通り子ワークフローは評価されません。
 
-And if we *do* need the child workflow to be evaluated, this works too:
+そして、子ワークフローを評価する必要がある場合も、次のように動作します。
 
 ```fsharp
 let m4 = maybe { 
-    return! maybe {printfn "Part 1: about to return None"}
+    return! maybe {printfn "パート1：Noneを返す直前"}
     return! childWorkflow 
     } 
 
-run m4 |> printfn "Result for Part1 and then childWorkflow: %A" 
+run m4 |> printfn "パート1と子ワークフローの結果：%A" 
 ```
 
-### Reviewing the builder class 
+### ビルダークラスの再確認 
 
-Let's look at all the code in the new builder class again:
+新しいビルダークラスのコード全体をもう一度見てみましょう。
 
 ```fsharp
 type Maybe<'a> = Maybe of (unit -> 'a option)
@@ -282,8 +282,8 @@ type MaybeBuilder() =
 
     member this.Combine (a,b) = 
         match a with
-        | Some _' -> a    // if a is good, skip b
-        | None -> b()     // if a is bad, run b
+        | Some _' -> a    // aが正常なら、bをスキップ
+        | None -> b()     // aが不正なら、bを実行
 
     member this.Delay(f) = 
         f
@@ -291,51 +291,51 @@ type MaybeBuilder() =
     member this.Run(f) = 
         Maybe f
 
-// make an instance of the workflow                
+// ワークフローのインスタンスを作成             
 let maybe = new MaybeBuilder()
 
 let run (Maybe f) = f()
 ```
 
-If we analyze this new builder using the terminology of the earlier post, we can see that the types used are:
+以前の記事の用語を使ってこの新しいビルダーを分析すると、使用されている型は次のようになります。
 
-* Wrapper type: `Maybe<'a>`
-* Internal type: `'a option`
-* Delayed type: `unit -> 'a option`
+* ラッパー型：`Maybe<'a>`
+* 内部型：`'a option`
+* 遅延型：`unit -> 'a option`
 
-Note that in this case it was convenient to use the standard `'a option` as the internal type, because we didn't need to modify `Bind` or `Return` at all.
+この場合、標準の`'a option`を内部型として使うのが便利でした。`Bind`や`Return`を全く変更する必要がなかったからです。
 
-An alternative design might use `Maybe<'a>` as the internal type as well, which would make things more consistent, but makes the code harder to read.
+別の設計として、内部型にも`Maybe<'a>`を使うこともできます。これによりより一貫性が出ますが、コードの読みにくさが増します。
 
-## True laziness
+## 真の遅延性
 
-Let's look at a variant of the last example:
+最後の例の変形を見てみましょう。
 
 ```fsharp
 let child_twice: Maybe<unit> = maybe { 
-    let workflow = maybe {printfn "Child workflow"} 
+    let workflow = maybe {printfn "子ワークフロー"} 
 
-    return! maybe {printfn "Part 1: about to return None"}
+    return! maybe {printfn "パート1：Noneを返す直前"}
     return! workflow 
     return! workflow 
     } 
 
-run child_twice |> printfn "Result for childWorkflow twice: %A" 
+run child_twice |> printfn "子ワークフローを2回実行した結果：%A" 
 ```
   
-What should happen? How many times should the child workflow be run?
+何が起こるでしょうか？子ワークフローは何回実行されるべきでしょうか？
 
-The delayed implementation above does ensure that the child workflow is only be evaluated on demand, but it does not stop it being run twice.  
+上記の遅延実装では、子ワークフローが要求時にのみ評価されることは保証されますが、2回実行されるのを止めることはできません。
 
-In some situations, you might require that the workflow is guaranteed to only run *at most once*, and then cached ("memoized"). This is easy enough to do using the `Lazy` type that is built into F#.
+状況によっては、ワークフローが*最大1回*だけ実行され、その後キャッシュされる（「メモ化」される）ことを保証する必要があるかもしれません。これはF#に組み込まれている`Lazy`型を使えば簡単に実現できます。
 
-The changes we need to make are:
+必要な変更点は次の通りです。
 
-* Change `Maybe` to wrap a `Lazy` instead of a delay
-* Change `ReturnFrom` and `run` to force the evaluation of the lazy value
-* Change `Run` to run the delay from inside a `lazy`
+* `Maybe`を変更して、遅延の代わりに`Lazy`をラップする
+* `ReturnFrom`と`run`を変更して、遅延値の評価を強制する
+* `Run`を変更して、`lazy`内から遅延を実行する
 
-Here is the new class with the changes:
+変更を加えた新しいクラスは次のようになります。
 
 ```fsharp
 type Maybe<'a> = Maybe of Lazy<'a option>
@@ -356,8 +356,8 @@ type MaybeBuilder() =
 
     member this.Combine (a,b) = 
         match a with
-        | Some _' -> a    // if a is good, skip b
-        | None -> b()     // if a is bad, run b
+        | Some _' -> a    // aが正常なら、bをスキップ
+        | None -> b()     // aが不正なら、bを実行
 
     member this.Delay(f) = 
         f
@@ -365,35 +365,35 @@ type MaybeBuilder() =
     member this.Run(f) = 
         Maybe (lazy f())
 
-// make an instance of the workflow                
+// ワークフローのインスタンスを作成             
 let maybe = new MaybeBuilder()
 
 let run (Maybe f) = f.Force()
 ```
 
-And if we run the "child twice` code from above, we get:
+そして、上記の「子を2回実行する」コードを動かすと、次のような結果になります。
 
 ```text
-Part 1: about to return None
-Child workflow
-Result for childWorkflow twice: <null>
+パート1：Noneを返す直前
+子ワークフロー
+子ワークフローを2回実行した結果：<null>
 ```
   
-from which it is clear that the child workflow only ran once.  
-  
-## Summary: Immediate vs. Delayed vs. Lazy 
+これから、子ワークフローが1回だけ実行されたことが明らかです。
 
-On this page, we've seen three different implementations of the `maybe` workflow. One that is always evaluated immediately, one that uses a delay function, and one that uses laziness with memoization.
+## まとめ：即時 vs. 遅延 vs. 遅延評価 
 
-So... which approach should you use?
+このページでは、`maybe`ワークフローの3つの異なる実装を見てきました。常に即時評価される実装、遅延関数を使う実装、そしてメモ化を伴う遅延評価を使う実装です。
 
-There is no single "right" answer. Your choice depends on a number of things:
+では... どのアプローチを使うべきでしょうか？
 
-* *Is the code in the expression cheap to execute, and without important side-effects?* If so, stick with the first, immediate version.  It's simple and easy to understand, and this is exactly what most implementations of the `maybe` workflow use.
-* *Is the code in the expression expensive to execute, might the result vary with each call (e.g. non-deterministic), or are there important side-effects?* If so, use the second, delayed version. This is exactly what most other workflows do, especially those relating to I/O (such as `async`). 
-* F# does not attempt to be a purely functional language, so almost all F# code will fall into one of these two categories. But, *if you need to code in a guaranteed side-effect free style, or you just want to ensure that expensive code is evaluated at most once*, then use the third, lazy option.  
+唯一の「正解」はありません。選択は以下のような要因に依存します。
 
-Whatever your choice, do make it clear in the documentation. For example, the delayed vs. lazy implementations appear exactly the same to the client, but they have very different semantics, and the  client code must be written differently for each case.
+* *式内のコードの実行コストが低く、重要な副作用がないなら？* この場合は、最初の即時バージョンを使いましょう。単純で理解しやすく、ほとんどの`maybe`ワークフローの実装がまさにこの方法を使っています。
+* *式内のコードの実行コストが高い、呼び出しごとに結果が変わる可能性がある（非決定的）、または重要な副作用があるなら？* この場合は、2番目の遅延バージョンを使います。これはほとんどの他のワークフロー、特にI/O関連（`async`など）のワークフローが行っていることです。
+* F#は純粋な関数型言語を目指しているわけではないので、ほとんどすべてのF#コードはこの2つのカテゴリのいずれかに該当します。しかし、*保証された副作用のないスタイルでコーディングする必要がある場合、または高コストのコードが最大1回しか評価されないことを保証したい場合は*、3番目の遅延評価オプションを使います。
 
-Now that we have finished with delays and laziness, we can go back to the builder methods and finish them off.
+どの選択をしても、ドキュメントで明確にしておくことが重要です。例えば、遅延と遅延評価の実装はクライアントにとっては全く同じに見えますが、セマンティクスが大きく異なり、クライアントコードはそれぞれのケースで異なる書き方をする必要があります。
+
+これで遅延と遅延評価について終わりましたので、ビルダーメソッドに戻って仕上げていきましょう。
 
