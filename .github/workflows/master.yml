@@ -35,6 +35,12 @@ jobs:
       - name: Build with HonKit
         run: npx honkit build
 
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          # upload entire directory
+          path: './_book'
+
   deploy:
     needs: build
     permissions:
@@ -47,15 +53,6 @@ jobs:
       url: ${{steps.deployment.outputs.page_url}}
 
     steps:
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v3
-
-      - name: Upload Artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          # upload entire directory
-          path: './_book'
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
