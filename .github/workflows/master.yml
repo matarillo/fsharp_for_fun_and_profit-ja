@@ -1,0 +1,50 @@
+# これはActionsを使い始めるための基本的なワークフローです
+
+name: CI
+
+# ワークフローの実行タイミングを制御します
+on:
+  # "master"ブランチへのプッシュまたはプルリクエストイベントでワークフローをトリガーします
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+  # Actionsタブから手動でこのワークフローを実行することを許可します
+  workflow_dispatch:
+
+# ワークフロー実行は、順次または並行して実行できる1つ以上のジョブで構成されます
+jobs:
+  # このワークフローには"build"という単一のジョブが含まれています
+  build:
+    # ジョブが実行されるランナーの種類
+    runs-on: ubuntu-latest
+
+    # ステップは、ジョブの一部として実行されるタスクのシーケンスを表します
+    steps:
+      # $GITHUB_WORKSPACEの下にあなたのリポジトリをチェックアウトします。これによりジョブがアクセスできるようになります
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build with HonKit
+        run: npx honkit build
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          # upload entire directory
+          path: './_book'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
