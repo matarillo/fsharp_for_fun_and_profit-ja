@@ -15,7 +15,6 @@ on:
 
 # ワークフロー実行は、順次または並行して実行できる1つ以上のジョブで構成されます
 jobs:
-  # このワークフローには"build"という単一のジョブが含まれています
   build:
     # ジョブが実行されるランナーの種類
     runs-on: ubuntu-latest
@@ -36,6 +35,18 @@ jobs:
       - name: Build with HonKit
         run: npx honkit build
 
+  deploy:
+    needs: build
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{steps.deployment.outputs.page_url}}
+
+    steps:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v3
 
