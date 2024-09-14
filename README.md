@@ -1,6 +1,6 @@
 # F# for Fun and Profit eBook
 
-この電子書籍は、[fsharpforfunandprofit.com](fsharpforfunandprofit.com) サイトのコンテンツをまとめたものです。
+この電子書籍は、[fsharpforfunandprofit.com](https://fsharpforfunandprofit.com/) サイトのコンテンツをまとめたものです。
 Kindle やスマホを使ってオフラインで読みたいという要望に応えて制作されました。
 最後の一押しをしてくれた Roman Provaznik 氏に感謝します。
 
