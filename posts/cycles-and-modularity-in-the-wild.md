@@ -10,7 +10,7 @@ image: "/assets/img/specflow_svg.png"
 
 (*2013-06-15更新。記事末尾のコメントを参照*)
 
-(*2014-04-12更新。[続編の記事](../posts/roslyn-vs-fsharp-compiler.md)でRoslynにも同様の分析を適用*)
+(*2014-04-12更新。[続編の記事](https://fsharpforfunandprofit.com/posts/roslyn-vs-fsharp-compiler/)でRoslynにも同様の分析を適用*)
 
 (*2015-01-23更新。[Evelina Gabasovaによるこの分析のより明確なバージョン](http://evelinag.com/blog/2014/06-09-comparing-dependency-networks/)を強くお勧めします。
 彼女は本当にこの分野に詳しいので、まず彼女の記事を読むことをお勧めします！*)
