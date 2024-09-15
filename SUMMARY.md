@@ -117,7 +117,7 @@
 * [「循環依存」 シリーズ](series/dependency-cycles.md)    
   * [循環依存は悪](posts/cyclic-dependencies.md)
   * [循環依存を取り除くリファクタリング](posts/removing-cyclic-dependencies.md)
-  * [実世界の循環とモジュール性](posts/cycles-and-modularity-in-the-wild.md)
+  * [実世界の循環依存とモジュール性](posts/cycles-and-modularity-in-the-wild.md)
 * [「C# からの移植」 シリーズ](series/porting-from-csharp.md)    
   * [C# から F# への移植: はじめに](posts/porting-to-csharp-intro.md)
   * [直接移植の始め方](posts/porting-to-csharp-getting-started.md)

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "実世界の循環とモジュール性"
+title: "実世界の循環依存とモジュール性"
 description: "C#とF#で実プロジェクトの指標を比較"
 categories: []
 seriesId: "循環依存"

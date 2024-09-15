@@ -11,4 +11,4 @@ F#に関してよく聞かれる不満の一つに、コードを「依存順」
 
 * [循環依存は悪](../posts/cyclic-dependencies.md)。循環依存：パート1
 * [循環依存を取り除くリファクタリング](../posts/removing-cyclic-dependencies.md)。循環依存：パート2
-* [実世界の循環とモジュール性](../posts/cycles-and-modularity-in-the-wild.md)。C#とF#で実プロジェクトの指標を比較
+* [実世界の循環依存とモジュール性](../posts/cycles-and-modularity-in-the-wild.md)。C#とF#で実プロジェクトの指標を比較

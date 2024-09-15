@@ -436,6 +436,6 @@ module UseCases =
 
 それまでの間、循環依存性についての続編をお読みください：
 
-* [循環依存性は悪](../posts/cyclic-dependencies.md)
-* [循環依存性を取り除くリファクタリング](../posts/removing-cyclic-dependencies.md)
-* [実際の循環依存性とモジュール性](../posts/cycles-and-modularity-in-the-wild.md)（C#とF#のプロジェクトの実際の指標を比較しています）
+* [循環依存は悪](../posts/cyclic-dependencies.md)
+* [循環依存を取り除くリファクタリング](../posts/removing-cyclic-dependencies.md)
+* [実世界の循環依存とモジュール性](../posts/cycles-and-modularity-in-the-wild.md)（C#とF#のプロジェクトの実際の指標を比較しています）
