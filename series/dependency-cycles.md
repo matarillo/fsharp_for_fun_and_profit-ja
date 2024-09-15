@@ -1,14 +1,14 @@
 ---
 layout: series_index
-title: "The 'dependency cycle' series"
-seriesIndexId: "Dependency cycles"
+title: "「循環依存」シリーズ"
+seriesIndexId: "循環依存"
 ---
 
-One of the most common complaints about F# is that it requires code to be in *dependency order*. That is, you cannot use forward references to code that hasn't been seen by the compiler yet.  
+F#に関してよく聞かれる不満の一つに、コードを「依存順」で書く必要があるという点があります。つまり、コンパイラがまだ認識していないコードへの前方参照を使うことができません。
 
-In this series, I discuss dependency cycles, why they are bad, and how to get rid of them.
+このシリーズでは、循環依存について議論し、なぜそれが悪いのか、そしてどのように取り除くかを説明します。
 
 
-* [Cyclic dependencies are evil](../posts/cyclic-dependencies.md). Cyclic dependencies: Part 1.
-* [Refactoring to remove cyclic dependencies](../posts/removing-cyclic-dependencies.md). Cyclic dependencies: Part 2.
-* [Cycles and modularity in the wild](../posts/cycles-and-modularity-in-the-wild.md). Comparing some real-world metrics of C# and F# projects.
+* [循環依存は悪](../posts/cyclic-dependencies.md)。循環依存：パート1
+* [循環依存を取り除くリファクタリング](../posts/removing-cyclic-dependencies.md)。循環依存：パート2
+* [実世界の循環とモジュール性](../posts/cycles-and-modularity-in-the-wild.md)。C#とF#で実プロジェクトの指標を比較

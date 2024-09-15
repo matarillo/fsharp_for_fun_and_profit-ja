@@ -1,128 +1,128 @@
 ---
 layout: post
-title: "Cyclic dependencies are evil"
-description: "Cyclic dependencies: Part 1"
+title: "循環依存は悪"
+description: "循環依存：パート1"
 categories: [Design]
-seriesId: "Dependency cycles"
+seriesId: "循環依存"
 seriesOrder: 1
 image: "/assets/img/Layering3b.png"
 ---
 
-*One of three related posts on [module organization](../posts/recipe-part3.md) and [cyclic dependencies](../posts/removing-cyclic-dependencies.md).*
+*[モジュール構成](../posts/recipe-part3.md)と[循環依存](../posts/removing-cyclic-dependencies.md)に関する3つの関連記事の1つ。*
 
-One of the most common complaints about F# is that it requires code to be in *dependency order*. That is, you cannot use forward references to code that hasn't been seen by the compiler yet.  
+F#についてよく聞かれる不満の一つに、コードを *依存順* に書く必要があるという点があります。つまり、コンパイラがまだ認識していないコードへの前方参照を使うことができません。
 
-Here's a typical example:
+典型的な例をいくつか紹介します：
 
-> "The order of .fs files makes it hard to compile... My F# application is just over 50 lines of code, but it's already more work than it's worth to compile even the tiniest non-trivial application. Is there a way to make the F# compiler more like the C# compiler, so that it's not so tightly coupled to the order that files are passed to the compiler?" [[fpish.net]](http://fpish.net/topic/None/57578) 
+> 「.fsファイルの順序がコンパイルを難しくしています...私のF#アプリケーションはたった50行程度のコードですが、ごく小さな非自明なアプリケーションをコンパイルするのにすでに労力がかかりすぎています。F#コンパイラをC#コンパイラのようにして、ファイルがコンパイラに渡される順序に密接に結びついていないようにする方法はありませんか？」 [[fpish.net]](https://fpish.net/topic/None/57578) 
 
-and another:
+別の例：
 
-> "After trying to build a slightly above-toy-size project in F#, I came to the conclusion that with current tools it would be quite difficult to maintain a project of even moderate complexity." [[www.ikriv.com]](http://www.ikriv.com/blog/?p=28) 
+> 「おもちゃの域をわずかに超えるプロジェクトをF#で構築しようとした後、現在のツールでは中程度の複雑さのプロジェクトでさえ維持するのがかなり難しいだろうという結論に達しました。」 [[www.ikriv.com]](https://ikriv.com/blog/?p=28) 
 
-and another:
+さらに別の例：
 
-> "F# compiler [is] too linear. The F# compiler should handle all type resolution matters automatically, independent of declaration order" [[www.sturmnet.org]](http://www.sturmnet.org/blog/2008/05/20/f-compiler-considered-too-linear) 
+> 「F#コンパイラは線形すぎます。F#コンパイラは、宣言の順序に関係なく、すべての型解決を自動的に処理すべきです。」 [[www.sturmnet.org]](https://www.oliversturm.com/blog/2008/05/20/f-compiler-considered-too-linear/) 
 
-and one more:
+もう一つ：
 
-> "The topic of annoying (and IMHO unnecessary) limitations of the F# project system was already discussed on this forum. I am talking about the way compilation order is controlled" [[fpish.net]](http://fpish.net/topic/Some/0/59219) 
+> 「F#プロジェクトシステムの煩わしい（そして個人的には不必要な）制限についてはすでにこのフォーラムで議論されています。コンパイル順序の制御方法について話しています。」 [[fpish.net]](https://fpish.net/topic/Some/0/59219) 
 
-Well, these complaints are unfounded. You most certainly can build and maintain large projects using F#. The F# compiler and the core library are two obvious examples.
+しかし、これらの不満には根拠がありません。F#を使って大規模なプロジェクトを構築・維持することは、十分に可能です。F#のコンパイラとコアライブラリがその好例です。
 
-In fact, most of these problems boil down to "why can't F# be like C#".  If you are coming from C#, you are used to having the compiler connect everything automatically. Having to deal with dependency relationships explicitly is very annoying -- old-fashioned and regressive, even.  
+これらの問題のほとんどは、結局、「F#はなぜC#のようにならないのか」という疑問に帰結します。C#から来た人は、コンパイラがすべてを自動的に接続してくれることに慣れています。依存関係を明示的に扱う必要があることは非常に面倒です。古臭く、退歩的にさえ感じられます。
 
-The aim of this post is to explain (a) why dependency management is important, and (b) some techniques that can help you deal with it.
+この投稿の目的は、(a) 依存関係の管理がなぜ重要なのか、そして(b) 依存関係を管理するためのいくつかのテクニックについて説明することです。
 
-## Dependencies are bad things...
+## 依存関係は厄介なもので...
 
-We all know that dependencies are the bane of our existence. Assembly dependencies, configuration dependencies, database dependencies, network dependencies -- there's always something.
+依存関係は、私たちの日常における悩みの種であることは皆知っています。アセンブリの依存関係、設定の依存関係、データベースの依存関係、ネットワークの依存関係など、常に何かが存在します。
 
-So we developers, as a profession, tend to put a lot of effort into making dependencies more manageable. This goal manifests itself in many disparate ways: the [interface segregation principle](http://en.wikipedia.org/wiki/Interface_segregation_principle), inversion of control and [dependency injection](http://en.wikipedia.org/wiki/Dependency_inversion_principle); package management with NuGet; configuration management with puppet/chef; and so on. In some sense all these approaches are trying to reduce the number of things we have to be aware of, and the number of things that can break.
+そのため、私たち開発者は職業として、依存関係をより管理しやすくするために多くの労力を費やす傾向があります。この目標は様々な形で現れます：[インターフェース分離の原則](https://en.wikipedia.org/wiki/Interface_segregation_principle)、[依存性逆転の原則](https://ja.wikipedia.org/wiki/%E4%BE%9D%E5%AD%98%E6%80%A7%E9%80%86%E8%BB%A2%E3%81%AE%E5%8E%9F%E5%89%87)と依存性の注入、NuGetによるパッケージ管理、puppet/chefによる設定管理などです。ある意味、これらのアプローチはすべて、意識しなければならないものの数と、壊れる可能性のあるものの数を減らそうとしています。
 
-This is not a new problem, of course. A large part of the classic book "[Large-Scale C++ Software Design](http://www.amazon.com/Large-Scale-Software-Design-John-Lakos/dp/0201633620)" is devoted to dependency management. As John Lakos, the author, put it:
+もちろん、これは新しい問題ではありません。古典的な書籍『[大規模C++ソフトウェアデザイン](https://www.amazon.co.jp/dp/4894711249)』の大部分は依存関係の管理に充てられています。著者のJohn Lakosが言うように：
 
-> "The maintenance cost of a subsystem can be reduced significantly by avoiding unnecessary dependencies among components"
+> 「コンポーネント間の不必要な依存関係を避けることで、サブシステムのメンテナンスコストを大幅に削減できます」
 
-The key word here is "unnecessary". What is an "unnecessary" dependency?  It depends, of course. But one particular kind of dependency is almost always unnecessary -- a **circular dependency**.
+ここでのキーワードは「不必要な」です。何が「不必要な」依存関係なのでしょうか？もちろん、状況によります。しかし、ある特定の種類の依存関係はほぼ常に不必要です - それが**循環依存**です。
 
-## ... and circular dependencies are evil
+## ...そして循環依存は悪
 
-To understand why circular dependencies are evil, let's revisit what we mean by a "component".
+循環依存がなぜ悪なのかを理解するために、「コンポーネント」の意味を再確認してみましょう。
 
-Components are Good Things. Whether you think of them as packages, assemblies, modules, classes or whatever, their primary purpose is to break up large amounts of code into smaller and more manageable pieces.  In other words, we are applying a divide and conquer approach to the problem of software development.
+コンポーネントは良いものです。パッケージ、アセンブリ、モジュール、クラスなど、何と呼ぶかは別として、その主な目的は大量のコードをより小さく管理しやすい部分に分割することです。つまり、ソフトウェア開発の問題に分割統治アプローチを適用しているのです。
 
-But in order to be useful for maintenance, deployment, or whatever, a component shouldn't just be a random collection of stuff. It should (of course) group only *related code* together. 
+しかし、メンテナンス、デプロイメント、その他の目的で有用であるためには、コンポーネントは単なるランダムな要素の集まりであってはいけません。（もちろん）関連するコードのみをグループ化すべきです。
 
-In an ideal world, each component would thus be completely independent of any others. But generally (of course), some dependencies are always necessary.  
+理想的な世界では、各コンポーネントは他のコンポーネントから完全に独立しているはずです。しかし一般的に（当然ながら）、いくつかの依存は常に必要です。
 
-But, now that we have components with *dependencies*, we need a way to manage these dependencies. One standard way to do this is with the "layering" principle. We can have "high level" layers and "low level" layers, and the critical rule is: *each layer should depend only on layers below it, and never on a layer above it*.
+しかし、依存関係を持つコンポーネントができたので、これらの依存関係を管理する方法が必要になります。標準的な方法の一つが「レイヤリング」の原則です。「高レベル」レイヤーと「低レベル」レイヤーを持つことができ、重要なルールは次のとおりです：*各レイヤーはその下のレイヤーにのみ依存し、上のレイヤーには決して依存しない*。
 
-You are very familiar with this, I'm sure. Here's a diagram of some simple layers:
+これには馴染みがあるはずです。以下は単純なレイヤーの図です：
 
 ![](../assets/img/Layering1.png)
 
-But now what happens when you introduce a dependency from the bottom layer to the top layer, like this?
+しかし、最下層から最上層への依存を導入するとどうなるでしょうか？
 
 ![](../assets/img/Layering2.png)
 
-By having a dependency from the bottom to the top, we have introduced the evil "circular dependency". 
+最下層から最上層への依存を導入することで、悪の「循環依存」を生み出してしまいました。
 
-Why is it evil? Because *any* alternative layering method is now valid! 
+なぜ悪なのでしょうか？それは、*どんな*代替のレイヤリング方法も有効になってしまうからです！
 
-For example, we could put the bottom layer on top instead, like this:
+例えば、最下層を最上層に置くこともできます：
 
 ![](../assets/img/Layering3.png)
 
-From a logical point of view, this alternative layering is just the same as the original layering. 
+論理的な観点から見れば、この代替レイヤリングは元のレイヤリングと同じです。
 
-Or how about we put the middle layer on top?
+では、中間層を最上層に置くのはどうでしょうか？
 
 ![](../assets/img/Layering3b.png)
 
-Something has gone badly wrong! It's clear that we've really messed things up. 
+何かがひどく間違っています！明らかに、物事を台無しにしてしまいました。
 
-In fact, as soon as you have any kind of circular dependency between components, the *only* thing you can do is to put them *all* into the *same* layer.  
+実際、コンポーネント間に何らかの循環依存がある場合、*できること*は*すべて*のコンポーネントを*同じ*レイヤーに置くことだけです。
 
 ![](../assets/img/Layering4.png)
 
-In other words, the circular dependency has completely destroyed our "divide and conquer" approach, the whole reason for having components in the first place.  Rather than having three components, we now have just one "super component", which is three times bigger and more complicated than it needed to be. 
+言い換えれば、循環依存は「分割統治」アプローチを完全に破壊し、そもそもコンポーネントを持つ理由を台無しにしてしまいます。3つのコンポーネントを持つ代わりに、今や1つの「スーパーコンポーネント」を持つことになり、それは必要以上に3倍大きく複雑になっています。
 
 ![](../assets/img/Layering5.png)
 
-And that's why circular dependencies are evil.
+これが循環依存が悪である理由です。
 
-*For more on this subject, see this [StackOverflow answer](http://stackoverflow.com/a/1948636/1136133) and [this article about layering](http://codebetter.com/patricksmacchia/2008/02/10/layering-the-level-metric-and-the-discourse-of-method/) by Patrick Smacchia (of NDepend).*
+*このトピックの詳細については、[StackOverflowの回答](https://stackoverflow.com/questions/1897537/why-are-circular-references-considered-harmful/1948636#1948636)と[Patrick Smacchia（NDepend）によるレイヤリングに関する記事](https://web.archive.org/web/20200702163321/http://codebetter.com/patricksmacchia/2008/02/10/layering-the-level-metric-and-the-discourse-of-method/)を参照してください。*
 
-## Circular dependencies in the real world
+## 実世界における循環依存
 
-Let's start by looking at circular dependencies between .NET assemblies. Here are some war stories from Brian McNamara (my emphasis):
+まず、.NETアセンブリ間の循環依存を見てみましょう。Brian McNamaraの経験談をいくつか紹介します（強調は筆者による）：
 
-> The .Net Framework 2.0 has this problem in spades; System.dll, System.Configuration.dll, and System.Xml.dll are all hopelessly entangled with one another. This manifests in a variety of ugly ways. For example, I found a simple [bug] in the VS debugger that effectively crashes the debuggee when hitting a breakpoint while trying to loads symbols, caused by the circular dependencies among these assemblies. Another story: a friend of mine was a developer on the initial versions of Silverlight and was tasked with trying to trim down these three assemblies, and the first arduous task was trying to untangle the circular dependencies. **"Mutual recursion for free" is very convenient on a small scale, but it will destroy you on a large scale.**
+> .Net Framework 2.0 ではこの問題が特に顕著です。System.dll、System.Configuration.dll、System.Xml.dllは互いに絡み合っており、非常に厄介です。これは様々な問題を引き起こします。例えば、デバッグ時にブレークポイントに到達するとデバッグ対象がクラッシュしてしまうという Visual Studio デバッガーの[バグ]を発見したのですが、原因はこのアセンブリ間の循環依存でした。もう一つの話として、知り合いの開発者が Silverlight の初期バージョンでこの 3 つのアセンブリを軽量化するというタスクを担当したのですが、最初にしなければならなかったのは、この循環依存を解きほぐすという骨の折れる作業でした。**「相互再帰できる」ことは、小さな規模では便利でも、大きな規模になると破滅をもたらします。**
 
-> VS2008 shipped a week later than planned, because VS2008 had a dependency on SQL server, and SQL server had a dependency on VS, and whoops! in the end they couldn't produce a full product version where everything had the same build number, and had to scramble to make it work.  [[fpish.net]](http://fpish.net/topic/None/59219#comment-70220)
+> VS2008 は当初の予定より 1 週間遅れて出荷されました。というのも、VS2008 は SQL Server に依存しており、SQL Server は逆に VS に依存していたからです。そしてなんと、最終的にすべてのビルド番号を揃えた完全な製品版をリリースすることができず、なんとか機能させるために慌てて対応しなければなりませんでした。 [[fpish.net]](https://fpish.net/topic/None/59219#comment-70220)
 
-So there is plenty of evidence that circular dependencies between assemblies are bad.  In fact, circular dependencies between assemblies are considered bad enough that Visual Studio won't even let you create them!
+このように、アセンブリ間の循環依存が悪いという証拠は十分にあります。実際、Visual Studioがアセンブリ間の循環依存を許可していないのは、それがとても悪いことだからです！
 
-You might say, "Yes, I can understand why circular dependencies are bad for assemblies, but why bother for code inside an assembly?"
+「もちろん、アセンブリの循環依存が悪いのはわかります。でも、アセンブリ内のコードについてなぜ気にする必要があるのでしょうか？」と思うかもしれません。
 
-Well, for exactly the same reasons!  Layering allows better partitioning, easier testing and cleaner refactoring.  You can see what I mean in a [related post on dependency cycles "in the wild"](../posts/cycles-and-modularity-in-the-wild.md) where I compare C# projects and F# projects. The dependencies in the F# projects are a lot less spaghetti-like.
+それは、まさに同じ理由からです！レイヤリングは、より良い分割、容易なテスト、クリーンなリファクタリングを可能にします。[実世界の循環依存を説明する関連記事](../posts/cycles-and-modularity-in-the-wild.md)でC#プロジェクトとF#プロジェクトを比較しているのを見れば、私が言いたいことがわかると思います。F# プロジェクトの依存関係は、はるかにスパゲッティコード的ではありません。
 
-Another quote from Brian's (excellent) comment:
+Brianの（優れた）コメントからもう一つ引用します：
 
-> I'm evangelizing an unpopular position here, but my experience is that everything in the world is better when you're forced to consider and manage "dependency order among software components" at every level of the system. The specific UI/tooling for F# may not yet be ideal, but I think the principle is right. This is a burden you want. It *is* more work. "Unit testing" is also more work, but we've gotten to the point where the consensus is that work is "worth it" in that it saves you time in the long run. I feel the same way about 'ordering'. There are dependencies among the classes and methods in your system. You ignore those dependencies at your own peril. A system that forces you to consider this dependency graph (roughly, the topological sort of components) is likely to steer you into developing software with cleaner architectures, better system layering, and fewer needless dependencies.
+> ここで私はあまり人気のない立場を主張しますが、私の経験上、システムのあらゆるレベルで「ソフトウェアコンポーネントの依存順」を検討し、管理することを強制されると、世の中のすべてがより良くなると思います。F#の特定のUI/ツールはまだ理想的ではないかもしれませんが、原則は正しいと思います。これは歓迎すべき負担なのです。確かに多くの作業が必要です。「ユニットテスト」も多くの作業を必要としますが、長期的には時間を節約できるという点で、その作業には「価値がある」というのが一般的な認識になっています。私は「順序付け」についても同じように感じています。システム内のクラスやメソッドの間には依存関係があります。そうした依存関係を無視すると、自分で自分の首を絞めることになります。この依存関係グラフ（大まかに言えば、コンポーネントのトポロジカルソート）を考慮するようにシステムが強制すると、よりクリーンなアーキテクチャ、より良いシステムレイヤリング、そして不必要な依存関係が少ないソフトウェアを開発する方向に導かれるでしょう。
 
-## Detecting and removing circular dependencies 
+## 循環依存の検出と除去
 
-Ok, we're agreed that circular dependencies are bad. So how do we detect them and then get rid of them?
+さて、循環依存が悪いことに同意したとして、それらをどのように検出し、取り除けばよいのでしょうか？
 
-Let's start with detection. There are a number of tools to help you detect circular dependencies in your code.
+まず検出から始めましょう。コード内の循環依存を検出するのに役立つツールがいくつかあります。
 
-* If you're using C#, you will need a tool like the invaluable [NDepend](http://www.ndepend.com/features.aspx#DependencyCycle).
-* And if you are using Java, there are equivalent tools such as [JDepend](http://www.clarkware.com/software/JDepend.html#cycles).
-* But if you are using F#, you're in luck! You get circular dependency detection for free!
+* C#を使用している場合は、極めて便利な[NDepend](https://www.ndepend.com/features/dependency-cycles#DependencyCycle)のようなツールが必要になります。
+* Javaを使用している場合は、[JDepend](https://github.com/clarkware/jdepend)などの同等のツールがあります。
+* しかし、F#を使用している場合は幸運です！循環依存の検出が無料で付いてきます！
 
-"Very funny," you might say, "I already know about F#'s circular dependency prohibition -- it's driving me nuts! What can I do to fix the problem and make the compiler happy?"
+「冗談でしょう」と思うかもしれません。「F#の循環依存の禁止についてはすでに知っています - それが私を悩ませているのです！問題を解決してコンパイラを満足させるには、どうすればよいのでしょうか？」
 
-For that, you'll need to read the [next post](../posts/removing-cyclic-dependencies.md)...
+その答えは、[次の投稿](../posts/removing-cyclic-dependencies.md)で説明します...
 

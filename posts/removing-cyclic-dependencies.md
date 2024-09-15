@@ -1,61 +1,61 @@
 ---
 layout: post
-title: "Refactoring to remove cyclic dependencies"
-description: "Cyclic dependencies: Part 2"
+title: "循環依存を取り除くリファクタリング"
+description: "循環依存：パート2"
 categories: [Design]
-seriesId: "Dependency cycles"
+seriesId: "循環依存"
 seriesOrder: 2
 
 ---
 
-In the previous post, we looked at the concept of dependency cycles, and why they are bad.
+前回の記事では、循環依存の概念とその問題点について説明しました。
 
-In this post, we'll look at some techniques for eliminating them from your code.  Having to do this may seem annoying at first, but really, you'll come to appreciate that in the long run, "it's not a bug, it's a feature!"
+今回は、コードから循環依存を取り除くためのテクニックを紹介します。最初は面倒に感じるかもしれませんが、長期的に見れば「バグではなく機能だ！」と評価するようになるでしょう。
 
-## Classifying some common cyclic dependencies
+## 一般的な循環依存の分類
 
-Let's classify the kinds of dependencies you're likely to run into. I'll look at three common situations, and for each one, demonstrate some techniques for dealing with them.
+よく遭遇する依存関係のパターンを分類してみましょう。3つの一般的な状況を取り上げ、それぞれの対処法を示します。
 
-First, there is what I will call a *"method dependency"*. 
+まず、「メソッド依存」と呼ぶものがあります。
 
-* Type A stores a value of type B in a property
-* Type B references type A in a method signature, but doesn't store a value of type A
+* 型Aはプロパティに型Bの値を保存する
+* 型Bはメソッドのシグネチャで型Aを参照するが、型Aの値は保存しない
 
-Second, there is what I will call a *"structural dependency"*. 
+次に、「構造的依存」と呼ぶものがあります。
 
-* Type A stores a value of type B in a property
-* Type B stores a value of type A in a property
+* 型Aはプロパティに型Bの値を保存する
+* 型Bはプロパティに型Aの値を保存する
 
-Finally, there is what I will call an *"inheritance dependency"*. 
+最後に、「継承依存」と呼ぶものがあります。
 
-* Type A stores a value of type B in a property
-* Type B inherits from type A
+* 型Aはプロパティに型Bの値を保存する
+* 型Bは型Aを継承する
 
-There are, of course, other variants. But if you know how to deal with these, you can use the same techniques to deal with the others as well.
+もちろん他のバリエーションもありますが、これらの対処法を知っていれば、他のケースにも応用できるでしょう。
 
-## Three tips on dealing with dependencies in F# ##
+## F#での依存関係への対処に関する3つのヒント
 
-Before we get started, here are three useful tips which apply generally when trying to untangle dependencies.
+依存関係の解消に取り組む前に、一般的に適用できる3つの有用なヒントを紹介します。
 
-**Tip 1: Treat F# like F#**.  
+**ヒント1：F#らしく扱う**
 
-Recognize that F# is not C#. If you are willing to work with F# using its native idioms, then it is normally very straightforward to avoid circular dependencies by using a different style of [code organization](../posts/recipe-part3.md). 
+F#はC#ではありません。F#固有の表現方法を使う心構えがあれば、[コード構成](../posts/recipe-part3.md)の工夫により、循環依存を避けるのは通常とても簡単です。
 
-**Tip 2: Separate types from behavior**. 
+**ヒント2：型と振る舞いを分離する**
 
-Since most types in F# are immutable, it is acceptable for them to be "exposed" and ["anemic"](http://www.martinfowler.com/bliki/AnemicDomainModel.html), even. So in a functional design it is common to separate the types themselves from the functions that act on them. This approach will often help to clean up dependencies, as we'll see below.
+F#の型はほとんどが不変なので、「露出」していて「[貧血](https://bliki-ja.github.io/AnemicDomainModel)」であっても問題ありません。そのため、関数型設計では型自体と、それらに作用する関数を分離するのが一般的です。この手法は後述するように、依存関係の整理に役立ちます。
 
-**Tip 3: Parameterize, parameterize, parameterize**. 
+**ヒント3：パラメータ化、パラメータ化、パラメータ化**
 
-Dependencies can only happen when a specific type is referenced. If you use generic types, you cannot have a dependency! 
+依存関係は特定の型が参照されたときにのみ発生します。ジェネリック型を使えば、依存関係は生じません！
 
-And rather than hard coding behavior for a type, why not parameterize it by passing in functions instead? The `List` module is a great example of this approach, and I'll show some examples below as well. 
+また、型に固有の振る舞いをハードコードする代わりに、関数を渡すことでパラメータ化できないでしょうか？`List`モジュールはこのアプローチの良い例で、以下でも例を示します。
 
-## Dealing with a "method dependency"
+## 「メソッド依存」への対処
 
-We'll start with the simplest kind of dependency -- what I will call a "method dependency".
+最も単純な種類の依存関係から始めましょう。これを「メソッド依存」と呼びます。
 
-Here is an example.
+以下に例を示します。
 
 ```fsharp
 module MethodDependencyExample = 
@@ -72,56 +72,56 @@ module MethodDependencyExample =
         member this.OnNameChanged(c:Customer) =     
             printfn "Customer name changed to '%s' " c.Name
 
-    // test
+    // テスト
     let observer = new CustomerObserver()
     let customer = Customer("Alice",observer)
     customer.Name <- "Bob"
 ```
 
-The `Customer` class has a property/field of type `CustomerObserver`, but the `CustomerObserver` class has a method which takes a `Customer` as a parameter, causing a mutual dependency.
+`Customer`クラスは`CustomerObserver`型のプロパティ/フィールドを持ち、`CustomerObserver`クラスはパラメータとして`Customer`を取るメソッドを持っています。これにより相互依存が生じています。
 
-### Using the "and" keyword
+### "and"キーワードの使用
 
-One straightforward way to get the types to compile is to use the `and` keyword, as I did above.
+コンパイルを可能にする直接的な方法の1つは、上記のように`and`キーワードを使うことです。
 
-The `and` keyword is designed for just this situation -- it allows you to have two or more types that refer to each other.  
+`and`キーワードはまさにこのような状況のために設計されており、互いに参照し合う2つ以上の型を定義できます。
 
-To use it, just replace the second `type` keyword with `and`. Note that using `and type`, as shown below, is incorrect. Just the single `and` is all you need.
+使用するには、2番目の`type`キーワードを`and`に置き換えます。以下のように`and type`を使うのは間違いです。単に`and`だけで十分です。
 
 ```fsharp
 type Something 
-and type SomethingElse  // wrong
+and type SomethingElse  // 間違い
 
 type Something 
-and SomethingElse       // correct
+and SomethingElse       // 正しい
 ```
 
-But `and` has a number of problems, and using it is generally discouraged except as a last resort.
+しかし、`and`には多くの問題があり、最後の手段としてのみ使用することが一般的に推奨されます。
 
-First, it only works for types declared in the same module. You can't use it across module boundaries.
+まず、同じモジュール内で宣言された型にしか使えません。モジュールをまたいで使うことはできません。
 
-Second, it should really only be used for tiny types. If you have 500 lines of code between the `type` and the `and`, then you are doing something very wrong.
+次に、本当に小さな型にのみ使うべきです。`type`と`and`の間に500行のコードがあるなら、何か非常に間違ったことをしています。
 
 ```fsharp
 type Something
-   // 500 lines of code
+   // 500行のコード
 and SomethingElse
-   // 500 more lines of code
+   // さらに500行のコード
 ```
 
-The code snippet shown above is an example of how *not* to do it.
+上記のコードスニペットは、やってはいけない例です。
 
-In other words, don't treat `and` as a panacea. Overusing it is a symptom that you have not refactored your code properly. 
+つまり、`and`を万能薬として扱わないでください。過度に使用することは、コードを適切にリファクタリングしていない兆候です。
 
-### Introducing parameterization
+### パラメータ化の導入
 
-So, instead of using `and`, let's see what we can do using parameterization, as mentioned in the third tip.
+では、先ほど言及した3つ目のヒントであるパラメータ化を使って、`and`を使わずに何ができるか見てみましょう。
 
-If we think about the example code, do we *really* need a special `CustomerObserver` class? Why have we restricted it to `Customer` only?  Can't we have a more generic observer class? 
+サンプルコードを考えてみると、本当に特別な`CustomerObserver`クラスが必要でしょうか？なぜ`Customer`だけに限定しているのでしょう？もっとジェネリックなオブザーバークラスを作れないでしょうか？
 
-So why don't we create a `INameObserver<'T>` interface instead, with the same `OnNameChanged` method, but the method (and interface) parameterized to accept any class?
+そこで、同じ`OnNameChanged`メソッドを持つ`INameObserver<'T>`インターフェイスを作成しませんか？ただし、メソッド（とインターフェイス）はどんなクラスでも受け入れるようにパラメータ化します。
 
-Here's what I mean:
+以下がその例です：
 
 ```fsharp
 module MethodDependency_ParameterizedInterface = 
@@ -142,26 +142,26 @@ module MethodDependency_ParameterizedInterface =
             member this.OnNameChanged c =     
                 printfn "Customer name changed to '%s' " c.Name
 
-    // test
+    // テスト
     let observer = new CustomerObserver()
     let customer = Customer("Alice", observer)
     customer.Name <- "Bob"
 ```
 
-In this revised version, the dependency has been broken! No `and` is needed at all.  In fact, you could even put the types in different projects or assemblies now!
+この改訂版では、依存関係が解消されました！`and`はまったく必要ありません。実際、これらの型を別のプロジェクトやアセンブリに置くこともできるようになりました！
 
-The code is almost identical to the first version, except that the `Customer` constructor accepts a interface, and `CustomerObserver` now implements the same interface.  In fact, I would argue that introducing the interface has actually made the code better than before. 
+コードは最初のバージョンとほとんど同じですが、`Customer`コンストラクタがインターフェイスを受け取り、`CustomerObserver`が同じインターフェイスを実装するようになっています。実際、インターフェイスの導入により、コードは以前よりも良くなったと言えるでしょう。
 
-But we don't have to stop there.  Now that we have an interface, do we really need to create a whole class just to implement it?  F# has a great feature called [object expressions](http://msdn.microsoft.com/en-us/library/dd233237.aspx) which allows you to instantiate an interface directly.
+しかし、ここで止まる必要はありません。インターフェイスができたので、本当にそれを実装するためだけのクラス全体を作る必要があるでしょうか？F#には[オブジェクト式](https://learn.microsoft.com/ja-jp/dotnet/fsharp/language-reference/object-expressions)という素晴らしい機能があり、インターフェイスを直接インスタンス化できます。
 
-Here is the same code again, but this time the `CustomerObserver` class has been eliminated completely and the `INameObserver` created directly.
+以下は同じコードですが、今回は`CustomerObserver`クラスが完全に削除され、`INameObserver`が直接作成されています。
 
 ```fsharp
 module MethodDependency_ParameterizedInterface = 
 
-    // code as above
+    // 上記と同じコード
     
-    // test
+    // テスト
     let observer2 = {
         new INameObserver<Customer> with 
             member this.OnNameChanged c =     
@@ -171,7 +171,7 @@ module MethodDependency_ParameterizedInterface =
     customer2.Name <- "Bob"
 ```
 
-This technique will obviously work for more complex interfaces as well, such as that shown below, where there are two methods:
+このテクニックは、以下のように2つのメソッドがある、より複雑なインターフェイスでも明らかに機能します：
 
 ```fsharp
 module MethodDependency_ParameterizedInterface2 = 
@@ -197,7 +197,7 @@ module MethodDependency_ParameterizedInterface2 =
                 email <- value
                 observer.OnEmailChanged(this)
 
-    // test
+    // テスト
     let observer2 = {
         new ICustomerObserver<Customer> with 
             member this.OnNameChanged c =     
@@ -210,9 +210,9 @@ module MethodDependency_ParameterizedInterface2 =
     customer2.Email <- "y@example.com"
 ```
 
-### Using functions instead of parameterization
+### パラメータ化の代わりに関数を使う
 
-In many cases, we can go even further and eliminate the interface class as well. Why not just pass in a simple function that is called when the name changes, like this:
+多くの場合、インターフェイスクラスも完全に排除できます。名前が変更されたときに呼び出される単純な関数を渡すだけでよいのではないでしょうか？以下のようにします：
 
 ```fsharp
 module MethodDependency_ParameterizedClasses_HOF  = 
@@ -227,28 +227,28 @@ module MethodDependency_ParameterizedClasses_HOF  =
                 name <- value
                 observer this
 
-    // test
+    // テスト
     let observer(c:Customer) = 
         printfn "Customer name changed to '%s' " c.Name
     let customer = Customer("Alice", observer)
     customer.Name <- "Bob"
 ```
 
-I think you'll agree that this snippet is "lower ceremony" than either of the previous versions.  The observer is now defined inline as needed, very simply:
+この方法は、以前のバージョンよりも「儀式的」でないと同意いただけるでしょう。オブザーバーは必要に応じて非常に簡単にインラインで定義されています：
 
 ```fsharp
 let observer(c:Customer) = 
     printfn "Customer name changed to '%s' " c.Name
 ```
 
-True, it only works when the interface being replaced is simple, but even so, this approach can be used more often than you might think.
+確かに、置き換えられるインターフェイスが単純な場合にのみ機能しますが、それでも思っているよりも頻繁に使用できるアプローチです。
 
 
-## A more functional approach: separating types from functions
+## より関数型のアプローチ：型と関数の分離
 
-As I mentioned above, a more "functional design" would be to separate the types themselves from the functions that act on those types. Let's see how this might be done in this case.
+先ほど述べたように、より「関数型の設計」では、型自体をそれらに作用する関数から分離します。この場合、どのように行うか見てみましょう。
 
-Here is a first pass:
+以下は最初の試みです：
 
 ```fsharp
 module MethodDependencyExample_SeparateTypes = 
@@ -264,7 +264,7 @@ module MethodDependencyExample_SeparateTypes =
         let changeName customer newName = 
             let newCustomer = {customer with name=newName}
             customer.observer newCustomer
-            newCustomer     // return the new customer
+            newCustomer     // 新しいcustomerを返す
 
     module Observer = 
         open DomainTypes
@@ -272,7 +272,7 @@ module MethodDependencyExample_SeparateTypes =
         let printNameChanged customer = 
             printfn "Customer name changed to '%s' " customer.name
 
-    // test
+    // テスト
     module Test = 
         open DomainTypes
 
@@ -281,11 +281,11 @@ module MethodDependencyExample_SeparateTypes =
         Customer.changeName customer "Bob"
 ```
 
-In the example above, we now have *three* modules: one for the types, and one each for the functions. Obviously, in a real application, there will be a lot more Customer related functions in the `Customer` module than just this one!
+上の例では、3つのモジュールがあります：型用のモジュール、および関数用のモジュールが2つです。実際のアプリケーションでは、`Customer`モジュールにはこの1つだけでなく、もっと多くのCustomer関連の関数があるでしょう！
 
-In this code, though, we still have the mutual dependency between `Customer` and `CustomerObserver`. The type definitions are more compact, so it is not such a problem, but even so, can we eliminate the `and`?
+しかし、このコードでも`Customer`と`CustomerObserver`の間に相互依存が残っています。型定義がより簡潔になったので大きな問題ではありませんが、それでも`and`を排除できるでしょうか？
 
-Yes, of course. We can use the same trick as in the previous approach, eliminating the observer type and embedding a function directly in the `Customer` data structure, like this:
+はい、もちろんです。前のアプローチと同じトリックを使って、オブザーバー型を排除し、`Customer`データ構造に関数を直接埋め込むことができます：
 
 ```fsharp
 module MethodDependency_SeparateTypes2 = 
@@ -299,7 +299,7 @@ module MethodDependency_SeparateTypes2 =
         let changeName customer newName = 
             let newCustomer = {customer with name=newName}
             customer.observer newCustomer
-            newCustomer     // return the new customer
+            newCustomer     // 新しいcustomerを返す
 
     module Observer = 
         open DomainTypes
@@ -315,20 +315,20 @@ module MethodDependency_SeparateTypes2 =
         Customer.changeName customer "Bob"
 ```
 
-### Making types dumber
+### 型をよりシンプルに
 
-The `Customer` type still has some behavior embedded in it. In many cases, there is no need for this.  A more functional approach would be to pass a function only when you need it.
+`Customer`型にはまだ一部の振る舞いが埋め込まれています。多くの場合、これは不要です。より関数型のアプローチでは、必要なときにのみ関数を渡します。
 
-So let's remove the `observer` from the customer type, and pass it as an extra parameter to the `changeName` function, like this:
+そこで、`observer`を顧客型から取り除き、`changeName`関数に追加のパラメータとして渡してみましょう：
 
 ```fsharp
 let changeName observer customer newName = 
     let newCustomer = {customer with name=newName}
-    observer newCustomer    // call the observer with the new customer
-    newCustomer             // return the new customer
+    observer newCustomer    // 新しい顧客でオブザーバーを呼び出す
+    newCustomer             // 新しい顧客を返す
 ```
 
-Here's the complete code:
+以下が完全なコードです：
 
 ```fsharp
 module MethodDependency_SeparateTypes3 = 
@@ -341,8 +341,8 @@ module MethodDependency_SeparateTypes3 =
 
         let changeName observer customer newName = 
             let newCustomer = {customer with name=newName}
-            observer newCustomer    // call the observer with the new customer
-            newCustomer             // return the new customer
+            observer newCustomer    // 新しい顧客でオブザーバーを呼び出す
+            newCustomer             // 新しい顧客を返す
 
     module Observer = 
         open DomainTypes
@@ -358,85 +358,85 @@ module MethodDependency_SeparateTypes3 =
         Customer.changeName observer customer "Bob"
 ```
 
-You might be thinking that I have made things more complicated now -- I have to specify the `observer` function everywhere I call `changeName` in my code. Surely this is worse than before? At least in the OO version, the observer was part of the customer object and I didn't have to keep passing it in.
+これで事態をより複雑にしてしまったと思われるかもしれません。コードのあちこちで`changeName`を呼び出すたびに`observer`関数を指定しなければならなくなりました。確かに、以前のOOバージョンの方が良かったのではないでしょうか？少なくともそこでは、オブザーバーが顧客オブジェクトの一部だったので、毎回渡す必要がありませんでした。
 
-Ah, but, you're forgetting the magic of [partial application](../posts/partial-application.md)!  You can set up a function with the observer "baked in", and then use *that* function everywhere, without needing to pass in an observer every time you use it. Clever!
+しかし、[部分適用](../posts/partial-application.md)の魔法を忘れていますね！オブザーバーを「焼き付けた」関数を設定し、それを使用できます。そうすれば、使用するたびにオブザーバーを渡す必要はありません。賢いですね！
 
 ```fsharp
 module MethodDependency_SeparateTypes3 = 
 
-    // code as above
+    // 上記と同じコード
     
     module TestWithPartialApplication = 
         open DomainTypes
 
         let observer = Observer.printNameChanged 
 
-        // set up this partial application only once (at the top of your module, say)
+        // この部分適用を一度だけ設定します（例えば、モジュールの先頭で）
         let changeName = Customer.changeName observer 
 
-        // then call changeName without needing an observer
+        // そして、オブザーバーを必要とせずにchangeNameを呼び出します
         let customer = {name="Alice"}
         changeName customer "Bob"
 ```
 
-### But wait... there's more!
+### でも、まだあります！
 
-Let's look at the `changeName` function again:
+`changeName`関数をもう一度見てみましょう：
 
 ```fsharp
 let changeName observer customer newName = 
     let newCustomer = {customer with name=newName}
-    observer newCustomer    // call the observer with the new customer
-    newCustomer             // return the new customer
+    observer newCustomer    // 新しい顧客でオブザーバーを呼び出す
+    newCustomer             // 新しい顧客を返す
 ```
 
-It has the following steps:
+これには以下のステップがあります：
 
-1. do something to make a result value
-1. call the observer with the result value
-1. return the result value
+1. 何かを行って結果の値を作成する
+2. オブザーバーを結果の値で呼び出す
+3. 結果の値を返す
 
-This is completely generic logic -- it has nothing to do with customers at all. So we can rewrite it as a completely generic library function. Our new function will allow *any* observer function to "hook into" into the result of *any* other function, so let's call it `hook` for now. 
+これは完全にジェネリックなロジックで、顧客とは何の関係もありません。そこで、これを完全にジェネリックなライブラリ関数として書き直すことができます。この新しい関数は、*どんな*オブザーバー関数でも*どんな*他の関数の結果に「フック」できるようにするので、とりあえず`hook`と呼びましょう。
 
 ```fsharp
 let hook2 observer f param1 param2 = 
-    let y = f param1 param2 // do something to make a result value
-    observer y              // call the observer with the result value
-    y                       // return the result value
+    let y = f param1 param2 // 何かを行って結果の値を作成する
+    observer y              // オブザーバーを結果の値で呼び出す
+    y                       // 結果の値を返す
 ```
 
-Actually, I called it `hook2` because the function `f` being "hooked into" has two parameters. I could make another version for functions that have one parameter, like this:
+実際、「フック」される関数`f`が2つのパラメータを持つため、これを`hook2`と呼びました。1つのパラメータを持つ関数用の別のバージョンを作ることもできます：
 
 ```fsharp
 let hook observer f param1 = 
-    let y = f param1 // do something to make a result value 
-    observer y       // call the observer with the result value
-    y                // return the result value
+    let y = f param1 // 何かを行って結果の値を作成する
+    observer y       // オブザーバーを結果の値で呼び出す
+    y                // 結果の値を返す
 ```
 
-If you have read the [railway oriented programming post](../posts/recipe-part2.md), you might notice that this is quite similar to what I called a "dead-end" function.  I won't go into more details here, but this is indeed a common pattern.
+[鉄道指向プログラミングの記事](../posts/recipe-part2.md)を読んだことがある方は、これが「デッドエンド」関数と呼んだものと非常に似ていることに気づくかもしれません。ここではより詳しく説明しませんが、これは実際によくあるパターンです。
 
-Ok, back to the code -- how do we use this generic `hook` function?  
+さて、コードに戻りましょう - このジェネリックな`hook`関数をどのように使用するのでしょうか？
 
-* `Customer.changeName` is the function being hooked into, and it has two parameters, so we use `hook2`.
-* The observer function is just as before
+* `Customer.changeName`はフックされる関数で、2つのパラメータを持つので`hook2`を使用します。
+* オブザーバー関数は以前と同じです
 
-So, again, we create a partially applied `changeName` function, but this time we create it by passing the observer and the hooked function to `hook2`, like this:
+そこで、また部分適用された`changeName`関数を作成しますが、今回はオブザーバーとフックされる関数を`hook2`に渡して作成します：
 
 ```fsharp
 let observer = Observer.printNameChanged 
 let changeName = hook2 observer Customer.changeName 
 ```
 
-Note that the resulting `changeName` has *exactly the same signature* as the original `Customer.changeName` function, so it can be used interchangably with it anywhere.
+注目すべきは、結果として得られる`changeName`が元の`Customer.changeName`関数と*まったく同じシグネチャ*を持つことです。そのため、どこでも互換的に使用できます。
 
 ```fsharp
 let customer = {name="Alice"}
 changeName customer "Bob"
 ```
 
-Here's the complete code:
+以下が完全なコードです：
 
 ```fsharp
 module MethodDependency_SeparateTypes_WithHookFunction = 
@@ -445,14 +445,14 @@ module MethodDependency_SeparateTypes_WithHookFunction =
     module MyFunctionLibrary = 
 
         let hook observer f param1 = 
-            let y = f param1 // do something to make a result value 
-            observer y       // call the observer with the result value
-            y                // return the result value
+            let y = f param1 // 何かを行って結果の値を作成する
+            observer y       // オブザーバーを結果の値で呼び出す
+            y                // 結果の値を返す
 
         let hook2 observer f param1 param2 = 
-            let y = f param1 param2 // do something to make a result value
-            observer y              // call the observer with the result value
-            y                       // return the result value
+            let y = f param1 param2 // 何かを行って結果の値を作成する
+            observer y              // オブザーバーを結果の値で呼び出す
+            y                       // 結果の値を返す
 
     module DomainTypes = 
         type Customer = { name:string}
@@ -472,32 +472,32 @@ module MethodDependency_SeparateTypes_WithHookFunction =
     module TestWithPartialApplication = 
         open DomainTypes
 
-        // set up this partial application only once (at the top of your module, say)
+        // この部分適用を一度だけ設定します（例えば、モジュールの先頭で）
         let observer = Observer.printNameChanged 
         let changeName = hook2 observer Customer.changeName 
 
-        // then call changeName without needing an observer
+        // そして、オブザーバーを必要とせずにchangeNameを呼び出します
         let customer = {name="Alice"}
         changeName customer "Bob"
 ```
 
-Creating a `hook` function like this might seem to add extra complication initially, but it has eliminated yet more code from the main application, and once you have built up a library of functions like this, you will find uses for them everywhere.
+このような`hook`関数を作成すると、最初は余分な複雑さを追加するように見えるかもしれませんが、メインアプリケーションからさらにコードを削除し、このような関数のライブラリを構築すれば、あらゆる場所で使用することができます。
 
-By the way, if it helps you to use OO design terminology, you can think of this approach as a "Decorator" or "Proxy" pattern.
+ちなみに、OO設計の用語を使うのに役立つなら、このアプローチを「デコレータ」または「プロキシ」パターンと考えることができます。
 
 
-## Dealing with a "structural dependency"
+## 「構造的依存」への対処
 
-The second of our classifications is what I am calling a "structural dependency", where each type stores a value of the other type.
+2つ目の分類は「構造的依存」と呼ぶもので、各型が他の型の値を保存します。
 
-* Type A stores a value of type B in a property
-* Type B stores a value of type A in a property
+* 型Aはプロパティに型Bの値を保存する
+* 型Bはプロパティに型Aの値を保存する
 
-For this set of examples, consider an `Employee` who works at a `Location`. The `Employee` contains the `Location` they work at, and the `Location` stores a list of `Employees` who work there.
+この一連の例では、`Location`で働く`Employee`を考えてみましょう。`Employee`は働く`Location`を含み、`Location`はそこで働く`Employee`のリストを保存します。
 
-Voila -- mutual dependency!
+これで相互依存が生まれました！
 
-Here is the example in code:
+以下がコードでの例です：
 
 ```fsharp
 module StructuralDependencyExample = 
@@ -511,30 +511,30 @@ module StructuralDependencyExample =
         member this.Employees  = employees 
 ```
 
-Before we get on to refactoring, let's consider how awkward this design is. How can we initialize an `Employee` value without having a `Location` value, and vice versa.
+リファクタリングに進む前に、この設計がどれほど扱いにくいかを考えてみましょう。`Location`値なしで`Employee`値を、また逆に`Employee`値なしで`Location`値を初期化するのは、どのようにすればよいでしょうか。
 
-Here's one attempt. We create a location with an empty list of employees, and then create other employees using that location:
+ここに1つの試みがあります。空の従業員リストを持つロケーションを作成し、そのロケーションを使用して他の従業員を作成します：
 
 ```fsharp
 module StructuralDependencyExample = 
 
-    // code as above
+    // 上記と同じコード
     
     module Test = 
         let location = new Location("CA",[])       
         let alice = new Employee("Alice",location)       
         let bob = new Employee("Bob",location)      
 
-        location.Employees  // empty!
+        location.Employees  // 空！
         |> List.iter (fun employee -> 
             printfn "employee %s works at %s" employee.Name employee.Location.Name) 
 ```
 
-But this code doesn't work as we want. We have to set the list of employees for `location` as empty because we can't forward reference the `alice` and `bob` values..
+しかし、このコードは望むように機能しません。`alice`と`bob`の値を前方参照できないため、`location`の従業員リストを空に設定する必要があります。
 
-F# will sometimes allow you to use the `and` keyword in these situation too, for recursive "lets". Just as with "type", the "and" keyword replaces the "let" keyword. Unlike "type", the first "let" has to be marked as recursive with `let rec`.
+F#では、再帰的な「let」に対しても`and`キーワードを使用できる場合があります。「type」と同様に、「and」キーワードは「let」キーワードに置き換わります。「type」とは異なり、最初の「let」は`let rec`で再帰的とマークする必要があります。
 
-Let's try it. We will give `location` a list of `alice` and `bob` even though they are not declared yet. 
+試してみましょう。`location`に`alice`と`bob`のリストを与えますが、これらはまだ宣言されていません。
 
 ```fsharp
 module UncompilableTest = 
@@ -543,10 +543,10 @@ module UncompilableTest =
     and bob = new Employee("Bob",location )      
 ```
 
-But no, the compiler is not happy about the infinite recursion that we have created.  In some cases, `and` does indeed work for `let` definitions, but this is not one of them! 
-And anyway, just as for types, having to use `and` for "let" definitions is a clue that you might need to refactor.
+しかし、コンパイラは作成した無限再帰に対して不満を示します。場合によっては`and`が`let`定義で機能することもありますが、これはそのケースではありません！
+そして、やはり「let」定義に`and`を使用しなければならないということは、リファクタリングが必要かもしれないという兆候です。
 
-So, really, the only sensible solution is to use mutable structures, and to fix up the location object *after* the individual employees have been created, like this:
+したがって、本当に賢明な解決策は可変構造を使用し、個々の従業員が作成された*後に*ロケーションオブジェクトを修正することです：
 
 ```fsharp
 module StructuralDependencyExample_Mutable = 
@@ -567,7 +567,7 @@ module StructuralDependencyExample_Mutable =
         let location = new Location("CA",[])       
         let alice = new Employee("Alice",location)       
         let bob = new Employee("Bob",location)      
-        // fixup after creation
+        // 作成後に修正
         location.SetEmployees [alice;bob]  
 
         location.Employees  
@@ -575,11 +575,11 @@ module StructuralDependencyExample_Mutable =
             printfn "employee %s works at %s" employee.Name employee.Location.Name) 
 ```
 
-So, a lot of trouble just to create some values. This is another reason why mutual dependencies are a bad idea!
+値を作成するだけでこんなに手間がかかるのです。これは相互依存が悪いアイデアであるもう1つの理由です！
 
-### Parameterizing again
+### 再びパラメータ化
 
-To break the dependency, we can use the parameterization trick again. We can just create a parameterized vesion of `Employee`.
+依存関係を断ち切るために、再びパラメータ化のトリックを使用できます。`Employee`のパラメータ化バージョンを作成するだけです。
 
 ```fsharp
 module StructuralDependencyExample_ParameterizedClasses = 
@@ -603,28 +603,28 @@ module StructuralDependencyExample_ParameterizedClasses =
         let bob = new Employee("Bob",location)      
         location.SetEmployees [alice;bob]
 
-        location.Employees  // non-empty!
+        location.Employees  // 空ではない！
         |> List.iter (fun employee -> 
             printfn "employee %s works at %s" employee.Name employee.Location.Name) 
 ```
 
-Note that we create a type alias for `Employee`, like this:
+次のように`Employee`の型エイリアスを作成していることに注目してください：
 
 ```fsharp
 type Employee = ParameterizedEmployee<Location> 
 ```
 
-One nice thing about creating an alias like that is that the original code for creating employees will continue to work unchanged.
+このようなエイリアスを作成する利点の1つは、従業員を作成する元のコードが変更されずに引き続き機能することです。
 
 ```fsharp
 let alice = new Employee("Alice",location)       
 ```
 
-### Parameterizing with behavior dependencies
+### 振る舞いの依存をパラメータ化する
 
-The code above assumes that the particular class being parameterized over is not important. But what if there are dependencies on particular properties of the type? 
+上記のコードは、パラメータ化される特定のクラスが重要ではないことを前提としています。しかし、型の特定のプロパティに依存関係がある場合はどうでしょうか？
 
-For example, let's say that the `Employee` class expects a `Name` property, and the `Location` class expects an `Age` property, like this:
+例えば、`Employee`クラスが`Name`プロパティを期待し、`Location`クラスが`Age`プロパティを期待する場合を考えてみましょう：
 
 ```fsharp
 module StructuralDependency_WithAge = 
@@ -634,7 +634,7 @@ module StructuralDependency_WithAge =
         member this.Age = age
         member this.Location = location
         
-        // expects Name property
+        // Nameプロパティを期待
         member this.LocationName = location.Name  
 
     and Location(name, employees: Employee list) = 
@@ -644,7 +644,7 @@ module StructuralDependency_WithAge =
         member this.SetEmployees es = 
             employees <- es
         
-        // expects Age property            
+        // Ageプロパティを期待            
         member this.AverageAge = 
             employees |> List.averageBy (fun e -> e.Age)
 
@@ -656,9 +656,9 @@ module StructuralDependency_WithAge =
         printfn "Average age is %g" location.AverageAge 
 ```
 
-How can we possibly parameterize this?
+これをどのようにパラメータ化できるでしょうか？
 
-Well, let's try using the same approach as before:
+まず、前と同じアプローチを試してみましょう：
 
 ```fsharp
 module StructuralDependencyWithAge_ParameterizedError = 
@@ -667,7 +667,7 @@ module StructuralDependencyWithAge_ParameterizedError =
         member this.Name = name
         member this.Age = age
         member this.Location = location
-        member this.LocationName = location.Name  // error
+        member this.LocationName = location.Name  // エラー
 
     type Location(name, employees: ParameterizedEmployee<Location> list) = 
         let mutable employees = employees
@@ -679,11 +679,11 @@ module StructuralDependencyWithAge_ParameterizedError =
             employees |> List.averageBy (fun e -> e.Age)
 ```
 
-The `Location` is happy with `ParameterizedEmployee.Age`, but `location.Name` fails to compile. obviously, because the type parameter is too generic.
+`Location`は`ParameterizedEmployee.Age`に満足していますが、`location.Name`はコンパイルに失敗します。明らかに、型パラメータが一般的すぎるためです。
 
-One way would be to fix this by creating interfaces such as `ILocation` and `IEmployee`, and that might often be the most sensible approach.
+1つの方法は、`ILocation`や`IEmployee`のようなインターフェースを作成することです。多くの場合、これが最も賢明なアプローチかもしれません。
 
-But another way is to let the Location parameter be generic and pass in an *additional function* that knows how to handle it. In this case a `getLocationName` function.
+しかし、もう1つの方法は、Locationパラメータをジェネリックにしておき、それを処理する*追加の関数*を渡すことです。この場合、`getLocationName`関数を使用します。
 
 ```fsharp
 module StructuralDependencyWithAge_ParameterizedCorrect = 
@@ -692,7 +692,7 @@ module StructuralDependencyWithAge_ParameterizedCorrect =
         member this.Name = name
         member this.Age = age
         member this.Location = location
-        member this.LocationName = getLocationName location  // ok
+        member this.LocationName = getLocationName location  // OK
 
     type Location(name, employees: ParameterizedEmployee<Location> list) = 
         let mutable employees = employees
@@ -706,27 +706,27 @@ module StructuralDependencyWithAge_ParameterizedCorrect =
 
 ```
 
-One way of thinking about this is that we are providing the behavior externally, rather than as part of the type.
+これについて考える1つの方法は、振る舞いを型の一部としてではなく、外部から提供していると考えることです。
 
-To use this then, we need to pass in a function along with the type parameter. This would be annoying to do all the time, so naturally we will wrap it in a function, like this:
+これを使用するには、型パラメータと一緒に関数を渡す必要があります。これを毎回行うのは面倒なので、当然ながら関数でラップします：
 
 ```fsharp
 module StructuralDependencyWithAge_ParameterizedCorrect = 
 
-    // same code as above
+    // 上記と同じコード
 
-    // create a helper function to construct Employees
+    // Employeeを構築するためのヘルパー関数を作成
     let Employee(name, age, location) = 
         let getLocationName (l:Location) = l.Name
         new ParameterizedEmployee<Location>(name, age, location, getLocationName)
 ```
 
-With this in place, the original test code continues to work, almost unchanged (we have to change `new Employee` to just `Employee`).
+これを使用すると、元のテストコードはほとんど変更なしで引き続き機能します（`new Employee`を単に`Employee`に変更するだけです）。
 
 ```fsharp
 module StructuralDependencyWithAge_ParameterizedCorrect = 
 
-    // same code as above
+    // 上記と同じコード
 
     module Test = 
         let location = new Location("CA",[])       
@@ -734,16 +734,16 @@ module StructuralDependencyWithAge_ParameterizedCorrect =
         let bob = Employee("Bob",30.0,location)      
         location.SetEmployees [alice;bob]
 
-        location.Employees  // non-empty!
+        location.Employees  // 空ではない！
         |> List.iter (fun employee -> 
             printfn "employee %s works at %s" employee.Name employee.LocationName) 
 ```
 
-## The functional approach: separating types from functions again
+## 関数型アプローチ：再び型と関数を分離
 
-Now let's apply the functional design approach to this problem, just as we did before.
+では、この問題に関数型設計アプローチを適用してみましょう。前回と同様に行います。
 
-Again, we'll separate the types themselves from the functions that act on those types. 
+再び、型自体をそれらに作用する関数から分離します。
 
 ```fsharp
 module StructuralDependencyExample_SeparateTypes = 
@@ -781,8 +781,8 @@ module StructuralDependencyExample_SeparateTypes =
             printfn "employee %s works at %s" (Employee.Name e) (Employee.LocationName e) ) 
 ```
 
-Before we go any further, let's remove some unneeded code.  One nice thing about using a record type is that you don't need to define "getters", so the only functions you need in the modules
-are functions that manipulate the data, such as `AverageAge`.
+さらに進む前に、不要なコードを削除しましょう。レコード型を使用する利点の1つは、「ゲッター」を定義する必要がないことです。
+そのため、モジュールに必要な関数は`AverageAge`のようにデータを操作する関数だけです。
 
 ```fsharp
 module StructuralDependencyExample_SeparateTypes2 = 
@@ -803,16 +803,16 @@ module StructuralDependencyExample_SeparateTypes2 =
             location.employees |> List.averageBy (fun e -> e.age)
 ```
 
-### Parameterizing again
+### 再びパラメータ化
 
-Once again, we can remove the dependency by creating a parameterized version of the types.
+再び、型のパラメータ化バージョンを作成することで依存関係を取り除くことができます。
 
-Let's step back and think about the "location" concept. Why does a location have to only contain Employees? If we make it a bit more generic, we could consider a location as being a "place"
-plus "a list of things at that place".
+一歩下がって「location」の概念について考えてみましょう。なぜロケーションは従業員だけを含む必要があるのでしょうか？
+もう少し一般的にすれば、ロケーションを「場所」と「その場所にある物のリスト」と考えることができます。
 
-For example, if the things are products, then a place full of products might be a warehouse. If the things are books, then a place full of books might be a library.
+例えば、物が製品であれば、製品がある場所は倉庫かもしれません。物が本であれば、本がある場所は図書館かもしれません。
 
-Here are these concepts expressed in code:
+以下は、これらの概念をコードで表現したものです：
 
 ```fsharp
 module LocationOfThings =
@@ -829,10 +829,10 @@ module LocationOfThings =
     type Library = Location<Book>
 ```
 
-Of course, these locations are not exactly the same, but there might be something in common that you can extract into a generic design, especially as there is no behavior requirement attached to
-the things they contain.
+もちろん、これらのロケーションは完全に同じではありませんが、含まれる物に関する振る舞いの要件がない場合、
+特にジェネリックな設計に抽出できる共通点があるかもしれません。
 
-So, using the "location of things" design, here is our dependency rewritten to use parameterized types.
+そこで、「物のロケーション」に関する設計をもとに、依存がパラメータ化された型を使って書き直してみましょう。
 
 ```fsharp
 module StructuralDependencyExample_SeparateTypes_Parameterized = 
@@ -864,13 +864,13 @@ module StructuralDependencyExample_SeparateTypes_Parameterized =
             |> List.averageBy (fun e -> e.age) 
 ```
 
-In this revised design you will see that the `AverageAge` function has been completely removed from the `Location` module. There is really no need for it, because we can do these
-kinds of calculations quite well "inline" without needing the overhead of special functions.
+この改訂された設計では、`AverageAge`関数が`Location`モジュールから完全に削除されていることがわかります。実際、必要ではなかったのです。
+この種の計算は、特別な関数のオーバーヘッドなしで「インライン」で十分にできるからです。
 
-And if you think about it, if we *did* need to have such a function pre-defined, it would probably be more appropriate to put in the `Employee` module rather than the `Location` module.
-After all, the functionality is much more related to how employees work than how locations work.
+そして、よく考えてみると、そのような関数を事前に定義する必要が本当にあったとしても、それを`Location`モジュールではなく`Employee`モジュールに置く方が適切だったでしょう。
+結局のところ、この機能はロケーションの働き方よりも従業員の働き方に関連しているからです。
 
-Here's what I mean:
+以下がその例です：
 
 ```fsharp
 module Employee = 
@@ -879,20 +879,20 @@ module Employee =
         location.things |> List.averageBy (fun e -> e.age) 
 ```
 
-This is one advantage of modules over classes; you can mix and match functions with different types, as long as they are all related to the underlying use cases.
+これはクラスよりもモジュールの利点の1つです。基礎となるユースケースに関連している限り、異なる型の関数を組み合わせることができます。
 
-### Moving relationships into distinct types
+### 関係を別の型に移動する
 
-In the examples so far, the "list of things" field in location has had to be mutable.  How can we work with immutable types and still support relationships?
+これまでの例では、ロケーションの「物のリスト」フィールドは可変である必要がありました。不変の型で作業しながら関係性をサポートするには、どうすればよいでしょうか？
 
-Well one way *not* to do it is to have the kind of mutual dependency we have seen.  In that design, synchronization (or lack of) is a terrible problem
+一つの方法は、これまで見てきたような相互依存を持たないことです。その設計では、同期（または同期の欠如）が大きな問題となります。
 
-For example, I could change Alice's location without telling the location she points to, resulting in an inconsistency. But if I tried to change the contents of the location as well, then I would also need to update the value of Bob as well. And so on, ad infinitum. A nightmare, basically.
+例えば、Aliceのロケーションを変更しても、参照しているロケーションに知らせなければ、不整合が生じる可能性があります。しかし、ロケーションの内容も変更しようとすると、Bobの値も更新する必要があるため、無限に続く作業になってしまいます。基本的に、悪夢のようなシナリオです。
 
-The correct way to do this with immutable data is steal a leaf from database design, and extract the relationship into a separate "table" or type in our case.
-The current relationships are held in a single master list, and so when changes are made, no synchronization is needed.
+不変データでこれを正しく行う方法は、データベース設計から学び、関係を別の「テーブル」、つまり我々の場合は型に抽出することです。
+現在の関係は単一のマスターリストに保持され、変更が行われても同期は必要ありません。
 
-Here is a very crude example, using a simple list of `Relationship`s. 
+以下は、単純な`Relationship`のリストを使用した非常に基本的な例です。
 
 ```fsharp
 module StructuralDependencyExample_Normalized = 
@@ -931,18 +931,18 @@ module StructuralDependencyExample_Normalized =
             printfn "employee %s works at %s" (empl.name) (loc.name) ) 
 ```
 
-Or course, a more efficient design would use dictionaries/maps, or special in-memory structures designed for this kind of thing.
+もちろん、より効率的な設計では辞書/マップを使用したり、この種の操作用に設計された特別なインメモリ構造を使用したりするでしょう。
 
-## Inheritance dependencies
+## 継承依存
 
-Finally, let's look at an "inheritance dependency". 
+最後に、「継承依存」を見てみましょう。
 
-* Type A stores a value of type B in a property
-* Type B inherits from type A
+* 型Aはプロパティに型Bの値を保存する
+* 型Bは型Aを継承する
 
-We'll consider a UI control hierarchy, where every control belongs to a top-level "Form", and the Form itself is a Control.
+UIコントロールの階層を考えてみましょう。すべてのコントロールはトップレベルの「Form」に属し、Formそのものもコントロールです。
 
-Here's a first pass at an implementation:
+以下は最初の実装の試みです：
 
 ```fsharp
 module InheritanceDependencyExample = 
@@ -956,21 +956,21 @@ module InheritanceDependencyExample =
     and Form(name) as self = 
         inherit Control(name, self)
 
-    // test
+    // テスト
     let form = new Form("form")       // NullReferenceException!
     let button = new Control("button",form)
 ```
 
-The thing to note here is that the Form passes itself in as the `form` value for the Control constructor.
+ここで注目すべきは、Formが自身をControl コンストラクタの`form`値として渡していることです。
 
-This code will compile, but will cause a `NullReferenceException` error at runtime. This kind of technique will work in C#, but not in F#, because the class initialization logic is done differently.
+このコードはコンパイルに成功しますが、実行時に`NullReferenceException`エラーを引き起こします。この種のテクニックはC#では機能しますが、F#では機能しません。クラスの初期化ロジックが異なるためです。
 
-Anyway, this is a terrible design. The form shouldn't have to pass itself in to a constructor.
+いずれにしても、これは酷い設計です。フォームがコンストラクタに自身を渡す必要はありません。
 
-A better design, which also fixes the constructor error, is to make `Control` an abstract class instead, and distinguish between non-form child classes (which do take a form in their constructor)
-and the `Form` class itself, which doesn't.  
+より良い設計は、コンストラクタのエラーも修正する方法として、`Control`を抽象クラスにし、
+コンストラクタでフォームを受け取る非フォームの子クラスと、フォームを受け取らない`Form`クラス自体を区別することです。
 
-Here's some sample code:
+以下にサンプルコードを示します：
 
 ```fsharp
 module InheritanceDependencyExample2 = 
@@ -991,14 +991,14 @@ module InheritanceDependencyExample2 =
 
         override this.Form = form
 
-    // test
+    // テスト
     let form = new Form("form")       
     let button = new Button("button",form)
 ```
 
-### Our old friend parameterization again
+### またもやパラメータ化の出番です
 
-To remove the circular dependency, we can parameterize the classes in the usual way, as shown below.
+循環依存を取り除くために、いつもの方法でクラスをパラメータ化できます。以下に示します。
 
 ```fsharp
 module InheritanceDependencyExample_ParameterizedClasses = 
@@ -1020,27 +1020,27 @@ module InheritanceDependencyExample_ParameterizedClasses =
         override this.Form = form
 
 
-    // test
+    // テスト
     let form = new Form("form")       
     let button = new Button("button",form)
 ```
 
-### A functional version
+### 関数型バージョン
 
-I will leave a functional design as an exercise for you to do yourself.
+関数型設計については、自分で行う演習として残しておきます。
 
-If we were going for truly functional design, we probably would not be using inheritance at all. Instead, we would use composition in conjunction with parameterization.
+本当の関数型設計を目指すなら、おそらく継承を全く使用しないでしょう。代わりに、パラメータ化と組み合わせてコンポジションを使用するでしょう。
 
-But that's a big topic, so I'll save it for another day.
+しかし、これは大きなトピックなので、別の機会に取り上げることにします。
 
-## Summary
+## まとめ
 
-I hope that this post has given you some useful tips on removing dependency cycles. With these various approaches in hand, any problems with [module organization](../posts/recipe-part3.md) should be able to be resolved easily.
+この記事が循環依存を取り除くための有用なヒントを提供できたことを願っています。これらの様々なアプローチを手に入れたことで、[モジュール構成](../posts/recipe-part3.md)の問題は簡単に解決できるはずです。
 
-In the next post in this series, I'll look at dependency cycles "in the wild", by comparing some real world C# and F# projects. 
+このシリーズの次の記事では、「野生の」循環依存を見ていきます。実際のC#とF#のプロジェクトを比較してみましょう。
 
-As we have seen, F# is a very opinionated language! It wants us to use modules instead of classes and it prohibits dependency cycles. Are these just annoyances, or do they really make a difference to the way that code is organized?
-[Read on and find out!](../posts/cycles-and-modularity-in-the-wild.md)
+これまで見てきたように、F#は非常に独自の考えを持つ言語です！クラスの代わりにモジュールを使用することを求め、循環依存を禁止します。これらは単なる煩わしさなのか、それともコードの構成方法に本当に違いをもたらすのでしょうか？
+[続きを読んで確かめてください！](../posts/cycles-and-modularity-in-the-wild.md)
 
 
 
