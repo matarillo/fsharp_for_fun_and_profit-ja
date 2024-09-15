@@ -1,126 +1,126 @@
 ---
 layout: post
-title: "Getting started with direct porting"
-description: "F# equivalents to C#"
+title: "直接移植を始める"
+description: "C#に相当するF#の表現"
 nav: fsharp-types
-seriesId: "Porting from C#"
+seriesId: "C# からの移植"
 seriesOrder: 2
 ---
 
-Before we get started on the detailed examples, we'll go back to basics and do some simple porting of trivial examples.
+詳細な例に取り掛かる前に、基本に立ち返って簡単な例の移植を行います。
 
-In this post and the next, we'll look at the nearest F# equivalents to common C# statements and keywords, to guide you when doing direct ports.
+この投稿と次の投稿では、直接移植を行う際の指針として、一般的なC#の文やキーワードに最も近いF#の表現を見ていきます。
 
-## Basic syntax conversion guidelines ##
+## 基本的な構文変換ガイドライン
 
-Before starting a port, you need to understand how F# syntax is different from C# syntax. This section presents some general guidelines for converting from one to another. (For a quick overview of F# syntax as a whole, see ["F# syntax in 60 seconds"](../posts/fsharp-in-60-seconds.md))
+移植を始める前に、F#の構文がC#の構文とどのように異なるかを理解する必要があります。このセクションでは、一方から他方への変換に関する一般的なガイドラインを示します。（F#構文の簡単な概要については、「[60秒でわかるF#構文](../posts/fsharp-in-60-seconds.md)」をご覧ください）
 
-### Curly braces and indentation ###
+### 波かっことインデント
 
-C# uses curly braces to indicate the start and end of a block of code. F# generally just uses indentation.  
+C#はコードブロックの開始と終了を示すために波かっこを使います。F#は一般的にインデントだけを使います。
 
-Curly braces are used in F#, but not for blocks of code. Instead, you will see them used:
+F#でも波かっこは使われますが、コードブロックのためではありません。代わりに、以下の場合に見られます。
 
-* 	For definitions and usage of "record" types. 
-* 	In conjunction with computation expressions, such as `seq` and `async`. In general, you will not be using these expressions for basic ports anyway.
+* 「レコード」型の定義と使用。
+* `seq`や`async`などの計算式と組み合わせて使用。一般的に、基本的な移植ではこれらの式を使うことはありません。
 
-For details on the indentation rules, [see this post](../posts/fsharp-syntax).
+インデントルールの詳細については、[この投稿](../posts/fsharp-syntax.md)を参照してください。
 
-### Semicolons
+### セミコロン
 
-Unlike C#'s semicolon, F# does not require any kind of line or statement terminator.
+C#のセミコロンとは異なり、F#は行や文の終端を示すものを必要としません。
 
-### Commas
+### カンマ
 
-F# does not use commas for separating parameters or list elements, so remember not to use commas when porting!
+F#はパラメータやリスト要素の区切りにカンマを使いません。移植する際はカンマを使わないよう注意してください！
 
-*For separating list elements, use semicolons rather than commas.*
+*リスト要素の区切りには、カンマではなくセミコロンを使います。*
 
 ```csharp
-// C# example
+// C#の例
 var list = new int[] { 1,2,3}
 ```
 
 ```fsharp
-// F# example
-let list = [1;2;3] // semicolons
+// F#の例
+let list = [1;2;3] // セミコロン
 ```
 
-*For separating parameters for native F# functions, use white space.*
+*ネイティブF#関数のパラメータの区切りには、空白を使います。*
 
 ```csharp
-// C# example 
-int myFunc(int x, int y, int z) { ... function body ...}
+// C#の例 
+int myFunc(int x, int y, int z) { ... 関数本体 ...}
 ```
 
 ```fsharp
-// F# example 
-let myFunc (x:int) (y:int) (z:int) :int = ... function body ...
-let myFunc x y z = ... function body ...
+// F#の例 
+let myFunc (x:int) (y:int) (z:int) :int = ... 関数本体 ...
+let myFunc x y z = ... 関数本体 ...
 ```
 
-Commas are generally only used for tuples, or for separating parameters when calling .NET library functions. (See [this post](http://localhost:4000/posts/defining-functions/#tuples) for more on tuples vs multiple parameters)
+カンマは一般的に、タプルや.NETライブラリ関数を呼び出す際のパラメータの区切りにのみ使われます。（タプルと複数パラメータの違いについては、[この投稿](../posts/defining-functions.md#tuples)を参照してください）
 
-### Defining variables, functions and types
+### 変数、関数、型の定義
 
-In F#, definitions of both variables and functions use the form:
+F#では、変数と関数の両方の定義に以下の形式を使います。
 
 ```fsharp
-let someName = // the definition
+let 名前 = // 定義
 ```
 
-Definitions for all types (classes, structures, interfaces, etc.) use the form:
+すべての型（クラス、構造体、インターフェースなど）の定義には以下の形式を使います。
 
 ```fsharp
-type someName = // the definition
+type 名前 = // 定義
 ```
 
-The use of the `=` sign is an important difference between F# and C#. Where C# uses curly braces, F# uses the `=` and then the following block of code must be indented.
+等号（`=`）の使用は、F#とC#の重要な違いです。C#が波かっこを使用する箇所で、F#は等号を使用し、その後のコードブロックはインデントする必要があります。
 
-### Mutable values
+### 可変値
 
-In F#, values are immutable by default. If you are doing a direct imperative port, you probably need to make some of the values mutable, using the `mutable` keyword.
-Then to assign to the values, use the `<-` operator, not the equals sign.
+F#では、デフォルトで値は不変です。命令型の直接移植を行う場合、一部の値を可変にする必要があるかもしれません。その場合は`mutable`キーワードを使用します。
+そして、値に代入する際は、等号ではなく`<-`演算子を使用します。
 
 ```csharp
-// C# example 
+// C#の例 
 var variableName = 42
 variableName = variableName + 1
 ```
 
 ```fsharp
-// F# example 
+// F#の例 
 let mutable variableName = 42
 variableName <- variableName + 1
 ```
 
-### Assignment vs. testing for equality 
+### 代入と等値比較 
 
-In C#, the equals sign is used for assignment, and the double equals `==` is used for testing equality. 
+C#では、等号は代入に使用され、二重等号`==`は等値比較に使用されます。
 
-However in F#, the equals sign is used for testing equality, and is also used to initially bind values to other values when declared,
-
-```fsharp
-let mutable variableName = 42     // Bound to 42 on declaration
-variableName <- variableName + 1  // Mutated (reassigned)
-variableName = variableName + 1   // Comparison not assignment! 
-```
-
-To test for inequality, use SQL-style `<>` rather than `!=`
+しかしF#では、等号は等値比較に使用され、また宣言時に値を他の値に初期バインドする際にも使用されます。
 
 ```fsharp
-let variableName = 42             // Bound to 42 on declaration
-variableName <> 43                // Comparison will return true.
-variableName != 43                // Error FS0020.
+let mutable variableName = 42     // 宣言時に42にバインド
+variableName <- variableName + 1  // 変更（再代入）
+variableName = variableName + 1   // 代入ではなく比較！ 
 ```
 
-If you accidentally use `!=` you will probably get an [error FS0020](../troubleshooting-fsharp/index.md#FS0020).
+不等比較には、`!=`ではなくSQL風の`<>`を使用します。
 
-## Conversion example #1
+```fsharp
+let variableName = 42             // 宣言時に42にバインド
+variableName <> 43                // 比較はtrueを返します。
+variableName != 43                // エラー FS0020。
+```
 
-With these basic guidelines in place, let's look at some real code examples, and do a direct port for them.
+誤って`!=`を使用すると、おそらく[error FS0020](../troubleshooting-fsharp/index.md#FS0020)が発生します。
 
-This first example has some very simple code, which we will port line by line. Here's the C# code.
+## 変換例 #1
+
+これらの基本的なガイドラインを踏まえて、実際のコード例を見て、直接移植を行ってみましょう。
+
+この最初の例はとてもシンプルなコードで、1行ずつ移植していきます。以下がC#のコードです。
 
 ```csharp
 using System;
@@ -145,196 +145,196 @@ namespace PortingToFsharp
     }
 ```
     
-### Converting "using" and "namespace"
+### "using"と"namespace"の変換
 
-These keywords are straightforward:
+これらのキーワードは単純です。
 
-* 	`using` becomes `open`
-* 	`namespace` with curly braces becomes just `namespace`. 
+* `using`は`open`になります
+* 波かっこ付きの`namespace`は単に`namespace`になります。
 
-Unlike C#, F# files do not generally declare namespaces unless they need to interop with other .NET code. The filename itself acts as a default namespace.
+C#とは異なり、F#のファイルは他の.NETコードと相互運用する必要がない限り、一般的に名前空間を宣言しません。ファイル名自体がデフォルトの名前空間として機能します。
 
-Note that the namespace, if used, must come before anything else, such as "open".  This the opposite order from most C# code.
+注意点として、名前空間を使用する場合、"open"などの他の要素よりも前に記述する必要があります。これは多くのC#コードとは逆の順序です。
 
-### Converting the class
+### クラスの変換
 
-To declare a simple class, use:
+シンプルなクラスを宣言するには、以下のように記述します。
 
 ```fsharp
 type myClassName() = 
-   ... code ...  
+   ... コード ...  
 ```
 
-Note that there are parentheses after the class name. These are required for class definitions.
+クラス名の後にかっこがあることに注意してください。これはクラス定義に必要です。
 
-More complicated class definitions will be shown in the next example, and you read the [complete discussion of classes](../posts/classes.md).
+より複雑なクラス定義は次の例で示し、[クラスに関する完全な説明](../posts/classes.md)を読むこともできます。
 
-### Converting function/method signatures
+### 関数/メソッドのシグネチャの変換
 
-For function/method signatures:
+関数/メソッドのシグネチャについて：
 
-* Parentheses are not needed around the parameter list
-* Whitespace is used to separate the parameters, not commas
-* Rather than curly braces, an equals sign signals the start of the function body
-* The parameters don't normally need types but if you do need them:
-  *	The type name comes after the value or parameter
-  *	The parameter name and type are separated by colons 
-  *	When specifying types for parameters, you should probably wrap the pair in parentheses to avoid unexpected behavior.
-  *	The return type for the function as a whole is prefixed by a colon, and comes after all the other parameters
+* パラメータリストの周りにかっこは不要です
+* パラメータの区切りにはカンマではなく空白を使います
+* 波かっこの代わりに、等号が関数本体の開始を示します
+* パラメータは通常型を必要としませんが、必要な場合は：
+  * 型名は値やパラメータの後に来ます
+  * パラメータ名と型はコロンで区切られます 
+  * パラメータの型を指定する場合、予期しない動作を避けるためにペアをかっこで囲むべきでしょう
+  * 関数全体の戻り値の型はコロンで始まり、他のすべてのパラメータの後に来ます
 
-Here's a C# function signature:
+以下はC#の関数シグネチャです。
 
 ```csharp
-int Square(int input) { ... code ...}
+int Square(int input) { ... コード ...}
 ```
 
-and here's the corresponding F# function signature with explicit types:
+そして、これが明示的な型を持つ対応するF#の関数シグネチャです。
 
 ```fsharp
-let Square (input:int) :int =  ... code ...
+let Square (input:int) :int =  ... コード ...
 ```
 
-However, because F# can normally infer the parameter and return types, you rarely need to specify them explicitly.
+しかし、F#は通常パラメータと戻り値の型を推論できるため、明示的に指定する必要はほとんどありません。
 
-Here's a more typical F# signature, with inferred types:
+以下は、型を推論した、より一般的なF#のシグネチャです。
 
 ```fsharp
-let Square input =  ... code ...
+let Square input =  ... コード ...
 ```
 
 ### void
 
-The `void` keyword in C# is generally not needed, but if required, would be converted to `unit`
+C#の`void`キーワードは一般的に必要ありませんが、必要な場合は`unit`に変換されます。
 
-So the C# code:
-
-```csharp
-void PrintSquare(int input) { ... code ...}
-```
-
-could be converted to the F# code:
-
-```fsharp
-let PrintSquare (input:int) :unit =  ... code ...
-```
-
-but again, the specific types are rarely needed, and so the F# version is just:
-
-```fsharp
-let PrintSquare input =  ... code ...
-```
-
-### Converting function/method bodies
-
-In a function body, you are likely to have a combination of:
-
-* 	Variable declarations and assignments
-* 	Function calls
-* 	Control flow statements
-* 	Return values
-
-We'll have a quick look at porting each of these in turn, except for control flow, which we'll discuss later.
-
-### Converting variable declarations
-
-Almost always, you can use `let` on its own, just like `var` in C#:
+つまり、以下のC#のコードは：
 
 ```csharp
-// C# variable declaration
+void PrintSquare(int input) { ... コード ...}
+```
+
+F#のコードに以下のように変換できます。
+
+```fsharp
+let PrintSquare (input:int) :unit =  ... コード ...
+```
+
+しかし繰り返しになりますが、具体的な型はほとんど必要ないため、F#のバージョンでは以下のように書くだけです。
+
+```fsharp
+let PrintSquare input =  ... コード ...
+```
+
+### 関数/メソッド本体の変換
+
+関数本体では、以下の組み合わせが見られる可能性が高いです。
+
+* 変数の宣言と代入
+* 関数呼び出し
+* 制御フロー文
+* 戻り値
+
+制御フローを除いて、これらの変換について簡単に見ていきます。制御フローについては後ほど説明します。
+
+### 変数宣言の変換
+
+ほとんどの場合、C#の`var`と同じように`let`を単独で使えます。
+
+```csharp
+// C#の変数宣言
 var result = input * input;
 ```
 
 ```fsharp
-// F# value declaration
+// F#の値宣言
 let result = input * input
 ```
 
-Unlike C#, you must always assign ("bind") something to an F# value as part of its declaration.
+C#とは異なり、F#では値の宣言の一部として必ず何かを割り当て（「バインド」）する必要があります。
 
 ```csharp
-// C# example 
-int unassignedVariable; //valid
+// C#の例 
+int unassignedVariable; //有効
 ```
 
 ```fsharp
-// F# example 
-let unassignedVariable // not valid
+// F#の例 
+let unassignedVariable // 無効
 ```
 
-As noted above, if you need to change the value after its declaration, you must use the "mutable" keyword.
+前述のとおり、宣言後に値を変更する必要がある場合は、"mutable"キーワードを使用する必要があります。
 
-If you need to specify a type for a value, the type name comes after the value or parameter, preceded by a colon.
+値に型を指定する必要がある場合、型名はコロンに続いて値やパラメータの後に来ます。
 
 ```csharp
-// C# example 
+// C#の例 
 int variableName = 42;
 ```
 
 ```fsharp
-// F# example 
+// F#の例 
 let variableName:int = 42
 ```
 
-### Converting function calls
+### 関数呼び出しの変換
 
-When calling a native F# function, there is no need for parentheses or commas. In other words, the same rules apply for calling a function as when defining it. 
+F#ネイティブの関数を呼び出す場合、かっこやカンマは不要です。つまり、関数の定義時と同じルールが関数の呼び出しにも適用されます。
 
-Here's C# code for defining a function, then calling it:
+以下はC#コードで関数を定義し、それを呼び出す例です。
 
 ```csharp
-// define a method/function 
-int Square(int input) { ... code  ...}
+// メソッド/関数の定義 
+int Square(int input) { ... コード  ...}
 
-// call it
+// 呼び出し
 var result = Square(input);
 ```
 
-However, because F# can normally infer the parameter and return types, you rarely need to specify them explicitly
-So here's typical F# code for defining a function and then calling it:
+しかし、F#は通常パラメータと戻り値の型を推論できるため、明示的に指定する必要はほとんどありません。
+したがって、以下は関数を定義し、それを呼び出す典型的なF#コードです。
 
 ```fsharp
-// define a function 
-let Square input = ... code ...
+// 関数の定義 
+let Square input = ... コード ...
 
-// call it
+// 呼び出し
 let result = Square input
 ```
 
-### Return values
+### 戻り値
 
-In C#, you use the `return` keyword. But in F#, the last value in the block is automatically the "return" value. 
+C#では`return`キーワードを使用します。しかしF#では、ブロック内の最後の値が自動的に「戻り値」になります。
 
-Here's the C# code returning the `result` variable.
+以下はC#コードで`result`変数を返す例です。
 
 ```csharp
 public int Square(int input)
 {
     var result = input * input;
-    return result;   //explicit "return" keyword
+    return result;   //明示的な"return"キーワード
 }
 ```
 
-And here's the F# equivalent.
+そして、これがF#の同等のコードです。
 
 ```fsharp
 let Square input = 
     let result = input * input
-    result        // implicit "return" value
+    result        // 暗黙的な「戻り値」
 ```
 
-This is because F# is expression-based. Everything is an expression, and the value of a block expression as a whole is just the value of the last expression in the block. 
+これは、F#が式ベースだからです。すべてが式であり、ブロック式全体の値は単にブロック内の最後の式の値です。
 
-For more details on expression-oriented code, see ["expressions vs statements"](../posts/expressions-vs-statements.md).
+式指向のコードの詳細については、「[式 vs. 文](../posts/expressions-vs-statements.md)」を参照してください。
 
-### Printing to the console
+### コンソールへの出力
 
-To print output in C#, you generally use `Console.WriteLine` or similar. In F#, you generally use `printf` or similar, which is typesafe.  ([More details on using "printf" family](../posts/printf)).
+C#で出力を行うには、一般的に`Console.WriteLine`やそれに類似したものを使用します。F#では、一般的に型安全な`printf`やそれに類似したものを使用します。（[「printf」ファミリーの使用に関する詳細](../posts/printf.md)）
 
-### The complete port of example #1
+### 例#1の完全な移植
 
-Putting it all together, here is the complete direct port of example #1 to F#.
+すべてをまとめると、例#1のF#への完全な直接移植は以下のようになります。
 
-The C# code again:
+C#のコードを再度示します。
 ```csharp
 using System;
 using System.Collections.Generic;
@@ -358,7 +358,7 @@ namespace PortingToFsharp
     }
 ```
 
-And the equivalent F# code:
+そして、F#での同等なコードがこちらです。
 
 ```fsharp
 namespace PortingToFsharp

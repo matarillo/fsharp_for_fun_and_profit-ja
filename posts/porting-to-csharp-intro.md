@@ -1,79 +1,79 @@
 ---
 layout: post
-title: "Porting from C# to F#: Introduction"
-description: "Three approaches to porting existing C# code to F#"
+title: "C# から F# への移植：はじめに"
+description: "既存のC#コードをF#に移植する3つのアプローチ"
 nav: fsharp-types
-seriesId: "Porting from C#"
+seriesId: "C# からの移植"
 seriesOrder: 1
 ---
 
-*NOTE: Before reading this series, I suggest that you read the following series as a prerequisite: ["thinking functionally"](../series/thinking-functionally.md), ["式と構文"](../series/expressions-and-syntax.md), and ["understanding F# types"](../series/understanding-fsharp-types.md).* 
+*注意：このシリーズを読む前に、前提知識として以下のシリーズを読むことをお勧めします：「[関数型思考](../series/thinking-functionally.md)」 、 「[式と構文](../series/expressions-and-syntax.md)」 、 「[F#の型を理解する](../series/understanding-fsharp-types.md)」。*
 
-For many developers, the next step after learning a new language might be to port some existing code over to it, so that they can get a good feel for the differences between the two languages.
+多くの開発者にとって、新しい言語を学んだ後の次のステップは、既存のコードをその言語に移植することかもしれません。これにより、両言語の違いを実感できます。
 
-As we pointed out earlier, functional languages are very different from imperative languages, and so trying to do a direct port of imperative code to a functional language is often not possible, and even if a crude port is done successfully, the ported code will probably not be using the functional model to its best advantage.
+以前に指摘したように、関数型言語は命令型言語とは大きく異なるため、命令型コードを関数型言語に直接移植することは多くの場合不可能です。たとえ粗い移植に成功したとしても、移植されたコードは関数型モデルを最大限に活用できていない可能性が高いです。
 
-Of course, F# is a multi-paradigm language, and includes support for object-oriented and imperative techniques, but even so, a direct port will generally not be the best way to write the corresponding F# code.
+もちろん、F#はマルチパラダイム言語で、オブジェクト指向や命令型のテクニックもサポートしています。それでも、直接的な移植は一般的に、対応するF#コードを書く最良の方法ではありません。
 
-So, in this series, we'll look at various approaches to porting existing C# code to F#. 
+そこで、このシリーズでは、既存のC#コードをF#に移植するさまざまなアプローチを見ていきます。
 
-## Levels of porting sophistication ##
+## 移植の洗練度レベル
 
-If you recall the diagram from an [earlier post](../posts/key-concepts), there are four key concepts that differentiate F# from C#.
+[以前の投稿](../posts/key-concepts.md)の図を思い出してください。F#をC#と区別する4つの主要な概念があります。
 
-* Function-oriented rather than object-oriented
-* Expressions rather than statements 
-* Algebraic types for creating domain models
-* Pattern matching for flow of control
+* オブジェクト指向ではなく関数指向
+* 文ではなく式
+* ドメインモデル作成のための代数的データ型
+* 制御フローのためのパターンマッチング
 
-![four key concepts](../assets/img/four-concepts2.png)
+![4つの主要概念](../assets/img/four-concepts2.png)
 
-And, as explained in that post and its sequels, these aspects are not just academic, but offer concrete benefits to you as a developer. 
+そして、その投稿とその後の投稿で説明したように、これらの側面は単に学術的なものではなく、開発者であるあなたに具体的な利点を提供します。
 
-So I have divided the porting process into three levels of sophistication (for lack of a better term), which represent how well the ported code exploits these benefits.
+そこで、移植プロセスを3つの洗練度レベル（より適切な言葉がないため）に分けました。これらは、移植されたコードがこれらの利点をどの程度活用しているかを表しています。
 
-### Basic Level: Direct port ###
+### 基本レベル：直接移植
 
-At this first level, the F# code is a direct port (where possible) of the C# code.  Classes and methods are used instead of modules and functions, and values are frequently mutated.
+この最初のレベルでは、F#コードはC#コードの直接的な移植（可能な範囲で）です。モジュールや関数の代わりにクラスやメソッドが使われ、値は頻繁に変更されます。
 
-### Intermediate Level: Functional code ###
+### 中級レベル：関数型コード
 
-At the next level, the F# code has been refactored to be fully functional.  
+次のレベルでは、F#コードが完全に関数型に再構成されています。
 
-* Classes and methods have been replaced by modules and functions, and values are generally immutable.  
-* Higher order functions are used to replace interfaces and inheritance.
-* Pattern matching is used extensively for control flow.
-* Loops have been replaced with list functions such as "map" or recursion.
+* クラスやメソッドはモジュールや関数に置き換えられ、値は一般的に不変です。
+* 高階関数がインターフェースや継承の代わりに使われます。
+* パターンマッチングが制御フローに広く使用されます。
+* ループは「map」などのリスト関数や再帰に置き換えられています。
 
-There are two different paths that can get you to this level. 
+このレベルに到達する方法は2つあります。
 
-* The first path is to do a basic direct port to F#, and then refactor the F# code.
-* The second path is to convert the existing imperative code to functional code while staying in C#, and only then port the functional C# code to functional F# code!  
+* 1つ目は、F#に基本的な直接移植を行い、そのF#コードをリファクタリングする方法です。
+* 2つ目は、既存の命令型コードをC#内で関数型コードに変換し、その後で関数型C#コードを関数型F#コードに移植する方法です！
 
-The second option might seem clumsy, but for real code it will probably be both faster and more comfortable. Faster because you can use a tool such as Resharper to do the refactoring, and more comfortable because you are working in C# until the final port. This approach also makes it clear that the hard part is not the actual port from C# to F#, but the conversion of imperative code to functional code!  
+2つ目の選択肢は面倒に見えるかもしれませんが、実際のコードではおそらくより速く、より快適です。Resharperなどのツールを使ってリファクタリングができるため速く、最終的な移植まではC#で作業できるため快適です。このアプローチはまた、難しい部分がC#からF#への実際の移植ではなく、命令型コードから関数型コードへの変換であることを明確にします！
 
-### Advanced Level: Types represent the domain ###
+### 上級レベル：型がドメインを表現
 
-At this final level, not only is the code functional, but the design itself has been changed to exploit the power of algebraic data types (especially union types). 
+この最終レベルでは、コードが関数型であるだけでなく、設計自体が代数的データ型（特に判別共用体）の力を活用するように変更されています。
 
-The domain will have been [encoded into types](../posts/designing-with-types-single-case-dus.md) such that [illegal states are not even representable](../posts/designing-with-types-making-illegal-states-unrepresentable.md), and [correctness is enforced at compile time](../posts/correctness-type-checking.md).
-For a concrete demonstration of the power of this approach, see the [shopping cart example](../posts/designing-for-correctness) in the ["F# を使う理由" series](../series/why-use-fsharp.md) and the whole ["Designing with types" series](../series/designing-with-types.md).
+ドメインは[型にエンコードされ](../posts/designing-with-types-single-case-dus.md)、[不正な状態が表現できないようになっており](../posts/designing-with-types-making-illegal-states-unrepresentable.md)、[正しさがコンパイル時に強制されます](../posts/correctness-type-checking.md)。
+このアプローチの威力を具体的に示すには、[「F#を使う理由」シリーズ](../series/why-use-fsharp.md)の[ショッピングカートの例](../posts/designing-for-correctness.md)と[「型を使って設計する」シリーズ](../series/designing-with-types.md)全体を参照してください。
 
-This level can only be done in F#, and is not really practical in C#. 
+このレベルはF#でのみ実現可能で、C#では実用的ではありません。
 
-### Porting diagram ###
+### 移植の図
 
-Here is a diagram to help you visualize the various porting paths described above.
+上で説明したさまざまな移植経路を視覚化するのに役立つ図を以下に示します。
 
-![four key concepts](../assets/img/porting-paths.png)
+![4つの主要概念](../assets/img/porting-paths.png)
  
-## The approach for this series ##
+## このシリーズのアプローチ
 
-To see how these three levels work in practice, we'll apply them to some worked examples:
+これら3つのレベルが実際にどのように機能するかを見るため、いくつかの実例に適用します：
 
-* The first example is a simple system for creating and scoring a ten-pin bowling game, based on the code from the well known "bowling game kata" described by "Uncle" Bob Martin. The original C# code has only one class and about 70 lines of code, but even so, it demonstrates a number of important principles.
-* Next, we'll look at some shopping cart code, based on [this example](../posts/designing-for-correctness.md).
-* The final example is code that represents states for a subway turnstile system, also based on an example from Bob Martin. This example demonstrates how the union types in F# can represent a state transition model more easily than the OO approach. 
+* 最初の例は、"Uncle" Bob Martinが説明した有名な「ボウリングゲームカタ」のコードに基づいた、10ピンボウリングゲームの作成と得点計算のシンプルなシステムです。元のC#コードはクラスが1つだけで約70行のコードですが、それでも多くの重要な原則を示しています。
+* 次に、[この例](../posts/designing-for-correctness.md)に基づいたショッピングカートのコードを見ていきます。
+* 最後の例は、Bob Martinの例に基づいた地下鉄の改札システムの状態を表すコードです。この例は、F#の判別共用体がオブジェクト指向アプローチよりも簡単に状態遷移モデルを表現できることを示しています。
 
-But first, before we get started on the detailed examples, we'll go back to basics and do some simple porting of some code snippets. That will be the topic of the next post.
+しかし、詳細な例に取り掛かる前に、基本に立ち返ってコードスニペットの簡単な移植を行います。それが次の投稿のテーマになります。
 
