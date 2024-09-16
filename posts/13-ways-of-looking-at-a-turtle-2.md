@@ -24,13 +24,13 @@ categories: [パターン]
 * [方法7. 関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)：関数パラメータを渡すことで実装をAPIから分離します。
 * [方法8. Stateモナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)：状態を追跡するための特別な「タートルワークフロー」コンピュテーション式を作ります。
 * [方法9. コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)：タートルコマンドを表す型を作り、コマンドのリストを一括処理します。
-* [間奏：データ型による意識的な分離](../posts/13-ways-of-looking-at-a-turtle.md#decoupling)。分離のためのデータ対インターフェースの使用に関するメモ。
+* [間奏：データ型を使った意識的な分離](../posts/13-ways-of-looking-at-a-turtle.md#decoupling)。分離のためのデータ対インターフェースの使用に関するメモ。
 * [方法10. イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)：過去のイベントのリストから状態を構築します。
 * [方法11. 関数型リアクティブプログラミング（ストリーム処理）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)：ビジネスロジックが以前のイベントに反応することに基づいています。
 * [エピソードV：タートルの逆襲](../posts/13-ways-of-looking-at-a-turtle-2.md#strikes-back)：タートルAPIが変更され、一部のコマンドが失敗する可能性がでてきます。
 * [方法12. モナディック制御フロー](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)：以前のコマンドの結果に基づいてタートルワークフロー内で決定を行います。
 * [方法13. タートルインタープリター](../posts/13-ways-of-looking-at-a-turtle-2.md#way13)：タートルのプログラミングとタートルの実装を完全に分離し、フリーモナドに近づきます。
-* [使用したすべての技術のレビュー](../posts/13-ways-of-looking-at-a-turtle-2.md#review)。
+* [使用したテクニックの再確認](../posts/13-ways-of-looking-at-a-turtle-2.md#review)。
 
 拡大版には、おまけの方法が2つあります。
 
@@ -795,7 +795,7 @@ Move 60.0
 
 最後のアプローチでは、タートルのプログラミングとその解釈を*完全に*分離する方法を見ていきます。
 
-これは[コマンドオブジェクトを使用したバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)アプローチに似ていますが、
+これは[使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)アプローチに似ていますが、
 コマンドの出力に応答できるように拡張されています。
 
 ### インタープリターの設計
@@ -1270,13 +1270,13 @@ let drawTwoLines log = turtleProgram {
 
 <a id="review"></a>
 
-## 使用された技術のレビュー
+## 使用したテクニックの再確認
 
-この投稿では、タートルAPIを実装する13の異なる方法を見てきました。様々な技術を使用しました。使用されたすべての技術を簡単に振り返ってみましょう：
+この投稿では、タートルAPIを実装する13の異なる方法を見てきました。様々なテクニックを使用しました。使用されたすべてのテクニックを簡単に振り返ってみましょう：
 
 * **純粋でステートレスな関数**。FP指向のすべての例で見られます。これらはすべてテストやモックが非常に容易です。
 * **部分適用**。[最もシンプルなFPの例（方法2）](../posts/13-ways-of-looking-at-a-turtle.md#way2)で初めて見られ、メインフローがパイピングを使用できるようにタートル関数にロギング関数が適用されました。
-  その後、特に[「関数を使用した依存性注入アプローチ」（方法7）](../posts/13-ways-of-looking-at-a-turtle.md#way7)で広く使用されました。
+  その後、特に[「関数を使った依存性注入アプローチ」（方法7）](../posts/13-ways-of-looking-at-a-turtle.md#way7)で広く使用されました。
 * **オブジェクト式**。クラスを作成せずにインターフェースを実装するために使用されました（[方法6](../posts/13-ways-of-looking-at-a-turtle.md#way6)参照）。
 * **Result型**（別名Eitherモナド）。すべての関数型APIの例（[例えば方法4](../posts/13-ways-of-looking-at-a-turtle.md#way4)）で、例外を投げる代わりにエラーを返すために使用されました。
 * **アプリカティブ「リフティング」**（例：`lift2`）。通常の関数を`Result`の世界に持ち上げるために使用されました（[方法4](../posts/13-ways-of-looking-at-a-turtle.md#way4)など）。

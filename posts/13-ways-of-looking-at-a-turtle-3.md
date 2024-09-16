@@ -23,7 +23,7 @@ categories: [パターン]
 * [方法2：基本的な関数型アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way2)。不変の状態を持つ関数のモジュールを作成します。
 * [方法3：オブジェクト指向コアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way3)。状態を持つコアクラスを呼び出すオブジェクト指向APIを作成します。
 * [方法4：関数型コアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way4)。状態を持たないコア関数を使う状態を持つAPIを作成します。
-* [方法5：エージェントの前にあるAPI](../posts/13-ways-of-looking-at-a-turtle.md#way5)。エージェントとメッセージキューを使って通信するAPIを作成します。
+* [方法5：エージェントの前面にあるAPI](../posts/13-ways-of-looking-at-a-turtle.md#way5)。エージェントとメッセージキューを使って通信するAPIを作成します。
 * [方法6：インターフェースを使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way6)。インターフェースや関数のレコードを使って実装とAPIを分離します。
 * [方法7：関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)。関数パラメータを渡すことで実装とAPIを分離します。
 * [方法8：状態モナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)。状態を追跡する特別な「タートルワークフロー」計算式を作成します。
@@ -32,9 +32,9 @@ categories: [パターン]
 * [方法10：イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)。過去のイベントのリストから状態を構築します。
 * [方法11：関数型リアクティブプログラミング（ストリーム処理）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)。ビジネスロジックを過去のイベントへの反応に基づいて構築します。
 * [エピソードV：タートルの逆襲](../posts/13-ways-of-looking-at-a-turtle-2.md#strikes-back)。タートルAPIを変更し、一部のコマンドが失敗する可能性を導入します。
-* [方法12：モナドを使った制御フロー](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)。タートルワークフロー内で、以前のコマンドの結果に基づいて決定を行います。
-* [方法13：タートルインタープリタ](../posts/13-ways-of-looking-at-a-turtle-2.md#way13)。タートルのプログラミングと実装を完全に分離し、フリーモナドに近づきます。
-* [使用したテクニックの総括](../posts/13-ways-of-looking-at-a-turtle-2.md#review)。
+* [方法12：モナディック制御フロー](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)。タートルワークフロー内で、以前のコマンドの結果に基づいて決定を行います。
+* [方法13：タートルインタープリター](../posts/13-ways-of-looking-at-a-turtle-2.md#way13)。タートルのプログラミングと実装を完全に分離し、フリーモナドに近づきます。
+* [使用したテクニックの再確認](../posts/13-ways-of-looking-at-a-turtle-2.md#review)。
 
 この投稿のソースコードは[GitHub](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle)で入手できます。
 
@@ -202,7 +202,7 @@ F#での抽象データ型についての詳細は、Bryan Eddsによる[この�
 
 ## 15：ケイパビリティベースのタートル
 
-[方法12](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)の「モナドを使った制御フロー」アプローチでは、タートルが障壁に当たったことを知らせる応答を処理しました。
+[方法12](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)の「モナディック制御フロー」アプローチでは、タートルが障壁に当たったことを知らせる応答を処理しました。
 
 しかし、障壁に当たったにもかかわらず、`move`操作を何度も呼び出すことを止められませんでした。
 
