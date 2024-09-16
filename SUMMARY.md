@@ -133,7 +133,7 @@
   * [制約付き文字列](posts/designing-with-types-more-semantic-types.md)
   * [文字列以外の型](posts/designing-with-types-non-strings.md)
   * [型を使って設計する: 結論](posts/designing-with-types-conclusion.md)
-* [代数型サイズとドメインモデリング](posts/type-size-and-design.md)
+* [代数的型のサイズとドメインモデリング](posts/type-size-and-design.md)
 * [カメの十三通りの見方](posts/13-ways-of-looking-at-a-turtle.md)
   * [カメの十三通りの見方 (パート2)](posts/13-ways-of-looking-at-a-turtle-2.md)
   * [カメの十三通りの見方 - 補遺](posts/13-ways-of-looking-at-a-turtle-3.md)

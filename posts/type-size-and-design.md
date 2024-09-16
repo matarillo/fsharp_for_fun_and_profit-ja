@@ -1,23 +1,23 @@
 ---
 layout: post
-title: "Algebraic type sizes and domain modelling"
-description: "Comprehending cardinality for fun and profit"
+title: "代数的型のサイズとドメインモデリング"
+description: "趣味と実益を兼ねた濃度の理解"
 categories: []
 ---
 
-In this post, we'll look at how to calculate the "size", or cardinality, of an algebraic type, and see how this knowledge can help us with design decisions.
+この記事では、代数的型の「サイズ」、つまり集合で言う濃度の計算方法と、この知識が設計の決定にどう役立つかを見ていきます。
 
-## Getting started
+## はじめに
 
-I'm going to define the "size" of a type by thinking of it as a set, and counting the number of possible elements.  
+型の「サイズ」を定義するために、それを集合と考え、可能な要素の数を数えます。
 
-For example, there are two possible booleans, so the size of the `Boolean` type is two.
+例えば、可能なブール値は2つなので、`Boolean`型のサイズは2です。
 
-Is there a type with size one? Yes -- the `unit` type only has one value: `()`.
+サイズが1の型はあるでしょうか？はい、`unit`型にはただ1つの値しかありません。それは`()`です。
 
-Is there a type with size zero? That is, is there a type that has no values at all? Not in F#, but in Haskell there is. It is called `Void`.
+サイズが0の型はあるでしょうか？つまり、値が全くない型は存在するでしょうか？F#にはありませんが、Haskellにはあります。それは`Void`と呼ばれます。
 
-What about a type like this:
+次のような型ではどうでしょうか。
 
 ```fsharp
 type ThreeState = 
@@ -26,9 +26,9 @@ type ThreeState =
     | Unknown
 ```
 
-What is its size?  There are three possible values, so the size is three.
+このサイズはいくつでしょうか？可能な値は3つなので、サイズは3です。
 
-What about a type like this:
+次のような型はどうでしょうか。
 
 ```fsharp
 type Direction = 
@@ -38,16 +38,16 @@ type Direction =
     | West
 ```
 
-Obviously, four.
+明らかに4です。
 
-I think you get the idea! 
+これでお分かりいただけたと思います！
 
-## Calculating the size of compound types
+## 複合型のサイズの計算
 
-Let's look at calculating the sizes of compound types now. If you remember from the [understanding F# types](../series/understanding-fsharp-types.md) series,
-there are two kinds of algebraic types: "product" types such as [tuples](../posts/tuples.md) and records, and "sum" types, called [discriminated unions](../posts/discriminated-unions.md) in F#.
+ここで、複合型のサイズの計算を見ていきましょう。[「F# の型を理解する」](../series/understanding-fsharp-types.md)シリーズを思い出してほしいのですが、代数的型には2種類あります。
+[タプル](../posts/tuples.md)やレコードなどの「積」型と、F#では[判別共用体](../posts/discriminated-unions.md)と呼ばれる「和」型です。
 
-For example, let's say that we have a `Speed` as well as a `Direction`, and we combine them into a record type called `Velocity`:
+例えば、`Speed`と`Direction`があり、それらを`Velocity`というレコード型に組み合わせるとします。
 
 ```fsharp
 type Speed = 
@@ -60,9 +60,9 @@ type Velocity = {
     }
 ```
 
-What is the size of `Velocity`?  
+`Velocity`のサイズはいくつでしょうか？
 
-Here's every possible value:
+可能な値をすべて書き出すと以下のようになります。
 
 ```fsharp
 {direction=North; speed=Slow}; {direction=North; speed=Fast}
@@ -71,41 +71,41 @@ Here's every possible value:
 {direction=West;  speed=Slow}; {direction=West;  speed=Fast}
 ```
 
-There are eight possible values, one for every possible combination of the two `Speed` values and the four `Direction` values.
+可能な値は8つあり、2つの`Speed`値と4つの`Direction`値のすべての組み合わせに対応しています。
 
-We can generalize this into a rule:
+これを一般化してルールにすると次のようになります。
 
-* **RULE: The size of a product type is the *product* of the sizes of the component types.**
+* **ルール：直積型のサイズは、構成要素の型のサイズの積です。**
 
-That is, given a record type like this:
+つまり、次のようなレコード型があるとします。
 
 ```fsharp
 type RecordType = {
     a : TypeA
     b : TypeB }
 ```
-    
-The size is calculated like this:
-    
+
+サイズは次のように計算されます。
+
 ```fsharp
 size(RecordType) = size(TypeA) * size(TypeB)
 ```
 
-And similarly for a tuple:
+同様に、タプルの場合も
 
 ```fsharp
 type TupleType = TypeA * TypeB    
 ```
-    
-The size is:
-    
+
+サイズはこのようになります。
+
 ```fsharp
 size(TupleType) = size(TypeA) * size(TypeB)
 ```
 
-### Sum types
+### 直和型
 
-Sum types can be analyzed the same way. Given a type `Movement` defined like this:
+直和型も同じように分析できます。次のように定義された`Movement`型があるとします。
 
 ```fsharp
 type Movement = 
@@ -113,7 +113,7 @@ type Movement =
     | NotMoving
 ```
 
-We can write out and count all the possibilities:
+可能性をすべて書き出して数えると
 
 ```fsharp
 Moving North
@@ -123,7 +123,7 @@ Moving West
 NotMoving
 ```
 
-So, five in all. Which just happens to be `size(Direction) + 1`.  Here's another fun one:
+合計で5つです。これは偶然にも`size(Direction) + 1`になります。こちらも面白い例です。
 
 ```fsharp
 type ThingsYouCanSay =
@@ -141,7 +141,7 @@ type HelloGoodbye =
     | ISay of ThingsICanSay 
 ```
 
-Again, we can write out and count all the possibilities:
+ここでも、可能性をすべて書き出して数えてみましょう。
 
 ```fsharp
 YouSay Yes
@@ -152,31 +152,31 @@ YouSay Goodbye
 ISay Hello
 ```
 
-There are three possible values in the `YouSay` case, and three possible values in the `ISay` case, making six in all.
+`YouSay`ケースで3つの可能な値があり、`ISay`ケースでも3つの可能な値があるので、合計6つになります。
 
-Again, we can make a general rule.
+ここでも、一般的なルールを作ることができます。
 
-* **RULE: The size of a sum or union type is the *sum* of the sizes of the component types.**
+* **ルール：直和型または共用体型のサイズは、構成要素の型のサイズの和です。**
 
-That is, given a union type like this:
+つまり、次のような共用体型があるとします。
 
 ```fsharp
 type SumType = 
     | CaseA of TypeA
     | CaseB of TypeB
 ```
-    
-The size is calculated like this:
-    
+
+サイズは次のように計算されます。
+
 ```fsharp
 size(SumType) = size(TypeA) + size(TypeB)
 ```
 
-## Working with generic types
+## ジェネリック型の扱い
 
-What happens if we throw generic types into the mix?
+ジェネリック型を加えるとどうなるでしょうか？
 
-For example, what is the size of a type like this:
+例えば、次のような型のサイズはどうでしょうか。
 
 ```fsharp
 type Optional<'a> =   
@@ -184,17 +184,17 @@ type Optional<'a> =
     | Nothing
 ```
 
-Well, the first thing to say is that `Optional<'a>` is not a *type* but a *type constructor*. `Optional<string>` is a type. `Optional<int>` is a type, but `Optional<'a>` isn't.
+まず言えることは、`Optional<'a>`は「型」ではなく「型コンストラクタ」だということです。`Optional<string>`は型です。`Optional<int>`も型ですが、`Optional<'a>`は型ではありません。
 
-Nevertheless, we can still calculate its size by noting that `size(Optional<string>)` is just `size(string) + 1`, `size(Optional<int>)` is just `size(int) + 1`, and so on.
+それでも、`size(Optional<string>)`が`size(string) + 1`、`Optional<int>`が`size(int) + 1`となることに注目すれば、サイズを計算できます。
 
-So we can say:
+つまり、次のように言えます。
 
 ```fsharp
 size(Optional<'a>) = size('a) + 1
 ```
 
-Similarly, for a type with two generics like this:
+同様に、次のような2つのジェネリックを持つ型の場合
 
 ```fsharp
 type Either<'a,'b> =   
@@ -202,17 +202,17 @@ type Either<'a,'b> =
     | Right of 'b
 ```
 
-we can say that its size can be calculated using the size of the generic components (using the "sum rule" above):
+そのサイズは、ジェネリック構成要素のサイズを使って計算できます（上記の「和のルール」を使用）。
 
 ```fsharp
 size(Either<'a,'b>) = size('a) + size('b)
 ```
 
-## Recursive types
+## 再帰型
 
-What about a recursive type? Let's look at the simplest one, a linked list.  
+再帰型はどうでしょうか？最も単純なものとして、連結リストを見てみましょう。
 
-A linked list is either empty, or it has a cell with a tuple: a head and a tail. The head is an `'a` and the tail is another list. Here's the definition:
+連結リストは空か、タプルを持つセルがあります。先頭は`'a`で、末尾は別のリストです。定義は次のようになります。
 
 ```fsharp
 type LinkedList<'a> = 
@@ -220,80 +220,80 @@ type LinkedList<'a> =
     | Node of head:'a * tail:LinkedList<'a>
 ```
 
-To calculate the size, let's assign some names to the various components:
+サイズを計算するために、各構成要素に名前をつけましょう。
 
 ```fsharp
 let S = size(LinkedList<'a>)
 let N = size('a)
 ```
 
-Now we can write:
+これで次のように書けます。
 
 ```fsharp
 S = 
-    1         // Size of "Empty" case 
-    +         // Union type
-    N * S     // Size of "Cell" case using tuple size calculation
+    1         // "Empty"ケースのサイズ
+    +         // 共用体型
+    N * S     // タプルサイズ計算を使用した"Cell"ケースのサイズ
 ```
 
-Let's play with this formula a bit. We start with: 
+この式で少し遊んでみましょう。まず
 
 ```fsharp
 S = 1 + (N * S)
 ```
 
-and let's substitute the last S with the formula to get:
+から始めて、最後のSを式で置き換えると
 
 ```fsharp
 S = 1 + (N * (1 + (N * S)))
 ```
 
-If we clean this up, we get:
+整理すると
 
 ```fsharp
 S = 1 + N + (N^2 * S)
 ```
 
-(where `N^2` means "N squared")
+（ここで`N^2`は「Nの2乗」を意味します）
 
-Let's substitute the last S with the formula again:
+再び最後のSを式で置き換えると
 
 ```fsharp
 S = 1 + N + (N^2 * (1 + (N * S)))
 ```
 
-and clean up again:
+さらに整理すると
 
 ```fsharp
 S = 1 + N + N^2 + (N^3 * S)
 ```
 
-You can see where this is going! The formula for `S` can be expanded out indefinitely to be:
+このパターンが見えてきましたね！`S`の式は無限に展開できます。
 
 ```fsharp
 S = 1 + N + N^2 + N^3 + N^4 + N^5 + ...
 ```
 
-How can we interpret this?  Well, we can say that a list is a union of the following cases:
+これをどう解釈すればいいでしょうか？リストは次のケースの和だと言えます。
 
-* an empty list(size = 1)
-* a one element list (size = N)
-* a two element list (size = N x N)
-* a three element list (size = N x N x N)
-* and so on.
+* 空のリスト（サイズ = 1）
+* 1要素のリスト（サイズ = N）
+* 2要素のリスト（サイズ = N x N）
+* 3要素のリスト（サイズ = N x N x N）
+* 以下同様
 
-And this formula has captured that.
+この式がそれを表現しています。
 
-As an aside, you can calculate `S` directly using the formula `S = 1/(1-N)`, which means that a list of `Direction` (size=4) has size "-1/3".
-Hmmm, that's strange! It reminds me of [this "-1/12" video](https://www.youtube.com/watch?v=w-I6XTVZXww).
+余談ですが、`S = 1/(1-N)`という式を使って`S`を直接計算できます。これは`Direction`（サイズ=4）のリストのサイズが「-1/3」になることを意味します。
+うーん、変ですね！これは[この「-1/12」の動画](https://www.youtube.com/watch?v=w-I6XTVZXww)を思い出させます。
 
-## Calculating the size of functions
+## 関数のサイズの計算
 
-What about functions? Can they be sized?
+関数はどうでしょうか？サイズを計算できるでしょうか？
 
-Yes, all we need to do is write down every possible implementation and count them. Easy!
+もちろん、可能な実装をすべて書き出して数えるだけです。簡単ですね！
 
-For example, say that we have a function `SuitColor` that maps a card `Suit` to a `Color`, red or black.
+例えば、カードの`Suit`（スート）を`Color`（色）に対応させる`SuitColor`関数があるとします。
 
 ```fsharp
 type Suit = Heart | Spade | Diamond | Club
@@ -302,19 +302,19 @@ type Color = Red | Black
 type SuitColor = Suit -> Color
 ```
 
-One implementation would be to return red, no matter what suit was provided:
+1つの実装は、どのスートが与えられても赤を返すものです。
 
 ```fsharp
 (Heart -> Red); (Spade -> Red); (Diamond -> Red); (Club -> Red)
 ```
 
-Another implementation would be to return red for all suits except `Club`:
+別の実装は、`Club`以外のすべてのスートに対して赤を返すものです。
 
 ```fsharp
 (Heart -> Red); (Spade -> Red); (Diamond -> Red); (Club -> Black)
 ```
 
-In fact we can write down all 16 possible implementations of this function:
+実際、この関数の可能な実装をすべて書き出すと16通りあります。
 
 ```fsharp
 (Heart -> Red); (Spade -> Red); (Diamond -> Red); (Club -> Red)
@@ -323,7 +323,7 @@ In fact we can write down all 16 possible implementations of this function:
 (Heart -> Red); (Spade -> Red); (Diamond -> Black); (Club -> Black)
 
 (Heart -> Red); (Spade -> Black); (Diamond -> Red); (Club -> Red)
-(Heart -> Red); (Spade -> Black); (Diamond -> Red); (Club -> Black)  // the right one!
+(Heart -> Red); (Spade -> Black); (Diamond -> Red); (Club -> Black)  // 正しいもの！
 (Heart -> Red); (Spade -> Black); (Diamond -> Black); (Club -> Red)
 (Heart -> Red); (Spade -> Black); (Diamond -> Black); (Club -> Black)
 
@@ -338,10 +338,10 @@ In fact we can write down all 16 possible implementations of this function:
 (Heart -> Black); (Spade -> Black); (Diamond -> Black); (Club -> Black)
 ```
 
-Another way to think of it is that we can define a record type where each value represents a particular implementation:
-which color do we return for a `Heart` input, which color do we return for a `Spade` input, and so on.
+別の見方をすると、各値が特定の実装を表すレコード型を定義できます。
+`Heart`入力に対してどの色を返すか、`Spade`入力に対してどの色を返すか、といった具合です。
 
-The type definition for the implementations of `SuitColor` would therefore look like this:
+`SuitColor`の実装の型定義は次のようになります。
 
 ```fsharp
 type SuitColorImplementation = {
@@ -351,42 +351,42 @@ type SuitColorImplementation = {
     Club : Color }
 ```
 
-What is the size of this record type?  
+このレコード型のサイズはいくつでしょうか？
 
 ```fsharp
 size(SuitColorImplementation) = size(Color) * size(Color) * size(Color) * size(Color)
 ```
 
-There are four `size(Color)` here. In other words, there is one `size(Color)` for every input, so we could write this as:
+ここには4つの`size(Color)`があります。言い換えると、入力ごとに1つの`size(Color)`があるので、次のように書けます。
 
 ```fsharp
-size(SuitColorImplementation) = size(Color) to the power of size(Suit)
+size(SuitColorImplementation) = size(Color)のsize(Suit)乗
 ```
 
-In general, then, given a function type: 
+一般に、次のような関数型があるとします。
 
 ```fsharp
 type Function<'input,'output> = 'input -> 'output
 ```
 
-The size of the function is `size(output type)` to the power of `size(input type)`:
+関数のサイズは`size(出力型)`の`size(入力型)`乗になります。
 
 ```fsharp
 size(Function) =  size(output) ^ size(input)
 ```
 
-Lets codify that into a rule too:
+これもルールにしましょう。
 
-* **RULE: The size of a function type is `size(output type)` to the power of `size(input type)`.**
+* **ルール：関数型のサイズは`size(出力型)`の`size(入力型)`乗です。**
 
 
-## Converting between types
+## 型間の変換
 
-All right, that is all very interesting, but is it *useful*?
+さて、これはとても興味深いですが、実用的でしょうか？
 
-Yes, I think it is. I think that understanding sizes of types like this helps us design conversions from one type to another, which is something we do a lot of!
+私はそう思います。このような型のサイズを理解することは、ある型から別の型への変換を設計する上で役立ちます。これは私たちがよく行うことです！
 
-Let's say that we have a union type and a record type, both representing a yes/no answer:
+例えば、はい/いいえの回答を表す共用体型とレコード型があるとします。
 
 ```fsharp
 type YesNoUnion = 
@@ -397,9 +397,9 @@ type YesNoRecord = {
     isYes: bool }
 ```
 
-How can we map between them?
+これらの間でどのようにマッピングできるでしょうか？
 
-They both have size=2, so we should be able to map each value in one type to the other, and vice versa:
+両方ともサイズは2なので、一方の型の各値を他方の型に対応させることができるはずです。
 
 ```fsharp
 let toUnion yesNoRecord =
@@ -414,10 +414,10 @@ let toRecord yesNoUnion =
     | No ->  {isYes = false}
 ```
 
-This is what you might call a "lossless" conversion. If you round-trip the conversion, you can recover the original value.
-Mathematicians would call this an *isomorphism* (from the Greek "equal shape").
+これは「損失のない」変換と呼べるものです。変換を往復させると、元の値を復元できます。
+数学者はこれを同型写像（アイソモーフィズム：ギリシャ語で「同じ形」の意味）と呼びます。
 
-What about another example? Here's a type with three cases, yes, no, and maybe.
+別の例を見てみましょう。はい、いいえ、たぶんの3つのケースを持つ型があります。
 
 ```fsharp
 type YesNoMaybe = 
@@ -426,15 +426,15 @@ type YesNoMaybe =
     | Maybe
 ```
 
-Can we losslessly convert this to this type?
+この型を次の型に損失なく変換できるでしょうか？
 
 ```fsharp
 type YesNoOption = { maybeIsYes: bool option }    
 ```
 
-Well, what is the size of an `option`? One plus the size of the inner type, which in this case is a `bool`. So `size(YesNoOption)` is also three.
+`option`のサイズはいくつでしょうか？内部の型のサイズに1を足したものです。この場合、内部の型は`bool`です。したがって、`YesNoOption`のサイズも3です。
 
-Here are the conversion functions:
+変換関数は次のようになります。
 
 ```fsharp
 let toYesNoMaybe yesNoOption =
@@ -449,11 +449,11 @@ let toYesNoOption yesNoMaybe =
     | Maybe -> {maybeIsYes = None}
 ```
 
-So we can make a rule:
+ここからルールを作れます。
 
-* **RULE: If two types have the same size, you can create a pair of lossless conversion functions**
+* **ルール：2つの型のサイズが同じであれば、損失のない変換関数のペアを作成できます**
 
-Let's try it out.  Here's a `Nibble` type and a `TwoNibbles` type:
+試してみましょう。`Nibble`型と`TwoNibbles`型があります。
 
 ```fsharp
 type Nibble = {
@@ -467,36 +467,36 @@ type TwoNibbles = {
     low: Nibble }
 ```
 
-Can we convert `TwoNibbles` to a `byte` and back?
+`TwoNibbles`を`byte`に、そしてその逆に変換できるでしょうか？
 
-The size of `Nibble` is `2 x 2 x 2 x 2` = 16 (using the product size rule), and the size of `TwoNibbles` is size(Nibble) x size(Nibble), or `16 x 16`, which is 256.
+`Nibble`のサイズは`2 x 2 x 2 x 2` = 16（積のサイズルールを使用）で、`TwoNibbles`のサイズはsize(Nibble) x size(Nibble)、つまり`16 x 16`で256です。
 
-So yes, we can convert from `TwoNibbles` to a `byte` and back.
+したがって、`TwoNibbles`から`byte`への、そしてその逆の変換が可能です。
 
-## Lossy conversions
+## 損失のある変換
 
-What happens if the types are different sizes?
+型のサイズが異なる場合はどうなるでしょうか？
 
-If the target type is "larger" than the source type, then you can always map without loss, but if the target type is "smaller" than the source type, you have a problem. 
+目標の型が元の型より「大きい」場合は、常に損失なく変換できます。しかし、目標の型が元の型より「小さい」場合は問題があります。
 
-For example, the `int` type is smaller than the `string` type.  You can convert an `int` to a `string` accurately, but you can't convert a `string` to an `int` easily.
+例えば、`int`型は`string`型より小さいです。`int`を正確に`string`に変換できますが、`string`を簡単に`int`に変換することはできません。
 
-If you *do* want to map a string to an int, then some of the non-integer strings will have to be mapped to a special, non-integer value in the target type:
+`string`を`int`にマッピングしたい場合、整数でない文字列の一部を、目標の型の特別な非整数値にマッピングする必要があります。
 
 ![](../assets/img/type-size-1.png)
 
-In other words we know from the sizes that the target type can't just be an `int` type, it must be an `int + 1` type. In other words, an Option type!
+つまり、サイズから、目標の型は単なる`int`型ではなく、`int + 1`型でなければならないことがわかります。言い換えると、Option型です！
 
-Interestingly, the `Int32.TryParse` function in the BCL returns two values, a success/failure `bool` and the parsed result as an `int`. In other words, a tuple `bool * int`.
+興味深いことに、BCLの`Int32.TryParse`関数は2つの値（成功/失敗を示す`bool`と、パースされた結果の`int`）を返します。つまり、`bool * int`というタプルです。
 
-The size of that tuple is `2 x int`, many more values that are really needed. Option types ftw!
+そのタプルのサイズは`2 x int`で、実際に必要な値よりもはるかに多くなります。Option型の勝利です！
 
-Now let's say we are converting from a `string` to a `Direction`. Some strings are valid, but most of them are not. But this time, instead of having one invalid case, let's also
-say that we want to distinguish between empty inputs, inputs that are too long, and other invalid inputs. 
+次に、`string`を`Direction`に変換する場合を考えてみましょう。一部の文字列は有効ですが、ほとんどは無効です。
+しかし今回は、1つの無効なケースを持つのではなく、空の入力、長すぎる入力、その他の無効な入力を区別したいとします。
 
 ![](../assets/img/type-size-2.png)
 
-We can't model the target with an Option any more, so let's design a custom type that contains all seven cases:
+もはやOption型で目標をモデル化することはできないので、7つのケースすべてを含むカスタム型を設計しましょう。
 
 ```fsharp
 type StringToDirection_V1 = 
@@ -509,7 +509,7 @@ type StringToDirection_V1 =
     | TooLong
 ```
 
-But this design mixes up successful conversions and failed conversions. Why not separate them?
+しかし、この設計は成功した変換と失敗した変換を混在させています。分離してはどうでしょうか？
 
 ```fsharp
 type Direction = 
@@ -528,22 +528,22 @@ type StringToDirection_V2 =
     | Failure of ConversionFailure
 ```
 
-What is the size of `StringToDirection_V2`?  
+`StringToDirection_V2`のサイズはいくつでしょうか？
 
-There are 4 choices of `Direction` in the `Success` case, and three choices of `ConversionFailure` in the `Failure` case,
-so the total size is seven, just as in the first version. 
+`Success`ケースには4つの`Direction`の選択肢があり、`Failure`ケースには3つの`ConversionFailure`の選択肢があるので、
+合計サイズは7で、最初のバージョンと同じです。
 
-In other words, both of these designs are *equivalent* and we can use either one.  
+つまり、これらの設計は「等価」で、どちらも使えるということです。
 
-Personally, I prefer version 2, but if we had version 1 in our legacy code, the good news is that we can losslessly convert from version 1 to version 2 and back again.
-Which in turn means that we can safely refactor to version 2 if we need to.
+個人的には、バージョン2を好みますが、レガシーコードにバージョン1があっても、バージョン1からバージョン2へ、そしてその逆へ損失なく変換できるのは良いニュースです。
+これは、必要に応じてバージョン2に安全にリファクタリングできることを意味します。
 
 
-## Designing the core domain
+## コアドメインの設計
 
-Knowing that different types can be losslessly converted allows you to tweak your domain designs as needed.
+異なる型間で損失なく変換できることを知ると、必要に応じてドメイン設計を調整できます。
 
-For example, this type:
+例えば、この型：
 
 ```fsharp
 type Something_V1 =
@@ -551,7 +551,7 @@ type Something_V1 =
     | CaseA2 of TypeX * TypeZ
 ```
 
-can be losslessly converted to this one:
+は、次のように損失なく変換できます。
 
 ```fsharp
 type Inner =
@@ -562,7 +562,7 @@ type Something_V2 =
     TypeX * Inner 
 ```
 
-or this one:
+あるいは、次のようにもできます。
 
 ```fsharp
 type Something_V3 = {
@@ -570,18 +570,18 @@ type Something_V3 = {
     inner: Inner }
 ```
 
-Here's a real example:
+実際の例を見てみましょう：
 
-* You have a website where some users are registered and some are not.
-* For all users, you have a session id
-* For registered users only, you have extra information
+* 登録ユーザーと未登録ユーザーがいるウェブサイトがあります。
+* すべてのユーザーにセッションIDがあります。
+* 登録ユーザーにのみ、追加情報があります。
 
-We could model that requirement like this:
+この要件を次のようにモデル化できます。
 
 ```fsharp
 module Customer_V1 =
 
-    type UserInfo = {name:string} //etc
+    type UserInfo = {name:string} //など
     type SessionId = SessionId of int
 
     type WebsiteUser = 
@@ -589,12 +589,12 @@ module Customer_V1 =
         | GuestUser of SessionId 
 ```
 
-or alternatively, we can pull the common `SessionId` up to a higher level like this:
+あるいは、共通の`SessionId`を上位レベルに引き上げて、次のようにもできます。
 
 ```fsharp
 module Customer_V2 =
 
-    type UserInfo = {name:string} //etc
+    type UserInfo = {name:string} //など
     type SessionId = SessionId of int
 
     type WebsiteUserInfo = 
@@ -606,24 +606,24 @@ module Customer_V2 =
         info: WebsiteUserInfo }
 ```
 
-Which is better? In one sense, they are both the "same", but obviously the best design depends on the usage pattern.
+どちらが良いでしょうか？ある意味では、両方とも「同じ」ですが、使用パターンによって最適な設計は異なります。
 
-* If you care more about the type of user than the session id, then version 1 is better.
-* If you are constantly looking at the session id without caring about the type of user, then version 2 is better.
+* ユーザーの種類をセッションIDより重視する場合は、バージョン1が良いでしょう。
+* ユーザーの種類を気にせず、常にセッションIDを見る場合は、バージョン2が良いでしょう。
 
-The nice thing about knowing that they are isomorphic is that you can define *both* types if you like, use them in different contexts, and losslessly map between them as needed.
+これらが同型であることを知っていれば、必要に応じて両方の型を定義し、異なるコンテキストで使用し、必要に応じて損失なく相互に変換できるのが良い点です。
 
-## Interfacing with the outside world
+## 外部世界とのインターフェース
 
-We have all these nice domain types like `Direction` or `WebsiteUser` but at some point we need to interface with the outside world -- store them in a database,
-receive them as JSON, etc.
+`Direction`や`WebsiteUser`のようなきれいなドメイン型がありますが、どこかで外部世界とインターフェースを取る必要があります。
+データベースに保存したり、JSONとして受け取ったりする場合などです。
 
-The problem is that the outside world does not have a nice type system! Everything tends to be primitives: strings, ints and bools.
+問題は、外部世界には素晴らしい型システムがないことです！すべてが文字列、整数、ブール値などのプリミティブになりがちです。
 
-Going from our domain to the outside world means going from types with a "small" set of values to types with a "large" set of values, which we can do straightforwardly.
-But coming in from the outside world into our domain means going from a "large" set of values to a "small" set of values, which requires validation and error cases.
+私たちのドメインから外部世界に行くことは、「小さな」値の集合から「大きな」値の集合への移行を意味し、これは簡単にできます。
+しかし、外部世界から私たちのドメインに入ってくるということは、「大きな」値の集合から「小さな」値の集合への移行を意味し、これには検証とエラーケースが必要です。
 
-For example, a domain type might look like this:
+例えば、ドメイン型は次のようになるかもしれません：
 
 ```fsharp
 type DomainCustomer = {
@@ -632,9 +632,9 @@ type DomainCustomer = {
     Age: PositiveIntegerLessThan130 }
 ```
 
-The values are constrained: max 50 chars for the name, a validated email, an age which is between 1 and 129.  
+値には制約があります：名前は最大50文字、検証済みのメールアドレス、1から129の間の年齢です。
 
-On the other hand, the DTO type might look like this:
+一方、DTO型は次のようになるかもしれません：
 
 ```fsharp
 type CustomerDTO = {
@@ -643,46 +643,46 @@ type CustomerDTO = {
     Age: int }
 ```
 
-The values are unconstrained: any string for the name, a unvalidated email, an age that can be any of 2^32 different values, including negative ones.
+値に制約はありません：名前は任意の文字列、未検証のメールアドレス、2^32の異なる値（負の値を含む）を取り得る年齢です。
 
-This means that we *cannot* create a `CustomerDTO` to `DomainCustomer` mapping. We *have* to have at least one other value (`DomainCustomer + 1`) to map the
-invalid inputs onto, and preferably more to document the various errors. 
+これは、`CustomerDTO`から`DomainCustomer`へのマッピングを作成できないことを意味します。
+無効な入力をマッピングするために、少なくとも1つの別の値（`DomainCustomer + 1`）が必要で、できれば様々なエラーを文書化するためにさらに多くの値が必要です。
 
-This leads naturally to the `Success/Failure` model as described in my [functional error handling](http://fsharpforfunandprofit.com/rop/) talk,
+これは自然に、私の[関数型エラー処理](https://fsharpforfunandprofit.com/rop/)の講演で説明した`Success/Failure`モデルにつながります。
 
-The final version of the mapping would then be from a `CustomerDTO` to a `SuccessFailure<DomainCustomer>` or similar. 
+最終的なマッピングは、`CustomerDTO`から`SuccessFailure<DomainCustomer>`または類似のものへのマッピングになります。
 
-So that leads to the final rule:
+これから最後のルールが導かれます：
 
-* **RULE: Trust no one. If you import data from an external source, be sure to handle invalid input.**
+* **ルール：誰も信用しないこと。外部ソースからデータをインポートする場合は、必ず無効な入力を処理すること。**
 
-If we take this rule seriously, it has some knock on effects, such as:
+このルールを真剣に受け止めると、いくつかの影響があります：
 
-* Never try to deserialize directly to a domain type (e.g. no ORMs), only to DTO types.
-* Always validate every record you read from a database or other "trusted" source.
+* ドメイン型に直接デシリアライズしようとしない（例：ORMは使用しない）。DTOタイプにのみデシリアライズする。
+* データベースやその他の「信頼できる」ソースから読み取るすべてのレコードを常に検証する。
 
-You might think that having everything wrapped in a `Success/Failure` type can get annoying, and this is true (!), but there are ways to make this easier.
-See [this post](../posts/elevated-world-5.md#asynclist) for example.
+すべてが`Success/Failure`型でラップされていると面倒になると思うかもしれません。それは事実ですが（！）、これを簡単にする方法があります。
+例えば、[この投稿](../posts/elevated-world-5.md#asynclist)を参照してください。
 
-## Further reading
+## さらに読むべき資料
 
-The "algebra" of algebraic data types is well known. There is a good recent summary in
+代数的型の「代数」はよく知られています。最近の良いまとめとして、
 ["The algebra (and calculus!) of algebraic data types"](https://codewords.recurse.com/issues/three/algebra-and-calculus-of-algebraic-data-types)
-and a [series by Chris Taylor](https://chris-taylor.github.io/blog/2013/02/13/the-algebra-of-algebraic-data-types-part-iii/).
+と[Chris Taylorによるシリーズ](https://web.archive.org/web/20170929124618/http://chris-taylor.github.io/blog/2013/02/13/the-algebra-of-algebraic-data-types-part-iii/)があります。
 
-And after I wrote this, I was pointed to two similar posts:
+この記事を書いた後、2つの類似した投稿を指摘されました：
 
-* [One by Tomas Petricek](http://tomasp.net/blog/types-and-math.aspx/) with almost the same content! 
-* [One by Bartosz Milewski](http://bartoszmilewski.com/2015/01/13/simple-algebraic-data-types/) in his series on category theory.
+* [Tomas Petricekによるもの](https://tomasp.net/blog/types-and-math.aspx/)で、ほぼ同じ内容です！
+* [Bartosz Milewskiによるもの](https://bartoszmilewski.com/2015/01/13/simple-algebraic-data-types/)で、圏論のシリーズの一部です。
 
-As some of those posts mention, you can do strange things with these type formulas, such as differentiate them!
+一部の記事で触れられていますが、代数的型の数式を使って、微分など、興味深い操作ができます！
 
-If you like academic papers, you can read the original discussion of derivatives in ["The Derivative of a Regular Type is its Type of One-Hole Contexts"](http://strictlypositive.org/diff.pdf)(PDF) by Conor McBride from 2001,
-and a follow up in ["Differentiating Data Structures"](http://www.cs.nott.ac.uk/~txa/publ/jpartial.pdf)(PDF) [Abbott, Altenkirch, Ghani, and McBride, 2005].
+学術論文が好きな方は、2001年のConor McBrideによる["The Derivative of a Regular Type is its Type of One-Hole Contexts"](http://strictlypositive.org/diff.pdf) (PDF)で元の議論を読むことができ、
+2005年のAbbott、Altenkirch、Ghani、McBrideによる["Differentiating Data Structures"](https://www.cs.nott.ac.uk/~txa/publ/jpartial.pdf) (PDF)でフォローアップを読むことができます。
 
-## Summary
+## まとめ
 
-This might not be the most exciting topic in the world, but I've found this approach both interesting and useful, and I wanted to share it with you.
+この記事は世界で最も刺激的なトピックではないかもしれませんが、私はこのアプローチを興味深く、また有用だと感じ、皆さんと共有したいと思いました。
 
-Let me know what you think. Thanks for reading!
+あなたの考えを聞かせてください。読んでいただきありがとうございます！
 

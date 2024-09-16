@@ -60,8 +60,8 @@ categories: [Folds, Patterns]
 
 ## ジェネリック再帰型 LinkedList
 
-ここで質問です。代数型しかなく、それらを積（[タプル](../posts/tuples.md)、[レコード](../posts/records.md)）
-または和（[判別共用体](../posts/discriminated-unions.md)）としてしか組み合わせられない場合、これらの操作だけでリスト型を作成するにはどうすればよいでしょうか？
+ここで質問です。代数的型しかなく、それらを直積（[タプル](../posts/tuples.md)、[レコード](../posts/records.md)）
+または直和（[判別共用体](../posts/discriminated-unions.md)）としてしか組み合わせられない場合、これらの操作だけでリスト型を作成するにはどうすればよいでしょうか？
 
 答えは、もちろん再帰です！
 

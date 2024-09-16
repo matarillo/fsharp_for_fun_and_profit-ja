@@ -23,7 +23,7 @@ seriesOrder: 1
 
 * オブジェクト指向ではなく関数指向
 * 文ではなく式
-* ドメインモデル作成のための代数的データ型
+* ドメインモデル作成のための代数的型
 * 制御フローのためのパターンマッチング
 
 ![4つの主要概念](../assets/img/four-concepts2.png)
@@ -54,7 +54,7 @@ seriesOrder: 1
 
 ### 上級レベル：型がドメインを表現
 
-この最終レベルでは、コードが関数型であるだけでなく、設計自体が代数的データ型（特に判別共用体）の力を活用するように変更されています。
+この最終レベルでは、コードが関数型であるだけでなく、設計自体が代数的型（特に判別共用体）の力を活用するように変更されています。
 
 ドメインは[型にエンコードされ](../posts/designing-with-types-single-case-dus.md)、[不正な状態が表現できないようになっており](../posts/designing-with-types-making-illegal-states-unrepresentable.md)、[正しさがコンパイル時に強制されます](../posts/correctness-type-checking.md)。
 このアプローチの威力を具体的に示すには、[「F#を使う理由」シリーズ](../series/why-use-fsharp.md)の[ショッピングカートの例](../posts/designing-for-correctness.md)と[「型を使って設計する」シリーズ](../series/designing-with-types.md)全体を参照してください。

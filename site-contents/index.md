@@ -81,7 +81,7 @@ hasNoCode: 1
 * [レコード型](../posts/records.md)
 * [タプル型](../posts/tuples.md)
 * [判別共用体](../posts/the-option-type.md)
-* [代数型のサイズとドメインモデリング](../posts/type-size-and-design.md)
+* [代数的型のサイズとドメインモデリング](../posts/type-size-and-design.md)
 
 ## 物議を醸す記事
 
