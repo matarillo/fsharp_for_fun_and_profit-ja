@@ -19,21 +19,21 @@ categories: [パターン]
 
 前回紹介した13の方法を振り返ってみましょう。
 
-* [方法1：基本的なオブジェクト指向アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way1)。可変状態を持つクラスを作成します。
-* [方法2：基本的な関数型アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way2)。不変の状態を持つ関数のモジュールを作成します。
-* [方法3：オブジェクト指向コアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way3)。状態を持つコアクラスを呼び出すオブジェクト指向APIを作成します。
-* [方法4：関数型コアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way4)。状態を持たないコア関数を使う状態を持つAPIを作成します。
-* [方法5：エージェントの前面にあるAPI](../posts/13-ways-of-looking-at-a-turtle.md#way5)。エージェントとメッセージキューを使って通信するAPIを作成します。
-* [方法6：インターフェースを使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way6)。インターフェースや関数のレコードを使って実装とAPIを分離します。
-* [方法7：関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)。関数パラメータを渡すことで実装とAPIを分離します。
-* [方法8：状態モナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)。状態を追跡する特別な「タートルワークフロー」計算式を作成します。
-* [方法9：コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)。タートルコマンドを表す型を作成し、コマンドのリストを一度に処理します。
+* [方法1. 基本的なオブジェクト指向アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way1)：可変状態を持つクラスを作ります。
+* [方法2. 基本的な関数型アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way2)：不変の状態を持つ関数のモジュールを作ります。
+* [方法3. オブジェクト指向のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way3)：状態を持つコアクラスを呼び出すオブジェクト指向APIを作ります。
+* [方法4. 関数型のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way4)：状態を持たないコア関数を使う、状態を持つAPIを作ります。
+* [方法5. エージェントの前面にあるAPI](../posts/13-ways-of-looking-at-a-turtle.md#way5)：メッセージキューを使っててエージェントと通信するAPIを作ります。
+* [方法6. インターフェースを使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way6)：インターフェースまたは関数のレコードを使って、実装をAPIから分離します。
+* [方法7. 関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)：関数パラメータを渡すことで、実装をAPIから分離します。
+* [方法8. 状態モナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)：状態を追跡する特別な「タートルワークフロー」コンピュテーション式を作ります。
+* [方法9. コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)：タートルのコマンドを表す型を作り、コマンドのリストを一括処理します。
 * [幕間：データ型を使った意識的な分離](../posts/13-ways-of-looking-at-a-turtle.md#decoupling)。データまたはインターフェースを使った分離に関するメモ。
-* [方法10：イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)。過去のイベントのリストから状態を構築します。
-* [方法11：関数型リアクティブプログラミング（ストリーム処理）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)。ビジネスロジックを過去のイベントへの反応に基づいて構築します。
-* [エピソードV：タートルの逆襲](../posts/13-ways-of-looking-at-a-turtle-2.md#strikes-back)。タートルAPIを変更し、一部のコマンドが失敗する可能性を導入します。
-* [方法12：モナディック制御フロー](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)。タートルワークフロー内で、以前のコマンドの結果に基づいて決定を行います。
-* [方法13：タートルインタープリター](../posts/13-ways-of-looking-at-a-turtle-2.md#way13)。タートルのプログラミングと実装を完全に分離し、フリーモナドに近づきます。
+* [方法10. イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)：過去のイベントのリストから状態を構築します。
+* [方法11. 関数型リアクティブプログラミング（ストリーム処理）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)：ビジネスロジックが以前のイベントに反応することに基づいています。
+* [エピソードV：タートルの逆襲](../posts/13-ways-of-looking-at-a-turtle-2.md#strikes-back)：一部のコマンドが失敗する可能性を考慮するように、タートルAPIを変更します。
+* [方法12. モナディック制御フロー](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)：タートルワークフロー内で、以前のコマンドの結果に基づいて決定を行います。
+* [方法13. タートルインタープリター](../posts/13-ways-of-looking-at-a-turtle-2.md#way13)：タートルプログラミングとタートルの実装を完全に分離し、ほぼフリーモナドを実現します。
 * [使用したテクニックの再確認](../posts/13-ways-of-looking-at-a-turtle-2.md#review)。
 
 この投稿のソースコードは[GitHub](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle)で入手できます。
