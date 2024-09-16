@@ -1,77 +1,77 @@
 ---
 layout: post
-title: "Thirteen ways of looking at a turtle (part 2)"
-description: "Continuing with examples of event sourcing, FRP, monadic control flow, and an interpreter."
-categories: [Patterns]
+title: "タートルを見る13の方法（パート2）"
+description: "イベントソーシング、FRP、モナディック制御フロー、インタープリターの例を続けます。"
+categories: [パターン]
 ---
 
-> This post is part of the [F# Advent Calendar in English 2015](https://sergeytihon.wordpress.com/2015/10/25/f-advent-calendar-in-english-2015/) project.
-> Check out all the other great posts there! And special thanks to Sergey Tihon for organizing this.
+> この投稿は[2015年英語版F#アドベントカレンダー](https://sergeytihon.wordpress.com/2015/10/25/f-advent-calendar-in-english-2015/)プロジェクトの一部です。
+> 他の素晴らしい投稿もぜひチェックしてください！また、このプロジェクトを企画してくれたSergey Tihonに特別な感謝を。
 
-In this two-part mega-post, I'm stretching the simple turtle graphics model to the limit while demonstrating partial application, validation, the concept of "lifting",
-agents with message queues, dependency injection, the State monad, event sourcing, stream processing, and an interpreter!
+この2部構成の大型投稿では、シンプルなタートルグラフィックスモデルを極限まで拡張しながら、部分適用、バリデーション、「リフティング」の概念、
+メッセージキューを持つエージェント、依存性注入、Stateモナド、イベントソーシング、ストリーム処理、そしてインタープリターを実演します！
 
-In the [previous post](../posts/13-ways-of-looking-at-a-turtle.md), we covered the first nine ways of looking at a turtle. In this post, we'll look at the remaining four.
+[前回の投稿](../posts/13-ways-of-looking-at-a-turtle.md)では、タートルを見る最初の9つの方法を紹介しました。今回は残りの4つを見ていきます。
 
-As a reminder, here are the thirteen ways:
+おさらいとして、13の方法を挙げておきます：
 
-* [Way 1. A basic object-oriented approach](../posts/13-ways-of-looking-at-a-turtle.md#way1), in which we create a class with mutable state.
-* [Way 2. A basic functional approach](../posts/13-ways-of-looking-at-a-turtle.md#way2), in which we create a module of functions with immutable state.
-* [Way 3. An API with a object-oriented core](../posts/13-ways-of-looking-at-a-turtle.md#way3), in which we create an object-oriented API that calls a stateful core class.
-* [Way 4. An API with a functional core](../posts/13-ways-of-looking-at-a-turtle.md#way4), in which we create an stateful API that uses stateless core functions.
-* [Way 5. An API in front of an agent](../posts/13-ways-of-looking-at-a-turtle.md#way5), in which we create an API that uses a message queue to communicate with an agent.
-* [Way 6. Dependency injection using interfaces](../posts/13-ways-of-looking-at-a-turtle.md#way6), in which we decouple the implementation from the API using an interface or record of functions.
-* [Way 7. Dependency injection using functions](../posts/13-ways-of-looking-at-a-turtle.md#way7), in which we decouple the implementation from the API by passing a function parameter.
-* [Way 8. Batch processing using a state monad](../posts/13-ways-of-looking-at-a-turtle.md#way8), in which we create a special "turtle workflow" computation expression to track state for us.
-* [Way 9. Batch processing using command objects](../posts/13-ways-of-looking-at-a-turtle.md#way9), in which we create a type to represent a turtle command, and then process a list of commands all at once.
-* [Interlude: Conscious decoupling with data types](../posts/13-ways-of-looking-at-a-turtle.md#decoupling). A few notes on using data vs. interfaces for decoupling.
-* [Way 10. Event sourcing](../posts/13-ways-of-looking-at-a-turtle-2.md#way10), in which  state is built from a list of past events.
-* [Way 11. Functional Retroactive Programming (stream processing)](../posts/13-ways-of-looking-at-a-turtle-2.md#way11), in which business logic is based on reacting to earlier events.
-* [Episode V: The Turtle Strikes Back](../posts/13-ways-of-looking-at-a-turtle-2.md#strikes-back), in which the turtle API changes so that some commands may fail.
-* [Way 12. Monadic control flow](../posts/13-ways-of-looking-at-a-turtle-2.md#way12), in which we make decisions in the turtle workflow based on results from earlier commands.
-* [Way 13. A turtle interpreter](../posts/13-ways-of-looking-at-a-turtle-2.md#way13), in which we completely decouple turtle programming from turtle implementation, and nearly encounter the free monad.
-* [Review of all the techniques used](../posts/13-ways-of-looking-at-a-turtle-2.md#review).
+* [方法1. 基本的なオブジェクト指向アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way1)：可変状態を持つクラスを作ります。
+* [方法2. 基本的な関数型アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way2)：不変の状態を持つ関数のモジュールを作ります。
+* [方法3. オブジェクト指向のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way3)：状態を持つコアクラスを呼び出すオブジェクト指向APIを作ります。
+* [方法4. 関数型のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way4)：状態を持たないコア関数を使う状態を持つAPIを作ります。
+* [方法5. エージェントの前面にあるAPI](../posts/13-ways-of-looking-at-a-turtle.md#way5)：エージェントと通信するためのメッセージキューを使うAPIを作ります。
+* [方法6. インターフェースを使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way6)：インターフェースまたは関数のレコードを使って実装をAPIから分離します。
+* [方法7. 関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)：関数パラメータを渡すことで実装をAPIから分離します。
+* [方法8. Stateモナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)：状態を追跡するための特別な「タートルワークフロー」コンピュテーション式を作ります。
+* [方法9. コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)：タートルコマンドを表す型を作り、コマンドのリストを一括処理します。
+* [間奏：データ型による意識的な分離](../posts/13-ways-of-looking-at-a-turtle.md#decoupling)。分離のためのデータ対インターフェースの使用に関するメモ。
+* [方法10. イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)：過去のイベントのリストから状態を構築します。
+* [方法11. 関数型リアクティブプログラミング（ストリーム処理）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)：ビジネスロジックが以前のイベントに反応することに基づいています。
+* [エピソードV：タートルの逆襲](../posts/13-ways-of-looking-at-a-turtle-2.md#strikes-back)：タートルAPIが変更され、一部のコマンドが失敗する可能性がでてきます。
+* [方法12. モナディック制御フロー](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)：以前のコマンドの結果に基づいてタートルワークフロー内で決定を行います。
+* [方法13. タートルインタープリター](../posts/13-ways-of-looking-at-a-turtle-2.md#way13)：タートルのプログラミングとタートルの実装を完全に分離し、フリーモナドに近づきます。
+* [使用したすべての技術のレビュー](../posts/13-ways-of-looking-at-a-turtle-2.md#review)。
 
-and 2 bonus ways for the extended edition:
+拡大版には、おまけの方法が2つあります。
 
-* [Way 14. Abstract Data Turtle](../posts/13-ways-of-looking-at-a-turtle-3.md#way14), in which we encapsulate the details of a turtle implementation by using an Abstract Data Type.
-* [Way 15. Capability-based Turtle](../posts/13-ways-of-looking-at-a-turtle-3.md#way15), in which we control what turtle functions are available to a client, based on the current
-  state of the turtle.
+* [方法14. 抽象データタートル](../posts/13-ways-of-looking-at-a-turtle-3.md#way14)：抽象データ型を使ってタートル実装の詳細をカプセル化します。
+* [方法15. ケイパビリティベースのタートル](../posts/13-ways-of-looking-at-a-turtle-3.md#way15)：タートルの現在の状態に基づいて、
+クライアントが使えるタートル関数を制御します。
 
-It's turtles all the way down!
+タートルの上にタートル、その上にまたタートル！
 
-All source code for this post is available [on github](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle).
+この投稿のすべてのソースコードは[GitHub](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle)で入手できます。
 
 <hr>
 
 <a id="way10"></a>
 
-## 10: Event sourcing -- Building state from a list of past events
+## 10: イベントソーシング - 過去のイベントのリストから状態を構築する
 
-In this design, we build on the "command" concept used in the [Agent (way 5)](../posts/13-ways-of-looking-at-a-turtle.md#way5)
-and [Batch (way 9)](../posts/13-ways-of-looking-at-a-turtle.md#way9) approaches, but replacing "commands" with "events" as the method of updating state.
+このデザインでは、[エージェント（方法5）](../posts/13-ways-of-looking-at-a-turtle.md#way5)と[バッチ（方法9）](../posts/13-ways-of-looking-at-a-turtle.md#way9)アプローチで使用した「コマンド」の概念を基に、
+状態を更新する方法として「コマンド」を「イベント」に置き換えます。
 
-The way that it works is:
+動作の仕組みは次のとおりです：
 
-* The client sends a `Command` to a `CommandHandler`.
-* Before processing a `Command`, the `CommandHandler` first rebuilds the current state
-  from scratch using the past events associated with that particular turtle.
-* The `CommandHandler` then validates the command and decides what to do based on the current (rebuilt) state.
-  It generates a (possibly empty) list of events.
-* The generated events are stored in an `EventStore` for the next command to use.
+* クライアントが`Command`を`CommandHandler`に送ります。
+* `CommandHandler`は、`Command`を処理する前に、
+  まずその特定のタートルに関連する過去のイベントを使って現在の状態を一から再構築します。
+* `CommandHandler`はコマンドを検証し、現在の（再構築された）状態に基づいて何をするかを決めます。
+  （場合によっては空の）イベントのリストを生成します。
+* 生成されたイベントは、次のコマンドで使うために`EventStore`に保存されます。
 
 ![](../assets/img/turtle-event-source.png)
 
-In this way, neither the client nor the command handler needs to track state.  Only the `EventStore` is mutable.
+このようにして、クライアントもコマンドハンドラも状態を追跡する必要がありません。`EventStore`だけが可変です。
 
-### The Command and Event types
+### CommandとEvent型
 
-We will start by defining the types relating to our event sourcing system. First, the types related to commands:
+イベントソーシングシステムに関連する型の定義から始めましょう。まず、コマンドに関連する型です：
 
 ```fsharp
 type TurtleId = System.Guid
 
-/// A desired action on a turtle
+/// タートルに対する望ましいアクション
 type TurtleCommandAction = 
     | Move of Distance 
     | Turn of Angle
@@ -79,22 +79,22 @@ type TurtleCommandAction =
     | PenDown 
     | SetColor of PenColor
 
-/// A command representing a desired action addressed to a specific turtle
+/// 特定のタートルに向けられた望ましいアクションを表すコマンド
 type TurtleCommand = {
     turtleId : TurtleId
     action : TurtleCommandAction 
     }
 ```
 
-Note that the command is addressed to a particular turtle using a `TurtleId`.
+コマンドは`TurtleId`を使って特定のタートルに向けられています。
 
-Next, we will define two kinds of events that can be generated from a command:
+次に、コマンドから生成される2種類のイベントを定義します：
 
-* A `StateChangedEvent` which represents what changed in the state
-* A `MovedEvent` which represents the start and end positions of a turtle movement.
+* 状態の変化を表す`StateChangedEvent`
+* タートルの動きの開始位置と終了位置を表す`MovedEvent`
 
 ```fsharp
-/// An event representing a state change that happened
+/// 発生した状態変化を表すイベント
 type StateChangedEvent = 
     | Moved of Distance 
     | Turned of Angle
@@ -102,36 +102,36 @@ type StateChangedEvent =
     | PenWentDown 
     | ColorChanged of PenColor
 
-/// An event representing a move that happened
-/// This can be easily translated into a line-drawing activity on a canvas
+/// 発生した移動を表すイベント
+/// これはキャンバス上の線描画アクティビティに簡単に変換できます
 type MovedEvent = {
     startPos : Position 
     endPos : Position 
     penColor : PenColor option
     }
 
-/// A union of all possible events
+/// 可能なすべてのイベントの共用体
 type TurtleEvent = 
     | StateChangedEvent of StateChangedEvent
     | MovedEvent of MovedEvent
 ```
 
-It is an important part of event sourcing that all events are labeled in the past tense: `Moved` and `Turned` rather than `Move` and `Turn`. The event are facts -- they have happened in the past.
+イベントソーシングの重要な部分として、すべてのイベントは過去形でラベル付けされています：`Move`と`Turn`ではなく`Moved`と`Turned`です。イベントは事実です - 過去に起こったことを表します。
 
-### The Command handler
+### コマンドハンドラ
 
-The next step is to define the functions that convert a command into events.
+次のステップは、コマンドをイベントに変換する関数を定義することです。
 
-We will need:
+以下が必要になります：
 
-* A (private) `applyEvent` function that updates the state from a previous event. 
-* A (private) `eventsFromCommand` function that determines what events to generate, based on the command and the state.
-* A public `commandHandler` function that handles the command, reads the events from the event store and calls the other two functions.
+* 以前のイベントから状態を更新する（プライベートな）`applyEvent`関数。
+* コマンドと状態に基づいて、生成するイベントを決める（プライベートな）`eventsFromCommand`関数。
+* コマンドを処理し、イベントストアからイベントを読み取り、他の2つの関数を呼び出す公開`commandHandler`関数。
 
-Here's `applyEvent`. You can see that it is very similar to the `applyCommand` function that we saw in the [previous batch-processing example](../posts/13-ways-of-looking-at-a-turtle.md#way9).
+これが`applyEvent`です。[以前のバッチ処理の例](../posts/13-ways-of-looking-at-a-turtle.md#way9)で見た`applyCommand`関数とよく似ています。
 
 ```fsharp
-/// Apply an event to the current state and return the new state of the turtle
+/// 現在の状態にイベントを適用し、タートルの新しい状態を返す
 let applyEvent log oldState event =
     match event with
     | Moved distance ->
@@ -146,18 +146,18 @@ let applyEvent log oldState event =
         Turtle.setColor log color oldState 
 ```
 
-The `eventsFromCommand` function contains the key logic for validating the command and creating events. 
+`eventsFromCommand`関数には、コマンドを検証してイベントを作成するための主要なロジックが含まれています。
 
-* In this particular design, the command is always valid, so at least one event is returned.
-* The `StateChangedEvent` is created from the `TurtleCommand` in a direct one-to-one map of the cases.
-* The `MovedEvent` is only created from the `TurtleCommand` if the turtle has changed position.
+* このデザインでは、コマンドは常に有効なので、少なくとも1つのイベントが返されます。
+* `StateChangedEvent`は`TurtleCommand`から、ケースの一対一のマッピングで直接作成されます。
+* `MovedEvent`は、タートルが位置を変更した場合にのみ`TurtleCommand`から作成されます。
 
 ```fsharp
-// Determine what events to generate, based on the command and the state.
+// コマンドと状態に基づいて、生成するイベントを決める
 let eventsFromCommand log command stateBeforeCommand =
 
     // --------------------------
-    // create the StateChangedEvent from the TurtleCommand
+    // TurtleCommandからStateChangedEventを作成する
     let stateChangedEvent = 
         match command.action with
         | Move dist -> Moved dist
@@ -167,12 +167,12 @@ let eventsFromCommand log command stateBeforeCommand =
         | SetColor color -> ColorChanged color
 
     // --------------------------
-    // calculate the current state from the new event
+    // 新しいイベントから現在の状態を計算する
     let stateAfterCommand = 
         applyEvent log stateBeforeCommand stateChangedEvent
 
     // --------------------------
-    // create the MovedEvent 
+    // MovedEventを作成する 
     let startPos = stateBeforeCommand.position 
     let endPos = stateAfterCommand.position 
     let penColor = 
@@ -188,62 +188,62 @@ let eventsFromCommand log command stateBeforeCommand =
         }
 
     // --------------------------
-    // return the list of events
+    // イベントのリストを返す
     if startPos <> endPos then
-        // if the turtle has moved, return both the stateChangedEvent and the movedEvent 
-        // lifted into the common TurtleEvent type
+        // タートルが移動した場合、stateChangedEventとmovedEventの両方を
+        // 共通のTurtleEvent型にリフトして返す
         [ StateChangedEvent stateChangedEvent; MovedEvent movedEvent]                
     else
-        // if the turtle has not moved, return just the stateChangedEvent 
+        // タートルが移動していない場合、stateChangedEventのみを返す
         [ StateChangedEvent stateChangedEvent]    
 ```
 
-Finally, the `commandHandler` is the public interface. It is passed in some dependencies as parameters:  a logging function, a function to retrieve the historical events
-from the event store, and a function to save the newly generated events into the event store.
+最後に、`commandHandler`が公開インターフェースです。これにはいくつかの依存関係がパラメータとして渡されます：ロギング関数、イベントストアから履歴イベントを取得する関数、
+新しく生成されたイベントをイベントストアに保存する関数です。
 
 ```fsharp
-/// The type representing a function that gets the StateChangedEvents for a turtle id
-/// The oldest events are first
+/// タートルIDのStateChangedEventsを取得する関数を表す型
+/// 最も古いイベントが最初に来る
 type GetStateChangedEventsForId =
      TurtleId -> StateChangedEvent list
 
-/// The type representing a function that saves a TurtleEvent 
+/// TurtleEventを保存する関数を表す型
 type SaveTurtleEvent = 
     TurtleId -> TurtleEvent -> unit
 
-/// main function : process a command
+/// メイン関数：コマンドを処理する
 let commandHandler 
     (log:string -> unit) 
     (getEvents:GetStateChangedEventsForId) 
     (saveEvent:SaveTurtleEvent) 
     (command:TurtleCommand) =
 
-    /// First load all the events from the event store
+    /// まずイベントストアからすべてのイベントを読み込む
     let eventHistory = 
         getEvents command.turtleId
     
-    /// Then, recreate the state before the command
+    /// 次に、コマンド前の状態を再作成する
     let stateBeforeCommand = 
-        let nolog = ignore // no logging when recreating state
+        let nolog = ignore // 状態再作成時にはログを取らない
         eventHistory 
         |> List.fold (applyEvent nolog) Turtle.initialTurtleState
     
-    /// Construct the events from the command and the stateBeforeCommand
-    /// Do use the supplied logger for this bit
+    /// コマンドとstateBeforeCommandからイベントを構築する
+    /// この部分では提供されたロガーを使う
     let events = eventsFromCommand log command stateBeforeCommand 
     
-    // store the events in the event store
+    // イベントをイベントストアに保存する
     events |> List.iter (saveEvent command.turtleId)
 ```
 
-### Calling the command handler
+### コマンドハンドラの呼び出し
 
-Now we are ready to send events to the command handler.
+これでイベントをコマンドハンドラに送信する準備ができました。
 
-First we need some helper functions that create commands:
+まず、コマンドを作成するヘルパー関数が必要です：
 
 ```fsharp
-// Command versions of standard actions   
+// 標準アクションのコマンドバージョン   
 let turtleId = System.Guid.NewGuid()
 let move dist = {turtleId=turtleId; action=Move dist} 
 let turn angle = {turtleId=turtleId; action=Turn angle} 
@@ -252,7 +252,7 @@ let penUp = {turtleId=turtleId; action=PenUp}
 let setColor color = {turtleId=turtleId; action=SetColor color} 
 ```
 
-And then we can draw a figure by sending the various commands to the command handler:
+そして、様々なコマンドをコマンドハンドラに送信して図形を描くことができます：
 
 ```fsharp
 let drawTriangle() = 
@@ -265,142 +265,142 @@ let drawTriangle() =
     handler (turn 120.0<Degrees>)
 ```
 
-NOTE: I have not shown how to create the command handler or event store, see the code for full details.
+注：コマンドハンドラやイベントストアの作成方法は示していません。詳細はコードを参照してください。
 
-### Advantages and disadvantages of event sourcing
+### イベントソーシングの利点と欠点
 
-*Advantages*
+*利点*
 
-* All code is stateless, hence easy to test.
-* Supports replay of events.
+* すべてのコードがステートレスなので、テストが容易です。
+* イベントの再生をサポートします。
 
-*Disadvantages*
+*欠点*
 
-* Can be more complex to implement than a CRUD approach (or at least, less support from tools and libraries).
-* If care is not taken, the command handler can get overly complex and evolve into implementing too much business logic.   
+* CRUDアプローチよりも実装が複雑になる可能性があります（少なくとも、ツールやライブラリのサポートが少ないです）。
+* 注意しないと、コマンドハンドラが過度に複雑になり、多くのビジネスロジックを実装してしまう可能性があります。
 
 
-*The source code for this version is available [here](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/10-EventSourcing.fsx).*
+*このバージョンのソースコードは[こちら](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/10-EventSourcing.fsx)で入手できます。*
 
 <hr>
 
 <a id="way11"></a>
 
-## 11: Functional Retroactive Programming (stream processing)
+## 11: 関数型リアクティブプログラミング（ストリーム処理）
 
-In the event sourcing example above, all the domain logic (in our case, just tracing the state) is embedded in the command handler. One drawback of this is that,
-as the application evolves, the logic in the command handler can become very complex.
+上記のイベントソーシングの例では、すべてのドメインロジック（この場合は単に状態をトレースするだけ）がコマンドハンドラに組み込まれています。これの欠点の1つは、
+アプリケーションが進化するにつれて、コマンドハンドラのロジックが非常に複雑になる可能性があることです。
 
-A way to avoid this is to combine ["functional reactive programming"](https://en.wikipedia.org/wiki/Functional_reactive_programming) with event sourcing
-to create a design  where the domain logic is performed on the "read-side", by listening to events ("signals") emitted from the event store.
+これを回避する方法の1つは、「[関数型リアクティブプログラミング](https://en.wikipedia.org/wiki/Functional_reactive_programming)」とイベントソーシングを組み合わせて、
+イベントストアから発信されるイベント（"シグナル"）をリッスンすることで、"読み取り側"でドメインロジックを実行するデザインを作成することです。
 
-In this approach, the "write-side" follows the same pattern as the event-sourcing example.
-A client sends a `Command` to a `commandHandler`, which converts that to a list of events and stores them in an `EventStore`.
+このアプローチでは、"書き込み側"はイベントソーシングの例と同じパターンに従います。
+クライアントが`Command`を`commandHandler`に送信し、それをイベントのリストに変換して`EventStore`に保存します。
 
-However the `commandHandler` only does the *minimal* amount of work, such as updating state, and does NOT do any complex domain logic.
-The complex logic is performed by one or more downstream "processors" (also sometimes called "aggregators") that subscribe to the event stream.
+しかし、`commandHandler`は最小限の作業（状態の更新など）しか行わず、複雑なドメインロジックは実行しません。
+複雑なロジックは、イベントストリームをサブスクライブする1つ以上のダウンストリーム"プロセッサ"（"アグリゲータ"とも呼ばれます）によって実行されます。
 
 ![](../assets/img/turtle-frp.png)
 
-You can even think of these events as "commands" to the processors, and of course, the processors can generate new events for another processor to consume,
-so this approach can be extended into an architectural style where an application consists of a set of command handlers linked by an event store.
+これらのイベントをプロセッサへの"コマンド"と考えることもでき、もちろん、プロセッサは別のプロセッサが消費する新しいイベントを生成できるので、
+このアプローチは、アプリケーションがイベントストアによってリンクされたコマンドハンドラのセットで構成されるアーキテクチャスタイルに拡張できます。
 
-This techique is often called ["stream processing"](http://www.confluent.io/blog/making-sense-of-stream-processing/).
-However, Jessica Kerr once called this approach ["Functional Retroactive Programming"](https://twitter.com/jessitron/status/408554836578537472) -- I like that, so I'm going to steal that name!
+この手法は「[ストリーム処理](https://www.confluent.io/blog/making-sense-of-stream-processing/)」とよく呼ばれます。
+しかし、Jessica Kerrはこのアプローチを「[関数型レトロアクティブプログラミング](https://x.com/jessitron/status/408554836578537472)」と呼んでいました - 気に入ったので、この名前を借用します！
 
 ![](../assets/img/turtle-stream-processor.png)
 
-### Implementing the design
+### デザインの実装
 
-For this implementation, the `commandHandler` function is the same as in the event sourcing example, except that no work (just logging!) is done at all. The command handler *only* rebuilds state
-and generates events. How the events are used for business logic is no longer in its scope.
+この実装では、`commandHandler`関数はイベントソーシングの例と同じですが、作業（ただのログ記録！）がまったく行われません。コマンドハンドラは状態を再構築し、
+イベントを生成するだけです。イベントをビジネスロジックにどう使うかは、もはやその範囲外です。
 
-The new stuff comes in creating the processors.
+新しい部分はプロセッサの作成です。
 
-However, before we can create a processor, we need some helper functions that can filter the event store feed to only include turtle specific events,
-and of those only `StateChangedEvent`s or `MovedEvent`s.
+しかし、プロセッサを作成する前に、イベントストアのフィードをフィルタリングして、タートル固有のイベントのみを含め、
+そのうち`StateChangedEvent`または`MovedEvent`のみを選択するヘルパー関数が必要です。
 
 ```fsharp
-// filter to choose only TurtleEvents
+// TurtleEventのみを選択するフィルター
 let turtleFilter ev = 
     match box ev with
     | :? TurtleEvent as tev -> Some tev
     | _ -> None
 
-// filter to choose only MovedEvents from TurtleEvents
+// TurtleEventからMovedEventのみを選択するフィルター
 let moveFilter = function 
     | MovedEvent ev -> Some ev
     | _ -> None
 
-// filter to choose only StateChangedEvent from TurtleEvents
+// TurtleEventからStateChangedEventのみを選択するフィルター
 let stateChangedEventFilter = function 
     | StateChangedEvent ev -> Some ev
     | _ -> None
 ```
 
-Now let's create a processor that listens for movement events and moves a physical turtle when the virtual turtle is moved. 
+では、移動イベントをリッスンし、仮想タートルが移動したときに物理的なタートルを動かすプロセッサを作成しましょう。 
 
-We will make the input to the processor be an `IObservable` -- an event stream -- so that it is not coupled to any specific source such as the `EventStore`.
-We will connect the `EventStore` "save" event to this processor when the application is configured.
+入力をプロセッサに`IObservable`（イベントストリーム）にして、`EventStore`などの特定のソースに結合しないようにします。
+アプリケーションの設定時に`EventStore`の "save" イベントをこのプロセッサに接続します。
 
 ```fsharp
-/// Physically move the turtle
+/// 物理的にタートルを動かす
 let physicalTurtleProcessor (eventStream:IObservable<Guid*obj>) =
 
-    // the function that handles the input from the observable
+    // オブザーバブルからの入力を処理する関数
     let subscriberFn (ev:MovedEvent) =
         let colorText = 
             match ev.penColor with
-            | Some color -> sprintf "line of color %A" color
-            | None -> "no line"
-        printfn "[turtle  ]: Moved from (%0.2f,%0.2f) to (%0.2f,%0.2f) with %s" 
+            | Some color -> sprintf "%A色の線" color
+            | None -> "線なし"
+        printfn "[タートル]: (%0.2f,%0.2f)から(%0.2f,%0.2f)に%sで移動" 
             ev.startPos.x ev.startPos.y ev.endPos.x ev.endPos.y colorText 
 
-    // start with all events
+    // すべてのイベントから始める
     eventStream
-    // filter the stream on just TurtleEvents
+    // ストリームをTurtleEventだけにフィルタリング
     |> Observable.choose (function (id,ev) -> turtleFilter ev)
-    // filter on just MovedEvents
+    // MovedEventだけにフィルタリング
     |> Observable.choose moveFilter
-    // handle these
+    // これらを処理
     |> Observable.subscribe subscriberFn
 ```
 
-In this case we are just printing the movement -- I'll leave the building of an [actual Lego Mindstorms turtle](https://www.youtube.com/watch?v=pcJHLClDKVw) as an exercise for the reader!
+この場合、単に移動を出力しているだけです - [実際のレゴマインドストームタートル](https://www.youtube.com/watch?v=pcJHLClDKVw)の構築は読者の課題としておきます！
 
-Let's also create a processor that draws lines on a graphics display:
+グラフィックスディスプレイに線を描くプロセッサも作成しましょう：
 
 ```fsharp
-/// Draw lines on a graphics device
+/// グラフィックスデバイスに線を描く
 let graphicsProcessor (eventStream:IObservable<Guid*obj>) =
 
-    // the function that handles the input from the observable
+    // オブザーバブルからの入力を処理する関数
     let subscriberFn (ev:MovedEvent) =
         match ev.penColor with
         | Some color -> 
-            printfn "[graphics]: Draw line from (%0.2f,%0.2f) to (%0.2f,%0.2f) with color %A" 
+            printfn "[グラフィックス]: (%0.2f,%0.2f)から(%0.2f,%0.2f)に%A色で線を描く" 
                 ev.startPos.x ev.startPos.y ev.endPos.x ev.endPos.y color
         | None -> 
-            ()  // do nothing
+            ()  // 何もしない
 
-    // start with all events
+    // すべてのイベントから始める
     eventStream
-    // filter the stream on just TurtleEvents
+    // ストリームをTurtleEventだけにフィルタリング
     |> Observable.choose (function (id,ev) -> turtleFilter ev)
-    // filter on just MovedEvents
+    // MovedEventだけにフィルタリング
     |> Observable.choose moveFilter
-    // handle these
+    // これらを処理
     |> Observable.subscribe subscriberFn 
 ```
        
-And finally, let's create a processor that accumulates the total distance moved so that we can keep track of how much ink has been used, say. 
+最後に、移動した総距離を累積して、使用したインクの量を追跡するプロセッサを作成しましょう。 
 
 ```fsharp
-/// Listen for "moved" events and aggregate them to keep
-/// track of the total ink used
+/// "moved"イベントをリッスンし、それらを集計して
+/// 使用したインクの総量を追跡する
 let inkUsedProcessor (eventStream:IObservable<Guid*obj>) =
 
-    // Accumulate the total distance moved so far when a new event happens
+    // 新しいイベントが発生したときに、これまでの移動距離の合計を累積する
     let accumulate distanceSoFar (ev:StateChangedEvent) =
         match ev with
         | Moved dist -> 
@@ -408,39 +408,39 @@ let inkUsedProcessor (eventStream:IObservable<Guid*obj>) =
         | _ -> 
             distanceSoFar 
 
-    // the function that handles the input from the observable
+    // オブザーバブルからの入力を処理する関数
     let subscriberFn distanceSoFar  =
-        printfn "[ink used]: %0.2f" distanceSoFar  
+        printfn "[使用インク]: %0.2f" distanceSoFar  
 
-    // start with all events
+    // すべてのイベントから始める
     eventStream
-    // filter the stream on just TurtleEvents
+    // ストリームをTurtleEventだけにフィルタリング
     |> Observable.choose (function (id,ev) -> turtleFilter ev)
-    // filter on just StateChangedEvent
+    // StateChangedEventだけにフィルタリング
     |> Observable.choose stateChangedEventFilter
-    // accumulate total distance
+    // 総距離を累積
     |> Observable.scan accumulate 0.0
-    // handle these
+    // これらを処理
     |> Observable.subscribe subscriberFn 
 ```
 
-This processor uses `Observable.scan` to accumulate the events into a single value -- the total distance travelled.
+このプロセッサは`Observable.scan`を使って、イベントを単一の値（移動した総距離）に累積しています。
 
-### Processors in practice
+### プロセッサの実践
 
-Let's try these out!
+これらを試してみましょう！
 
-For example, here is `drawTriangle`: 
+例えば、`drawTriangle`はこのようになります：
 
 ```fsharp
 let drawTriangle() = 
-    // clear older events
+    // 古いイベントをクリア
     eventStore.Clear turtleId   
 
-    // create an event stream from an IEvent
+    // IEventからイベントストリームを作成
     let eventStream = eventStore.SaveEvent :> IObservable<Guid*obj>
 
-    // register the processors
+    // プロセッサを登録
     use physicalTurtleProcessor = EventProcessors.physicalTurtleProcessor eventStream 
     use graphicsProcessor = EventProcessors.graphicsProcessor eventStream 
     use inkUsedProcessor = EventProcessors.inkUsedProcessor eventStream 
@@ -454,45 +454,45 @@ let drawTriangle() =
     handler (turn 120.0<Degrees>)
 ```
 
-Note that `eventStore.SaveEvent` is cast into an `IObservable<Guid*obj>` (that is, an event stream) before being passed to the processors as a parameter.
+`eventStore.SaveEvent`がプロセッサにパラメータとして渡される前に`IObservable<Guid*obj>`（つまりイベントストリーム）にキャストされていることに注意してください。
 
-`drawTriangle` generates this output:
+`drawTriangle`は以下の出力を生成します：
 
 ```text
-[ink used]: 100.00
-[turtle  ]: Moved from (0.00,0.00) to (100.00,0.00) with line of color Black
-[graphics]: Draw line from (0.00,0.00) to (100.00,0.00) with color Black
-[ink used]: 100.00
-[ink used]: 200.00
-[turtle  ]: Moved from (100.00,0.00) to (50.00,86.60) with line of color Black
-[graphics]: Draw line from (100.00,0.00) to (50.00,86.60) with color Black
-[ink used]: 200.00
-[ink used]: 300.00
-[turtle  ]: Moved from (50.00,86.60) to (0.00,0.00) with line of color Black
-[graphics]: Draw line from (50.00,86.60) to (0.00,0.00) with color Black
-[ink used]: 300.00
+[使用インク]: 100.00
+[タートル  ]: (0.00,0.00)から(100.00,0.00)に黒色の線で移動
+[グラフィックス]: (0.00,0.00)から(100.00,0.00)に黒色で線を描く
+[使用インク]: 100.00
+[使用インク]: 200.00
+[タートル  ]: (100.00,0.00)から(50.00,86.60)に黒色の線で移動
+[グラフィックス]: (100.00,0.00)から(50.00,86.60)に黒色で線を描く
+[使用インク]: 200.00
+[使用インク]: 300.00
+[タートル  ]: (50.00,86.60)から(0.00,0.00)に黒色の線で移動
+[グラフィックス]: (50.00,86.60)から(0.00,0.00)に黒色で線を描く
+[使用インク]: 300.00
 ```
 
-You can see that all the processors are handling events successfully.
+すべてのプロセッサがイベントを正常に処理していることがわかります。
 
-The turtle is moving, the graphics processor is drawing lines, and the ink used processor has correctly calculated the total distance moved as 300 units.
+タートルは移動し、グラフィックスプロセッサは線を描き、インク使用プロセッサは移動した総距離を正しく300単位と計算しています。
 
-Note, though, that the ink used processor is emitting output on *every* state change (such as turning), rather than only when actual movement happens.
+ただし、インク使用プロセッサは実際の移動時だけでなく、*すべての*状態変化（回転など）で出力を発生させていることに注意してください。
 
-We can fix this by putting a pair `(previousDistance, currentDistance)` in the stream, and then filtering out those events where the values are the same.
+これを修正するには、ストリームに`(前回の距離, 現在の距離)`のペアを入れ、値が同じイベントをフィルタリングで除外します。
 
-Here's the new `inkUsedProcessor` code, with the following changes:
+新しい`inkUsedProcessor`のコードを以下に示します。変更点は：
 
-* The `accumulate` function now emits a pair.
-* There is a new filter `changedDistanceOnly`.
+* `accumulate`関数がペアを出力するようになりました。
+* 新しいフィルター`changedDistanceOnly`を追加しました。
 
 ```fsharp
-/// Listen for "moved" events and aggregate them to keep
-/// track of the total distance moved
-/// NEW! No duplicate events! 
+/// "moved"イベントをリッスンし、それらを集計して
+/// 移動した総距離を追跡する
+/// 新機能！重複イベントなし！ 
 let inkUsedProcessor (eventStream:IObservable<Guid*obj>) =
 
-    // Accumulate the total distance moved so far when a new event happens
+    // 新しいイベントが発生したときに、これまでの移動距離の合計を累積する
     let accumulate (prevDist,currDist) (ev:StateChangedEvent) =
         let newDist =
             match ev with
@@ -502,76 +502,76 @@ let inkUsedProcessor (eventStream:IObservable<Guid*obj>) =
                 currDist
         (currDist, newDist)
 
-    // convert unchanged events to None so they can be filtered out with "choose"
+    // 変更のないイベントをNoneに変換し、"choose"でフィルタリングできるようにする
     let changedDistanceOnly (currDist, newDist) =
         if currDist <> newDist then 
             Some newDist 
         else 
             None
 
-    // the function that handles the input from the observable
+    // オブザーバブルからの入力を処理する関数
     let subscriberFn distanceSoFar  =
-        printfn "[ink used]: %0.2f" distanceSoFar  
+        printfn "[使用インク]: %0.2f" distanceSoFar  
 
-    // start with all events
+    // すべてのイベントから始める
     eventStream
-    // filter the stream on just TurtleEvents
+    // ストリームをTurtleEventだけにフィルタリング
     |> Observable.choose (function (id,ev) -> turtleFilter ev)
-    // filter on just StateChangedEvent
+    // StateChangedEventだけにフィルタリング
     |> Observable.choose stateChangedEventFilter
-    // NEW! accumulate total distance as pairs
+    // 新機能！総距離をペアとして累積
     |> Observable.scan accumulate (0.0,0.0)   
-    // NEW! filter out when distance has not changed
+    // 新機能！距離が変化していない場合はフィルタリング
     |> Observable.choose changedDistanceOnly
-    // handle these
+    // これらを処理
     |> Observable.subscribe subscriberFn 
 ```
 
-With these changes, the output of `drawTriangle` looks like this:
+これらの変更により、`drawTriangle`の出力は以下のようになります：
 
 ```text
-[ink used]: 100.00
-[turtle  ]: Moved from (0.00,0.00) to (100.00,0.00) with line of color Black
-[graphics]: Draw line from (0.00,0.00) to (100.00,0.00) with color Black
-[ink used]: 200.00
-[turtle  ]: Moved from (100.00,0.00) to (50.00,86.60) with line of color Black
-[graphics]: Draw line from (100.00,0.00) to (50.00,86.60) with color Black
-[ink used]: 300.00
-[turtle  ]: Moved from (50.00,86.60) to (0.00,0.00) with line of color Black
-[graphics]: Draw line from (50.00,86.60) to (0.00,0.00) with color Black
+[使用インク]: 100.00
+[タートル  ]: (0.00,0.00)から(100.00,0.00)に黒色の線で移動
+[グラフィックス]: (0.00,0.00)から(100.00,0.00)に黒色で線を描く
+[使用インク]: 200.00
+[タートル  ]: (100.00,0.00)から(50.00,86.60)に黒色の線で移動
+[グラフィックス]: (100.00,0.00)から(50.00,86.60)に黒色で線を描く
+[使用インク]: 300.00
+[タートル  ]: (50.00,86.60)から(0.00,0.00)に黒色の線で移動
+[グラフィックス]: (50.00,86.60)から(0.00,0.00)に黒色で線を描く
 ```
 
-and there are no longer any duplicate messages from the `inkUsedProcessor`.
+これで`inkUsedProcessor`からの重複メッセージはなくなりました。
 
-### Advantages and disadvantages of stream processing
+### ストリーム処理の利点と欠点
 
-*Advantages*
+*利点*
 
-* Same advantages as event-sourcing.
-* Decouples stateful logic from other non-intrinsic logic.
-* Easy to add and remove domain logic without affecting the core command handler.
+* イベントソーシングと同じ利点があります。
+* 状態を持つロジックを、他の本質的でないロジックから分離します。
+* コアのコマンドハンドラに影響を与えずに、ドメインロジックの追加と削除が容易です。
 
-*Disadvantages*
+*欠点*
 
-* More complex to implement.
+* 実装がより複雑になります。
 
-*The source code for this version is available [here](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/11-FRP.fsx).*
+*このバージョンのソースコードは[こちら](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/11-FRP.fsx)で入手できます。*
 
 <a id="strikes-back"></a>
 
 <hr>
 
-## Episode V: The Turtle Strikes Back
+## エピソードV：タートルの逆襲
 
-So far, we have not had to make decisions based on the turtle's state. So, for the two final approaches, we will change the
-turtle API so that some commands may fail.
+これまで、タートルの状態に基づいて決定を下す必要はありませんでした。そこで、最後の2つのアプローチでは、
+一部のコマンドが失敗する可能性があるようにタートルAPIを変更します。
 
-For example, we might say that the turtle must move within a limited arena, and a `move` instruction may cause the turtle to hit the barrier.
-In this case, the `move` instruction can return a choice of `MovedOk` or `HitBarrier`.
+例えば、タートルが限られたアリーナ内で移動しなければならず、`move`命令によってタートルが障壁に衝突する可能性があるとしましょう。
+この場合、`move`命令は`MovedOk`か`HitBarrier`の選択肢を返すことができます。
 
-Or let's say that there is only a limited amount of colored ink. In this case, trying to set the color may return an "out of ink" response.
+または、色付きのインクの量が限られているとしましょう。この場合、色を設定しようとすると「インク切れ」の応答が返される可能性があります。
 
-So let's update the turtle functions with these cases. First the new response types for `move` and `setColor`:
+では、これらのケースでタートル関数を更新しましょう。まず、`move`と`setColor`の新しい応答型です：
 
 ```fsharp
 type MoveResponse = 
@@ -583,12 +583,12 @@ type SetColorResponse =
     | OutOfInk
 ```
 
-We will need a bounds checker to see if the turtle is in the arena.
-Say that if the position tries to go outside the square (0,0,100,100), the response is `HitABarrier`:
+タートルがアリーナ内にいるかどうかを確認する境界チェッカーが必要です。
+位置が正方形(0,0,100,100)の外に出ようとすると、応答は`HitABarrier`になるとしましょう：
 
 ```fsharp
-// if the position is outside the square (0,0,100,100) 
-// then constrain the position and return HitABarrier
+// 位置が正方形(0,0,100,100)の外にある場合
+// 位置を制限してHitBarrierを返す
 let checkPosition position =
     let isOutOfBounds p = 
         p > 100.0 || p < 0.0
@@ -604,86 +604,86 @@ let checkPosition position =
         MoveOk,position
 ```
 
-And finally, the `move` function needs an extra line to check the new position:
+最後に、`move`関数に新しい位置をチェックする行を追加する必要があります：
 
 ```fsharp
 let move log distance state =
     let newPosition = ...
     
-    // adjust the new position if out of bounds
+    // 範囲外の場合、新しい位置を調整
     let moveResult, newPosition = checkPosition newPosition 
     
     ...
 ```
 
-Here's the complete `move` function:
+これが完全な`move`関数です：
 
 ```fsharp
 let move log distance state =
     log (sprintf "Move %0.1f" distance)
-    // calculate new position 
+    // 新しい位置を計算 
     let newPosition = calcNewPosition distance state.angle state.position 
-    // adjust the new position if out of bounds
+    // 範囲外の場合、新しい位置を調整
     let moveResult, newPosition = checkPosition newPosition 
-    // draw line if needed
+    // 必要な場合、線を描く
     if state.penState = Down then
         dummyDrawLine log state.position newPosition state.color
-    // return the new state and the Move result
+    // 新しい状態とMoveの結果を返す
     let newState = {state with position = newPosition}
     (moveResult,newState) 
 ```
 
-We will make similar changes for the `setColor` function too, returning `OutOfInk` if we attempt to set the color to `Red`.
+`setColor`関数にも同様の変更を加え、色を`Red`に設定しようとすると`OutOfInk`を返すようにします。
 
 ```fsharp
 let setColor log color state =
     let colorResult = 
         if color = Red then OutOfInk else ColorOk
     log (sprintf "SetColor %A" color)
-    // return the new state and the SetColor result
+    // 新しい状態とSetColorの結果を返す
     let newState = {state with color = color}
     (colorResult,newState) 
 ```
 
-With the new versions of the turtle functions available, we have to create implementations that can respond to the error cases. That will be done in the next two examples.
+タートル関数の新バージョンが利用可能になったので、エラーケースに対応する実装を作成する必要があります。これは次の2つの例で行います。
         
-*The source code for the new turtle functions is available [here](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/FPTurtleLib2.fsx).*
-        
+*新しいタートル関数のソースコードは[こちら](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/FPTurtleLib2.fsx)で入手できます。*
+
 <hr>
 
 <a id="way12"></a>
 
-## 12: Monadic control flow
+## 12: モナディック制御フロー
 
-In this approach, we will reuse the `turtle` workflow from [way 8](../posts/13-ways-of-looking-at-a-turtle.md#way8).
-This time though, we will make decisions for the next command based on the result of the previous one.
+このアプローチでは、[方法8](../posts/13-ways-of-looking-at-a-turtle.md#way8)の`turtle`ワークフローを再利用します。
+ただし今回は、前のコマンドの結果に基づいて次のコマンドの決定を行います。
 
-Before we do that though, let's look at what effect the change to `move` will have on our code.  Let's say that we want to move forwards a few times using `move 40.0`, say.   
+その前に、`move`の変更がコードにどのような影響を与えるか見てみましょう。例えば、`move 40.0`を使って何回か前進したいとします。
 
-If we write the code using `do!` as we did before, we get a nasty compiler error:
+以前のように`do!`を使ってコードを書くと、厄介なコンパイラエラーが発生します：
 
 ```fsharp
 let drawShape() = 
-    // define a set of instructions 
+    // 一連の指示を定義 
     let t = turtle {
         do! move 60.0   
-        // error FS0001: 
-        // This expression was expected to have type
+        // エラー FS0001: 
+        // この式は以下の型を持つと期待されていました
         //    Turtle.MoveResponse    
-        // but here has type
+        // しかし、ここでは以下の型を持っています
         //     unit    
         do! move 60.0 
         } 
-    // etc                
+    // 以下省略                
 ```
 
-Instead, we need to use `let!` and assign the response to something.
+代わりに、`let!`を使用し、応答を何かに割り当てる必要があります。
 
-In the following code, we assign the response to a value and then ignore it!  
+以下のコードでは、応答を値に割り当てて、それを無視しています！
 
 ```fsharp
 let drawShapeWithoutResponding() = 
-    // define a set of instructions 
+    // 一連の指示を定義 
     let t = turtle {
         let! response = move 60.0 
         let! response = move 60.0 
@@ -691,11 +691,11 @@ let drawShapeWithoutResponding() =
         return ()
         } 
 
-    // finally, run the monad using the initial state
+    // 最後に、初期状態を使用してモナドを実行
     runT t initialTurtleState 
 ```
 
-The code does compile and work, but if we run it the output shows that, by the third call, we are banging our turtle against the wall (at 100,0) and not moving anywhere.
+コードはコンパイルされ動作しますが、実行すると、3回目の呼び出しでタートルが壁（100,0）にぶつかって動かなくなっていることが出力からわかります。
 
 ```text
 Move 60.0
@@ -706,42 +706,42 @@ Move 60.0
 ...Draw line from (100.0,0.0) to (100.0,0.0) using Black
 ```
 
-### Making decisions based on a response
+### 応答に基づく決定
 
-Let's say that our response to a `move` that returns `HitABarrier` is to turn 90 degrees and wait for the next command. Not the cleverest algorithm, but it will do for demonstration purposes!
+`HitBarrier`を返す`move`への応答として、90度回転して次のコマンドを待つことにしましょう。あまり賢明なアルゴリズムではありませんが、デモンストレーションには十分でしょう！
 
-Let's design a function to implement this. The input will be a `MoveResponse`, but what will the output be?  We want to encode the `turn` action somehow, but the raw `turn` function needs
-state input that we don't have.  So instead let's return a `turtle` workflow that represents the instruction we *want* to do, when the state becomes available (in the `run` command).
+これを実装する関数を設計しましょう。入力は`MoveResponse`ですが、出力は何でしょうか？ `turn`アクションを何らかの形でエンコードしたいのですが、
+生の`turn`関数には私たちが持っていない状態の入力が必要です。そこで、状態が利用可能になったとき（`run`コマンドで）に実行したい指示を表す`turtle`ワークフローを返すことにしましょう。
 
-So here is the code:
+以下がコードです：
 
 ```fsharp
 let handleMoveResponse moveResponse = turtle {
     match moveResponse with
     | Turtle.MoveOk -> 
-        () // do nothing
-    | Turtle.HitABarrier ->
-        // turn 90 before trying again
-        printfn "Oops -- hit a barrier -- turning"
+        () // 何もしない
+    | Turtle.HitBarrier ->
+        // 再試行の前に90度回転
+        printfn "おっと -- 障壁にぶつかりました -- 回転します"
         do! turn 90.0<Degrees>
     }
 ```
 
-The type signature looks like this:
+型シグネチャは以下のようになります：
 
 ```fsharp
 val handleMoveResponse : MoveResponse -> TurtleStateComputation<unit>
 ```
 
-which means that it is a monadic (or "diagonal") function -- one that starts in the normal world and ends in the `TurtleStateComputation` world.
+これはモナディック（または「対角」）関数です -- 通常の世界で始まり、`TurtleStateComputation`世界で終わります。
 
-These are exactly the functions that we can use "bind" with, or within computation expressions, `let!` or `do!`.
+これらは、「bind」を使用したり、コンピュテーション式内で`let!`や`do!`を使用したりできる関数です。
 
-Now we can add this `handleMoveResponse` step after `move` in the turtle workflow:
+これで、タートルワークフロー内の`move`の後に、この`handleMoveResponse`ステップを追加できます：
 
 ```fsharp
 let drawShape() = 
-    // define a set of instructions 
+    // 一連の指示を定義 
     let t = turtle {
         let! response = move 60.0 
         do! handleMoveResponse response 
@@ -753,67 +753,67 @@ let drawShape() =
         do! handleMoveResponse response 
         } 
 
-    // finally, run the monad using the initial state
+    // 最後に、初期状態を使用してモナドを実行
     runT t initialTurtleState 
 ```
 
-And the result of running it is:
+実行結果は以下のようになります：
 
 ```text
 Move 60.0
 ...Draw line from (0.0,0.0) to (60.0,0.0) using Black
 Move 60.0
 ...Draw line from (60.0,0.0) to (100.0,0.0) using Black
-Oops -- hit a barrier -- turning
+おっと -- 障壁にぶつかりました -- 回転します
 Turn 90.0
 Move 60.0
 ...Draw line from (100.0,0.0) to (100.0,60.0) using Black
 ```
 
-You can see that the move response worked. When the turtle hit the edge at (100,0) it turned 90 degrees and the next move succeeded (from (100,0) to (100,60)).
+移動応答が機能していることがわかります。タートルが(100,0)の端にぶつかったとき、90度回転し、次の移動は成功しました（(100,0)から(100,60)へ）。
 
-So there you go! This code demonstrates how you can make decisions inside the `turtle` workflow while the state is being passed around behind the scenes.
+これで完了です！このコードは、舞台裏で状態が受け渡されている間に、`turtle`ワークフロー内で決定を下せることを示しています。
 
-### Advantages and disadvantages
+### 利点と欠点
 
-*Advantages*
+*利点*
 
-* Computation expressions allow the code to focus on the logic while taking care of the "plumbing" -- in this case, the turtle state.
+* コンピュテーション式を使用することで、コードはロジックに焦点を当て、「配管」（この場合はタートルの状態）の処理を行うことができます。
 
-*Disadvantages*
+*欠点*
 
-* Still coupled to a particular implementation of the turtle functions.
-* Computation expressions can be complex to implement and how they work is not obvious for beginners.
+* 特定のタートル関数の実装にまだ結びついています。
+* コンピュテーション式の実装は複雑になる可能性があり、初心者にとってはその動作が明白ではありません。
 
-*The source code for this version is available [here](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/12-BranchingOnResponse.fsx).*
+*このバージョンのソースコードは[こちら](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/12-BranchingOnResponse.fsx)で入手できます。*
 
 <hr>
 
 <a id="way13"></a>
 
-## 13: A turtle interpreter 
+## 13: タートルインタープリター 
 
-For our final approach, we'll look at a way to *completely* decouple the programming of the turtle from its interpretation.  
+最後のアプローチでは、タートルのプログラミングとその解釈を*完全に*分離する方法を見ていきます。
 
-This is similar to the [batch processing using command objects](../posts/13-ways-of-looking-at-a-turtle.md#way9) approach,
-but is enhanced to support responding to the output of a command.
+これは[コマンドオブジェクトを使用したバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)アプローチに似ていますが、
+コマンドの出力に応答できるように拡張されています。
 
-### Designing an interpreter
+### インタープリターの設計
 
-The approach we will take is to design an "interpreter" for a set of turtle commands, where the client provides the commands to the turtle,
-and responds to outputs from the turtle, but the actual turtle functions are provided later by a particular implementation.
+我々が取るアプローチは、一連のタートルコマンドのための「インタープリター」を設計することです。クライアントがタートルにコマンドを提供し、
+タートルからの出力に応答しますが、実際のタートル関数は後で特定の実装によって提供されます。
 
-In other words, we have a chain of interleaved commands and turtle functions that look like this:
+言い換えれば、以下のような一連の交互のコマンドとタートル関数があります：
 
 ![](../assets/img/turtle-interpreter-chain.png)
 
-So how can we model this design in code?
+では、このデザインをコードでどのようにモデル化できるでしょうか？
 
-For a first attempt, let's model the chain as a sequence of request/response pairs. We send a command to the turtle and it responds appropriately with
-a `MoveResponse` or whatever, like this:
+まず最初の試みとして、このチェーンをリクエスト/レスポンスのペアの連続としてモデル化してみましょう。タートルにコマンドを送信すると、
+`MoveResponse`などで適切に応答します：
 
 ```fsharp
-// we send this to the turtle...
+// タートルに送信するもの
 type TurtleCommand = 
     | Move of Distance 
     | Turn of Angle
@@ -821,7 +821,7 @@ type TurtleCommand =
     | PenDown
     | SetColor of PenColor
 
-// ... and the turtle replies with one of these
+// ... そしてタートルはこれらのうちの1つで応答する
 type TurtleResponse = 
     | Moved of MoveResponse
     | Turned 
@@ -830,70 +830,70 @@ type TurtleResponse =
     | ColorSet of SetColorResponse
 ```
 
-The problem is that we cannot be sure that the response correctly matches the command.  For example, if I send a `Move` command, I expect to get a `MoveResponse`, and never
-a `SetColorResponse`. But this implementation doesn't enforce that!
+問題は、応答がコマンドと正しく一致することを保証できないことです。例えば、`Move`コマンドを送信した場合、`MoveResponse`を期待し、
+決して`SetColorResponse`を期待しません。しかし、この実装ではそれを強制していません！
 
-We want to [make illegal states unrepresentable](../posts/designing-with-types-making-illegal-states-unrepresentable.md) -- how can we do that?
+[不正な状態を表現不可能にする](../posts/designing-with-types-making-illegal-states-unrepresentable.md)方法を見つける必要があります - どうすればいいでしょうか？
 
-The trick is to combine the request and response in *pairs*. That is, for a `Move` command, there is an associated function which is given a `MoveResponse` as input, and similarly for each other combination.
-Commands that have no response can be considered as returning `unit` for now.
+トリックは、リクエストとレスポンスを*ペア*で組み合わせることです。つまり、`Move`コマンドには、入力として`MoveResponse`を受け取る関連する関数があり、他の各組み合わせについても同様です。
+応答のないコマンドは、今のところ`unit`を返すと考えることができます。
 
 ```fsharp
-Move command => pair of (Move command parameters), (function MoveResponse -> something)
-Turn command => pair of (Turn command parameters), (function unit -> something)
-etc
+Moveコマンド => (Moveコマンドのパラメータ), (関数 MoveResponse -> 何か) のペア
+Turnコマンド => (Turnコマンドのパラメータ), (関数 unit -> 何か) のペア
+等
 ```
 
-The way this works is that:
+これは以下のように機能します：
 
-* The client creates a command, say `Move 100`, and also provides the additional function that handles the response.
-* The turtle implementation for the Move command (inside the interpreter) processes the input (a `Distance`) and then generates a `MoveResponse`.
-* The interpreter then takes this `MoveResponse` and calls the associated function in the pair, as supplied by the client.
+* クライアントがコマンド（例：`Move 100`）を作成し、応答を処理する追加の関数も提供します。
+* Moveコマンドのタートル実装（インタープリター内）が入力（`Distance`）を処理し、`MoveResponse`を生成します。
+* インタープリターは、この`MoveResponse`を取り、クライアントが提供したペアの関連する関数を呼び出します。
 
-By associating the `Move` command with a function in this way, we can *guarantee* that the internal turtle implementation must accept a `distance` and return a `MoveResponse`, just as we want.
+このように`Move`コマンドを関数と関連付けることで、内部のタートル実装が`distance`を受け入れ、`MoveResponse`を返す*必要がある*ことを保証できます。
 
-The next question is: what is the `something` that is the output?  It is the output after the client has handled the response -- that is, another command/response chain!
+次の質問は：出力の`何か`は何でしょうか？ クライアントが応答を処理した後の出力、つまり別のコマンド/レスポンスチェーンです！
 
-So we can model the whole chain of pairs as a recursive structure:
+したがって、ペアの全チェーンを再帰的な構造としてモデル化できます：
 
 ![](../assets/img/turtle-interpreter-nested.png)
 
-Or in code:
+コードでは：
 
 ```fsharp
 type TurtleProgram = 
-    //         (input params)  (response)
+    //         (入力パラメータ)  (応答)
     | Move     of Distance   * (MoveResponse -> TurtleProgram)
     | Turn     of Angle      * (unit -> TurtleProgram)
-    | PenUp    of (* none *)   (unit -> TurtleProgram)
-    | PenDown  of (* none *)   (unit -> TurtleProgram)
+    | PenUp    of (* なし *)   (unit -> TurtleProgram)
+    | PenDown  of (* なし *)   (unit -> TurtleProgram)
     | SetColor of PenColor   * (SetColorResponse -> TurtleProgram)
 ```
 
-I've renamed the type from `TurtleCommand` to `TurtleProgram` because it is no longer just a command, but is now a complete chain of commands and associated response handlers.
+型名を`TurtleCommand`から`TurtleProgram`に変更しました。これはもはや単なるコマンドではなく、コマンドと関連する応答ハンドラの完全なチェーンになったためです。
 
-There's a problem though! Every step needs yet another `TurtleProgram` to follow -- so when will it stop?  We need some way of saying that there is no next command.
+しかし、問題があります！ 各ステップには次の`TurtleProgram`が必要です - いつ停止するのでしょうか？ 次のコマンドがないことを示す方法が必要です。
 
-To solve this issue, we will add a special `Stop` case to the program type:
+この問題を解決するために、プログラム型に特別な`Stop`ケースを追加します：
 
 ```fsharp
 type TurtleProgram = 
-    //         (input params)  (response)
+    //         (入力パラメータ)  (応答)
     | Stop
     | Move     of Distance   * (MoveResponse -> TurtleProgram)
     | Turn     of Angle      * (unit -> TurtleProgram)
-    | PenUp    of (* none *)   (unit -> TurtleProgram)
-    | PenDown  of (* none *)   (unit -> TurtleProgram)
+    | PenUp    of (* なし *)   (unit -> TurtleProgram)
+    | PenDown  of (* なし *)   (unit -> TurtleProgram)
     | SetColor of PenColor   * (SetColorResponse -> TurtleProgram)
 ```
 
-Note that there is no mention of `TurtleState` in this structure. How the turtle state is managed is internal to the interpreter, and is not part of the "instruction set", as it were.
+この構造には`TurtleState`への言及がないことに注意してください。タートル状態の管理方法はインタープリターの内部的なものであり、「命令セット」の一部ではありません。
 
-`TurtleProgram` is an example of an Abstract Syntax Tree (AST) -- a structure that represents a program to interpreted (or compiled). 
+`TurtleProgram`は抽象構文木（AST）の一例です - 解釈（またはコンパイル）されるプログラムを表す構造です。
 
-### Testing the interpreter
+### インタープリターのテスト
 
-Let's create a little program using this model. Here's our old friend `drawTriangle`:
+このモデルを使って小さなプログラムを作ってみましょう。ここに古い友人`drawTriangle`があります：
 
 ```fsharp
 let drawTriangle = 
@@ -906,19 +906,19 @@ let drawTriangle =
     Stop))))))
 ```
 
-This program is a data structure containing only client commands and responses -- there are no actual turtle functions in it anywhere!
-And yes, it is really ugly right now, but we will fix that shortly.
+このプログラムは、クライアントのコマンドと応答のみを含むデータ構造です - どこにも実際のタートル関数は含まれていません！
+そして、はい、今のところ非常に醜いですが、すぐに修正します。
 
-Now the next step is to interpret this data structure.
+次のステップは、このデータ構造を解釈することです。
 
-Let's create an interpreter that calls the real turtle functions. How would we implement the `Move` case, say?
+実際のタートル関数を呼び出すインタープリターを作成しましょう。例えば、`Move`ケースをどのように実装すればよいでしょうか？
 
-Well, just as described above:
+上記で説明したとおりです：
 
-* Get the distance and associated function from the `Move` case
-* Call the real turtle function with the distance and current turtle state, to get a `MoveResult` and a new turtle state.
-* Get the next step in the program by passing the `MoveResult` to the associated function
-* Finally call the interpreter again (recursively) with the new program and new turtle state.
+* `Move`ケースから距離と関連する関数を取得します。
+* 距離と現在のタートル状態を使って実際のタートル関数を呼び出し、`MoveResult`と新しいタートル状態を取得します。
+* 関連する関数に`MoveResult`を渡して、プログラムの次のステップを取得します。
+* 最後に、新しいプログラムと新しいタートル状態でインタープリターを（再帰的に）再度呼び出します。
 
 ```fsharp
 let rec interpretAsTurtle state program =
@@ -926,14 +926,14 @@ let rec interpretAsTurtle state program =
     match program  with
     | Move (dist,next) ->
         let result,newState = Turtle.move log dist state 
-        let nextProgram = next result  // compute the next step
+        let nextProgram = next result  // 次のステップを計算
         interpretAsTurtle newState nextProgram 
     ...        
 ```
 
-You can see that the updated turtle state is passed as a parameter to the next recursive call, and so no mutable field is needed.
+更新されたタートル状態が次の再帰呼び出しのパラメータとして渡されるため、可変フィールドは必要ないことがわかります。
 
-Here's the full code for `interpretAsTurtle`:
+以下は`interpretAsTurtle`の完全なコードです：
 
 ```fsharp
 let rec interpretAsTurtle state program =
@@ -944,11 +944,11 @@ let rec interpretAsTurtle state program =
         state
     | Move (dist,next) ->
         let result,newState = Turtle.move log dist state 
-        let nextProgram = next result  // compute the next step 
+        let nextProgram = next result  // 次のステップを計算 
         interpretAsTurtle newState nextProgram 
     | Turn (angle,next) ->
         let newState = Turtle.turn log angle state 
-        let nextProgram = next()       // compute the next step
+        let nextProgram = next()       // 次のステップを計算
         interpretAsTurtle newState nextProgram 
     | PenUp next ->
         let newState = Turtle.penUp log state 
@@ -964,16 +964,16 @@ let rec interpretAsTurtle state program =
         interpretAsTurtle newState nextProgram 
 ```
 
-Let's run it:
+実行してみましょう：
 
 ```fsharp
 let program = drawTriangle
-let interpret = interpretAsTurtle   // choose an interpreter 
+let interpret = interpretAsTurtle   // インタープリターを選択 
 let initialState = Turtle.initialTurtleState
 interpret initialState program |> ignore
 ```
 
-and the output is exactly what we have seen before:
+出力は以前と全く同じです：
 
 ```text
 Move 100.0
@@ -987,10 +987,10 @@ Move 100.0
 Turn 120.0
 ```
 
-But unlike all the previous approaches we can take *exactly the same program* and interpret it in a new way.
-We don't need to set up any kind of dependency injection, we just need to use a different interpreter.
+しかし、これまでのアプローチとは異なり、*全く同じプログラム*を取り、新しい方法で解釈できます。
+依存性注入のようなものを設定する必要はなく、単に異なるインタープリターを使用するだけです。
 
-So let's create another interpreter that aggregates the distance travelled, without caring about the turtle state:
+では、タートル状態を気にせずに移動距離を集計する別のインタープリターを作成しましょう：
 
 ```fsharp
 let rec interpretAsDistance distanceSoFar program =
@@ -1002,53 +1002,53 @@ let rec interpretAsDistance distanceSoFar program =
         distanceSoFar
     | Move (dist,next) ->
         let newDistanceSoFar = distanceSoFar + dist
-        let result = Turtle.MoveOk   // hard-code result
+        let result = Turtle.MoveOk   // 結果をハードコード
         let nextProgram = next result 
         recurse newDistanceSoFar nextProgram 
     | Turn (angle,next) ->
-        // no change in distanceSoFar
+        // distanceSoFarは変更なし
         let nextProgram = next()
         recurse distanceSoFar nextProgram 
     | PenUp next ->
-        // no change in distanceSoFar
+        // distanceSoFarは変更なし
         let nextProgram = next()
         recurse distanceSoFar nextProgram 
     | PenDown next -> 
-        // no change in distanceSoFar
+        // distanceSoFarは変更なし
         let nextProgram = next()
         recurse distanceSoFar nextProgram 
     | SetColor (color,next) ->
-        // no change in distanceSoFar
-        let result = Turtle.ColorOk   // hard-code result
+        // distanceSoFarは変更なし
+        let result = Turtle.ColorOk   // 結果をハードコード
         let nextProgram = next result
         recurse distanceSoFar nextProgram 
 ```
 
-In this case, I've aliased `interpretAsDistance` as `recurse` locally to make it obvious what kind of recursion is happening.
+この場合、`interpretAsDistance`をローカルで`recurse`として別名を付けて、どの種類の再帰が行われているかを明確にしています。
 
-Let's run the same program with this new interpreter:
+同じプログラムをこの新しいインタープリターで実行してみましょう：
 
 ```fsharp
-let program = drawTriangle           // same program  
-let interpret = interpretAsDistance  // choose an interpreter 
+let program = drawTriangle           // 同じプログラム  
+let interpret = interpretAsDistance  // インタープリターを選択 
 let initialState = 0.0
-interpret initialState program |> printfn "Total distance moved is %0.1f"
+interpret initialState program |> printfn "移動した総距離は %0.1f"
 ```
 
-and the output is again exactly what we expect:
+出力は再び予想通りです：
 
 ```text
-Total distance moved is 300.0
+移動した総距離は 300.0
 ```
 
-### Creating a "turtle program" workflow
+### "タートルプログラム"ワークフローの作成
 
-That code for creating a program to interpret was pretty ugly! Can we create a computation expression to make it look nicer?
+解釈するプログラムを作成するためのコードはかなり醜かったですね！ コンピュテーション式を作成して見栄えを良くすることはできないでしょうか？
 
-Well, in order to create a computation expression, we need `return` and `bind` functions, and those require that the
-`TurtleProgram` type be generic.
+コンピュテーション式を作成するには、`return`と`bind`関数が必要です。これらは
+`TurtleProgram`型がジェネリックであることを要求します。
 
-No problem! Let's make `TurtleProgram` generic then:
+問題ありません！`TurtleProgram`をジェネリックにしましょう：
 
 ```fsharp
 type TurtleProgram<'a> = 
@@ -1060,14 +1060,14 @@ type TurtleProgram<'a> =
     | SetColor of PenColor * (SetColorResponse -> TurtleProgram<'a>)
 ```
 
-Note that the `Stop` case has a value of type `'a` associated with it now.  This is needed so that we can implement `return` properly:
+`Stop`ケースに型`'a`の値が関連付けられていることに注意してください。これは`return`を適切に実装するために必要です：
 
 ```fsharp
 let returnT x = 
     Stop x  
 ```
 
-The `bind` function is more complicated to implement. Don't worry about how it works right now -- the important thing is that the types match up and it compiles!
+`bind`関数の実装はより複雑です。今のところその動作方法を気にする必要はありません - 重要なのは型が合致し、コンパイルされることです！
 
 ```fsharp
 let rec bindT f inst  = 
@@ -1078,7 +1078,7 @@ let rec bindT f inst  =
         (*
         Move(dist,fun moveResponse -> (bindT f)(next moveResponse)) 
         *)
-        // "next >> bindT f" is a shorter version of function response
+        // "next >> bindT f"は関数responseの短縮版
         Move(dist,next >> bindT f) 
     | Turn(angle,next) -> 
         Turn(angle,next >> bindT f)  
@@ -1090,23 +1090,23 @@ let rec bindT f inst  =
         SetColor(color,next >> bindT f)
 ```
 
-With `bind` and `return` in place, we can create a computation expression:
+`bind`と`return`が揃ったので、コンピュテーション式を作成できます：
 
 ```fsharp
-// define a computation expression builder
+// コンピュテーション式ビルダーを定義
 type TurtleProgramBuilder() =
     member this.Return(x) = returnT x
     member this.Bind(x,f) = bindT f x
     member this.Zero(x) = returnT ()
 
-// create an instance of the computation expression builder
+// コンピュテーション式ビルダーのインスタンスを作成
 let turtleProgram = TurtleProgramBuilder()
 ```
 
-We can now create a workflow that handles `MoveResponse`s just as in the monadic control flow example (way 12) earlier.
+これで、モナディック制御フローの例（方法12）で見たように、`MoveResponse`を処理するワークフローを作成できます。
 
 ```fsharp
-// helper functions
+// ヘルパー関数
 let stop = fun x -> Stop x
 let move dist  = Move (dist, stop)
 let turn angle  = Turn (angle, stop)
@@ -1118,14 +1118,14 @@ let handleMoveResponse log moveResponse = turtleProgram {
     match moveResponse with
     | Turtle.MoveOk -> 
         ()
-    | Turtle.HitABarrier ->
-        // turn 90 before trying again
-        log "Oops -- hit a barrier -- turning"
+    | Turtle.HitBarrier ->
+        // 再試行の前に90度回転
+        log "おっと -- 障壁にぶつかりました -- 回転します"
         let! x = turn 90.0<Degrees>
         ()
     }
 
-// example
+// 例
 let drawTwoLines log = turtleProgram {
     let! response = move 60.0
     do! handleMoveResponse log response 
@@ -1134,7 +1134,7 @@ let drawTwoLines log = turtleProgram {
     }
 ```
 
-Let's interpret this using the real turtle functions (assuming that the `interpretAsTurtle` function has been modified to handle the new generic structure):
+実際のタートル関数を使ってこれを解釈してみましょう（`interpretAsTurtle`関数が新しいジェネリック構造を処理するように修正されていると仮定します）：
     
 ```fsharp
 let log = printfn "%s"
@@ -1144,30 +1144,30 @@ let initialState = Turtle.initialTurtleState
 interpret initialState program |> ignore
 ```
 
-The output shows that the `MoveResponse` is indeed being handled correctly when the barrier is encountered:
+出力は、障壁に遭遇したときに`MoveResponse`が確かに正しく処理されていることを示しています：
 
 ```text
 Move 60.0
 ...Draw line from (0.0,0.0) to (60.0,0.0) using Black
 Move 60.0
 ...Draw line from (60.0,0.0) to (100.0,0.0) using Black
-Oops -- hit a barrier -- turning
+おっと -- 障壁にぶつかりました -- 回転します
 Turn 90.0
 ```
 
-### Refactoring the `TurtleProgram` type into two parts
+### `TurtleProgram`型を2つの部分にリファクタリング
 
-This approach works fine, but it bothers me that there is a special `Stop` case in the `TurtleProgram` type. It would nice if we could somehow
-just focus on the five turtle actions and ignore it.
+このアプローチは十分に機能しますが、`TurtleProgram`型に特別な`Stop`ケースがあることが気になります。できれば、
+5つのタートルアクションに焦点を当て、それを無視できればいいのですが。
 
-As it turns out, there *is* a way to do this.  In Haskell and Scalaz it would be called a "free monad", but since F# doesn't support typeclasses,
-I'll just call it the "free monad pattern" that you can use to solve the problem. There's a little bit of boilerplate that
-you have to write, but not much.
+実際、これを行う方法があります。HaskellやScalazでは「フリーモナド」と呼ばれますが、F#は型クラスをサポートしていないため、
+この問題を解決するための「フリーモナドパターン」と呼ぶことにします。
+少しのボイラープレートを書く必要がありますが、それほど多くはありません。
 
-The trick is to separate the api cases and "stop"/"keep going" logic into two separate types, like this: 
+トリックは、APIケースと "stop"/"keep going" ロジックを2つの別々の型に分離することです：
 
 ```fsharp
-/// Create a type to represent each instruction
+/// 各命令を表す型を作成
 type TurtleInstruction<'next> = 
     | Move     of Distance * (MoveResponse -> 'next)
     | Turn     of Angle    * 'next
@@ -1175,15 +1175,15 @@ type TurtleInstruction<'next> =
     | PenDown  of            'next
     | SetColor of PenColor * (SetColorResponse -> 'next)
 
-/// Create a type to represent the Turtle Program
+/// タートルプログラムを表す型を作成
 type TurtleProgram<'a> = 
     | Stop of 'a
     | KeepGoing of TurtleInstruction<TurtleProgram<'a>>
 ```
 
-Note that I've also changed the responses for `Turn`, `PenUp` and `PenDown` to be single values rather than a unit function. `Move` and `SetColor` remain as functions though.
+`Turn`、`PenUp`、`PenDown`の応答を単一の値に変更し、unit関数ではなくしたことにも注意してください。`Move`と`SetColor`は関数のままです。
 
-In this new "free monad" approach, the only custom code we need to write is a simple `map` function for the api type, in this case `TurtleInstruction`:
+この新しい「フリーモナド」アプローチでは、APIタイプ（この場合は`TurtleInstruction`）に対する単純な`map`関数を書くだけです：
 
 ```fsharp
 let mapInstr f inst  = 
@@ -1195,11 +1195,11 @@ let mapInstr f inst  =
     | SetColor(color,next) -> SetColor(color,next >> f)
 ```
 
-The rest of the code (`return`, `bind`, and the computation expression) is
-[always implemented exactly the same way](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/4a8cdf3bda9fc9db030842e99f78487aea928e57/13-Interpreter-v2.fsx#L67), regardless of the particular api.
-That is, more boilerplate is needed but less thinking is required!
+残りのコード（`return`、`bind`、およびコンピュテーション式）は、
+[常に同じ方法で実装されます](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/4a8cdf3bda9fc9db030842e99f78487aea928e57/13-Interpreter-v2.fsx#L67)。これは特定のAPIに関係なく、同じです。
+つまり、より多くのボイラープレートが必要ですが、考える必要は少なくなります！
 
-The interpreters need to change in order to handle the new cases. Here's a snippet of the new version of `interpretAsTurtle`:
+インタープリターは新しいケースを処理するように変更する必要があります。以下は`interpretAsTurtle`の新バージョンの一部です：
 
 ```fsharp
 let rec interpretAsTurtle log state program =
@@ -1210,30 +1210,30 @@ let rec interpretAsTurtle log state program =
         state
     | KeepGoing (Move (dist,next)) ->
         let result,newState = Turtle.move log dist state 
-        let nextProgram = next result // compute next program
+        let nextProgram = next result // 次のプログラムを計算
         recurse newState nextProgram 
     | KeepGoing (Turn (angle,next)) ->
         let newState = Turtle.turn log angle state 
-        let nextProgram = next        // use next program directly
+        let nextProgram = next        // 次のプログラムを直接使用
         recurse newState nextProgram 
 ```
 
-And we also need to adjust the helper functions when creating a workflow. You can see below that we now have slightly
-more complicated code like `KeepGoing (Move (dist, Stop))` instead of the simpler code in the original interpreter.
+ワークフローを作成する際のヘルパー関数も調整する必要があります。以下では、元のインタープリターでの単純なコードの代わりに、
+`KeepGoing (Move (dist, Stop))`のようなやや複雑なコードがあることがわかります。
 
 ```fsharp
-// helper functions
+// ヘルパー関数
 let stop = Stop()
-let move dist  = KeepGoing (Move (dist, Stop))    // "Stop" is a function
-let turn angle  = KeepGoing (Turn (angle, stop))  // "stop" is a value
+let move dist  = KeepGoing (Move (dist, Stop))    // "Stop"は関数
+let turn angle  = KeepGoing (Turn (angle, stop))  // "stop"は値
 let penUp  = KeepGoing (PenUp stop)
 let penDown  = KeepGoing (PenDown stop)
 let setColor color = KeepGoing (SetColor (color,Stop))
 
 let handleMoveResponse log moveResponse = turtleProgram {
-    ... // as before
+    ... // 以前と同じ
 
-// example
+// 例
 let drawTwoLines log = turtleProgram {
     let! response = move 60.0
     do! handleMoveResponse log response 
@@ -1242,85 +1242,85 @@ let drawTwoLines log = turtleProgram {
     }
 ```
 
-But with those changes, we are done, and the code works just as before.
+これらの変更を加えれば、コードは以前と同じように動作します。
 
-### Advantages and disadvantages of the interpreter pattern
+### インタープリターパターンの利点と欠点
 
-*Advantages*
+*利点*
 
-* *Decoupling.* An abstract syntax tree completely decouples the program flow from the implementation and allows lots of flexibility.
-* *Optimization*. Abstract syntax trees can be manipulated and changed *before* running them, in order to do optimizations or other transformations. As an example, for the turtle program,
-  we could process the tree and collapse all contiguous sequences of `Turn` into a single `Turn` operation.
-  This is a simple optimization which saves on the number of times we need to communicate with a physical turtle. [Twitter's Stitch library](https://engineering.twitter.com/university/videos/introducing-stitch)
-  does something like this, but obviously, in a more sophisticated way. [This video has a good explanation](https://www.youtube.com/watch?v=VVpmMfT8aYw&feature=youtu.be&t=625).
-* *Minimal code for a lot of power*. The "free monad" approach to creating abstract syntax trees allows you to focus on the API and ignore the Stop/KeepGoing logic, and also means that only a minimal amount of code needs to be customized.
-  For more on the free monad, start with [this excellent video](https://www.youtube.com/watch?v=hmX2s3pe_qk) and then see [this post](http://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html)
-  and [this one](http://www.haskellforall.com/2012/06/you-could-have-invented-free-monads.html).
+* *分離。* 抽象構文木は、プログラムフローを実装から完全に分離し、多くの柔軟性を可能にします。
+* *最適化*。抽象構文木は、実行前に操作や変更を加えて、最適化やその他の変換を行うことができます。例えば、タートルプログラムでは、
+  ツリーを処理して、連続するすべての`Turn`を単一の`Turn`操作に集約することができます。
+  これは、物理的なタートルとの通信回数を節約する単純な最適化です。[TwitterのStitchライブラリ](https://web.archive.org/web/20160617143939/https://engineering.twitter.com/university/videos/introducing-stitch)
+  は、より洗練された方法でこのようなことを行っています。[この動画に良い説明があります](https://www.youtube.com/watch?v=VVpmMfT8aYw&feature=youtu.be&t=625)。
+* *最小限のコードで多くの力を得られる*。抽象構文木を作成する「フリーモナド」アプローチにより、APIに焦点を当て、Stop/KeepGoingロジックを無視できます。また、カスタマイズが必要な最小限のコードで済みます。
+  フリーモナドについて詳しく知るには、まず[この素晴らしい動画](https://www.youtube.com/watch?v=hmX2s3pe_qk)から始め、次に[この投稿](https://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html)
+  と[こちらの投稿](https://www.haskellforall.com/2012/06/you-could-have-invented-free-monads.html)を参照してください。
 
-*Disadvantages*
+*欠点*
 
-* Complex to understand.
-* Only works well if there are a limited set of operations to perform.
-* Can be inefficient if the ASTs get too large.
+* 理解するのが複雑です。
+* 実行する操作が限られている場合にのみ効果的です。
+* ASTが大きくなりすぎると非効率になる可能性があります。
 
-*The source code for this version is available [here (original version)](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/13-Interpreter-v1.fsx)
-and [here ("free monad" version)](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/13-Interpreter-v2.fsx).*
+*このバージョンのソースコードは[こちら（オリジナルバージョン）](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/13-Interpreter-v1.fsx)
+と[こちら（「フリーモナド」バージョン）](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/13-Interpreter-v2.fsx)で入手できます。*
 
 <hr>
 
 <a id="review"></a>
 
-## Review of techniques used
+## 使用された技術のレビュー
 
-In this post, we looked at thirteen different ways to implement a turtle API, using a wide variety of different techniques.  Let's quickly run down all the techniques that were used:
+この投稿では、タートルAPIを実装する13の異なる方法を見てきました。様々な技術を使用しました。使用されたすべての技術を簡単に振り返ってみましょう：
 
-* **Pure, stateless functions**. As seen in all of the FP-oriented examples. All these are very easy to test and mock.
-* **Partial application**. As first seen in [the simplest FP example (way 2)](../posts/13-ways-of-looking-at-a-turtle.md#way2), when the turtle functions had the logging function applied so that the main flow could use piping,
-  and thereafter used extensively, particularly in the ["dependency injection using functions approach" (way 7)](../posts/13-ways-of-looking-at-a-turtle.md#way7).
-* **Object expressions** to implement an interface without creating a class, as seen in [way 6](../posts/13-ways-of-looking-at-a-turtle.md#way6).
-* **The Result type** (a.k.a the Either monad). Used in all the functional API examples ([e.g. way 4](../posts/13-ways-of-looking-at-a-turtle.md#way4)) to return an error rather than throw an exception. 
-* **Applicative "lifting"** (e.g. `lift2`) to lift normal functions to the world of `Result`s, again [in way 4](../posts/13-ways-of-looking-at-a-turtle.md#way4) and others.
-* **Lots of different ways of managing state**:
-  * mutable fields (way 1)
-  * managing state explicitly and piping it though a series of functions (way 2)
-  * having state only at the edge (the functional core/imperative shell in way 4)
-  * hiding state in an agent (way 5)
-  * threading state behind the scenes in a state monad (the `turtle` workflow in ways 8 and 12)
-  * avoiding state altogether by using batches of commands (way 9) or batches of events (way 10) or an interpreter (way 13)
-* **Wrapping a function in a type**. Used in [way 8](../posts/13-ways-of-looking-at-a-turtle.md#way8) to manage state (the State monad) and in [way 13](../posts/13-ways-of-looking-at-a-turtle.md#way13) to store responses.
-* **Computation expressions**, lots of them! We created and used three:
-  * `result` for working with errors
-  * `turtle` for managing turtle state
-  * `turtleProgram` for building an AST in the interpreter approach ([way 13](../posts/13-ways-of-looking-at-a-turtle-2.md#way13)).
-* **Chaining of monadic functions** in the `result` and `turtle` workflows. The underlying functions are monadic ("diagonal") and would not normally compose properly,
-  but inside a workflow, they can be sequenced easily and transparently.
-* **Representing behavior as a data structure** in the ["functional dependency injection" example (way 7)](../posts/13-ways-of-looking-at-a-turtle.md#way7) so that a single function could be passed in rather than a whole interface.
-* **Decoupling using a data-centric protocol** as seen in the agent, batch command, event sourcing, and interpreter examples.
-* **Lock free and async processing** using an agent (way 5).
-* **The separation of "building" a computation vs. "running" it**, as seen in the `turtle` workflows (ways 8 and 12) and the `turtleProgram` workflow (way 13: interpreter).
-* **Use of event sourcing to rebuild state** from scratch rather than maintaining mutable state in memory, as seen in the [event sourcing (way 10)](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)
-   and [FRP (way 11)](../posts/13-ways-of-looking-at-a-turtle-2.md#way11) examples.
-* **Use of event streams** and [FRP (way 11)](../posts/13-ways-of-looking-at-a-turtle-2.md#way11) to break business logic into small, independent, and decoupled processors rather than having a monolithic object.
+* **純粋でステートレスな関数**。FP指向のすべての例で見られます。これらはすべてテストやモックが非常に容易です。
+* **部分適用**。[最もシンプルなFPの例（方法2）](../posts/13-ways-of-looking-at-a-turtle.md#way2)で初めて見られ、メインフローがパイピングを使用できるようにタートル関数にロギング関数が適用されました。
+  その後、特に[「関数を使用した依存性注入アプローチ」（方法7）](../posts/13-ways-of-looking-at-a-turtle.md#way7)で広く使用されました。
+* **オブジェクト式**。クラスを作成せずにインターフェースを実装するために使用されました（[方法6](../posts/13-ways-of-looking-at-a-turtle.md#way6)参照）。
+* **Result型**（別名Eitherモナド）。すべての関数型APIの例（[例えば方法4](../posts/13-ways-of-looking-at-a-turtle.md#way4)）で、例外を投げる代わりにエラーを返すために使用されました。
+* **アプリカティブ「リフティング」**（例：`lift2`）。通常の関数を`Result`の世界に持ち上げるために使用されました（[方法4](../posts/13-ways-of-looking-at-a-turtle.md#way4)など）。
+* **状態管理の様々な方法**：
+  * 可変フィールド（方法1）
+  * 状態を明示的に管理し、一連の関数を通してパイプする（方法2）
+  * エッジでのみ状態を持つ（方法4の関数型コア/命令型シェル）
+  * エージェント内に状態を隠す（方法5）
+  * ステートモナドで舞台裏で状態をスレッド化する（方法8と12の`turtle`ワークフロー）
+  * コマンドのバッチ（方法9）やイベントのバッチ（方法10）、インタープリター（方法13）を使用して状態を完全に避ける
+* **関数を型でラップする**。[方法8](../posts/13-ways-of-looking-at-a-turtle.md#way8)で状態を管理するため（Stateモナド）と、[方法13](../posts/13-ways-of-looking-at-a-turtle.md#way13)で応答を格納するために使用されました。
+* **コンピュテーション式**、たくさんありました！3つ作成して使用しました：
+  * エラー処理のための`result`
+  * タートルの状態管理のための`turtle`
+  * インタープリターアプローチ（[方法13](../posts/13-ways-of-looking-at-a-turtle-2.md#way13)）でASTを構築するための`turtleProgram`
+* **モナディック関数のチェーン化**。`result`と`turtle`ワークフローで行われました。基礎となる関数はモナディック（「対角」）で、通常は適切に合成できませんが、
+  ワークフロー内では簡単かつ透過的に順序付けできます。
+* **振る舞いをデータ構造として表現する**。[「関数型依存性注入」の例（方法7）](../posts/13-ways-of-looking-at-a-turtle.md#way7)で、インターフェース全体ではなく単一の関数を渡せるようにするために使用されました。
+* **データ中心のプロトコルを使用した分離**。エージェント、バッチコマンド、イベントソーシング、インタープリターの例で見られました。
+* **ロックフリーと非同期処理**。エージェントを使用（方法5）。
+* **コンピュテーションの「構築」と「実行」の分離**。`turtle`ワークフロー（方法8と12）と`turtleProgram`ワークフロー（方法13：インタープリター）で見られました。
+* **イベントソーシングを使用して状態を再構築する**。メモリ内で可変状態を維持する代わりに、[イベントソーシング（方法10）](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)
+   と[FRP（方法11）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)の例で見られました。
+* **イベントストリーム**と[FRP（方法11）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)の使用。ビジネスロジックを小さく、独立した、分離されたプロセッサに分割し、モノリシックなオブジェクトを避けるために使用されました。
 
-I hope it's clear that examining these thirteen ways is just a fun exercise, and I'm not suggesting that you immediately convert all your code to use stream processors and interpreters! And, especially
-if you are working with people who are new to functional programming, I would tend to stick with the earlier (and simpler) approaches unless there is a clear benefit in exchange for the extra complexity.
+これら13の方法を検討することは単なる楽しい演習であり、すべてのコードをすぐにストリームプロセッサやインタープリターを使用するように変換することを提案しているわけではありません！特に
+関数型プログラミングに慎重な人々と一緒に作業している場合、追加の複雑さに見合う明確な利点がない限り、初期の（そしてよりシンプルな）アプローチに固執する傾向があります。
 
 <hr>
 
-## Summary
+## まとめ
 
-> When the tortoise crawled out of sight,   
-> It marked the edge   
-> Of one of many circles.   
-> -- *"Thirteen ways of looking at a turtle", by Wallace D Coriacea*
+> 亀は這い出て見えなくなり  
+> 無数の円のひとつだけ  
+> 縁の跡が残った  
+> -- *ウォレス・オサガメ・スティーヴンズ 著 「タートルを見る13の方法」*
 
-I hope you enjoyed this post. I certainly enjoyed writing it. As usual, it ended up much longer than I intended, so I hope that the effort of reading it was worth it to you!
+この投稿を楽しんでいただけたら幸いです。私も書くのを楽しみました。いつものように、意図したよりもずっと長くなってしまいましたが、読む価値があったと思っていただければ幸いです！
 
-If you like this kind of comparative approach, and want more, check out [the posts by Yan Cui, who is doing something similar](http://theburningmonk.com/fsharp-exercises-in-programming-style/) on his blog.
+このような比較アプローチが好きで、もっと知りたい場合は、[Yan Cuiのブログで同様のことを行っている投稿](https://medium.com/theburningmonk-com/fsharp-exercises-in-programming-style/home)をチェックしてみてください。
 
-Enjoy the rest of the [F# Advent Calendar](https://sergeytihon.wordpress.com/2015/10/25/f-advent-calendar-in-english-2015/). Happy Holidays!  
+[F#アドベントカレンダー](https://sergeytihon.wordpress.com/2015/10/25/f-advent-calendar-in-english-2015/)の残りもお楽しみください。ハッピーホリデー！  
   
-*The source code for this post is available [on github](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle).*
+*この投稿のソースコードは[GitHub](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle)で入手できます。*
 
 
 

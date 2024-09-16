@@ -136,7 +136,7 @@
 * [代数的型のサイズとドメインモデリング](posts/type-size-and-design.md)
 * [タートルを見る13の方法](posts/13-ways-of-looking-at-a-turtle.md)
   * [タートルを見る13の方法 (パート2)](posts/13-ways-of-looking-at-a-turtle-2.md)
-  * [タートルを見る13の方法 - 補遺](posts/13-ways-of-looking-at-a-turtle-3.md)
+  * [タートルを見る13の方法 - 追補](posts/13-ways-of-looking-at-a-turtle-3.md)
     
 ### 関数型パターン ###
 
