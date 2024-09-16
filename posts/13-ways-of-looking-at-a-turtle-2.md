@@ -24,7 +24,7 @@ categories: [パターン]
 * [方法7. 関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)：関数パラメータを渡すことで実装をAPIから分離します。
 * [方法8. Stateモナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)：状態を追跡するための特別な「タートルワークフロー」コンピュテーション式を作ります。
 * [方法9. コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)：タートルコマンドを表す型を作り、コマンドのリストを一括処理します。
-* [間奏：データ型を使った意識的な分離](../posts/13-ways-of-looking-at-a-turtle.md#decoupling)。分離のためのデータ対インターフェースの使用に関するメモ。
+* [間奏：データ型を使った意識的な分離](../posts/13-ways-of-looking-at-a-turtle.md#decoupling)。データまたはインターフェースを使った分離に関するメモ。
 * [方法10. イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)：過去のイベントのリストから状態を構築します。
 * [方法11. 関数型リアクティブプログラミング（ストリーム処理）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)：ビジネスロジックが以前のイベントに反応することに基づいています。
 * [エピソードV：タートルの逆襲](../posts/13-ways-of-looking-at-a-turtle-2.md#strikes-back)：タートルAPIが変更され、一部のコマンドが失敗する可能性がでてきます。
