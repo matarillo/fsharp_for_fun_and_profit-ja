@@ -134,9 +134,9 @@
   * [文字列以外の型](posts/designing-with-types-non-strings.md)
   * [型を使って設計する: 結論](posts/designing-with-types-conclusion.md)
 * [代数的型のサイズとドメインモデリング](posts/type-size-and-design.md)
-* [カメの十三通りの見方](posts/13-ways-of-looking-at-a-turtle.md)
-  * [カメの十三通りの見方 (パート2)](posts/13-ways-of-looking-at-a-turtle-2.md)
-  * [カメの十三通りの見方 - 補遺](posts/13-ways-of-looking-at-a-turtle-3.md)
+* [タートルを見る13の方法](posts/13-ways-of-looking-at-a-turtle.md)
+  * [タートルを見る13の方法 (パート2)](posts/13-ways-of-looking-at-a-turtle-2.md)
+  * [タートルを見る13の方法 - 補遺](posts/13-ways-of-looking-at-a-turtle-3.md)
     
 ### 関数型パターン ###
 

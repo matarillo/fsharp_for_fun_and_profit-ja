@@ -1,59 +1,59 @@
 ---
 layout: post
-title: "Thirteen ways of looking at a turtle"
-description: "Examples of an API, dependency injection, a state monad, and more!"
-categories: [Patterns]
+title: "タートルを見る13の方法"
+description: "API、依存性注入、状態モナドなどの例"
+categories: [パターン]
 ---
 
-> This post is part of the [F# Advent Calendar in English 2015](https://sergeytihon.wordpress.com/2015/10/25/f-advent-calendar-in-english-2015/) project.
-> Check out all the other great posts there! And special thanks to Sergey Tihon for organizing this.
+> この投稿は[F# Advent Calendar in English 2015](https://sergeytihon.wordpress.com/2015/10/25/f-advent-calendar-in-english-2015/)プロジェクトの一部です。
+> そこにある他の素晴らしい投稿もチェックしてください。このイベントを企画してくれたSergey Tihonに特別な感謝を捧げます。
 
-I was discussing how to implement a simple [turtle graphics system](https://en.wikipedia.org/wiki/Turtle_graphics) some time ago,
-and it struck me that, because the turtle requirements are so simple and so well known, it would make a great basis for demonstrating a range of different techniques.
+以前、シンプルな[タートルグラフィックスシステム](https://en.wikipedia.org/wiki/Turtle_graphics)の実装方法について議論していたとき、タートルの要件はとてもシンプルでよく知られているため、
+さまざまな技術を実演するのに最適な基盤になると思いつきました。
 
-So, in this two part mega-post, I'll stretch the turtle model to the limit while demonstrating things like: partial application, validation with Success/Failure results,
-the concept of "lifting", agents with message queues, dependency injection, the State monad, event sourcing, stream processing, and finally a custom interpreter!
+そこで、この2部構成のメガ投稿では、タートルのモデルを極限まで拡張しながら、部分適用、Success/Failure結果を用いた検証、「リフティング」の概念、
+メッセージキューを持つエージェント、依存性注入、状態モナド、イベントソーシング、ストリーム処理、そして最後にカスタムインタプリタなどを実演します。
 
-Without further ado then, I hereby present thirteen different ways of implementing a turtle: 
+では、早速ですが、タートルを実装する13の異なる方法をご紹介しましょう。
 
-* [Way 1. A basic object-oriented approach](../posts/13-ways-of-looking-at-a-turtle.md#way1), in which we create a class with mutable state.
-* [Way 2. A basic functional approach](../posts/13-ways-of-looking-at-a-turtle.md#way2), in which we create a module of functions with immutable state.
-* [Way 3. An API with a object-oriented core](../posts/13-ways-of-looking-at-a-turtle.md#way3), in which we create an object-oriented API that calls a stateful core class.
-* [Way 4. An API with a functional core](../posts/13-ways-of-looking-at-a-turtle.md#way4), in which we create an stateful API that uses stateless core functions.
-* [Way 5. An API in front of an agent](../posts/13-ways-of-looking-at-a-turtle.md#way5), in which we create an API that uses a message queue to communicate with an agent.
-* [Way 6. Dependency injection using interfaces](../posts/13-ways-of-looking-at-a-turtle.md#way6), in which we decouple the implementation from the API using an interface or record of functions.
-* [Way 7. Dependency injection using functions](../posts/13-ways-of-looking-at-a-turtle.md#way7), in which we decouple the implementation from the API by passing a function parameter.
-* [Way 8. Batch processing using a state monad](../posts/13-ways-of-looking-at-a-turtle.md#way8), in which we create a special "turtle workflow" computation expression to track state for us.
-* [Way 9. Batch processing using command objects](../posts/13-ways-of-looking-at-a-turtle.md#way9), in which we create a type to represent a turtle command, and then process a list of commands all at once.
-* [Interlude: Conscious decoupling with data types](../posts/13-ways-of-looking-at-a-turtle.md#decoupling). A few notes on using data vs. interfaces for decoupling.
-* [Way 10. Event sourcing](../posts/13-ways-of-looking-at-a-turtle-2.md#way10), in which  state is built from a list of past events.
-* [Way 11. Functional Retroactive Programming (stream processing)](../posts/13-ways-of-looking-at-a-turtle-2.md#way11), in which business logic is based on reacting to earlier events.
-* [Episode V: The Turtle Strikes Back](../posts/13-ways-of-looking-at-a-turtle-2.md#strikes-back), in which the turtle API changes so that some commands may fail.
-* [Way 12. Monadic control flow](../posts/13-ways-of-looking-at-a-turtle-2.md#way12), in which we make decisions in the turtle workflow based on results from earlier commands.
-* [Way 13. A turtle interpreter](../posts/13-ways-of-looking-at-a-turtle-2.md#way13), in which we completely decouple turtle programming from turtle implementation, and nearly encounter the free monad.
-* [Review of all the techniques used](../posts/13-ways-of-looking-at-a-turtle-2.md#review).
+* [方法1. 基本的なオブジェクト指向アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way1)：可変状態を持つクラスを作成します。
+* [方法2. 基本的な関数型アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way2)：不変の状態を持つ関数のモジュールを作成します。
+* [方法3. オブジェクト指向コアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way3)：状態を持つコアクラスを呼び出すオブジェクト指向APIを作成します。
+* [方法4. 関数型コアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way4)：状態を持たないコア関数を使用する状態を持つAPIを作成します。
+* [方法5. エージェントの前面にあるAPI](../posts/13-ways-of-looking-at-a-turtle.md#way5)：メッセージキューを使用してエージェントと通信するAPIを作成します。
+* [方法6. インターフェースを使用した依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way6)：インターフェースまたは関数のレコードを使用して、実装をAPIから分離します。
+* [方法7. 関数を使用した依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)：関数パラメータを渡すことで、実装をAPIから分離します。
+* [方法8. 状態モナドを使用したバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)：状態を追跡する特別な「タートルワークフロー」計算式を作成します。
+* [方法9. コマンドオブジェクトを使用したバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)：タートルのコマンドを表す型を作成し、コマンドのリストを一度に処理します。
+* [幕間：データ型による意識的な分離](../posts/13-ways-of-looking-at-a-turtle.md#decoupling)。分離のためのデータ対インターフェースの使用に関するメモ。
+* [方法10. イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)：過去のイベントのリストから状態を構築します。
+* [方法11. 関数型遡及プログラミング（ストリーム処理）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)：ビジネスロジックを以前のイベントへの反応に基づいて構築します。
+* [エピソードV：タートルの逆襲](../posts/13-ways-of-looking-at-a-turtle-2.md#strikes-back)：一部のコマンドが失敗する可能性がある場合のタートルAPIの変更。
+* [方法12. モナディック制御フロー](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)：以前のコマンドの結果に基づいてタートルのワークフローで決定を行います。
+* [方法13. タートルインタプリタ](../posts/13-ways-of-looking-at-a-turtle-2.md#way13)：タートルのプログラミングとタートルの実装を完全に分離し、フリーモナドにほぼ遭遇します。
+* [使用されたすべての技術のレビュー](../posts/13-ways-of-looking-at-a-turtle-2.md#review)。
 
-and 2 bonus ways for the extended edition:
+拡大版として、おまけの方法を2つ：
 
-* [Way 14. Abstract Data Turtle](../posts/13-ways-of-looking-at-a-turtle-3.md#way14), in which we encapsulate the details of a turtle implementation by using an Abstract Data Type.
-* [Way 15. Capability-based Turtle](../posts/13-ways-of-looking-at-a-turtle-3.md#way15), in which we control what turtle functions are available to a client, based on the current
-  state of the turtle.
+* [方法14. 抽象データタートル](../posts/13-ways-of-looking-at-a-turtle-3.md#way14)：抽象データ型を使用してタートルの実装の詳細をカプセル化します。
+* [方法15. ケイパビリティベースタートル](../posts/13-ways-of-looking-at-a-turtle-3.md#way15)：タートルの現在の状態に基づいて、
+クライアントが利用できるタートルの関数を制御します。
 
 
-All source code for this post is available [on github](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle).
+この投稿のすべてのソースコードは[GitHub](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle)で入手できます。
 
 <hr>
 
-## The requirements for a Turtle
+## タートルの要件
 
-A turtle supports four instructions:
+タートルは4つの指示をサポートします。
 
-* Move some distance in the current direction.
-* Turn a certain number of degrees clockwise or anticlockwise.
-* Put the pen down or up. When the pen is down, moving the turtle draws a line.
-* Set the pen color (one of black, blue or red).
+* 現在の方向に一定の距離を移動する。
+* 時計回りまたは反時計回りに一定の角度だけ回転する。
+* ペンを上げ下げする。ペンが下がっているとき、タートルを動かすと線が描かれる。
+* ペンの色を設定する（黒、青、赤のいずれか）。
 
-These requirements lead naturally to some kind of "turtle interface" like this:
+これらの要件は自然に、次のような「タートルインターフェース」につながります。
 
 * `Move aDistance`
 * `Turn anAngle`
@@ -61,95 +61,95 @@ These requirements lead naturally to some kind of "turtle interface" like this:
 * `PenDown`
 * `SetColor aColor`
 
-All of the following implementations will be based on this interface or some variant of it.
+これから紹介するすべての実装は、このインターフェースまたはそのバリエーションに基づいています。
 
-Note that the turtle must convert these instructions to drawing lines on a canvas or other graphics context.
-So the implementation will probably need to keep track of the turtle position and current state somehow.
+タートルは、これらの指示をキャンバスやその他のグラフィックスコンテキストに線を描くことに変換する必要があることに注意してください。
+そのため、実装ではタートルの位置と現在の状態を何らかの方法で追跡する必要があるでしょう。
 
 <hr>
 
-## Common code
+## 共通コード
 
-Before we start implementing, let's get some common code out of the way.
+実装を始める前に、いくつかの共通コードを用意しましょう。
 
-First, we'll need some types to represent distances, angles, the pen state, and the pen colors.
+まず、距離、角度、ペンの状態、ペンの色を表す型が必要です。
 
 ```fsharp
-/// An alias for a float
+/// floatのエイリアス
 type Distance = float
 
-/// Use a unit of measure to make it clear that the angle is in degrees, not radians
+/// 角度が度数法であることを明確にするための単位の測定
 type [<Measure>] Degrees
 
-/// An alias for a float of Degrees
+/// Degreesのfloatのエイリアス
 type Angle  = float<Degrees>
 
-/// Enumeration of available pen states
+/// 利用可能なペンの状態の列挙
 type PenState = Up | Down
 
-/// Enumeration of available pen colors
+/// 利用可能なペンの色の列挙
 type PenColor = Black | Red | Blue
 ```
 
-and we'll also need a type to represent the position of the turtle:
+また、タートルの位置を表す型も必要です。
 
 ```fsharp
-/// A structure to store the (x,y) coordinates
+/// (x,y)座標を格納する構造体
 type Position = {x:float; y:float}
 ```
 
-We'll also need a helper function to calculate a new position based on moving a certain distance at a certain angle:
+さらに、特定の角度と距離で移動した後の新しい位置を計算するためのヘルパー関数も必要です。
 
 ```fsharp
-// round a float to two places to make it easier to read
+// 読みやすくするためにfloatを小数点以下2桁に丸める
 let round2 (flt:float) = Math.Round(flt,2)
 
-/// calculate a new position from the current position given an angle and a distance
+/// 現在の位置から角度と距離を与えられた新しい位置を計算する
 let calcNewPosition (distance:Distance) (angle:Angle) currentPos = 
-    // Convert degrees to radians with 180.0 degrees = 1 pi radian
+    // 度数をラジアンに変換（180.0度 = 1πラジアン）
     let angleInRads = angle * (Math.PI/180.0) * 1.0<1/Degrees> 
-    // current pos
+    // 現在の位置
     let x0 = currentPos.x
     let y0 = currentPos.y
-    // new pos
+    // 新しい位置
     let x1 = x0 + (distance * cos angleInRads)
     let y1 = y0 + (distance * sin angleInRads)
-    // return a new Position
+    // 新しいPositionを返す
     {x=round2 x1; y=round2 y1}
 ```
 
-Let's also define the initial state of a turtle:
+タートルの初期状態も定義しましょう。
 
 ```fsharp
-/// Default initial state
+/// デフォルトの初期状態
 let initialPosition,initialColor,initialPenState = 
     {x=0.0; y=0.0}, Black, Down
 ```
 
-And a helper that pretends to draw a line on a canvas:
+そして、キャンバスに線を描くふりをするヘルパー関数も用意します。
 
 ```fsharp
 let dummyDrawLine log oldPos newPos color =
-    // for now just log it
-    log (sprintf "...Draw line from (%0.1f,%0.1f) to (%0.1f,%0.1f) using %A" oldPos.x oldPos.y newPos.x newPos.y color)
+    // とりあえずログに記録するだけ
+    log (sprintf "...(%0.1f,%0.1f)から(%0.1f,%0.1f)まで%Aを使用して線を描く" oldPos.x oldPos.y newPos.x newPos.y color)
 ```
-    
-Now we're ready for the first implementation!
+
+これで最初の実装の準備が整いました。
 
 <hr>
 
 <a id="way1"></a>
 
-## 1. Basic OO -- A class with mutable state
+## 1. 基本的なOO - 可変状態を持つクラス
 
-In this first design, we will use an object-oriented approach and represent the turtle with a simple class.
+この最初のデザインでは、オブジェクト指向アプローチを使用し、シンプルなクラスでタートルを表現します。
 
-* The state will be stored in local fields (`currentPosition`, `currentAngle`, etc) that are mutable.
-* We will inject a logging function `log` so that we can monitor what happens.
+* 状態はローカルフィールド（`currentPosition`、`currentAngle`など）に格納され、これらは可変です。
+* 何が起こっているかを監視できるように、ログ関数`log`を注入します。
 
 ![](../assets/img/turtle-oo.png)
 
-And here's the complete code, which should be self-explanatory:
+以下は完全なコードで、自明なはずです。
 
 ```fsharp
 type Turtle(log) =
@@ -161,19 +161,19 @@ type Turtle(log) =
     
     member this.Move(distance) =
         log (sprintf "Move %0.1f" distance)
-        // calculate new position 
+        // 新しい位置を計算 
         let newPosition = calcNewPosition distance currentAngle currentPosition 
-        // draw line if needed
+        // 必要に応じて線を描く
         if currentPenState = Down then
             dummyDrawLine log currentPosition newPosition currentColor
-        // update the state
+        // 状態を更新
         currentPosition <- newPosition
 
     member this.Turn(angle) =
         log (sprintf "Turn %0.1f" angle)
-        // calculate new angle
+        // 新しい角度を計算
         let newAngle = (currentAngle + angle) % 360.0<Degrees>
-        // update the state
+        // 状態を更新
         currentAngle <- newAngle 
 
     member this.PenUp() =
@@ -189,12 +189,12 @@ type Turtle(log) =
         currentColor <- color
 ```
 
-### Calling the turtle object
+### タートルオブジェクトの呼び出し
 
-The client code instantiates the turtle and talks to it directly:
+クライアントコードはタートルをインスタンス化し、直接対話します。
 
 ```fsharp
-/// Function to log a message
+/// メッセージをログに記録する関数
 let log message =
     printfn "%s" message 
 
@@ -206,24 +206,24 @@ let drawTriangle() =
     turtle.Turn 120.0<Degrees>
     turtle.Move 100.0
     turtle.Turn 120.0<Degrees>
-    // back home at (0,0) with angle 0
+    // (0,0)に戻り、角度は0
 ```
 
-The logged output of `drawTriangle()` is:
+`drawTriangle()`のログ出力は以下のようになります。
 
 ```text
 Move 100.0
-...Draw line from (0.0,0.0) to (100.0,0.0) using Black
+...(0.0,0.0)から(100.0,0.0)までBlackを使用して線を描く
 Turn 120.0
 Move 100.0
-...Draw line from (100.0,0.0) to (50.0,86.6) using Black
+...(100.0,0.0)から(50.0,86.6)までBlackを使用して線を描く
 Turn 120.0
 Move 100.0
-...Draw line from (50.0,86.6) to (0.0,0.0) using Black
+...(50.0,86.6)から(0.0,0.0)までBlackを使用して線を描く
 Turn 120.0
 ```
 
-Similarly, here's the code to draw a polygon:
+同様に、多角形を描くコードは以下のようになります。
 
 ```fsharp
 let drawPolygon n = 
@@ -231,50 +231,50 @@ let drawPolygon n =
     let angleDegrees = angle * 1.0<Degrees>
     let turtle = Turtle(log)
 
-    // define a function that draws one side
+    // 1辺を描く関数を定義
     let drawOneSide() = 
         turtle.Move 100.0 
         turtle.Turn angleDegrees 
 
-    // repeat for all sides
+    // すべての辺について繰り返す
     for i in [1..n] do
         drawOneSide()
 ```
 
-Note that `drawOneSide()` does not return anything -- all the code is imperative and stateful.  Compare this to the code in the next example, which takes a pure functional approach.
+`drawOneSide()`は何も返さないことに注意してください。すべてのコードは命令的で状態を持ちます。これを次の例の純粋な関数型アプローチのコードと比較してみてください。
 
-### Advantages and disadvantages
+### 長所と短所
 
-So what are the advantages and disadvantages of this simple approach?
+この単純なアプローチの長所と短所は何でしょうか？
 
-*Advantages*
+*長所*
 
-* It's very easy to implement and understand.
+* 実装が非常に簡単で理解しやすい。
 
-*Disadvantages*
+*短所*
 
-* The stateful code is harder to test. We have to put an object into a known state state before testing,
-  which is simple in this case, but can be long-winded and error-prone for more complex objects.
-* The client is coupled to a particular implementation. No interfaces here! We'll look at using interfaces shortly.
+* 状態を持つコードはテストが難しい。テスト前に、オブジェクトを既知の状態にする必要があります。
+  これは単純な場合は簡単ですが、より複雑なオブジェクトでは面倒で間違いやすくなります。
+* クライアントが特定の実装に結合してしまう。ここにはインターフェースがありません！インターフェースの使用については後ほど見ていきます。
 
 
-*The source code for this version is available [here (turtle class)](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/OOTurtleLib.fsx)
-and [here (client)](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/01-OOTurtle.fsx).*
+*このバージョンのソースコードは[こちら（タートルクラス）](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/OOTurtleLib.fsx)
+と[こちら（クライアント）](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/01-OOTurtle.fsx)で入手できます。*
 
 <hr>
 
 <a id="way2"></a>
 
-## 2: Basic FP - A module of functions with immutable state
+## 2：基本的なFP - 不変の状態を持つ関数のモジュール
 
-The next design will use a pure, functional approach. An immutable `TurtleState` is defined, and then the
-various turtle functions accept a state as input and return a new state as output.
+次のデザインでは、純粋な関数型アプローチを使用します。不変の`TurtleState`を定義し、
+さまざまなタートル関数が状態を入力として受け取り、新しい状態を出力として返します。
 
-In this approach then, the client is responsible for keeping track of the current state and passing it into the next function call.
+このアプローチでは、クライアントが現在の状態を追跡し、次の関数呼び出しに渡す責任を負います。
 
 ![](../assets/img/turtle-fp.png)
 
-Here's the definition of `TurtleState` and the values for the initial state:
+以下は`TurtleState`の定義と初期状態の値です。
 
 ```fsharp
 module Turtle = 
@@ -294,28 +294,28 @@ module Turtle =
     }                
 ```
 
-And here are the "api" functions, all of which take a state parameter and return a new state:
+そして、これらが「API」関数です。すべての関数が状態パラメータを受け取り、新しい状態を返します。
 
 ```fsharp
 module Turtle = 
     
-    // [state type snipped]
+    // [状態の型定義は省略]
     
     let move log distance state =
         log (sprintf "Move %0.1f" distance)
-        // calculate new position 
+        // 新しい位置を計算 
         let newPosition = calcNewPosition distance state.angle state.position 
-        // draw line if needed
+        // 必要に応じて線を描く
         if state.penState = Down then
             dummyDrawLine log state.position newPosition state.color
-        // update the state
+        // 状態を更新
         {state with position = newPosition}
 
     let turn log angle state =
         log (sprintf "Turn %0.1f" angle)
-        // calculate new angle
+        // 新しい角度を計算
         let newAngle = (state.angle + angle) % 360.0<Degrees>
-        // update the state
+        // 状態を更新
         {state with angle = newAngle}
 
     let penUp log state =
@@ -331,20 +331,20 @@ module Turtle =
         {state with color = color}
 ```
 
-Note that the `state` is always the last parameter -- this makes it easier to use the "piping" idiom.
+`state`が常に最後のパラメータであることに注目してください。これにより、「パイピング」イディオムの使用が容易になります。
 
-### Using the turtle functions
+### タートル関数の使用
 
-The client now has to pass in both the `log` function and the `state` to every function, every time!
+クライアントは、`log`関数と`state`の両方を毎回すべての関数に渡す必要があります。
 
-We can eliminate the need to pass in the log function by using partial application to create new versions of the functions with the logger baked in:
+部分適用を使用して、ロガーが組み込まれた関数の新しいバージョンを作成することで、log関数を渡す必要性を排除できます。
 
 ```fsharp
-/// Function to log a message
+/// メッセージをログに記録する関数
 let log message =
     printfn "%s" message 
 
-// versions with log baked in (via partial application)
+// logが組み込まれたバージョン（部分適用を介して）
 let move = Turtle.move log
 let turn = Turtle.turn log
 let penDown = Turtle.penDown log
@@ -352,7 +352,7 @@ let penUp = Turtle.penUp log
 let setColor = Turtle.setColor log
 ```
 
-With these simpler versions, the client can just pipe the state through in a natural way:
+これらのシンプルなバージョンを使用すると、クライアントは自然な方法で状態をパイプ処理できます。
 
 ```fsharp
 let drawTriangle() = 
@@ -363,104 +363,104 @@ let drawTriangle() =
     |> turn 120.0<Degrees>
     |> move 100.0 
     |> turn 120.0<Degrees>
-    // back home at (0,0) with angle 0
+    // (0,0)に戻り、角度は0
 ```
 
-When it comes to drawing a polygon, it's a little more complicated, as we have to "fold" the state through the repetitions for each side:
+多角形を描く場合、各辺の繰り返しを通じて状態を「畳み込む」必要があるため、少し複雑になります。
 
 ```fsharp
 let drawPolygon n = 
     let angle = 180.0 - (360.0/float n) 
     let angleDegrees = angle * 1.0<Degrees>
 
-    // define a function that draws one side
+    // 1辺を描く関数を定義
     let oneSide state sideNumber = 
         state
         |> move 100.0 
         |> turn angleDegrees 
 
-    // repeat for all sides
+    // すべての辺について繰り返す
     [1..n] 
     |> List.fold oneSide Turtle.initialTurtleState
 ```
 
-### Advantages and disadvantages
+### 長所と短所
 
-What are the advantages and disadvantages of this purely functional approach?
+この純粋関数型のアプローチの長所と短所は何でしょうか？
 
-*Advantages*
+*長所*
 
-* Again, it's very easy to implement and understand.
-* The stateless functions are easier to test. We always provide the current state as input, so there is no setup needed to get an object into a known state.
-* Because there is no global state, the functions are modular and can be reused in other contexts (as we'll see later in this post).
+* 再び、実装が非常に簡単で理解しやすい。
+* 状態を持たない関数はテストが容易。現在の状態を入力として常に提供するため、オブジェクトを既知の状態にするためのセットアップは不要。
+* グローバルな状態がないため、関数はモジュール化され、他のコンテキストで再利用できる（この投稿の後半で見ていきます）。
 
-*Disadvantages*
+*短所*
 
-* As before, the client is coupled to a particular implementation. 
-* The client has to keep track of the state (but some solutions to make this easier are shown later in this post).
+* 以前と同様に、クライアントが特定の実装に結合している。
+* クライアントが状態を追跡する必要がある（ただし、この問題を解決するためのいくつかの方法をこの投稿の後半で紹介します）。
 
-*The source code for this version is available [here (turtle functions)](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/FPTurtleLib.fsx)
-and [here (client)](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/02-FPTurtle.fsx).*
+*このバージョンのソースコードは[こちら（タートル関数）](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/FPTurtleLib.fsx)
+と[こちら（クライアント）](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/02-FPTurtle.fsx)で入手できます。*
 
 
 <hr>
 
 <a id="way3"></a>
 
-## 3: An API with a object-oriented core
+## 3：オブジェクト指向コアを持つAPI
 
-Let's hide the client from the implementation using an API!
+APIを使ってクライアントを実装から隠蔽しましょう！
 
-In this case, the API will be string based, with text commands such as `"move 100"` or `"turn 90"`. The API must validate
-these commands and turn them into method calls on the turtle (we'll use the OO approach of a stateful `Turtle` class again).
+この場合、APIはテキストベースで、`"move 100"`や`"turn 90"`のようなテキストコマンドを使用します。APIはこれらのコマンドを検証し、
+タートル（再び状態を持つ`Turtle`クラスのOOアプローチを使用します）のメソッド呼び出しに変換する必要があります。
 
 ![](../assets/img/turtle-oo-api.png)
 
-If the command is *not* valid, the API must indicate that to the client.  Since we are using an OO approach, we'll
-do this by throwing a `TurtleApiException` containing a string, like this.
+コマンドが有効でない場合、APIはそれをクライアントに示す必要があります。OOアプローチを使用しているため、
+次のように文字列を含む`TurtleApiException`をスローします。
 
 ```fsharp
 exception TurtleApiException of string
 ```
 
-Next we need some functions that validate the command text:
+次に、コマンドテキストを検証する関数が必要です。
 
 ```fsharp
-// convert the distance parameter to a float, or throw an exception
+// 距離パラメータをfloatに変換、または例外をスロー
 let validateDistance distanceStr =
     try
         float distanceStr 
     with
     | ex -> 
-        let msg = sprintf "Invalid distance '%s' [%s]" distanceStr  ex.Message
+        let msg = sprintf "不正な距離 '%s' [%s]" distanceStr  ex.Message
         raise (TurtleApiException msg)
 
-// convert the angle parameter to a float<Degrees>, or throw an exception
+// 角度パラメータをfloat<Degrees>に変換、または例外をスロー
 let validateAngle angleStr =
     try
         (float angleStr) * 1.0<Degrees> 
     with
     | ex -> 
-        let msg = sprintf "Invalid angle '%s' [%s]" angleStr ex.Message
+        let msg = sprintf "不正な角度 '%s' [%s]" angleStr ex.Message
         raise (TurtleApiException msg)
         
-// convert the color parameter to a PenColor, or throw an exception
+// 色パラメータをPenColorに変換、または例外をスロー
 let validateColor colorStr =
     match colorStr with
     | "Black" -> Black
     | "Blue" -> Blue
     | "Red" -> Red
     | _ -> 
-        let msg = sprintf "Color '%s' is not recognized" colorStr
+        let msg = sprintf "色 '%s' が認識されません" colorStr
         raise (TurtleApiException msg)
 ```
 
-With these in place, we can create the API. 
+これらを使用して、APIを作成できます。
 
-The logic for parsing the command text is to split the command text into tokens and then
-match the first token to `"move"`, `"turn"`, etc. 
+コマンドテキストを解析するロジックは、コマンドテキストをトークンに分割し、
+最初のトークンを`"move"`、`"turn"`などとマッチさせます。
 
-Here's the code:
+以下がコードです。
 
 ```fsharp
 type TurtleApi() =
@@ -484,33 +484,33 @@ type TurtleApi() =
             let color = validateColor colorStr 
             turtle.SetColor color
         | _ -> 
-            let msg = sprintf "Instruction '%s' is not recognized" commandStr
+            let msg = sprintf "命令 '%s' が認識されません" commandStr
             raise (TurtleApiException msg)
 ```
 
-### Using the API
+### APIの使用
 
-Here's how `drawPolygon` is implemented using the `TurtleApi` class:
+`TurtleApi`クラスを使用して`drawPolygon`を実装する方法は次のとおりです。
 
 ```fsharp
 let drawPolygon n = 
     let angle = 180.0 - (360.0/float n) 
     let api = TurtleApi()
 
-    // define a function that draws one side
+    // 1辺を描く関数を定義
     let drawOneSide() = 
         api.Exec "Move 100.0"
         api.Exec (sprintf "Turn %f" angle)
 
-    // repeat for all sides
+    // すべての辺について繰り返す
     for i in [1..n] do
         drawOneSide()
 ```
 
-You can see that the code is quite similar to the earlier OO version,
-with the direct call `turtle.Move 100.0` being replaced with the indirect API call `api.Exec "Move 100.0"`.
+コードが以前のOOバージョンと非常に似ていることがわかります。
+直接呼び出し`turtle.Move 100.0`が間接的なAPI呼び出し`api.Exec "Move 100.0"`に置き換えられています。
 
-Now if we trigger an error with a bad command such as `api.Exec "Move bad"`, like this:
+ここで、`api.Exec "Move bad"`のような不正なコマンドでエラーをトリガーすると、次のようになります。
 
 ```fsharp
 let triggerError() = 
@@ -518,60 +518,60 @@ let triggerError() =
     api.Exec "Move bad"
 ```
 
-then the expected exception is thrown:
+予想される例外がスローされます。
 
 ```text
-Exception of type 'TurtleApiException' was thrown.
+'TurtleApiException'型の例外がスローされました。
 ```
 
-### Advantages and disadvantages
+### 長所と短所
 
-What are the advantages and disadvantages of an API layer like this?
+このようなAPIレイヤーの長所と短所は何でしょうか？
 
-* The turtle implementation is now hidden from the client.
-* An API at a service boundary supports validation and can be extended to support monitoring, internal routing, load balancing, etc.
+* タートルの実装がクライアントから隠蔽されています。
+* サービス境界にあるAPIは検証をサポートし、モニタリング、内部ルーティング、負荷分散などをサポートするように拡張できます。
 
-*Disadvantages*
+*短所*
 
-* The API is coupled to a particular implementation, even though the client isn't. 
-* The system is very stateful. Even though the client does not know about the implementation behind the API,
-  the client is still indirectly coupled to the inner core via shared state which in turn can make testing harder.
+* クライアントは特定の実装に結合していませんが、APIは特定の実装に結合しています。
+* システムは非常に状態を持っています。クライアントはAPIの背後にある実装を知りませんが、
+  共有状態を通じて内部コアに間接的に結合されており、これによってテストが困難になる可能性があります。
 
-*The source code for this version is available [here](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/03-Api_OO_Core.fsx).*
+*このバージョンのソースコードは[こちら](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/03-Api_OO_Core.fsx)で入手できます。*
 
 
 <hr>
 
 <a id="way4"></a>
 
-## 4:  An API with a functional core
+## 4：関数型コアを持つAPI
 
-An alternative approach for this scenario is to use a hybrid design, where the core of the application consists of pure functions, while the boundaries are imperative and stateful.
+このシナリオの代替アプローチは、アプリケーションのコアが純粋な関数で構成され、境界が命令的で状態を持つハイブリッドデザインを使用することです。
 
-This approach has been named "Functional Core/Imperative Shell" by [Gary Bernhardt](https://www.youtube.com/watch?v=yTkzNHF6rMs).
+このアプローチは[Gary Bernhardt](https://www.youtube.com/watch?v=yTkzNHF6rMs)によって「関数型コア/命令型シェル」と名付けられています。
 
-Applied to our API example, the API layer uses only pure turtle functions,
-but the API layer manages the state (rather than the client) by storing a mutable turtle state.
+私たちのAPI例に適用すると、APIレイヤーは純粋なタートル関数のみを使用しますが、
+APIレイヤーが可変のタートル状態を格納することで状態を管理します（クライアントではなく）。
 
-Also, to be more functional, the API will not throw exceptions if the command text is not valid,
-but instead will return a `Result` value with `Success` and `Failure` cases, where the `Failure` case is used for any errors.
-(See [my talk on the functional approach to error handling](http://fsharpforfunandprofit.com/rop/) for a more in depth discussion of this technique).
+また、より関数型にするために、APIはコマンドテキストが無効な場合に例外をスローせず、
+代わりに`Success`と`Failure`のケースを持つ`Result`値を返します。`Failure`ケースはエラーに使用されます。
+（エラー処理の関数型アプローチについての[私の講演](https://fsharpforfunandprofit.com/rop/)で、この技術についてより詳しく説明しています。）
 
 ![](../assets/img/turtle-fp-api.png)
 
-Let's start by implementing the API class. This time it contains a `mutable` turtle state:
+APIクラスの実装から始めましょう。今回は`mutable`なタートル状態を含んでいます。
 
 ```fsharp
 type TurtleApi() =
 
     let mutable state = initialTurtleState
 
-    /// Update the mutable state value
+    /// 可変の状態値を更新する
     let updateState newState =
         state <- newState
 ```
 
-The validation functions no longer throw an exception, but return `Success` or `Failure`:
+検証関数はもはや例外をスローせず、`Success`または`Failure`を返します。
 
 ```fsharp
 let validateDistance distanceStr =
@@ -582,7 +582,7 @@ let validateDistance distanceStr =
         Failure (InvalidDistance distanceStr)
 ```
 
-The error cases are documented in their own type:
+エラーケースは独自の型で文書化されています。
 
 ```fsharp
 type ErrorMessage = 
@@ -592,61 +592,61 @@ type ErrorMessage =
     | InvalidCommand of string
 ```
 
-Now because the validation functions now return a `Result<Distance>` rather than a "raw" distance, the `move` function needs to be lifted to
-the world of `Results`, as does the current state.
+検証関数が「生の」距離ではなく`Result<Distance>`を返すようになったので、`move`関数を
+`Result`の世界に持ち上げる必要があります。現在の状態も同様です。
 
-There are three functions that we will use when working with `Result`s: `returnR`, `mapR` and `lift2R`.
+`Result`を扱う際に使用する3つの関数があります：`returnR`、`mapR`、`lift2R`です。
 
-* `returnR` transforms a "normal" value into a value in the world of Results:
+* `returnR`は「通常の」値を`Result`の世界の値に変換します。
 
 ![](../assets/img/turtle-returnR.png)
 
-* `mapR` transforms a "normal" one-parameter function into a one-parameter function in the world of Results:
+* `mapR`は「通常の」1パラメータ関数を`Result`の世界の1パラメータ関数に変換します。
 
 ![](../assets/img/turtle-mapR.png)
 
-* `lift2R` transforms a "normal" two-parameter function into a two-parameter function in the world of Results:
+* `lift2R`は「通常の」2パラメータ関数を`Result`の世界の2パラメータ関数に変換します。
 
 ![](../assets/img/turtle-lift2R.png)
 
-As an example, with these helper functions, we can turn the normal `move` function into a function in the world of Results:
+例として、これらのヘルパー関数を使用して、通常の`move`関数を`Result`の世界の関数に変換できます。
 
-* The distance parameter is already in `Result` world 
-* The state parameter is lifted into `Result` world using `returnR`
-* The `move` function is lifted into `Result` world using `lift2R`
+* 距離パラメータはすでに`Result`の世界にあります
+* 状態パラメータは`returnR`を使用して`Result`の世界に持ち上げられます
+* `move`関数は`lift2R`を使用して`Result`の世界に持ち上げられます
 
 ```fsharp
-// lift current state to Result
+// 現在の状態をResultに持ち上げる
 let stateR = returnR state
 
-// get the distance as a Result
+// 距離をResultとして取得
 let distanceR = validateDistance distanceStr 
 
-// call "move" lifted to the world of Results
+// Resultの世界に持ち上げられた"move"を呼び出す
 lift2R move distanceR stateR
 ```
 
-*(For more details on lifting functions to `Result` world, see the post on ["lifting" in general](../posts/elevated-world.md#lift) )*
+*（`Result`の世界への関数の「持ち上げ」についての詳細は、[「持ち上げ」に関する一般的な投稿](../posts/elevated-world.md#lift)を参照してください）*
 
-Here's the complete code for `Exec`:
+以下が`Exec`の完全なコードです。
 
 ```fsharp
-/// Execute the command string, and return a Result
+/// コマンド文字列を実行し、Resultを返す
 /// Exec : commandStr:string -> Result<unit,ErrorMessage>
 member this.Exec (commandStr:string) = 
     let tokens = commandStr.Split(' ') |> List.ofArray |> List.map trimString
 
-    // lift current state to Result
+    // 現在の状態をResultに持ち上げる
     let stateR = returnR state
 
-    // calculate the new state
+    // 新しい状態を計算する
     let newStateR = 
         match tokens with
         | [ "Move"; distanceStr ] -> 
-            // get the distance as a Result
+            // 距離をResultとして取得
             let distanceR = validateDistance distanceStr 
 
-            // call "move" lifted to the world of Results
+            // Resultの世界に持ち上げられた"move"を呼び出す
             lift2R move distanceR stateR
 
         | [ "Turn"; angleStr ] -> 
@@ -666,19 +666,19 @@ member this.Exec (commandStr:string) =
         | _ -> 
             Failure (InvalidCommand commandStr)
 
-    // Lift `updateState` into the world of Results and 
-    // call it with the new state.
+    // `updateState`をResultの世界に持ち上げ、
+    // 新しい状態で呼び出す
     mapR updateState newStateR
 
-    // Return the final result (output of updateState)
+    // 最終結果を返す（updateStateの出力）
 ```
 
-### Using the API
+### APIの使用
 
-The API returns a `Result`, so the client can no longer call each function in sequence, as we need to handle any errors coming
-from a call and abandon the rest of the steps.
+APIは`Result`を返すので、クライアントはもはや各関数を順番に呼び出すことができません。
+呼び出しからのエラーを処理し、残りのステップを中止する必要があります。
 
-To make our lives easier, we'll use a `result` computation expression (or workflow) to chain the calls and preserve the imperative "feel" of the OO version.
+私たちの生活を楽にするために、`result`計算式（またはワークフロー）を使用して呼び出しを連鎖させ、OOバージョンの命令的な「感じ」を保持します。
 
 ```fsharp
 let drawTriangle() = 
@@ -693,60 +693,60 @@ let drawTriangle() =
         }
 ```
 
-*The source code for the `result` computation expression is available [here](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/Common.fsx#L70).*
+*`result`計算式のソースコードは[こちら](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/Common.fsx#L70)で入手できます。*
 
-Similarly, for the `drawPolygon` code, we can create a helper to draw one side and then call it `n` times inside a `result` expression.
+同様に、`drawPolygon`コードでは、1辺を描くヘルパーを作成し、`result`式内で`n`回呼び出すことができます。
 
 ```fsharp
 let drawPolygon n = 
     let angle = 180.0 - (360.0/float n) 
     let api = TurtleApi()
 
-    // define a function that draws one side
+    // 1辺を描く関数を定義
     let drawOneSide() = result {
         do! api.Exec "Move 100.0"
         do! api.Exec (sprintf "Turn %f" angle)
         }
 
-    // repeat for all sides
+    // すべての辺について繰り返す
     result {
         for i in [1..n] do
             do! drawOneSide() 
     }
 ```
 
-The code looks imperative, but is actually purely functional, as the returned `Result` values are being handled transparently by the `result` workflow.
+コードは命令的に見えますが、実際には純粋関数型です。返された`Result`値は`result`ワークフローによって透過的に処理されています。
 
-### Advantages and disadvantages
+### 長所と短所
 
-*Advantages*
+*長所*
 
-* The same as for the OO version of an API -- the turtle implementation is hidden from the client, validation can be done, etc.
-* The only stateful part of the system is at the boundary. The core is stateless which makes testing easier.
+* OOバージョンのAPIと同様 - タートルの実装がクライアントから隠蔽され、検証を行うことができるなど。
+* システムの状態を持つ部分は境界のみです。コアは状態を持たないため、テストが容易になります。
 
-*Disadvantages*
+*短所*
 
-* The API is still coupled to a particular implementation. 
+* APIは依然として特定の実装に結合しています。
 
-*The source code for this version is available [here (api helper functions)](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/TurtleApiHelpers.fsx)
-and [here (API and client)](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/04-Api_FP_Core.fsx).*
+*このバージョンのソースコードは[こちら（APIヘルパー関数）](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/TurtleApiHelpers.fsx)
+と[こちら（APIとクライアント）](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/04-Api_FP_Core.fsx)で入手できます。*
 
 <hr>
 
 <a id="way5"></a>
 
-## 5: An API in front of an agent
+## 5：エージェントの前面にあるAPI
 
-In this design, an API layer communicates with a `TurtleAgent` via a message queue
-and the client talks to the API layer as before.
+このデザインでは、APIレイヤーがメッセージキューを介して`TurtleAgent`と通信し、
+クライアントは以前と同様にAPIレイヤーと対話します。
 
 ![](../assets/img/turtle-agent.png)
 
-There are no mutables in the API (or anywhere). The `TurtleAgent` manages state by 
-storing the current state as a parameter in the recursive message processing loop.
+API（またはどこにも）に可変要素はありません。`TurtleAgent`は再帰的なメッセージ処理ループのパラメータとして
+現在の状態を格納することで状態を管理します。
 
-Now because the `TurtleAgent` has a typed message queue, where all messages are the same type,
-we must combine all possible commands into a single discriminated union type (`TurtleCommand`).
+`TurtleAgent`には型付けされたメッセージキューがあり、すべてのメッセージが同じ型であるため、
+すべての可能なコマンドを単一の判別共用体型（`TurtleCommand`）に結合する必要があります。
 
 ```fsharp
 type TurtleCommand = 
@@ -757,17 +757,17 @@ type TurtleCommand =
     | SetColor of PenColor
 ```
 
-The agent implementation is similar to the previous ones, but rather than exposing the turtle functions directly,
-we now do pattern matching on the incoming command to decide which function to call:
+エージェントの実装は以前のものと似ていますが、タートル関数を直接公開する代わりに、
+受信したコマンドにパターンマッチングを行い、どの関数を呼び出すかを決定します。
 
 ```fsharp
 type TurtleAgent() =
 
-    /// Function to log a message
+    /// メッセージをログに記録する関数
     let log message =
         printfn "%s" message 
 
-    // logged versions    
+    // ログ付きバージョン    
     let move = Turtle.move log
     let turn = Turtle.turn log
     let penDown = Turtle.penDown log
@@ -776,9 +776,9 @@ type TurtleAgent() =
 
     let mailboxProc = MailboxProcessor.Start(fun inbox ->
         let rec loop turtleState = async { 
-            // read a command message from teh queue
+            // キューからコマンドメッセージを読み取る
             let! command = inbox.Receive()
-            // create a new state from handling the message
+            // メッセージを処理して新しい状態を作成
             let newState = 
                 match command with
                 | Move distance ->
@@ -795,16 +795,16 @@ type TurtleAgent() =
             }
         loop Turtle.initialTurtleState )
 
-    // expose the queue externally
+    // キューを外部に公開
     member this.Post(command) = 
         mailboxProc.Post command
 ```
 
-### Sending a command to the Agent
+### エージェントへのコマンドの送信
 
-The API calls the agent by constructing a `TurtleCommand` and posting it to the agent's queue.
+APIはエージェントを呼び出すために、`TurtleCommand`を構築し、エージェントのキューにポストします。
 
-This time, rather than using the previous approach of "lifting" the `move` command:
+今回は、前回の「move」コマンドを「持ち上げる」アプローチの代わりに：
 
 ```fsharp
 let stateR = returnR state
@@ -812,7 +812,7 @@ let distanceR = validateDistance distanceStr
 lift2R move distanceR stateR
 ```
 
-we'll use the `result` computation expression instead, so the code above would have looked like this: 
+`result`計算式を使用します。そうすると、上記のコードは次のようになります：
 
 ```fsharp
 result {
@@ -821,7 +821,7 @@ result {
     } 
 ```
 
-In the agent implementation, we are not calling a `move` command, but instead creating the `Move` case of the `Command` type, so the code looks like:
+エージェントの実装では、`move`コマンドを呼び出すのではなく、`Command`型の`Move`ケースを作成しているので、コードは次のようになります：
 
 ```fsharp
 result {
@@ -831,13 +831,13 @@ result {
     } 
 ```
 
-Here's the complete code:
+以下が完全なコードです：
 
 ```fsharp
 member this.Exec (commandStr:string) = 
     let tokens = commandStr.Split(' ') |> List.ofArray |> List.map trimString
 
-    // calculate the new state
+    // 新しい状態を計算
     let result = 
         match tokens with
         | [ "Move"; distanceStr ] -> result {
@@ -871,47 +871,47 @@ member this.Exec (commandStr:string) =
         | _ -> 
             Failure (InvalidCommand commandStr)
 
-    // return any errors
+    // エラーがあれば返す
     result
 ```
 
-### Advantages and disadvantages of the Agent approach
+### エージェントアプローチの長所と短所
 
-*Advantages*
+*長所*
 
-* A great way to protect mutable state without using locks.
-* The API is decoupled from a particular implementation via the message queue. The `TurtleCommand` acts as a sort of protocol that decouples the two ends of the queue. 
-* The turtle agent is naturally asynchronous.
-* Agents can easily be scaled horizontally.
+* ロックを使用せずに可変状態を保護する優れた方法。
+* APIはメッセージキューを通じて特定の実装から分離されています。`TurtleCommand`は、キューの両端を分離する一種のプロトコルとして機能します。
+* タートルエージェントは自然に非同期です。
+* エージェントは簡単に水平方向にスケールアップできます。
 
-*Disadvantages*
+*短所*
 
-* Agents are stateful and have the same problem as stateful objects:
-  * It is harder to reason about your code.
-  * Testing is harder. 
-  * It is all too easy to create a web of complex dependencies between actors.
-* A robust implementation for agents can get quite complex, as you may need support for supervisors, heartbeats, back pressure, etc.
+* エージェントは状態を持ち、状態を持つオブジェクトと同じ問題があります：
+  * コードの理解が難しくなります。
+  * テストが難しくなります。
+  * アクター間の複雑な依存関係のウェブを作成しやすくなります。
+* エージェントの堅牢な実装はかなり複雑になる可能性があります。スーパーバイザー、ハートビート、バックプレッシャーなどのサポートが必要になる場合があります。
 
-*The source code for this version is available [here ](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/05-TurtleAgent.fsx).*
+*このバージョンのソースコードは[こちら](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/05-TurtleAgent.fsx)で入手できます。*
 
 <hr>
 
 <a id="way6"></a>
 
-## 6: Dependency injection using interfaces
+## 6: インターフェースを使った依存性注入
 
-All the implementations so far have been tied to a specific implementation of the turtle functions, with the exception of the Agent version, where the API communicated indirectly via a queue.
+エージェントバージョンを除いて、これまでのすべての実装は特定のタートル関数の実装に結びついていました。エージェントバージョンではAPIがキューを介して間接的に通信していました。
 
-So let's now look at some ways of decoupling the API from the implementation.
- 
-### Designing an interface, object-oriented style 
- 
-We'll start with the classic OO way of decoupling implementations: using interfaces. 
+では、APIを実装から分離するいくつかの方法を見てみましょう。
 
-Applying that approach to the turtle domain, we can see that our API layer will need to communicate with a `ITurtle` interface rather than a specific turtle implementation.
-The client injects the turtle implementation later, via the API's constructor.
+### オブジェクト指向スタイルでインターフェースを設計する
 
-Here's the interface definition:
+まず、実装を分離するクラシックなOOの方法から始めましょう。インターフェースを使います。
+
+このアプローチをタートルドメインに適用すると、APIレイヤーは特定のタートル実装ではなく、`ITurtle`インターフェースと通信する必要があることがわかります。
+クライアントは後でAPIのコンストラクタを通じてタートル実装を注入します。
+
+インターフェースの定義は次のとおりです。
 
 ```fsharp
 type ITurtle =
@@ -922,16 +922,16 @@ type ITurtle =
     abstract SetColor : PenColor -> unit
 ```
 
-Note that there are a lot of `unit`s in these functions. A `unit` in a function signature implies side effects, and indeed the `TurtleState` is not used anywhere,
-as this is a OO-based approach where the mutable state is encapsulated in the object.
+これらの関数にはたくさんの`unit`があることに注目してください。関数シグネチャの`unit`は副作用を示唆します。実際、`TurtleState`はどこにも使われていません。
+これはOOベースのアプローチで、可変状態がオブジェクトにカプセル化されているためです。
 
-Next, we need to change the API layer to use the interface by injecting it in the constructor for `TurtleApi`.
-Other than that, the rest of the API code is unchanged, as shown by the snippet below:
+次に、APIレイヤーを変更して、`TurtleApi`のコンストラクタでインターフェースを注入するようにします。
+それ以外のAPIコードは変更されません。以下のスニペットで示されています。
 
 ```fsharp
 type TurtleApi(turtle: ITurtle) =
 
-    // other code
+    // その他のコード
     
     member this.Exec (commandStr:string) = 
         let tokens = commandStr.Split(' ') |> List.ofArray |> List.map trimString
@@ -942,27 +942,27 @@ type TurtleApi(turtle: ITurtle) =
         | [ "Turn"; angleStr ] -> 
             let angle = validateAngle angleStr
             turtle.Turn angle  
-        // etc
+        // 他の場合も同様
 ```
 
-### Creating some implementations of an OO interface
+### OOインターフェースのいくつかの実装を作成する
 
-Now let's create and test some implementations.
+では、いくつかの実装を作成してテストしてみましょう。
 
-The first implementation will be called `normalSize` and will be the original one. The second will be called `halfSize` and will reduce
-all the distances by half.
+最初の実装は`normalSize`と呼び、オリジナルのものになります。2番目は`halfSize`と呼び、
+すべての距離を半分に縮小します。
 
-For `normalSize` we could go back and retrofit the orginal `Turtle` class to support the `ITurtle` interface. But I hate having to change
-working code! Instead, we can create a "proxy" wrapper around the orginal `Turtle` class, where the proxy implements the new interface.
+`normalSize`については、元の`Turtle`クラスに戻って`ITurtle`インターフェースをサポートするように改修できます。しかし、動作するコードを変更するのは嫌です！
+代わりに、元の`Turtle`クラスの周りに「プロキシ」ラッパーを作成し、プロキシが新しいインターフェースを実装します。
 
-In some languages, creating proxy wrappers can be long-winded, but in F# you can use [object expressions](../posts/object-expressions.md) to implement an interface quickly:
+一部の言語では、プロキシラッパーの作成に時間がかかる可能性がありますが、F#では[オブジェクト式](../posts/object-expressions.md)を使ってインターフェースを素早く実装できます。
 
 ```fsharp
 let normalSize() = 
     let log = printfn "%s"
     let turtle = Turtle(log)
     
-    // return an interface wrapped around the Turtle
+    // Turtleの周りにインターフェースをラップして返す
     {new ITurtle with
         member this.Move dist = turtle.Move dist
         member this.Turn angle = turtle.Turn angle
@@ -972,15 +972,15 @@ let normalSize() =
     }
 ```
 
-And to create the `halfSize` version, we do the same thing, but intercept the calls to `Move` and halve the distance parameter:
+`halfSize`バージョンを作成するには、同じことを行いますが、`Move`の呼び出しをインターセプトして距離パラメータを半分にします。
 
 ```fsharp
 let halfSize() = 
     let normalSize = normalSize() 
     
-    // return a decorated interface 
+    // 装飾されたインターフェースを返す 
     {new ITurtle with
-        member this.Move dist = normalSize.Move (dist/2.0)   // halved!!
+        member this.Move dist = normalSize.Move (dist/2.0)   // 半分にする！
         member this.Turn angle = normalSize.Turn angle
         member this.PenUp() = normalSize.PenUp()
         member this.PenDown() = normalSize.PenDown()
@@ -988,15 +988,15 @@ let halfSize() =
     }
 ```
 
-This is actually [the "decorator" pattern](https://en.wikipedia.org/wiki/Decorator_pattern) at work:
-we're wrapping `normalSize` in a proxy with an identical interface, then changing the behavior for some of the methods, while passing others though untouched.
+これは実際に[「デコレータ」パターン](https://en.wikipedia.org/wiki/Decorator_pattern)が働いています。
+`normalSize`を同一のインターフェースを持つプロキシでラップし、一部のメソッドの動作を変更しながら、他のメソッドはそのまま通します。
 
 
-### Injecting dependencies, OO style
+### OOスタイルで依存性を注入する
 
-Now let's look at the client code that injects the dependencies into the API.
+では、依存性をAPIに注入するクライアントコードを見てみましょう。
 
-First, some code to draw a triangle, where a `TurtleApi` is passed in:
+まず、`TurtleApi`が渡される三角形を描くコードです。
 
 ```fsharp
 let drawTriangle(api:TurtleApi) = 
@@ -1008,17 +1008,17 @@ let drawTriangle(api:TurtleApi) =
     api.Exec "Turn 120"
 ```
 
-And now let's try drawing the triangle by instantiating the API object with the normal interface:
+そして、通常のインターフェースでAPIオブジェクトをインスタンス化して三角形を描いてみましょう。
 
 ```fsharp
-let iTurtle = normalSize()   // an ITurtle type
+let iTurtle = normalSize()   // ITurtle型
 let api = TurtleApi(iTurtle)
 drawTriangle(api) 
 ```
 
-Obviously, in a real system, the dependency injection would occur away from the call site, using an IoC container or similar.
+実際のシステムでは、依存性注入はIoCコンテナなどを使用して呼び出し元から離れた場所で行われるでしょう。
 
-If we run it, the output of `drawTriangle` is just as before:
+実行すると、`drawTriangle`の出力は以前と同じになります。
 
 ```text
 Move 100.0
@@ -1032,7 +1032,7 @@ Move 100.0
 Turn 120.0
 ```
 
-And now with the half-size interface..
+次に、半分のサイズのインターフェースで試してみます。
 
 ```fsharp
 let iTurtle = halfSize()
@@ -1040,7 +1040,7 @@ let api = TurtleApi(iTurtle)
 drawTriangle(api) 
 ```
 
-...the output is, as we hoped, half the size!
+出力は期待通り半分のサイズになります！
 
 ```text
 Move 50.0
@@ -1054,13 +1054,13 @@ Move 50.0
 Turn 120.0
 ```
 
-### Designing an interface, functional style 
+### 関数型スタイルでインターフェースを設計する
 
-In a pure FP world, OO-style interfaces do not exist. However, you can emulate them by using a record containing functions, with one function for each method in the interface.
+純粋なFPの世界では、OOスタイルのインターフェースは存在しません。しかし、インターフェースの各メソッドに対応する関数を含むレコードを使用してエミュレートできます。
 
-So let's create a alternative version of dependency injection, where this time the API layer will use a record of functions rather than an interface.
+そこで、依存性注入の別のバージョンを作成しましょう。今回は、APIレイヤーがインターフェースの代わりに関数のレコードを使用します。
 
-A record of functions is a normal record, but the types of the fields are function types. Here's the definition we'll use:
+関数のレコードは通常のレコードですが、フィールドの型が関数型です。以下が使用する定義です。
 
 ```fsharp
 type TurtleFunctions = {
@@ -1072,12 +1072,12 @@ type TurtleFunctions = {
     }
 ```
 
-Note that there are no `unit`s in these function signatures, unlike the OO version. Instead, the `TurtleState` is explicitly passed in and returned.
+OOバージョンとは異なり、これらの関数シグネチャに`unit`がないことに注目してください。代わりに、`TurtleState`が明示的に渡され、返されます。
 
-Also note that there is no logging either. The logging method will be baked in to the functions when the record is created.
+また、ログも含まれていないことに注意してください。ログメソッドはレコードの作成時に関数に組み込まれます。
 
-The `TurtleApi` constructor now takes a `TurtleFunctions` record rather than an `ITurtle`, but as these functions are pure,
-the API needs to manage the state again with a `mutable` field.
+`TurtleApi`コンストラクタは`ITurtle`の代わりに`TurtleFunctions`レコードを受け取りますが、これらの関数は純粋なので、
+APIは再び`mutable`フィールドで状態を管理する必要があります。
 
 ```fsharp
 type TurtleApi(turtleFunctions: TurtleFunctions) =
@@ -1085,18 +1085,18 @@ type TurtleApi(turtleFunctions: TurtleFunctions) =
     let mutable state = initialTurtleState
 ```
 
-The implementation of the main `Exec` method is very similar to what we have seen before, with these differences:
+メインの`Exec`メソッドの実装は、以前に見たものと非常に似ていますが、次の違いがあります。
 
-* The function is fetched from the record (e.g. `turtleFunctions.move`).
-* All the activity takes place in a `result` computation expression so that the result of the validations can be used.
+* 関数はレコードから取得されます（例：`turtleFunctions.move`）。
+* すべての活動は`result`計算式で行われるため、検証の結果を使用できます。
 
-Here's the code:
+以下がコードです。
 
 ```fsharp
 member this.Exec (commandStr:string) = 
     let tokens = commandStr.Split(' ') |> List.ofArray |> List.map trimString
 
-    // return Success of unit, or Failure
+    // unitのSuccessまたはFailureを返す
     match tokens with
     | [ "Move"; distanceStr ] -> result {
         let! distance = validateDistance distanceStr 
@@ -1108,21 +1108,21 @@ member this.Exec (commandStr:string) =
         let newState = turtleFunctions.turn angle state
         updateState newState
         }
-    // etc
+    // 他の場合も同様
 ```
 
-### Creating some implementations of a "record of functions"
+### 「関数のレコード」の実装を作成する
 
-Noe let's create some implementations.
+では、いくつかの実装を作成しましょう。
 
-Again, we'll have a `normalSize` implementation and a `halfSize` implementation.
+再び、`normalSize`実装と`halfSize`実装を持つことにします。
 
-For `normalSize` we just need to use the functions from the original `Turtle` module, with the logging baked in using partial application:
+`normalSize`については、元の`Turtle`モジュールの関数を使用し、部分適用を使ってログを組み込むだけです。
 
 ```fsharp
 let normalSize() = 
     let log = printfn "%s"
-    // return a record of functions
+    // 関数のレコードを返す
     {
         move = Turtle.move log 
         turn = Turtle.turn log 
@@ -1132,114 +1132,114 @@ let normalSize() =
     }
 ```
 
-And to create the `halfSize` version, we clone the record, and change just the `move` function:
+`halfSize`バージョンを作成するには、レコードをクローンし、`move`関数だけを変更します。
 
 ```fsharp
 let halfSize() = 
     let normalSize = normalSize() 
-    // return a reduced turtle
+    // 縮小されたタートルを返す
     { normalSize with
         move = fun dist -> normalSize.move (dist/2.0) 
     }
 ```
 
-What's nice about cloning records rather than proxying interfaces is that we don't have to reimplement every function in the record, just the ones we care about.
+インターフェースをプロキシする代わりにレコードをクローンすることの利点は、レコード内のすべての関数を再実装する必要がなく、気にする関数だけを変更できることです。
 
-### Injecting dependencies again
+### 再び依存性を注入する
 
-The client code that injects the dependencies into the API is implemented just as you expect.  The API is a class with a constructor,
-and so the record of functions can be passed into the constructor in exactly the same way that the `ITurtle` interface was:
+APIに依存性を注入するクライアントコードは、予想通りに実装されます。APIはコンストラクタを持つクラスなので、
+関数のレコードは`ITurtle`インターフェースと全く同じ方法でコンストラクタに渡すことができます。
 
 ```fsharp
-let turtleFns = normalSize()  // a TurtleFunctions type
+let turtleFns = normalSize()  // TurtleFunctions型
 let api = TurtleApi(turtleFns)
 drawTriangle(api) 
 ```
 
-As you can see, the client code in the `ITurtle` version and `TurtleFunctions` version looks identical! If it wasn't for the different types, you could not tell them apart.
+見てのとおり、`ITurtle`バージョンと`TurtleFunctions`バージョンのクライアントコードは同じように見えます！型が異なることがなければ、区別がつかないでしょう。
 
-### Advantages and disadvantages of using interfaces
+### インターフェースを使用する長所と短所
 
-The OO-style interface and the FP-style "record of functions" are very similar, although the FP functions are stateless, unlike the OO interface.
+OOスタイルのインターフェースとFPスタイルの「関数のレコード」は非常に似ていますが、FP関数はOOインターフェースとは異なり、状態を持ちません。
 
-*Advantages*
+*長所*
 
-* The API is decoupled from a particular implementation via the interface.
-* For the FP "record of functions" approach (compared to OO interfaces):
-  * Records of functions can be cloned more easily than interfaces.
-  * The functions are stateless
+* APIはインターフェースを通じて特定の実装から分離されています。
+* FPの「関数のレコード」アプローチ（OOインターフェースと比較して）：
+  * 関数のレコードはインターフェースよりも簡単にクローンできます。
+  * 関数は状態を持ちません。
 
-*Disadvantages*
+*短所*
 
-* Interfaces are more monolithic than individual functions and can easily grow to include too many unrelated methods,
-  breaking the [Interface Segregation Principle](https://en.wikipedia.org/wiki/Interface_segregation_principle) if care is not taken.
-* Interfaces are not composable (unlike individual functions). 
-* For more on the problems with this approach, see [this Stack Overflow answer by Mark Seemann](https://stackoverflow.com/questions/34011895/f-how-to-pass-equivalent-of-interface/34028711?stw=2#34028711).
-* For the OO interface approach in particular:
-  * You may have to modify existing classes when refactoring to an interface.
-* For the FP "record of functions" approach:
-  * Less tooling support, and poor interop, compared to OO interfaces.
-  
-*The source code for these versions is available [here (interface)](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/06-DependencyInjection_Interface-1.fsx)
-and [here (record of functions)](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/06-DependencyInjection_Interface-2.fsx).*
+* インターフェースは個々の関数よりも一枚岩的で、関係のないメソッドを簡単に含むようになり、
+  注意を払わないと[インターフェース分離の原則](https://en.wikipedia.org/wiki/Interface_segregation_principle)に違反する可能性があります。
+* インターフェースは（個々の関数とは異なり）合成できません。
+* このアプローチの問題点についての詳細は、[Mark SeemannによるこのStack Overflowの回答](https://stackoverflow.com/questions/34011895/f-how-to-pass-equivalent-of-interface/34028711?stw=2#34028711)を参照してください。
+* 特にOOインターフェースアプローチについて：
+  * インターフェースにリファクタリングする際に、既存のクラスを変更する必要がある場合があります。
+* FPの「関数のレコード」アプローチについて：
+  * OOインターフェースと比較して、ツールのサポートが少なく、相互運用性が低いです。
+
+*これらのバージョンのソースコードは[こちら（インターフェース）](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/06-DependencyInjection_Interface-1.fsx)
+と[こちら（関数のレコード）](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/06-DependencyInjection_Interface-2.fsx)で入手できます。*
 
 
 <hr>
 
 <a id="way7"></a>
 
-## 7: Dependency injection using functions
+## 7: 関数を使った依存性注入
 
-The two main disadvantages of the "interface" approach is that interfaces are not composable,
-and they break the ["pass in only the dependencies you need" rule](https://en.wikipedia.org/wiki/Interface_segregation_principle), which is a key part of functional design.
+「インターフェース」アプローチの2つの主な欠点は、インターフェースが合成できないことと、
+関数型設計の重要な部分である[「必要な依存性だけを渡す」ルール](https://en.wikipedia.org/wiki/Interface_segregation_principle)に違反することです。
 
-In a true functional approach, we would pass in functions. That is, the API layer communicates via one or more functions that are passed in as parameters to the API call.
-These functions are typically partially applied so that the call site is decoupled from the "injection".
+真の関数型アプローチでは、関数を渡します。つまり、APIレイヤーは、APIコールにパラメータとして渡される1つ以上の関数を通じて通信します。
+これらの関数は通常、部分適用されており、呼び出し元は「注入」から分離されています。
 
-No interface is passed to the constructor as generally there is no constructor! (I'm only using a API class here to wrap the mutable turtle state.)
+一般的にコンストラクタはないため、インターフェースはコンストラクタに渡されません！（ここでAPIクラスを使っているのは、タートルの可変状態をラップするためだけです。）
 
-In the approach in this section, I'll show two alternatives which use function passing to inject dependencies: 
+このセクションのアプローチでは、依存性を注入するために関数の受け渡しを使用する2つの代替案を示します：
 
-* In the first approach, each dependency (turtle function) is passed separately.
-* In the second approach, only one function is passed in. So to determine which specific turtle function is used, a discriminated union type is defined.
+* 最初のアプローチでは、各依存性（タートル関数）を個別に渡します。
+* 2番目のアプローチでは、1つの関数だけを渡します。特定のタートル関数を使用するかを決定するために、判別共用体型を定義します。
 
-### Approach 1 - passing in each dependency as a separate function
+### アプローチ1 - 各依存性を個別の関数として渡す
 
-The simplest way to manage dependencies is always just to pass in all dependencies as parameters to the function that needs them.
+依存性を管理する最も単純な方法は、常にすべての依存性を必要とする関数のパラメータとして渡すことです。
 
-In our case, the `Exec` method is the only function that needs to control the turtle, so we can pass them in there directly:
- 
+今回の場合、`Exec`メソッドがタートルを制御する唯一の関数なので、直接そこに依存性を渡すことができます：
+
 ```fsharp
 member this.Exec move turn penUp penDown setColor (commandStr:string) = 
     ...
 ```
 
-To stress that point again: in this approach dependencies are always passed "just in time", to the function that needs them. No dependencies are used in the constructor and then used later.
+この点を強調しておきましょう：このアプローチでは、依存性は常に必要とする関数に「ジャストインタイム」で渡されます。コンストラクタで依存性を使用して後で使うことはありません。
 
-Here's a bigger snippet of the `Exec` method using those functions:
+以下は、これらの関数を使用する`Exec`メソッドのより大きなスニペットです：
 
 ```fsharp
 member this.Exec move turn penUp penDown setColor (commandStr:string) = 
     ...
 
-    // return Success of unit, or Failure
+    // unitのSuccessまたはFailureを返す
     match tokens with
     | [ "Move"; distanceStr ] -> result {
         let! distance = validateDistance distanceStr 
-        let newState = move distance state   // use `move` function that was passed in
+        let newState = move distance state   // 渡された`move`関数を使用
         updateState newState
         }
     | [ "Turn"; angleStr ] -> result {
         let! angle = validateAngle angleStr   
-        let newState = turn angle state   // use `turn` function that was passed in
+        let newState = turn angle state   // 渡された`turn`関数を使用
         updateState newState
         }
     ...            
 ```
 
-### Using partial application to bake in an implementation
+### 部分適用を使用して実装を組み込む
 
-To create a normal or half-size version of `Exec`, we just pass in different functions:
+通常サイズまたは半分サイズの`Exec`バージョンを作成するには、異なる関数を渡すだけです：
 
 ```fsharp
 let log = printfn "%s"
@@ -1251,28 +1251,28 @@ let setColor = Turtle.setColor log
 
 let normalSize() = 
     let api = TurtleApi() 
-    // partially apply the functions
+    // 関数を部分適用
     api.Exec move turn penUp penDown setColor 
-    // the return value is a function: 
+    // 戻り値は関数： 
     //     string -> Result<unit,ErrorMessage> 
 
 let halfSize() = 
     let moveHalf dist = move (dist/2.0)  
     let api = TurtleApi() 
-    // partially apply the functions
+    // 関数を部分適用
     api.Exec moveHalf turn penUp penDown setColor 
-    // the return value is a function: 
+    // 戻り値は関数： 
     //     string -> Result<unit,ErrorMessage> 
 ```
 
-In both cases we are returning a *function* of type `string -> Result<unit,ErrorMessage>`.
+両方の場合で、`string -> Result<unit,ErrorMessage>`型の*関数*を返しています。
 
-### Using a purely functional API
+### 純粋な関数型APIの使用
 
-So now when we want to draw something, we need only pass in *any* function of type `string -> Result<unit,ErrorMessage>`.  The `TurtleApi` is no longer needed or mentioned!
+そこで、何かを描きたい場合、`string -> Result<unit,ErrorMessage>`型の*任意の*関数を渡すだけで済みます。`TurtleApi`はもはや必要ではなく、言及されません！
 
 ```fsharp
-// the API type is just a function
+// API型は単なる関数
 type ApiFunction = string -> Result<unit,ErrorMessage>
 
 let drawTriangle(api:ApiFunction) = 
@@ -1286,7 +1286,7 @@ let drawTriangle(api:ApiFunction) =
         }
 ```
 
-And here is how the API would be used:
+APIの使用方法は以下のとおりです：
 
 ```fsharp
 let apiFn = normalSize()  // string -> Result<unit,ErrorMessage>
@@ -1296,9 +1296,9 @@ let apiFn = halfSize()
 drawTriangle(apiFn) 
 ```
 
-So, although we did have mutable state in the `TurtleApi`, the final "published" api is a function that hides that fact.  
+`TurtleApi`には可変状態がありましたが、最終的に「公開」されたAPIはその事実を隠す関数になっています。
 
-This approach of having the api be a single function makes it very easy to mock for testing!
+APIを単一の関数にするこのアプローチは、テスト用のモックを作成するのがとても簡単です！
 
 ```fsharp
 let mockApi s = 
@@ -1308,17 +1308,17 @@ let mockApi s =
 drawTriangle(mockApi) 
 ```
 
-### Approach 2 - passing a single function that handles all commands
+### アプローチ2 - すべてのコマンドを処理する単一の関数を渡す
 
-In the version above, we passed in 5 separate functions! 
+上記のバージョンでは、5つの個別の関数を渡しました！
 
-Generally, when you are passing in more than three or four parameters, that implies that your design needs tweaking. You shouldn't really need that many, if the functions are truly independent.
+一般的に、3つか4つ以上のパラメータを渡している場合、設計の調整が必要であることを示唆しています。関数が本当に独立している場合、そんなに多くは必要ないはずです。
 
-But in our case, the five functions are *not* independent -- they come as a set -- so how can we pass them in together without using a "record of functions" approach?
+しかし、今回の場合、5つの関数は*独立していません* - セットとして提供されます - では、「関数のレコード」アプローチを使わずにまとめて渡すにはどうすればよいでしょうか？
 
-The trick is to pass in just *one* function! But how can one function handle five different actions? Easy - by using a discriminated union to represent the possible commands.
+トリックは*1つの*関数だけを渡すことです！しかし、1つの関数でどのように5つの異なるアクションを処理できるでしょうか？簡単です - 判別共用体を使って可能なコマンドを表現します。
 
-We've seen this done before in the agent example, so let's revisit that type again:
+エージェントの例でこれを見たことがありますので、その型を再度見てみましょう：
 
 ```fsharp
 type TurtleCommand = 
@@ -1329,38 +1329,38 @@ type TurtleCommand =
     | SetColor of PenColor
 ```
 
-All we need now is a function that handles each case of that type.
+必要なのは、この型の各ケースを処理する関数だけです。
 
-Befor we do that though, let's look at the changes to the `Exec` method implementation:
+ただし、その前に`Exec`メソッドの実装の変更点を見てみましょう：
 
 ```fsharp
 member this.Exec turtleFn (commandStr:string) = 
     ...
 
-    // return Success of unit, or Failure
+    // unitのSuccessまたはFailureを返す
     match tokens with
     | [ "Move"; distanceStr ] -> result {
         let! distance = validateDistance distanceStr 
-        let command =  Move distance      // create a Command object
+        let command =  Move distance      // Commandオブジェクトを作成
         let newState = turtleFn command state
         updateState newState
         }
     | [ "Turn"; angleStr ] -> result {
         let! angle = validateAngle angleStr 
-        let command =  Turn angle      // create a Command object
+        let command =  Turn angle      // Commandオブジェクトを作成
         let newState = turtleFn command state
         updateState newState
         }
     ...
 ```
 
-Note that a `command` object is being created and then the `turtleFn` parameter is being called with it.
+`command`オブジェクトが作成され、`turtleFn`パラメータがそれで呼び出されていることに注目してください。
 
-And by the way, this code is very similar to the agent implementation, which used `turtleAgent.Post command` rather than `newState = turtleFn command state`:
+ちなみに、このコードはエージェントの実装と非常に似ています。`newState = turtleFn command state`の代わりに`turtleAgent.Post command`を使用しています：
 
-### Using partial application to bake in an implementation
+### 部分適用を使用して実装を組み込む
 
-Let's create the two implementations using this approach:
+このアプローチを使用して2つの実装を作成しましょう：
 
 ```fsharp
 let log = printfn "%s"
@@ -1378,10 +1378,10 @@ let normalSize() =
         | PenDown -> penDown 
         | SetColor color -> setColor color
 
-    // partially apply the function to the API
+    // 関数をAPIに部分適用
     let api = TurtleApi() 
     api.Exec turtleFn 
-    // the return value is a function: 
+    // 戻り値は関数： 
     //     string -> Result<unit,ErrorMessage> 
 
 let halfSize() = 
@@ -1392,14 +1392,14 @@ let halfSize() =
         | PenDown -> penDown 
         | SetColor color -> setColor color
 
-    // partially apply the function to the API
+    // 関数をAPIに部分適用
     let api = TurtleApi() 
     api.Exec turtleFn 
-    // the return value is a function: 
+    // 戻り値は関数： 
     //     string -> Result<unit,ErrorMessage> 
 ```
 
-As before, in both cases we are returning a function of type `string -> Result<unit,ErrorMessage>`,. which we can pass into the `drawTriangle` function we defined earlier: 
+前回と同様に、両方の場合で`string -> Result<unit,ErrorMessage>`型の関数を返しています。これを先ほど定義した`drawTriangle`関数に渡すことができます：
 
 ```fsharp
 let api = normalSize()
@@ -1409,114 +1409,114 @@ let api = halfSize()
 drawTriangle(api) 
 ```
 
-### Advantages and disadvantages of using functions
+### 関数を使用する長所と短所
 
-*Advantages*
+*長所*
 
-* The API is decoupled from a particular implementation via parameterization. 
-* Because dependencies are passed in at the point of use ("in your face") rather than in a constructor ("out of sight"), the tendency for dependencies to multiply is greatly reduced.
-* Any function parameter is automatically a "one method interface" so no retrofitting is needed.
-* Regular partial application can be used to bake in parameters for "dependency injection". No special pattern or IoC container is needed.
+* APIはパラメータ化を通じて特定の実装から分離されています。
+* 依存性がコンストラクタ（「目に見えない」）ではなく、使用時点（「目の前」）で渡されるため、依存性が増殖する傾向が大幅に減少します。
+* 任意の関数パラメータは自動的に「1メソッドインターフェース」になるため、改修は必要ありません。
+* 通常の部分適用を使用してパラメータを「依存性注入」のために組み込むことができます。特別なパターンやIoCコンテナは必要ありません。
 
-*Disadvantages*
+*短所*
 
-* If the number of dependent functions is too great (say more than four) passing them all in as separate parameters can become awkward (hence, the second approach).
-* The discriminated union type can be trickier to work with than an interface.
+* 依存する関数の数が多すぎる場合（4つ以上）、すべてを個別のパラメータとして渡すのは面倒になる可能性があります（そのため、2番目のアプローチがあります）。
+* 判別共用体型はインターフェースよりも扱いにくい場合があります。
 
-*The source code for these versions is available [here (five function params)](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/07-DependencyInjection_Functions-1.fsx)
-and [here (one function param)](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/07-DependencyInjection_Functions-2.fsx).*
+*これらのバージョンのソースコードは[こちら（5つの関数パラメータ）](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/07-DependencyInjection_Functions-1.fsx)
+と[こちら（1つの関数パラメータ）](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/07-DependencyInjection_Functions-2.fsx)で入手できます。*
 
 
 <hr>
 
 <a id="way8"></a>
 
-## 8: Batch processing using a state monad
+## 8: 状態モナドを使ったバッチ処理
 
-In the next two sections, we'll switch from "interactive" mode, where instructions are processed one at a time, to "batch" mode,
-where a whole series of instructions are grouped together and then run as one unit.
+次の2つのセクションでは、命令を1つずつ処理する「インタラクティブ」モードから、
+一連の命令をグループ化して1つのユニットとして実行する「バッチ」モードに切り替えます。
 
-In the first design, we'll go back to the model where the client uses the Turtle functions directly.
+最初の設計では、クライアントがタートル関数を直接使用するモデルに戻ります。
 
-Just as before, the client must keep track of the current state and pass it into the next function call,
-but this time we'll keep the state out of sight by using a so-called "state monad" to thread the state through the various instructions.
-As a result, there are no mutables anywhere! 
+以前と同様に、クライアントは現在の状態を追跡し、次の関数呼び出しに渡す必要がありますが、
+今回はいわゆる「状態モナド」を使用して、様々な命令を通じて状態を渡すことで、状態を見えないようにします。
+結果として、どこにも可変要素はありません！
 
-This won't be a generalized state monad, but a simplified one just for this demonstration. I'll call it the `turtle` workflow.
+これは汎用の状態モナドではなく、このデモンストレーション用に簡略化したものです。`turtle`ワークフローと呼びます。
 
-*(For more on the state monad see my ["monadster" talk and post](http://fsharpforfunandprofit.com/monadster/) and [post on parser combinators](../posts/understanding-parser-combinators.md) )*
+*（状態モナドについての詳細は、私の[「モナドスター」トークと投稿](https://fsharpforfunandprofit.com/monadster/)と[パーサーコンビネータに関する投稿](../posts/understanding-parser-combinators.md)を参照してください）*
 
 ![](../assets/img/turtle-monad.png)
 
-### Defining the `turtle` workflow
+### `turtle`ワークフローの定義
 
-The core turtle functions that we defined at the very beginning follow the same "shape" as many other state-transforming functions, an input plus the turtle state, and the output plus the turtle state.
+最初に定義した基本的なタートル関数は、他の多くの状態変換関数と同じ「形」を持っています。入力とタートル状態、そして出力とタートル状態です。
 
 ![](../assets/img/turtle-monad-1.png)
 
-*(It's true that, so far. we have not had any useable output from the turtle functions, but in a later example we will see this output being used to make decisions.)*
+*（これまでのところ、タートル関数から使用可能な出力はありませんでしたが、後の例では、この出力を使用して決定を行う様子を見ることができます。）*
 
-There is a standard way to deal with these kinds of functions -- the "state monad".
+これらの種類の関数を扱うための標準的な方法があります - 「状態モナド」です。
 
-Let's look at how this is built.
+その構築方法を見てみましょう。
 
-First, note that, thanks to currying, we can recast a function in this shape into two separate one-parameter functions: processing the input generates another function that in turn has the state as the parameter:
+まず、カリー化のおかげで、この形の関数を2つの別々の1パラメータ関数に再構成できることに注目してください：入力の処理は、次に状態をパラメータとして持つ別の関数を生成します。
 
 ![](../assets/img/turtle-monad-2.png)
 
-We can then think of a turtle function as something that takes an input and returns a new *function*, like this:
+そこで、タートル関数を入力を受け取り新しい*関数*を返すものとして考えることができます：
 
 ![](../assets/img/turtle-monad-3.png)
 
-In our case, using `TurtleState` as the state, the returned function will look like this:
+今回の場合、`TurtleState`を状態として使用すると、返される関数は次のようになります：
 
 ```fsharp
 TurtleState -> 'a * TurtleState
 ```
 
-Finally, to make it easier to work with, we can treat the returned function as a thing in its own right, give it a name such as `TurtleStateComputation`:
+最後に、扱いやすくするために、返される関数を独自の存在として扱い、`TurtleStateComputation`のような名前を付けることができます：
 
 ![](../assets/img/turtle-monad-4.png)
 
-In the implementation, we would typically wrap the function with a [single case discriminated union](../posts/designing-with-types-single-case-dus.md) like this:
+実装では、通常、関数を[単一ケース判別共用体](../posts/designing-with-types-single-case-dus.md)でラップします：
 
 ```fsharp
 type TurtleStateComputation<'a> = 
     TurtleStateComputation of (Turtle.TurtleState -> 'a * Turtle.TurtleState)
 ```
 
-So that is the basic idea behind the "state monad".  However, it's important to realize that a state monad consists of more than just this type -- you also need some functions ("return" and "bind") that obey some sensible laws.
+これが「状態モナド」の基本的なアイデアです。しかし、状態モナドがこの型だけでなく、いくつかの関数（「return」と「bind」）も必要とし、それらがいくつかの合理的な法則に従う必要があることを理解することが重要です。
 
-I won't define the `returnT` and `bindT` functions here, but you can see their definitions in the [full source](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/8e4e8d23b838ca88702d0b318bfd57a87801305e/08-StateMonad.fsx#L46).
+ここでは`returnT`と`bindT`関数の定義は示しませんが、[完全なソース](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/8e4e8d23b838ca88702d0b318bfd57a87801305e/08-StateMonad.fsx#L46)でその定義を見ることができます。
 
-We need some additional helper functions too. (I'm going to add a `T` for Turtle suffix to all the functions).
+いくつかの追加のヘルパー関数も必要です。（すべての関数にタートルの「T」サフィックスを追加します。）
 
-In particular, we need a way to feed some state into the `TurtleStateComputation` to "run" it:
+特に、`TurtleStateComputation`に状態を供給して「実行」する方法が必要です：
 
 ```fsharp
 let runT turtle state = 
-    // pattern match against the turtle
-    // to extract the inner function
+    // タートルに対してパターンマッチングを行い
+    // 内部関数を抽出する
     let (TurtleStateComputation innerFn) = turtle 
-    // run the inner function with the passed in state
+    // 渡された状態で内部関数を実行する
     innerFn state
 ```
 
-Finally, we can create a `turtle` workflow, which is a computation expression that makes it easier to work with the `TurtleStateComputation` type:
+最後に、`turtle`ワークフローを作成できます。これは`TurtleStateComputation`型の操作を容易にする計算式です：
 
 ```fsharp
-// define a computation expression builder
+// 計算式ビルダーを定義する
 type TurtleBuilder() =
     member this.Return(x) = returnT x
     member this.Bind(x,f) = bindT f x
 
-// create an instance of the computation expression builder
+// 計算式ビルダーのインスタンスを作成する
 let turtle = TurtleBuilder()
 ```
 
-### Using the Turtle workflow
+### タートルワークフローの使用
 
-To use the `turtle` workflow, we first need to create "lifted" or "monadic" versions of the turtle functions:
+`turtle`ワークフローを使用するには、まずタートル関数の「持ち上げられた」または「モナディック」バージョンを作成する必要があります：
 
 ```fsharp
 let move dist = 
@@ -1540,14 +1540,14 @@ let setColor color =
 // val setColor : PenColor -> TurtleStateComputation<unit>
 ```
 
-The `toUnitComputation` helper function does the lifting. Don't worry about how it works, but the effect is that the original version of the `move` function (`Distance -> TurtleState -> TurtleState`)
-is reborn as a function returning a `TurtleStateComputation` (`Distance -> TurtleStateComputation<unit>`)
+`toUnitComputation`ヘルパー関数が持ち上げを行います。その動作方法は気にしないでください。効果としては、`move`関数の元のバージョン（`Distance -> TurtleState -> TurtleState`）が
+`TurtleStateComputation`を返す関数（`Distance -> TurtleStateComputation<unit>`）として生まれ変わります。
 
-Once we have these "monadic" versions, we can use them inside the `turtle` workflow like this:
+これらの「モナディック」バージョンを作成したら、`turtle`ワークフロー内で次のように使用できます：
 
 ```fsharp
 let drawTriangle() = 
-    // define a set of instructions 
+    // 一連の命令を定義する 
     let t = turtle {
         do! move 100.0 
         do! turn 120.0<Degrees>
@@ -1557,14 +1557,14 @@ let drawTriangle() =
         do! turn 120.0<Degrees>
         } 
 
-    // finally, run them using the initial state as input
+    // 最後に、初期状態を入力として使用して実行する
     runT t initialTurtleState 
 ```
 
-The first part of `drawTriangle` chains together six instructions, but importantly, does *not* run them.
-Only when the `runT` function is used at the end are the instructions actually executed.
+`drawTriangle`の最初の部分は6つの命令を連鎖させていますが、重要なのは、それらを*実行していない*ことです。
+最後に`runT`関数が使用されたときにのみ、命令が実際に実行されます。
 
-The `drawPolygon` example is a little more complicated. First we define a workflow for drawing one side:
+`drawPolygon`の例は少し複雑です。まず、1辺を描くためのワークフローを定義します：
 
 ```fsharp
 let oneSide = turtle {
@@ -1573,87 +1573,87 @@ let oneSide = turtle {
     }
 ```
 
-But then we need a way of combining all the sides into a single workflow. There are a couple of ways of doing this. I'll go with creating a pairwise combiner `chain`
-and then using `reduce` to combine all the sides into one operation.
+しかし、次にすべての辺を1つのワークフローに組み合わせる方法が必要です。これを行うにはいくつかの方法があります。ここでは、ペアワイズコンバイナー`chain`を作成し、
+`reduce`を使用してすべての辺を1つの操作に組み合わせる方法を採用します。
 
 ```fsharp
-// chain two turtle operations in sequence
+// 2つのタートル操作を順番に連鎖する
 let chain f g  = turtle {
     do! f
     do! g
     } 
 
-// create a list of operations, one for each side
+// 各辺に対応する操作のリストを作成する
 let sides = List.replicate n oneSide
 
-// chain all the sides into one operation
+// すべての辺を1つの操作に連鎖する
 let all = sides |> List.reduce chain 
 ```
 
-Here's the complete code for `drawPolygon`:
+以下が`drawPolygon`の完全なコードです：
 
 ```fsharp
 let drawPolygon n = 
     let angle = 180.0 - (360.0/float n) 
     let angleDegrees = angle * 1.0<Degrees>
 
-    // define a function that draws one side
+    // 1辺を描く関数を定義する
     let oneSide = turtle {
         do! move 100.0 
         do! turn angleDegrees 
         }
 
-    // chain two turtle operations in sequence
+    // 2つのタートル操作を順番に連鎖する
     let chain f g  = turtle {
         do! f
         do! g
         } 
 
-    // create a list of operations, one for each side
+    // 各辺に対応する操作のリストを作成する
     let sides = List.replicate n oneSide
 
-    // chain all the sides into one operation
+    // すべての辺を1つの操作に連鎖する
     let all = sides |> List.reduce chain 
 
-    // finally, run them using the initial state
+    // 最後に、初期状態を使用して実行する
     runT all initialTurtleState 
 ```
 
-### Advantages and disadvantages of the `turtle` workflow
+### `turtle`ワークフローの長所と短所
 
-*Advantages*
+*長所*
 
-* The client code is similar to imperative code, but preserves immutability.
-* The workflows are composable -- you can define two workflows and then combine them to create another workflow.
+* クライアントコードは命令型コードに似ていますが、不変性を保持します。
+* ワークフローは合成可能です - 2つのワークフローを定義し、それらを組み合わせて別のワークフローを作成できます。
 
-*Disadvantages*
+*短所*
 
-* Coupled to a particular implementation of the turtle functions.
-* More complex than tracking state explicitly.
-* Stacks of nested monads/workflows are hard to work with. 
+* 特定のタートル関数の実装に結合しています。
+* 状態を明示的に追跡するよりも複雑です。
+* ネストされたモナド/ワークフローのスタックは扱いが難しいです。
 
-As an example of that last point, let's say we have a `seq` containing a `result` workflow containing a `turtle` workflow and we want to invert them so that the `turtle` workflow is on the outside.
-How would you do that? It's not obvious!
+最後の点の例として、`seq`を含む`result`ワークフローを含む`turtle`ワークフローがあり、それらを反転して`turtle`ワークフローを外側にしたい場合を考えてみましょう。
+どのようにしますか？それは明白ではありません！
 
-*The source code for this version is available [here](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/08-StateMonad.fsx).*
+*このバージョンのソースコードは[こちら](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/08-StateMonad.fsx)で入手できます。*
 
 <hr>
 
 <a id="way9"></a>
 
-## 9: Batch processing using command objects
+## 9: コマンドオブジェクトを使用したバッチ処理
 
-Another batch-oriented approach is to reuse the `TurtleCommand` type in a new way. Instead of calling functions immediately,
-the client creates a list of commands that will be run as a group.
+もう1つのバッチ指向のアプローチは、`TurtleCommand`型を新しい方法で再利用することです。関数をすぐに呼び出す代わりに、
+クライアントはグループとして実行されるコマンドのリストを作成します。
 
-When you "run" the list of commands, you can just execute each one in turn using the standard Turtle library functions,
-using `fold` to thread the state through the sequence.
+コマンドのリストを「実行」する際、標準的なTurtleライブラリ関数を使用して各コマンドを順番に実行し、
+`fold`を使用して状態をシーケンス全体に渡すことができます。
 
 ![](../assets/img/turtle-batch.png)
 
-And since all the commands are run at once, this approach means that there is no state that needs to be persisted between calls by the client.
+そして、すべてのコマンドが一度に実行されるため、このアプローチではクライアントが呼び出し間で保持する必要のある状態はありません。
 
-Here's the `TurtleCommand` definition again:
+以下が`TurtleCommand`の定義の再掲です：
 
 ```fsharp
 type TurtleCommand = 
@@ -1664,11 +1664,11 @@ type TurtleCommand =
     | SetColor of PenColor
 ```
 
-To process a sequence of commands, we will need to fold over them, threading the state through,
-so we need a function that applies a single command to a state and returns a new state:
+コマンドのシーケンスを処理するために、それらを折りたたんで状態を通過させる必要があるので、
+単一のコマンドを状態に適用して新しい状態を返す関数が必要です：
 
 ```fsharp
-/// Apply a command to the turtle state and return the new state 
+/// コマンドをタートル状態に適用し、新しい状態を返す 
 let applyCommand state command =
     match command with
     | Move distance ->
@@ -1683,22 +1683,22 @@ let applyCommand state command =
         setColor color state
 ```
 
-And then, to run all the commands, we just use `fold`:
+そして、すべてのコマンドを実行するには、`fold`を使用するだけです：
 
 ```fsharp
-/// Run list of commands in one go
+/// コマンドのリストを一度に実行する
 let run aListOfCommands = 
     aListOfCommands 
     |> List.fold applyCommand Turtle.initialTurtleState
 ```
 
-### Running a batch of Commands
+### コマンドのバッチを実行する
 
-To draw a triangle, say, we just create a list of the commands and then run them:
+例えば、三角形を描くには、コマンドのリストを作成し、それらを実行するだけです：
 
 ```fsharp
 let drawTriangle() = 
-    // create the list of commands
+    // コマンドのリストを作成する
     let commands = [
         Move 100.0 
         Turn 120.0<Degrees>
@@ -1707,92 +1707,92 @@ let drawTriangle() =
         Move 100.0 
         Turn 120.0<Degrees>
         ]
-    // run them
+    // 実行する
     run commands
 ```
 
-Now, since the commands are just a collection, we can easily build bigger collections from smaller ones.
+コマンドは単なるコレクションなので、小さなコレクションから大きなコレクションを簡単に構築できます。
 
-Here's an example for `drawPolygon`, where `drawOneSide` returns a collection of commands, and that collection is duplicated for each side:
+以下は`drawPolygon`の例で、`drawOneSide`がコマンドのコレクションを返し、そのコレクションが各辺ごとに複製されます：
 
 ```fsharp
 let drawPolygon n = 
     let angle = 180.0 - (360.0/float n) 
     let angleDegrees = angle * 1.0<Degrees>
 
-    // define a function that draws one side
+    // 1辺を描く関数を定義する
     let drawOneSide sideNumber = [
         Move 100.0
         Turn angleDegrees
         ]
 
-    // repeat for all sides
+    // すべての辺について繰り返す
     let commands = 
         [1..n] |> List.collect drawOneSide
 
-    // run the commands
+    // コマンドを実行する
     run commands
 ```
 
 
-### Advantages and disadvantages of batch commands
+### バッチコマンドの長所と短所
 
-*Advantages*
+*長所*
 
-* Simpler to construct and use than workflows or monads.
-* Only one function is coupled to a particular implementation. The rest of the client is decoupled.
+* ワークフローやモナドよりも構築と使用が簡単です。
+* 1つの関数だけが特定の実装に結合しています。クライアントの残りの部分は分離されています。
 
-*Disadvantages*
+*短所*
 
-* Batch oriented only.
-* Only suitable when control flow is *not* based on the response from a previous command.
-  If you *do* need to respond to the result of each command, consider using the "interpreter" approach discussed later.
+* バッチ指向のみです。
+* 制御フローが前のコマンドの応答に基づいていない場合にのみ適しています。
+  各コマンドの結果に応答する必要がある場合は、後述する「インタープリタ」アプローチを検討してください。
 
-*The source code for this version is available [here](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/09-BatchCommands.fsx).*
+*このバージョンのソースコードは[こちら](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/09-BatchCommands.fsx)で入手できます。*
 
 <a id="decoupling"></a>
 
 <hr>
 
-## Interlude: Conscious decoupling with data types
+## 幕間：データ型による意識的な分離
 
-In three of the examples so far (the [agent](../posts/13-ways-of-looking-at-a-turtle.md#way5), [functional dependency injection](../posts/13-ways-of-looking-at-a-turtle.md#way7)
-and [batch processing](../posts/13-ways-of-looking-at-a-turtle.md#way9)) we have used a `Command` type -- a discriminated union containing a case for each API call.
-We'll also see something similar used for the event sourcing and interpreter approaches in the next post.
+これまでの例のうち3つ（[エージェント](../posts/13-ways-of-looking-at-a-turtle.md#way5)、[関数型依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)、
+[バッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)）で、`Command`型 - 各APIコールのケースを含む判別共用体 - を使用しました。
+次の投稿でも、イベントソーシングとインタープリタのアプローチで同様のものが使用されるのを見ることができます。
 
-This is not an accident. One of the differences between object-oriented design and functional design is that OO design focuses on behavior, while functional design focuses on
-data transformation.  
+これは偶然ではありません。オブジェクト指向設計と関数型設計の違いの1つは、OO設計が振る舞いに焦点を当てるのに対し、
+関数型設計はデータ変換に焦点を当てることです。
 
-As a result, their approach to decoupling differs too.  OO designs prefer to provide decoupling by sharing bundles of encapsulated behavior ("interfaces")
-while functional designs prefer to provide decoupling by agreeing on a common data type, sometimes called a "protocol" (although I prefer to reserve that word for message exchange patterns).
+結果として、分離へのアプローチも異なります。OO設計はカプセル化された振る舞いの束（「インターフェース」）を共有することで分離を提供することを好みますが、
+関数型設計は共通のデータ型に同意することで分離を提供することを好みます。これは時々「プロトコル」と呼ばれます（ただし、私はこの言葉をメッセージ交換パターンのために予約することを好みます）。
 
-Once that common data type is agreed upon, any function that emits that type can be connected to any function that consumes that type using regular function composition.
+その共通のデータ型に同意すれば、そのデータ型を出力する関数は、通常の関数合成を使用して、そのデータ型を消費する関数に接続できます。
 
-You can also think of the two approaches as analogous to the choice between [RPC or message-oriented APIs in web services](https://sbdevel.wordpress.com/2009/12/17/the-case-rpc-vs-messaging/),
-and just as [message-based designs have many advantages](https://github.com/ServiceStack/ServiceStack/wiki/Advantages-of-message-based-web-services#advantages-of-message-based-designs) over RPC,
-so the data-based decoupling has similar advantages over the behavior-based decoupling. 
+2つのアプローチを、[WebサービスにおけるRPCまたはメッセージ指向APIの選択](https://sbdevel.wordpress.com/2009/12/17/the-case-rpc-vs-messaging/)に類似したものとして考えることもできます。
+そして、[メッセージベースの設計には多くの利点](https://github.com/ServiceStack/ServiceStack/wiki/Advantages-of-message-based-web-services#advantages-of-message-based-designs)があるのと同様に、
+データベースの分離には振る舞いベースの分離と同様の利点があります。
 
-Some advantages of decoupling using data include:
+データを使用した分離の利点には以下のようなものがあります：
 
-* Using a shared data type means that composition is trivial. It is harder to compose behavior-based interfaces.
-* *Every* function is already "decoupled", as it were, and so there is no need to retrofit existing functions when refactoring. 
-  At worst you might need to convert one data type to another, but that is easily accomplished using... moar functions and moar function composition!
-* Data structures are easy to serialize to remote services if and when you need to split your code into physically separate services.
-* Data structures are easy to evolve safely. For example, if I added a sixth turtle action, or removed an action, or changed the parameters of an action, the discriminated union type would change
-  and all clients of the shared type would fail to compile until the sixth turtle action is accounted for, etc. On the other hand, if you *didn't*
-  want existing code to break, you can use a versioning-friendly data serialization format like [protobuf](https://developers.google.com/protocol-buffers/docs/proto3#updating).
-  Neither of these options are as easy when interfaces are used.
+* 共有データ型を使用することで、合成が簡単になります。振る舞いベースのインターフェースを合成するのは難しいです。
+* *すべての*関数がすでに「分離」されているため、リファクタリング時に既存の関数を改修する必要がありません。
+  最悪の場合、あるデータ型を別のデータ型に変換する必要があるかもしれませんが、それは...より多くの関数とより多くの関数合成で簡単に達成できます！
+* データ構造は、コードを物理的に分離されたサービスに分割する必要がある場合に、リモートサービスへのシリアル化が簡単です。
+* データ構造は安全に進化させるのが簡単です。例えば、6番目のタートルアクションを追加したり、アクションを削除したり、アクションのパラメータを変更したりした場合、判別共用体型が変更され、
+  共有型のすべてのクライアントは6番目のタートルアクションが考慮されるまでコンパイルに失敗します。
+  一方、既存のコードを壊したくない場合は、[protobuf](https://developers.google.com/protocol-buffers/docs/proto3#updating)のようなバージョニングに優しいデータシリアル化形式を使用できます。
+  これらのオプションは、インターフェースを使用する場合ほど簡単ではありません。
 
-  
-## Summary
 
-> The meme is spreading.  
-> The turtle must be paddling.    
-> -- *"Thirteen ways of looking at a turtle", by Wallace D Coriacea*
+## まとめ
 
-Hello? Anyone still there? Thanks for making it this far!
+> ミームは拡散  
+> 泳ぐ亀さん  
+> -- *ウォレス・オサガメ・スティーヴンズ による「タートルを見る13の方法」*
 
-So, time for a break! In the [next post](../posts/13-ways-of-looking-at-a-turtle-2.md), we'll cover the remaining four ways of looking at a turtle.
-  
-*The source code for this post is available [on github](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle).*
+もしもし？まだ誰かいますか？ここまで読んでいただきありがとうございます！
+
+さて、休憩の時間です！[次の投稿](../posts/13-ways-of-looking-at-a-turtle-2.md)では、タートルを見る方法について残りの4つをカバーします。
+
+*この投稿のソースコードは[GitHub](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle)で入手できます。*
 

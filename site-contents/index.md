@@ -42,7 +42,7 @@ hasNoCode: 1
 * [つらくないモノイド](../posts/monoids-without-tears.md): 一般的な関数型パターンを、ほとんど数学を使わずに解説します。
 * [フォールドと再帰型](../series/recursive-types-and-folds.md): 再帰型、カタモーフィズム、末尾再帰、左フォールドと右フォールドの違いなどについて説明します。
 * [パーサーコンビネータの理解](../posts/understanding-parser-combinators.md): パーサーコンビネータライブラリをスクラッチから作成します。
-* [カメを見る 13 の方法](../posts/13-ways-of-looking-at-a-turtle.md): State モナド、エージェント、インタープリタなど、さまざまな手法を使ってタートルグラフィック API を実装します。
+* [タートルを見る13の方法](../posts/13-ways-of-looking-at-a-turtle.md): State モナド、エージェント、インタープリタなど、さまざまな手法を使ってタートルグラフィック API を実装します。
 
 ## 実践例
 

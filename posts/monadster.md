@@ -8,7 +8,7 @@ seriesId: "Handling State"
 seriesOrder: 1
 ---
 
-*UPDATE: [Slides and video from my talk on this topic](http://fsharpforfunandprofit.com/monadster/)*
+*UPDATE: [Slides and video from my talk on this topic](https://fsharpforfunandprofit.com/monadster/)*
 
 *Warning! This post contains gruesome topics, strained analogies, discussion of monads*
 
