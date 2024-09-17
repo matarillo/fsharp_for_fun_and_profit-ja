@@ -103,7 +103,7 @@ x + y;;
 
 コードの一部を実行するには、選択してマウス右クリックするか、単に`Alt+Enter`を押します。
 
-![](../assets/img/fsharp-script-evaluate.jpg)
+![](../assets/img/fsharp-script-evaluate.png)
 
 <a name="working-with-nuget"></a>
 ## 外部ライブラリとNuGetの使用

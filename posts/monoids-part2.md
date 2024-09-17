@@ -933,11 +933,11 @@ It is obvious that, with respect to the entire document, "world" is the most fre
 
 So let's compare the two approaches as before.  The first approach will combine all the pages and then apply `mostFrequentWord`, like this.
 
-![mostFrequentWord via adding pages](../assets/img/monoid_non_h1.jpg)
+![mostFrequentWord via adding pages](../assets/img/monoid_non_h1.png)
 
 The second approach will do `mostFrequentWord` separately on each page and then combine the results, like this:
 
-![mostFrequentWord via adding counts](../assets/img/monoid_non_h2.jpg)
+![mostFrequentWord via adding counts](../assets/img/monoid_non_h2.png)
 
 Here's the code:
         
@@ -980,11 +980,11 @@ Let's look at these two different examples again to understand what the distinct
 In the word count example, we got the *same* final result whether we added the blocks and then did the word count,
 or whether we did the word counts and then added them together. Here's a diagram:
 
-![word count both ways](../assets/img/monoid_h1_both.jpg)
+![word count both ways](../assets/img/monoid_h1_both.png)
 
 But for the most frequent word example, we did *not* get the same answer from the two different approaches.
 
-![most frequent word both ways](../assets/img/monoid_non_h1_both.jpg)
+![most frequent word both ways](../assets/img/monoid_non_h1_both.png)
 
 In other words, for `wordCount`, we had
 
