@@ -8,7 +8,7 @@ categories: []
 image: "/assets/img/Recipe_Railway_Transparent.png"
 ---
 
-*更新: [より包括的なプレゼンテーションのスライドと動画はこちら](http://fsharpforfunandprofit.com/rop/)（そして、Eitherモナドを理解している場合は、[まずこれを読んでください](http://fsharpforfunandprofit.com/rop/#monads)）*
+*更新: [より包括的なプレゼンテーションのスライドと動画はこちら](https://fsharpforfunandprofit.com/rop/)（そして、Eitherモナドを理解している場合は、[まずこれを読んでください](https://fsharpforfunandprofit.com/rop/#monads)）*
 
 前回の記事では、ユースケースをステップに分け、全てのエラーを別の失敗トラックに振り分ける方法を見ました。以下のような感じです。
 
@@ -1150,13 +1150,13 @@ let usecase =
 ## さらなる読み物
 
 * この「鉄道指向」アプローチが気に入った場合、[FizzBuzzに適用した例](../posts/railway-oriented-programming-carbonated.md)もご覧ください。
-* このアプローチをさらに発展させる方法を示した[スライドと動画](http://fsharpforfunandprofit.com/rop/)もあります。（いずれ proper blog post にする予定です）
+* このアプローチをさらに発展させる方法を示した[スライドと動画](https://fsharpforfunandprofit.com/rop/)もあります（いずれ、ブログ投稿として適切な形にする予定です）。
 
 NDC Oslo 2014でこのトピックについて発表しました（画像をクリックすると動画が見られます）
 
-[![Video from NDC Oslo 2014](../assets/img/rop-ndcoslo.jpg)](http://vimeo.com/97344498)
+[![Video from NDC Oslo 2014](../assets/img/rop-ndcoslo.jpg)](https://vimeo.com/97344498)
 
 そして、使用したスライドはこちらです：
 
-<iframe src="//www.slideshare.net/slideshow/embed_code/32242318" width="627" height="556" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px 1px 0; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="https://www.slideshare.net/ScottWlaschin/railway-oriented-programming" title="Railway Oriented Programming" target="_blank">Railway Oriented Programming</a> </strong> from <strong><a href="http://www.slideshare.net/ScottWlaschin" target="_blank">私のSlideshareページ</a></strong> </div>
+<iframe src="//www.slideshare.net/slideshow/embed_code/32242318" width="627" height="556" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px 1px 0; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="https://www.slideshare.net/ScottWlaschin/railway-oriented-programming" title="Railway Oriented Programming" target="_blank">Railway Oriented Programming</a> </strong> from <strong><a href="https://www.slideshare.net/ScottWlaschin" target="_blank">私のSlideshareページ</a></strong> </div>
     
