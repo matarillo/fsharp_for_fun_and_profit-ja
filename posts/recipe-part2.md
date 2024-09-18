@@ -1,30 +1,30 @@
 ---
 layout: post
-title: "Railway oriented programming"
-description: "A recipe for a functional app, part 2"
-seriesId: "A recipe for a functional app"
+title: "鉄道指向プログラミング"
+description: "関数型アプリの作り方、パート2"
+seriesId: "関数型アプリの作り方"
 seriesOrder: 2
 categories: []
 image: "/assets/img/Recipe_Railway_Transparent.png"
 ---
 
-*UPDATE: [Slides and video from a more comprehensive presentation available here](http://fsharpforfunandprofit.com/rop/) (and if you understand the Either monad, [read this first](http://fsharpforfunandprofit.com/rop/#monads)!)*
+*更新: [より包括的なプレゼンテーションのスライドと動画はこちら](http://fsharpforfunandprofit.com/rop/)（そして、Eitherモナドを理解している場合は、[まずこれを読んでください](http://fsharpforfunandprofit.com/rop/#monads)）*
 
-In the previous post, we saw how a use case could be broken into steps, and all the errors shunted off onto a separate error track, like this:
-    
-![A function with two outputs](../assets/img/Recipe_Function_ErrorTrack.png)
+前回の記事では、ユースケースをステップに分け、全てのエラーを別の失敗トラックに振り分ける方法を見ました。以下のような感じです。
 
-In this post, we'll look at various ways of connecting these step functions into a single unit.  The detailed internal design of the functions will be described in a later post.
+![2つの出力を持つ関数](../assets/img/Recipe_Function_ErrorTrack.png)
 
-## Designing a function that represents a step
+この記事では、これらのステップ関数を1つの単位にまとめる様々な方法を見ていきます。関数の詳細な内部設計については、後の記事で説明します。
 
-Let's have a closer look at these steps. For example, consider the validation function. How would it work?  Some data goes in, but what comes out?
+## ステップを表す関数の設計
 
-Well, there are two possible cases: either the data is valid (the happy path), or something is wrong, in which case we go onto the failure path and bypass the rest of the steps, like this:
+これらのステップをもう少し詳しく見てみましょう。例えば、検証関数はどのように動作するのでしょうか？データが入力されますが、何が出力されるのでしょうか？
 
-![The validation function with a two outputs](../assets/img/Recipe_Validation_Paths.png)
+2つの可能性があります。データが有効な場合（ハッピーパス）、または何か問題がある場合です。問題がある場合は失敗パスに進み、残りのステップをバイパスします。以下のようになります。
 
-But as before, this would not be a valid function. A function can only have one output, so we must use the `Result` type we defined last time:
+![2つの出力を持つ検証関数](../assets/img/Recipe_Validation_Paths.png)
+
+しかし、前回と同様、これは有効な関数ではありません。関数は1つの出力しか持てないので、前回定義した`Result`型を使う必要があります。
 
 ```fsharp
 type Result<'TSuccess,'TFailure> = 
@@ -32,103 +32,103 @@ type Result<'TSuccess,'TFailure> =
     | Failure of 'TFailure
 ```
 
-And the diagram now looks like this:
+そして、図は次のようになります。
 
-![The validation function with a success/failure output](../assets/img/Recipe_Validation_Union2.png)
+![成功/失敗出力を持つ検証関数](../assets/img/Recipe_Validation_Union2.png)
 
-To show you how this works in practice, here is an example of what an actual validation function might look like:
+実際にどのように機能するかを示すために、実際の検証関数の例を挙げます。
 
 ```fsharp
 type Request = {name:string; email:string}
 
 let validateInput input =
-   if input.name = "" then Failure "Name must not be blank"
-   else if input.email = "" then Failure "Email must not be blank"
-   else Success input  // happy path
+   if input.name = "" then Failure "名前を空白にはできません"
+   else if input.email = "" then Failure "メールアドレスを空白にはできません"
+   else Success input  // ハッピーパス
 ```
 
-If you look at the type of the function, the compiler has deduced that it takes a `Request` and spits out a `Result` as output, with a `Request` for the success case and a `string` for the failure case:
+関数の型を見ると、コンパイラは`Request`を受け取り、成功の場合は`Request`、失敗の場合は`string`の`Result`を出力すると推論しています。
 
 ```fsharp
 validateInput : Request -> Result<Request,string>
 ```
 
-We can analyze the other steps in the flow in the same way. We will find that each one will have the same "shape" -- some sort of input and then this Success/Failure output.
+フローの他のステップも同じように分析できます。各ステップは同じ「形」を持つことがわかります。つまり、何らかの入力と、Success/Failureの出力です。
 
-*A pre-emptive apology: Having just said that a function can't have two outputs, I may occasionally refer to them hereafter as "two output" functions! Of course, what I mean is that the shape of the function output has two cases.*
+*先制的な謝罪：関数は2つの出力を持てないと言ったばかりですが、これ以降、「2つの出力」関数と呼ぶことがあるかもしれません！もちろん、関数の出力の形が2つのケースを持つという意味です。*
 
-## Railway oriented programming
+## 鉄道指向プログラミング
 
-So we have a lot of these "one input -> Success/Failure output" functions -- how do we connect them together? 
+では、これらの「1つの入力 -> 成功/失敗出力」関数をたくさん持っていますが、どのようにつなげればよいでしょうか？
 
-What we want to do is connect the `Success` output of one to the input of the next, but somehow bypass the second function in case of a `Failure` output.  This diagram gives the general idea:
+1つの関数の`Success`出力を次の関数の入力につなぎ、`Failure`出力の場合は2番目の関数をバイパスする方法が必要です。この図が全体的なアイデアを示しています。
 
-![Connecting validation function with update function](../assets/img/Recipe_Validation_Update.png)
+![検証関数と更新関数の接続](../assets/img/Recipe_Validation_Update.png)
 
-There is a great analogy for doing this -- something you are probably already familiar with. Railways!
+これを行うための素晴らしい類推があります。おそらくすでに馴染みのあるものです。鉄道です！
 
-Railways have switches ("points" in the UK) for directing trains onto a different track. We can think of these "Success/Failure" functions as railway switches, like this:
+鉄道には列車を別の線路に導くための分岐器（イギリスでは「ポイント」）があります。これらの「成功/失敗」関数を鉄道の分岐器と考えることができます。このようになります。
 
-![A railway switch](../assets/img/Recipe_RailwaySwitch.png)
+![鉄道の分岐器](../assets/img/Recipe_RailwaySwitch.png)
 
-And here we have two in a row.
+そして、ここに2つの分岐器が並んでいます。
 
-![2 railway switches disconnected](../assets/img/Recipe_RailwaySwitch1.png)
+![2つの分岐器（未接続）](../assets/img/Recipe_RailwaySwitch1.png)
 
-How do we combine them so that both failure tracks are connected?  It's obvious -- like this!
+両方の失敗トラックをつなげるにはどうすればよいでしょうか？明らかです。このようにします！
 
-![2 railway switches connected](../assets/img/Recipe_RailwaySwitch2.png)
+![2つの分岐器（接続済み）](../assets/img/Recipe_RailwaySwitch2.png)
 
-And if we have a whole series of switches, we will end up with a two track system, looking something like this:
+そして、一連の分岐器があれば、次のような2線式のシステムになります。
 
-![3 railway switches connected](../assets/img/Recipe_RailwaySwitch3.png)
+![3つの分岐器（接続済み）](../assets/img/Recipe_RailwaySwitch3.png)
 
-The top track is the happy path, and the bottom track is the failure path.  
+上の線路がハッピーパスで、下の線路が失敗パスです。
 
-Now stepping back and looking at the big picture, we can see that we will have a series of black box functions that appear to be straddling a two-track railway, each function processing data and passing it down the track to the next function:
+全体像を見ると、2線式の鉄道をまたぐ一連のブラックボックス関数があり、各関数がデータを処理して次の関数に渡していくことがわかります。
 
-![Opaque functions](../assets/img/Recipe_Railway_Opaque.png)
+![不透明な関数](../assets/img/Recipe_Railway_Opaque.png)
 
-But if we look inside the functions, we can see that there is actually a switch inside each one, for shunting bad data onto the failure track:
+しかし、関数の中を見ると、実際には各関数の中に分岐器があり、不正なデータを失敗トラックに振り分けていることがわかります。
 
-![Transparent functions](../assets/img/Recipe_Railway_Transparent.png)
+![透明な関数](../assets/img/Recipe_Railway_Transparent.png)
 
-Note that once we get on the failure path, we never (normally) get back onto the happy path. We just bypass the rest of the functions until we reach the end.
+失敗パスに入ると、（通常は）二度とハッピーパスに戻ることはなく、最後まで残りの関数をバイパスすることに注意してください。
 
 
-## Basic composition
+## 基本的な合成
 
-Before we discuss how to "glue" the step functions together, let's review how composition works.
+ステップ関数を「接着」する方法を議論する前に、合成がどのように機能するかを復習しましょう。
 
-Imagine that a standard function is a black box (a tunnel, say) sitting on a one-track railway. It has one input and one output.
+標準的な関数を、1線式の鉄道の上に座るブラックボックス（例えばトンネル）だと想像してください。1つの入力と1つの出力があります。
 
-If we want to connect a series of these one-track functions, we can use the left-to-right composition operator, with the symbol `>>`. 
+一連の1線式関数をつなげたい場合、左から右への合成演算子`>>`を使えます。
 
-![Composition of one-track functions](../assets/img/Recipe_Railway_Compose1.png)
+![1線式関数の合成](../assets/img/Recipe_Railway_Compose1.png)
 
-The same composition operation also works with two-track functions as well:
+同じ合成操作は2線式関数にも適用できます。
 
-![Composition of two-track functions](../assets/img/Recipe_Railway_Compose2.png)
+![2線式関数の合成](../assets/img/Recipe_Railway_Compose2.png)
 
-The only constraint on composition is that the output type of the left-hand function has to match the input type of the right-hand function.
+合成の唯一の制約は、左側の関数の出力型が右側の関数の入力型と一致する必要があることです。
 
-In our railway analogy, this means that you can connect one-track output to one-track input, or two-track output to two-track input, but you *can't* directly connect two-track output to one-track input.
+鉄道の類推では、1線式の出力を1線式の入力に接続したり、2線式の出力を2線式の入力に接続したりできますが、2線式の出力を1線式の入力に直接接続することは*できません*。
 
-![Composition of two-track functions](../assets/img/Recipe_Railway_Compose3.png)
+![2線式関数の合成](../assets/img/Recipe_Railway_Compose3.png)
 
-## Converting switches to two-track inputs
+## 分岐器を2線式入力に変換する
 
-So now we have run into a problem.
+ここで問題に直面しました。
 
-The function for each step is going to be a switch, with *one* input track.  But the overall flow requires a *two-track* system, with each function straddling *both* tracks, meaning that each function must have a two-track input (the `Result` output by the previous function), not just a simple one-track input (`Request`).
+各ステップの関数は*1つ*の入力トラックを持つ分岐器になります。しかし、全体のフローには2線式のシステムが必要で、各関数が*両方*のトラックにまたがる必要があります。つまり、各関数は単純な1線式入力（`Request`）ではなく、2線式入力（前の関数が出力した`Result`）を持つ必要があります。
 
-How can we insert the switches into the two track system?
+分岐器を2線式システムに挿入するにはどうすればよいでしょうか？
 
-The answer is simple. We can create an "adapter" function that has a "hole" or "slot" for a switch function and converts it into a proper two-track function. Here's an illustration:
+答えは簡単です。分岐器関数用の「穴」や「スロット」を持つ「アダプター」関数を作成し、それを適切な2線式関数に変換します。以下は図解です。
 
-![Bind adapter](../assets/img/Recipe_Railway_BindAdapter.png)
+![バインドアダプター](../assets/img/Recipe_Railway_BindAdapter.png)
 
-And here's what the actual code looks like. I'm going to name the adapter function `bind`, which is the standard name for it.
+そして、実際のコードは次のようになります。このアダプター関数を`bind`と呼びますが、これは標準的な名前です。
 
 ```fsharp
 let bind switchFunction = 
@@ -138,31 +138,31 @@ let bind switchFunction =
         | Failure f -> Failure f
 ```
 
-The bind function takes a switch function as a parameter and returns a new function. The new function takes a two-track input (which is of type `Result`) and then checks each case. If the input is a `Success` it calls the `switchFunction` with the value. But if the input is a `Failure`, then the switch function is bypassed.
+bind関数はスイッチ関数をパラメータとして受け取り、新しい関数を返します。新しい関数は2線式入力（`Result`型）を受け取り、各ケースをチェックします。入力が`Success`の場合、`switchFunction`を値で呼び出します。入力が`Failure`の場合、スイッチ関数はバイパスされます。
 
-Compile it and then look at the function signature:
+これをコンパイルして関数のシグネチャを見てみましょう。
 
 ```fsharp
 val bind : ('a -> Result<'b,'c>) -> Result<'a,'c> -> Result<'b,'c>
 ```
 
-One way of interpreting this signature is that the `bind` function has one parameter, a switch function (`'a -> Result<..>`) and it returns a fully two-track function (`Result<..> -> Result<..>`) as output.
+このシグネチャを解釈する一つの方法は、`bind`関数がスイッチ関数（`'a -> Result<..>`）を1つのパラメータとして持ち、完全な2線式関数（`Result<..> -> Result<..>`）を出力として返すということです。
 
-To be even more specific:
+より具体的に言えば、
 
-* The parameter (`switchFunction`) of bind takes some type `'a` and emits a `Result` of type `'b` (for the success track) and `'c` (for the failure track)
-* The returned function itself has a parameter (`twoTrackInput`) which is a `Result` of type `'a` (for success) and `'c` (for failure). The type `'a` has to be the same as what the `switchFunction` is expecting on its one track.
-* The output of the returned function is another `Result`, this time of type `'b` (for success) and `'c` (for failure) -- the same type as the switch function output.
+* bindのパラメータ（`switchFunction`）は何らかの型`'a`を受け取り、`'b`型（成功トラック用）と`'c`型（失敗トラック用）の`Result`を出力します。
+* 返される関数自体はパラメータ（`twoTrackInput`）を持ち、これは`'a`型（成功用）と`'c`型（失敗用）の`Result`です。型`'a`は`switchFunction`が1線式で期待するものと同じである必要があります。
+* 返される関数の出力は別の`Result`で、今度は`'b`型（成功用）と`'c`型（失敗用）です。これはスイッチ関数の出力と同じ型です。
 
-If you think about it, this type signature is exactly what we would expect.
+考えてみれば、この型シグネチャはまさに期待通りのものです。
 
-Note that this function is completely generic -- it will work with *any* switch function and *any* types. All it cares about is the "shape" of the `switchFunction`, not the actual types involved.
+この関数は完全に汎用的であり、*どんな*スイッチ関数や*どんな*型でも機能することに注意してください。関数が気にするのは、関与する実際の型ではなく、`switchFunction`の「形」だけです。
 
-### Other ways of writing the bind function
+### bind関数を書く他の方法
 
-Just as an aside, there are some other ways of writing functions like this.
+ちなみに、このような関数を書く他の方法もあります。
 
-One way is to use an explicit second parameter for the `twoTrackInput` rather than defining an internal function, like this:
+1つの方法は、内部関数を定義する代わりに、`twoTrackInput`の明示的な2番目のパラメータを使うことです。このようになります。
 
 ```fsharp
 let bind switchFunction twoTrackInput = 
@@ -171,9 +171,9 @@ let bind switchFunction twoTrackInput =
     | Failure f -> Failure f
 ```
 
-This is exactly the same as the first definition. And if you are wondering how a two parameter function can be exactly the same as a one parameter function, you need to read the post on [currying](../posts/currying.md)!
+これは最初の定義とまったく同じです。2つのパラメータを持つ関数が1つのパラメータを持つ関数とどうして全く同じになるのか疑問に思うなら、[カリー化](../posts/currying.md)に関する記事を読む必要があります！
 
-Yet another way of writing it is to replace the `match..with` syntax with the more concise `function` keyword, like this:
+もう1つの方法は、`match..with`構文をより簡潔な`function`キーワードに置き換えることです。このようになります。
 
 ```fsharp
 let bind switchFunction = 
@@ -182,13 +182,13 @@ let bind switchFunction =
     | Failure f -> Failure f
 ```
 
-You might see all three styles in other code, but I personally prefer to use the second style (`let bind switchFunction twoTrackInput = `), because I think that having explicit parameters makes the code more readable for non-experts. 
+他のコードでこれら3つのスタイルすべてを見かけるかもしれませんが、個人的には2番目のスタイル（`let bind switchFunction twoTrackInput = `）が好みです。明示的なパラメータを使うことで、専門家でない人にとってもコードが読みやすくなると思うからです。
 
-## Example: Combining some validation functions
+## 例: いくつかの検証関数の組み合わせ
 
-Let's write a little bit of code now, to test the concepts.
+ここで、概念をテストするために少しコードを書いてみましょう。
 
-Let's start with what we already have defined. `Request`, `Result` and `bind`:
+まず、すでに定義したものから始めましょう。`Request`、`Result`、そして`bind`です。
 
 ```fsharp
 type Result<'TSuccess,'TFailure> = 
@@ -204,72 +204,72 @@ let bind switchFunction twoTrackInput =
 ```
 
 
-Next we'll create three validation functions, each of which is a "switch" function, with the goal of combining them into one bigger function:
+次に、3つの検証関数を作成します。それぞれが「分岐器」関数で、これらを1つの大きな関数に組み合わせることが目標です。
 
 ```fsharp
 let validate1 input =
-   if input.name = "" then Failure "Name must not be blank"
+   if input.name = "" then Failure "名前を空白にはできません"
    else Success input
 
 let validate2 input =
-   if input.name.Length > 50 then Failure "Name must not be longer than 50 chars"
+   if input.name.Length > 50 then Failure "名前は50文字以内にしてください"
    else Success input
 
 let validate3 input =
-   if input.email = "" then Failure "Email must not be blank"
+   if input.email = "" then Failure "メールアドレスを空白にはできません"
    else Success input
 ```
 
-Now to combine them, we apply `bind` to each validation function to create a new alternative function that is two-tracked.
+これらを組み合わせるには、各検証関数に`bind`を適用して、2線式の入力を受け付ける新しい代替関数を作成します。
 
-Then we can connect the two-tracked functions using standard function composition, like this:
+そして、標準的な関数合成を使って2線式の関数をつなげることができます。このようになります。
 
 ```fsharp
-/// glue the three validation functions together
+/// 3つの検証関数をつなげる
 let combinedValidation = 
-    // convert from switch to two-track input
+    // 分岐器から2線式入力に変換
     let validate2' = bind validate2
     let validate3' = bind validate3
-    // connect the two-tracks together
+    // 2線式をつなげる
     validate1 >> validate2' >> validate3' 
 ```
 
-The functions `validate2'` and `validate3'` are new functions that take two-track input. If you look at their signatures you will see that they take a `Result` and return a `Result`.
-But note that `validate1` does not need to be converted to two track input. Its input is left as one-track, and its output is two-track already, as needed for composition to work.
+`validate2'`と`validate3'`は`Result`を受け取り`Result`を返す新しい関数です。シグネチャを見るとそれがわかります。
+しかし、`validate1`は2線式入力に変換する必要がありません。その入力は1線式のままで、出力は既に合成に必要な2線式になっています。
 
-Here's a diagram showing the `Validate1` switch (unbound) and the `Validate2` and `Validate3` switches, together with the `Validate2'` and `Validate3'` adapters.
+以下は、（バインドされていない）`Validate1`分岐器と、`Validate2`および`Validate3`分岐器、さらに`Validate2'`および`Validate3'`アダプターを示す図です。
 
-![Validate2 and Validate3 connected](../assets/img/Recipe_Railway_Validator2and3.png)
+![Validate2とValidate3の接続](../assets/img/Recipe_Railway_Validator2and3.png)
 
-We could have also "inlined" the `bind`, like this:
+`bind`を「インライン化」して、このように書くこともできます。
 
 ```fsharp
 let combinedValidation = 
-    // connect the two-tracks together
+    // 2線式をつなげる
     validate1 
     >> bind validate2 
     >> bind validate3
 ```
 
 
-Let's test it with two bad inputs and a good input:
+2つの不正な入力と1つの正しい入力でテストしてみましょう。
 
 ```fsharp
-// test 1
+// テスト1
 let input1 = {name=""; email=""}
 combinedValidation input1 
 |> printfn "Result1=%A"
 
-// ==> Result1=Failure "Name must not be blank"
+// ==> Result1=Failure "名前を空白にはできません"
 
-// test 2
+// テスト2
 let input2 = {name="Alice"; email=""}
 combinedValidation input2
 |> printfn "Result2=%A"
 
-// ==> Result2=Failure "Email must not be blank"
+// ==> Result2=Failure "メールアドレスを空白にはできません"
 
-// test 3
+// テスト3
 let input3 = {name="Alice"; email="good"}
 combinedValidation input3
 |> printfn "Result3=%A"
@@ -277,44 +277,44 @@ combinedValidation input3
 // ==> Result3=Success {name = "Alice"; email = "good";}
 ```
 
-I would encourage you to try it for yourself and play around with the validation functions and test input.
+ぜひ自分で試して、検証関数とテスト入力をいろいろ変えて遊んでみてください。
 
-*You might be wondering if there is a way to run all three validations in parallel, rather than serially, so that you can get back all the validation errors at once.
-Yes, there is a way, which I'll explain later in this post.*
+*3つの検証を並列で実行して、すべての検証エラーを一度に取得する方法はないのかと疑問に思うかもしれません。
+はい、その方法はあります。この記事の後半で説明します。*
 
-### Bind as a piping operation
+### パイピング操作としてのbind
 
-While we are discussing the `bind` function, there is a common symbol for it, `>>=`, which is used to pipe values into switch functions.
+`bind`関数について議論している間に、分岐器関数に値をパイプするために使われる一般的な記号`>>=`があります。
 
-Here's the definition, which switches around the two parameters to make them easier to chain together:
+以下は定義で、2つのパラメータを入れ替えてチェーンしやすくしています。
 
 ```fsharp
-/// create an infix operator
+/// 中置演算子を作成
 let (>>=) twoTrackInput switchFunction = 
     bind switchFunction twoTrackInput 
 ```
 
-*One way to remember the symbol is to think of it as the composition symbol, `>>`, followed by a two-track railway symbol, `=`.*
+*この記号を覚えるための一つの方法は、合成記号`>>`の後に2線式の鉄道記号`=`が続くと考えることです。*
 
-When used like this, the `>>=` operator is sort of like a pipe (`|>`) but for switch functions.
+このように使うと、`>>=`演算子は一種のパイプ（`|>`）ですが、分岐器関数用です。
 
-In a normal pipe, the left hand side is a one-track value, and the right hand value is a normal function.
-But in a "bind pipe" operation, the left hand side is a *two-track* value, and the right hand value is a *switch function*.
+通常のパイプでは、左側は1線式の値で、右側は通常の関数です。
+しかし、「bindパイプ」操作では、左側は*2線式*の値で、右側は*分岐器関数*です。
 
-Here it is in use to create another implementation of the `combinedValidation` function.
+これを使って`combinedValidation`関数の別の実装を作成してみましょう。
 
 ```fsharp
 let combinedValidation x = 
     x 
-    |> validate1   // normal pipe because validate1 has a one-track input
-                   // but validate1 results in a two track output...
-    >>= validate2  // ... so use "bind pipe". Again the result is a two track output
-    >>= validate3   // ... so use "bind pipe" again. 
+    |> validate1   // validate1は1線式入力を持つので通常のパイプ
+                   // しかしvalidate1の結果は2線式出力になる...
+    >>= validate2  // ...そのため「bindパイプ」を使う。結果は再び2線式出力
+    >>= validate3   // ...そのためもう一度「bindパイプ」を使う
 ```
 
-The difference between this implementation and the previous one is that this definition is *data-oriented* rather than *function-oriented*. It has an explicit parameter for the initial data value, namely `x`. `x` is passed to the first function, and then the output of that is passed to the second function, and so on.
+この実装と前の実装の違いは、この定義が関数指向ではなく*データ指向*だということです。初期データ値のための明示的なパラメータ`x`があります。`x`は最初の関数に渡され、その出力が2番目の関数に渡され、というように続きます。
 
-In the previous implementation (repeated below), there was no data parameter at all! The focus was on the functions themselves, not the data that flows through them.
+前の実装（以下に再掲）では、データのパラメータは全くありませんでした！焦点は関数自体にあり、それを流れるデータにはありませんでした。
 
 ```fsharp
 let combinedValidation = 
@@ -323,29 +323,29 @@ let combinedValidation =
     >> bind validate3
 ```
 
-## An alternative to bind 
+## bindの代替手法
 
-Another way to combine switches is not by adapting them to a two track input, but simply by joining them directly together to make a new, bigger switch.
+分岐器を組み合わせるもう一つの方法は、2線式入力に適応させるのではなく、単純に直接つなげて新しい、より大きな分岐器を作ることです。
 
-In other words, this:
+つまり、これが：
 
-![2 railway switches disconnected](../assets/img/Recipe_RailwaySwitch1.png)
+![2つの分岐器（未接続）](../assets/img/Recipe_RailwaySwitch1.png)
 
-becomes this:
+このようになります：
 
-![2 railway switches connected](../assets/img/Recipe_RailwaySwitch2.png)
+![2つの分岐器（接続済み）](../assets/img/Recipe_RailwaySwitch2.png)
 
-But if you think about it, this combined track is actually just another switch!  You can see this if you cover up the middle bit. There's one input and two outputs:
+しかし、よく考えてみると、この組み合わせたトラックも実際には別の分岐器にすぎません！中央部分を隠すとわかります。1つの入力と2つの出力があります：
 
-![2 railway switches connected](../assets/img/Recipe_RailwaySwitch2a.png)
+![2つの分岐器（接続済み）](../assets/img/Recipe_RailwaySwitch2a.png)
 
-So what we have really done is a form of composition for switches, like this:
+つまり、実際に行ったのは分岐器の一種の合成で、このようになります：
 
-![switches composition](../assets/img/Recipe_Railway_MComp.png)
+![分岐器の合成](../assets/img/Recipe_Railway_MComp.png)
 
-Because each composition results in just another switch, we can always add another switch again, resulting in an even bigger thing that is still a switch, and so on.
+各合成の結果は単なる別の分岐器なので、常に別の分岐器を追加でき、さらに大きなものになりますが、それでもまだ分岐器であり、このように続きます。
 
-Here's the code for switch composition.  The standard symbol used is `>=>`, a bit like the normal composition symbol, but with a railway track between the angles.
+以下は分岐器合成のコードです。標準的に使われる記号は`>=>`で、通常の合成記号に似ていますが、角括弧の間に鉄道トラックがあります。
 
 ```fsharp
 let (>=>) switch1 switch2 x = 
@@ -354,9 +354,9 @@ let (>=>) switch1 switch2 x =
     | Failure f -> Failure f 
 ```
 
-Again, the actual implementation is very straightforward. Pass the single track input `x` through the first switch. On success, pass the result into the second switch, otherwise bypass the second switch completely.
+ここでも、実際の実装は非常に単純です。1線式入力`x`を最初の分岐器に通します。成功した場合、結果を2番目の分岐器に渡し、それ以外の場合は2番目の分岐器を完全にバイパスします。
 
-Now we can rewrite the `combinedValidation` function to use switch composition rather than bind:
+これで`combinedValidation`関数を、bindではなく分岐器合成を使って書き直すことができます：
 
 ```fsharp
 let combinedValidation = 
@@ -365,89 +365,89 @@ let combinedValidation =
     >=> validate3 
 ```
 
-This one is the simplest yet, I think.  It's very easy to extend of course, if we have a fourth validation function, we can just append it to the end.
+これがこれまでで最もシンプルだと思います。もちろん、拡張も簡単です。4番目の検証関数がある場合、単純に最後に追加するだけです。
 
 
-### Bind vs. switch composition
+### bindと分岐器合成の比較
 
-We have two different concepts that at first glance seem quite similar. What's the difference? 
+一見似ているように見える2つの異なる概念があります。何が違うのでしょうか？
 
-To recap: 
+おさらいすると：
 
-* **Bind** has *one* switch function parameter.  It is an adapter that converts the switch function into a fully two-track function (with two-track input and two-track output).
-* **Switch composition** has *two* switch function parameters. It combines them in series to make another switch function.
+* **Bind**は*1つ*の分岐器関数パラメータを持ちます。分岐器関数を完全な2線式関数（2線式入力と2線式出力を持つ）に変換するアダプターです。
+* **分岐器合成**は*2つ*の分岐器関数パラメータを持ちます。これらを直列に組み合わせて別の分岐器関数を作ります。
 
-So why would you use bind rather than switch composition? It depends on the context. If you have an existing two-track system, and you need to insert a switch,
-then you have to use bind as an adapter to convert the switch into something that takes two-track input.
+では、分岐器合成ではなくbindを使う理由は何でしょうか？コンテキストによります。既存の2線式システムがあり、そこに分岐器を挿入する必要がある場合、
+bindをアダプターとして使用して、分岐器を2線式入力を受け付けるものに変換する必要があります。
 
-![switches composition](../assets/img/Recipe_Railway_WhyBind.png)
+![分岐器の合成](../assets/img/Recipe_Railway_WhyBind.png)
 
-On the other hand, if your entire data flow consists of a chain of switches, then switch composition can be simpler.
+一方、データフロー全体が一連の分岐器で構成されている場合、分岐器合成の方がシンプルかもしれません。
 
-![switches composition](../assets/img/Recipe_Railway_WhyCompose.png)
+![分岐器の合成](../assets/img/Recipe_Railway_WhyCompose.png)
 
-### Switch composition in terms of bind
+### bindを使った分岐器合成
 
-As it happens, switch composition can be written in terms of bind. If you connect the first switch with a bind-adapted second switch, you get the same thing as switch composition:
+実は、分岐器合成はbindを使って書くこともできます。最初の分岐器をbindで適応した2番目の分岐器とつなげると、分岐器合成と同じ結果が得られます：
 
-Here are two separate switches:
+これが2つの別々の分岐器です：
 
-![2 railway switches disconnected](../assets/img/Recipe_RailwaySwitch1.png)
+![2つの分岐器（未接続）](../assets/img/Recipe_RailwaySwitch1.png)
 
-And then here are the switches composed together to make a new bigger switch:
+そして、これが分岐器を組み合わせて新しい大きな分岐器を作ったものです：
 
-![2 railway switches disconnected](../assets/img/Recipe_RailwaySwitch2.png)
+![2つの分岐器（未接続）](../assets/img/Recipe_RailwaySwitch2.png)
 
-And here's the same thing done by using `bind` on the second switch:
+そして、これが2番目の分岐器に`bind`を使って同じことを行ったものです：
 
-![bind as switch composition](../assets/img/Recipe_Railway_BindIsCompose.png)
+![bindを分岐器合成として使用](../assets/img/Recipe_Railway_BindIsCompose.png)
 
-Here's the switch composition operator rewritten using this way of thinking:
+以下は、このような考え方で書き直した分岐器合成演算子です：
 
 ```fsharp
 let (>=>) switch1 switch2 = 
     switch1 >> (bind switch2)
 ```
 
-This implementation of switch composition is much simpler than the first one, but also more abstract. Whether it is easier to comprehend for a beginner is another matter! I find that if you think of functions as things in their own right, rather than just as conduits for data, this approach becomes easier to understand.
+この分岐器合成の実装は最初のものよりもはるかにシンプルですが、より抽象的でもあります。初心者にとってこちらの方が理解しやすいかどうかは別の問題です！関数をデータの導管としてだけでなく、それ自体で独立したものとして考えるようになれば、このアプローチの理解がより容易になると思います。
 
-## Converting simple functions to the railway-oriented programming model
+## 単純な関数を鉄道指向プログラミングモデルに変換する
 
-Once you get the hang of it, you can fit all sorts of other things into this model.
+慣れてくれば、このモデルにさまざまなものを当てはめることができます。
 
-For example, let's say we have a function that is *not* a switch, just a regular function. And say that we want to insert it into our flow.
+例えば、分岐器ではない、ただの通常の関数があるとします。そして、それをフローに挿入したいとします。
 
-Here's a real example - say that we want to trim and lowercase the email address after the validation is complete. Here's some code to do this:
+実際の例を挙げましょう。検証が完了した後にメールアドレスをトリムして小文字に変換したいとします。これを行うコードは次のようになります：
 
 ```fsharp
 let canonicalizeEmail input =
    { input with email = input.email.Trim().ToLower() }
 ```
 
-This code takes a (single-track) `Request` and returns a (single-track) `Request`. 
+このコードは（1線式の）`Request`を受け取り、（1線式の）`Request`を返します。
 
-How can we insert this after the validation steps but before the update step? 
+これを検証ステップの後、更新ステップの前に挿入するにはどうすればよいでしょうか？
 
-Well, if we can turn this simple function into a switch function, then we can use the switch composition we just talked about above.
+この単純な関数を分岐器関数に変換できれば、先ほど説明した分岐器合成を使うことができます。
 
-In other words, we need an adapter block. It the same concept that we used for `bind`, except that this time our adapter block will have a slot for one-track function, and the overall "shape" of the adapter block is a switch.
+言い換えれば、アダプターブロックが必要です。`bind`で使用したのと同じ概念ですが、今回のアダプターブロックは1線式関数用のスロットを持ち、アダプターブロック全体の「形」は分岐器になります。
 
-![lifting a simple function](../assets/img/Recipe_Railway_SwitchAdapter.png)
+![単純な関数の持ち上げ](../assets/img/Recipe_Railway_SwitchAdapter.png)
 
-The code to do this is trivial. All we need to do is take the output of the one track function and turn it into a two-track result. In this case, the result will *always* be Success.
+これを行うコードは些細なものです。1線式関数の出力を取り、2線式の結果に変換するだけです。この場合、結果は*常に*Successになります。
 
 ```fsharp
-// convert a normal function into a switch
+// 通常の関数を分岐器に変換する
 let switch f x = 
     f x |> Success
 ```
 
-In railway terms, we have added a bit of failure track.  Taken as a whole, it *looks* like a switch function (one-track input, two-track output),
-but of course, the failure track is just a dummy and the switch never actually gets used.
+鉄道の観点から言えば、失敗トラックを少し追加したことになります。全体として見ると、分岐器関数（1線式入力、2線式出力）のように*見えます*が、
+もちろん、失敗トラックはダミーで、分岐器が実際に使われることはありません。
 
-![lifting a simple function](../assets/img/Recipe_Railway_SwitchAdapter2.png)
+![単純な関数の持ち上げ](../assets/img/Recipe_Railway_SwitchAdapter2.png)
 
-Once `switch` is available, we can easily append the `canonicalizeEmail` function to the end of the chain. Since we are beginning to extend it, let's rename the function to `usecase`. 
+`switch`が利用可能になれば、`canonicalizeEmail`関数をチェーンの末尾に簡単に追加できます。拡張し始めているので、関数名を`usecase`に変更しましょう。
 
 ```fsharp
 let usecase = 
@@ -457,7 +457,7 @@ let usecase =
     >=> switch canonicalizeEmail
 ```
 
-Try testing it to see what happens:
+テストして何が起こるか見てみましょう：
 
 ```fsharp
 let goodInput = {name="Alice"; email="UPPERCASE   "}
@@ -470,70 +470,70 @@ let badInput = {name=""; email="UPPERCASE   "}
 usecase badInput
 |> printfn "Canonicalize Bad Result = %A"
 
-//Canonicalize Bad Result = Failure "Name must not be blank"
+//Canonicalize Bad Result = Failure "名前を空白にはできません"
 ```
-    
-## Creating two-track functions from one-track functions 
 
-In the previous example, we took a one-track function and created a switch from it. This enabled us to use switch composition with it.
+## 1線式関数から2線式関数を作成する
 
-Sometimes though, you want to use the two-track model directly, in which case you want to turn a one-track function into a two-track function directly.
+前の例では、1線式関数を取り、それから分岐器を作成しました。これにより、分岐器合成をその関数に使用できるようになりました。
 
-![mapping a simple function](../assets/img/Recipe_Railway_MapAdapter2.png)
+しかし、時には2線式モデルを直接使いたい場合があります。その場合、1線式関数を直接2線式関数に変換したいでしょう。
 
-Again, we just need an adapter block with a slot for the simple function. We typically call this adapter `map`.
+![単純な関数のマッピング](../assets/img/Recipe_Railway_MapAdapter2.png)
 
-![mapping a simple function](../assets/img/Recipe_Railway_MapAdapter.png)
+ここでも、単純な関数用のスロットを持つアダプターブロックが必要です。このアダプターを通常`map`と呼びます。
 
-And again, the actual implementation is very straightforward. If the two-track input is `Success`, call the function, and turn its output into Success. On the other hand, if the two-track input is `Failure` bypass the function completely.
+![単純な関数のマッピング](../assets/img/Recipe_Railway_MapAdapter.png)
 
-Here's the code:
+そして、ここでも実際の実装は非常に単純です。2線式入力が`Success`の場合、関数を呼び出し、その出力をSuccessに変換します。一方、2線式入力が`Failure`の場合、関数を完全にバイパスします。
+
+以下がコードです：
 
 ```fsharp
-// convert a normal function into a two-track function
+// 通常の関数を2線式関数に変換する
 let map oneTrackFunction twoTrackInput = 
     match twoTrackInput with
     | Success s -> Success (oneTrackFunction s)
     | Failure f -> Failure f
 ```
 
-And here it is in use with `canonicalizeEmail`:
+そして、これを`canonicalizeEmail`で使用すると次のようになります：
 
 ```fsharp
 let usecase = 
     validate1 
     >=> validate2 
     >=> validate3 
-    >> map canonicalizeEmail  // normal composition
+    >> map canonicalizeEmail  // 通常の合成
 ```
 
-Note that *normal* composition is now used because `map canonicalizeEmail` is a fully two-track function and can be connected to the output of the `validate3` switch directly.
+ここで*通常の*合成が使われていることに注意してください。`map canonicalizeEmail`は完全な2線式関数であり、`validate3`分岐器の出力に直接接続できるからです。
 
-In other words, for one-track functions, `>=> switch` is exactly the same as `>> map`. Your choice.
+言い換えれば、1線式関数の場合、`>=> switch`は`>> map`とまったく同じです。選択はあなた次第です。
 
-## Converting dead-end functions to two-track functions
+## デッドエンド関数を2線式関数に変換する
 
-Another function we will often want to work with is a "dead-end" function -- a function that accepts input but has no useful output.
+私たちがよく扱いたいもう一つの関数は「デッドエンド」関数です。これは入力を受け取りますが、有用な出力を持たない関数です。
 
-For example, consider a function that updates a database record. It is useful only for its side-effects -- it doesn't normally return anything.
+例えば、データベースレコードを更新する関数を考えてみましょう。これは副作用のためにのみ有用で、通常は何も返しません。
 
-How can we incorporate this kind of function into the flow? 
+このような関数をフローに組み込むにはどうすればよいでしょうか？
 
-What we need to do is:
+私たちがする必要があるのは：
 
-* Save a copy of the input.
-* Call the function and ignore its output, if any.
-* Return the original input for passing on to the next function in the chain.
+* 入力のコピーを保存する。
+* 関数を呼び出し、出力があってもそれを無視する。
+* チェーン内の次の関数に渡すために元の入力を返す。
 
-From a railway point of view, this is equivalent to creating a dead-end siding, like this.
+鉄道の観点から見ると、これはデッドエンドの側線を作ることに相当します。このようになります。
 
-![tee for a dead end function](../assets/img/Recipe_Railway_Tee.png)
+![デッドエンド関数のためのTee](../assets/img/Recipe_Railway_Tee.png)
 
-To make this work, we need another adapter function, like `switch`, except that this time it has a slot for one-track dead-end function, and converts it into a single-track pass through function, with a one-track output.
+これを機能させるには、`switch`のような別のアダプター関数が必要です。ただし、今回は1線式デッドエンド関数用のスロットがあり、それを1線式出力を持つ単一の1線式パススルー関数に変換します。
 
-![tee for a dead end function](../assets/img/Recipe_Railway_TeeAdapter.png)
+![デッドエンド関数のためのTeeアダプター](../assets/img/Recipe_Railway_TeeAdapter.png)
 
-Here's the code, which I will call `tee`, after the UNIX tee command:
+以下がコードで、UNIXのteeコマンドにちなんで`tee`と呼びます：
 
 ```fsharp
 let tee f x = 
@@ -542,14 +542,14 @@ let tee f x =
 ```
 
   
-Once we have converted the dead-end function to a simple one-track pass through function, we can then use it in the data flow by converting it using `switch` or `map` as described above.
+デッドエンド関数を単純な1線式パススルー関数に変換したら、前述の`switch`や`map`を使ってデータフローで使用できます。
 
-Here's the code in use with the "switch composition" style:
+以下は「分岐器合成」スタイルで使用したコードです：
 
 ```fsharp
-// a dead-end function    
+// デッドエンド関数    
 let updateDatabase input =
-   ()   // dummy dead-end function for now
+   ()   // 今はダミーのデッドエンド関数
 
 let usecase = 
     validate1 
@@ -559,9 +559,9 @@ let usecase =
     >=> switch (tee updateDatabase)
 ```
 
-Or alternatively, rather than using `switch` and then connecting with `>=>`, we can use `map` and connect with `>>`.  
+あるいは、`switch`を使って`>=>`で接続する代わりに、`map`を使って`>>`で接続することもできます。
 
-Here's a variant implementation which is exactly the same but uses the "two-track" style with normal composition
+以下は「2線式」スタイルで通常の合成を使用した別の実装で、まったく同じです：
 
 ```fsharp
 let usecase = 
@@ -572,11 +572,11 @@ let usecase =
     >> map (tee updateDatabase)
 ```
 
-## Handling exceptions
+## 例外の処理
 
-Our dead end database update might not return anything, but that doesn't mean that it might not throw an exception.  Rather than crashing, we want to catch that exception and turn it into a failure.
+デッドエンドのデータベース更新は何も返さないかもしれませんが、例外をスローしないとは限りません。クラッシュする代わりに、その例外をキャッチして失敗に変換したいと思います。
 
-The code is similar to the `switch` function, except that it catches exceptions. I'll call it `tryCatch`:
+コードは`switch`関数に似ていますが、例外をキャッチします。これを`tryCatch`と呼びましょう：
 
 ```fsharp
 let tryCatch f x =
@@ -586,7 +586,7 @@ let tryCatch f x =
     | ex -> Failure ex.Message
 ```
 
-And here is a modified version of the data flow, using `tryCatch` rather than `switch` for the update database code.
+そして、これはデータベース更新コードに`switch`の代わりに`tryCatch`を使用した修正版のデータフローです。
 
 ```fsharp
 let usecase = 
@@ -597,17 +597,17 @@ let usecase =
     >=> tryCatch (tee updateDatabase)
 ```
 
-## Functions with two-track input
+## 2線式入力を持つ関数
 
-All the functions we have seen so far have only one input, because they always just work with data travelling along the happy path.
+これまで見てきた関数はすべて1つの入力しか持っていません。なぜなら、常にハッピーパスを流れるデータだけを扱うからです。
 
-Sometimes though, you *do* need a function that handles both tracks. For example, a logging function that logs errors as well as successes.
+しかし、時には両方のトラックを扱う関数が必要な場合があります。例えば、成功と失敗の両方をログに記録する関数などです。
 
-As we have done previously, we will create an adapter block, but this time it will have slots for *two* separate one-track functions.
+これまでと同様に、アダプターブロックを作成しますが、今回は*2つ*の別々の1線式関数用のスロットを持ちます。
 
-![double map adapter](../assets/img/Recipe_Railway_DoubleMapAdapter.png)
+![ダブルマップアダプター](../assets/img/Recipe_Railway_DoubleMapAdapter.png)
 
-Here's the code:
+以下がコードです：
 
 ```fsharp
 let doubleMap successFunc failureFunc twoTrackInput =
@@ -616,19 +616,19 @@ let doubleMap successFunc failureFunc twoTrackInput =
     | Failure f -> Failure (failureFunc f)
 ```
 
-As an aside, we can use this function to create a simpler version of `map`, using `id` for the failure function:
+ちなみに、この関数を使って、失敗関数に`id`を使用することで、`map`のよりシンプルなバージョンを作ることができます：
 
 ```fsharp
 let map successFunc =
     doubleMap successFunc id
 ```
 
-Let's use `doubleMap` to insert some logging into the data flow:
+`doubleMap`を使ってデータフローにログ記録を挿入してみましょう：
 
 ```fsharp
 let log twoTrackInput = 
-    let success x = printfn "DEBUG. Success so far: %A" x; x
-    let failure x = printfn "ERROR. %A" x; x
+    let success x = printfn "デバッグ: ここまで成功: %A" x; x
+    let failure x = printfn "エラー: %A" x; x
     doubleMap success failure twoTrackInput 
 
 let usecase = 
@@ -640,28 +640,28 @@ let usecase =
     >> log
 ```
 
-Here's some test code, with the results:
+以下はテストコードと結果です：
 
 ```fsharp
 let goodInput = {name="Alice"; email="good"}
 usecase goodInput
-|> printfn "Good Result = %A"
+|> printfn "良好な結果 = %A"
 
-// DEBUG. Success so far: {name = "Alice"; email = "good";}
-// Good Result = Success {name = "Alice"; email = "good";}
+// デバッグ: ここまで成功: {name = "Alice"; email = "good";}
+// 良好な結果 = Success {name = "Alice"; email = "good";}
 
 let badInput = {name=""; email=""}
 usecase badInput 
-|> printfn "Bad Result = %A"
+|> printfn "不良な結果 = %A"
 
-// ERROR. "Name must not be blank"
-// Bad Result = Failure "Name must not be blank"
+// エラー: "名前を空白にはできません"
+// 不良な結果 = Failure "名前を空白にはできません"
 ```
 
 
-## Converting a single value to a two-track value
+## 単一の値を2線式の値に変換する
 
-For completeness, we should also create simple functions that turn a single simple value into a two-track value, either success or failure.
+完全を期すために、単純な単一の値を2線式の値（成功または失敗）に変換する簡単な関数も作成しておきましょう。
 
 ```fsharp
 let succeed x = 
@@ -671,25 +671,25 @@ let fail x =
     Failure x
 ```
 
-Right now these are trivial, just calling the constructor of the `Result` type, but when we get down to some proper coding we'll see that by using these rather than the union case constructor directly, we can isolate ourselves from changes behind the scenes. 
+現時点ではこれらは些細なもので、単に`Result`型のコンストラクタを呼び出しているだけです。しかし、本格的なコーディングに入ると、共用体ケースのコンストラクタを直接使用するのではなく、これらを使用することで、裏側の変更から自分たちを隔離できることがわかるでしょう。
 
-## Combining functions in parallel
+## 関数を並列に組み合わせる
 
-So far, we have combined functions in series.  But with something like validation, we might want to run multiple switches in parallel, and combine the results, like this:
+これまで、関数を直列に組み合わせてきました。しかし、検証のような場合、複数の分岐器を並列に実行し、結果を組み合わせたいことがあります。このようなイメージです：
 
-![switches in parallel](../assets/img/Recipe_Railway_Parallel.png)
+![並列の分岐器](../assets/img/Recipe_Railway_Parallel.png)
 
-To make this easier, we can reuse the same trick that we did for switch composition. Rather than doing many at once, if we just focus on a single pair, and "add" them to make a new switch, we can then easily chain the "addition" together so that we can add as many as we want.  In other words, we just need to implement this:
+これを簡単にするために、分岐器合成で使ったのと同じトリックを再利用できます。一度に多くを行うのではなく、単一のペアに焦点を当て、それらを「加算」して新しい分岐器を作れば、その後「加算」を簡単にチェーンして、必要な数だけ加算できます。つまり、これを実装するだけで良いのです：
 
-![add two switches in parallel](../assets/img/Recipe_Railway_MPlus.png)
+![2つの分岐器を並列に加算](../assets/img/Recipe_Railway_MPlus.png)
 
-So, what is the logic for adding two switches in parallel?
+では、並列に2つの分岐器を加算するロジックはどうなるでしょうか？
 
-* First, take the input and apply it to each switch.
-* Next look at the outputs of both switches, and if both are successful, the overall result is `Success`.
-* If either output is a failure, then the overall result is `Failure` as well.
+* まず、入力を取り、各分岐器に適用します。
+* 次に両方の分岐器の出力を見て、両方が成功なら全体の結果は`Success`になります。
+* どちらかの出力が失敗なら、全体の結果も`Failure`になります。
 
-Here's the function, which I will call `plus`:
+以下が関数で、これを`plus`と呼びましょう：
 
 ```fsharp
 let plus switch1 switch2 x = 
@@ -700,13 +700,13 @@ let plus switch1 switch2 x =
     | Failure f1,Failure f2 -> Failure (f1 + f2)
 ```
 
-But we now have a new problem. What do we do with two successes, or two failures? How do we combine the inner values?
+しかし、ここで新しい問題が出てきました。2つの成功、または2つの失敗をどう扱えばよいでしょうか？内部の値をどのように組み合わせればよいでしょうか？
 
-I used `s1 + s2` and `f1 + f2` in the example above, but that implies that there is some sort of `+` operator we can use. That may be true for strings and ints, but it is not true in general.
+上の例では`s1 + s2`と`f1 + f2`を使いましたが、これは何らかの`+`演算子が使えることを意味します。文字列や整数の場合はそうかもしれませんが、一般的にはそうではありません。
 
-The method of combining values might change in different contexts, so rather than trying to solve it once and for all, let's punt by letting the caller pass in the functions that are needed. 
+値を組み合わせる方法は異なるコンテキストで変わる可能性があるので、一度に全てを解決しようとするのではなく、必要な関数を呼び出し元に渡してもらうことにしましょう。
 
-Here's a rewritten version:
+以下が書き直したバージョンです：
 
 ```fsharp
 let plus addSuccess addFailure switch1 switch2 x = 
@@ -717,28 +717,28 @@ let plus addSuccess addFailure switch1 switch2 x =
     | Failure f1,Failure f2 -> Failure (addFailure f1 f2)
 ```
 
-I have put these new functions first in the parameter list, to aid partial application.
+部分適用を助けるために、これらの新しい関数をパラメータリストの最初に置きました。
 
-### An implementation for parallel validation
+### 並列検証の実装
 
-Now let's create a implementation of "plus" for the validation functions.
+では、検証関数用の「plus」の実装を作成しましょう。
 
-* When both functions succeed, they will return the request unchanged, so the `addSuccess` function can return either parameter.
-* When both functions fail, they will return different strings, so the `addFailure` function should concatenate them.
+* 両方の関数が成功した場合、変更されていないリクエストを返すので、`addSuccess`関数はどちらかのパラメータを返せば良いです。
+* 両方の関数が失敗した場合、異なる文字列を返すので、`addFailure`関数はそれらを連結すべきです。
 
-For validation then, the "plus" operation that we want is like an "AND" function. Only if both parts are "true" is the result "true".
+したがって、検証の場合、「plus」操作は「AND」関数のようなものです。両方の部分が「真」の場合にのみ結果が「真」になります。
 
-That naturally leads to wanting to use `&&` as the operator symbol. Unfortunately, `&&` is reserved, but we can use `&&&`, like this: 
+これは自然に`&&`を演算子として使いたくなりますが、残念ながら`&&`は予約されています。しかし、`&&&`を使うことができます。このようになります：
 
 ```fsharp
-// create a "plus" function for validation functions
+// 検証関数用の「plus」関数を作成
 let (&&&) v1 v2 = 
-    let addSuccess r1 r2 = r1 // return first
-    let addFailure s1 s2 = s1 + "; " + s2  // concat
+    let addSuccess r1 r2 = r1 // 最初のものを返す
+    let addFailure s1 s2 = s1 + "; " + s2  // 連結
     plus addSuccess addFailure v1 v2 
 ```
 
-And now using `&&&`, we can create a single validation function that combines the three smaller validations:
+そして、`&&&`を使って、3つの小さな検証を組み合わせた単一の検証関数を作成できます：
 
 ```fsharp
 let combinedValidation = 
@@ -747,31 +747,31 @@ let combinedValidation =
     &&& validate3 
 ```
 
-Now let's try it with the same tests we had earlier:
+では、以前と同じテストを試してみましょう：
 
 ```fsharp
-// test 1
+// テスト1
 let input1 = {name=""; email=""}
 combinedValidation input1 
-|> printfn "Result1=%A"
-// ==>  Result1=Failure "Name must not be blank; Email must not be blank"
+|> printfn "結果1=%A"
+// ==>  結果1=Failure "名前を空白にはできません; メールアドレスを空白にはできません"
 
-// test 2
+// テスト2
 let input2 = {name="Alice"; email=""}
 combinedValidation input2 
-|> printfn "Result2=%A"
-// ==>  Result2=Failure "Email must not be blank"
+|> printfn "結果2=%A"
+// ==>  結果2=Failure "メールアドレスを空白にはできません"
 
-// test 3
+// テスト3
 let input3 = {name="Alice"; email="good"}
 combinedValidation input3 
-|> printfn "Result3=%A"
-// ==>  Result3=Success {name = "Alice"; email = "good";}
+|> printfn "結果3=%A"
+// ==>  結果3=Success {name = "Alice"; email = "good";}
 ```
 
-The first test now has *two* validation errors combined into a single string, just as we wanted.
+最初のテストでは、*2つ*の検証エラーが単一の文字列に結合されています。まさに私たちが望んでいたものです。
 
-Next, we can tidy up the main dataflow function by using the `usecase` function now instead of the three separate validation functions we had before:
+次に、以前の3つの個別の検証関数の代わりに`usecase`関数を使用して、メインのデータフロー関数を整理できます：
 
 ```fsharp
 let usecase = 
@@ -780,39 +780,39 @@ let usecase =
     >=> tryCatch (tee updateDatabase)
 ```
 
-And if we test that now, we can see that a success flows all the way to the end and that the email is lowercased and trimmed:
+そして、これをテストすると、成功がすべて最後まで流れ、メールアドレスが小文字化されトリムされていることがわかります：
 
 ```fsharp
-// test 4
+// テスト4
 let input4 = {name="Alice"; email="UPPERCASE   "}
 usecase input4
-|> printfn "Result4=%A"
-// ==>  Result4=Success {name = "Alice"; email = "uppercase";}
+|> printfn "結果4=%A"
+// ==>  結果4=Success {name = "Alice"; email = "uppercase";}
 ```
 
-*You might be asking, can we create a way of OR-ing validation functions as well? That is, the overall result is valid if either part is valid? The answer is yes, of course. Try it! I suggest that you use the symbol `|||` for this.*
+*検証関数をORで結合する方法も作れるのではないかと疑問に思うかもしれません。つまり、どちらかの部分が有効であれば全体の結果も有効になるようなものです。答えはもちろんイエスです。試してみてください！この場合は`|||`という記号を使うことをお勧めします。*
 
-## Dynamic injection of functions 
+## 関数の動的な挿入
 
-Another thing we might want to do is add or remove functions into the flow dynamically, based on configuration settings, or even the content of the data.
+設定や、場合によってはデータの内容に基づいて、フローに関数を動的に追加または削除したいこともあるでしょう。
 
-The simplest way to do this is to create a two-track function to be injected into the stream, and replace it with the `id` function if not needed.
+最も簡単な方法は、ストリームに挿入する2線式関数を作成し、必要ない場合は`id`関数に置き換えることです。
 
-Here's the idea:
+アイデアは以下のとおりです：
 
 ```fsharp
 let injectableFunction = 
     if config.debug then debugLogger else id
 ```
 
-Let's try it with some real code:
+実際のコードで試してみましょう：
 
 ```fsharp
 type Config = {debug:bool}
 
 let debugLogger twoTrackInput = 
-    let success x = printfn "DEBUG. Success so far: %A" x; x
-    let failure = id // don't log here
+    let success x = printfn "デバッグ: ここまで成功: %A" x; x
+    let failure = id // ここではログを記録しない
     doubleMap success failure twoTrackInput 
 
 let injectableLogger config = 
@@ -824,7 +824,7 @@ let usecase config =
     >> injectableLogger config
 ```
 
-And here is it in use:
+以下は使用例です：
 
 ```fsharp
 let input = {name="Alice"; email="good"}
@@ -834,176 +834,176 @@ input
 |> usecase releaseConfig 
 |> ignore
 
-// no output
+// 出力なし
 
 let debugConfig = {debug=true}
 input 
 |> usecase debugConfig 
 |> ignore
 
-// debug output
-// DEBUG. Success so far: {name = "Alice"; email = "good";}
+// デバッグ出力
+// デバッグ: ここまで成功: {name = "Alice"; email = "good";}
 ```
 
 
-## The railway track functions: A toolkit 
+## 鉄道トラック関数：ツールキット
 
-Let's step back and review what we have done so far.
+ここで一歩下がって、これまでの内容を振り返ってみましょう。
 
-Using railway track as a metaphor, we have created a number of useful building blocks that will work with *any* data-flow style application.  
+鉄道トラックを比喩として使い、*あらゆる*データフロー型アプリケーションで機能する有用なビルディングブロックを作成しました。
 
-We can classify our functions roughly like this:
+関数を大まかに以下のように分類できます：
 
-* **"constructors"** are used to create new track.
-* **"adapters"** convert one kind of track into another.
-* **"combiners"** link sections of track together to make a bigger piece of track.
+* **「コンストラクタ」**は新しいトラックを作成するために使用されます。
+* **「アダプタ」**は1種類のトラックを別の種類のトラックに変換します。
+* **「コンバイナ」**はトラックのセクションをリンクして、より大きなトラックを作ります。
 
-These functions form what can be loosely called a *combinator library*, that is, a group of functions that are designed to work with a type (here represented by railway track),
-with the design goal that bigger pieces can be built by adapting and combining smaller pieces.
+これらの関数は、緩く言えば*コンビネータライブラリ*を形成します。
+つまり、型（ここでは鉄道トラックで表現される）と連携するように設計された関数のグループで、小さな部品を適応させたり組み合わせたりして、より大きな部品を構築することを設計目標としています。
 
-Functions like `bind`, `map`, `plus`, etc., crop up in all sorts of functional programming scenarios, and so you can think of them as functional patterns -- similar to, but not the same as, the OO patterns such as "visitor", "singleton", "facade", etc.
+`bind`、`map`、`plus`などの関数は、あらゆる種類の関数型プログラミングシナリオで出てきます。そのため、これらを関数型パターンと考えることができます。これらは、「ビジター」、「シングルトン」、「ファサード」などのOOパターンに似ていますが、同じではありません。
 
-Here they all are together:
+以下にすべてをまとめて示します：
 
 <table class="table table-condensed table-striped">
 
 <tr>
-<th>Concept</th>
-<th>Description</th>
+<th>概念</th>
+<th>説明</th>
 </tr>
 
 <tr>
 <td><code>succeed</code></td>
-<td>A constructor that takes a one-track value and creates a two-track value on the Success branch. In other contexts, this might also be called <code>return</code> or <code>pure</code>.</td>
+<td>1線式の値を受け取り、成功ブランチに2線式の値を作成するコンストラクタ。他のコンテキストでは<code>return</code>や<code>pure</code>とも呼ばれることがあります。</td>
 </tr>
 
 <tr>
 <td><code>fail</code></td>
-<td>A constructor that takes a one-track value and creates a two-track value on the Failure branch.</td>
+<td>1線式の値を受け取り、失敗ブランチに2線式の値を作成するコンストラクタ。</td>
 </tr>
 
 <tr>
 <td><code>bind</code></td>
-<td>An adapter that takes a switch function and creates a new function that accepts two-track values as input.</td>
+<td>分岐器関数を受け取り、2線式の値を入力として受け付ける新しい関数を作成するアダプタ。</td>
 </tr>
 
 <tr>
 <td><code>>>=</code></td>
-<td>An infix version of bind for piping two-track values into switch functions.</td>
+<td>2線式の値を分岐器関数にパイプするためのbindの中置版。</td>
 </tr>
 
 <tr>
 <td><code>>></code></td>
-<td>Normal composition. A combiner that takes two normal functions and creates a new function by connecting them in series.</td>
+<td>通常の合成。2つの通常関数を受け取り、それらを直列に接続して新しい関数を作成するコンバイナ。</td>
 </tr>
 
 <tr>
 <td><code>>=></code></td>
-<td>Switch composition. A combiner that takes two switch functions and creates a new switch function by connecting them in series.</td>
+<td>分岐器の合成。2つの分岐器関数を受け取り、それらを直列に接続して新しい分岐器関数を作成するコンバイナ。</td>
 </tr>
 
 <tr>
 <td><code>switch</code></td>
-<td>An adapter that takes a normal one-track function and turns it into a switch function. (Also known as a "lift" in some contexts.)</td>
+<td>通常の1線式関数を受け取り、分岐器関数に変換するアダプタ。（一部のコンテキストでは「リフト」としても知られています。）</td>
 </tr>
 
 <tr>
 <td><code>map</code></td>
-<td>An adapter that takes a normal one-track function and turns it into a two-track function. (Also known as a "lift" in some contexts.)</td>
+<td>通常の1線式関数を受け取り、2線式関数に変換するアダプタ。（一部のコンテキストでは「リフト」としても知られています。）</td>
 </tr>
 
 <tr>
 <td><code>tee</code></td>
-<td>An adapter that takes a dead-end function and turns it into a one-track function that can be used in a data flow. (Also known as <code>tap</code>.)</td>
+<td>デッドエンド関数を受け取り、データフローで使用できる1線式関数に変換するアダプタ。（<code>tap</code>としても知られています。）</td>
 </tr>
 
 <tr>
 <td><code>tryCatch</code></td>
-<td>An adapter that takes a normal one-track function and turns it into a switch function, but also catches exceptions.</td>
+<td>通常の1線式関数を受け取り、分岐器関数に変換するアダプタですが、例外もキャッチします。</td>
 </tr>
 
 <tr>
 <td><code>doubleMap</code></td>
-<td>An adapter that takes two one-track functions and turns them into a single two-track function. (Also known as <code>bimap</code>.)</td>
+<td>2つの1線式関数を受け取り、1つの2線式関数に変換するアダプタ。（<code>bimap</code>としても知られています。）</td>
 </tr>
 
 <tr>
 <td><code>plus</code></td>
-<td>A combiner that takes two switch functions and creates a new switch function by joining them in "parallel" and "adding" the results. (Also known as <code>++</code> and <code><+></code> in other contexts.)</td>
+<td>2つの分岐器関数を受け取り、それらを「並列」に結合し、結果を「加算」して新しい分岐器関数を作成するコンバイナ。（他のコンテキストでは<code>++</code>や<code><+></code>としても知られています。）</td>
 </tr>
 
 <tr>
 <td><code>&&&</code></td>
-<td>The "plus" combiner tweaked specifically for the validation functions, modelled on a binary AND.</td>
+<td>検証関数専用に調整された「plus」コンバイナで、二項ANDをモデルにしています。</td>
 </tr>
 
 </table>
 
-### The railway track functions: complete code
+### 鉄道トラック関数：完全なコード
 
-Here is the complete code for all the functions in one place.
+以下は、すべての関数を一箇所にまとめた完全なコードです。
 
-I have made some minor tweaks from the original code presented above:
+上記で紹介したオリジナルのコードから若干の調整を行いました：
 
-* Most functions are now defined in terms of a core function called `either`.
-* `tryCatch` has been given an extra parameter for the exception handler.
+* ほとんどの関数が`either`と呼ばれるコア関数を使用して定義されるようになりました。
+* `tryCatch`に例外ハンドラ用の追加パラメータが与えられました。
 
 ```fsharp
-// the two-track type
+// 2線式の型
 type Result<'TSuccess,'TFailure> = 
     | Success of 'TSuccess
     | Failure of 'TFailure
 
-// convert a single value into a two-track result
+// 単一の値を2線式の結果に変換する
 let succeed x = 
     Success x
 
-// convert a single value into a two-track result
+// 単一の値を2線式の結果に変換する
 let fail x = 
     Failure x
 
-// apply either a success function or failure function
+// 成功関数または失敗関数のいずれかを適用する
 let either successFunc failureFunc twoTrackInput =
     match twoTrackInput with
     | Success s -> successFunc s
     | Failure f -> failureFunc f
 
-// convert a switch function into a two-track function
+// 分岐器関数を2線式関数に変換する
 let bind f = 
     either f fail
 
-// pipe a two-track value into a switch function 
+// 2線式の値を分岐器関数にパイプする
 let (>>=) x f = 
     bind f x
 
-// compose two switches into another switch
+// 2つの分岐器を別の分岐器に合成する
 let (>=>) s1 s2 = 
     s1 >> bind s2
 
-// convert a one-track function into a switch
+// 1線式関数を分岐器に変換する
 let switch f = 
     f >> succeed
 
-// convert a one-track function into a two-track function
+// 1線式関数を2線式関数に変換する
 let map f = 
     either (f >> succeed) fail
 
-// convert a dead-end function into a one-track function
+// デッドエンド関数を1線式関数に変換する
 let tee f x = 
     f x; x 
 
-// convert a one-track function into a switch with exception handling
+// 1線式関数を例外処理付きの分岐器に変換する
 let tryCatch f exnHandler x =
     try
         f x |> succeed
     with
     | ex -> exnHandler ex |> fail
 
-// convert two one-track functions into a two-track function
+// 2つの1線式関数を2線式関数に変換する
 let doubleMap successFunc failureFunc =
     either (successFunc >> succeed) (failureFunc >> fail)
 
-// add two switches in parallel
+// 2つの分岐器を並列に追加する
 let plus addSuccess addFailure switch1 switch2 x = 
     match (switch1 x),(switch2 x) with
     | Success s1,Success s2 -> Success (addSuccess s1 s2)
@@ -1013,110 +1013,110 @@ let plus addSuccess addFailure switch1 switch2 x =
 ```
 
 
-## Types vs. shapes
+## 型 vs. 形
 
-So far, we have focused entirely on the shape of the track, not the cargo on the trains. 
+ここまで、トラックの形にのみ焦点を当て、列車が運ぶ貨物については全く触れていませんでした。
 
-This is a magical railway, where the goods being carried can change as they go along each length of track.
+これは魔法の鉄道で、運ばれる商品は各トラックを通過する際に魔法のように変化します。
 
-For example, a cargo of pineapples will magically transform into apples when it goes through the tunnel called `function1`.
+例えば、パイナップルの貨物は`function1`というトンネルを通過すると、魔法のようにリンゴに変わります。
 
-![pineapples to apples](../assets/img/Recipe_Railway_Cargo1.png)
+![パイナップルからリンゴへ](../assets/img/Recipe_Railway_Cargo1.png)
 
-And a cargo of apples will transform into bananas when it goes through the tunnel called `function2`.
+そして、リンゴの貨物は`function2`というトンネルを通過すると、バナナに変わります。
 
-![apples to bananas](../assets/img/Recipe_Railway_Cargo2.png)
+![リンゴからバナナへ](../assets/img/Recipe_Railway_Cargo2.png)
 
-This magical railway has an important rule, namely that you can only connect tracks which carry the same type of cargo.
-In this case we *can* connect `function1` to `function2` because the cargo coming out of `function1` (apples) is the same as the cargo going into `function2` (also apples).
+この魔法の鉄道には重要なルールがあります。同じ種類の貨物を運ぶトラックしか接続できないのです。
+この場合、`function1`と`function2`を接続できます。なぜなら、`function1`から出てくる貨物（リンゴ）が`function2`に入る貨物（同じくリンゴ）と同じだからです。
 
-![connecting functions](../assets/img/Recipe_Railway_Cargo3.png)
+![関数の接続](../assets/img/Recipe_Railway_Cargo3.png)
 
-Of course, it is not always true that the tracks carry the same cargo, and a mismatch in the kind of cargo will cause an error.
+もちろん、トラックが常に同じ貨物を運ぶわけではありません。貨物の種類の不一致はエラーの原因となります。
 
-But you'll notice that in this discussion so far, we haven't mentioned the cargo once! Instead, we have spent all our time talking about one-track vs. two track functions.
+しかし、これまでの議論で貨物に一度も触れていないことにお気づきでしょう！代わりに、1線式と2線式の関数について話すことに全ての時間を費やしてきました。
 
-Of course, it goes without saying that the cargo must match up. But I hope you can see that it is the *shape* of the track that is really the important thing, not the cargo that is carried.
+もちろん、貨物が一致しなければならないことは言うまでもありません。しかし、本当に重要なのは貨物ではなく、トラックの*形*であることがおわかりいただけたと思います。
 
-### Generic types are powerful
+### ジェネリック型は強力
 
-Why have we not worried about the type of cargo? Because all the "adapter" and "combiner" functions are completely generic!  The `bind` and `map` and `switch` and `plus` functions do not care about the type of the cargo, only the *shape* of the track.
+なぜ貨物の型を気にしなかったのでしょうか？それは、すべての「アダプタ」と「コンバイナ」関数が完全にジェネリックだからです！`bind`や`map`、`switch`、`plus`関数は、貨物の型を気にせず、トラックの*形*だけを気にします。
 
-Having extremely generic functions is a benefit in two ways. The first way is obvious: the more generic a function is, the more reusable it is. The implementation of `bind` will work with any types (as long as the shape is right).
+非常にジェネリックな関数を持つことは2つの点で利点があります。1つ目の利点は明白です：関数がより汎用的であればあるほど、再利用性が高くなります。`bind`の実装は（形が正しければ）どんな型でも機能します。
 
-But there is another, more subtle aspect of generic functions that is worth pointing out. Because we generally know *nothing* about the types involved, we are very constrained in what we can and can't do. As a result, we can't introduce bugs!
+しかし、ジェネリック関数のもう1つの、より微妙な側面もあります。関与する型について一般的に*何も知らない*ため、できることとできないことが非常に制限されます。結果として、バグを導入することができないのです！
 
-To see what I mean, let's look at the signature for `map`:
+これが何を意味するか見てみましょう。`map`のシグネチャを見てみましょう：
 
 ```fsharp
 val map : ('a -> 'b) -> (Result<'a,'c> -> Result<'b,'c>)
 ```
 
-It takes a function parameter `'a -> 'b` and a value `Result<'a,'c>` and returns a value `Result<'b,'c>`.
+これは関数パラメータ`'a -> 'b`と値`Result<'a,'c>`を受け取り、値`Result<'b,'c>`を返します。
 
-We don't know anything about the types `'a`, `'b`, and `'c`. The only things we know are that:
+型`'a`、`'b`、`'c`について何も知りません。知っているのは以下のことだけです：
 
-* The *same* type `'a` shows up in both the function parameter and the `Success` case of the first `Result`.
-* The *same* type `'b` shows up in both the function parameter and the `Success` case of the second `Result`.
-* The *same* type `'c` shows up in the `Failure` cases of both the first and second `Result`s, but doesn't show up in the function parameter at all.
+* *同じ*型`'a`が関数パラメータと最初の`Result`の`Success`ケースの両方に現れる。
+* *同じ*型`'b`が関数パラメータと2番目の`Result`の`Success`ケースの両方に現れる。
+* *同じ*型`'c`が両方の`Result`の`Failure`ケースに現れるが、関数パラメータには現れない。
 
-What can we deduce from this?
+ここから何がわかるでしょうか？
 
-The return value has a type `'b` in it. But where does it come from?  We don't know what type `'b` is, so we don't know how to make one. But the function parameter knows how to make one! Give it an `'a` and it will make a `'b` for us.
+戻り値には型`'b`が含まれています。しかし、それはどこから来るのでしょうか？型`'b`が何なのかわからないので、作り方がわかりません。しかし、関数パラメータは作り方を知っています！`'a`を与えれば、`'b`を作ってくれます。
 
-But where can we get an `'a` from? We don't know what type `'a` is either, so again we don't know how to make one. But the first result parameter has an `'a` we can use, so you can see that we are *forced* to get the `Success` value from the `Result<'a,'c>` parameter and pass it to the function parameter. And then the `Success` case of the `Result<'b,'c>` return value *must* be constructed from the result of the function.
+では、`'a`はどこから得られるでしょうか？型`'a`が何なのかもわからないので、これも作り方がわかりません。しかし、最初の結果パラメータには使える`'a`があるので、`Result<'a,'c>`パラメータから`Success`の値を取り出し、それを関数パラメータに渡す*しかない*ことがわかります。そして、`Result<'b,'c>`戻り値の`Success`ケースは*必ず*関数の結果から構築されなければなりません。
 
-Finally, the same logic applies to `'c`. We are forced to get the `Failure` value from the `Result<'a,'c>` input parameter and use it to construct the `Failure` case of the `Result<'a,'c>` return value.
+最後に、同じロジックが`'c`にも適用されます。`Result<'a,'c>`入力パラメータから`Failure`の値を取り出し、それを使って`Result<'a,'c>`戻り値の`Failure`ケースを構築する*しかありません*。
 
-In other words, there is basically *only one way to implement the `map` function*! The type signature is so generic that we have no choice.
+つまり、基本的に*`map`関数を実装する方法は1つしかない*のです！型シグネチャが非常にジェネリックなので、選択の余地がありません。
 
-On the other hand, imagine that the `map` function had been very specific about the types it needed, like this:
+一方で、`map`関数が必要な型について非常に具体的だったと想像してみてください：
 
 ```fsharp
 val map : (int -> int) -> (Result<int,int> -> Result<int,int>)
 ```
 
-In this case, we can come up a huge number of different implementations. To list a few:
+この場合、非常に多くの異なる実装を思いつくことができます。いくつか挙げてみましょう：
 
-* We could have swapped the success and failure tracks.
-* We could have added a random number to the success track.
-* We could have ignored the function parameter altogether, and returned zero on both the success and failure tracks.
+* 成功トラックと失敗トラックを入れ替えることができます。
+* 成功トラックにランダムな数を加えることができます。
+* 関数パラメータを完全に無視し、成功トラックと失敗トラックの両方でゼロを返すことができます。
 
-All of these implementations are "buggy" in the sense that they don't do what we expect.  But they are all only possible because we know in advance that the type is `int`, and therefore we can manipulate the values in ways we are not supposed to. The less we know about the types, the less likely we are to make a mistake.
+これらの実装はすべて、期待することを行わないという意味で「バグがある」と言えます。しかし、これらがすべて可能なのは、型が`int`であることを事前に知っているからで、そのため値を本来あるべきではない方法で操作できるのです。型について知っていることが少ないほど、間違いを犯す可能性は低くなります。
 
-### The failure type
+### 失敗の型
 
-In most of our functions, the transformation only applies to the success track. The failure track is left alone (`map`), or merged with an incoming failure (`bind`).
+ほとんどの関数で、変換は成功トラックにのみ適用されます。失敗トラックはそのまま残されるか（`map`）、入ってくる失敗とマージされます（`bind`）。
 
-This implies that the failure track must be *same type* all the way through. In this post we have just used `string`, but in the next post we'll change the failure type to be something more useful.
+これは、失敗トラックが最後まで*同じ型*でなければならないことを意味します。この記事では単に`string`を使用してきましたが、次の記事ではより有用なものに失敗の型を変更します。
 
-## Summary and guidelines
+## まとめとガイドライン
 
-At the beginning of this series, I promised to give you a simple recipe that you could follow.
+このシリーズの冒頭で、簡単に従えるレシピを提供すると約束しました。
 
-But you might be feeling a bit overwhelmed now. Instead of making things simpler, I seem to have made things more complicated. I have shown you lots of different ways of doing the same thing! Bind vs. compose. Map vs. switch. Which approach should you use? Which way is best? 
+しかし、今では少し圧倒されているかもしれません。物事をシンプルにする代わりに、より複雑にしてしまったように見えるかもしれません。同じことを行うたくさんの異なる方法を紹介しました！Bindと合成。Mapとswitch。どのアプローチを使うべきでしょうか？どの方法が最適でしょうか？
 
-Of course, there is never one "right way" for all scenarios, but nevertheless, as promised, here are some guidelines that can be used as the basis of a reliable and repeatable recipe.
+もちろん、すべてのシナリオに適した「正しい方法」は1つではありませんが、それでも約束通り、信頼性が高く繰り返し使える基本的なレシピとなるガイドラインをいくつか紹介します。
 
-*Guidelines*
+*ガイドライン*
 
-* Use double-track railway as your underlying model for dataflow situations.
-* Create a function for each step in the use case. The function for each step can in turn be built from smaller functions (e.g. the validation functions).
-* Use standard composition (`>>`) to connect the functions.
-* If you need to insert a switch into the flow, use `bind`.
-* If you need to insert a single-track function into the flow, use `map`.
-* If you need to insert other types of functions into the flow, create an appropriate adapter block and use it.
+* データフローの状況には、2線式の鉄道を基本モデルとして使用してください。
+* ユースケースの各ステップに対して関数を作成してください。各ステップの関数は、さらに小さな関数から構築できます（例：検証関数）。
+* 関数を接続するには、標準的な合成（`>>`）を使用してください。
+* フローに分岐器を挿入する必要がある場合は、`bind`を使用してください。
+* フローに1線式の関数を挿入する必要がある場合は、`map`を使用してください。
+* フローに他の種類の関数を挿入する必要がある場合は、適切なアダプターブロックを作成して使用してください。
 
-These guidelines may result in code that is not particularly concise or elegant, but on the other hand, you will be using a consistent model, and it should be understandable to other people when it needs to be maintained.
+これらのガイドラインに従うと、特に簡潔でエレガントなコードにはならないかもしれません。しかし、一貫したモデルを使用することになり、メンテナンスが必要になったときに他の人にも理解しやすいはずです。
 
-So with these guidelines, here are the main bits of the implementation so far. Note especially the use of `>>` everywhere in the final `usecase` function.
+これらのガイドラインに従って、これまでの実装の主要部分を以下に示します。特に、最終的な`usecase`関数で`>>`がどこでも使用されていることに注目してください。
 
 ```fsharp
 open RailwayCombinatorModule 
 
 let (&&&) v1 v2 = 
-    let addSuccess r1 r2 = r1 // return first
-    let addFailure s1 s2 = s1 + "; " + s2  // concat
+    let addSuccess r1 r2 = r1 // 最初のものを返す
+    let addFailure s1 s2 = s1 + "; " + s2  // 連結
     plus addSuccess addFailure v1 v2 
 
 let combinedValidation = 
@@ -1128,9 +1128,9 @@ let canonicalizeEmail input =
    { input with email = input.email.Trim().ToLower() }
 
 let updateDatabase input =
-   ()   // dummy dead-end function for now
+   ()   // 今はダミーのデッドエンド関数
 
-// new function to handle exceptions
+// 例外を処理する新しい関数
 let updateDatebaseStep = 
     tryCatch (tee updateDatabase) (fun ex -> ex.Message)
 
@@ -1141,22 +1141,22 @@ let usecase =
     >> log
 ```
 
-One final suggestion. If you are working with a team of non-experts, unfamiliar operator symbols will put people off. So here some extra guidelines with respect to operators:
+最後に1つ提案があります。非専門家のチームと働いている場合、馴染みのない演算子記号は人々を戸惑わせる可能性があります。そこで、演算子に関するいくつかの追加ガイドラインを示します：
 
-* Don't use any "strange" operators other than `>>` and `|>`. 
-* In particular, that means you should *not* use operators like `>>=` or `>=>` unless everyone is aware of them.
-* An exception can be made if you define the operator at the top of the module or function where it is used. For example, the `&&&` operator could be defined at the top of the validation module and then used later in that same module.
+* `>>`と`|>`以外の「奇妙な」演算子は使用しないでください。
+* 特に、全員が認識していない限り、`>>=`や`>=>`のような演算子は使用*しない*でください。
+* 例外として、モジュールや関数の先頭で演算子を定義する場合は使用しても構いません。例えば、`&&&`演算子を検証モジュールの先頭で定義し、その後そのモジュール内で使用することは可能です。
 
-## Further reading
+## さらなる読み物
 
-* If you like this "railway oriented" approach, you can also [see it applied to FizzBuzz](../posts/railway-oriented-programming-carbonated.md).
-* I also have some [slides and video](http://fsharpforfunandprofit.com/rop/) that show how take this approach further. (At some point I will turn these into a proper blog post)
+* この「鉄道指向」アプローチが気に入った場合、[FizzBuzzに適用した例](../posts/railway-oriented-programming-carbonated.md)もご覧ください。
+* このアプローチをさらに発展させる方法を示した[スライドと動画](http://fsharpforfunandprofit.com/rop/)もあります。（いずれ proper blog post にする予定です）
 
-I presented on this topic at NDC Oslo 2014 (click image to view video)  
+NDC Oslo 2014でこのトピックについて発表しました（画像をクリックすると動画が見られます）
 
 [![Video from NDC Oslo 2014](../assets/img/rop-ndcoslo.jpg)](http://vimeo.com/97344498)
 
-And here are the slides I used:
+そして、使用したスライドはこちらです：
 
-<iframe src="//www.slideshare.net/slideshow/embed_code/32242318" width="627" height="556" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px 1px 0; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="https://www.slideshare.net/ScottWlaschin/railway-oriented-programming" title="Railway Oriented Programming" target="_blank">Railway Oriented Programming</a> </strong> from <strong><a href="http://www.slideshare.net/ScottWlaschin" target="_blank">my slideshare page</a></strong> </div>
+<iframe src="//www.slideshare.net/slideshow/embed_code/32242318" width="627" height="556" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px 1px 0; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="https://www.slideshare.net/ScottWlaschin/railway-oriented-programming" title="Railway Oriented Programming" target="_blank">Railway Oriented Programming</a> </strong> from <strong><a href="http://www.slideshare.net/ScottWlaschin" target="_blank">私のSlideshareページ</a></strong> </div>
     

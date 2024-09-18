@@ -1,113 +1,113 @@
 ---
 layout: post
-title: "How to design and code a complete program"
-description: "A recipe for a functional app, part 1"
-seriesId: "A recipe for a functional app"
+title: "完全なプログラムの設計とコード作成方法"
+description: "関数型アプリの作り方、パート1"
+seriesId: "関数型アプリの作り方"
 seriesOrder: 1
 categories: [DDD]
 ---
 
 
-**"I think I understand functional programming at the micro level, and I have written toy programs, but how do I actually go about writing a complete application, with real data, real error handling, and so on?"**
+**「ミクロクロレベルでは関数型プログラミングを理解しているし、おもちゃのプログラムも書いたことがあるけれど、実際のデータや本格的なエラー処理などを含む完全なアプリケーションをどのように書けばいいのでしょうか？」**
 
-This is a very common question, so I thought that in this series of posts I'd describe a recipe for doing exactly this, covering design, validation, error handling, persistence, dependency management, code organization, and so on.
+これはよくある質問です。そこで、このシリーズの記事では、設計、検証、エラー処理、永続化、依存関係の管理、コードの構成などをカバーして、まさにこの課題に取り組むためのレシピを説明したいと思います。
 
-Some comments and caveats first:
+まず、いくつかのコメントと注意点を挙げます。
 
-* I'll focus on just a single use case rather than a whole application. I hope that it will be obvious how to extend the code as needed.  
-* This will deliberately be a very simple *data-flow oriented* recipe with no special tricks or advanced techniques. But if you are just getting started, I think it is useful to have some straightforward steps you can follow to get a predictable result. I don't claim that this is the one true way of doing this. Different scenarios will need different recipes, and of course, as you get more expert, you may find this recipe too simplistic and limited. 
-* To help ease the transition from object-oriented design, I will try to use familiar concepts such as "patterns", "services", "dependency injection", and so on, and explain how they map to functional concepts. 
-* This recipe is also deliberately somewhat imperative, that is, it uses an explicit step-by-step workflow. I hope this approach will ease the transition from OO to FP.
-* To keep things simple (and usable from a simple F# script), I'll mock the entire infrastructure and avoid the UI directly.
-
-
-## Overview
-
-Here's an overview of what I plan to cover in this series:
-
-* **Converting a use-case into a function**. In this first post, we'll examine a simple use case and see how it might be implemented using a functional approach.
-* **[Connecting smaller functions together](../posts/recipe-part2.md)**. In the next post, we'll discuss a simple metaphor for combining smaller functions into bigger functions.
-* **Type driven design and failure types**. In the third post, we'll build the types needed for the use case, and discuss the use of special error types for the failure path.
-* **Configuration and dependency management**. In this post, we'll talk about how to wire up all the functions.
-* **Validation**. In this post, we'll discuss various ways of implementing validation, and converting from the unsafe outside world to the warm fuzzy world of type safety.
-* **Infrastructure**. In this post, we'll discuss various infrastructure components, such as logging, working with external code, and so on.
-* **The domain layer**.  In this post, we'll discuss how domain driven design works in a functional environment.
-* **The presentation layer**.  In this post, we'll discuss how to convey results and errors back to the UI.
-* **Dealing with changing requirements**. In this post, we'll discuss how to deal with changing requirements and the effect this has on the code.
+* アプリケーション全体ではなく、単一のユースケースに焦点を当てます。必要に応じてコードを拡張する方法は明らかになるはずです。
+* これは、特別なトリックや高度な技法を使わない、非常にシンプルな*データフロー指向*のレシピとなるでしょう。しかし、初心者にとっては、予測可能な結果を得るための簡単な手順があると役立つでしょう。正解は一つだけだと言うつもりはありません。異なるシナリオでは異なるレシピが必要になりますし、経験を積むにつれ、このレシピは単純すぎて限界があると感じることもあるでしょう。
+* オブジェクト指向設計からの移行を容易にするために、「パターン」「サービス」「依存性注入」などの馴染みのある概念を使い、それらが関数型の概念にどう対応するかを説明します。
+* このレシピは、意図的にやや命令型です。つまり、明示的なステップバイステップのワークフローを使用します。このアプローチでOOからFPへの移行が楽になることを期待しています。
+* ものごとをシンプルに保つため（そして簡単なF#スクリプトから使えるようにするため）、インフラ全体をモック化し、UIには直接触れません。
 
 
-## Getting started
+## 概要
 
-Let's pick a very simple use case, namely updating some customer information via a web service. 
+この連載で取り上げる予定の内容は次のとおりです。
 
-So here are the basic requirements:
+* **ユースケースを関数に変換する**。この最初の記事では、シンプルなユースケースを検討し、関数型アプローチでどのように実装できるかを見ていきます。
+* **[小さな関数を組み合わせる](../posts/recipe-part2.md)**。次の記事では、小さな関数をより大きな関数に組み合わせるためのシンプルな比喩について説明します。
+* **型駆動設計とエラー型**。3番目の記事では、ユースケースに必要な型を構築し、失敗パスのための特別なエラー型の使用について説明します。
+* **設定と依存関係の管理**。この記事では、すべての関数をどのように接続するかについて説明します。
+* **バリデーション**。この記事では、バリデーションを実装するさまざまな方法と、安全でない外部の世界から型安全の暖かくファジーな世界に変換する方法について説明します。
+* **インフラストラクチャ**。この記事では、ログ記録、外部コードとの連携など、さまざまなインフラストラクチャコンポーネントについて説明します。
+* **ドメイン層**。この記事では、関数型環境でドメイン駆動設計がどのように機能するかを説明します。
+* **プレゼンテーション層**。この記事では、結果とエラーをUIに伝える方法について説明します。
+* **変化する要件への対応**。この記事では、変化する要件にどのように対処し、それがコードにどのような影響を与えるかについて説明します。
 
-* A user submits some data (userid, name and email).
-* We check to see that the name and email are valid.
-* The appropriate user record in a database is updated with the new name and email.
-* If the email has changed, send a verification email to that address.
-* Display the result of the operation to the user.
 
-This is a typical *data centric* use case. There is some sort of request that triggers the use case, and then the request data "flows" through the system, being processed by each step in turn.
-This kind of scenario is common in enterprise software, which is why I am using it as an example. 
+## はじめに
 
-Here's a diagram of the various components:
+非常にシンプルなユースケースを選びましょう。具体的には、Webサービスを通じて顧客情報を更新するケースです。
+
+基本的な要件は次のとおりです。
+
+* ユーザーがデータ（ユーザーID、名前、メールアドレス）を送信します。
+* 名前とメールアドレスが有効かどうかを確認します。
+* データベース内の適切なユーザーレコードを新しい名前とメールアドレスで更新します。
+* メールアドレスが変更された場合、そのアドレスに確認メールを送信します。
+* 操作の結果をユーザーに表示します。
+
+これは典型的な*データ中心*のユースケースです。ユースケースを開始する要求があり、その要求データがシステムを「流れ」ながら、各ステップで順番に処理されます。
+このようなシナリオは企業向けソフトウェアでよく見られるため、例として使用しています。
+
+以下は、さまざまなコンポーネントを示す図です。
 
 ![Recipe Happy Path](../assets/img/Recipe_HappyPath.png)
 
-But this describes the "happy path" only.  Reality is never so simple! What happens if the userid is not found in the database, or the email address is not valid, or the database has an error?
+しかし、これは「ハッピーパス」のみを示しています。現実はそれほど単純ではありません！データベースにユーザーIDが見つからない場合や、メールアドレスが無効な場合、データベースでエラーが発生した場合はどうなるでしょうか？
 
-Let's update the diagram to show all the things that could go wrong.
+問題が起こり得る箇所をすべて示すように図を更新してみましょう。
 
 ![Recipe Error Path](../assets/img/Recipe_ErrorPath.png)
 
-At each step in the use case, various things could cause errors, as shown.  Explaining how to handle these errors in an elegant way will be one of the goals of this series.
+ユースケースの各ステップで、図に示すようなさまざまなエラーが発生する可能性があります。このシリーズの目標の1つは、これらのエラーをエレガントに処理する方法を説明することです。
 
 
-## Thinking functionally 
+## 関数型思考
 
-So now that we understand the steps in the use case, how do we design a solution using a functional approach?
+ユースケースのステップを理解したところで、関数型アプローチを使ってどのように解決策を設計すればよいでしょうか？
 
-First of all, we have to address a mismatch between the original use case and functional thinking.
+まず、元のユースケースと関数型思考の間のミスマッチに対処する必要があります。
 
-In the use case, we typically think of a request/response model.  The request is sent, and the response comes back.  If something goes wrong, the flow is short-circuited and response is returned "early".
+ユースケースでは、通常、リクエスト/レスポンスモデルを考えます。リクエストが送信され、レスポンスが返されます。何か問題が発生した場合、フローは短絡され、レスポンスが「早期に」返されます。
 
-Here's a diagram showing what I mean, based on a simplified version of the use case:
+以下は、ユースケースを簡略化したバージョンに基づいて、私が意味することを示す図です。
 
 ![A imperative data flow](../assets/img/Recipe_ResponseBack.png)
 
-But in the functional model, a function is a black box with an input and an output, like this:
+しかし、関数型モデルでは、関数は入力と出力を持つブラックボックスです。このようになります。
 
 ![A function with one output](../assets/img/Recipe_Function1.png)
 
-How can we adapt the use case to fit this model?
+このモデルにユースケースを適合させるにはどうすればよいでしょうか？
 
-### Forward flow only
+### 前進するフローのみ
 
-First, you must recognize that functional data flow is *forward only*. You cannot do a U-turn or return early.
+まず、関数型のデータフローが*前進のみ*であることを認識する必要があります。Uターンしたり早期に戻ったりすることはできません。
 
-In our case, that means that all the errors *must* be sent forward to the end, as an alternative path to the happy path.
+この場合、すべてのエラーをハッピーパスの代替パスとして最後まで*前方に送る*必要があります。
 
 ![A functional data flow](../assets/img/Recipe_ResponseForward.png)
 
-Once we have done that, we can convert the whole flow into a single "black box" function like this:
+これを行えば、フロー全体を次のような単一の「ブラックボックス」関数に変換できます。
 
 ![A function with many outputs](../assets/img/Recipe_FunctionMany.png)
 
-But of course, if you look inside the big function, it is made up of ("composed from" in functional-speak) smaller functions, one for each step, joined in a pipeline.
+もちろん、大きな関数の内部を見れば、各ステップに対応する小さな関数が（関数型の言葉で言えば）「合成されて」パイプラインで結合されています。
 
 ![A function with many outputs](../assets/img/Recipe_FunctionMany2.png)
 
 
-### Error handling
+### エラー処理
 
-In that last diagram, there is one success output and three error outputs.  This is a problem, as functions can have only *one* output, not four!
+最後の図では、成功の出力が1つと、エラーの出力が3つあります。これは問題です。関数は*1つ*の出力しか持てず、4つは持てないからです。
 
-How can we handle this?
+これをどう扱えばよいでしょうか？
 
-The answer is to use a union type, with one case to represent each of the different possible outputs. And then the function as a whole would indeed only have a single output.
+答えは、共用体型を使うことです。相異なる出力に対応するケースを1つずつ作り、関数全体としては1つの出力しか持たないようにします。
 
-Here's an example of a possible type definition for the output:
+出力として考えられる型定義の例を示します。
 
 ```fsharp
 type UseCaseResult = 
@@ -117,15 +117,15 @@ type UseCaseResult =
     | SmtpError 
 ```
 
-And here's the diagram reworked to show a single output with four different cases embedded in it:
+そして、4つの異なるケースが1つの出力に埋め込まれているのを示すように書き直した図がこちらです。
 
 ![A function with a 4 case union output](../assets/img/Recipe_Function_Union4.png)
 
-### Simplifying the error handling
+### エラー処理の簡素化
 
-This does solve the problem, but having one error case for each step in the flow is brittle and not very reusable. Can we do better?
+これで問題は解決しますが、フローの各ステップに1つずつエラーケースを設けるのは脆弱で再利用性が低いです。もっと良い方法はないでしょうか？
 
-Yes! All we *really* need is *two* cases. One for the happy path, and one for all other error paths, like this:
+もちろん、あります。実際に*必要*なのは*2つ*のケースだけです。ハッピーパス用に1つ、他のすべてのエラーパス用に1つです。次のようになります。
 
 ```fsharp
 type UseCaseResult = 
@@ -135,11 +135,11 @@ type UseCaseResult =
 
 ![A function with a 2 case union output](../assets/img/Recipe_Function_Union2.png)
 
-This type is very generic and will work with *any* workflow!  In fact, you'll soon see that we can create a nice library of useful functions that will work with this type, and which can be reused for all sorts of scenarios.
+この型は非常に汎用的で、*どんな*ワークフローにも使えます！実際、この型を使った便利な関数のライブラリを作成できることと、それをあらゆるシナリオで再利用できることをこの後に示します。
 
-One more thing though -- as it stands there is no data in the result at all, just a success/failure status. We need to tweak it a bit so that it can contain an actual success or failure object. We will specify the success type and failure type using generics (a.k.a. type parameters).
+とはいえ、一つ注意点があります。現状では結果にデータがまったく含まれておらず、成功/失敗のステータスだけです。実際の成功オブジェクトや失敗オブジェクトを含められるように少し調整する必要があります。ジェネリクス（別名：型パラメータ）を使って、成功型とエラー型を指定しましょう。
 
-Here's the final, completely generic and reusable version:
+これが最終的な、完全に汎用的で再利用可能なバージョンです。
 
 ```fsharp
 type Result<'TSuccess,'TFailure> = 
@@ -147,22 +147,24 @@ type Result<'TSuccess,'TFailure> =
     | Failure of 'TFailure
 ```
 
-In fact, there is already a type almost exactly like this defined in the F# library. It's called [Choice](http://msdn.microsoft.com/en-us/library/ee353439.aspx). For clarity though, I will continue to use the `Result` type defined above for this and the next post.  When we come to some more serious coding, we'll revisit this.
+F#ライブラリには実際に、これとほぼ同じ型が定義されています。[Choice](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-core-fsharpchoice-2.html)という名前です*。ただし、わかりやすさのため、この記事と次の記事では上で定義した`Result`型を引き続き使います。より本格的なコーディングに入る際に再検討しましょう。
 
-So, now, showing the individual steps again, we can see that we will have to combine the errors from each step onto to a single "failure" path.
+<sub>* 訳注：現在のライブラリには、[Result](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-core-fsharpresult-2.html)型も含まれています。`Result`は構造体として実装されています。</sub>
+
+さて、個々のステップを再確認してみると、各ステップのエラーを単一の「失敗」パスに結合する必要があることがわかります。
 
 ![A function with two outputs](../assets/img/Recipe_Function_ErrorTrack.png)
 
-How to do this will be the topic of the next post.
+これをどのように行うかは、次の記事のトピックになります。
 
-## Summary and guidelines
+## まとめとガイドライン
 
-So far then, we have the following guidelines for the recipe:
+以上より、次のガイドラインが得られました。
 
-*Guidelines*
+*ガイドライン*
 
-* Each use case will be equivalent to a single function
-* The use case function will return a union type with two cases: `Success` and `Failure`.
-* The use case function will be built from a series of smaller functions, each representing one step in a data flow.
-* The errors from each step will be combined into a single error path.
+* 各ユースケースは単一の関数に相当します。
+* ユースケース関数は`Success`と`Failure`の2つのケースを持つ共用体型を返します。
+* ユースケース関数は、データフローの1ステップを表す一連の小さな関数から構築されます。
+* 各ステップのエラーは単一のエラーパスに結合されます。
 
