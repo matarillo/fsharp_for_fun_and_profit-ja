@@ -1,28 +1,28 @@
 ---
 layout: post
-title: "Railway oriented programming: Carbonated edition"
-description: "Three ways to implement FizzBuzz"
+title: "鉄道指向プログラミング：炭酸化バージョン"
+description: "FizzBuzzを実装する3つの方法"
 categories: []
 ---
 
-As a follow up to the [Railway Oriented Programming](../posts/recipe-part2.md) post, I thought I'd apply the same technique to the [FizzBuzz](http://imranontech.com/2007/01/24/using-fizzbuzz-to-find-developers-who-grok-coding/) problem,
-and compare it with other implementations.
+[鉄道指向プログラミング](../posts/recipe-part2.md)の記事に続いて、同じ手法を[FizzBuzz](http://web.archive.org/web/20110818113955/http://imranontech.com/2007/01/24/using-fizzbuzz-to-find-developers-who-grok-coding/)問題に適用し、
+他の実装と比較してみようと思います。
 
-A large part of this post was directly <s>stolen from</s> inspired by [Dave Fayram's post on FizzBuzz](http://dave.fayr.am/posts/2012-10-4-finding-fizzbuzz.html), with some additional ideas from
-[raganwald](http://weblog.raganwald.com/2007/01/dont-overthink-fizzbuzz.html).
+この記事の大部分は、[Dave FayramのFizzBuzzに関する投稿](http://web.archive.org/web/20160307132000/http://dave.fayr.am/posts/2012-10-4-finding-fizzbuzz.html)から直接<s>盗んだ</s>インスピレーションを得たもので、
+[raganwald](http://weblog.raganwald.com/2007/01/dont-overthink-fizzbuzz.html)からもいくつかのアイデアを取り入れています。
 
-## FizzBuzz: The imperative version
+## FizzBuzz：命令型バージョン
 
-As a reminder, here are the requirements for the FizzBuzz problem:
+FizzBuzz問題の要件を再確認しましょう。
 
 ```text
-Write a program that prints the numbers from 1 to 100. 
-* For multiples of three print "Fizz" instead of the number.
-* For multiples of five print "Buzz". 
-* For numbers which are multiples of both three and five print "FizzBuzz".
+1から100までの数字を出力するプログラムを書いてください。
+* 3の倍数の場合は、数字の代わりに「Fizz」と出力します。
+* 5の倍数の場合は「Buzz」と出力します。
+* 3と5の両方の倍数の場合は「FizzBuzz」と出力します。
 ```
 
-And here is a basic F# solution:
+以下はF#による基本的な解決策です。
 
 ```fsharp
 module FizzBuzz_Match = 
@@ -40,21 +40,21 @@ module FizzBuzz_Match =
 
         printf "; "
    
-    // do the fizzbuzz
+    // FizzBuzzを実行
     [1..100] |> List.iter fizzBuzz
 ```
 
-I have defined a function `fizzBuzz` that, given an integer `i`, uses `match` with `when` clauses to do the various tests, and then prints the appropriate value.
+整数`i`を受け取り、`match`と`when`句を使って各種テストを行い、適切な値を出力する`fizzBuzz`関数を定義しました。
 
-Simple and straightforward, and fine for a quick hack, but there are a number of problems with this implementation.
+シンプルで分かりやすく、簡単なハックには適していますが、この実装にはいくつかの問題があります。
 
-First, note that we had to have a special case for "fifteen". We couldn't just reuse the code from the "three" and "five" cases.  And this means that if we want to add another case, such as "seven",
-we also need to add special cases for all the combinations as well (that is "21", "35" and "105").  And of course, adding more numbers would lead to a combinatorial explosion of cases.
+まず、「15」の特別なケースが必要でした。「3」と「5」のケースのコードを再利用できませんでした。
+これは、「7」など別のケースを追加したい場合、すべての組み合わせ（つまり「21」、「35」、「105」）に対しても特別なケースを追加する必要があることを意味します。もちろん、さらに数を増やすと、ケースの組み合わせが爆発的に増加します。
 
-Second, the order of matching is important. If the "fifteen" case had come last in the list of patterns, the code would have run correctly, but not actually met the requirements.
-And again, if we need to add new cases, we must always remember to put the largest ones first to ensure correctness. This is just the kind of thing that causes subtle bugs.
+次に、マッチングの順序が重要です。「15」のケースがパターンリストの最後にあった場合、コードは正しく実行されますが、要件を満たしていないことになります。
+また、新しいケースを追加する必要がある場合、正確性を確保するために、常に最大のものを最初に配置することを忘れないようにしなければなりません。これはまさに、微妙なバグを引き起こす種類のものです。
 
-Let's try another implementation, where we reuse the code for the "three" and "five" case, and eliminate the need for a "fifteen" case altogether:
+「3」と「5」のケースのコードを再利用し、「15」のケースを完全に排除する別の実装を試してみましょう。
 
 ```fsharp
 module FizzBuzz_IfPrime = 
@@ -75,19 +75,19 @@ module FizzBuzz_IfPrime =
         
         printf "; "
     
-    // do the fizzbuzz
+    // FizzBuzzを実行
     [1..100] |> List.iter fizzBuzz
 ```
 
-In this implementation, the printed value for "15" will be correct, because both the "3" and "5" cases will be used.  And also we don't have to worry about order -- as much, anyway.
+この実装では、「3」と「5」の両方のケースが使用されるため、「15」の出力値は正しくなります。また、順序を気にする必要もありません（少なくともそれほど気にする必要はありません）。
 
-But -- these branches are no longer independent, so we have to track whether *any* branch has been used at all, so that we can handle the default case. And that has led
-to the mutable variable. Mutables are a code smell in F#, so this implementation is not ideal.
+しかし、これらの分岐はもはや独立していないため、デフォルトケースを処理できるように、いずれかの分岐が使用されたかどうかを追跡する必要があります。
+そのため、可変変数が導入されました。F#では可変変数はコードの臭いとされるので、この実装は理想的ではありません。
 
-However, this version *does* have the advantage that it can be easily refactored to support multiple factors, not just 3 and 5. 
+ただし、このバージョンには、3と5だけでなく、複数の因数をサポートするように簡単にリファクタリングできるという利点があります。
 
-Below is a version that does just this. We pass in a list of "rules" to `fizzBuzz`. Each rule consists of a factor and a corresponding label to print out.
-The `fizzBuzz` function then just iterates through these rules, processing each in turn.
+以下は、まさにそれを行ったバージョンです。`fizzBuzz`に「ルール」のリストを渡します。
+各ルールは、因数と対応する出力ラベルで構成されています。`fizzBuzz`関数は、これらのルールを順番に処理していきます。
 
 ```fsharp
 module FizzBuzz_UsingFactorRules = 
@@ -105,98 +105,98 @@ module FizzBuzz_UsingFactorRules =
         
         printf "; "
     
-    // do the fizzbuzz
+    // FizzBuzzを実行
     let rules = [ (3,"Fizz"); (5,"Buzz") ]
     [1..100] |> List.iter (fizzBuzz rules)
 ```
 
-If we want additional numbers to be processed, we just add them to the list of rules, like this:
+追加の数字を処理したい場合は、ルールのリストに追加するだけです。
 
 ```fsharp
 module FizzBuzz_UsingFactorRules = 
 
-    // existing code as above
+    // 既存のコードは上記と同じ
     
     let rules2 = [ (3,"Fizz"); (5,"Buzz"); (7,"Baz") ]
     [1..105] |> List.iter (fizzBuzz rules2)
 ```
 
-To sum up, we have created a very imperative implementation that would be almost the same in C#. It's flexible, but the mutable variable is a bit of a code smell. Is there another way?
- 
-## FizzBuzz: The pipeline version
+まとめると、C#とほぼ同じような非常に命令型の実装を作成しました。柔軟性はありますが、可変変数はコードの臭いの一種です。別の方法はないでしょうか？
 
-In this next version, we'll look at using the "pipeline" model, where data is fed through a series of functions to arrive at a final result.
+## FizzBuzz：パイプラインバージョン
 
-In this design, I envision a pipeline of functions, one to handle the "three" case, one to handle the "five" case, and so on. And at the end, the appropriate label is spat out, ready to be printed.
+次のバージョンでは、「パイプライン」モデルを使用します。ここでは、データを一連の関数に通して最終結果を得ます。
 
-Here is some pseudocode to demonstrate the concept:
+このデザインでは、「3」のケースを処理する関数、「5」のケースを処理する関数などの関数のパイプラインを想定しています。そして最後に、適切なラベルが出力され、印刷される準備が整います。
+
+以下は、この概念を示す擬似コードです。
 
 ```fsharp
 data |> handleThreeCase |> handleFiveCase |> handleAllOtherCases |> printResult
 ```
 
-As an additional requirement, we want the pipeline to have *no* side effects. This means that the intermediate functions must *not* print anything.
-They must instead pass any generated labels down the pipe to the end, and only at that point print the results.
+追加の要件として、パイプラインに副作用がないようにします。これは、中間関数が何も出力してはならないことを意味します。
+代わりに、生成されたラベルをパイプの最後まで渡し、その時点で結果を出力する必要があります。
 
-### Designing the pipeline
+### パイプラインの設計
 
-As a first step, we need to define what data will be fed down the pipe.  
+最初のステップとして、パイプを通して渡されるデータを定義する必要があります。
 
-Let's start with the first function, called `handleThreeCase` in the pseudocode above. What is its input, and what is its output?
+まず、上記の擬似コードの`handleThreeCase`と呼ばれる最初の関数から始めましょう。その入力と出力は何でしょうか？
 
-Obviously, the input is the integer being processed. But the output could be the string "Fizz" if we're lucky. Or the original integer if we're not.
+明らかに、入力は処理される整数です。しかし、出力は運が良ければ文字列「Fizz」かもしれません。または、運が悪ければ元の整数かもしれません。
 
-So now let's think about the input to the second function, `handleFiveCase`. It needs the integer as well.
-But in the case of "15" it *also* needs the string "Fizz" as well, so it can append "Buzz" to it.
+次に、2番目の関数`handleFiveCase`の入力について考えてみましょう。これも整数が必要です。
+しかし、「15」の場合は、「Fizz」という文字列も必要で、それに「Buzz」を追加できるようにする必要があります。
 
-Finally, the `handleAllOtherCases` function converts the int to a string, but *only* if "Fizz" or "Buzz" have not been generated yet.
+最後に、`handleAllOtherCases`関数は整数を文字列に変換しますが、これは「Fizz」や「Buzz」がまだ生成されていない場合のみです。
 
-It's quite obvious then, that the data structure needs to contain both the integer being processed *and* the "label so far". 
+したがって、データ構造には処理中の整数と「これまでのラベル」の両方を含める必要があることは明らかです。
 
-The next question is: how do we know if an upstream function has created a label?
-The `handleAllOtherCases` needs to know this in order to determine whether it needs to do anything.
+次の疑問は、上流の関数がラベルを作成したかどうかをどのように知るかです？
+`handleAllOtherCases`は、何かをする必要があるかどうかを判断するためにこれを知る必要があります。
 
-One way would be to use an empty string (or, horrors, a null string), but let's be good and use a `string option`.
+一つの方法は、空の文字列（または恐ろしいことにnull文字列）を使うことですが、良い方法として`string option`を使いましょう。
 
-So, here's the final data type that we will be using:
+そこで、以下が最終的に使用するデータ型です。
 
 ```fsharp
 type Data = {i:int; label:string option}
 ```
 
-### Pipeline version 1
+### パイプラインバージョン1
 
-With this data structure, we can define how `handleThreeCase` and `handleFiveCase` will work.
+このデータ構造を使って、`handleThreeCase`と`handleFiveCase`がどのように機能するかを定義できます。
 
-* First, test the input int `i` to see if it is divisible by the factor.
-* If it is divisible, look at the `label` -- if it is `None`, then replace it with `Some "Fizz"` or `Some "Buzz"`.
-* If the label already has a value, then append "Buzz" (or whatever) to it.
-* If the input is not divisible by the factor, just pass on the data unchanged.
+* まず、入力整数`i`が因数で割り切れるかテストします。
+* 割り切れる場合、`label`を見ます - `None`の場合、`Some "Fizz"`または`Some "Buzz"`に置き換えます。
+* ラベルが既に値を持っている場合、「Buzz」（または他の適切な値）を追加します。
+* 入力が因数で割り切れない場合、データを変更せずに渡します。
 
-Given this design, here's the implementation. It's a generic function that I will call `carbonate` (after [raganwald](http://weblog.raganwald.com/2007/01/dont-overthink-fizzbuzz.html))
-because it works with both "Fizz" and "Buzz":
+このデザインに基づいた実装が以下です。「Fizz」と「Buzz」の両方に対応する汎用的な関数で、
+[raganwald](https://weblog.raganwald.com/2007/01/dont-overthink-fizzbuzz.html)にちなんで`carbonate` （炭酸化）と呼びます。
 
 ```fsharp
 let carbonate factor label data = 
     let {i=i; label=labelSoFar} = data
     if i % factor = 0 then
-        // pass on a new data record
+        // 新しいデータレコードを渡す
         let newLabel = 
             match labelSoFar with
             | Some s -> s + label 
             | None -> label 
         {data with label=Some newLabel}
     else
-        // pass on the unchanged data
+        // 変更されていないデータを渡す
         data
 ```
 
-The design for the `handleAllOtherCases` function is slightly different:
+`handleAllOtherCases`関数のデザインは少し異なります。
 
-* Look at the label -- if it is not `None`, then a previous function has created a label, so do nothing.
-* But if the label is `None`, replace it with the string representation of the integer.
+* ラベルを見ます - `None`でない場合、前の関数がラベルを作成したので何もしません。
+* しかし、ラベルが`None`の場合、整数の文字列表現に置き換えます。
 
-Here's the code -- I will call it `labelOrDefault`:
+以下がコードです - これを`labelOrDefault`と呼びます。
 
 ```fsharp
 let labelOrDefault data = 
@@ -206,20 +206,20 @@ let labelOrDefault data =
     | None -> sprintf "%i" i
 ```
 
-Now that we have the components, we can assemble the pipeline:
+これでコンポーネントが揃ったので、パイプラインを組み立てることができます。
 
 ```fsharp
 let fizzBuzz i = 
     {i=i; label=None}
     |> carbonate 3 "Fizz"
     |> carbonate 5 "Buzz"
-    |> labelOrDefault     // convert to string
-    |> printf "%s; "      // print
+    |> labelOrDefault     // 文字列に変換
+    |> printf "%s; "      // 出力
 ```
 
-Note that we have to create an initial record using `{i=i; label=None}` for passing into the first function (`carbonate 3 "Fizz"`).
+最初の関数（`carbonate 3 "Fizz"`）に渡すための初期レコードを`{i=i; label=None}`で作成する必要があることに注意してください。
 
-Finally, here is all the code put together:
+最後に、すべてのコードをまとめると以下のようになります。
 
 ```fsharp
 module FizzBuzz_Pipeline_WithRecord = 
@@ -229,14 +229,14 @@ module FizzBuzz_Pipeline_WithRecord =
     let carbonate factor label data = 
         let {i=i; label=labelSoFar} = data
         if i % factor = 0 then
-            // pass on a new data record
+            // 新しいデータレコードを渡す
             let newLabel = 
                 match labelSoFar with
                 | Some s -> s + label 
                 | None -> label 
             {data with label=Some newLabel}
         else
-            // pass on the unchanged data
+            // 変更されていないデータを渡す
             data
 
     let labelOrDefault data = 
@@ -249,18 +249,18 @@ module FizzBuzz_Pipeline_WithRecord =
         {i=i; label=None}
         |> carbonate 3 "Fizz"
         |> carbonate 5 "Buzz"
-        |> labelOrDefault     // convert to string
-        |> printf "%s; "      // print
+        |> labelOrDefault     // 文字列に変換
+        |> printf "%s; "      // 出力
 
     [1..100] |> List.iter fizzBuzz
 ```
 
-### Pipeline version 2
+### パイプラインバージョン2
 
-Creating a new record type can be useful as a form of documentation, but in a case like this, it would probably be more idiomatic
-to just use a tuple rather than creating a special data structure.
+新しいレコード型の作成はドキュメントの形式として有用ですが、
+このような場合、特別なデータ構造を作成するよりもタプルを使用する方が慣用的でしょう。
 
-So here's a modified implementation that uses tuples. 
+以下は、タプルを使用した修正版の実装です。
 
 ```fsharp
 module FizzBuzz_Pipeline_WithTuple = 
@@ -270,14 +270,14 @@ module FizzBuzz_Pipeline_WithTuple =
     let carbonate factor label data = 
         let (i,labelSoFar) = data
         if i % factor = 0 then
-            // pass on a new data record
+            // 新しいデータレコードを渡す
             let newLabel = 
                 labelSoFar 
                 |> Option.map (fun s -> s + label)
                 |> defaultArg <| label 
             (i,Some newLabel)
         else
-            // pass on the unchanged data
+            // 変更されていないデータを渡す
             data
 
     let labelOrDefault data = 
@@ -286,83 +286,83 @@ module FizzBuzz_Pipeline_WithTuple =
         |> defaultArg <| sprintf "%i" i
 
     let fizzBuzz i = 
-        (i,None)   // use tuple instead of record
+        (i,None)   // レコードの代わりにタプルを使用
         |> carbonate 3 "Fizz"
         |> carbonate 5 "Buzz"
-        |> labelOrDefault     // convert to string
-        |> printf "%s; "      // print
+        |> labelOrDefault     // 文字列に変換
+        |> printf "%s; "      // 出力
 
     [1..100] |> List.iter fizzBuzz
 ```
 
-As an exercise, try to find all the code that had to be changed.
+練習として、変更が必要だったすべてのコードを見つけてみてください。
 
-### Eliminating explicit tests for Some and None
+### SomeとNoneの明示的なテストの排除
 
-In the tuple code above, I have also replaced the explicit Option matching code `match .. Some .. None` with some built-in Option functions, `map` and `defaultArg`.
+上記のタプルコードでは、明示的なOptionマッチングコード`match .. Some .. None`を、ビルトインのOption関数である`map`と`defaultArg`に置き換えました。
 
-Here are the changes in `carbonate` :
+以下が`carbonate`での変更点です。
 
 ```fsharp
-// before
+// 変更前
 let newLabel = 
     match labelSoFar with
     | Some s -> s + label 
     | None -> label 
 
-// after
+// 変更後
 let newLabel = 
     labelSoFar 
     |> Option.map (fun s -> s + label)
     |> defaultArg <| label 
 ```
 
-and in `labelOrDefault`:
+そして`labelOrDefault`での変更点。
 
 ```fsharp
-// before
+// 変更前
 match labelSoFar with
 | Some s -> s
 | None -> sprintf "%i" i
 
-// after
+// 変更後
 labelSoFar 
 |> defaultArg <| sprintf "%i" i
 ```
 
-You might be wondering about the strange looking `|> defaultArg <|` idiom.
+`|> defaultArg <|`という奇妙に見えるイディオムについて疑問に思うかもしれません。
 
-I am using it because the option is the *first* parameter to `defaultArg`, not the *second*, so a normal partial application won't work. But "bi-directional" piping does work, hence the strange looking code.
+optionが`defaultArg`の*最初*のパラメータであり、*2番目*ではないため、通常の部分適用は機能しません。しかし、「双方向」パイピングは機能するため、この奇妙に見えるコードになっています。
 
-Here's what I mean:
+以下が意味するところです。
 
 ```fsharp
-// OK - normal usage
+// OK - 通常の使用法
 defaultArg myOption defaultValue
 
-// ERROR: piping doesn't work
+// エラー：パイピングが機能しない
 myOption |> defaultArg defaultValue
 
-// OK - bi-directional piping does work
+// OK - 双方向パイピングは機能する
 myOption |> defaultArg <| defaultValue
 ```
 
-### Pipeline version 3
+### パイプラインバージョン3
 
-Our `carbonate` function is generic for any factor, so we can easily extend the code to support "rules" just as in the earlier imperative version.
+`carbonate`関数は任意の因数に対して汎用的なので、先ほどの命令型バージョンと同様に、「ルール」をサポートするようにコードを簡単に拡張できます。
 
-But one issue seems to be that we have hard-coded the "3" and "5" cases into the pipeline, like this:
+しかし、一つの問題点は、「3」と「5」のケースをパイプラインにハードコードしていることです。以下のようになっています。
 
 ```fsharp
 |> carbonate 3 "Fizz"
 |> carbonate 5 "Buzz"
 ```
 
-How can we dynamically add new functions into the pipeline?
+どうすれば新しい関数をパイプラインに動的に追加できるでしょうか？
 
-The answer is quite simple. We dynamically create a function for each rule, and then combine all these functions into one using composition.
+答えは非常にシンプルです。各ルールに対して動的に関数を作成し、それらの関数を合成を使って1つにまとめます。
 
-Here's a snippet to demonstrate:
+以下は、それを示すスニペットです。
 
 ```fsharp
 let allRules = 
@@ -371,9 +371,9 @@ let allRules =
     |> List.reduce (>>)
 ```
 
-Each rule is mapped into a function. And then the list of functions is combined into one single function using `>>`.
+各ルールは関数にマップされます。そして関数のリストは`>>`を使って1つの関数に結合されます。
 
-Putting it all together, we have this final implementation: 
+すべてをまとめると、以下の最終的な実装になります。
 
 ```fsharp
 module FizzBuzz_Pipeline_WithRules = 
@@ -381,14 +381,14 @@ module FizzBuzz_Pipeline_WithRules =
     let carbonate factor label data = 
         let (i,labelSoFar) = data
         if i % factor = 0 then
-            // pass on a new data record
+            // 新しいデータレコードを渡す
             let newLabel = 
                 labelSoFar 
                 |> Option.map (fun s -> s + label)
                 |> defaultArg <| label 
             (i,Some newLabel)
         else
-            // pass on the unchanged data
+            // 変更されていないデータを渡す
             data
 
     let labelOrDefault data = 
@@ -398,7 +398,7 @@ module FizzBuzz_Pipeline_WithRules =
 
     let fizzBuzz rules i = 
 
-        // create a single function from all the rules
+        // すべてのルールから単一の関数を作成
         let allRules = 
             rules
             |> List.map (fun (factor,label) -> carbonate factor label)
@@ -406,34 +406,34 @@ module FizzBuzz_Pipeline_WithRules =
 
         (i,None)   
         |> allRules
-        |> labelOrDefault     // convert to string
-        |> printf "%s; "      // print
+        |> labelOrDefault     // 文字列に変換
+        |> printf "%s; "      // 出力
 
-    // test
+    // テスト
     let rules = [ (3,"Fizz"); (5,"Buzz"); (7,"Baz") ]
     [1..105] |> List.iter (fizzBuzz rules)
 ```
 
-Comparing this "pipeline" version with the previous imperative version, the design is much more functional. There are no mutables and there are no side-effects anywhere (except in the final
-`printf` statement).
+この「パイプライン」バージョンを以前の命令型バージョンと比較すると、デザインがはるかに関数型になっています。
+可変変数はなく、最後の`printf`文を除いて副作用もありません。
 
-There is a subtle bug in the use of `List.reduce`, however. Can you see what it is?**  For a discussion of the problem and the fix, see the postscript at the bottom of this page. 
+ただし、`List.reduce`の使用には微妙なバグがあります。それが何か分かりますか？** この問題とその修正については、このページの最後の追伸で説明します。
 
-<sub>** Hint: try an empty list of rules.</sub>
+<sub>** ヒント：空のルールリストを試してみてください。</sub>
 
 
-## FizzBuzz: The railway oriented version
+## FizzBuzz：鉄道指向バージョン
 
-The pipeline version is a perfectly adequate functional implementation of FizzBuzz, but for fun, let's see if we can use the "two-track" design described
-in the [railway oriented programming](../posts/recipe-part2.md) post.
+パイプラインバージョンはFizzBuzzの十分に適切な関数型実装ですが、
+念のため、[鉄道指向プログラミング](../posts/recipe-part2.md)の記事で説明した「二軌道」設計を使用できるかどうか見てみましょう。
 
-As a quick reminder, in "railway oriented programming" (a.k.a the "Either" monad), we define a union type with two cases: "Success" and "Failure", each representing a different "track".
-We then connect a set of "two-track" functions together to make the railway.
+簡単に思い出すと、「鉄道指向プログラミング」（別名「Either」モナド）では、2つのケースを持つ共用体型を定義します。「成功」と「失敗」で、それぞれ異なる「軌道」を表します。
+そして、これらの「二軌道」関数を一連のつなぎ合わせて鉄道を作ります。
 
-Most of the functions we actually use are what I called "switch" or "points" functions, with a *one* track input, but a two-track output, one for the Success case, and one for the Failure case.
-These switch functions are converted into two-track functions using a glue function called "bind".
+実際に使用する関数のほとんどは、「スイッチ」または「ポイント」関数と呼んだものです。入力は*一*軌道ですが、出力は二軌道で、成功ケースと失敗ケースがあります。
+これらのスイッチ関数は、「bind」と呼ばれる接着剤関数を使って二軌道関数に変換されます。
 
-Here is a module containing definitions of the functions we will need.
+以下は、必要な関数の定義を含むモジュールです。
 
 ```fsharp
 module RailwayCombinatorModule = 
@@ -443,32 +443,32 @@ module RailwayCombinatorModule =
         | Choice1Of2 s -> Success s
         | Choice2Of2 f -> Failure f
 
-    /// convert a single value into a two-track result
+    /// 単一の値を二軌道の結果に変換
     let succeed x = Choice1Of2 x
 
-    /// convert a single value into a two-track result
+    /// 単一の値を二軌道の結果に変換
     let fail x = Choice2Of2 x
 
-    // appy either a success function or failure function
+    // 成功関数または失敗関数のいずれかを適用
     let either successFunc failureFunc twoTrackInput =
         match twoTrackInput with
         | Success s -> successFunc s
         | Failure f -> failureFunc f
 
-    // convert a switch function into a two-track function
+    // スイッチ関数を二軌道関数に変換
     let bind f = 
         either f fail
 ```
 
-I am using the `Choice` type here, which is built into the F# core library. But I have created some helpers to make it look like the Success/Failure type: an active pattern and two constructors.
+ここではF#のコアライブラリに組み込まれている`Choice`型を使用しています。しかし、Success/Failure型のように見せるためのヘルパーを作成しました。アクティブパターンと2つのコンストラクタです。
 
-Now, how will we adapt FizzBuzz to this?
+では、FizzBuzzをこれにどう適応させればよいでしょうか？
 
-Let's start by doing the obvious thing: defining "carbonation" as success, and an unmatched integer as a failure.
+まず、明白なことから始めましょう。「炭酸化」を成功とし、マッチしない整数を失敗と定義します。
 
-In other words, the Success track contains the labels, and the Failure track contains the ints.
+つまり、成功軌道にはラベルが含まれ、失敗軌道には整数が含まれます。
 
-Our `carbonate` "switch" function will therefore look like this:
+したがって、`carbonate`「スイッチ」関数は次のようになります。
 
 ```fsharp
 let carbonate factor label i = 
@@ -478,14 +478,14 @@ let carbonate factor label i =
         fail i
 ```
 
-This implementation is similar to the one used in the pipeline design discussed above, but it is cleaner because the input is just an int, not a record or a tuple.
+この実装は、上で議論したパイプライン設計で使用したものと似ていますが、入力がレコードやタプルではなく、単なる整数なのでよりクリーンです。
 
-Next, we need to connect the components together. The logic will be:
+次に、コンポーネントを接続する必要があります。ロジックは以下のようになります。
 
-* if the int is already carbonated, ignore it
-* if the int is not carbonated, connect it to the input of the next switch function
+* 整数が既に炭酸化されている場合、無視する
+* 整数が炭酸化されていない場合、次のスイッチ関数の入力に接続する
 
-Here is the implementation:
+以下が実装です。
 
 ```fsharp
 let connect f = 
@@ -494,44 +494,44 @@ let connect f =
     | Failure i -> f i
 ```
 
-Another way of writing this is to use the `either` function we defined in the library module:
+これを書く別の方法は、ライブラリモジュールで定義した`either`関数を使用することです。
 
 ```fsharp
 let connect' f = 
     either succeed f
 ```
 
-Make sure you understand that both of these implementations do exactly the same thing!
+これらの実装が全く同じことを行っていることを理解してください！
 
-Next, we can create our "two-track" pipeline, like this:  
+次に、「二軌道」パイプラインを以下のように作成できます。
 
 ```fsharp
 let fizzBuzz = 
-    carbonate 15 "FizzBuzz"      // need the 15-FizzBuzz rule because of short-circuit
+    carbonate 15 "FizzBuzz"      // 短絡のため15-FizzBuzzルールが必要
     >> connect (carbonate 3 "Fizz")
     >> connect (carbonate 5 "Buzz")
     >> either (printf "%s; ") (printf "%i; ")
 ```
 
-This is superficially similar to the "one-track" pipeline, but actually uses a different technique.
-The switches are connected together through composition (`>>`) rather than piping (`|>`).
+これは表面的には「一軌道」パイプラインに似ていますが、実際には異なる技法を使用しています。
+スイッチは、パイピング（`|>`）ではなく、合成（`>>`）を通じて接続されています。
 
-As a result, the `fizzBuzz` function does not have an int parameter -- we are defining a function by combining other functions. There is no data anywhere.
+結果として、`fizzBuzz`関数には整数パラメータがありません - 他の関数を組み合わせて関数を定義しています。どこにもデータはありません。
 
-A few other things have changed as well:
+他にもいくつか変更点があります。
 
-* We have had to reintroduce the explicit test for the "15" case. This is because we have only two tracks (success or failure).
-  There is no "half-finished track" that allows the "5" case to add to the output of the "3" case.
-* The `labelOrDefault` function from the previous example has been replaced with `either`. In the Success case, a string is printed. In the Failure case, an int is printed.
+* 「15」のテストを明示的に再導入する必要がありました。これは、成功か失敗の2つの軌道しかないためです。
+  「5」のケースが「3」のケースの出力に追加できる「半完成軌道」がありません。
+* 前の例の`labelOrDefault`関数が`either`に置き換えられました。成功の場合、文字列が出力されます。失敗の場合、整数が出力されます。
 
-Here is the complete implementation:
+以下が完全な実装です。
 
 ```fsharp
 module FizzBuzz_RailwayOriented_CarbonationIsSuccess = 
 
     open RailwayCombinatorModule 
 
-    // carbonate a value
+    // 値を炭酸化
     let carbonate factor label i = 
         if i % factor = 0 then
             succeed label
@@ -547,34 +547,34 @@ module FizzBuzz_RailwayOriented_CarbonationIsSuccess =
         either succeed f
 
     let fizzBuzz = 
-        carbonate 15 "FizzBuzz"      // need the 15-FizzBuzz rule because of short-circuit
+        carbonate 15 "FizzBuzz"      // 短絡のため15-FizzBuzzルールが必要
         >> connect (carbonate 3 "Fizz")
         >> connect (carbonate 5 "Buzz")
         >> either (printf "%s; ") (printf "%i; ")
 
-    // test
+    // テスト
     [1..100] |> List.iter fizzBuzz
 ```
 
-### Carbonation as failure?
+### 炭酸化を失敗とみなす？
 
-We defined carbonation as "success"in the example above -- it seems the natural thing to do, surely.  But if you recall, in the railway oriented programming model,
-"success" means that data should be passed on to the next function, while "failure" means to bypass all the intermediate functions and go straight to the end.
+上の例では炭酸化を「成功」と定義しました - 確かに自然なことのように思えます。しかし、鉄道指向プログラミングモデルを思い出すと、
+「成功」はデータを次の関数に渡すべきことを意味し、「失敗」は中間の関数をすべてバイパスして直接終点に行くことを意味します。
 
-For FizzBuzz, the "bypass all the intermediate functions" track is the track with the carbonated labels, while the "pass on to next function" track is the one with integers.
+FizzBuzzの場合、「中間の関数をすべてバイパスする」軌道は炭酸化されたラベルを持つ軌道であり、「次の関数に渡す」軌道は整数を持つ軌道です。
 
-So we should really reverse the tracks: "Failure" now means carbonation, while "Success" means no carbonation. 
+したがって、軌道を逆にすべきです。「失敗」は炭酸化を意味し、「成功」は炭酸化されていないことを意味します。
 
-By doing this, we also get to reuse the pre-defined `bind` function, rather than having to write our own `connect` function.
+このようにすることで、独自の`connect`関数を書く代わりに、事前定義された`bind`関数を再利用できます。
 
-Here's the code with the tracks switched around:
+以下は軌道を入れ替えたコードです。
 
 ```fsharp
 module FizzBuzz_RailwayOriented_CarbonationIsFailure = 
 
     open RailwayCombinatorModule 
 
-    // carbonate a value
+    // 値を炭酸化
     let carbonate factor label i = 
         if i % factor = 0 then
             fail label
@@ -587,21 +587,21 @@ module FizzBuzz_RailwayOriented_CarbonationIsFailure =
         >> bind (carbonate 5 "Buzz")
         >> either (printf "%i; ") (printf "%s; ") 
 
-    // test
+    // テスト
     [1..100] |> List.iter fizzBuzz
 ```
 
-### What are the two tracks anyway?
+### 結局、2つの軌道とは何なのか？
 
-The fact that we can swap the tracks so easily implies that that maybe there is a weakness in the design. Are we trying to use a design that doesn't fit?  
+軌道を簡単に入れ替えられるという事実は、設計に弱点があることを示唆しているかもしれません。適合しないデザインを使おうとしているのでしょうか？
 
-Why does one track have to be "Success" and another track "Failure" anyway? It doesn't seem to make much difference.
+なぜ一方の軌道が「成功」で、もう一方が「失敗」でなければならないのでしょうか？あまり違いがないように見えます。
 
-So, why don't we *keep* the two-track idea, but get rid of the "Success" and "Failure" labels.
+そこで、二軌道のアイデアは維持しつつ、「成功」と「失敗」のラベルを取り除いてはどうでしょうか。
 
-Instead, we can call one track "Carbonated" and the other "Uncarbonated".
+代わりに、一方の軌道を「炭酸化済み」、もう一方を「未炭酸化」と呼ぶことができます。
 
-To make this work, we can define an active pattern and constructor methods, just as we did for "Success/Failure".
+これを実現するために、「成功/失敗」の場合と同様に、アクティブパターンとコンストラクタメソッドを定義できます。
 
 ```fsharp
 let (|Uncarbonated|Carbonated|) =
@@ -609,15 +609,15 @@ let (|Uncarbonated|Carbonated|) =
     | Choice1Of2 u -> Uncarbonated u
     | Choice2Of2 c -> Carbonated c
 
-/// convert a single value into a two-track result
+/// 単一の値を二軌道の結果に変換
 let uncarbonated x = Choice1Of2 x
 let carbonated x = Choice2Of2 x
 ```
 
-If you are doing domain driven design, it is good practice to write code that uses the appropriate [Ubiquitous Language](http://martinfowler.com/bliki/UbiquitousLanguage.html)
-rather than language that is not applicable. 
+ドメイン駆動設計を行う場合、適切な[ユビキタス言語](https://bliki-ja.github.io/UbiquitousLanguage)を使用したコードを書くことは良い習慣です。
+適用できない言語ではなく、ドメインに適した言語を使うべきです。
 
-In this case, if FizzBuzz was our domain, then our functions could now use the domain-friendly terminology of `carbonated` and `uncarbonated` rather than "success" or "failure".
+この場合、FizzBuzzが私たちのドメインだとすれば、関数は「成功」や「失敗」ではなく、ドメインに適した用語である`carbonated`と`uncarbonated`を使用できます。
 
 ```fsharp
 let carbonate factor label i = 
@@ -632,14 +632,14 @@ let connect f =
     | Carbonated x -> carbonated x 
 ```
 
-Note that, as before, the `connect` function can be rewritten using `either` (or we can just use the predefined `bind` as before):
+前と同様に、`connect`関数は`either`を使って書き直すこともできます（または、以前のように事前定義された`bind`を使用できます）。
 
 ```fsharp
 let connect' f = 
     either f carbonated 
 ```
 
-Here's all the code in one module:
+以下は1つのモジュールにまとめたすべてのコードです。
 
 ```fsharp
 module FizzBuzz_RailwayOriented_UsingCustomChoice = 
@@ -651,11 +651,11 @@ module FizzBuzz_RailwayOriented_UsingCustomChoice =
         | Choice1Of2 u -> Uncarbonated u
         | Choice2Of2 c -> Carbonated c
 
-    /// convert a single value into a two-track result
+    /// 単一の値を二軌道の結果に変換
     let uncarbonated x = Choice1Of2 x
     let carbonated x = Choice2Of2 x
 
-    // carbonate a value
+    // 値を炭酸化
     let carbonate factor label i = 
         if i % factor = 0 then
             carbonated label
@@ -676,37 +676,37 @@ module FizzBuzz_RailwayOriented_UsingCustomChoice =
         >> connect (carbonate 5 "Buzz")
         >> either (printf "%i; ") (printf "%s; ") 
 
-    // test
+    // テスト
     [1..100] |> List.iter fizzBuzz
 ```
 
-### Adding rules
+### ルールの追加
 
-There are some problems with the version we have so far:
+これまでのバージョンにはいくつかの問題があります。
 
-* The "15" test is ugly. Can we get rid of it and reuse the "3" and "5" cases?
-* The "3" and "5" cases are hard-coded. Can we make this more dynamic?
+* 「15」のテストが醜いです。これを取り除いて「3」と「5」のケースを再利用できないでしょうか？
+* 「3」と「5」のケースがハードコードされています。これをより動的にできないでしょうか？
 
-As it happens, we can kill two birds with one stone and address both of these issues at once. 
+実は、一石二鳥でこれらの問題を同時に解決できます。
 
-Instead of combining all the "switch" functions in *series*, we can "add" them together in *parallel*.
-In the [railway oriented programming](../posts/recipe-part2.md) post, we used this technique for combining validation functions.
-For FizzBuzz we are going to use it for doing all the factors at once.
+すべての「スイッチ」関数を*直列*に結合する代わりに、*並列*に「加算」することができます。
+[鉄道指向プログラミング](../posts/recipe-part2.md)の記事では、この技法を検証関数の結合に使用しました。
+FizzBuzzでは、すべての因数を一度に処理するためにこれを使用します。
 
-The trick is to define a "append" or "concat" function for combining two functions. Once we can add two functions this way, we can continue and add as many as we like.
+コツは、2つの関数を結合するための「追加」または「連結」関数を定義することです。2つの関数をこの方法で追加できれば、続けて好きなだけ追加できます。
 
-So given that we have two carbonation functions, how do we concat them?
+では、2つの炭酸化関数があるとして、それらをどのように連結すればよいでしょうか？
 
-Well, here are the possible cases:
+以下が可能性のあるケースです。
 
-* If they both have carbonated outputs, we concatenate the labels into a new carbonated label.
-* If one has a carbonated output and the other doesn't, then we use the carbonated one.
-* If neither has a carbonated output, then we use either uncarbonated one (they will be the same).
+* 両方が炭酸化された出力を持つ場合、ラベルを新しい炭酸化されたラベルに連結します。
+* 一方が炭酸化された出力を持ち、もう一方が持たない場合、炭酸化された方を使用します。
+* どちらも炭酸化された出力を持たない場合、どちらかの未炭酸化の出力を使用します（両方とも同じになります）。
 
-Here's the code:
+以下がコードです。
 
 ```fsharp
-// concat two carbonation functions
+// 2つの炭酸化関数を連結
 let (<+>) switch1 switch2 x = 
     match (switch1 x),(switch2 x) with
     | Carbonated s1,Carbonated s2 -> carbonated (s1 + s2)
@@ -715,18 +715,18 @@ let (<+>) switch1 switch2 x =
     | Uncarbonated f1,Uncarbonated f2 -> uncarbonated f1
 ```
 
-As an aside, notice that this code is almost like math, with `uncarbonated` playing the role of "zero", like this:
+ちなみに、このコードはほとんど数学のようで、`uncarbonated`が「ゼロ」の役割を果たしています。以下のようなイメージです。
 
 ```text
-something + something = combined somethings
-zero + something = something
-something + zero = something
-zero + zero = zero
+何か + 何か = 組み合わされた何か
+ゼロ + 何か = 何か
+何か + ゼロ = 何か
+ゼロ + ゼロ = ゼロ
 ```
 
-This is not a coincidence! We will see this kind of thing pop up over and over in functional code. I'll be talking about this in a future post.
+これは偶然ではありません！関数型コードでは、このような種類のパターンが何度も現れます。将来の記事でこれについて話します。
 
-Anyway, with this "concat" function in place, we can rewrite the main `fizzBuzz` like this:
+とにかく、この「連結」関数を使って、メインの`fizzBuzz`を以下のように書き直すことができます。
 
 ```fsharp
 let fizzBuzz = 
@@ -737,9 +737,9 @@ let fizzBuzz =
     >> either (printf "%i; ") (printf "%s; ") 
 ```
 
-The two `carbonate` functions are added and then passed to `either` as before.
+2つの`carbonate`関数が加算され、以前と同様に`either`に渡されます。
 
-Here is the complete code:
+以下が完全なコードです。
 
 ```fsharp
 module FizzBuzz_RailwayOriented_UsingAppend = 
@@ -751,11 +751,11 @@ module FizzBuzz_RailwayOriented_UsingAppend =
         | Choice1Of2 u -> Uncarbonated u
         | Choice2Of2 c -> Carbonated c
 
-    /// convert a single value into a two-track result
+    /// 単一の値を二軌道の結果に変換
     let uncarbonated x = Choice1Of2 x
     let carbonated x = Choice2Of2 x
 
-    // concat two carbonation functions
+    // 2つの炭酸化関数を連結
     let (<+>) switch1 switch2 x = 
         match (switch1 x),(switch2 x) with
         | Carbonated s1,Carbonated s2 -> carbonated (s1 + s2)
@@ -763,7 +763,7 @@ module FizzBuzz_RailwayOriented_UsingAppend =
         | Carbonated s1,Uncarbonated f2 -> carbonated s1
         | Uncarbonated f1,Uncarbonated f2 -> uncarbonated f1
 
-    // carbonate a value
+    // 値を炭酸化
     let carbonate factor label i = 
         if i % factor = 0 then
             carbonated label
@@ -777,19 +777,19 @@ module FizzBuzz_RailwayOriented_UsingAppend =
         carbonateAll 
         >> either (printf "%i; ") (printf "%s; ") 
 
-    // test
+    // テスト
     [1..100] |> List.iter fizzBuzz
 ```
 
-With this addition logic available, we can easily refactor the code to use rules.
-Just as with the earlier "pipeline" implementation, we can use `reduce` to add all the rules together at once.
+この加算ロジックを利用できるようになったので、コードを簡単にリファクタリングしてルールを使用できます。
+先ほどの「パイプライン」実装と同様に、`reduce`を使用してすべてのルールを一度に加算できます。
 
-Here's the version with rules:
+以下がルールを使用したバージョンです。
 
 ```fsharp
 module FizzBuzz_RailwayOriented_UsingAddition = 
 
-    // code as above
+    // 上記と同じコード
         
     let fizzBuzzPrimes rules = 
         let carbonateAll  = 
@@ -800,51 +800,51 @@ module FizzBuzz_RailwayOriented_UsingAddition =
         carbonateAll 
         >> either (printf "%i; ") (printf "%s; ") 
 
-    // test
+    // テスト
     let rules = [ (3,"Fizz"); (5,"Buzz"); (7,"Baz") ]
     [1..105] |> List.iter (fizzBuzzPrimes rules)
 ```
 
 
-## Summary
+## まとめ
 
-In this post, we've seen three different implementations:
+この記事では、3つの異なる実装を見てきました。
 
-* An imperative version that used mutable values and mixed side-effects with logic.
-* A "pipeline" version that passed a data structure through a series of functions.
-* A "railway oriented" version that had two separate tracks, and used "addition" to combine functions in parallel.
+* 可変値を使用し、副作用とロジックを混在させた命令型バージョン。
+* データ構造を一連の関数に通す「パイプライン」バージョン。
+* 2つの別々の軌道を持ち、関数を並列に「加算」して結合する「鉄道指向」バージョン。
 
-In my opinion, the imperative version is the worst design. Even though it was easy to hack out quickly, it has a number of problems that make it brittle and error-prone.
+私の意見では、命令型バージョンが最悪の設計です。素早くハックするのは簡単でしたが、脆弱でエラーを起こしやすい多くの問題があります。
 
-Of the two functional versions, I think the "railway oriented" version is cleaner, for this problem at least.
+2つの関数型バージョンのうち、少なくともこの問題に関しては「鉄道指向」バージョンの方がよりクリーンだと思います。
 
-By using the `Choice` type rather than a tuple or special record, we made the code more elegant thoughout.
-You can see the difference if you compare the pipeline version of `carbonate` with the railway oriented version of `carbonate`.
+タプルや特別なレコードの代わりに`Choice`型を使用することで、コード全体をより優雅にしました。
+`carbonate`のパイプラインバージョンと鉄道指向バージョンを比較すれば、その違いが分かります。
 
-In other situations, of course, the railway oriented approach might not work, and the pipeline approach might be better. I hope this post has given some useful insight into both.
+もちろん、他の状況では鉄道指向アプローチがうまく機能せず、パイプラインアプローチの方が適している場合もあるでしょう。この記事が両方について有用な洞察を提供できたことを願っています。
 
-*If you're a FizzBuzz fan, check out the [Functional Reactive Programming](../posts/concurrency-reactive.md) page, which has yet another variant of the problem.*
+*FizzBuzzファンの方は、[関数型リアクティブプログラミング](../posts/concurrency-reactive.md)のページもチェックしてみてください。そこには問題のさらに別のバリエーションがあります。*
 
-## Postscript: Be careful when using List.reduce
+## 追伸：List.reduceの使用には注意が必要
 
-Be careful with `List.reduce` -- it will fail with empty lists. So if you have an empty rule set, the code will throw a `System.ArgumentException`.
+`List.reduce`の使用には注意が必要です - 空のリストで失敗します。つまり、空のルールセットがある場合、コードは`System.ArgumentException`をスローします。
 
-In the pipeline case, you can see this by adding the following snippet to the module:
+パイプラインの場合、以下のスニペットをモジュールに追加することでこれを確認できます。
 
 ```fsharp
 module FizzBuzz_Pipeline_WithRules = 
 
-    // code as before
+    // 以前のコード
     
-    // bug
+    // バグ
     let emptyRules = []
     [1..105] |> List.iter (fizzBuzz emptyRules)
 ```
 
-The fix is to replace `List.reduce` with `List.fold`. `List.fold` requires an additional parameter: the initial (or "zero") value.
-In this case, we can use the identity function, `id`, as the initial value.
+修正方法は、`List.reduce`を`List.fold`に置き換えることです。`List.fold`には追加のパラメータが必要です。初期（または「ゼロ」）値です。
+この場合、恒等関数`id`を初期値として使用できます。
 
-Here is the fixed version of the code:
+以下が修正されたコードのバージョンです。
 
 ```fsharp
 let allRules = 
@@ -853,7 +853,7 @@ let allRules =
     |> List.fold (>>) id
 ```
 
-Similarly, in the railway oriented example, we had:
+同様に、鉄道指向の例では以下のようになっていました。
 
 ```fsharp
 let allRules = 
@@ -862,7 +862,7 @@ let allRules =
     |> List.reduce (<+>)
 ```
 
-which should be corrected to:
+これは以下のように修正すべきです。
 
 ```fsharp
 let allRules = 
@@ -871,6 +871,6 @@ let allRules =
     |> List.fold (<+>) zero
 ```
 
-where `zero` is the "default" function to use if the list is empty. 
+ここで、`zero`はリストが空の場合に使用する「デフォルト」関数です。
 
-As an exercise, define the zero function for this case. (Hint: we have actually already defined it under another name).
+練習として、このケースの`zero`関数を定義してみてください。（ヒント：実は別の名前ですでに定義しています）
