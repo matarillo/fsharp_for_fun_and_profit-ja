@@ -1,44 +1,44 @@
 ---
 layout: post
-title: "Monoids in practice"
-description: "Monoids without tears - Part 2"
-categories: ["Patterns","Folds"]
-seriesId: "Understanding monoids"
+title: "実践におけるモノイド"
+description: "つらくないモノイド - パート2"
+categories: ["パターン","畳み込み"]
+seriesId: "モノイドを理解する"
 seriesOrder: 2
 ---
 
-In the [previous post](../posts/monoids-without-tears.md), we looked at the definition of a monoid. In this post, we'll see how to implement some monoids.
+[前回の投稿](../posts/monoids-without-tears.md)では、モノイドの定義について見てきました。今回は、モノイドの実装方法を見ていきます。
 
-First, let's revisit the definition:
+まず、定義を振り返ってみましょう。
 
-* You start with a bunch of things, *and* some way of combining them two at a time. 
-* **Rule 1 (Closure)**: The result of combining two things is always another one of the things.
-* **Rule 2 (Associativity)**: When combining more than two things, which pairwise combination you do first doesn't matter.
-* **Rule 3 (Identity element)**: There is a special thing called "zero" such that when you combine any thing with "zero" you get the original thing back.
+* モノイドは、いくつかのものと、それらを2つずつ組み合わせる方法から始まります。
+* **ルール1（閉包性）**：2つのものを組み合わせた結果は、必ず元のもののうちの1つになります。
+* **ルール2（結合法則）**：3つ以上のものを組み合わせる場合、どの順序で2つずつ組み合わせても結果は同じになります。
+* **ルール3（単位元）**：「ゼロ」と呼ばれる特別なものがあり、任意のものと「ゼロ」を組み合わせると、元のものが得られます。
 
-For example, if strings are the things, and string concatenation is the operation, then we have a monoid. Here's some code that demonstrates this:
+例えば、文字列をものとし、文字列の連結を操作とすると、モノイドになります。以下のコードでこれを示します。
 
 ```fsharp
 let s1 = "hello"
 let s2 = " world!"
 
-// closure
-let sum = s1 + s2  // sum is a string
+// 閉包性
+let sum = s1 + s2  // sumは文字列
 
-// associativity
+// 結合法則
 let s3 = "x"
 let s4a = (s1+s2) + s3  
 let s4b = s1 + (s2+s3)
 assert (s4a = s4b)
 
-// an empty string is the identity
+// 空文字列が単位元
 assert (s1 + "" = s1)
 assert ("" + s1 = s1)
 ```
 
-But now let's try to apply this to a more complicated object.
+では、これをより複雑なオブジェクトに適用してみましょう。
 
-Say that we have have an `OrderLine`, a little structure that represents a line in a sales order, say.
+例えば、`OrderLine`という構造体があるとします。これは販売注文の1行を表すものです。
 
 ```fsharp
 type OrderLine = {
@@ -48,9 +48,9 @@ type OrderLine = {
     }
 ```
 
-And then perhaps we might want to find the total for an order, that is, we want to sum the `Total` field for a list of lines.
+そして、注文の合計を求めたいとします。つまり、複数の行の`Total`フィールドを合計したいのです。
 
-The standard imperative approach would be to create a local `total` variable, and then loop through the lines, summing as we go, like this:
+標準的な命令型アプローチでは、ローカルの`total`変数を作成し、行をループしながら合計していきます。以下のようになります。
 
 ```fsharp
 let calculateOrderTotal lines = 
@@ -60,7 +60,7 @@ let calculateOrderTotal lines =
     total
 ```
 
-Let's try it:
+試してみましょう。
 
 ```fsharp
 module OrdersUsingImperativeLoop = 
@@ -88,7 +88,7 @@ module OrdersUsingImperativeLoop =
     |> printfn "Total is %g"
 ```
 
-But of course, being an experienced functional programmer, you would sneer at this, and use `fold` in `calculateOrderTotal` instead, like this:
+しかし、経験豊富な関数型プログラマーなら、`calculateOrderTotal`で`fold`を使うでしょう。以下のようになります。
 
 ```fsharp
 module OrdersUsingFold = 
@@ -116,26 +116,26 @@ module OrdersUsingFold =
     |> printfn "Total is %g"
 ```
 
-So far, so good. Now let's look at a solution using a monoid approach.
+ここまでは順調です。では、モノイドアプローチを使った解決策を見てみましょう。
 
-For a monoid, we need to define some sort of addition or combination operation. How about something like this?
+モノイドでは、何らかの加算や結合操作を定義する必要があります。以下のようなものはどうでしょうか？
 
 ```fsharp
 let addLine orderLine1 orderLine2 =
     orderLine1.Total + orderLine2.Total
 ```
 
-But this is no good, because we forgot a key aspect of monoids. The addition must return a value of the same type!
+しかし、これではダメです。モノイドの重要な側面を忘れています。加算は同じ型の値を返す必要があります！
 
-If we look at the signature for the `addLine` function...
+`addLine`関数のシグネチャを見てみると...
 
 ```fsharp
 addLine : OrderLine -> OrderLine -> float
 ```
 
-...we can see that the return type is `float` not `OrderLine`.
+...戻り値の型が`float`で、`OrderLine`ではありません。
 
-What we need to do is return a whole other `OrderLine`.  Here's a correct implementation:
+必要なのは、別の`OrderLine`全体を返すことです。以下が正しい実装です。
 
 ```fsharp
 let addLine orderLine1 orderLine2 =
@@ -146,35 +146,35 @@ let addLine orderLine1 orderLine2 =
     }
 ```
 
-Now the signature is correct: `addLine : OrderLine -> OrderLine -> OrderLine`.
+これでシグネチャは正しくなりました。`addLine : OrderLine -> OrderLine -> OrderLine`。
 
-Note that because we have to return the entire structure we have to specify something for the `ProductCode` and `Qty` as well, not just the total.
-The `Qty` is easy, we can just do a sum. For the `ProductCode`, I decided to use the string "TOTAL", because we don't have a real product code we can use.
+構造全体を返す必要があるため、合計だけでなく`ProductCode`と`Qty`も指定する必要があります。
+`Qty`は簡単で、単に合計すればいいです。`ProductCode`については、文字列"TOTAL"を使うことにしました。実際の製品コードを使うことはできないからです。
 
-Let's give this a little test:
+少しテストしてみましょう。
 
 ```fsharp
-// utility method to print an OrderLine
+// OrderLineを表示するユーティリティメソッド
 let printLine {ProductCode=p; Qty=q;Total=t} = 
     printfn "%-10s %5i %6g" p q t 
 
 let orderLine1 = {ProductCode="AAA"; Qty=2; Total=19.98}
 let orderLine2 = {ProductCode="BBB"; Qty=1; Total=1.99}
 
-//add two lines to make a third
+// 2行を加算して3行目を作成
 let orderLine3 = addLine orderLine1 orderLine2 
-orderLine3 |> printLine // and print it
+orderLine3 |> printLine // そして表示
 ```
 
-We should get this result:
+結果は以下のようになるはずです。
 
 ```text
 TOTAL          3  21.97
 ```
 
-*NOTE: For more on the printf formatting options used, see the post on [printf here](../posts/printf.md).*
+*注：使用されているprintf書式オプションについては、[printfに関する投稿](../posts/printf.md)を参照してください。*
 
-Now let's apply this to a list using `reduce`:
+では、これをリストに適用してみましょう。`reduce`を使います。
 
 ```fsharp
 let orderLines = [
@@ -188,16 +188,16 @@ orderLines
 |> printLine 
 ```
 
-With the result:
+結果：
 
 ```text
 TOTAL          6  25.96
 ```
 
-At first, this might seem like extra work, and just to add up a total.
-But note that we now have more information than just the total; we also have the sum of the qtys as well.
+一見、これは余計な作業に見えるかもしれません。単に合計を求めるだけなのに。
+しかし、注目してください。合計だけでなく、数量の合計も得られました。
 
-For example, we can easily reuse the `printLine` function to make a simple receipt printing function that includes the total, like this:
+例えば、`printLine`関数を再利用して、合計を含むシンプルなレシート印刷関数を簡単に作ることができます。
 
 ```fsharp
 let printReceipt lines = 
@@ -214,7 +214,7 @@ orderLines
 |> printReceipt
 ```
 
-Which gives an output like this:
+これにより、以下のような出力が得られます。
 
 ```text
 AAA            2  19.98
@@ -224,9 +224,9 @@ CCC            3   3.99
 TOTAL          6  25.96
 ```
 
-More importantly, we can now use the incremental nature of monoids to keep a running subtotal that we update every time a new line is added. 
+さらに重要なのは、モノイドの増分的な性質を利用して、新しい行が追加されるたびに更新される小計を保持できることです。
 
-Here's an example:
+以下は例です。
 
 ```fsharp
 let subtotal = orderLines |> List.reduce addLine 
@@ -235,39 +235,39 @@ let newSubtotal = subtotal |> addLine newLine
 newSubtotal |> printLine
 ```
 
-We could even define a custom operator such as `++` so that we can add lines together naturally as it they were numbers:
+さらに、`++`のようなカスタム演算子を定義して、行を数字のように自然に足し合わせることもできます。
 
 ```fsharp
-let (++) a b = addLine a b  // custom operator
+let (++) a b = addLine a b  // カスタム演算子
 
 let newSubtotal = subtotal ++ newLine 
 ```
     
-You can see that using the monoid pattern opens up a whole new way of thinking. You can apply this "add" approach to almost any kind of object.
+モノイドパターンを使用すると、全く新しい考え方が開けることがわかります。この「加算」アプローチをほぼあらゆる種類のオブジェクトに適用できます。
 
-For example, what would a product "plus" a product look like? Or a customer "plus" a customer? Let your imagination run wild! 
+例えば、製品「プラス」製品はどのようになるでしょうか？あるいは、顧客「プラス」顧客は？想像力を働かせてみてください！
 
-### Are we there yet?
+### まだ終わっていない？
 
-You might have noticed that we not quite done yet.  There is a third requirement for a monoid that we haven't discussed yet -- the zero or identity element.
+モノイドの3つ目の要件、つまりゼロまたは単位元についてまだ議論していないことにお気づきかもしれません。
 
-In this case, the requirement means that we need some kind of `OrderLine` such that adding it to another order line would leave the original untouched. Do we have such a thing?
+この場合、要件は、他の注文行に追加しても元のものが変わらないような`OrderLine`が必要だということです。そのようなものはありますか？
 
-Right now, no, because the addition operation always changes the product code to "TOTAL".  What we have right now is in fact a *semigroup*, not a monoid.
+現時点ではありません。なぜなら、加算操作は常に製品コードを"TOTAL"に変更するからです。今のところ、私たちが持っているのは実際には*半群*であり、モノイドではありません。
 
-As you can see, a semigroup is perfectly useable.  But a problem would arise if we had an empty list of lines and we wanted to total them. What should the result be?
+ご覧のように、半群は完全に使用可能です。しかし、空の行のリストがあって、それらを合計したい場合に問題が生じるでしょう。結果はどうなるべきでしょうか？
 
-One workaround would be to change the `addLine` function to ignore empty product codes. And then we could use an order line with an empty code as the zero element.
+一つの回避策は、`addLine`関数を変更して空の製品コードを無視することです。そして、空のコードを持つ注文行をゼロ要素として使用できます。
 
-Here's what I mean:
+以下がその意味するところです。
 
 ```fsharp
 let addLine orderLine1 orderLine2 =
     match orderLine1.ProductCode, orderLine2.ProductCode with
-    // is one of them zero? If so, return the other one
+    // どちらかがゼロの場合？その場合、もう一方を返す
     | "", _ -> orderLine2
     | _, "" -> orderLine1
-    // anything else is as before
+    // それ以外は以前と同じ
     | _ -> 
         {
         ProductCode = "TOTAL"
@@ -279,20 +279,20 @@ let zero = {ProductCode=""; Qty=0; Total=0.0}
 let orderLine1 = {ProductCode="AAA"; Qty=2; Total=19.98}
 ```
 
-We can then test that identity works as expected:
+そして、単位元が期待通りに機能することをテストできます。
 
 ```fsharp
 assert (orderLine1 = addLine orderLine1 zero)
 assert (orderLine1 = addLine zero orderLine1)
 ```
 
-This does seem a bit hacky, so I wouldn't recommend this technique in general. There's another way to get an identity that we'll be discussing later.
+これはやや強引に見えるかもしれません。一般的にはこの技術をお勧めしません。単位元を得るためのもう一つの方法があり、それについては後で説明します。
 
-## Introducing a special total type
+## 特別な合計型の導入
 
-In the example above, the `OrderLine` type was very simple and it was easy to overload the fields for the total. 
+上記の例では、`OrderLine`型がとてもシンプルだったため、合計のためにフィールドを流用するのは簡単でした。
 
-But what would happen if the `OrderLine` type was more complicated?  For example, if it had a `Price` field as well, like this:
+しかし、`OrderLine`型がもっと複雑だったらどうなるでしょうか？例えば、`Price`フィールドも含まれていたら、以下のようになります。
 
 ```fsharp
 type OrderLine = {
@@ -303,28 +303,28 @@ type OrderLine = {
     }
 ```
 
-Now we have introduced a complication.
-What should we set the `Price` to when we combine two lines?  The average price? No price?
+これで複雑さが増しました。
+2つの行を組み合わせるとき、`Price`をどう設定すべきでしょうか？平均価格？価格なし？
 
 ```fsharp
 let addLine orderLine1 orderLine2 =
     {
     ProductCode = "TOTAL"
     Qty = orderLine1.Qty + orderLine2.Qty
-    Price = 0 // or use average price? 
+    Price = 0 // または平均価格を使う？ 
     Total = orderLine1.Total + orderLine2.Total
     }
 ```
 
-Neither seems very satisfactory.
+どちらの方法も満足のいくものではありません。
 
-The fact that we don't know what to do probably means that our design is wrong.
+何をすべきかわからないということは、おそらく設計が間違っているということです。
 
-Really, we only need a subset of the data for the total, not all of it. How can we represent this?
+実際、合計には全てのデータではなく、データの一部だけが必要です。これをどのように表現できるでしょうか？
 
-With a discriminated union of course! One case can be used for product lines, and the other case can be used for totals only.
+もちろん、判別共用体を使います！一つのケースを製品行に使い、もう一つのケースを合計だけに使います。
 
-Here's what I mean:
+以下がその意味するところです。
 
 ```fsharp
 type ProductLine = {
@@ -344,11 +344,11 @@ type OrderLine =
     | Total of TotalLine
 ```
 
-This design is much nicer. We now have a special structure just for totals and we don't have to use contortions to make the excess data fit. We can even remove the dummy "TOTAL" product code.
+この設計はずっと良くなりました。合計だけのための特別な構造ができたので、余分なデータを無理に当てはめる必要がなくなりました。ダミーの"TOTAL"製品コードも削除できます。
 
-*Note that I named the "total" field differently in each record. Having unique field names like this means that you don't have to always specify the type explicitly.*
+*各レコードで「合計」フィールドの名前を異なるものにしたことに注意してください。このようにフィールド名を一意にすることで、常に型を明示的に指定する必要がなくなります。*
 
-Unfortunately, the addition logic is more complicated now, as we have to handle every combination of cases:
+残念ながら、加算のロジックはより複雑になりました。全ての組み合わせのケースを扱う必要があります。
 
 ```fsharp
 let addLine orderLine1 orderLine2 =
@@ -366,14 +366,14 @@ let addLine orderLine1 orderLine2 =
         | Total t1, Total t2 ->
             {Qty = t1.Qty + t2.Qty;
             OrderTotal = t1.OrderTotal + t2.OrderTotal}
-    Total totalLine // wrap totalLine to make OrderLine
+    Total totalLine // totalLineをラップしてOrderLineを作成
 ```
 
-Note that we cannot just return the `TotalLine` value. We have to wrap in the `Total` case to make a proper `OrderLine`.
-If we didn't do that, then our `addLine` would have the signature `OrderLine -> OrderLine -> TotalLine`, which is not correct. 
-We have to have the signature `OrderLine -> OrderLine -> OrderLine` -- nothing else will do!
+`TotalLine`値をそのまま返すことはできないことに注意してください。適切な`OrderLine`を作るには、`Total`ケースでラップする必要があります。
+そうしないと、`addLine`のシグネチャが`OrderLine -> OrderLine -> TotalLine`になってしまい、正しくありません。
+`OrderLine -> OrderLine -> OrderLine`というシグネチャでなければなりません。他の形は許されません！
 
-Now that we have two cases, we need to handle both of them in the `printLine` function:
+2つのケースができたので、`printLine`関数でも両方を扱う必要があります。
 
 ```fsharp
 let printLine =  function
@@ -383,7 +383,7 @@ let printLine =  function
         printfn "%-10s %5i            %6g" "TOTAL" q t 
 ```
 
-But once we have done this, we can now use addition just as before:
+これで、以前と同じように加算を使えるようになりました。
 
 ```fsharp
 let orderLine1 = Product {ProductCode="AAA"; Qty=2; Price=9.99; LineTotal=19.98}
@@ -395,11 +395,11 @@ orderLine2 |> printLine
 orderLine3 |> printLine 
 ```
 
-### Identity again
+### 単位元の再考
 
-Again, we haven't dealt with the identity requirement.  We could try using the same trick as before, with a blank product code, but that only works with the `Product` case.
+ここでも、単位元の要件を扱っていません。以前と同じトリックを試して、空の製品コードを使うこともできますが、それは`Product`ケースでしか機能しません。
 
-To get a proper identity, we really need to introduce a *third* case, `EmptyOrder` say, to the union type:
+適切な単位元を得るには、共用体型に3つ目のケース、例えば`EmptyOrder`を導入する必要があります。
 
 ```fsharp
 type ProductLine = {
@@ -420,15 +420,15 @@ type OrderLine =
     | EmptyOrder
 ```
 
-With this extra case available, we rewrite the `addLine` function to handle it:
+この追加のケースが利用可能になったので、`addLine`関数を書き直してこれを扱います。
 
 ```fsharp
 let addLine orderLine1 orderLine2 =
     match orderLine1,orderLine2 with
-    // is one of them zero? If so, return the other one
+    // どちらかがゼロ？その場合、もう一方を返す
     | EmptyOrder, _ -> orderLine2
     | _, EmptyOrder -> orderLine1
-    // otherwise as before
+    // それ以外は以前と同じ
     | Product p1, Product p2 ->
         Total { Qty = p1.Qty + p2.Qty;
         OrderTotal = p1.LineTotal + p2.LineTotal}
@@ -443,12 +443,12 @@ let addLine orderLine1 orderLine2 =
         OrderTotal = t1.OrderTotal + t2.OrderTotal}
 ```
 
-And now we can test it:
+これでテストできます。
 
 ```fsharp
 let zero = EmptyOrder
 
-// test identity
+// 単位元をテスト
 let productLine = Product {ProductCode="AAA"; Qty=2; Price=9.99; LineTotal=19.98}
 assert (productLine = addLine productLine zero)
 assert (productLine = addLine zero productLine)
@@ -459,103 +459,103 @@ assert (totalLine = addLine zero totalLine)
 ```
 
 
-## Using the built in List.sum function
+## 組み込みのList.sum関数の使用
 
-It turns out that the `List.sum` function knows about monoids!
-If you tell it what the addition operation is, and what the zero is, then you can use `List.sum` directly rather than `List.fold`.
+実は、`List.sum`関数はモノイドについて知っています！
+加算操作とゼロが何であるかを教えれば、`List.fold`の代わりに`List.sum`を直接使うことができます。
 
-The way you do this is by attaching two static members, `+` and `Zero` to your type, like this:
+これを行うには、型に2つの静的メンバー、`+`と`Zero`を付加します。以下のようになります。
 
 ```fsharp
 type OrderLine with
     static member (+) (x,y) = addLine x y 
-    static member Zero = EmptyOrder   // a property 
+    static member Zero = EmptyOrder   // プロパティ 
 ```
 
-Once this has been done, you can use `List.sum` and it will work as expected.
+これを行えば、`List.sum`を使用でき、期待通りに機能します。
 
 ```fsharp
 let lines1 = [productLine]
-// using fold with explicit op and zero
+// 明示的な演算子とゼロを使用したfold
 lines1 |> List.fold addLine zero |> printfn "%A"  
-// using sum with implicit op and zero
+// 暗黙的な演算子とゼロを使用したsum
 lines1 |> List.sum |> printfn "%A"  
 
 let emptyList: OrderLine list = []
-// using fold with explicit op and zero
+// 明示的な演算子とゼロを使用したfold
 emptyList |> List.fold addLine zero |> printfn "%A"  
-// using sum with implicit op and zero
+// 暗黙的な演算子とゼロを使用したsum
 emptyList |> List.sum |> printfn "%A"  
 ```
 
-Note that for this to work you mustn't already have a method or case called `Zero`.  If I had used the name `Zero` instead of `EmptyOrder` for the third case it would not have worked.
+これが機能するためには、`Zero`という名前のメソッドやケースがすでに存在していないことに注意してください。3つ目のケースに`Zero`という名前を使っていたら、機能しなかったでしょう。
 
-Although this is a neat trick, in practice I don't think it is a good idea unless you are defining a proper math-related type such as `ComplexNumber` or `Vector`.
-It's a bit too clever and non-obvious for my taste.
+これは巧妙なトリックですが、実際には`ComplexNumber`や`Vector`のような本格的な数学関連の型を定義する場合を除いて、良いアイデアだとは思いません。
+あまりに賢すぎて、明白でないからです。
 
-If you *do* want to use this trick, your `Zero` member cannot be an extension method -- it must be defined with the type.
+このトリックを使いたい場合、`Zero`メンバーは拡張メソッドではなく、型と一緒に定義する必要があります。
 
-For example, in the code below, I'm trying to define the empty string as the "zero" for strings.
- 
-`List.fold` works because `String.Zero` is visible as an extension method in this code right here,
-but `List.sum` fails because the extension method is not visible to it.
- 
+例えば、以下のコードでは、空の文字列を文字列の「ゼロ」として定義しようとしています。
+
+`List.fold`は機能します。なぜなら`String.Zero`がここで拡張メソッドとして見えるからです。
+しかし、`List.sum`は失敗します。拡張メソッドが見えないからです。
+
 ```fsharp
 module StringMonoid =
 
-    // define extension method
+    // 拡張メソッドを定義
     type System.String with
         static member Zero = "" 
 
-    // OK.
+    // OK
     ["a";"b";"c"] 
     |> List.reduce (+)    
     |> printfn "Using reduce: %s"
 
-    // OK. String.Zero is visible as an extension method
+    // OK。String.Zeroが拡張メソッドとして見える
     ["a";"b";"c"] 
     |> List.fold (+) System.String.Zero
     |> printfn "Using fold: %s"
 
-    // Error. String.Zero is NOT visible to List.sum
+    // エラー。String.ZeroがList.sumに見えない
     ["a";"b";"c"] 
     |> List.sum          
     |> printfn "Using sum: %s"
 ```
 
-## Mapping to a different structure
+## 異なる構造へのマッピング
 
-Having two different cases in a union might be acceptable in the order line case, but in many real world cases, that approach is too complicated or confusing.
+共用体に2つの異なるケースを持つことは、注文行の場合は許容できるかもしれませんが、多くの実際のケースでは、このアプローチは複雑すぎたり混乱を招いたりします。
 
-Consider a customer record like this:
+以下のような顧客レコードを考えてみましょう。
 
 ```fsharp
 open System
 
 type Customer = {
-    Name:string // and many more string fields!
+    Name:string // さらに多くの文字列フィールドがあります！
     LastActive:DateTime 
     TotalSpend:float }
 ```
 
-How would we "add" two of these customers?
+これらの顧客を2つ「加算」するにはどうすればよいでしょうか？
 
-A helpful tip is to realize that aggregation really only works for numeric and similar types. Strings can't really be aggregated easily.
+役立つヒントは、集計が本当に機能するのは数値や類似の型に対してだけだということです。文字列は簡単には集計できません。
 
-So rather than trying to aggregate `Customer`, let's define a separate class `CustomerStats` that contains all the aggregatable information:
+そこで、`Customer`を集計しようとするのではなく、集計可能な情報をすべて含む別のクラス`CustomerStats`を定義しましょう。
 
 ```fsharp
-// create a type to track customer statistics
+// 顧客統計を追跡するための型を作成
 type CustomerStats = {
-    // number of customers contributing to these stats
+    // これらの統計に寄与する顧客数
     Count:int 
-    // total number of days since last activity
+    // 最後の活動からの日数の合計
     TotalInactiveDays:int 
-    // total amount of money spent
+    // 使用金額の合計
     TotalSpend:float }
 ```
 
-All the fields in `CustomerStats` are numeric, so it is obvious how we can add two stats together:
+`CustomerStats`のすべてのフィールドは数値なので、2つの統計を加算する方法は明白です。
 
 ```fsharp
 let add stat1 stat2 = {
@@ -564,35 +564,35 @@ let add stat1 stat2 = {
     TotalSpend = stat1.TotalSpend + stat2.TotalSpend
     }
 
-// define an infix version as well
+// 中置演算子版も定義
 let (++) a b = add a b
 ```
 
 
-As always, the inputs and output of the `add` function must be the same type.
-We must have `CustomerStats -> CustomerStats -> CustomerStats`, not `Customer -> Customer -> CustomerStats` or any other variant.
+いつものように、`add`関数の入力と出力は同じ型でなければなりません。
+`CustomerStats -> CustomerStats -> CustomerStats`でなければならず、`Customer -> Customer -> CustomerStats`やその他の変形ではいけません。
 
-Ok, so far so good. 
+ここまでは順調です。
 
-Now let's say we have a collection of customers, and we want to get the aggregated stats for them, how should we do this?
+では、顧客のコレクションがあり、その集計統計を取得したい場合、どうすればよいでしょうか？
 
-We can't add the customers directly, so what we need to do is first convert each customer to a `CustomerStats`, and then add the stats up using the monoid operation.
+顧客を直接加算することはできないので、まず各顧客を`CustomerStats`に変換し、それからモノイド演算を使って統計を加算する必要があります。
 
-Here's an example:
+以下は例です。
 
 ```fsharp
-// convert a customer to a stat
+// 顧客を統計に変換
 let toStats cust =
     let inactiveDays= DateTime.Now.Subtract(cust.LastActive).Days;
     {Count=1; TotalInactiveDays=inactiveDays; TotalSpend=cust.TotalSpend}
 
-// create a list of customers
+// 顧客のリストを作成
 let c1 = {Name="Alice"; LastActive=DateTime(2005,1,1); TotalSpend=100.0}
 let c2 = {Name="Bob"; LastActive=DateTime(2010,2,2); TotalSpend=45.0}
 let c3 = {Name="Charlie"; LastActive=DateTime(2011,3,3); TotalSpend=42.0}
 let customers = [c1;c2;c3]
 
-// aggregate the stats
+// 統計を集計
 customers 
 |> List.map toStats
 |> List.reduce add
@@ -600,57 +600,57 @@ customers
 ```
 
 
-The first thing to note is that the `toStats` creates statistics for just one customer. We set the count to just 1.
-It might seem a bit strange, but it does make sense, because if there was just one customer in the list, that's what the aggregate stats would be.
+注目すべき点が2つあります。まず、`toStats`は1人の顧客の統計を作成します。カウントを1に設定しています。
+少し奇妙に思えるかもしれませんが、理にかなっています。リストに1人の顧客しかいない場合、それが集計統計になるからです。
 
-The second thing to note is how the final aggregation is done. First we use `map` to convert the source type to a type that is a monoid, and then we use `reduce` to aggregate all the stats.
+2つ目の注目点は、最終的な集計の方法です。まずソース型をモノイドである型に変換するために`map`を使い、次に`reduce`を使ってすべての統計を集計しています。
 
-Hmmm.... `map` followed by `reduce`. Does that sound familiar to you?  
+う〜ん... `map`の後に`reduce`。聞き覚えがありませんか？
 
-Yes indeed, Google's famous MapReduce algorithm was inspired by this concept (although the details are somewhat different).
+そうです。Googleの有名なMapReduceアルゴリズムは、この概念からインスピレーションを得ています（ただし、詳細は若干異なります）。
 
-Before we move on, here are some simple exercises for you to check your understanding. 
+先に進む前に、理解度をチェックするための簡単な演習をいくつか紹介します。
 
-* What is the "zero" for `CustomerStats`?  Test your code by using `List.fold` on an empty list.
-* Write a simple `OrderStats` class and use it to aggregate the `OrderLine` type that we introduced at the beginning of this post.
+* `CustomerStats`の「ゼロ」は何ですか？空のリストで`List.fold`を使ってコードをテストしてください。
+* シンプルな`OrderStats`クラスを作成し、この投稿の冒頭で紹介した`OrderLine`型を集計するために使ってください。
 
 <a name="monoid-homomorphism"></a>
 
-## Monoid Homomorphisms
+## モノイド準同型
 
-We've now got all the tools we need to understand something called a *monoid homomorphism*. 
+これで、モノイド準同型と呼ばれるものを理解するために必要なツールがすべて揃いました。
 
-I know what you're thinking... Ugh! Not just one, but two strange math words at once!
+何を考えているかわかります... うわ！一度に2つの奇妙な数学用語！
 
-But I hope that the word "monoid" is not so intimidating now.
-And "homomorphism" is another math word that is simpler than it sounds. It's just greek for "same shape" and it describes a mapping or function that keeps the "shape" the same.
+しかし、「モノイド」という言葉がもはやそれほど怖くないことを願っています。
+そして「準同型」は、聞こえるほど複雑ではない数学用語です。ギリシャ語で「同じ形」を意味し、「形」を保つマッピングまたは関数を表します。
 
-What does that mean in practice? 
+実際にはどういう意味でしょうか？
 
-Well, we have seen that all monoids have a certain common structure.
-That is, even though the underlying objects can be quite different (integers, strings, lists, `CustomerStats`, etc.) the "monoidness" of them is the same.
-As George W. Bush once said, once you've seen one monoid, you've seen them all.
+すべてのモノイドには共通の構造があることを見てきました。
+つまり、基礎となるオブジェクトはかなり異なる場合がある（整数、文字列、リスト、`CustomerStats`など）にもかかわらず、それらの「モノイド性」は同じです。
+ジョージ・W・ブッシュが言ったように、一度モノイドを見れば、すべてのモノイドを見たことになります。
 
-So a *monoid* homomorphism is a transformation that preserves an essential "monoidness", even if the "before" and "after" objects are quite different.  
+したがって、*モノイド*準同型は、「前」と「後」のオブジェクトがかなり異なる場合でも、本質的な「モノイド性」を保つ変換です。
 
-In this section, we'll look at a simple monoid homomorphism. It's the "hello world", the "fibonacci series", of monoid homomorphisms -- word counting.
+このセクションでは、シンプルなモノイド準同型を見ていきます。これは、モノイド準同型の「Hello World」、「フィボナッチ数列」にあたるもの - 単語数のカウントです。
 
-### Documents as a monoid
+### モノイドとしての文書
 
-Let's say we have a type which represents text blocks, something like this:
+テキストブロックを表す型があるとしましょう。以下のようなものです。
 
 ```fsharp
 type Text = Text of string
 ```
 
-And of course we can add two smaller text blocks to make a larger text block:
+もちろん、2つの小さなテキストブロックを加算して、より大きなテキストブロックを作ることができます。
 
 ```fsharp
 let addText (Text s1) (Text s2) =
     Text (s1 + s2)
 ```
 
-Here's an example of how adding works:
+加算の動作例は以下の通りです。
 
 ```fsharp
 let t1 = Text "Hello"
@@ -658,70 +658,70 @@ let t2 = Text " World"
 let t3 = addText t1 t2
 ```
 
-Since you are now a expert, you will quickly recognize this as a monoid, with the zero obviously being `Text ""`.
+あなたは今や専門家なので、これがモノイドであることをすぐに認識するでしょう。ゼロが明らかに`Text ""`であることも。
 
-Now let's say we are writing a book (such as [this one](https://leanpub.com/understandingfunctionalprogramming?utm_campaign=understandingfunctionalprogramming)) and
-we want a word count to show how much we have written.
+さて、本を書いている（[この本](https://leanpub.com/understandingfunctionalprogramming?utm_campaign=understandingfunctionalprogramming)のような）としましょう。
+どれだけ書いたかを示す単語数が欲しいとします。
 
-Here's a very crude implementation, plus a test:
+以下は非常に粗い実装と、そのテストです。
 
 ```fsharp
 let wordCount (Text s) =
     s.Split(' ').Length
 
-// test
+// テスト
 Text "Hello world"
 |> wordCount
 |> printfn "The word count is %i"
 ```
 
-So we are writing away, and now we have produced three pages of text.  How do we calculate the word count for the complete document?
+さて、執筆を続けて、3ページのテキストが出来上がりました。完全な文書の単語数をどのように計算すればよいでしょうか？
 
-Well, one way is to add the separate pages together to make a complete text block, and then apply the `wordCount` function to that text block. Here's a diagram:
+一つの方法は、別々のページを加算して完全なテキストブロックを作り、そのテキストブロックに`wordCount`関数を適用することです。以下は図解です。
 
-![Word count via adding pages](../assets/img/monoid_h1.jpg)
+![ページの加算による単語数カウント](../assets/img/monoid_h1.jpg)
 
-But everytime we finish a new page, we have to add all the text together and do the word count all over again.
+しかし、新しいページを書き終えるたびに、すべてのテキストを加算し、単語数を数え直す必要があります。
 
-No doubt you can see that there is a better way of doing this.
-Instead of adding all the text together and then counting, get the word count for each page separately, and then add these counts up, like this:
+疑いなく、もっと良い方法があることがわかるでしょう。
+すべてのテキストを加算してから数えるのではなく、各ページの単語数を別々に数え、それらの数を加算するのです。以下のようになります。
 
-![Word count via adding counts](../assets/img/monoid_h2.jpg)
+![カウントの加算による単語数カウント](../assets/img/monoid_h2.jpg)
 
-The second approach relies on the fact that integers (the counts) are themselves a monoid, and you can add them up to get the desired result.
+2つ目のアプローチは、整数（カウント）自体がモノイドであり、それらを加算して望む結果を得られるという事実に基づいています。
 
-So the `wordCount` function has transformed an aggregation over "pages" into an aggregation over "counts". 
+つまり、`wordCount`関数は「ページ」上の集計を「カウント」上の集計に変換しました。
 
-The big question now: is `wordCount` a monoid homomorphism? 
+ここで大きな疑問が生じます。`wordCount`はモノイド準同型でしょうか？
 
-Well, pages (text) and counts (integers) are both monoids, so it certainly transforms one monoid into another.
+ページ（テキスト）とカウント（整数）は両方ともモノイドなので、確かに一つのモノイドを別のモノイドに変換しています。
 
-But the more subtle condition is: does it preserve the "shape"?  That is, does the adding of the counts give the same answer as the adding of the pages?
+しかし、より微妙な条件は、「形」を保存しているかどうかです。つまり、カウントの加算がページの加算と同じ答えを与えるかどうかです。
 
-In this case, the answer is yes. So `wordCount` *is* a monoid homomorphism! 
+この場合、答えはイエスです。したがって、`wordCount`は*モノイド準同型*です！
 
-You might think that this is obvious, and that all mappings like this must be monoid homomorphisms, but we'll see an example later where this is not true.
+これは明白で、このようなマッピングはすべてモノイド準同型でなければならないと思うかもしれませんが、後でそうでない例を見ていきます。
 
-### The benefits of chunkability
+### チャンク化の利点
 
-The advantage of the monoid homomorphism approach is that it is *"chunkable"*. 
+モノイド準同型アプローチの利点は、「チャンク化可能」であることです。
 
-Each map and word count is independent of the others,
-so we can do them separately and then add up the answers afterwards.
-For many algorithms, working on small chunks of data is much more efficient than working on large chunks, so if we can, we should exploit this whenever possible.
+各マップと単語カウントは他から独立しているため、別々に処理し、後で答えを加算できます。
+多くのアルゴリズムでは、大きなチャンクよりも小さなチャンクで作業する方が効率的なので、
+可能な限りこの特性を活用すべきです。
 
-As a direct consequence of this chunkability,  we get some of the benefits that we touched on in the previous post. 
+このチャンク化可能性の直接的な結果として、前回の投稿で触れたいくつかの利点が得られます。
 
-First, it is *incremental*. That is, as we add text to the last page, we don't have to recalculate the word counts for all the previous pages, which might save some time.
+まず、*増分的*です。つまり、最後のページにテキストを追加する際、前のページの単語数を再計算する必要がないため、時間を節約できる可能性があります。
 
-Second, it is *parallelizable*. The work for each chunk can be done independently, on different cores or machines. Note that in practice, parallelism is much overrated.
-The chunkability into small pieces has a much greater effect on performance than parallelism itself.
+次に、*並列化可能*です。各チャンクの作業は独立して、異なるコアやマシンで行うことができます。ただし、実際には並列性は過大評価されがちです。
+小さな部分へのチャンク化が、並列性そのものよりもパフォーマンスに大きな影響を与えます。
 
-### Comparing word count implementations
+### 単語カウント実装の比較
 
-We're now ready to create some code that will demonstrate these two different techniques. 
+これで、これら2つの異なる技術を実証するコードを作成する準備が整いました。
 
-Let's start with the basic definitions from above, except that I will change the word count to use regular expressions instead of `split`.
+まず、上記の基本的な定義から始めましょう。ただし、単語カウントには`split`の代わりに正規表現を使用します。
 
 ```fsharp
 module WordCountTest = 
@@ -736,12 +736,12 @@ module WordCountTest =
         System.Text.RegularExpressions.Regex.Matches(s,@"\S+").Count
 ```
 
-Next, we'll create a page with 1000 words in it, and a document with 1000 pages.
+次に、1000語を含むページと、1000ページの文書を作成します。
 
 ```fsharp
 module WordCountTest = 
     
-    // code as above
+    // 上記のコード
 
     let page() = 
         List.replicate 1000 "hello "
@@ -752,12 +752,12 @@ module WordCountTest =
         page() |> List.replicate 1000 
 ```
 
-We'll want to time the code to see if there is any difference between the implementations. Here's a little helper function.
+実装間で時間差があるかどうかを確認するために、コードの実行時間を計測したいと思います。以下は小さなヘルパー関数です。
 
 ```fsharp
 module WordCountTest = 
     
-    // code as above
+    // 上記のコード
 
     let time f msg = 
         let stopwatch = Diagnostics.Stopwatch()
@@ -767,12 +767,12 @@ module WordCountTest =
         printfn "Time taken for %s was %ims" msg stopwatch.ElapsedMilliseconds
 ```
 
-Ok, let's implement the first approach. We'll add all the pages together using `addText` and then do a word count on the entire million word document.
+さて、最初のアプローチを実装しましょう。`addText`を使ってすべてのページを加算し、その後、100万語の文書全体に対して単語カウントを行います。
 
 ```fsharp
 module WordCountTest = 
     
-    // code as above
+    // 上記のコード
         
     let wordCountViaAddText() = 
         document() 
@@ -783,12 +783,12 @@ module WordCountTest =
     time wordCountViaAddText "reduce then count"
 ```
 
-For the second approach, we'll do `wordCount` on each page first, and then add all the results together (using `reduce` of course).
+2つ目のアプローチでは、まず各ページで`wordCount`を行い、その後、すべての結果を加算します（もちろん`reduce`を使用します）。
 
 ```fsharp
 module WordCountTest = 
     
-    // code as above
+    // 上記のコード
         
     let wordCountViaMap() = 
         document() 
@@ -799,29 +799,29 @@ module WordCountTest =
     time wordCountViaMap "map then reduce"
 ```
 
-Note that we have only changed two lines of code!
+コードのわずか2行だけを変更したことに注目してください！
 
-In `wordCountViaAddText` we had:
+`wordCountViaAddText`では以下のようになっていました。
 
 ```fsharp
 |> List.reduce addText
 |> wordCount
 ```
 
-And in `wordCountViaMap` we have basically swapped these lines. We now do `wordCount` *first* and then `reduce` afterwards, like this:
+そして`wordCountViaMap`では、基本的にこれらの行を入れ替えました。今度は*最初に*`wordCount`を行い、その後に`reduce`を行います。以下のようになります。
 
 ```fsharp
 |> List.map wordCount
 |> List.reduce (+)
 ```
 
-Finally, let's see what difference parallelism makes. We'll use the built-in `Array.Parallel.map` instead of `List.map`,
-which means we'll need to convert the list into an array first.
+最後に、並列性がどれだけ違いを生むか見てみましょう。`List.map`の代わりに組み込みの`Array.Parallel.map`を使用します。
+これは、まずリストを配列に変換する必要があることを意味します。
 
 ```fsharp
 module WordCountTest = 
 
-    // code as above
+    // 上記のコード
 
     let wordCountViaParallelAddCounts() = 
         document() 
@@ -833,11 +833,11 @@ module WordCountTest =
     time wordCountViaParallelAddCounts "parallel map then reduce"
 ```
 
-I hope that you are following along with the implementations, and that you understand what is going on. 
+実装を追いかけ、何が起こっているかを理解していただけたと思います。
 
-### Analyzing the results
+### 結果の分析
 
-Here are the results for the different implementations running on my 4 core machine:
+以下は、私の4コアマシンで実行した異なる実装の結果です。
 
 ```text
 Time taken for reduce then count was 7955ms
@@ -845,29 +845,29 @@ Time taken for map then reduce was 698ms
 Time taken for parallel map then reduce was 603ms
 ```
 
-We must recognize that these are crude results, not a proper performance profile.
-But even so, it is very obvious that the map/reduce version is about 10 times faster that the `ViaAddText` version.
+これらは粗い結果であり、適切なパフォーマンスプロファイルではないことを認識する必要があります。
+しかし、それでもmap/reduceバージョンが`ViaAddText`バージョンの約10倍速いことは非常に明白です。
 
-This is the key to why monoid homomorphisms are important -- they enable a "divide and conquer" strategy that is both powerful and easy to implement.
+これがモノイド準同型が重要である理由のカギです - 強力で実装が簡単な「分割統治」戦略を可能にするのです。
 
-Yes, you could argue that the algorithms used are very inefficient.
-String concat is a terrible way to accumulate large text blocks, and there are much better ways of doing word counts.
-But even with these caveats, the fundamental point is still valid: by swapping two lines of code, we got a huge performance increase.
+はい、使用されているアルゴリズムが非常に非効率的だと主張することもできます。
+文字列の連結は大きなテキストブロックを蓄積するのに terrible な方法ですし、単語数を数えるもっと良い方法もあります。
+しかし、これらの注意点があっても、基本的なポイントはまだ有効です：コードのわずか2行を入れ替えることで、大幅なパフォーマンス向上を得られました。
 
-And with a little bit of hashing and caching, we would also get the benefits of incremental aggregation -- only recalculating the minimum needed as pages change.
+そして、少しのハッシュ化とキャッシュを使えば、増分的な集計の利点も得られます - ページが変更されたときに必要最小限の再計算だけを行います。
 
-Note that the parallel map didn't make that much difference in this case, even though it did use all four cores. 
-Yes, we did add some minor expense with `toArray` but even in the best case, you might only get a small speed up on a multicore machine.
-To reiterate, what really made the most difference was the divide and conquer strategy inherent in the map/reduce approach.
+この場合、4つのコアすべてを使用したにもかかわらず、並列マップはそれほど大きな違いを生みませんでした。
+確かに、`toArray`で若干のコストを追加しましたが、最良のケースでも、マルチコアマシンでわずかな速度向上しか得られないかもしれません。
+繰り返しますが、最も大きな違いを生んだのは、map/reduceアプローチに固有の分割統治戦略でした。
 
 
-## A non-monoid homomorphism
+## モノイド準同型でない例
 
-I mentioned earlier that not all mappings are necessarily monoid homomorphisms. In this section, we'll look at an example of one that isn't.
+先ほど、すべてのマッピングが必ずしもモノイド準同型ではないと述べました。このセクションでは、そうでない例を見ていきます。
 
-For this example, rather than using counting words, we're going to return the most frequent word in a text block.
+この例では、単語を数える代わりに、テキストブロック内で最も頻出する単語を返します。
 
-Here's the basic code.
+以下が基本的なコードです。
 
 ```fsharp
 module FrequentWordTest = 
@@ -891,24 +891,24 @@ module FrequentWordTest =
         |> fst
 ```
 
-The `mostFrequentWord` function is bit more complicated than the previous `wordCount` function, so I'll take you through it step by step.
+`mostFrequentWord`関数は前の`wordCount`関数よりも少し複雑なので、ステップバイステップで説明します。
 
-First, we use a regex to match all non-whitespace. The result of this is a `MatchCollection` not a list of `Match`,
-so we have to explicitly cast it into a sequence (an `IEnumerable<Match>` in C# terms).
+まず、正規表現を使用してすべての非空白文字にマッチします。この結果は`Match`のリストではなく`MatchCollection`なので、
+明示的にシーケンス（C#用語では`IEnumerable<Match>`）にキャストする必要があります。
 
-Next we convert each `Match` into the matched word, using `ToString()`. Then we group by the word itself, which gives us a list of pairs, where each
-pair is a `(word,list of words)`. We then turn those pairs into `(word,list count)` and then sort descending (using the negated word count).
+次に、各`Match`を`ToString()`を使用してマッチした単語に変換します。その後、単語自体でグループ化します。これにより、各ペアが
+`(単語, 単語のリスト)`となるペアのリストが得られます。そして、これらのペアを`(単語, リストの数)`に変換し、降順にソートします（単語数の負の値を使用）。
 
-Finally we take the first pair, and return the first part of the pair. This is the most frequent word.
+最後に、最初のペアを取り、そのペアの最初の部分を返します。これが最も頻出する単語です。
 
-Ok, let's continue, and create some pages and a document as before.  This time we're not interested in performance, so we only need a few pages.
-But we do want to create *different* pages. We'll create one containing nothing but "hello world", another containing nothing but "goodbye world",
-and a third containing "foobar". (Not a very interesting book IMHO!)
+では続けて、前回と同様にページと文書を作成しましょう。今回はパフォーマンスに興味がないので、少数のページだけ必要です。
+しかし、*異なる*ページを作成したいと思います。"hello world"のみを含むページ、"goodbye world"のみを含むページ、
+そして"foobar"を含む3つ目のページを作成します。（個人的には、あまり面白い本ではないと思います！）
 
 ```fsharp
 module FrequentWordTest = 
 
-    // code as above 
+    // 上記のコード 
 
     let page1() = 
         List.replicate 1000 "hello world "
@@ -929,22 +929,22 @@ module FrequentWordTest =
         [page1(); page2(); page3()]
 ```
 
-It is obvious that, with respect to the entire document, "world" is the most frequent word overall.
+文書全体に関して、"world"が全体で最も頻出する単語であることは明らかです。
 
-So let's compare the two approaches as before.  The first approach will combine all the pages and then apply `mostFrequentWord`, like this.
+では、前回と同様に2つのアプローチを比較しましょう。最初のアプローチはすべてのページを結合し、その後`mostFrequentWord`を適用します。以下のようになります。
 
-![mostFrequentWord via adding pages](../assets/img/monoid_non_h1.png)
+![ページの加算によるmostFrequentWord](../assets/img/monoid_non_h1.png)
 
-The second approach will do `mostFrequentWord` separately on each page and then combine the results, like this:
+2つ目のアプローチは、各ページで別々に`mostFrequentWord`を行い、その後結果を結合します。以下のようになります。
 
-![mostFrequentWord via adding counts](../assets/img/monoid_non_h2.png)
+![カウントの加算によるmostFrequentWord](../assets/img/monoid_non_h2.png)
 
-Here's the code:
+以下がコードです。
         
 ```fsharp
 module FrequentWordTest = 
 
-    // code as above 
+    // 上記のコード 
     
     document() 
     |> List.reduce addText
@@ -957,89 +957,89 @@ module FrequentWordTest =
     |> printfn "Using map reduce, the most frequent word is %s"
 ```
 
-Can you see what happened?  The first approach was correct. But the second approach gave a completely wrong answer!
+何が起こったか分かりますか？最初のアプローチは正しい結果を得ました。しかし、2つ目のアプローチは完全に間違った答えを出しました！
 
 ```text
 Using add first, the most frequent word is world
 Using map reduce, the most frequent word is hellogoodbyefoobar
 ```
 
-The second approach just concatenated the most frequent words from each page. The result is a new string that was not on *any* of the pages. A complete fail!
+2つ目のアプローチは、各ページの最頻出単語を単に連結しただけです。結果は*どの*ページにも存在しない新しい文字列になりました。完全な失敗です！
 
-What went wrong?
+何が間違っていたのでしょうか？
 
-Well, strings *are* a monoid under concatenation, so the mapping transformed a monoid (Text) to another monoid (string).
+文字列は連結下でモノイドですので、このマッピングはモノイド（Text）を別のモノイド（string）に変換しました。
 
-But the mapping did not preserve the "shape". The most frequent word in a big chunk of text cannot be derived from the most frequent words in smaller chunks of text.
-In other words, it is not a proper monoid homomorphism.
+しかし、マッピングは「形」を保存しませんでした。大きなテキストの塊の中で最も頻出する単語は、小さなテキストの塊の中で最も頻出する単語から導き出すことはできません。
+言い換えれば、これは適切なモノイド準同型ではありません。
 
-### Definition of a monoid homomorphism
+### モノイド準同型の定義
 
-Let's look at these two different examples again to understand what the distinction is between them.  
+これら2つの異なる例を再度見て、その違いが何かを理解しましょう。
 
-In the word count example, we got the *same* final result whether we added the blocks and then did the word count,
-or whether we did the word counts and then added them together. Here's a diagram:
+単語数の例では、ブロックを加算してから単語数を数えても、単語数を数えてから加算しても、*同じ*最終結果が得られました。
+以下は図解です。
 
-![word count both ways](../assets/img/monoid_h1_both.png)
+![両方の方法による単語数](../assets/img/monoid_h1_both.png)
 
-But for the most frequent word example, we did *not* get the same answer from the two different approaches.
+しかし、最頻出単語の例では、2つの異なるアプローチから*同じ*答えは得られませんでした。
 
-![most frequent word both ways](../assets/img/monoid_non_h1_both.png)
+![両方の方法による最頻出単語](../assets/img/monoid_non_h1_both.png)
 
-In other words, for `wordCount`, we had
-
-```text
-wordCount(page1) + wordCount(page2) EQUALS wordCount(page1 + page)
-```
-
-But for `mostFrequentWord`, we had:
+言い換えれば、`wordCount`については以下が成り立ちました。
 
 ```text
-mostFrequentWord(page1) + mostFrequentWord(page2) NOT EQUAL TO mostFrequentWord(page1 + page)
+wordCount(page1) + wordCount(page2) は wordCount(page1 + page2) に等しい
 ```
 
-
-So this brings us to a slightly more precise definition of a monoid homomorphism:
+しかし、`mostFrequentWord`については以下のようになりました。
 
 ```text
-Given a function that maps from one monoid to another (like 'wordCount' or 'mostFrequentWord')
-
-Then to be a monoid homomorphism, the function must meet the requirement that:
-
-function(chunk1) + function(chunk2) MUST EQUAL function(chunk1 + chunk2)
+mostFrequentWord(page1) + mostFrequentWord(page2) は mostFrequentWord(page1 + page2) に等しくない
 ```
 
-Alas, then, `mostFrequentWord` is not a monoid homomorphism.
 
-That means that if we want to calculate the `mostFrequentWord` on a large number of text files,
-we are sadly forced to add all the text together first, and we can't benefit from a divide and conquer strategy.
+これにより、モノイド準同型のより正確な定義が得られます。
 
-... or can we? Is there a way to turn `mostFrequentWord` into a proper monoid homomorphism? Stay tuned!
+```text
+あるモノイドから別のモノイドへのマッピング関数（'wordCount'や'mostFrequentWord'のような）が与えられたとき
 
-## Next steps
+モノイド準同型であるためには、その関数は以下の要件を満たす必要があります：
 
-So far, we have only dealt with things that are proper monoids.  But what if the thing you want to work with is *not* a monoid? What then? 
+function(chunk1) + function(chunk2) は function(chunk1 + chunk2) に等しくなければならない
+```
 
-In the next post in this series, I'll give you some tips on converting almost anything into a monoid.
+残念ながら、`mostFrequentWord`はモノイド準同型ではありません。
 
-We'll also fix up the `mostFrequentWord` example so that it is a proper monoid homomorphism,
-and we'll revisit the thorny problem of zeroes, with an elegant approach for creating them.
+つまり、大量のテキストファイルに対して`mostFrequentWord`を計算したい場合、
+悲しいことに、まずすべてのテキストを加算する必要があり、分割統治戦略の恩恵を受けることができません。
 
-See you then!
+...本当にそうでしょうか？`mostFrequentWord`を適切なモノイド準同型に変える方法はないのでしょうか？続きをお楽しみに！
 
-## Further reading
+## 次のステップ
 
-If you are interested in using monoids for data aggregation, there are lots of good discussions in the following links:
+ここまでは、適切なモノイドであるものだけを扱ってきました。しかし、扱いたいものがモノイドでない場合はどうすればよいでしょうか？
 
-* Twitter's [Algebird library](https://blog.twitter.com/2012/scalding-080-and-algebird) 
-* Most [probabilistic data structures](http://highlyscalable.wordpress.com/2012/05/01/probabilistic-structures-web-analytics-data-mining/) are monoids.
-* [Gaussian distributions form a monoid](http://izbicki.me/blog/gausian-distributions-are-monoids).
-* Google's [MapReduce Programming Model](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.104.5859&rep=rep1&type=pdf) (PDF).
-* [Monoidify! Monoids as a Design Principle for Efficient MapReduce Algorithms](http://arxiv.org/abs/1304.7544) (PDF).
-* LinkedIn's [Hourglass libary for Hadoop](http://www.slideshare.net/matthewterencehayes/hourglass-27038297)
-* From Stack Exchange: [What use are groups, monoids, and rings in database computations?](http://cs.stackexchange.com/questions/9648/what-use-are-groups-monoids-and-rings-in-database-computations)
+このシリーズの次の投稿では、ほぼすべてのものをモノイドに変換するためのヒントをいくつか紹介します。
 
-If you want to get a bit more technical, here is a detailed study of monoids and semigroups, using graphics diagrams as the domain:
+また、`mostFrequentWord`の例を修正して適切なモノイド準同型にし、
+ゼロの厄介な問題を再検討し、それらを作成するためのエレガントなアプローチを紹介します。
 
-* [Monoids: Theme and Variations](http://www.cis.upenn.edu/~byorgey/pub/monoid-pearl.pdf) (PDF).
+その時までお待ちください！
+
+## さらなる読み物
+
+データ集計にモノイドを使用することに興味がある場合、以下のリンクに多くの良い議論があります：
+
+* Twitterの[Algebirdライブラリ](https://blog.twitter.com/2012/scalding-080-and-algebird) 
+* ほとんどの[確率的データ構造](https://highlyscalable.wordpress.com/2012/05/01/probabilistic-structures-web-analytics-data-mining/)はモノイドです。
+* [ガウス分布はモノイドを形成します](https://izbicki.me/blog/gausian-distributions-are-monoids)。
+* Googleの[MapReduceプログラミングモデル](https://www.sciencedirect.com/science/article/pii/S0167642307001281) (PDF)。
+* [Monoidify! 効率的なMapReduceアルゴリズムのための設計原則としてのモノイド](https://arxiv.org/abs/1304.7544) (PDF)。
+* LinkedInの[Hadoop用Hourglassライブラリ](https://www.slideshare.net/slideshow/hourglass-27038297/27038297)
+* Stack Exchangeより：[データベース計算において群、モノイド、環はどのように使われるか？](https://cs.stackexchange.com/questions/9648/what-use-are-groups-monoids-and-rings-in-database-computations)
+
+もう少し技術的な内容を望む場合は、グラフィックス図形をドメインとして使用したモノイドと半群の詳細な研究があります：
+
+* [モノイド：テーマとバリエーション](https://repository.upenn.edu/entities/publication/cc20f527-f169-4343-a8c3-911ae3a11ceb) (PDF)。
 

@@ -1,295 +1,295 @@
 ---
 layout: post
-title: "Monoids without tears"
-description: "A mostly mathless discussion of a common functional pattern"
-categories: ["Patterns","Math","Folds"]
-seriesId: "Understanding monoids"
+title: "つらくないモノイド"
+description: "一般的な関数型パターンについて、数学をほとんど使わずに説明します"
+categories: ["パターン","数学","畳み込み"]
+seriesId: "モノイドを理解する"
 seriesOrder: 1
 ---
 
-If you are coming from an OO background, one of the more challenging aspects of learning functional programming is the lack of obvious design patterns.
-There are plenty of idioms such as [partial application](../posts/partial-application.md), and [error handling techniques](../posts/recipe-part2.md), but no apparent patterns in the [GoF sense](http://en.wikipedia.org/wiki/Design_Patterns).
+オブジェクト指向の背景から来た人にとって、関数型プログラミングを学ぶ上で最も難しい点の1つは、明確なデザインパターンが見当たらないことです。
+[部分適用](../posts/partial-application.md)や[エラー処理テクニック](../posts/recipe-part2.md)などのイディオムは多くありますが、[GoF的な意味での](https://ja.wikipedia.org/wiki/%E3%83%87%E3%82%B6%E3%82%A4%E3%83%B3%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3_(%E3%82%BD%E3%83%95%E3%83%88%E3%82%A6%E3%82%A7%E3%82%A2))明らかなパターンはありません。
 
-In this post, we'll look at a very common "pattern" known as a *monoid*. Monoids are not really a design pattern; more an approach to working with many different types of values in a common way.
-In fact, once you understand monoids, you will start seeing them everywhere!
+この記事では、*モノイド*と呼ばれる非常に一般的な「パターン」を見ていきます。モノイドは、厳密にはデザインパターンではありません。むしろ、様々な種類の値を共通の方法で扱うためのアプローチと言えます。
+実際、モノイドを理解すると、モノイドがあらゆるところに潜んでいることに気づくようになります。
 
-Unfortunately the term "monoid" itself is a bit off-putting. It originally comes from [mathematics](http://en.wikipedia.org/wiki/Monoid)
-but the concept as applied to programming is easy to grasp without any math at all, as I hope to demonstrate.  In fact, if we were to name the concept today in a programming context,
-we might call it something like `ICombinable` instead, which is not nearly as scary. 
+残念ながら、「モノイド」という用語自体は少し敬遠されがちです。もともとは[数学](https://ja.wikipedia.org/wiki/%E3%83%A2%E3%83%8E%E3%82%A4%E3%83%89)に由来していますが、
+プログラミングに適用される概念は、これから示すように、数学をまったく使わずに理解するのは簡単です。実際、今日のプログラミングの文脈でこの概念に名前をつけるとしたら、
+`ICombinable`のような、それほど怖くない名前になっていたかもしれません。
 
-Finally, you might be wondering if a "monoid" has any connection with a "monad". Yes, there is a mathematical connection between them, but in programming terms, they are very different things, despite having similar names.
+最後に、「モノイド」と「モナド」に何か関連があるのかと疑問に思うかもしれません。確かに、数学的にはつながりがありますが、プログラミングの観点では、似た名前にもかかわらず、非常に異なるものです。
 
-## Uh-oh... some equations
+## ああ...方程式が出てきた
 
-On this site, I generally don't use any math, but in this case I'm going to break my self-imposed rule and show you some equations. 
+このサイトでは、一般的に数学を使いませんが、今回は自分で課したルールを破って、いくつかの方程式をお見せします。
 
-Ready? Here's the first one:
+準備はいいですか？これが1つ目です：
 
 ```text
 1 + 2 = 3
 ```
 
-Could you handle that? How about another one?
+これは大丈夫でしたか？もう1つどうでしょう：
 
 ```text
 1 + (2 + 3) = (1 + 2) + 3
 ```
 
-And finally one more...
+そして最後にもう1つ...
 
 ```text
-1 + 0 = 1 and 0 + 1 = 1
+1 + 0 = 1 そして 0 + 1 = 1
 ```
 
-Ok! We're done! If you can understand these equations, then you have all the math you need to understand monoids.
+はい、終わりです！これらの方程式を理解できれば、モノイドを理解するのに必要な数学はすべて持っていることになります。
 
-## Thinking like a mathematician
+## 数学者のように考える
 
-> *"A mathematician, like a painter or poet, is a maker of patterns. If his patterns are more permanent than theirs, it is because they are made with ideas" -- G H Hardy*
+> *「数学者は、画家や詩人と同じように、パターンの作り手です。彼らのパターンがより永続的であるとすれば、それはアイデアで作られているからです」 -- G H ハーディ*
  
-Most people imagine that mathematicians work with numbers, doing complicated arithmetic and calculus. 
+多くの人は、数学者が数字を扱い、複雑な計算や微積分を行うと想像しています。
 
-This is a misconception. For example, if you look at [typical high-level](http://terrytao.wordpress.com/2013/07/27/an-improved-type-i-estimate/) [math discussions](http://books.google.co.uk/books?id=VOCQUC_uiWgC&pg=PA102),
-you will see lots of strange words, and lots of letter and symbols, but not a lot of arithmetic.
+これは誤解です。例えば、[典型的な高度な](https://terrytao.wordpress.com/2013/07/27/an-improved-type-i-estimate/)[数学の議論](https://books.google.co.uk/books?id=VOCQUC_uiWgC&pg=PA102)を見ると、
+奇妙な言葉や文字、記号はたくさん見かけますが、計算はあまり見かけません。
  
-One of the things that mathematicians *do* do though, is try to find patterns in things. "What do these things have in common?" and "How can we generalize these concepts?" are typical mathematical questions.
+しかし、数学者が実際に行っていることの1つは、物事のパターンを見つけようとすることです。「これらの物事に共通点は何か？」「これらの概念をどのように一般化できるか？」といった問いは、数学的な疑問の典型例です。
 
 
-So let's look at these three equations through a mathematician's eyes.
+では、数学者の目を通して、これら3つの方程式を見てみましょう。
 
-### Generalizing the first equation
+### 最初の方程式の一般化
 
-A mathematician would look at `1 + 2 = 3` and think something like:
+数学者は `1 + 2 = 3` を見て、次のように考えるでしょう：
 
-* We've got a bunch of things (integers in this case)
-* We've got some way of combining two of them (addition in this case)
-* And the result is another one of these things (that is, we get another integer)
+* 一群のもの（この場合は整数）がある
+* それらを2つずつ組み合わせる方法（この場合は加算）がある
+* そして結果はこれらのものの1つになる（つまり、別の整数が得られる）
 
-And then a mathematician might try to see if this pattern could be generalized to other kinds of things and operations. 
+そして数学者は、このパターンを他の種類のものや操作に一般化できないかと考えるかもしれません。
 
-Let's start by staying with integers as the "things". What other ways are there of combining integers? And do they fit the pattern?
+まずは、「もの」として整数を維持しましょう。整数を組み合わせる他の方法にはどのようなものがあるでしょうか？そしてそれらはこのパターンに当てはまるでしょうか？
 
-Let's try multiplication, does that fit this pattern?
+乗算を試してみましょう。これはパターンに当てはまるでしょうか？
 
-The answer is yes, multiplication does fit this pattern because multiplying any two integers results in another integer.
+答えはイエスです。2つの整数を掛け合わせた結果は別の整数になるので、乗算はこのパターンに当てはまります。
 
-What about division? Does that fit the pattern? The answer is no, because in most cases, dividing two integers results in a fraction, which is *not* an integer (I'm ignoring integer division).
+除算はどうでしょうか？これはパターンに当てはまるでしょうか？答えはノーです。なぜなら、ほとんどの場合、2つの整数を割ると分数になり、整数では*ありません*（整数除算は無視します）。
 
-What about the `max` function? Does that fit the pattern? It combines two integers and returns one of them, so the answer is yes.
+`max`関数はどうでしょうか？これはパターンに当てはまるでしょうか？2つの整数を組み合わせてそのうちの1つを返すので、答えはイエスです。
 
-What about the `equals` function? It combines two integers but returns a boolean, not an integer, so the answer is no.
+`equals`関数はどうでしょうか？2つの整数を組み合わせますが、ブール値を返すので整数ではありません。したがって答えはノーです。
 
-Enough of integers! What other kinds of things can we think of?
+整数はもう十分です！他にどんな種類のものを考えられるでしょうか？
 
-Floats are similar to integers, but unlike integers, using division with floats does result in another float, so the division operation fits the pattern.
+浮動小数点数は整数に似ていますが、整数とは異なり、浮動小数点数での除算は別の浮動小数点数になるので、除算操作はパターンに当てはまります。
 
-How about booleans? They can be combined using operators such as AND, OR and so on. Does `aBool AND aBool` result in another bool? Yes! And `OR` too fits the pattern.
+ブール値はどうでしょうか？ANDやORなどの演算子で組み合わせることができます。`aBool AND aBool`は別のブール値になりますか？はい！そして`OR`もパターンに当てはまります。
 
-Strings next. How can they be combined? One way is string concatenation, which returns another string, which is what we want. But something like the equality operation doesn't fit, because it returns a boolean.
+次は文字列です。どのように組み合わせられるでしょうか？1つの方法は文字列の連結で、これは別の文字列を返すのでパターンに当てはまります。しかし、等価性操作のようなものはブール値を返すのでパターンに当てはまりません。
 
-Finally, let's consider lists. As for strings, the obvious way to combine them is with list concatenation, which returns another list and fits the pattern.
+最後にリストを考えてみましょう。文字列と同様に、明らかな組み合わせ方法はリストの連結で、これは別のリストを返すのでパターンに当てはまります。
 
-We can continue on like this for all sorts of objects and combining operations, but you should see how it works now.
+このように、さまざまなオブジェクトと組み合わせ操作について続けることができますが、どのように機能するかはもうわかったでしょう。
 
-You might ask: why is it so important that the operation return another thing of the same type? The answer is that **you can chain together multiple objects using the operation**.
+操作が同じ型の別のものを返すことがなぜそんなに重要なのかと疑問に思うかもしれません。答えは、**操作を使って複数のオブジェクトを連鎖的に組み合わせることができる**からです。
 
 
-For example, because `1 + 2` is another integer, you can add 3 to it. And then because `1 + 2 + 3` is an integer as well, you can keep going and add say, 4, to the result.
-In other words, it is only because integer addition fits the pattern that you can write a sequence of additions like this: `1 + 2 + 3 + 4`.  You couldn't write `1 = 2 = 3 = 4` in the same way,
-because integer equality doesn't fit the pattern.
+例えば、`1 + 2`は別の整数なので、それに3を足すことができます。そして`1 + 2 + 3`も整数なので、続けて例えば4を足すことができます。
+つまり、整数の加算がこのパターンに当てはまるからこそ、`1 + 2 + 3 + 4`のような一連の加算を書くことができるのです。同じように`1 = 2 = 3 = 4`とは書けません。
+なぜなら、整数の等価性はこのパターンに当てはまらないからです。
 
-And of course, the chain of combined items can be as long as we like. In other words, this pattern allows us to extend a pairwise operation into **an operation that works on lists**.
+もちろん、組み合わされた項目の連鎖は好きなだけ長くすることができます。言い換えれば、このパターンによって、ペアワイズ操作を**リストに対する操作に拡張する**ことができます。
 
-Mathematicians call the requirement that "the result is another one of these things" the *closure* requirement.
+数学者は、「結果が別のこれらのもの1つになる」という要件を*閉包*要件と呼びます。
 
-### Generalizing the second equation
+### 2つ目の方程式の一般化
 
-Ok, what about the next equation, `1 + (2 + 3) = (1 + 2) + 3`? Why is that important?
+さて、次の方程式 `1 + (2 + 3) = (1 + 2) + 3` はどうでしょうか？なぜこれが重要なのでしょうか？
 
-Well, if you think about the first pattern, it says we can build up a chain of operations such as `1 + 2 + 3`. But we have only got a pairwise operation. So what order should we do the combining in? Should we combine 1 and 2 first,
-then combine the result with 3? Or should we combine 2 and 3 first and then combine 1 with that result? Does it make a difference?
+最初のパターンを考えると、`1 + 2 + 3`のような操作の連鎖を構築できると言っています。しかし、ペアワイズ操作しか持っていません。では、どの順序で組み合わせるべきでしょうか？まず1と2を組み合わせて、
+その結果を3と組み合わせるべきでしょうか？それとも、まず2と3を組み合わせて、その結果を1と組み合わせるべきでしょうか？違いはあるのでしょうか？
 
-That's where this second equation is useful. It says that, for addition, the order of combination doesn't matter. You get the same result either way. 
+ここで2つ目の方程式が役立ちます。加算の場合、組み合わせの順序は関係ないと言っています。どちらの方法でも同じ結果が得られます。
 
-So for a chain of four items like this: `1 + 2 + 3 + 4`, we could start working from the left hand side: `((1+2) + 3) + 4` or from the right hand side: `1 + (2 + (3+4))` or even do it in two parts
-and then combine them like this: `(1+2) + (3+4)`.
+したがって、`1 + 2 + 3 + 4`のような4つの項目の連鎖の場合、左側から始めることもできます：`((1+2) + 3) + 4`、右側から始めることもできます：`1 + (2 + (3+4))`、
+あるいは2つの部分に分けて組み合わせることもできます：`(1+2) + (3+4)`。
 
-Let's see if this pattern applies to the examples we've already looked at.
+これまで見てきた例にこのパターンが当てはまるかどうか見てみましょう。
 
-Again, let's start with other ways of combining integers. 
+再び、整数を組み合わせる他の方法から始めましょう。
 
-We'll start with multiplication again. Does `1 * (2 * 3)` give the same result as `(1 * 2) * 3`? Yes. Just as with addition, the order doesn't matter.
+まず乗算から始めます。`1 * (2 * 3)`は`(1 * 2) * 3`と同じ結果になりますか？はい。加算と同様に、順序は関係ありません。
 
-Now let's try subtraction. Does `1 - (2 - 3)` give the same result as `(1 - 2) - 3`?  No. For subtraction, the order *does* matter. 
+次に減算を試してみましょう。`1 - (2 - 3)`は`(1 - 2) - 3`と同じ結果になりますか？いいえ。減算の場合、順序が*重要です*。
 
-What about division? Does `12 / (2 / 3)` give the same result as `(12 / 2) / 3`?  No. For division also, the order matters. 
+除算はどうでしょうか？`12 / (2 / 3)`は`(12 / 2) / 3`と同じ結果になりますか？いいえ。除算の場合も順序が重要です。
 
-But the `max` function does work. `max( max(12,2), 3)` gives the same result as `max(12, max(2,3)`.
+しかし、`max`関数は機能します。`max(max(12,2), 3)`は`max(12, max(2,3))`と同じ結果になります。
 
-What about strings and lists? Does concatenation meet the requirement? What do you think?
+文字列やリストはどうでしょうか？連結はこの要件を満たしますか？どう思いますか？
 
-Here's a question... Can we come up with an operation for strings that *is* order dependent? 
+ここで質問です... 文字列に対して、順序に依存する操作を考え出せますか？
 
-Well, how about a function like "subtractChars" which removes all characters in the right string from the left string. So `subtractChars("abc","ab")` is just `"c"`.
-`subtractChars` is indeed order dependent, as you can see with a simple example: `subtractChars("abc", subtractChars("abc","abc"))` is not the same string  as `subtractChars(subtractChars("abc","abc"),"abc")`.
+例えば、「subtractChars」のような関数はどうでしょうか。これは左の文字列から右の文字列にあるすべての文字を取り除きます。つまり、`subtractChars("abc","ab")`は単に`"c"`になります。
+`subtractChars`は確かに順序に依存します。簡単な例で確認できます：`subtractChars("abc", subtractChars("abc","abc"))`は`subtractChars(subtractChars("abc","abc"),"abc")`と同じ文字列にはなりません。
 
-Mathematicians call the requirement that "the order doesn't matter" the *associativity* requirement.
+数学者は「順序が関係ない」という要件を*結合法則*と呼びます。
 
-**Important Note:**  When I say the "order of combining", I am talking about the order in which you do the pairwise combining steps -- combining one pair, and then combining the result with the next item. 
+**重要な注意：** 「組み合わせの順序」と言うとき、ペアワイズの組み合わせステップを行う順序について話しています - 1つのペアを組み合わせ、その結果を次の項目と組み合わせます。
 
-But it is critical that the overall sequence of the items be left unchanged. This is because for certain operations, if you change the sequencing of the items,
-then you get a completely different result! `1 - 2` does not mean the same as `2 - 1` and `2 / 3` does not mean the same as `3 / 2`.
+しかし、項目の全体的な順序を変更しないことが重要です。なぜなら、特定の操作では、項目の順序を変更すると
+まったく異なる結果になるからです！`1 - 2`は`2 - 1`と同じ意味ではありませんし、`2 / 3`は`3 / 2`と同じ意味ではありません。
 
-Of course, in many common cases, the sequence order doesn't matter. After all, `1+2` is the same as `2+1`. In this case, the operation is said to be *commutative*.
+もちろん、多くの一般的なケースでは、順序は関係ありません。結局のところ、`1+2`は`2+1`と同じです。この場合、操作は*可換*であると言います。
 
-### The third equation
+### 3つ目の方程式
 
-Now let's look at the third equation, `1 + 0 = 1`.
+では、3つ目の方程式 `1 + 0 = 1` を見てみましょう。
 
-A mathematician would say something like: that's interesting -- there is a special kind of thing ("zero") that, when you combine it with something,
-just gives you back the original something, as if nothing had happened.
+数学者はこう言うでしょう：面白い - 特別な種類のもの（「ゼロ」）があって、それを何かと組み合わせると、
+まるで何も起こらなかったかのように元のものがそのまま返ってくる。
 
-So once more, let's revisit our examples and see if we can extend this "zero" concept to other operations and other things.
+そこで、もう一度例を振り返り、この「ゼロ」の概念を他の操作や他のものに拡張できるかどうか見てみましょう。
 
-Again, let's start with multiplication. Is there some value, such that when you multiply a number with it, you get back the original number?
+再び、乗算から始めましょう。ある値があって、それを数と掛け合わせると元の数が返ってくるようなものはあるでしょうか？
 
-Yes, of course! The number one. So for multiplication, the number `1` is the "zero".
+ええ、もちろんあります！数字の1です。つまり、乗算の場合、数字「1」が「ゼロ」になります。
 
-What about `max`? Is there a "zero" for that?  For 32 bit ints, yes. Combining `System.Int32.MinValue` with any other 32 bit integer using `max` will return the other integer.
-That fits the definition of "zero" perfectly.
+`max`はどうでしょうか？「ゼロ」はありますか？32ビット整数の場合、はい。`System.Int32.MinValue`を他の任意の32ビット整数と`max`を使って組み合わせると、他の整数が返されます。
+これは「ゼロ」の定義に完全に当てはまります。
 
-What about booleans combined using AND? Is there a zero for that? Yes. It is the value `True`. Why? Because `True AND False` is `False`, and `True AND True` is `True`. In both cases the other value is returned untouched.
+ANDを使って組み合わせるブール値はどうでしょうか？これに「ゼロ」はありますか？はい。値`True`です。なぜなら、`True AND False`は`False`で、`True AND True`は`True`だからです。どちらの場合も他の値がそのまま返されます。
 
-What about booleans combined using OR? Is there a zero for that as well? I'll let you decide.
+ORを使って組み合わせるブール値にも「ゼロ」はありますか？答えはあなたに委ねます。
 
-Moving on, what about string concatenation? Is there a "zero" for this?  Yes, indeed -- it is just the empty string.
+次に、文字列の連結はどうでしょうか？これに「ゼロ」はありますか？ええ、確かにあります - 空の文字列です。
 
 ```text
 "" + "hello" = "hello"
 "hello" + "" = "hello"
 ```
 
-Finally, for list concatenation, the "zero" is just the empty list.  
+最後に、リストの連結の場合、「ゼロ」は空のリストです。
 
 ```text
 [] @ [1;2;3] = [1;2;3]
 [1;2;3] @ [] = [1;2;3]
 ```
 
-You can see that the "zero" value depends very much on the operation, not just on the set of things. The zero for integer addition is different from the "zero" for integer multiplication,
-which is different again from the from "zero" for `Max`.
+「ゼロ」の値は、ものの集合だけでなく、操作にも大きく依存することがわかります。整数加算の「ゼロ」は整数乗算の「ゼロ」とは異なり、
+それはさらに`Max`の「ゼロ」とも異なります。
 
-Mathematicians call the "zero" the *identity element*.
+数学者は「ゼロ」を*単位元*と呼びます。
 
-### The equations revisited
+### 方程式の再考
 
-So now let's revisit the equations with our new generalizations in mind.
+では、新しい一般化を念頭に置いて、方程式を再考してみましょう。
 
-Before, we had:
+以前は次のようでした：
 
 ```text
 1 + 2 = 3
 1 + (2 + 3) = (1 + 2) + 3
-1 + 0 = 1 and 0 + 1 = 1
+1 + 0 = 1 そして 0 + 1 = 1
 ```
 
-But now we have something much more abstract, a set of generalized requirements that can apply to all sorts of things:
+しかし今では、あらゆる種類のものに適用できる、はるかに抽象的な一連の一般化された要件があります：
 
-* You start with a bunch of things, *and* some way of combining them two at a time. 
-* **Rule 1 (Closure)**: The result of combining two things is always another one of the things.
-* **Rule 2 (Associativity)**: When combining more than two things, which pairwise combination you do first doesn't matter.
-* **Rule 3 (Identity element)**: There is a special thing called "zero" such that when you combine any thing with "zero" you get the original thing back.
+* あなたは一群のものと、それらを2つずつ組み合わせる方法から始めます。
+* **規則1（閉包）**：2つのものを組み合わせた結果は、常にそれらのものの1つになります。
+* **規則2（結合法則）**：2つ以上のものを組み合わせる場合、どのペアワイズの組み合わせを最初に行うかは関係ありません。
+* **規則3（単位元）**：「ゼロ」と呼ばれる特別なものがあり、任意のものと「ゼロ」を組み合わせると元のものが返されます。
 
-With these rules in place, we can come back to the definition of a monoid. A "monoid" is just a system that obeys all three rules. Simple!
+これらの規則が整えば、モノイドの定義に戻ることができます。「モノイド」とは単に、これら3つの規則すべてに従う仕組みのことです。簡単でしょう！
 
-As I said at the beginning, don't let the mathematical background put you off. If programmers had named this pattern, it probably would been called something like "the combinable pattern" rather than "monoid".
-But that's life.  The terminology is already well-established, so we have to use it.
+冒頭で述べたように、数学的背景に気後れしないでください。プログラマーがこのパターンに名前をつけていたら、おそらく「モノイド」ではなく「組み合わせ可能パターン」のような名前になっていたでしょう。
+しかし、それが現実です。用語はすでに確立されているので、使わざるを得ません。
 
-Note there are *two* parts to the definition of a monoid -- the things plus the associated operation.
-A monoid is not just "a bunch of things", but "a bunch of things" *and* "some way of combining them".
-So, for example, "the integers" is not a monoid, but "the integers under addition" is a monoid.
+モノイドの定義には*2つの*部分があることに注意してください - ものと、それに関連する操作です。
+モノイドは単に「一群のもの」ではなく、「一群のもの」*と*「それらを組み合わせる方法」です。
+したがって、例えば「整数」はモノイドではありませんが、「加算下の整数」はモノイドです。
 
-### Semigroups
+### 半群
 
-In certain cases, you have a system that only follows the first two rules, and there is no candidate for a "zero" value. 
+場合によっては、最初の2つの規則にのみ従う仕組みがあり、「ゼロ」の候補がないことがあります。
 
-For example, if your domain consists only of strictly positive numbers, then under addition they are closed and associative, but there is no positive number that can be "zero".
+例えば、ドメインが厳密に正の数のみで構成される場合、加算の下で閉じていて結合的ですが、「ゼロ」になる正の数はありません。
 
-Another example might be the intersection of finite lists. It is closed and associative, but there is no (finite) list that when intersected with any other finite list, leaves it untouched.
+別の例として、有限リストの交差があります。これは閉じていて結合的ですが、他の任意の有限リストと交差させたときにそのリストをそのまま残す（有限の）リストはありません。
 
-This kind of system still quite useful, and is called a "semigroup" by mathematicians, rather than a monoid.
-Luckily, there is a trick that can convert any semigroup into a monoid (which I'll describe later).
+この種の仕組みはまだかなり有用で、数学者によって「半群」と呼ばれます。モノイドではありません。
+幸いなことに、任意の半群をモノイドに変換するトリックがあります（後で説明します）。
 
 
-### A table of classifications
+### 分類の表
 
-Let's put all our examples into a table, so you can see them all together.
+これまでの例をすべて表にまとめてみましょう。
 
 <table class="table table-condensed table-striped">
 <col width=5em></col>
 <tr>
-<th>Things</th>
-<th>Operation</th>
-<th>Closed?</th>
-<th>Associative?</th>
-<th>Identity?</th>
-<th>Classification</th>
+<th>もの</th>
+<th>操作</th>
+<th>閉じている？</th>
+<th>結合的？</th>
+<th>単位元？</th>
+<th>分類</th>
 </tr>
 
 <tr>
 <td>Int32</td>
-<td>Addition</td>
-<td>Yes</td>
-<td>Yes</td>
+<td>加算</td>
+<td>はい</td>
+<td>はい</td>
 <td>0</td>
-<td>Monoid</td>
+<td>モノイド</td>
 </tr>
 
 <tr>
 <td>Int32</td>
-<td>Multiplication</td>
-<td>Yes</td>
-<td>Yes</td>
+<td>乗算</td>
+<td>はい</td>
+<td>はい</td>
 <td>1</td>
-<td>Monoid</td>
+<td>モノイド</td>
 </tr>
 
 <tr>
 <td>Int32</td>
-<td>Subtraction</td>
-<td>Yes</td>
-<td>No</td>
+<td>減算</td>
+<td>はい</td>
+<td>いいえ</td>
 <td>0</td>
-<td>Other</td>
+<td>その他</td>
 </tr>
 
 
 <tr>
 <td>Int32</td>
 <td>Max</td>
-<td>Yes</td>
-<td>Yes</td>
+<td>はい</td>
+<td>はい</td>
 <td>Int32.MinValue</td>
-<td>Monoid</td>
+<td>モノイド</td>
 </tr>
 
 <tr>
 <td>Int32</td>
-<td>Equality</td>
-<td>No</td>
+<td>等価性</td>
+<td>いいえ</td>
 <td></td>
 <td></td>
-<td>Other</td>
+<td>その他</td>
 </tr>
 
 
 <tr>
 <td>Int32</td>
-<td>Less than</td>
-<td>No</td>
+<td>未満</td>
+<td>いいえ</td>
 <td></td>
 <td></td>
-<td>Other</td>
+<td>その他</td>
 </tr>
 
 <tr>
@@ -298,20 +298,20 @@ Let's put all our examples into a table, so you can see them all together.
 
 <tr>
 <td>Float</td>
-<td>Multiplication</td>
-<td>Yes</td>
-<td>No (See note 1)</td>
+<td>乗算</td>
+<td>はい</td>
+<td>いいえ（注1参照）</td>
 <td>1</td>
-<td>Other</td>
+<td>その他</td>
 </tr>
 
 <tr>
 <td>Float</td>
-<td>Division</td>
-<td>Yes (See note 2)</td>
-<td>No</td>
+<td>除算</td>
+<td>はい（注2参照）</td>
+<td>いいえ</td>
 <td>1</td>
-<td>Other</td>
+<td>その他</td>
 </tr>
 
 <tr>
@@ -319,21 +319,21 @@ Let's put all our examples into a table, so you can see them all together.
 </tr>
 
 <tr>
-<td>Positive Numbers</td>
-<td>Addition</td>
-<td>Yes</td>
-<td>Yes</td>
-<td>No identity</td>
-<td>Semigroup</td>
+<td>正の数</td>
+<td>加算</td>
+<td>はい</td>
+<td>はい</td>
+<td>単位元なし</td>
+<td>半群</td>
 </tr>
 
 <tr>
-<td>Positive Numbers</td>
-<td>Multiplication</td>
-<td>Yes</td>
-<td>Yes</td>
+<td>正の数</td>
+<td>乗算</td>
+<td>はい</td>
+<td>はい</td>
 <td>1</td>
-<td>Monoid</td>
+<td>モノイド</td>
 </tr>
 
 
@@ -344,19 +344,19 @@ Let's put all our examples into a table, so you can see them all together.
 <tr>
 <td>Boolean</td>
 <td>AND</td>
-<td>Yes</td>
-<td>Yes</td>
+<td>はい</td>
+<td>はい</td>
 <td>true</td>
-<td>Monoid</td>
+<td>モノイド</td>
 </tr>
 
 <tr>
 <td>Boolean</td>
 <td>OR</td>
-<td>Yes</td>
-<td>Yes</td>
+<td>はい</td>
+<td>はい</td>
 <td>false</td>
-<td>Monoid</td>
+<td>モノイド</td>
 </tr>
 
 
@@ -366,29 +366,29 @@ Let's put all our examples into a table, so you can see them all together.
 
 <tr>
 <td>String</td>
-<td>Concatenation</td>
-<td>Yes</td>
-<td>Yes</td>
-<td>Empty string ""</td>
-<td>Monoid</td>
+<td>連結</td>
+<td>はい</td>
+<td>はい</td>
+<td>空文字列 ""</td>
+<td>モノイド</td>
 </tr>
 
 <tr>
 <td>String</td>
-<td>Equality</td>
-<td>No</td>
+<td>等価性</td>
+<td>いいえ</td>
 <td></td>
 <td></td>
-<td>Other</td>
+<td>その他</td>
 </tr>
 
 <tr>
 <td>String</td>
 <td>"subtractChars"</td>
-<td>Yes</td>
-<td>No</td>
-<td>Empty string ""</td>
-<td>Other</td>
+<td>はい</td>
+<td>いいえ</td>
+<td>空文字列 ""</td>
+<td>その他</td>
 </tr>
 
 <tr>
@@ -397,57 +397,57 @@ Let's put all our examples into a table, so you can see them all together.
 
 <tr>
 <td>List</td>
-<td>Concatenation</td>
-<td>Yes</td>
-<td>Yes</td>
-<td>Empty list []</td>
-<td>Monoid</td>
+<td>連結</td>
+<td>はい</td>
+<td>はい</td>
+<td>空リスト []</td>
+<td>モノイド</td>
 </tr>
 
 <tr>
 <td>List</td>
-<td>Intersection</td>
-<td>Yes</td>
-<td>Yes</td>
-<td>No identity</td>
-<td>Semigroup</td>
+<td>交差</td>
+<td>はい</td>
+<td>はい</td>
+<td>単位元なし</td>
+<td>半群</td>
 </tr>
 
 </table>
 
-There are many other kinds of things you can add to this list; polynomials, matrices, probability distributions, and so on.
-This post won't discuss them, but once you get the idea of monoids, you will see that the concept can be applied to all sorts of things.
+このリストに追加できる他の種類のものがたくさんあります。多項式、行列、確率分布などです。
+この投稿ではそれらについて議論しませんが、モノイドの考え方を理解すれば、この概念をあらゆる種類のものに適用できることがわかるでしょう。
 
-*[Note 1]* As Doug points out in the comments, [floats are not associative](http://forums.udacity.com/questions/100055360/why-floating-point-arithematic-non-associative).
-Replace 'float' with 'real number' to get associativity.
+*[注1]* Dougがコメントで指摘しているように、[浮動小数点数は結合的ではありません](https://web.archive.org/web/20140717011142/http://forums.udacity.com/questions/100055360/why-floating-point-arithematic-non-associative)。
+結合性を得るには、'float'を'実数'に置き換えてください。
 
-*[Note 2]* Mathematical real numbers are not closed under division, because you cannot divide by zero and get another real number. However, with IEEE floating point numbers you
-[<i>can</i> divide by zero](http://stackoverflow.com/questions/14682005/why-does-division-by-zero-in-ieee754-standard-results-in-infinite-value) and get a valid value. So floats are indeed closed under
-division! Here's a demonstration:
+*[注2]* 数学的な実数は除算の下で閉じていません。なぜなら、0で割って別の実数を得ることはできないからです。しかし、IEEE浮動小数点数では
+[0で割ることができ](https://stackoverflow.com/questions/14682005/why-does-division-by-zero-in-ieee754-standard-results-in-infinite-value)、有効な値を得ることができます。
+したがって、浮動小数点数は確かに除算の下で閉じています！ここに示します：
 
 ```fsharp
-let x = 1.0/0.0 // infinity
-let y = x * 2.0 // two times infinity 
-let z = 2.0 / x // two divided by infinity 
+let x = 1.0/0.0 // 無限大
+let y = x * 2.0 // 無限大の2倍 
+let z = 2.0 / x // 2を無限大で割る 
 ```
 
-## What use are monoids to a programmer?
+## プログラマーにとってモノイドはどのような用途があるか？
 
-So far, we have described some abstract concepts, but what good are they for real-world programming problems?
+ここまで、いくつかの抽象的な概念を説明してきましたが、実世界のプログラミングの問題にどのような有用性があるのでしょうか？
 
-### The benefit of closure
+### 閉包の利点
 
-As we've seen, the closure rule has the benefit that you can convert pairwise operations into operations that work on lists or sequences. 
+見てきたように、閉包規則には、ペアワイズ操作をリストや配列に対する操作に変換できるという利点があります。
 
-In other words, if we can define a pairwise operation, we can extend it to list operations "for free".
+言い換えれば、ペアワイズ操作を定義できれば、それをリスト操作に「無料で」拡張できます。
 
-The function that does this is typically called "reduce". Here are some examples:
+この機能を実行する関数は通常「reduce」と呼ばれます。いくつか例を挙げましょう：
 
 <table class="table table-condensed table-striped">
 
 <tr>
-<th>Explicit</th>
-<th>Using reduce</th>
+<th>明示的</th>
+<th>reduceを使用</th>
 </tr>
 
 <tr>
@@ -472,35 +472,35 @@ The function that does this is typically called "reduce". Here are some examples
 
 </table>
 
-You can see that `reduce` can be thought of as inserting the specified operation between each element of the list.
+`reduce`は指定された操作をリストの各要素の間に挿入すると考えることができます。
 
-Note that in the last example, the input to `reduce` is a list of lists, and the output is a single list. Make sure you understand why this is.
+最後の例で、`reduce`への入力がリストのリストで、出力が単一のリストであることに注意してください。なぜそうなるのか理解していることを確認してください。
 
-### The benefit of associativity
+### 結合性の利点
 
-If the pairwise combinations can be done in any order, that opens up some interesting implementation techniques, such as:
+ペアワイズの組み合わせを任意の順序で行うことができれば、次のような興味深い実装テクニックが可能になります：
 
-* Divide and conquer algorithms
-* Parallelization
-* Incrementalism
+* 分割統治アルゴリズム
+* 並列化
+* 増分性
 
-These are deep topics, but let's have a quick look!
+これらは深いトピックですが、簡単に見てみましょう！
 
-**Divide and conquer algorithms**
+**分割統治アルゴリズム**
 
-Consider the task of summing the first 8 integers; how could we implement this?
+最初の8つの整数の合計を求める課題を考えてみましょう。これをどのように実装できるでしょうか？
 
-One way would be a crude step-by-step sum, as follows:
+1つの方法は、次のような単純な段階的な合計です：
 
 ```fsharp
 let sumUpTo2 = 1 + 2
 let sumUpTo3 = sumUpTo2 + 3
 let sumUpTo4 = sumUpTo3 + 4
-// etc
+// 以下同様
 let result = sumUpTo7 + 8
 ```
 
-But because the sums can be done in any order, we could also implement the requirement by splitting the sum into two halves, like this
+しかし、合計を任意の順序で行えるため、要件を次のように2つの半分に分割して実装することもできます：
 
 ```fsharp
 let sum1To4 = 1 + 2 + 3 + 4
@@ -508,7 +508,7 @@ let sum5To8 = 5 + 6 + 7 + 8
 let result = sum1To4 + sum5To8
 ```
 
-and then we can recursively split the sums into sub-sums in the same way until we get down to the basic pairwise operation:
+そして、基本的なペアワイズ操作に到達するまで、同じ方法で合計を再帰的に部分合計に分割できます：
 
 ```fsharp
 let sum1To2 = 1 + 2 
@@ -516,26 +516,26 @@ let sum3To4 = 3 + 4
 let sum1To4 = sum1To2 + sum3To4
 ```
 
-This "divide and conquer" approach may seem like overkill for something like a simple sum, but we'll see in a future post that, in conjunction with a `map`, it is the basis for some well known aggregation algorithms.
+この「分割統治」アプローチは、単純な合計のような場合には大げさに見えるかもしれませんが、後の投稿で、`map`と組み合わせることで、よく知られているいくつかの集約アルゴリズムの基礎になることを見ていきます。
 
-**Parallelization**
+**並列化**
 
-Once we have a divide and conquer strategy, it can be easily converted into a parallel algorithm. 
+分割統治戦略を持っていれば、それを簡単に並列アルゴリズムに変換できます。
 
-For example, to sum the first 8 integers on a four-core CPU, we might do something like this:
+例えば、4コアのCPUで最初の8つの整数の合計を求めるには、次のようなことができるかもしれません：
 
 <table class="table table-condensed table-striped">
 
 <tr>
 <th></th>
-<th>Core 1</th>
-<th>Core 2</th>
-<th>Core 3</th>
-<th>Core 4</th>
+<th>コア1</th>
+<th>コア2</th>
+<th>コア3</th>
+<th>コア4</th>
 </tr>
 
 <tr>
-<td>Step 1</td>
+<td>ステップ1</td>
 <td><code>sum12 = 1 + 2</code></td>
 <td><code>sum34 = 3 + 4</code></td>
 <td><code>sum56 = 5 + 6</code></td>
@@ -543,106 +543,106 @@ For example, to sum the first 8 integers on a four-core CPU, we might do somethi
 </tr>
 
 <tr>
-<td>Step 2</td>
+<td>ステップ2</td>
 <td><code>sum1234 = sum12 + sum34</code></td>
 <td><code>sum5678 = sum56 + sum78</code></td>
-<td>(idle)</td>
-<td>(idle)</td>
+<td>(アイドル)</td>
+<td>(アイドル)</td>
 </tr>
 
 <tr>
-<td>Step 3</td>
+<td>ステップ3</td>
 <td><code>sum1234 + sum5678</code></td>
-<td>(idle)</td>
-<td>(idle)</td>
-<td>(idle)</td>
+<td>(アイドル)</td>
+<td>(アイドル)</td>
+<td>(アイドル)</td>
 </tr>
 
 </table>
 
-There are still seven calculations that need to be done, but because we are doing it parallel, we can do them all in three steps.
+まだ7つの計算を行う必要がありますが、並列で行うことで3つのステップで実行できます。
 
-Again, this might seem like a trivial example, but big data systems such as Hadoop are all about aggregating large amounts of data,
-and if the aggregation operation is a monoid, then you can, in theory, easily scale these aggregations by using multiple machines*.
+これも些細な例に見えるかもしれませんが、Hadoopのようなビッグデータシステムは大量のデータを集約することが全てで、
+集約操作がモノイドであれば、理論的には、複数のマシンを使用してこれらの集約を簡単にスケールアップできます*。
 
-*<sub>In practice, of course, the devil is in the details, and real-world systems don't work exactly this way.</sub>
-
-
-**Incrementalism**
-
-Even if you do not need parallelism, a nice property of monoids is that they support incremental calculations.
-
-For example, let's say you have asked me to calculate the sum of one to five. Then of course I give you back the answer fifteen. 
-
-But now you say that you have changed your mind, and you want the sum of one to *six* instead. Do I have to add up all the numbers again, starting from scratch?
-No, I can use the previous sum, and just add six to it incrementally.  This is possible because integer addition is a monoid.
-
-That is, when faced with a sum like `1 + 2 + 3 + 4 + 5 + 6`, I can group the numbers any way I like.
-In particular, I can make an incremental sum like this: `(1 + 2 + 3 + 4 + 5) + 6`, which then reduces to `15 + 6`.
-
-In this case, recalculating the entire sum from scratch might not be a big deal, but consider a real-world example like web analytics, counting the number of visitors over the last 30 days, say.
-A naive implementation might be to calculate the numbers by parsing the logs of the last 30 days data.  A more efficient approach would be to recognize that the previous 29 days have not changed,
-and to only process the incremental changes for one day. As a result, the parsing effort is greatly reduced.
-
-Similarly, if you had a word count of a 100 page book, and you added another page, you shouldn't need to parse all 101 pages again. You just need to count the words on the last page and add that to the previous total.*
-
-* <sub>Technically, these are scary sounding *monoid homomorphisms*. I will explain what this is in the next post.</sub>
+*<sub>実際には、もちろん悪魔は細部に宿り、現実世界のシステムはこのように正確に動作しません。</sub>
 
 
-### The benefit of identity
+**増分性**
 
-Having an identity element is not always required. Having a closed, associative operation (i.e. a semigroup) is sufficient to do many useful things.
+並列処理が必要ない場合でも、モノイドの素晴らしい特性として、増分計算をサポートすることが挙げられます。
 
-But in some cases, it is not enough.  For example, here are some cases that might crop up:
+例えば、1から5までの合計を計算するよう頼まれたとしましょう。もちろん、答えは15を返します。
 
-* How can I use `reduce` on an empty list? 
-* If I am designing a divide and conquer algorithm, what should I do if one of the "divide" steps has nothing in it?
-* When using an incremental algorithm, what value should I start with when I have no data?
+しかし、その後、考えが変わって1から*6*までの合計が欲しいと言われたとします。最初からやり直して全ての数を足し合わせる必要があるでしょうか？
+いいえ、前回の合計を使って、6を増分的に加えることができます。これが可能なのは、整数の加算がモノイドだからです。
 
-In all cases we need a "zero" value.  This allows us to say, for example, that the sum of an empty list is `0`. 
+つまり、`1 + 2 + 3 + 4 + 5 + 6`のような合計に直面したとき、好きなように数をグループ化できます。
+特に、`(1 + 2 + 3 + 4 + 5) + 6`のような増分的な合計にすることができ、これは`15 + 6`に簡略化されます。
 
-Regarding the first point above, if we are concerned that the list might be empty, then we must replace `reduce` with `fold`, which allows an initial value to be passed in.
-(Of course, `fold` can be used for more things than just monoid operations.)
+この場合、最初から全ての合計をやり直すのはそれほど大変ではないかもしれませんが、例えばウェブアナリティクスのような現実世界の例を考えてみてください。過去30日間の訪問者数を数えるとします。
+素朴な実装では、過去30日分のデータのログを解析して数を計算するかもしれません。より効率的なアプローチは、前の29日分は変わっていないことを認識し、
+1日分の増分変更のみを処理することです。その結果、解析の労力が大幅に削減されます。
 
-Here are `reduce` and `fold` in action:
+同様に、100ページの本の単語数を数えていて、1ページ追加した場合、101ページすべてを再度解析する必要はありません。最後のページの単語を数えて、それを前の合計に加えるだけで済みます*。
+
+* <sub>技術的には、これらは恐ろしげな*モノイド準同型*と呼ばれるものです。次の投稿で説明します。</sub>
+
+
+### 単位元の利点
+
+単位元を持つことが常に必要というわけではありません。閉じていて結合的な操作（つまり半群）を持つことで、多くの有用なことができます。
+
+しかし、場合によっては十分ではありません。例えば、次のようなケースが出てくるかもしれません：
+
+* 空のリストに対して`reduce`をどのように使用できるか？
+* 分割統治アルゴリズムを設計する際、「分割」ステップの1つが何もない場合はどうすべきか？
+* 増分アルゴリズムを使用する際、データがない状態から始める場合、どの値から始めるべきか？
+
+全てのケースで「ゼロ」値が必要です。これにより、例えば空のリストの合計は`0`であると言えます。
+
+上記の最初の点に関して、リストが空である可能性がある場合は、`reduce`を`fold`に置き換える必要があります。`fold`は初期値を渡すことができます。
+（もちろん、`fold`はモノイド操作以外にも使用できます。）
+
+以下に`reduce`と`fold`の動作例を示します：
 
 ```fsharp
-// ok
+// OK
 [1..10] |> List.reduce (+)
 
-// error
+// エラー
 [] |> List.reduce (+)  
 
-// ok with explicit zero
+// 明示的なゼロでOK
 [1..10] |> List.fold (+) 0 
 
-// ok with explicit zero
+// 明示的なゼロでOK
 [] |> List.fold (+) 0 
 ```
 
-Using a "zero" can result in counter-intuitive results sometimes. For example, what is the *product* of an empty list of integers? 
+「ゼロ」を使用すると、時々直感に反する結果になることがあります。例えば、空の整数リストの*積*は何でしょうか？
 
-The answer is `1`, not `0` as you might expect!  Here's the code to prove it:
+答えは、予想されるかもしれない`0`ではなく、`1`です！以下のコードで証明できます：
 
 ```fsharp
-[1..4] |> List.fold (*) 1  // result is 24
-[] |> List.fold (*) 1      // result is 1
+[1..4] |> List.fold (*) 1  // 結果は24
+[] |> List.fold (*) 1      // 結果は1
 ```
 
-### Summary of the benefits
+### 利点のまとめ
 
-To sum up, a monoid is basically a way to describe an aggregation pattern -- we have a list of things, we have some way of combining them, and we get a single aggregated object back at the end.
+要約すると、モノイドは基本的に集約パターンを記述する方法です - ものののリストがあり、それらを組み合わせる方法があり、最後に単一の集約されたオブジェクトが返されます。
 
-Or in F# terms:
+あるいはF#の用語で言えば：
 
 ```text
-Monoid Aggregation : 'T list -> 'T
+モノイド集約 : 'T list -> 'T
 ```
 
-So when you are designing code, and you start using terms like "sum", "product", "composition", or "concatenation", these are clues that you are dealing with a monoid.
+したがって、コードを設計する際に、「合計」、「積」、「構成」、または「連結」などの用語を使用し始めたら、モノイドを扱っている可能性があるというヒントです。
 
-## Next steps
+## 次のステップ
 
-Now that we understand what a monoid is, let's see how they can be used in practice.
+モノイドが何であるかを理解したので、実際にどのように使用できるか見てみましょう。
 
-In the next post in this series, we'll look at how you might write real code that implements the monoid "pattern".
+このシリーズの次の投稿では、モノイド「パターン」を実装する実際のコードをどのように書くかを見ていきます。

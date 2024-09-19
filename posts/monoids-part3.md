@@ -1,46 +1,46 @@
 ---
 layout: post
-title: "Working with non-monoids"
-description: "Monoids without tears - Part 3"
-categories: ["Patterns","Folds"]
-seriesId: "Understanding monoids"
+title: "非モノイドの扱い方"
+description: "つらくないモノイド - パート3"
+categories: ["パターン","畳み込み"]
+seriesId: "モノイドを理解する"
 seriesOrder: 3
 ---
 
 
-In the previous posts in [this series](../series/understanding-monoids.md), we only dealt with things that were proper monoids.
+[このシリーズ](../series/understanding-monoids.md)の前回の投稿では、適切なモノイドだけを扱いました。
 
-But what if the thing you want to work with is *not* a monoid? What then? 
-Well, in this post, I'll give you some tips on converting almost anything into a monoid. 
+でも、扱いたいものがモノイドでない場合はどうすればいいでしょうか。
+この投稿では、ほぼすべてのものをモノイドに変換するコツをお教えします。
 
-In the process, we'll be introduced to a number of important and common functional design idioms, such as preferring lists rather than singletons, and using the option type at every opportunity.
+その過程で、シングルトンよりもリストを好む、オプション型をできるだけ使うなど、重要でよく使われる関数型設計のイディオムをいくつか紹介します。
 
-## Getting closure
+## クロージャを得る
 
-If you recall, for a proper monoid, we need three things to be true: closure, associativity, and identity.
-Each requirement can present a challenge, so we'll discuss each in turn.
+思い出してください。適切なモノイドには3つの条件が必要です。クロージャ、結合法則、単位元です。
+各要件には課題があるので、順番に説明していきます。
 
-We'll start with closure.
+まずはクロージャから始めましょう。
 
-In some cases you might want to add values together, but the type of the combined value is not the same as the type of the original values.
-How can you handle this?
+値を足し合わせたいけれど、結合した値の型が元の値の型と同じではない場合があります。
+こんな場合、どう対処すればいいでしょうか。
 
-One way is to just to map from the original type to a new type that *is* closed. We saw this approach used with the `Customer` and `CustomerStats` example in the previous post.
-In many cases, this is the easiest approach, because you don't have to mess with the design of the original types.
+一つの方法は、元の型から新しい型にマップすることです。前回の投稿で、`Customer`と`CustomerStats`の例でこのアプローチを使いました。
+多くの場合、元の型の設計を変更する必要がないので、これが最も簡単なアプローチです。
 
-On the other hand, sometimes you really don't want to use `map`, but instead want to design your type from the beginning so that it meets the closure requirement.
+一方で、`map`を使いたくない場合もあります。最初からクロージャの要件を満たすように型を設計したい場合もあるでしょう。
 
-Either way, whether you are designing a new type or redesigning an existing type, you can use similar techniques to get closure.
+いずれにせよ、新しい型を設計する場合でも、既存の型を再設計する場合でも、クロージャを得るには似たような技術を使えます。
 
-### Combining closed types to make new compound types
+### クローズド型を組み合わせて新しい複合型を作る
 
-Obviously, we've seen that numeric types are closed under some basic math operations like addition and multiplication.
-We've also seen that some non-numeric types, like strings and lists, are closed under concatenation.
+数値型が加算や乗算などの基本的な数学演算でクローズドなのは明らかです。
+文字列やリストなどの非数値型も、連結演算でクローズドなのを見てきました。
 
-With this in mind, it should be obvious that any combination of these types will be closed too.
-We just have to define the "add" function to do the appropriate "add" on the component types.
+これを踏まえると、これらの型の組み合わせもクローズドになるのは明らかです。
+コンポーネント型に適切な「加算」を行うように「加算」関数を定義するだけです。
 
-Here's an example:
+例を見てみましょう。
 
 ```fsharp
 type MyType = {count:int; items:int list}
@@ -50,119 +50,119 @@ let addMyType t1 t2 =
      items = t1.items @ t2.items}
 ```
 
-The `addMyType` function uses integer addition on the `int` field, and list concatenation on the `list` field.
-As a result the `MyType` is closed using the function `addMyType` -- in fact, not only is it closed, it is a monoid too. So in this case, we're done!
+`addMyType`関数は`int`フィールドに整数加算を、`list`フィールドにリスト連結を使います。
+結果として、`MyType`は`addMyType`関数を使ってクローズドになります。実際、クローズドになるだけでなく、モノイドにもなります。これで完成です！
 
-This is exactly the approach we took with `CustomerStats` in the [previous post](../posts/monoids-part2.md).
+これは[前回の投稿](../posts/monoids-part2.md)で`CustomerStats`に用いたアプローチと同じです。
 
-So here's my first tip:
+ここで最初のコツを紹介します。
 
-* **DESIGN TIP: To easily create a monoidal type, make sure that each field of the type is also a monoid.**
+* **設計のコツ：モノイド的な型を簡単に作るには、型の各フィールドもモノイドになるようにしましょう。**
 
-Question to think about: when you do this, what is the "zero" of the new compound type?
+考えてみてください。この方法を使うとき、新しい複合型の「ゼロ」は何になりますか？
 
-### Dealing with non-numeric types
+### 非数値型の扱い
 
-The approach above works when creating compound types. But what about non-numeric types, which have no obvious numeric equivalent?
+上記のアプローチは複合型を作る際に有効です。でも、明らかな数値的等価物がない非数値型はどうすればいいでしょうか？
 
-Here's a very simple case. Say that you have some chars that you want to add together, like this:
+とてもシンプルな例を見てみましょう。次のように足し合わせたい文字がある場合を考えます。
 
 ```fsharp
 'a' + 'b' -> what?
 ```
 
-But, a char plus a char is not another char. If anything, it is a string.
+しかし、文字と文字を足しても別の文字にはなりません。強いて言えば、文字列になります。
 
 ```fsharp
-'a' + 'b' -> "ab" // Closure fail!
+'a' + 'b' -> "ab" // クロージャの失敗！
 ```
 
-But that is very unhelpful, as it does not meet the closure requirement.
+でも、これはクロージャの要件を満たさないので、とても役に立ちません。
 
-One way to fix this is to force the chars into strings, which does work:
+この問題を解決する一つの方法は、文字を強制的に文字列にすることです。これは確かに機能します。
 
 ```fsharp
 "a" + "b" -> "ab" 
 ```
 
-But that is a specific solution for chars -- is there a more generic solution that will work for other types?
+ただし、これは文字に特化した解決策です。他の型にも適用できる、より一般的な解決策はないでしょうか？
 
-Well, think for a minute what the relationship of a `string` to a `char` is. A string can be thought of as a list or array of chars.
+少し考えてみましょう。`string`と`char`の関係は何でしょうか。文字列は文字のリストまたは配列と考えることができます。
 
-In other words, we could have used lists of chars instead, like this:
+つまり、代わりに文字のリストを使うこともできます。
 
 ```fsharp
-['a'] @ ['b'] -> ['a'; 'b'] // Lists FTW!
+['a'] @ ['b'] -> ['a'; 'b'] // リスト万歳！
 ```
 
-This meets the closure requirement as well.
+これもクロージャの要件を満たします。
 
-What's more, this is in fact a general solution to *any* problem like this, because *anything* can be put into a list, and lists (with concatenation) are always monoids.
+さらに、これは実際にこの種の問題に対する一般的な解決策です。なぜなら、何でもリストに入れることができ、リスト（連結を伴う）は常にモノイドだからです。
 
-So here's my next tip:
+ここで次のコツを紹介します。
 
-* **DESIGN TIP: To enable closure for a non-numeric type, replace single items with lists.**
+* **設計のコツ：非数値型のクロージャを可能にするには、単一の項目をリストに置き換えましょう。**
 
-In some cases, you might need to convert to a list when setting up the monoid and then convert to another type when you are done.
+場合によっては、モノイドを設定するときにリストに変換し、終了時に別の型に変換する必要があるかもしれません。
 
-For example, in the `Char` case, you would do all your manipulation on lists of chars and then only convert to a string at the end.
+例えば、`Char`の場合、文字のリストですべての操作を行い、最後に文字列に変換するだけです。
 
-So let's have a go at creating a "monoidal char" module.
+では、「モノイド的な文字」モジュールを作ってみましょう。
 
 ```fsharp
 module MonoidalChar =
     open System
 
-    /// "monoidal char"
+    /// "モノイド的な文字"
     type MChar = MChar of Char list
 
-    /// convert a char into a "monoidal char"
+    /// 文字を"モノイド的な文字"に変換する
     let toMChar ch = MChar [ch]
 
-    /// add two monoidal chars
+    /// 2つのモノイド的な文字を足す
     let addChar (MChar l1) (MChar l2) = 
         MChar (l1 @ l2)
 
-    // infix version
+    // 中置演算子版
     let (++) = addChar  
 
-    /// convert to a string
+    /// 文字列に変換する
     let toString (MChar cs) = 
         new System.String(List.toArray cs)
 ```
 
-You can see that `MChar` is a wrapper around a list of chars, rather than a single char.
+`MChar`は単一の文字ではなく、文字のリストのラッパーになっています。
 
-Now let's test it:
+では、テストしてみましょう。
 
 ```fsharp
 open MonoidalChar
 
-// add two chars and convert to string
+// 2つの文字を足して文字列に変換する
 let a = 'a' |> toMChar
 let b = 'b' |> toMChar
 let c = a ++ b
 c |> toString |> printfn "a + b = %s"  
-// result: "a + b = ab"
+// 結果: "a + b = ab"
 ```
 
-If we want to get fancy we can use map/reduce to work on a set of chars, like this:
+凝ってみたい場合は、map/reduceを使って文字のセットを処理することもできます。
 
 ```fsharp
-[' '..'z']   // get a lot of chars
+[' '..'z']   // たくさんの文字を取得
 |> List.filter System.Char.IsPunctuation
 |> List.map toMChar
 |> List.reduce addChar
 |> toString
-|> printfn "punctuation chars are %s" 
-// result: "punctuation chars are !"#%&'()*,-./:;?@[\]_"
+|> printfn "句読点は %s" 
+// 結果: "句読点は !"#%&'()*,-./:;?@[\]_"
 ```
 
-### Monoids for errors
+### エラーのモノイド
 
-The `MonoidalChar` example is trivial, and could perhaps be implemented in other ways, but in general this is an extremely useful technique.
+`MonoidalChar`の例は些細なもので、他の方法でも実装できるかもしれません。しかし、一般的にこれは非常に便利な技術です。
 
-For example, here is a simple module for doing some validation. There are two options, `Success` and `Failure`, and the `Failure` case also has a error string associated with it.
+例えば、バリデーションを行うシンプルなモジュールを見てみましょう。`Success`と`Failure`の2つのオプションがあり、`Failure`の場合はエラー文字列も含まれます。
 
 ```fsharp
 module Validation = 
@@ -173,35 +173,35 @@ module Validation =
 
     let validateBadWord badWord (name:string) =
         if name.Contains(badWord) then
-            Failure ("string contains a bad word: " + badWord)
+            Failure ("文字列に悪い単語が含まれています: " + badWord)
         else 
             Success 
 
     let validateLength maxLength name =
         if String.length name > maxLength then
-            Failure "string is too long"
+            Failure "文字列が長すぎます"
         else 
             Success 
 ```
 
-In practice, we might perform multiple validations on a string, and we would like to return all the results at once, added together somehow.
+実際には、文字列に対して複数のバリデーションを行い、すべての結果を一度に返したいでしょう。何らかの方法で足し合わせたいのです。
 
-This calls out for being a monoid! If we can add two results pairwise, then we can extend the operation to add as many results as we like!
+これはモノイドを求めているのと同じです！2つの結果を対ごとに足せるなら、好きなだけ結果を足し合わせることができます！
 
-So then the question is, how do we combine *two* validation results?
+そこで問題になるのが、2つのバリデーション結果をどう組み合わせるかです。
 
 ```fsharp
-let result1 = Failure "string is null or empty"
-let result2 = Failure "string is too long"
+let result1 = Failure "文字列がnullまたは空です"
+let result2 = Failure "文字列が長すぎます"
 
 result1 + result2 = ????
 ```
 
-A naive approach would be to concatenate the strings, but that wouldn't work if we were using format strings, or resource ids with localization, etc.
+単純なアプローチは文字列を連結することですが、フォーマット文字列やローカライゼーション用のリソースIDを使っている場合には機能しません。
 
-No, a better way is to convert the `Failure` case to use a *list* of strings instead of a single string. That will make combining results simple. 
+いいえ、もっと良い方法は、`Failure`ケースを単一の文字列ではなく文字列のリストを使うように変更することです。そうすれば、結果の組み合わせが簡単になります。
 
-Here's the same code as above, with the `Failure` case redefined to use a list:
+上記のコードを`Failure`ケースがリストを使うように変更したものを見てみましょう。
 
 ```fsharp
 module MonoidalValidation = 
@@ -210,41 +210,41 @@ module MonoidalValidation =
         | Success
         | Failure of string list
 
-    // helper to convert a single string into the failure case
+    // 単一の文字列をFailureケースに変換するヘルパー
     let fail str =
         Failure [str]
 
     let validateBadWord badWord (name:string) =
         if name.Contains(badWord) then
-            fail ("string contains a bad word: " + badWord)
+            fail ("文字列に悪い単語が含まれています: " + badWord)
         else 
             Success 
 
     let validateLength maxLength name =
         if String.length name > maxLength then
-            fail "string is too long"
+            fail "文字列が長すぎます"
         else 
             Success 
 ```
-            
-You can see that the individual validations call `fail` with a single string, but behind the scenes it is being stored as a list of strings, which can, in turn, be concatenated together.           
-            
-With this in place, we can now create the `add` function.  
 
-The logic will be:
+個々のバリデーションが単一の文字列で`fail`を呼び出しているのがわかります。しかし、内部では文字列のリストとして保存され、後で連結できます。
 
-* If both results are `Success`, then the combined result is `Success`
-* If one result is `Failure`, then the combined result is that failure.
-* If both results are `Failure`, then the combined result is a `Failure` with both error lists concatenated.
+これで、`add`関数を作成できます。
 
-Here's the code:
-            
+ロジックは次のようになります。
+
+* 両方の結果が`Success`なら、組み合わせた結果も`Success`です。
+* 一方の結果が`Failure`なら、組み合わせた結果はその失敗です。
+* 両方の結果が`Failure`なら、組み合わせた結果は両方のエラーリストを連結した`Failure`です。
+
+コードは次のようになります。
+
 ```fsharp
 module MonoidalValidation = 
 
-    // as above
+    // 上記と同じ
     
-    /// add two results
+    /// 2つの結果を足す
     let add r1 r2 = 
         match r1,r2 with
         | Success,    Success -> Success 
@@ -253,7 +253,7 @@ module MonoidalValidation =
         | Failure f1, Failure f2 -> Failure (f1 @ f2)
 ```
 
-Here are some tests to check the logic:
+ロジックを確認するためのテストをいくつか見てみましょう。
 
 ```fsharp
 open MonoidalValidation 
@@ -262,28 +262,28 @@ let test1 =
     let result1 = Success
     let result2 = Success
     add result1 result2 
-    |> printfn "Result is %A"
-    // "Result is Success"
+    |> printfn "結果は %A"
+    // "結果は Success"
 
 let test2 = 
     let result1 = Success
-    let result2 = fail "string is too long"
+    let result2 = fail "文字列が長すぎます"
     add result1 result2 
-    |> printfn "Result is %A"
-    // "Result is Failure ["string is too long"]"
+    |> printfn "結果は %A"
+    // "結果は Failure ["文字列が長すぎます"]"
 
 let test3 = 
-    let result1 = fail "string is null or empty"
-    let result2 = fail "string is too long"
+    let result1 = fail "文字列がnullまたは空です"
+    let result2 = fail "文字列が長すぎます"
     add result1 result2 
-    |> printfn "Result is %A"
+    |> printfn "結果は %A"
 
-    // Result is Failure 
-    //   [ "string is null or empty"; 
-    //     "string is too long"]
+    // 結果は Failure 
+    //   [ "文字列がnullまたは空です"; 
+    //     "文字列が長すぎます"]
 ```
 
-And here's a more realistic example, where we have a list of validation functions that we want to apply:
+そして、より現実的な例として、適用したいバリデーション関数のリストがある場合を見てみましょう。
 
 ```fsharp
 let test4 = 
@@ -298,34 +298,34 @@ let test4 =
     "cobol has native support for monads"
     |> validationResults 
     |> List.reduce add
-    |> printfn "Result is %A"
+    |> printfn "結果は %A"
 ```
 
-The output is a `Failure` with three error messages.
+出力は3つのエラーメッセージを含む`Failure`です。
 
 ```text
-Result is Failure
-  ["string is too long"; "string contains a bad word: monad";
-   "string contains a bad word: cobol"]
+結果は Failure
+  ["文字列が長すぎます"; "文字列に悪い単語が含まれています: monad";
+   "文字列に悪い単語が含まれています: cobol"]
 ```
-   
-One more thing is needed to finish up this monoid. We need a "zero" as well.  What should it be?
 
-By definition, it is something that when combined with another result, leaves the other result alone.
+このモノイドを完成させるには、もう一つ必要なものがあります。「ゼロ」も必要です。何がゼロになるでしょうか？
 
-I hope you can see that by this definition, "zero" is just `Success`.
+定義上、他の結果と組み合わせたとき、その結果をそのまま残すものです。
+
+この定義によれば、「ゼロ」は単に`Success`だとわかるはずです。
 
 ```fsharp
 module MonoidalValidation = 
 
-    // as above
+    // 上記と同じ
     
-    // identity
+    // 単位元
     let zero = Success
 ```
 
-As you know, we would need to use zero if the list to reduce over is empty.
-So here's an example where we don't apply any validation functions at all, giving us an empty list of `ValidationResult`.
+ご存知の通り、reduceするリストが空の場合にzeroを使う必要があります。
+そこで、バリデーション関数をまったく適用しない例を見てみましょう。これにより、空の`ValidationResult`リストが得られます。
 
 ```fsharp
 let test5 = 
@@ -336,19 +336,19 @@ let test5 =
     "cobol has native support for monads"
     |> validationResults 
     |> List.fold add zero
-    |> printfn "Result is %A"
+    |> printfn "結果は %A"
     
-    // Result is Success
+    // 結果は Success
 ```
 
-Note that we needed to change `reduce` to `fold` as well, otherwise we would get a runtime error.
+`reduce`を`fold`に変更する必要もありました。そうしないと実行時エラーが発生します。
 
-### Lists for performance
+### パフォーマンスのためのリスト
 
-Here's one more example of the benefit of using lists.  Compared with other methods of combination, list concatenation is relatively cheap, both in computation and in memory use,
-because the objects being pointed to don't have to change or be reallocated.
+リストを使うメリットをもう一つ紹介しましょう。他の組み合わせ方法と比べて、リストの連結は計算量も消費メモリも比較的少なくて済みます。
+これは、参照されているオブジェクトを変更したり再割り当てしたりする必要がないためです。
 
-For example, in the previous post, we defined a `Text` block that wrapped a string, and used string concatenation to add their contents.
+例えば、前回の投稿では、文字列をラップした`Text`ブロックを定義し、その内容を連結するために文字列連結を使いました。
 
 ```fsharp
 type Text = Text of string
@@ -357,9 +357,9 @@ let addText (Text s1) (Text s2) =
     Text (s1 + s2)
 ```
 
-But for large strings this continual concatenation can be expensive.
+しかし、大きな文字列の場合、この連続的な連結は高コストになる可能性があります。
 
-Consider a different implementation, where the `Text` block contains a *list* of strings instead.
+代わりに、`Text`ブロックが文字列のリストを含むような実装を考えてみましょう。
 
 ```fsharp
 type Text = Text of string list
@@ -368,78 +368,78 @@ let addText (Text s1) (Text s2) =
     Text (s1 @ s2)
 ```
 
-Almost no change in implementation, but performance will probably be greatly improved.  
+実装はほとんど変わりませんが、パフォーマンスは大幅に向上する可能性があります。
 
-You can do all your manipulation on *lists* of strings and you need only convert to a normal string at the very end of the processing sequence.
+文字列のリストで全ての操作を行い、処理の最後に通常の文字列に変換するだけで済みます。
 
-And if lists aren't performant enough for you, you can easily extend this approach to use classic data structures like trees, heaps, etc. or mutable types like ResizeArray.
-(See the appendix on performance at the bottom of this post for some more discussion on this)
+リストのパフォーマンスでも不十分な場合は、ツリーやヒープなどの古典的なデータ構造や、ResizeArrayのような可変型を使用するように、このアプローチを簡単に拡張できます。
+（パフォーマンスについての詳細は、この投稿の最後にある付録を参照してください）
 
-### Jargon alert
+### 専門用語注意
 
-The concept of using a list of objects as a monoid is common in mathematics, where it is called a ["free monoid"](http://en.wikipedia.org/wiki/Free_monoid). In computer science, it also called
-a ["Kleene star"](http://en.wikipedia.org/wiki/Kleene_star) such as `A*`. And if you don't allow empty lists, then you have no zero element. This variant is called a "free semigroup" or "Kleene plus" such as `A+`.
+オブジェクトのリストをモノイドとして使用する概念は、数学では["自由モノイド"](https://en.wikipedia.org/wiki/Free_monoid)と呼ばれます。コンピュータサイエンスでは、
+`A*`のような["クリーネスター"](https://en.wikipedia.org/wiki/Kleene_star)とも呼ばれます。空のリストを許可しない場合は、単位元がありません。この変種は"自由半群"または`A+`のような"クリーネプラス"と呼ばれます。
 
-This "star" and "plus" notation will surely be familiar to you if you have ever used regular expressions.* 
+この"スター"や"プラス"の表記は、正規表現を使ったことがある人なら見覚えがあるでしょう。*
 
-<sub>* You probably weren't aware that there was a connection between regular expressions and monoids! There's some even [deeper relationships too](http://scienceblogs.com/goodmath/2008/03/06/monoids-and-computation-syntac/). </sub>
+<sub>* 正規表現とモノイドに関係があることに気づいていなかったかもしれません！[さらに深い関係](https://scienceblogs.com/goodmath/2008/03/06/monoids-and-computation-syntac/)もあります。</sub>
 
-## Associativity
+## 結合法則
 
-Now that we have dealt with closure, let's take on associativity.
+クロージャを扱ったので、次は結合法則に取り組みましょう。
 
-We saw a couple of non-associative operations in the very first post, including subtraction and division.
+最初の投稿で、減算や除算など、結合法則を満たさない演算をいくつか見ました。
 
-We can see that `5 - (3 - 2)` is not equal to `(5 - 3) - 2`. This shows that subtraction is not associative, and
-also `12 / (3 / 2)` is not equal to `(12 / 3) / 2`, which shows that division is not associative.
+`5 - (3 - 2)`が`(5 - 3) - 2`と等しくないことから、減算が結合法則を満たさないことがわかります。
+また、`12 / (3 / 2)`が`(12 / 3) / 2`と等しくないことから、除算も結合法則を満たさないことがわかります。
 
-There's no single correct answer in these cases, because you might genuinely care about different answers depending on whether you work from left to right or right to left.
+これらの場合、単一の正しい答えはありません。左から右に計算するか、右から左に計算するかによって、異なる答えが必要になる可能性があるからです。
 
-In fact, the F# standard libraries have two versions of `fold` and `reduce` to cater for each preference.  The normal `fold` and `reduce` work left to right, like this:
+実際、F#の標準ライブラリには、この好みに対応するために`fold`と`reduce`の2つのバージョンがあります。通常の`fold`と`reduce`は左から右へ処理します。
 
 ```fsharp
-//same as (12 - 3) - 2
+//（12 - 3） - 2 と同じ
 [12;3;2] |> List.reduce (-)  // => 7 
 
-//same as ((12 - 3) - 2) - 1
+//（（12 - 3） - 2） - 1 と同じ
 [12;3;2;1] |> List.reduce (-)  // => 6
 
 ```
 
-But there is also `foldBack` and `reduceBack` that work from right to left, like this:
+一方、`foldBack`と`reduceBack`は右から左へ処理します。
 
 ```fsharp
-//same as 12 - (3 - 2)
+//12 - （3 - 2）と同じ
 [12;3;2] |> List.reduceBack (-) // => 11
 
-//same as 12 - (3 - (2 - 1))
+//12 - （3 - （2 - 1））と同じ
 [12;3;2;1] |> List.reduceBack (-) // => 10
 ```
 
-In a sense, then, the associativity requirement is just a way of saying that you should get the *same* answer no matter whether you use `fold` or `foldBack`.
+ある意味、結合法則の要件は、`fold`を使っても`foldBack`を使っても同じ答えが得られるべきだと言っているのです。
 
 
-### Moving the operation into the element
+### 演算を要素の中に移動する
 
-But assuming that you *do* want a consistent monoidal approach, the trick in many cases is to move the operation into a property of each element. **Make the operation a noun, rather than a verb.**
+しかし、一貫したモノイド的アプローチを望む場合、多くのケースでのコツは、演算を各要素のプロパティに移すことです。**動詞としての演算ではなく、名詞としての演算にします。**
 
-For example `3 - 2` can be thought of as `3 + (-2)`. Rather than "subtraction" as a verb, we have "negative 2" as a noun.
+例えば、`3 - 2`は`3 + (-2)`と考えることができます。「減算」を動詞としてではなく、「マイナス2」を名詞として扱います。
 
-In that case, the above example becomes `5 + (-3) + (-2)`.
-And since we are now using addition as the operator, we *do* have associativity, and `5 + (-3 + -2)` is indeed the same as `(5 + -3) + -2`.  
+この場合、上記の例は`5 + (-3) + (-2)`になります。
+演算子として加算を使用しているので、結合法則が成り立ち、`5 + (-3 + -2)`は確かに`(5 + -3) + -2`と同じになります。
 
-A similar approach works with division. `12 / 3 / 2` can be converted into `12 * (1/3) * (1/2)`, and now we are back to multiplication as the operator, which is associative.
+除算でも同様のアプローチが機能します。`12 / 3 / 2`は`12 * (1/3) * (1/2)`に変換でき、演算子は乗算になり、結合法則を満たします。
 
-This approach of converting the operator into a property of the element can be generalized nicely. 
+演算子をオブジェクトのプロパティに変換するこのアプローチは、うまく一般化できます。
 
-So here's a tip:
+ここで次のコツを紹介します。
 
-* **DESIGN TIP: To get associativity for an operation, try to move the operation into the object.**
+* **設計のコツ：演算の結合法則を得るには、演算をオブジェクトの中に移すことを試みましょう。**
 
-We can revisit an earlier example to understand how this works.
-If you recall, in the first post we tried to come up with a non-associative operation for strings, and settled on `subtractChars`.
+これがどのように機能するかを理解するために、以前の例を再検討してみましょう。
+最初の投稿で、文字列に対する結合法則を満たさない演算を考え出そうとして、`subtractChars`に落ち着いたことを思い出してください。
 
-Here's a simple implementation of `subtractChars`
+`subtractChars`の簡単な実装は次のとおりです。
 
 ```fsharp
 let subtractChars (s1:string) (s2:string) = 
@@ -447,146 +447,146 @@ let subtractChars (s1:string) (s2:string) =
     let chars = s1.ToCharArray() |> Array.filter isIncluded
     System.String(chars)
 
-// infix version        
+// 中置演算子版        
 let (--) = subtractChars
 ```
 
-With this implementation we can do some interactive tests:
+この実装で、いくつかの対話的なテストができます。
 
 ```fsharp
 "abcdef" -- "abd"   //  "cef"
 "abcdef" -- ""      //  "abcdef"
 ```
 
-And we can see for ourselves that the associativity requirement is violated:
+そして、結合法則の要件が満たされていないことを自分で確認できます。
 
 ```fsharp
 ("abc" -- "abc") -- "abc"  // ""
 "abc" -- ("abc" -- "abc")  // "abc"
 ```
 
-How can we make this associative?
+これをどうすれば結合法則を満たすようにできるでしょうか？
 
-The trick is move the "subtract-ness" from the operator into the object, just as we did with the numbers earlier.
+コツは、先ほどの数字の例と同様に、演算子から「引く」という性質をオブジェクトに移すことです。
 
-What I mean is that we replace the plain strings with a "subtract" or "chars to remove" data structure that captures what we want to remove, like so:
+つまり、プレーンな文字列を、「引く」または「削除する文字」というデータ構造に置き換えます。これは削除したいものを捕捉します。
 
 ```fsharp
-let removalAction = (subtract "abd") // a data structure
+let removalAction = (subtract "abd") // データ構造
 ```
 
-And then we "apply" the data structure to the string:
+そして、このデータ構造を文字列に「適用」します。
 
 ```fsharp
 let removalAction = (subtract "abd") 
-removalAction |> applyTo "abcdef"  // "Result is cef"
+removalAction |> applyTo "abcdef"  // "結果は cef"
 ```
 
-Once we use this approach, we can rework the non-associative example above to look something like this:
+このアプローチを使えば、上記の結合法則を満たさない例を次のように書き直すことができます。
 
 ```fsharp
 let removalAction = (subtract "abc") + (subtract "abc") + (subtract "abc")   
-removalAction |> applyTo "abc"    // "Result is "
+removalAction |> applyTo "abc"    // "結果は "
 ```
 
-Yes, it is not exactly the same as the original code, but you might find that this is actually a better fit in many situations.
+はい、元のコードと全く同じではありませんが、多くの状況でこの方が実際にはより適していると気づくかもしれません。
 
-The implementation is below. We define a `CharsToRemove` to contain a set of chars, and the other function implementations fall out from that in a straightforward way.
+実装は以下の通りです。文字のセットを含む`CharsToRemove`を定義し、他の関数の実装はそこから自然に導き出されます。
 
 ```fsharp
-/// store a list of chars to remove
+/// 削除する文字のリストを保存
 type CharsToRemove = CharsToRemove of Set<char>
 
-/// construct a new CharsToRemove
+/// 新しいCharsToRemoveを構築
 let subtract (s:string) = 
     s.ToCharArray() |> Set.ofArray |>  CharsToRemove 
 
-/// apply a CharsToRemove to a string
+/// CharsToRemoveを文字列に適用
 let applyTo (s:string) (CharsToRemove chs) = 
     let isIncluded ch = Set.exists ((=) ch) chs |> not
     let chars = s.ToCharArray() |> Array.filter isIncluded
     System.String(chars)
 
-// combine two CharsToRemove to get a new one
+// 2つのCharsToRemoveを組み合わせて新しいものを得る
 let (++) (CharsToRemove c1) (CharsToRemove c2) = 
     CharsToRemove (Set.union c1 c2) 
 ```
 
-Let's test!
+テストしてみましょう！
 
 ```fsharp
 let test1 = 
     let removalAction = (subtract "abd") 
-    removalAction |> applyTo "abcdef" |> printfn "Result is %s"
-    // "Result is cef"
+    removalAction |> applyTo "abcdef" |> printfn "結果は %s"
+    // "結果は cef"
 
 let test2 = 
     let removalAction = (subtract "abc") ++ (subtract "abc") ++ (subtract "abc")   
-    removalAction |> applyTo "abcdef" |> printfn "Result is %s"
-    // "Result is "
+    removalAction |> applyTo "abcdef" |> printfn "結果は %s"
+    // "結果は "
 ```
 
-The way to think about this approach is that, in a sense, we are modelling *actions* rather than *data*. We have a list of `CharsToRemove` actions,
-then we combine them into a single "big" `CharsToRemove` action,
-and then we execute that single action at the end, after we have finished the intermediate manipulations.
+このアプローチの考え方は、ある意味で、データではなくアクションをモデル化していることです。`CharsToRemove`アクションのリストがあり、
+それらを単一の「大きな」`CharsToRemove`アクションに組み合わせ、
+中間的な操作が終わった後、最後にその単一のアクションを実行します。
 
-We'll see another example of this shortly, but you might be thinking at this point: "this sounds a bit like functions, doesn't it?" To which I will say "yes, it does!"
+すぐに別の例を見ますが、この時点で「これは関数に似ていますね？」と思うかもしれません。その通りです！
 
-In fact rather than creating this `CharsToRemove` data structure, we could have just partially applied the original `subtractChars` function, as shown below: 
+実際、この`CharsToRemove`データ構造を作る代わりに、元の`subtractChars`関数を部分適用することもできました。以下のようになります。
 
-(Note that we reverse the parameters to make partial application easier)
+（部分適用を容易にするためにパラメータの順序を逆にしていることに注意してください）
 
 ```fsharp
-// reverse for partial application
+// 部分適用のために逆順に
 let subtract str charsToSubtract = 
     subtractChars charsToSubtract str 
 
 let removalAction = subtract "abd" 
-"abcdef" |> removalAction |> printfn "Result is %s"
-// "Result is cef"
+"abcdef" |> removalAction |> printfn "結果は %s"
+// "結果は cef"
 ```
 
-And now we don't even need a special `applyTo` function.
+これで特別な`applyTo`関数さえ必要ありません。
 
-But when we have more than one of these subtraction functions, what do we do? 
-Each of these partially applied functions has signature `string -> string`, so how can we "add" them together?
+しかし、このような減算関数が複数ある場合はどうすればいいでしょうか？
+これらの部分適用された関数はそれぞれ`string -> string`という型を持っているので、どのように「足し合わせる」ことができるでしょうか？
 
 ```fsharp
 (subtract "abc") + (subtract "abc") + (subtract "abc")  = ?
 ```
 
-The answer is function composition, of course!
+答えは、もちろん関数合成です！
 
 ```fsharp
 let removalAction2 = (subtract "abc") >> (subtract "abc") >> (subtract "abc") 
-removalAction2 "abcdef" |> printfn "Result is %s"
-// "Result is def"
+removalAction2 "abcdef" |> printfn "結果は %s"
+// "結果は def"
 ```
 
-This is the functional equivalent of creating the `CharsToRemove` data structure.  
+これは、`CharsToRemove`データ構造を作成することの関数版です。
 
-The "data structure as action" and function approach are not exactly the same -- the `CharsToRemove` approach may be more efficient, for example, because it uses a set, and is only applied to strings at the end -- but they both achieve the same goal.
-Which one is better depends on the particular problem you're working on.
+「データ構造としてのアクション」アプローチと関数アプローチは完全に同じではありません。`CharsToRemove`アプローチはセットを使用し、最後にのみ文字列に適用されるため、より効率的かもしれません。しかし、両者とも同じ目標を達成します。
+どちらが良いかは、取り組んでいる特定の問題に依存します。
 
-I'll have more to say on functions and monoids in the next post.
+次の投稿で、関数とモノイドについてさらに詳しく説明します。
 
-## Identity
+## 単位元
 
-Now to the last requirement for a monoid: identity.   
+最後にモノイドの要件である単位元について見ていきましょう。
 
-As we have seen, identity is not always needed, but it is nice to have if you might be dealing with empty lists.
+これまで見てきたように、単位元は常に必要というわけではありませんが、空のリストを扱う可能性がある場合には便利です。
 
-For numeric values, finding an identity for an operation is generally easy, whether it be `0` (addition), `1` (multiplication) or `Int32.MinValue` (max).
+数値の場合、演算の単位元を見つけるのは一般的に簡単です。`0`（加算）、`1`（乗算）、`Int32.MinValue`（最大値）などです。
 
-And this carries over to structures that contain only numeric values as well -- just set all values to their appropriate identity. The `CustomerStats` type from the previous post demonstrates that nicely.
+この考え方は、数値だけを含む構造にも適用できます。適切な値をすべて対応する単位元に設定するだけです。前回の投稿の`CustomerStats`型がその良い例です。
 
-But what if you have objects that are not numeric? How can you create a "zero" or identity element if there is no natural candidate?
+しかし、数値でないオブジェクトの場合はどうでしょうか？自然な候補がない場合、どのように「ゼロ」や単位元を作ればいいでしょうか？
 
-The answer is: *you just make one up*.
+答えは：適当に作ってしまうのです。
 
-Seriously!
+マジです！
 
-We have already seen an example of this in the previous post, when we added an `EmptyOrder` case to the `OrderLine` type:
+前回の投稿で、`OrderLine`型に`EmptyOrder`ケースを追加した例を見ました。
 
 ```fsharp
 type OrderLine = 
@@ -595,37 +595,37 @@ type OrderLine =
     | EmptyOrder
 ```
 
-Let's look at this more closely. We performed two steps: 
+これをもう少し詳しく見てみましょう。2つのステップを踏みました。
 
-* First, we created a new case and added it to the list of alternatives for an `OrderLine` (as shown above).
-* Second, we adjusted the `addLine` function to take it into account (as shown below).
+* まず、新しいケースを作成し、`OrderLine`の選択肢のリストに追加しました（上記のとおり）。
+* 次に、`addLine`関数を調整して、それを考慮するようにしました（以下のとおり）。
 
 ```fsharp
 let addLine orderLine1 orderLine2 =
     match orderLine1,orderLine2 with
-    // is one of them zero? If so, return the other one
+    // どちらかがゼロ？その場合、もう一方を返す
     | EmptyOrder, _ -> orderLine2
     | _, EmptyOrder -> orderLine1
-    // logic for other cases ...
+    // 他のケースのロジック...
 ```
 
-That's all there is to it.
+これだけです。
 
-The new, augmented type consists of the old order line cases, *plus* the new `EmptyOrder` case, and so it can reuse much of the behavior of the old cases.
+新しく拡張された型は、古い注文行のケースに加えて、新しい`EmptyOrder`ケースで構成されており、古いケースの振る舞いの多くを再利用できます。
 
-In particular, can you see that the new augmented type follows all the monoid rules?
+特に、新しく拡張された型がすべてのモノイドの規則に従っていることがわかりますか？
 
-* A pair of values of the new type can be added to get another value of the new type (closure)
-* If the combination order didn't matter for the old type, then it still doesn't matter for the new type (associativity)
-* And finally... this extra case now gives us an identity for the new type.
+* 新しい型の2つの値を足すと、新しい型の別の値が得られます（クロージャ）。
+* 古い型で組み合わせの順序が問題なかった場合、新しい型でも順序は問題になりません（結合法則）。
+* そして最後に... この追加のケースが新しい型の単位元を提供します。
 
-### Turning PositiveNumber into a monoid
+### PositiveNumberをモノイドに変える
 
-We could do the same thing with the other semigroups we've seen.  
+これまで見てきた他の半群でも同じことができます。
 
-For example, we noted earlier that strictly positive numbers (under addition) didn't have an identity; they are only a semigroup.
-If we wanted to create a zero using the "augmentation with extra case" technique (rather than just using `0`!) we would
-first define a special `Zero` case (not an integer), and then create an `addPositive` function that can handle it, like this:
+例えば、先ほど、正の数（加算の下で）には単位元がなく、半群にすぎないと述べました。
+「追加のケースで拡張する」テクニック（単に`0`を使うのではなく！）を使って単位元を作りたい場合、
+まず特別な`Zero`ケース（整数ではない）を定義し、それを扱える`addPositive`関数を作成します。以下のようになります。
 
 ```fsharp
 type PositiveNumberOrIdentity = 
@@ -639,20 +639,20 @@ let addPositive i1 i2 =
     | Positive p1, Positive p2 -> Positive (p1 + p2)
 ```
 
-Admittedly, `PositiveNumberOrIdentity` is a contrived example, but you can see how this same approach would work for any situation where you have "normal" values and a special, separate, zero value.
+確かに、`PositiveNumberOrIdentity`は人為的な例ですが、「通常の」値と特別な、別個のゼロ値がある状況で、このアプローチがどのように機能するかがわかります。
 
-### A generic solution
+### 汎用的な解決策
 
-There are a few drawbacks to this:
+これには2つの欠点があります。
 
-* We have to deal with *two* cases now: the normal case and the zero case. 
-* We have to create custom types and custom addition functions
+* 通常のケースとゼロのケースの2つを扱う必要があります。
+* カスタム型とカスタムの加算関数を作る必要があります。
 
-Unfortunately, there's nothing you can do about the first issue.
-If you have a system with no natural zero, and you create an artificial one, then you will indeed always have to deal with two cases.
+残念ながら、最初の問題については何もできません。
+自然なゼロがないシステムで人工的なゼロを作る場合、常に2つのケースを扱う必要があります。
 
-But there *is* something you can do about the second issue!  Rather than create a new custom type over and over,
-perhaps can we create a *generic* type that has two cases: one for all normal values and one for the artificial zero, like this:
+しかし、2番目の問題については対処できます！新しいカスタム型を何度も作成する代わりに、
+通常の値用と人工的なゼロ用の2つのケースを持つ汎用的な型を作成できないでしょうか？以下のようになります。
 
 ```fsharp
 type NormalOrIdentity<'T> = 
@@ -660,11 +660,11 @@ type NormalOrIdentity<'T> =
     | Zero
 ```
 
-Does this type look familiar?  It's just the **Option type** in disguise!
+この型は見覚えがありませんか？これは単に**オプション型**の変装です！
 
-In other words, any time we need an identity which is outside the normal set of values, we can use `Option.None` to represent it. And then `Option.Some` is used for all the other "normal" values.
+言い換えれば、通常の値の集合の外にある単位元が必要な場合はいつでも、`Option.None`を使ってそれを表現できます。そして、他のすべての「通常の」値には`Option.Some`を使います。
 
-Another benefit of using `Option` is that we can also write a completely generic "add" function as well. Here's a first attempt:
+`Option`を使うもう一つの利点は、完全に汎用的な「加算」関数も書けることです。最初の試みは以下のようになります。
 
 ```fsharp
 let optionAdd o1 o2 =
@@ -674,9 +674,9 @@ let optionAdd o1 o2 =
     | Some s1, Some s2 -> Some (s1 + s2)
 ```
 
-The logic is straightforward. If either option is `None`, the other option is returned.  If both are `Some`, then they are unwrapped, added together, and then wrapped in a `Some` again.
+ロジックは簡単です。どちらかのオプションが`None`なら、もう一方のオプションを返します。両方が`Some`なら、中身を取り出して足し、再び`Some`でラップします。
 
-But the `+` in the last line makes assumptions about the types that we are adding. Better to pass in the addition function explicitly, like this:
+しかし、最後の行の`+`は足し合わせる型について仮定をしています。加算関数を明示的に渡す方が良いでしょう。以下のようになります。
 
 ```fsharp
 let optionAdd f o1 o2 =
@@ -686,49 +686,49 @@ let optionAdd f o1 o2 =
     | Some s1, Some s2 -> Some (f s1 s2)
 ```
 
-In practice, this would used with partial application to bake in the addition function.
+実際には、部分適用を使って加算関数を組み込むことになります。
 
-So now we have another important tip:
+ここで、もう一つ重要なコツを紹介します。
 
-* **DESIGN TIP: To get identity for an operation, create a special case in a discriminated union, or, even simpler, just use Option.**
+* **設計のコツ：演算の単位元を得るには、識別子付き共用体に特別なケースを作るか、もっと簡単に、オプションを使いましょう。**
 
-### PositiveNumber revisited
+### PositiveNumberの再検討
 
-So here is the Positive Number example again, now using the `Option` type.
+では、PositiveNumber の例を、今度は`Option`型を使って再度見てみましょう。
 
 ```fsharp
 type PositiveNumberOrIdentity = int option
 let addPositive = optionAdd (+)
 ```
 
-Much simpler!
+とてもシンプルになりました！
 
-Notice that we pass in the "real" addition function as a parameter to `optionAdd` so that it is baked in.
-In other situations, you would do the same with the relevant aggregation function that is associated with the semigroup.
+`optionAdd`に「実際の」加算関数をパラメータとして渡し、組み込んでいることに注目してください。
+他の状況でも、半群に関連する適切な集約関数を同じように渡します。
 
-As a result of this partial application, `addPositive` has the signature: `int option -> int option -> int option`, which is exactly what we would expect from a monoid addition function.
+この部分適用の結果、`addPositive`の型シグネチャは`int option -> int option -> int option`となり、これはまさにモノイドの加算関数に期待されるものです。
 
-In other words, `optionAdd` turns any function `'a -> 'a -> 'a` into the *same* function, but "lifted" to the option type, that is, having a signature `'a option -> 'a option -> 'a option` .
+言い換えれば、`optionAdd`は任意の関数`'a -> 'a -> 'a`を、同じ関数ですがオプション型に「持ち上げられた」、つまり`'a option -> 'a option -> 'a option`という型シグネチャを持つ関数に変換します。
 
-So, let's test it! Some test code might look like this:
+では、テストしてみましょう！テストコードは以下のようになります。
 
 ```fsharp
-// create some values
+// 値を作成
 let p1 = Some 1
 let p2 = Some 2
 let zero = None
 
-// test addition
+// 加算をテスト
 addPositive p1 p2
 addPositive p1 zero
 addPositive zero p2
 addPositive zero zero
 ```
 
-You can see that unfortunately we do have to wrap the normal values in `Some` in order to get the `None` as identity.
+残念ながら、`None`を単位元として得るために、通常の値を`Some`でラップする必要があることがわかります。
 
-That sounds tedious but in practice, it is easy enough. The code below shows how we might handle the two distinct cases when summing a list.
-First how to sum a non-empty list, and then how to sum an empty list.
+これは面倒に聞こえるかもしれませんが、実際にはそれほど大変ではありません。
+以下のコードは、リストの総和を求める際の2つの異なるケース、つまり空でないリストと空のリストの扱い方を示しています。
 
 ```fsharp
 [1..10]
@@ -741,9 +741,9 @@ First how to sum a non-empty list, and then how to sum an empty list.
 ```
 
 
-### ValidationResult revisited
+### ValidationResultの再検討
 
-While we're at it, let's also revisit the `ValidationResult` type that we described earlier when talking about using lists to get closure. Here it is again:
+ついでに、クロージャを得るためにリストを使う方法を説明したときに紹介した`ValidationResult`型も再検討してみましょう。以下が再掲です。
 
 ```fsharp
 type ValidationResult = 
@@ -751,12 +751,12 @@ type ValidationResult =
     | Failure of string list
 ```
 
-Now that we've got some insight into the positive integer case, let's look at this type from a different angle as well. 
+正の整数の例から得た洞察を活かして、この型を別の角度から見てみましょう。
 
-The type has two cases. One case holds data that we care about, and the other case holds no data. But the data we really care about are the error messages, not the success.
-As Leo Tolstoy nearly said "All validation successes are alike; each validation failure is a failure in its own way."
+この型には2つのケースがあります。1つのケースはデータを保持し、もう1つのケースはデータを保持しません。しかし、本当に気にかけるべきデータはエラーメッセージであり、成功ではありません。
+レフ・トルストイがほぼ言ったように、「すべての検証の成功は似ているが、各検証の失敗はそれぞれ独自の方法で失敗する」のです。
 
-So, rather than thinking of it as a "Result", let's think of the type as *storing failures*, and rewrite it like this instead, with the failure case first:
+そこで、「結果」として考えるのではなく、この型を失敗を格納するものとして考え、次のように書き直してみましょう。失敗のケースを最初に置きます。
 
 ```fsharp
 type ValidationFailure = 
@@ -764,51 +764,51 @@ type ValidationFailure =
     | Success
 ```
 
-Does this type appear familar now? 
+この型が見覚えがありますか？
 
-Yes! It's the option type again! Can we never get away from the darn thing?
+そうです！またもやオプション型です！この厄介なものから逃れられないのでしょうか？
 
-Using the option type, we can simplify the design of the `ValidationFailure` type to just this:
+オプション型を使えば、`ValidationFailure`型の設計を次のように簡略化できます。
 
 ```fsharp
 type ValidationFailure = string list option
 ```
 
-The helper to convert a string into the failure case is now just `Some` with a list:
+文字列を失敗のケースに変換するヘルパーは、リストを含む`Some`になります。
 
 ```fsharp
 let fail str =
     Some [str]
 ```
-        
-And the "add" function can reuse `optionAdd`, but this time with list concatenation as the underlying operation:
+
+そして、「加算」関数は`optionAdd`を再利用できますが、今回は基本の演算としてリストの連結を使います。
 
 ```fsharp
 let addFailure f1 f2 = optionAdd (@) f1 f2
 ```
 
-Finally, the "zero" that was the `Success` case in the original design now simply becomes `None` in the new design.
+最後に、元の設計で`Success`ケースだった「ゼロ」は、新しい設計では単に`None`になります。
 
-Here's all the code, plus tests
+以下は全コードとテストです。
 
 ```fsharp
 module MonoidalValidationOption = 
 
     type ValidationFailure = string list option
 
-    // helper to convert a string into the failure case
+    // 文字列を失敗のケースに変換するヘルパー
     let fail str =
         Some [str]
 
     let validateBadWord badWord (name:string) =
         if name.Contains(badWord) then
-            fail ("string contains a bad word: " + badWord)
+            fail ("文字列に悪い単語が含まれています: " + badWord)
         else 
             None
 
     let validateLength maxLength name =
         if String.length name > maxLength then
-            fail "string is too long"
+            fail "文字列が長すぎます"
         else 
             None
 
@@ -818,10 +818,10 @@ module MonoidalValidationOption =
         | _, None -> o1
         | Some s1, Some s2 -> Some (f s1 s2)
 
-    /// add two results using optionAdd
+    /// optionAddを使って2つの結果を足す
     let addFailure f1 f2 = optionAdd (@) f1 f2
 
-    // define the Zero 
+    // ゼロを定義
     let Success = None
 
 module MonoidalValidationOptionTest =
@@ -831,23 +831,23 @@ module MonoidalValidationOptionTest =
         let result1 = Success
         let result2 = Success
         addFailure result1 result2 
-        |> printfn "Result is %A"
+        |> printfn "結果は %A"
 
-        // Result is <null>
+        // 結果は <null>
         
     let test2 = 
         let result1 = Success
-        let result2 = fail "string is too long"
+        let result2 = fail "文字列が長すぎます"
         addFailure result1 result2 
-        |> printfn "Result is %A"
-        // Result is Some ["string is too long"]
+        |> printfn "結果は %A"
+        // 結果は Some ["文字列が長すぎます"]
 
     let test3 = 
-        let result1 = fail "string is null or empty"
-        let result2 = fail "string is too long"
+        let result1 = fail "文字列がnullまたは空です"
+        let result2 = fail "文字列が長すぎます"
         addFailure result1 result2 
-        |> printfn "Result is %A"
-        // Result is Some ["string is null or empty"; "string is too long"]
+        |> printfn "結果は %A"
+        // 結果は Some ["文字列がnullまたは空です"; "文字列が長すぎます"]
 
     let test4 = 
         let validationResults str = 
@@ -861,10 +861,10 @@ module MonoidalValidationOptionTest =
         "cobol has native support for monads"
         |> validationResults 
         |> List.reduce addFailure
-        |> printfn "Result is %A"
-        // Result is Some
-        //   ["string is too long"; "string contains a bad word: monad";
-        //    "string contains a bad word: cobol"]
+        |> printfn "結果は %A"
+        // 結果は Some
+        //   ["文字列が長すぎます"; "文字列に悪い単語が含まれています: monad";
+        //    "文字列に悪い単語が含まれています: cobol"]
 
     let test5 = 
         let validationResults str = 
@@ -874,206 +874,206 @@ module MonoidalValidationOptionTest =
         "cobol has native support for monads"
         |> validationResults 
         |> List.fold addFailure Success
-        |> printfn "Result is %A"
-        // Result is <null>
+        |> printfn "結果は %A"
+        // 結果は <null>
 ```
 
-## Summary of the design tips 
+## 設計のコツのまとめ
 
-Let's pause for a second and see what we have covered so far.
+ここで一旦立ち止まって、これまでに扱ったことを振り返ってみましょう。
 
-Here are all the design tips together:
+以下が全ての設計のコツをまとめたものです。
 
-* To easily create a monoidal type, make sure that each field of the type is also a monoid.
-* To enable closure for a non-numeric type, replace single items with lists (or a similar data structure).
-* To get associativity for an operation, try to move the operation into the object.
-* To get identity for an operation, create a special case in a discriminated union, or, even simpler, just use Option.
+* モノイド的な型を簡単に作るには、型の各フィールドもモノイドになるようにしましょう。
+* 非数値型のクロージャを可能にするには、単一の項目をリスト（または類似のデータ構造）に置き換えましょう。
+* 演算の結合法則を得るには、演算をオブジェクトの中に移すことを試みましょう。
+* 演算の単位元を得るには、識別子付き共用体に特別なケースを作るか、もっと簡単に、オプションを使いましょう。
 
-In the next two sections, we'll apply these tips to two of the non-monoids that we have seen in previous posts: "average" and "most frequent word".
+次の2つのセクションでは、これらのコツを前回の投稿で見た2つの非モノイド、「平均」と「最頻出単語」に適用してみましょう。
 
-## A case study: Average
+## ケーススタディ：平均
 
-So now we have the toolkit that will enable us to deal with the thorny case of averages.
+さて、厄介な平均のケースを扱うためのツールキットができました。
 
-Here's a simple implementation of a pairwise average function:
+以下は、ペアワイズ平均関数の簡単な実装です。
 
 ```fsharp
 let avg i1 i2 = 
     float (i1 + i2) / 2.0
 
-// test
-avg 4 5 |> printfn "Average is %g"
-// Average is 4.5
+// テスト
+avg 4 5 |> printfn "平均は %g"
+// 平均は 4.5
 ```
 
-As we mentioned briefly in the first post, `avg` fails on all three monoid requirements!
+最初の投稿で少し触れたように、`avg`はモノイドの3つの要件すべてを満たしていません！
 
-First, it is not closed. Two ints that are combined together using `avg` do not result in another int.
+まず、クローズドではありません。`avg`を使って組み合わせた2つのintは、別のintにはなりません。
 
-Second, even if it was closed, `avg` is not associative, as we can see by defining a similar float function `avgf`:
+次に、クローズドだったとしても、`avg`は結合法則を満たしません。以下のように類似のfloat関数`avgf`を定義すると、それがわかります。
 
 ```fsharp
 let avgf i1 i2 = 
     (i1 + i2) / 2.0
 
-// test
-avgf (avgf 1.0 3.0) 5.0  |> printfn "Average from left is %g"
-avgf 1.0 (avgf 3.0 5.0)  |> printfn "Average from right is %g"
+// テスト
+avgf (avgf 1.0 3.0) 5.0  |> printfn "左からの平均は %g"
+avgf 1.0 (avgf 3.0 5.0)  |> printfn "右からの平均は %g"
 
-// Average from left is 3.5
-// Average from right is 2.5
+// 左からの平均は 3.5
+// 右からの平均は 2.5
 ```
 
-Finally, there is no identity. 
+最後に、単位元がありません。
 
-What number, when averaged with any other number, returns the original value?  Answer: none!
+どの数と平均を取っても元の値を返す数は何でしょうか？答え：ありません！
 
-### Applying the design tips 
+### 設計のコツを適用する
 
-So let's apply the design tips to see if they help us come up with a solution.
+では、設計のコツを適用して、解決策を見つけられるか試してみましょう。
 
-* *To easily create a monoidal type, make sure that each field of the type is also a monoid.*
+* *モノイド的な型を簡単に作るには、型の各フィールドもモノイドになるようにしましょう。*
 
-Well, "average" is a mathematical operation, so we could expect that a monoidal equivalent would also be based on numbers. 
+「平均」は数学的な演算なので、モノイド的な等価物も数字に基づいていると予想できます。
 
-* *To enable closure for a non-numeric type, replace single items with lists.*
+* *非数値型のクロージャを可能にするには、単一の項目をリストに置き換えましょう。*
 
-This looks at first glance like it won't be relevant, so we'll skip this for now.
+一見したところ、これは関係なさそうなので、今のところスキップします。
 
-* *To get associativity for an operation, try to move the operation into the object.*
+* *演算の結合法則を得るには、演算をオブジェクトの中に移すことを試みましょう。*
 
-Here's the crux! How do we convert "average" from a verb (an operation) to a noun (a data structure)?
+ここが肝心です！「平均」を動詞（演算）から名詞（データ構造）にどのように変換すればいいでしょうか？
 
-The answer is that we create a structure that is not actually an average, but a "delayed average" -- everything you need to make an average on demand.
+答えは、実際の平均ではなく、「遅延平均」- 必要に応じて平均を計算するために必要なすべてのもの - を表すような構造を作ることです。
 
-That is, we need a data structure with *two* components: a total, and a count.  With these two numbers we can calculate an average as needed.
+つまり、2つの要素を持つデータ構造が必要です：合計と数。この2つの数字があれば、必要に応じて平均を計算できます。
 
 ```fsharp
-// store all the info needed for an average
+// 平均に必要なすべての情報を保存
 type Avg = {total:int; count:int}
 
-// add two Avgs together
+// 2つのAvgを足す
 let addAvg avg1 avg2 = 
     {total = avg1.total + avg2.total; 
      count = avg1.count + avg2.count}
 ```
 
-The good thing about this, is that structure stores `ints`, not `floats`, so we don't need to worry about loss of precision or associativity of floats.
+この構造の良いところは、`float`ではなく`int`を保存しているので、精度の損失やfloatの結合法則について心配する必要がないことです。
 
-The last tip is:
+最後のコツは：
 
-* *To get identity for an operation, create a special case in a discriminated union, or, even simpler, just use Option.*
+* *演算の単位元を得るには、識別子付き共用体に特別なケースを作るか、もっと簡単に、オプションを使いましょう。*
 
-In this case, the tip is not needed, as we can easily create a zero by setting the two components to be zero:
+この場合、コツは必要ありません。2つの要素をゼロに設定することで簡単に単位元を作れるからです。
 
 ```fsharp
 let zero = {total=0; count=0}
 ```
 
-We could also have used `None` for the zero, but it seems like overkill in this case. If the list is empty, the `Avg` result is valid, even though we can't do the division.
+`None`を単位元として使うこともできましたが、この場合は過剰のように思えます。リストが空の場合でも、除算はできなくても`Avg`の結果は有効です。
 
-Once we have had this insight into the data structure, the rest of the implementation follows easily.  Here is all the code, plus some tests:
+このデータ構造についての洞察を得たら、残りの実装は簡単に導き出せます。以下は全コードとテストです。
 
 ```fsharp
 module Average = 
 
-    // store all the info needed for an average
+    // 平均に必要なすべての情報を保存
     type Avg = {total:int; count:int}
 
-    // add two Avgs together
+    // 2つのAvgを足す
     let addAvg avg1 avg2 = 
         {total = avg1.total + avg2.total; 
          count = avg1.count + avg2.count}
     
-    // inline version of add
+    // 加算のインライン版
     let (++) = addAvg
 
-    // construct an average from a single number
+    // 単一の数字から平均を構築
     let avg n = {total=n; count=1}
 
-    // calculate the average from the data.
-    // return 0 for empty lists
+    // データから平均を計算
+    // 空のリストの場合は0を返す
     let calcAvg avg = 
         if avg.count = 0 
         then 0.0  
         else float avg.total / float avg.count
 
-    // alternative - return None for empty lists
+    // 代替案 - 空のリストの場合はNoneを返す
     let calcAvg2 avg = 
         if avg.count = 0 
         then None
         else Some (float avg.total / float avg.count)
         
-    // the identity
+    // 単位元
     let zero = {total=0; count=0}
 
-    // test
+    // テスト
     addAvg (avg 4) (avg 5) 
     |> calcAvg 
-    |> printfn "Average is %g"
-    // Average is 4.5
+    |> printfn "平均は %g"
+    // 平均は 4.5
     
     (avg 4) ++ (avg 5) ++ (avg 6) 
     |> calcAvg 
-    |> printfn "Average is %g"
-    // Average is 5
+    |> printfn "平均は %g"
+    // 平均は 5
 
-    // test
+    // テスト
     [1..10]
     |> List.map avg
     |> List.reduce addAvg
     |> calcAvg
-    |> printfn "Average is %g"
-    // Average is 5.5
+    |> printfn "平均は %g"
+    // 平均は 5.5
 ```
 
-In the code above, you can see that I created a `calcAvg` function that uses the `Avg` structure to calculate a (floating point) average. One nice thing
-about this approach is that we can delay having to make a decision about what to do with a zero divisor. We can just return `0`, or alternatively `None`, or
-we can just postpone the calculation indefinitely, and only generate the average at the last possible moment, on demand!
+上記のコードでは、`Avg`構造を使って（浮動小数点の）平均を計算する`calcAvg`関数を作成しました。このアプローチの良い点は、
+ゼロ除算をどう扱うかの決定を遅らせられることです。単に`0`を返すこともできますし、あるいは`None`を返すこともできます。
+または計算を無期限に延期し、必要になった時点で、オンデマンドで平均を生成することもできます！
 
-And of course, this implementation of "average" has the ability to do incremental averages. We get this for free because it is a monoid.
+そしてもちろん、この「平均」の実装には増分平均を行う能力があります。これはモノイドだからこそ無料で得られる機能です。
 
-That is, if I have already calculated the average of a million numbers, and I want to add one more, I don't have to recalculate everything,
-I can just add the new number to the totals so far.
+つまり、すでに100万個の数の平均を計算していて、もう1つ追加したい場合、すべてを再計算する必要はありません。
+新しい数字をこれまでの合計に追加するだけでいいのです。
 
 
-## A slight diversion on metrics
+## メトリクスに関する小さな余談
 
-If you have ever been responsible for managing any servers or services,
-you will be aware of the importance of logging and monitoring metrics, such as CPU, I/O, etc. 
+サーバーやサービスの管理を担当したことがある人なら、
+CPU、I/Oなどのメトリクスのロギングとモニタリングの重要性を知っているでしょう。
 
-One of the questions you often face then is how to design your metrics.
-Do you want kilobytes per second, or just total kilobytes since the server started. Visitors per hour, or total visitors?
+そこでよく直面する質問の1つは、メトリクスをどのように設計するかということです。
+1秒あたりのキロバイト数が欲しいのか、それともサーバー起動からの合計キロバイト数が欲しいのか。1時間あたりの訪問者数か、それとも合計訪問者数か。
 
-If you look at some [guidelines when creating metrics](http://opentsdb.net/metrics.html) you will see the frequent recommendation to only track metrics that are *counters*, not *rates*.
+[メトリクス作成時のガイドライン](https://opentsdb.net/metrics.html)を見ると、*レート*ではなく*カウンター*のみを追跡するようにという頻繁な推奨事項があります。
 
-The advantage of counters is that (a) missing data doesn't affect the big picture, and (b) they can be aggregated in many ways after the fact -- by minute, by hour, as a ratio with something else, and so on.
+カウンターの利点は、（a）データの欠損が全体像に影響を与えないこと、（b）後から様々な方法で集計できること - 分単位、時間単位、他のものとの比率など - です。
 
-Now that you have worked through this series, you can see that the recommendation can really be rephrased as **metrics should be monoids**.  
+このシリーズを通じて学んできたことから、この推奨事項を本当は**メトリクスはモノイドであるべき**と言い換えられることがわかります。
 
-The work we did in the code above to transform "average" into two components, "total" and "count", is exactly what you want to do to make a good metric.
+上記のコードで「平均」を2つの要素、「合計」と「数」に変換する作業は、まさに良いメトリクスを作るために行うべきことです。
 
-Averages and other rates are not monoids, but "total" and "count" are, and then "average" can be calculated from them at your leisure.
+平均や他のレートはモノイドではありませんが、「合計」と「数」はモノイドであり、そこから好きな時に「平均」を計算できます。
 
-## Case study: Turning "most frequent word" into a monoid homomorphism
+## ケーススタディ：「最頻出単語」をモノイドの準同型に変える
 
-In the last post, we implemented a "most frequent word" function, but found that it wasn't a monoid homomorphism. That is, 
+前回の投稿で、「最頻出単語」関数を実装しましたが、それがモノイドの準同型ではないことがわかりました。つまり、
 
 ```text
 mostFrequentWord(text1) + mostFrequentWord(text2)
 ```
 
-did *not* give the same result as:
+は以下と同じ結果にはなりませんでした。
 
 ```text
 mostFrequentWord( text1 + text2 )
 ```
 
-Again, we can use the design tips to fix this up so that it works.
+ここでも、設計のコツを使ってこれを修正し、うまく機能するようにできます。
 
-The insight here is again to delay the calculation until the last minute, just as we did in the "average" example.
+ここでの洞察は、「平均」の例と同様に、計算を最後の瞬間まで遅らせることです。
 
-Rather than calculating the most frequent word upfront then, we create a data structure that stores all the information that we need to calculate the most frequent word later.
+そこで、最頻出単語を前もって計算するのではなく、後で最頻出単語を計算するために必要なすべての情報を保存するデータ構造を作ります。
 
 ```fsharp
 module FrequentWordMonoid = 
@@ -1086,7 +1086,7 @@ module FrequentWordMonoid =
     let addText (Text s1) (Text s2) =
         Text (s1 + s2)
 
-    // return a word frequency map
+    // 単語頻度マップを返す
     let wordFreq (Text s) =
         Regex.Matches(s,@"\S+")
         |> Seq.cast<Match>
@@ -1096,15 +1096,15 @@ module FrequentWordMonoid =
         |> Map.ofSeq
 ```
 
-In the code above we have a new function `wordFreq`, that returns a `Map<string,int>` rather just a single word.
-That is, we are now working with dictionaries, where each slot has a word and its associated frequency.
+上記のコードでは、単一の単語ではなく`Map<string,int>`を返す新しい関数`wordFreq`があります。
+つまり、各スロットに単語とそれに関連する頻度を持つ辞書を扱っています。
 
-Here is a demonstration of how it works:
+これがどのように機能するかのデモを見てみましょう。
 
 ```fsharp
 module FrequentWordMonoid = 
 
-    // code from above
+    // 上記のコード
     
     let page1() = 
         List.replicate 1000 "hello world "
@@ -1124,31 +1124,31 @@ module FrequentWordMonoid =
     let document() = 
         [page1(); page2(); page3()]
 
-    // show some word frequency maps
-    page1() |> wordFreq |> printfn "The frequency map for page1 is %A"
-    page2() |> wordFreq |> printfn "The frequency map for page2 is %A"
+    // いくつかの単語頻度マップを表示
+    page1() |> wordFreq |> printfn "page1の頻度マップは %A"
+    page2() |> wordFreq |> printfn "page2の頻度マップは %A"
     
-    //The frequency map for page1 is map [("hello", 1000); ("world", 1000)]
-    //The frequency map for page2 is map [("goodbye", 1000); ("world", 1000)]
+    //page1の頻度マップは map [("hello", 1000); ("world", 1000)]
+    //page2の頻度マップは map [("goodbye", 1000); ("world", 1000)]
     
     document() 
     |> List.reduce addText
     |> wordFreq 
-    |> printfn "The frequency map for the document is %A"
+    |> printfn "文書全体の頻度マップは %A"
     
-    //The frequency map for the document is map [
+    //文書全体の頻度マップは map [
     //      ("foobar", 1000); ("goodbye", 1000); 
     //      ("hello", 1000); ("world", 2000)]
 ```
     
-With this map structure in place, we can create a function `addMap` to add two maps. It simply merges the frequency counts of the words from both maps.
+このマップ構造ができたので、2つのマップを足す`addMap`関数を作れます。これは単に両方のマップから単語の頻度カウントをマージします。
     
 ```fsharp
 module FrequentWordMonoid = 
 
-    // code from above
+    // 上記のコード
     
-    // define addition for the maps
+    // マップの加算を定義
     let addMap map1 map2 =
         let increment mapSoFar word count = 
             match mapSoFar |> Map.tryFind word with
@@ -1158,15 +1158,15 @@ module FrequentWordMonoid =
         map2 |> Map.fold increment map1
 ```
 
-And when we have combined all the maps together, we can then calculate the most frequent word by looping through the map and finding the word with the largest frequency.
+そして、すべてのマップを組み合わせた後、マップをループして最大の頻度を持つ単語を見つけることで、最頻出単語を計算できます。
 
 ```fsharp
 module FrequentWordMonoid = 
 
-    // code from above
+    // 上記のコード
         
-    // as the last step,
-    // get the most frequent word in a map
+    // 最後のステップとして、
+    // マップ内の最頻出単語を取得
     let mostFrequentWord map = 
         let max (candidateWord,maxCountSoFar) word count =
             if count > maxCountSoFar
@@ -1176,105 +1176,105 @@ module FrequentWordMonoid =
         map |> Map.fold max ("None",0)
 ```
 
-So, here are the two scenarios revisited using the new approach.
+では、新しいアプローチを使って2つのシナリオを再検討してみましょう。
 
-The first scenario combines all the pages into a single text, then applies `wordFreq` to get a frequency map, and applies `mostFrequentWord` to get the most frequent word.
+最初のシナリオは、すべてのページを単一のテキストに組み合わせ、`wordFreq`を適用して頻度マップを取得し、`mostFrequentWord`を適用して最頻出単語を取得します。
 
-The second scenario applies `wordFreq` to each page separately to get a map for each page.
-These maps are then combined with `addMap` to get a single global map. Then `mostFrequentWord` is applied as the last step, as before.
+2番目のシナリオは、各ページに個別に`wordFreq`を適用して、各ページのマップを取得します。
+これらのマップは`addMap`で組み合わされて単一のグローバルマップになります。そして、前と同様に最後のステップとして`mostFrequentWord`が適用されます。
 
 ```fsharp
 module FrequentWordMonoid = 
 
-    // code from above
+    // 上記のコード
 
     document() 
     |> List.reduce addText
     |> wordFreq
-    // get the most frequent word from the big map
+    // 大きなマップから最頻出単語を取得
     |> mostFrequentWord
-    |> printfn "Using add first, the most frequent word and count is %A"
+    |> printfn "先に加算を行うと、最頻出単語とその出現回数は %A"
 
-    //Using add first, the most frequent word and count is ("world", 2000)
+    //先に加算を行うと、最頻出単語とその出現回数は ("world", 2000)
 
     document() 
     |> List.map wordFreq
     |> List.reduce addMap
-    // get the most frequent word from the merged smaller maps
+    // より小さなマップをマージしてから最頻出単語を取得
     |> mostFrequentWord
-    |> printfn "Using map reduce, the most frequent and count is %A"
+    |> printfn "マップリデュースを使うと、最頻出単語とその出現回数は %A"
     
-    //Using map reduce, the most frequent and count is ("world", 2000)
+    //マップリデュースを使うと、最頻出単語とその出現回数は ("world", 2000)
 ```
 
-If you run this code, you will see that you now get the *same* answer. 
+このコードを実行すると、今度は同じ答えが得られることがわかります。
 
-This means that `wordFreq` is indeed a monoid homomorphism, and is suitable for running in parallel, or incrementally.  
+これは、`wordFreq`が実際にモノイドの準同型であり、並列実行や増分的な実行に適していることを意味します。
 
 
-## Next time
+## 次回予告
 
-We've seen a lot of code in this post, but it has all been focused on data structures.
+この投稿では多くのコードを見てきましたが、すべてデータ構造に焦点を当てたものでした。
 
-However, there is nothing in the definition of a monoid that says that the things to be combined have to be data structures -- they could be *anything at all*. 
+しかし、モノイドの定義には、組み合わせるものがデータ構造でなければならないという制約はありません - *何でも*構いません。
 
-In the next post we'll look at monoids applied to other objects, such as types, functions, and more.
+次回の投稿では、型、関数、その他のオブジェクトに適用されるモノイドについて見ていきます。
 
 <a name="performance" ></a>
 <p></p>
 <p></p>
 <p></p>
 
-## Appendix: On Performance
+## 付録：パフォーマンスについて
 
-In the examples above, I have made frequent use of `@` to "add" two lists in the same way that `+` adds two numbers.
-I did this to highlight the analogies with other monoidal operations such as numeric addition and string concatenation.
+上記の例では、`+`が2つの数字を足すのと同じように、`@`を使って2つのリストを「足す」ことをよく行いました。
+これは、数値の加算や文字列の連結など、他のモノイド的な演算との類似性を強調するためでした。
 
-I hope that it is clear that the code samples above are meant to be teaching examples, not necessarily good models for the kind of real-world, battle-hardened, and all-too-ugly code you need in a production environment. 
+上記のコードサンプルが教育目的のものであり、必ずしも実際の本番環境で必要な、実戦で鍛えられた、往々にして美しくないコードのモデルとしては適していないことは明らかだと思います。
 
-A couple of people have pointed out that using List append (`@`) should be avoided in general. This is because the entire first list needs to be copied, which is not very efficient.
+リストの連結（`@`）の使用は一般的に避けるべきだと指摘する人もいるでしょう。これは、最初のリスト全体をコピーする必要があり、あまり効率的ではないためです。
 
-By far the best way to add something to a list is to add it to the front using the so-called "cons" mechanism, which in F# is just `::`.  F# lists are implemented as linked lists, so
-adding to the front is very cheap.
+リストに何かを追加する最も良い方法は、いわゆる「cons」メカニズムを使って先頭に追加することです。F#では単に`::`を使います。F#のリストは連結リストとして実装されているので、
+先頭への追加は非常に安価です。
 
-The problem with using this approach is that it is not symmetrical -- it doesn't add two lists together, just a list and an element. This means that it cannot be used as the "add" operation in a monoid.
+このアプローチを使う問題は、対称的でないことです - 2つのリストを足すのではなく、リストと要素を足すだけです。これはモノイドの「加算」演算として使用できません。
 
-If you don't need the benefits of a monoid, such as divide and conquer, then that is a perfectly valid design decision. No need to sacrifice performance for a pattern that you are not going to benefit from.
+分割統治のようなモノイドの利点が必要ない場合は、これは完全に有効な設計決定です。利益を得られないパターンのためにパフォーマンスを犠牲にする必要はありません。
 
-The other alternative to using `@` is to not use lists in the first place!
+`@`を使用する他の代替案は、そもそもリストを使わないことです！
 
-### Alternatives to lists
+### リストの代替案
 
-In the `ValidationResult` design, I used a list to hold the error results so that we could get easy accumulation of the results.
-But I only chose the `list` type because it is really the default collection type in F#.
-I could have equally well have chosen sequences, or arrays, or sets. Almost any other collection type would have done the job just as well.
+`ValidationResult`の設計では、結果の簡単な蓄積を得るために、エラー結果を保持するリストを使用しました。
+しかし、`list`型を選んだのは、それがF#のデフォルトのコレクション型だからに過ぎません。
+シーケンス、配列、セットなど、他のほとんどどのコレクション型を選んでも同じように機能したでしょう。
 
-But not all types will have the same performance. For example, combining two sequences is a lazy operation. You don't have to copy all the data; you just enumerate one sequence, then the other.
-So that might be faster perhaps?
+しかし、すべての型が同じパフォーマンスを持つわけではありません。例えば、2つのシーケンスの組み合わせは遅延操作です。すべてのデータをコピーする必要はなく、一方のシーケンスを列挙し、次に他方を列挙するだけです。
+そのため、おそらくより高速かもしれません。
 
-Rather than guessing, I wrote a little test script to measure performance at various list sizes, for various collection types. 
+推測するよりも、様々なリストサイズで、様々なコレクション型のパフォーマンスを測定する小さなテストスクリプトを書きました。
 
-I have chosen a very simple model: we have a list of objects, each of which is a collection containing *one* item. 
-We then reduce this list of collections into a single giant collection using the appropriate monoid operation. Finally, we iterate over the giant collection once.
+非常にシンプルなモデルを選びました：各オブジェクトが*1つ*の項目を含むコレクションである、オブジェクトのリストがあります。
+次に、適切なモノイド演算を使って、このコレクションのリストを単一の巨大なコレクションに縮約します。最後に、巨大なコレクションを一度反復処理します。
 
-This is very similar to the `ValidationResult` design, where we would combine all the results into a single list of results, and then (presumably) iterate over them to show the errors.
+これは`ValidationResult`の設計と非常によく似ています。そこでは、すべての結果を単一の結果リストに組み合わせ、そして（おそらく）エラーを表示するためにそれらを反復処理します。
 
-It is also similar to the "most frequent word" design, above, where we combine all the individual frequency maps into a single frequency map, and then iterate over it to find the most frequent word.
-In that case, of course, we were using `map` rather than `list`, but the set of steps is the same.
+これは「最頻出単語」の設計とも似ています。そこでは、個々の頻度マップをすべて単一の頻度マップに組み合わせ、最頻出単語を見つけるためにそれを反復処理します。
+もちろん、その場合は`map`を使用していましたが、ステップのセットは同じです。
 
-### A performance experiment
+### パフォーマンス実験
 
-Ok, here's the code:
+では、コードを見てみましょう：
 
 ```fsharp
 module Performance =
 
     let printHeader() =
-        printfn "Label,ListSize,ReduceAndIterMs" 
+        printfn "ラベル,リストサイズ,縮約と反復にかかったミリ秒" 
 
-    // time the reduce and iter steps for a given list size and print the results
+    // 与えられたリストサイズに対して縮約と反復のステップの時間を計測し、結果を出力
     let time label reduce iter listSize = 
-        System.GC.Collect() //clean up before starting
+        System.GC.Collect() //開始前にクリーンアップ
         let stopwatch = System.Diagnostics.Stopwatch()
         stopwatch.Start()
         reduce() |> iter
@@ -1313,19 +1313,19 @@ module Performance =
         time "ResizeArray.append" reduce iter listSize 
 ```
 
-Let's go through the code quickly:
+コードを簡単に説明しましょう：
 
-* The `time` function times the reduce and iteration steps. It deliberately does not test how long it takes to create the collection.
-  I do perform a GC before starting, but in reality, the memory pressure that a particular type or algorithm causes is an important part of the decision to use it (or not).
-  [Understanding how GC works](https://www.simple-talk.com/dotnet/.net-framework/5-tips-and-techniques-for-avoiding-automatic-gc-collections/) is an important part of getting performant code.
-* The `testListPerformance` function sets up the list of collections (lists in this case) and also the `reduce` and `iter` functions. It then runs the timer on `reduce` and `iter`.
-* The other functions do the same thing, but with sequences, arrays, and ResizeArrays (standard .NET Lists).
-  Out of curiosity, I thought I'd test two ways of merging sequences, one using the standard library
-function `Seq.append` and the other using two `yield!`s in a row.
-* The `testResizeArrayPerformance` uses ResizeArrays and adds the right list to the left one.
-The left one mutates and grows larger as needed, using a [growth strategy](http://stackoverflow.com/questions/1665298/listt-and-arraylist-default-capacity/1665325#1665325) that keeps inserts efficient.
+* `time`関数は縮約と反復のステップの時間を計測します。意図的にコレクションの作成にかかる時間は測定しません。
+  開始前にGCを実行していますが、実際には特定の型やアルゴリズムが引き起こすメモリ圧力は、それを使用する（または使用しない）決定の重要な部分です。
+  [GCの仕組みを理解する](https://www.red-gate.com/simple-talk/development/dotnet-development/5-tips-and-techniques-for-avoiding-automatic-gc-collections/)ことは、パフォーマンスの高いコードを得るための重要な部分です。
+* `testListPerformance`関数はコレクションのリスト（この場合はリスト）を設定し、`reduce`と`iter`関数も設定します。その後、`reduce`と`iter`に対してタイマーを実行します。
+* 他の関数も同じことを行いますが、シーケンス、配列、ResizeArray（標準の.NETリスト）を使用します。
+  興味深いことに、シーケンスをマージする2つの方法をテストしてみました。
+  1つは標準ライブラリの関数`Seq.append`を使用し、もう1つは2つの`yield!`を連続して使用します。
+* `testResizeArrayPerformance`はResizeArrayを使用し、右のリストを左のリストに追加します。
+左のリストは変更され、必要に応じて大きくなり、[成長戦略](https://stackoverflow.com/questions/1665298/listt-and-arraylist-default-capacity/1665325#1665325)を使用して挿入を効率的に保ちます。
 
-Now let's write code to check the performance on various sized lists. I chose to start with a count of 2000 and move by increments of 4000 up to 50000.
+では、様々なサイズのリストでパフォーマンスをチェックするコードを書いてみましょう。2000から始めて、4000ずつ増やして50000まで行くことにしました。
 
 ```fsharp
 open Performance
@@ -1348,51 +1348,51 @@ printHeader()
 |> List.iter testSeqPerformance_Yield 
 ```
 
-I won't list all the detailed output -- you can run the code for yourself -- but here is a chart of the results.
+詳細な出力はすべて列挙しません - 自分でコードを実行できますが - 結果のグラフを以下に示します。
 
-![monoid performance](../assets/img/monoid_performance.jpg)
+![モノイドパフォーマンス](../assets/img/monoid_performance.jpg)
 
-There are a few things to note:
+いくつか注目すべき点があります：
 
-* The two sequence-based examples crashed with stack overflows. The `yield!` was about 30% faster than `Seq.append`, but also ran out of stack faster.
-* List.append didn't run out of stack, but got much slower as the lists got larger.
-* Array.append was fast, and increases more slowly with the size of the list
-* ResizeArray was fastest of all, and didn't break a sweat even with large lists.
+* 2つのシーケースベースの例はスタックオーバーフローでクラッシュしました。`yield!`は`Seq.append`より約30%高速でしたが、より早くスタックを使い果たしました。
+* List.appendはスタックオーバーフローしませんでしたが、リストが大きくなるにつれてかなり遅くなりました。
+* Array.appendは高速で、リストのサイズが大きくなるにつれてより緩やかに増加しました。
+* ResizeArrayが最も高速で、大きなリストでも問題ありませんでした。
 
-For the three collection types that didn't crash, I also timed them for a list of 100K items. The results were:
+クラッシュしなかった3つのコレクション型については、100Kアイテムのリストでも時間を計測しました。結果は以下の通りです：
 
-* List = 150,730 ms
-* Array = 26,062 ms
+* リスト = 150,730 ms
+* 配列 = 26,062 ms
 * ResizeArray = 33 ms
 
-A clear winner there, then.
+明らかな勝者がいますね。
 
-### Analyzing the results
+### 結果の分析
 
-What conclusion can we draw from this little experiment?
+この小さな実験からどのような結論を導き出せるでしょうか？
 
-First, you might have all sorts of questions, such as: Were you running in debug or release mode? Did you have optimization turned on? What about using parallelism to increase performance? 
-And no doubt, there will be comments saying "why did you use technique X, technique Y is so much better".
+まず、こんな疑問が浮かぶかもしれません。デバッグモードでテストしたの？リリースモードでテストしたの？最適化はオンにしていたの？並列処理を使ってパフォーマンスを向上させることはできないの？
+そして間違いなく、「なぜテクニックXを使ったの？テクニックYの方がずっと良いのに」というコメントがあるでしょう。
 
-But here's the conclusion I would like to make: 
+でも、ここで私が導き出したい結論はこうです：
 
-* **You cannot draw any conclusion from these results!**
+* **これらの結果から結論を導き出すことはできません！**
 
-Every situation is different and requires a different approach:
+状況によって異なるアプローチが必要です：
 
-* If you are working with small data sets you might not care about performance anyway. In this case I would stick with lists -- I'd rather not sacrifice pattern matching and immutability unless I have to.
-* The performance bottleneck might not be in the list addition code. There is no point working on optimizing the list addition if you are actually spending all your time on disk I/O or network delays.
-A real-world version of the word frequency example might actually spend most of its time doing reading from disk, or parsing, rather than adding lists.
-* If you working at the scale of Google, Twitter, or Facebook, you really need to go and hire some algorithm experts.
+* 小さなデータセットを扱っている場合は、そもそもパフォーマンスを気にする必要がないかもしれません。この場合、リストを使い続けるでしょう - 必要がない限り、パターンマッチングや不変性を犠牲にしたくありません。
+* パフォーマンスのボトルネックはリストの加算コードにはないかもしれません。実際にディスクI/Oやネットワーク遅延に時間を費やしているなら、リストの加算の最適化に取り組んでも意味がありません。
+単語頻度の例の実世界版では、実際にはリストの加算よりも、ディスクからの読み取りや解析に多くの時間を費やす可能性があります。
+* Google、Twitter、Facebookのような規模で作業している場合は、本当にアルゴリズムの専門家を雇う必要があります。
 
-The only principles that we can take away from any discussion on optimization and performance are:
+最適化とパフォーマンスに関する議論から導き出せる唯一の原則は以下の通りです：
 
-* **A problem must be dealt with in its own context.** The size of the data being processed, the type of hardware, the amount of memory, and so on. All these will make a difference to your performance. 
-What works for me may not work for you, which is why...
-* **You should always measure, not guess.** Don't make assumptions about where your code is spending its time -- learn to use a profiler!
-There are some good examples of using a profiler [here](http://moiraesoftware.com/blog/2012/07/15/the-lurking-horror/) and [here](http://moiraesoftware.com/blog/2011/12/11/fixing-a-hole/).
-* **Be wary of micro-optimizations**. Even if your profiler shows that your sorting routine spends all its time in comparing strings, that doesn't necessarily mean that you need to improve your string comparison function.
-You might be better off improving your algorithm so that you don't need to do so many comparisons in the first place. [Premature optimization](http://programmers.stackexchange.com/a/79954/44643) and all that.
+* **問題は独自の文脈で扱わなければなりません。** 処理されるデータのサイズ、ハードウェアの種類、メモリ量など、すべてがパフォーマンスに影響を与えます。
+私にとって有効なことがあなたには有効でない可能性があります。だからこそ...
+* **常に推測ではなく、測定しましょう。** コードがどこで時間を費やしているかについて仮定を立てないでください - プロファイラの使い方を学びましょう！
+プロファイラの使用例は[ここ](https://web.archive.org/web/20131127003137/http://moiraesoftware.com/blog/2012/07/15/the-lurking-horror/)と[ここ](https://web.archive.org/web/20120206083810/http://moiraesoftware.com/blog/2011/12/11/fixing-a-hole/)にあります。
+* **マイクロ最適化に注意しましょう**。プロファイラが、ソートルーチンが文字列の比較にすべての時間を費やしていることを示したとしても、必ずしも文字列比較関数を改善する必要があるとは限りません。
+そもそも比較回数を減らすようにアルゴリズムを改善する方が良いかもしれません。[早すぎる最適化](https://web.archive.org/web/20130502122153/http://programmers.stackexchange.com/questions/79946/what-is-the-best-retort-to-premature-optimization-is-the-root-of-all-evil/79954)などがそれに当たります。
 
 
 

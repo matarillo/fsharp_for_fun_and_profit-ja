@@ -1,17 +1,17 @@
 ---
 layout: series_index
-title: "The 'Understanding monoids' series"
-seriesIndexId: "Understanding monoids"
+title: "「モノイドを理解する」シリーズ"
+seriesIndexId: "モノイドを理解する"
 ---
 
-In this series, we'll look at a very common "pattern" known as a *monoid*. 
+このシリーズでは、*モノイド*と呼ばれる非常に一般的な「パターン」を見ていきます。
 
-Monoids are not really a design pattern; more an approach to working with many different types of values in a common way.
-In fact, once you understand monoids, you will start seeing them everywhere!
-
-
+モノイドは、厳密にはデザインパターンではありません。むしろ、様々な種類の値を共通の方法で扱うためのアプローチと言えます。
+実際、モノイドを理解すると、モノイドがあらゆるところに潜んでいることに気づくようになります。
 
 
-* [Monoids without tears](../posts/monoids-without-tears.md). A mostly mathless discussion of a common functional pattern.
-* [Monoids in practice](../posts/monoids-part2.md). Monoids without tears - Part 2.
-* [Working with non-monoids](../posts/monoids-part3.md). Monoids without tears - Part 3.
+
+
+* [つらくないモノイド](../posts/monoids-without-tears.md)。一般的な関数型パターンについて、数学をほとんど使わずに説明します。
+* [実践的なモノイド](../posts/monoids-part2.md)。つらくないモノイド - パート2。
+* [モノイド以外を扱う](../posts/monoids-part3.md)。つらくないモノイド - パート3。
