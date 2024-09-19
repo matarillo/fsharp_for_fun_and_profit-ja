@@ -1,15 +1,15 @@
 ---
-layout: series_index
-title: "Understanding Parser Combinators"
-seriesIndexId: "Understanding Parser Combinators"
+layout。series_index
+title。"パーサーコンビネータを理解する"
+seriesIndexId。"パーサーコンビネータを理解する"
 ---
 
-In this series, we'll look at how so-called "applicative parsers" work. In order to understand something, there's nothing
-like building it for yourself, and so we'll create a basic parser library from scratch, then some useful "parser combinators",
-and then finish off by building a complete JSON parser.
+このシリーズでは、いわゆる「アプリカティブパーサー」がどのように動作するかを詳しく見ていきます。
+何かを深く理解するためには、自分で作ってみるのが一番です。
+そこで、まずは基本的なパーサーライブラリをゼロから書き、次に便利な「パーサーコンビネータ」をいくつか作り、最後に完全なJSONパーサーを組み上げることで締めくくりたいと思います。
 
 
-* [Understanding Parser Combinators](../posts/understanding-parser-combinators.md). Building a parser combinator library from scratch.
-* [Building a useful set of parser combinators](../posts/understanding-parser-combinators-2.md). 15 or so combinators that can be combined to parse almost anything.
-* [Improving the parser library](../posts/understanding-parser-combinators-3.md). Adding more informative errors.
-* [Writing a JSON parser from scratch](../posts/understanding-parser-combinators-4.md). In 250 lines of code.
+* [パーサーコンビネータを理解する](../posts/understanding-parser-combinators.md)。パーサーコンビネータライブラリをゼロから書きます。
+* [便利なパーサーコンビネータの作成](../posts/understanding-parser-combinators-2.md)。15個ほどのコンビネータを組み合わせれば、ほとんどのものを解析できます。
+* [パーサーライブラリの改善](../posts/understanding-parser-combinators-3.md)。より詳細なエラー情報を追加します。
+* [JSONパーサーをゼロから書く](../posts/understanding-parser-combinators-4.md)。250行のコードで実装します。
