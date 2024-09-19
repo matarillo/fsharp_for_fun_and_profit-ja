@@ -142,7 +142,7 @@
 
 * [完全なプログラムの設計とコーディング方法](posts/recipe-part1.md)   
 * [エラー処理への関数型アプローチ (鉄道指向プログラミング)](posts/recipe-part2.md)   
-  * [鉄道指向プログラミング: 炭酸飲料エディション](posts/railway-oriented-programming-carbonated.md)
+  * [鉄道指向プログラミング: 炭酸化バージョン](posts/railway-oriented-programming-carbonated.md)
 * [「モノイドを理解する」 シリーズ](series/understanding-monoids.md)           
   * [つらくないモノイド](posts/monoids-without-tears.md)
   * [実践的なモノイド](posts/monoids-part2.md)
