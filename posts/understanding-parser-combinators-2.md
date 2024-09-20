@@ -1,43 +1,43 @@
 ---
 layout: post
-title: "Building a useful set of parser combinators"
-description: "15 or so combinators that can be combined to parse almost anything"
+title: "便利なパーサーコンビネータの作成"
+description: "15個ほどのコンビネータでほとんどのものを解析できます"
 categories: [Combinators,Patterns]
-seriesId: "Understanding Parser Combinators"
+seriesId: "パーサーコンビネータの理解"
 seriesOrder: 2
 ---
 
-*UPDATE: [Slides and video from my talk on this topic](http://fsharpforfunandprofit.com/parser/)*
+*更新：[このトピックに関する私の講演のスライドとビデオ](https://fsharpforfunandprofit.com/parser/)*
 
-In this series, we are looking at how applicative parsers and parser combinators work.
+このシリーズでは、アプリカティブパーサーとパーサーコンビネータの仕組みを見ていきます。
 
-* In the [first post](../posts/understanding-parser-combinators.md), we created the foundations of a parsing library.
-* In this post, we'll build out the library with many other useful combinators.
-  The combinator names will be copied from those used by [FParsec](http://www.quanttec.com/fparsec/), so that you can easily migrate to it.
+* [最初の投稿](../posts/understanding-parser-combinators.md)でパーシングライブラリの基礎を作りました。
+* この投稿では、他の多くの便利なコンビネータを使ってライブラリを拡張します。
+  コンビネータ名は[FParsec](https://www.quanttec.com/fparsec/)で使われているものをコピーしているので、簡単に移行できます。
 
 <hr>
 
 
-## 1. `map` -- transforming the contents of a parser
+## 1. `map` -- パーサーの内容を変換する
 
-When parsing, we often we want to match a particular string, such as a reserved word like "if" or "where". A string is just a sequence of characters,
-so surely we could use the same technique that we used to define `anyOf` in the first post, but using `andThen` instead of `orElse`?
+パースするとき、「if」や「where」などの予約語のような特定の文字列に一致させたいことがよくあります。文字列は単なる文字の列なので、
+最初の投稿で`anyOf`を定義したときと同じ手法を使えるはずです。ただし、`orElse`の代わりに`andThen`を使います。
 
-Here's a (failed) attempt to create a `pstring` parser using that approach:
+以下は、そのアプローチを使って`pstring`パーサーを作ろうとした（失敗した）試みです。
 
 ```fsharp
 let pstring str = 
     str
-    |> Seq.map pchar // convert into parsers
+    |> Seq.map pchar // パーサーに変換
     |> Seq.reduce andThen
 ```
 
-This doesn't work, because the output of `andThen` is different from the input (a tuple, not a char) and so the `reduce` approach fails.
+これは機能しません。`andThen`の出力は入力と異なる（文字ではなくタプル）ため、`reduce`アプローチが失敗します。
 
-In order to solve this, we'll need to use a different technique. 
+この問題を解決するには、別の手法が必要です。
 
-To get started, let's try just matching a string of a specific length.
-Say, for example, that we want to match a three digits in a row. Well, we can do that using `andThen`:
+まずは、特定の長さの文字列に一致させることから始めましょう。
+例えば、3桁の数字を連続して一致させたい場合、`andThen`を使って次のようにできます。
 
 ```fsharp
 let parseDigit =
@@ -47,124 +47,124 @@ let parseThreeDigits =
     parseDigit .>>. parseDigit .>>. parseDigit 
 ```
 
-If we run it like this:
+次のように実行すると、
 
 ```fsharp
 run parseThreeDigits "123A"
 ```
 
-then we get the result:
+結果は以下のようになります。
  
 ```fsharp
 Success ((('1', '2'), '3'), "A")
 ```
 
-It does work, but the result contains a tuple inside a tuple `(('1', '2'), '3')` which is fugly and hard to use.
-It would be so much more convenient to just have a simple string (`"123"`).
+動作はしますが、結果にはタプル内のタプル`(('1', '2'), '3')`が含まれており、見た目が悪く使いにくいです。
+単純な文字列（`"123"`）があれば、はるかに便利でしょう。
 
-But in order to turn `('1', '2'), '3')` into `"123"`, we'll need a function that can reach inside of the parser and transform the result using an arbitrary passed in function.
+しかし、`('1', '2'), '3')`を`"123"`に変換するには、パーサー内部に入り込み、任意の関数を使って結果を変換できる関数が必要です。
 
-Of course, what we need is the functional programmer's best friend, `map`. 
+もちろん、必要なのは関数型プログラマの親友、`map`です。
 
-To understand `map` and similar functions, I like to think of there being two worlds: a "Normal World", where regular things live, and "Parser World", where `Parser`s live.
+`map`や類似の関数を理解するために、2つの世界があると考えるのが好きです。通常の物事が存在する「通常の世界」と、`Parser`が存在する「パーサーの世界」です。
 
-You can think of Parser World as a sort of "mirror" of Normal World because it obeys the following rules:
+パーサーの世界は通常の世界の一種の「鏡」と考えられます。次のルールに従うからです。
 
-* Every type in Normal World (say `char`) has a corresponding type in Parser World (`Parser<char>`).
+* 通常の世界のすべての型（例えば`char`）には、パーサーの世界に対応する型（`Parser<char>`）があります。
 
 ![](../assets/img/parser-world-return.png)
 
-And:
+そして、
 
-* Every value in Normal World (say `"ABC"`) has a corresponding value in Parser World (that is, some `Parser<string>` that returns `"ABC"`).
+* 通常の世界のすべての値（例えば`"ABC"`）には、パーサーの世界に対応する値（つまり、`"ABC"`を返す`Parser<string>`）があります。
 
-And:
+さらに、
 
-* Every function in Normal World (say `char -> string`) has a corresponding function in Parser World (`Parser<char> -> Parser<string>`).
+* 通常の世界のすべての関数（例えば`char -> string`）には、パーサーの世界に対応する関数（`Parser<char> -> Parser<string>`）があります。
 
 ![](../assets/img/parser-world-map.png)
 
-Using this metaphor then, `map` transforms (or "lifts") a function in Normal World into a function in Parser World.
+この比喩を使うと、`map`は通常の世界の関数をパーサーの世界の関数に変換（または「持ち上げ」）します。
 
 ![](../assets/img/parser-map.png)
 
-*And by the way, if you like this metaphor, I have a [whole series of posts that develop it further](../posts/elevated-world.md).*
+*ちなみに、この比喩が気に入ったなら、[さらに詳しく説明した一連の投稿](../posts/elevated-world.md)があります。*
 
-So that's what `map` does; how do we implement it?
+これが`map`の機能です。では、どのように実装すればいいでしょうか。
 
-The logic is:
+ロジックは次のとおりです。
 
-* Inside the `innerFn`, run the parser to get the result.
-* If the result was a success, apply the specified function to the success value to get a new, transformed value, and...
-* ...return the new, mapped, value instead of the original value.
+* `innerFn`内でパーサーを実行して結果を取得します。
+* 結果が成功だった場合、指定された関数を成功値に適用して新しい変換された値を取得し、
+* 元の値の代わりに新しくマップされた値を返します。
 
-Here's the code (I've named the map function `mapP` to avoid confusion with other map functions):
+以下がコードです（他のmap関数との混同を避けるため、map関数を`mapP`と名付けました）。
 
 ```fsharp
 let mapP f parser = 
     let innerFn input =
-        // run parser with the input
+        // 入力でパーサーを実行
         let result = run parser input
 
-        // test the result for Failure/Success
+        // 結果を失敗/成功でテスト
         match result with
         | Success (value,remaining) -> 
-            // if success, return the value transformed by f
+            // 成功した場合、fで変換した値を返す
             let newValue = f value
             Success (newValue, remaining)
 
         | Failure err -> 
-            // if failed, return the error
+            // 失敗した場合、エラーを返す
             Failure err
-    // return the inner function
+    // 内部関数を返す
     Parser innerFn 
 ```
 
-If we look at the signature of `mapP`:
+`mapP`のシグネチャを見てみましょう。
 
 ```fsharp
 val mapP : 
     f:('a -> 'b) -> Parser<'a> -> Parser<'b>
 ```
 
-we can see that it has exactly the signature we want, transforming a function `'a -> 'b` into a function `Parser<'a> -> Parser<'b>`.
+これは、関数`'a -> 'b`を関数`Parser<'a> -> Parser<'b>`に変換する、まさに望んでいたシグネチャです。
 
-It's common to define an infix version of `map` as well:
+`map`の中置バージョンを定義するのも一般的です。
 
 ```fsharp
 let ( <!> ) = mapP
 ```
 
-And in the context of parsing, we'll often want to put the mapping function *after* the parser, with the parameters flipped.
-This makes using `map` with the pipeline idiom much more convenient:
+そして、パースの文脈では、マッピング関数をパーサーの後に置き、パラメータを反転させることがよくあります。
+これにより、パイプラインイディオムで`map`を使うのがはるかに便利になります。
 
 ```fsharp
 let ( |>> ) x f = mapP f x
 ```
 
-### Parsing three digits with `mapP` 
+### `mapP`を使って3桁の数字をパースする
 
-With `mapP` available, we can revisit `parseThreeDigits` and turn the tuple into a string.
+`mapP`が使えるようになったので、`parseThreeDigits`を再検討し、タプルを文字列に変換できます。
 
-Here's the code:
+以下がコードです。
 
 ```fsharp
 let parseDigit = anyOf ['0'..'9']
 
 let parseThreeDigitsAsStr = 
-    // create a parser that returns a tuple
+    // タプルを返すパーサーを作る
     let tupleParser = 
         parseDigit .>>. parseDigit .>>. parseDigit
 
-    // create a function that turns the tuple into a string
+    // タプルを文字列に変換する関数を作る
     let transformTuple ((c1, c2), c3) = 
         String [| c1; c2; c3 |]
 
-    // use "map" to combine them
+    // "map"を使って組み合わせる
     mapP transformTuple tupleParser 
 ```
 
-Or, if you prefer a more compact implementation:
+または、より簡潔な実装もできます。
 
 ```fsharp
 let parseThreeDigitsAsStr = 
@@ -173,134 +173,134 @@ let parseThreeDigitsAsStr =
 ```
 
 
-And if we test it, we get a string in the result now, rather than a tuple: 
+テストすると、結果にタプルではなく文字列が含まれます。
 
 ```fsharp
 run parseThreeDigitsAsStr "123A"  // Success ("123", "A")
 ```
 
-We can go further, and map the string into an int:
+さらに進んで、文字列を整数にマップすることもできます。
 
 ```fsharp
 let parseThreeDigitsAsInt = 
     mapP int parseThreeDigitsAsStr 
 ```
 
-If we test this, we get an `int` in the Success branch.
+これをテストすると、Successブランチに`int`が含まれます。
 
 ```fsharp
 run parseThreeDigitsAsInt "123A"  // Success (123, "A")
 ```
 
-Let's check the type of `parseThreeDigitsAsInt`:
+`parseThreeDigitsAsInt`の型を確認してみましょう。
 
 ```fsharp
 val parseThreeDigitsAsInt : Parser<int>
 ```
 
-It's a `Parser<int>` now, not a `Parser<char>` or `Parser<string>`.
-The fact that a `Parser` can contain *any* type, not just a char or string, is a key feature that will be very valuable when we need to build more complex parsers.
+これは`Parser<char>`や`Parser<string>`ではなく、`Parser<int>`になりました。
+`Parser`が文字や文字列だけでなく*任意の*型を含められるという事実は、より複雑なパーサーを組み立てるときに非常に価値のある重要な特徴です。
 
 
-## 2. `apply` and `return` -- lifting functions to the world of Parsers
+## 2. `apply`と`return` -- 関数をパーサーの世界に持ち上げる
 
-To achieve our goal of creating a parser that matches a list of characters, we need two more helper functions which I will call `returnP` and `applyP`.
+文字のリストに一致するパーサーを作るという目標を達成するには、`returnP`と`applyP`と呼ぶ2つのヘルパー関数が必要です。
 
-* `returnP` simply transforms a normal value into a value in Parser World
-* `applyP` transforms a Parser containing a function (`Parser< 'a->'b >`) into a function in Parser World (`Parser<'a> -> Parser<'b >`)
+* `returnP`は単に通常の値をパーサーの世界の値に変換します。
+* `applyP`は関数を含むパーサー（`Parser< 'a->'b >`）をパーサーの世界の関数（`Parser<'a> -> Parser<'b >`）に変換します。
 
-Here's a diagram of `returnP`:
+以下は`returnP`の図です。
 
 ![](../assets/img/parser-return.png)
 
-And here is the implementation of `returnP`:
+そして、これが`returnP`の実装です。
 
 ```fsharp
 let returnP x = 
     let innerFn input =
-        // ignore the input and return x
+        // 入力を無視してxを返す
         Success (x,input )
-    // return the inner function
+    // 内部関数を返す
     Parser innerFn 
 ```
 
-The signature of `returnP` is just as we want:
+`returnP`のシグネチャは望んでいたとおりです。
 
 ```fsharp
 val returnP : 
     'a -> Parser<'a>
 ```
 
-Now here's a diagram of `applyP`:
+次に`applyP`の図を示します。
 
 ![](../assets/img/parser-apply.png)
 
-And here is the implementation of `applyP`, which uses `.>>.` and `map`:
+そして、これが`.>>.`と`map`を使った`applyP`の実装です。
 
 ```fsharp
 let applyP fP xP = 
-    // create a Parser containing a pair (f,x)
+    // ペア(f,x)を含むパーサーを作る
     (fP .>>. xP) 
-    // map the pair by applying f to x
+    // fをxに適用してペアをマップする
     |> mapP (fun (f,x) -> f x)
 ```
 
-The infix version of `applyP` is written as `<*>`:
+`applyP`の中置バージョンは`<*>`と書きます。
 
 ```fsharp
 let ( <*> ) = applyP
 ```
     
-Again, the signature of `applyP` is just as we want:
+ここでも、`applyP`のシグネチャは望んでいたとおりです。
 
 ```fsharp
 val applyP : 
     Parser<('a -> 'b)> -> Parser<'a> -> Parser<'b>
 ```
 
-Why do we need these two functions? Well, `map` will lift functions in Normal World into functions in Parser World, but only for one-parameter functions.
+なぜこの2つの関数が必要なのでしょうか。`map`は通常の世界の関数をパーサーの世界の関数に持ち上げますが、1つのパラメータの関数に限られます。
 
-What's great about `returnP` and `applyP` is that, together, they can lift *any* function in Normal World into a function in Parser World, no matter how many parameters it has.
+`returnP`と`applyP`の素晴らしい点は、一緒に使うことで、パラメータの数に関係なく、通常の世界の*任意の*関数をパーサーの世界の関数に持ち上げられることです。
 
-For example, we now can define a `lift2` function that will lift a two parameter function into Parser World like this:
+例えば、2つのパラメータを持つ関数をパーサーの世界に持ち上げる`lift2`関数を次のように定義できます。
 
 ```fsharp
-// lift a two parameter function to Parser World
+// 2つのパラメータを持つ関数をパーサーの世界に持ち上げる
 let lift2 f xP yP =
     returnP f <*> xP <*> yP
 ```
 
-The signature of `lift2` is:
+`lift2`のシグネチャは次のとおりです。
 
 ```fsharp
 val lift2 : 
     f:('a -> 'b -> 'c) -> Parser<'a> -> Parser<'b> -> Parser<'c>
 ```
 
-Here's a diagram of `lift2`:
+これが`lift2`の図です。
 
 ![](../assets/img/parser-lift2.png)
 
-*If you want to know more about how this works, check out my ["man page" post on `lift2`](../posts/elevated-world.md) or [my explanation that involves the "Monadster"](../posts/monadster.md).*
+*この仕組みについてもっと知りたい場合は、[`lift2`に関する私の「マニュアルページ」投稿](../posts/elevated-world.md)や[「Monadster」を使った説明](../posts/monadster.md)をご覧ください。*
 
-Let's see some examples of using `lift2` in practice. First, lifting integer addition to addition of Parsers:
+`lift2`を実際に使う例を見てみましょう。まず、整数の加算をパーサーの加算に持ち上げます。
 
 ```fsharp
 let addP = 
     lift2 (+)
 ```
 
-The signature is:
+シグネチャは次のようになります。
 
 ```fsharp
 val addP : 
     Parser<int> -> Parser<int> -> Parser<int>
 ```
 
-which shows that `addP` does indeed take two `Parser<int>` parameters and returns another `Parser<int>`.
+これは`addP`が確かに2つの`Parser<int>`パラメータを取り、別の`Parser<int>`を返すことを示しています。
 
 
-And here's the `startsWith` function being lifted to Parser World:
+次に`startsWith`関数をパーサーの世界に持ち上げます。
 
 ```fsharp
 let startsWith (str:string) prefix =
@@ -310,7 +310,7 @@ let startsWithP =
     lift2 startsWith 
 ```
 
-Again, the signature of `startsWithP` is parallel to the signature of `startsWith`, but lifted to the world of Parsers.
+ここでも、`startsWithP`のシグネチャは`startsWith`のシグネチャと並行していますが、パーサーの世界に持ち上げられています。
 
 ```fsharp
 val startsWith : 
@@ -321,28 +321,28 @@ val startsWithP :
 ```
 
 
-## 3. `sequence` -- transforming a list of Parsers into a single Parser 
+## 3. `sequence` -- パーサーのリストを1つのパーサーに変換する
 
-We now have the tools we need to implement our sequencing combinator! The logic will be:
+これで、シーケンシングコンビネータを実装するのに必要なツールが揃いました。ロジックは次のとおりです。
 
-* Start with the list "cons" operator. This is the two-parameter function that prepends a "head" element onto a "tail" of elements to make a new list.
-* Lift `cons` into the world of Parsers using `lift2`.
-* We now have a a function that prepends a head `Parser` to a tail list of `Parser`s to make a new list of `Parser`s, where:
-  * The head Parser is the first element in the list of parsers that has been passed in.
-  * The tail is generated by calling the same function recursively with the next parser in the list.
-* When the input list is empty, just return a `Parser` containing an empty list.
+* リストの「cons」演算子から始めます。これは「head」要素を要素の「tail」に前置して新しいリストを作る2つのパラメータを持つ関数です。
+* `lift2`を使って`cons`をパーサーの世界に持ち上げます。
+* これで、head `Parser`をtailの`Parser`のリストに前置して新しい`Parser`のリストを作る関数ができました。ここで、
+  * headパーサーは渡されたパーサーのリストの最初の要素です。
+  * tailは同じ関数をリストの次のパーサーで再帰的に呼び出すことで生成されます。
+* 入力リストが空の場合は、空のリストを含む`Parser`を返します。
 
-Here's the implementation:
+実装は以下のとおりです。
 
 ```fsharp
 let rec sequence parserList =
-    // define the "cons" function, which is a two parameter function
+    // "cons"関数を定義（2つのパラメータを持つ関数）
     let cons head tail = head::tail
 
-    // lift it to Parser World
+    // パーサーの世界に持ち上げる
     let consP = lift2 cons
 
-    // process the list of parsers recursively
+    // パーサーのリストを再帰的に処理
     match parserList with
     | [] -> 
         returnP []
@@ -350,16 +350,16 @@ let rec sequence parserList =
         consP head (sequence tail)
 ```
 
-The signature of `sequence` is:
+`sequence`のシグネチャは次のとおりです。
 
 ```fsharp
 val sequence : 
     Parser<'a> list -> Parser<'a list>
 ```
 
-which shows that the input is a list of `Parser`s and the output is a `Parser` containing a list of elements.
+これは入力が`Parser`のリストで、出力が要素のリストを含む`Parser`であることを示しています。
 
-Let's test it by creating a list of three parsers, and then combining them into one:
+3つのパーサーのリストを作成し、それらを1つに結合してテストしてみましょう。
 
 ```fsharp
 let parsers = [ pchar 'A'; pchar 'B'; pchar 'C' ]
@@ -369,40 +369,40 @@ run combined "ABCD"
 // Success (['A'; 'B'; 'C'], "D")
 ```
 
-As you can see, when we run it we get back a list of characters, one for each parser in the original list.
+見ての通り、実行すると元のリストの各パーサーに対応する文字のリストが返ってきます。
 
-### Implementing the `pstring` parser
+### `pstring`パーサーの実装
 
-At last, we can implement the parser that matches a string, which we'll call `pstring`.
+ついに、文字列に一致するパーサー（`pstring`と呼びます）を実装できます。
 
-The logic is:
+ロジックは次のとおりです。
 
-* Convert the string into a list of characters.
-* Convert each character into a `Parser<char>`.
-* Use `sequence` to convert the list of `Parser<char>` into a single `Parser<char list>`.
-* And finally, use `map` to convert the `Parser<char list>` into a `Parser<string>`.
+* 文字列を文字のリストに変換します。
+* 各文字を`Parser<char>`に変換します。
+* `sequence`を使って`Parser<char>`のリストを単一の`Parser<char list>`に変換します。
+* 最後に、`map`を使って`Parser<char list>`を`Parser<string>`に変換します。
 
-Here's the code:
+以下がコードです。
 
 ```fsharp
-/// Helper to create a string from a list of chars
+/// 文字のリストから文字列を作るヘルパー
 let charListToStr charList = 
      String(List.toArray charList)
 
-// match a specific string
+// 特定の文字列に一致する
 let pstring str = 
     str
-    // convert to list of char
+    // 文字のリストに変換
     |> List.ofSeq
-    // map each char to a pchar
+    // 各文字をpcharにマップ
     |> List.map pchar 
-    // convert to Parser<char list>
+    // Parser<char list>に変換
     |> sequence
-    // convert Parser<char list> to Parser<string>
+    // Parser<char list>をParser<string>に変換
     |> mapP charListToStr 
 ```
 
-Let's test it:
+テストしてみましょう。
 
 ```fsharp
 let parseABC = pstring "ABC"
@@ -412,85 +412,85 @@ run parseABC "A|CDE"  // Failure "Expecting 'B'. Got '|'"
 run parseABC "AB|DE"  // Failure "Expecting 'C'. Got '|'"
 ```
 
-It works as expected. Phew!
+期待通りに動作しています。よかった！
 
-## 4. `many` and `many1` -- matching a parser multiple times
+## 4. `many`と`many1` -- パーサーを複数回マッチさせる
 
-Another common need is to match a particular parser as many times as you can. For example:
+よくある要件として、特定のパーサーをできるだけ多く一致させることがあります。例えば：
 
-* When matching an integer, you want to match as many digit characters as you can.
-* When matching a run of whitespace, you want to match as many whitespace characters as you can.
+* 整数を一致させるとき、できるだけ多くの数字文字を一致させたいです。
+* 空白文字の連続を一致させるとき、できるだけ多くの空白文字を一致させたいです。
 
-There are slightly different requirements for these two cases.
+これらの2つのケースには、少し異なる要件があります。
 
-* When matching whitespace, it is often optional, so we want a "zero or more" matcher, which we'll call `many`.
-* On the other hand, when matching digits for an integer, you want to match *at least one* digit, so we want a "one or more" matcher, which we'll call `many1`.
+* 空白文字を一致させるとき、多くの場合オプションなので、「0回以上」のマッチャーが欲しいです。これを`many`と呼びます。
+* 一方、整数の数字を一致させるときは、*少なくとも1個*の数字に一致させたいので、「1回以上」のマッチャーが欲しいです。これを`many1`と呼びます。
 
-Before creating these, we'll define a helper function which matches a parser zero or more times. The logic is:
+これらを作る前に、パーサーを0回以上一致させるヘルパー関数を定義します。ロジックは次のとおりです。
 
-* Run the parser.
-* If the parser returns `Failure` (and this is key) just return an empty list. That is, this function can never fail!
-* If the parser succeeds:
-  * Call the function recursively to get the remaining values (which could also be an empty list).
-  * Then combine the first value and the remaining values.
+* パーサーを実行します。
+* パーサーが`Failure`を返した場合（これが重要です）、空のリストを返します。つまり、この関数は決して失敗しません！
+* パーサーが成功した場合：
+  * 関数を再帰的に呼び出して残りの値を取得します（これも空のリストかもしれません）。
+  * そして、最初の値と残りの値を組み合わせます。
 
-Here's the code:
+以下がコードです。
 
 ```fsharp
 let rec parseZeroOrMore parser input =
-    // run parser with the input
+    // 入力でパーサーを実行
     let firstResult = run parser input 
-    // test the result for Failure/Success
+    // 結果を失敗/成功でテスト
     match firstResult with
     | Failure err -> 
-        // if parse fails, return empty list
+        // パースが失敗したら空のリストを返す
         ([],input)  
     | Success (firstValue,inputAfterFirstParse) -> 
-        // if parse succeeds, call recursively
-        // to get the subsequent values
+        // パースが成功したら、再帰的に呼び出して
+        // 後続の値を取得
         let (subsequentValues,remainingInput) = 
             parseZeroOrMore parser inputAfterFirstParse
         let values = firstValue::subsequentValues
         (values,remainingInput)  
 ```
 
-With this helper function, we can easily define `many` now -- it's just a wrapper over `parseZeroOrMore`:
+このヘルパー関数を使えば、`many`を簡単に定義できます -- `parseZeroOrMore`のラッパーにすぎません。
 
 ```fsharp
-/// match zero or more occurences of the specified parser
+/// 指定されたパーサーの0回以上の出現に一致する
 let many parser = 
 
     let rec innerFn input =
-        // parse the input -- wrap in Success as it always succeeds
+        // 入力をパース -- 常に成功するのでSuccessでラップ
         Success (parseZeroOrMore parser input)
 
     Parser innerFn
 ```
 
-The signature of `many` shows that the output is indeed a list of values wrapped in a `Parser`:
+`many`のシグネチャを見ると、出力が確かに`Parser`でラップされた値のリストであることがわかります。
 
 ```fsharp
 val many : 
     Parser<'a> -> Parser<'a list>
 ```
 
-Now let's test `many`:
+では、`many`をテストしてみましょう。
 
 ```fsharp
 let manyA = many (pchar 'A')
 
-// test some success cases
+// 成功するケースをいくつかテスト
 run manyA "ABCD"  // Success (['A'], "BCD")
 run manyA "AACD"  // Success (['A'; 'A'], "CD")
 run manyA "AAAD"  // Success (['A'; 'A'; 'A'], "D")
 
-// test a case with no matches
+// 一致がないケースをテスト
 run manyA "|BCD"  // Success ([], "|BCD")
 ```
 
-Note that in the last case, even when there is nothing to match, the function succeeds.
+最後のケースでは、一致するものがなくても関数は成功することに注意してください。
 
-There's nothing about `many` that restricts its use to single characters. For example, we can use it to match repetitive string sequences too:
+`many`の使用は単一の文字に限定されません。例えば、繰り返される文字列のシーケンスにも一致させることができます。
 
 ```fsharp
 let manyAB = many (pstring "AB")
@@ -501,7 +501,7 @@ run manyAB "ZCD"  // Success ([], "ZCD")
 run manyAB "AZCD"  // Success ([], "AZCD")
 ```
 
-Finally, let's implement the original example of matching whitespace:
+最後に、空白文字に一致させる元の例を実装してみましょう。
 
 ```fsharp
 let whitespaceChar = anyOf [' '; '\t'; '\n']
@@ -512,28 +512,28 @@ run whitespace " ABC"  // Success ([' '], "ABC")
 run whitespace "\tABC"  // Success (['\t'], "ABC")
 ```
 
-### Defining `many1`
+### `many1`の定義
 
-We can also define the "one or more" combinator `many1`, using the following logic:
+「1回以上」のコンビネータ`many1`も定義できます。ロジックは次のとおりです。
 
-* Run the parser.
-* If it fails, return the failure.
-* If it succeeds:
-  * Call the helper function `parseZeroOrMore` to get the remaining values.
-  * Then combine the first value and the remaining values.
+* パーサーを実行します。
+* 失敗した場合、その失敗を返します。
+* 成功した場合：
+  * ヘルパー関数`parseZeroOrMore`を呼び出して残りの値を取得します。
+  * 最初の値と残りの値を組み合わせます。
 
 ```fsharp
-/// match one or more occurences of the specified parser
+/// 指定されたパーサーの1回以上の出現に一致する
 let many1 parser = 
     let rec innerFn input =
-        // run parser with the input
+        // 入力でパーサーを実行
         let firstResult = run parser input 
-        // test the result for Failure/Success
+        // 結果を失敗/成功でテスト
         match firstResult with
         | Failure err -> 
-            Failure err // failed
+            Failure err // 失敗
         | Success (firstValue,inputAfterFirstParse) -> 
-            // if first found, look for zeroOrMore now
+            // 最初が見つかったら、次はzeroOrMoreを探す
             let (subsequentValues,remainingInput) = 
                 parseZeroOrMore parser inputAfterFirstParse
             let values = firstValue::subsequentValues
@@ -541,20 +541,20 @@ let many1 parser =
     Parser innerFn
 ```
 
-Again, the signature of `many1` shows that the output is indeed a list of values wrapped in a `Parser`:
+`many1`のシグネチャを見ると、出力が`Parser`でラップされた値のリストであることがわかります。
 
 ```fsharp
 val many1 : 
     Parser<'a> -> Parser<'a list>
 ```
 
-Now let's test `many1`:
+`many1`をテストしてみましょう。
 
 ```fsharp
-// define parser for one digit
+// 1桁の数字のパーサーを定義
 let digit = anyOf ['0'..'9']
 
-// define parser for one or more digits
+// 1桁以上の数字のパーサーを定義
 let digits = many1 digit 
 
 run digits "1ABC"  // Success (['1'], "ABC")
@@ -565,38 +565,38 @@ run digits "1234"  // Success (['1'; '2'; '3'; '4'], "")
 run digits "ABC"   // Failure "Expecting '9'. Got 'A'"
 ```
 
-As we saw in an earlier example, the last case gives a misleading error. It says "Expecting '9'" when it really should say "Expecting a digit".
-In the next post we'll fix this.
+最後のケースは誤解を招くエラーを出します。「9」を期待しているとありますが、実際には「数字を期待している」と言うべきです。
+これは次の投稿で修正します。
 
-### Parsing an integer
+### 整数をパースする
 
-Using `many1`, we can create a parser for an integer. The implementation logic is:
+`many1`を使って、整数のパーサーを作れます。実装のロジックは次のとおりです。
 
-* Create a parser for a digit.
-* Use `many1` to get a list of digits.
-* Using `map`, transform the result (a list of digits) into a string and then into an int.
+* 数字のパーサーを作ります。
+* `many1`を使って数字のリストを取得します。
+* `map`を使って、結果（数字のリスト）を文字列に変換し、さらに整数に変換します。
 
-Here's the code:
+以下がコードです。
 
 ```fsharp
 let pint = 
-    // helper
+    // ヘルパー
     let resultToInt digitList = 
-        // ignore int overflow for now
+        // 今のところ整数のオーバーフローは無視
         String(List.toArray digitList) |> int
         
-    // define parser for one digit
+    // 1桁の数字のパーサーを定義
     let digit = anyOf ['0'..'9']
 
-    // define parser for one or more digits
+    // 1桁以上の数字のパーサーを定義
     let digits = many1 digit 
 
-    // map the digits to an int
+    // 数字を整数にマップ
     digits 
     |> mapP resultToInt
 ```
 
-And let's test it:
+テストしてみましょう。
 
 ```fsharp
 run pint "1ABC"  // Success (1, "ABC")
@@ -607,18 +607,18 @@ run pint "1234"  // Success (1234, "")
 run pint "ABC"   // Failure "Expecting '9'. Got 'A'"
 ```
 
-## 5. `opt` -- matching a parser zero or one time
+## 5. `opt` -- パーサーを0回または1回一致させる
 
-Sometimes we only want to match a parser zero or one time. For example, the `pint` parser above does not handle negative values.
-To correct this, we need to be able to handle an optional minus sign.
+パーサーを0回または1回だけ一致させたい場合があります。例えば、上の`pint`パーサーは負の値を扱えません。
+これを修正するには、オプションのマイナス記号を扱える必要があります。
 
-We can define an `opt` combinator easily:
+`opt`コンビネータは簡単に定義できます。
 
-* Change the result of a specified parser to an option by mapping the result to `Some`.
-* Create another parser that always returns `None`.
-* Use `<|>` to choose the second ("None") parser if the first fails.
+* 指定されたパーサーの結果を、`Some`にマップしてオプションに変更します。
+* 常に`None`を返す別のパーサーを作ります。
+* `<|>`を使って、最初のパーサーが失敗した場合に2つ目の（「None」）パーサーを選択します。
 
-Here's the code:
+以下がコードです。
 
 ```fsharp
 let opt p = 
@@ -627,7 +627,7 @@ let opt p =
     some <|> none
 ```
 
-Here's an example of it in use -- we match a digit followed by an optional semicolon:
+使用例を示します。数字の後にオプションのセミコロンを一致させます。
 
 ```fsharp
 let digit = anyOf ['0'..'9']
@@ -637,85 +637,85 @@ run digitThenSemicolon "1;"  // Success (('1', Some ';'), "")
 run digitThenSemicolon "1"   // Success (('1', None), "")
 ```
 
-And here is `pint` rewritten to handle an optional minus sign:
+オプションのマイナス記号を扱うように`pint`を書き直すと次のようになります。
 
 ```fsharp
 let pint = 
-    // helper
+    // ヘルパー
     let resultToInt (sign,charList) = 
         let i = String(List.toArray charList) |> int
         match sign with
-        | Some ch -> -i  // negate the int
+        | Some ch -> -i  // 整数を負にする
         | None -> i
         
-    // define parser for one digit
+    // 1桁の数字のパーサーを定義
     let digit = anyOf ['0'..'9']
 
-    // define parser for one or more digits
+    // 1桁以上の数字のパーサーを定義
     let digits = many1 digit 
 
-    // parse and convert
+    // パースして変換
     opt (pchar '-') .>>. digits 
     |>> resultToInt 
 ```
 
-Note that the `resultToInt` helper function now needs to handle the sign option as well as the list of digits.
+`resultToInt`ヘルパー関数が、数字のリストだけでなく記号オプションも扱うように変更されています。
 
-And here it is in action:
+実際に動かしてみましょう。
 
 ```fsharp
 run pint "123C"   // Success (123, "C")
 run pint "-123C"  // Success (-123, "C")
 ```
 
-## 6. Throwing results away
+## 6. 結果を捨てる
 
-We often want to match something in the input, but we don't care about the parsed value itself. For example:
+入力の一部に一致させる必要があるが、パースされた値自体は不要な場合がよくあります。例えば、
 
-* For a quoted string, we need to parse the quotes, but we don't need the quotes themselves.
-* For a statement ending in a semicolon, we need to ensure the semicolon is there, but we don't need the semicolon itself.
-* For whitespace separators, we need to ensure the whitespace is there, but we don't need the actual whitespace data.
+* 引用符で囲まれた文字列では、引用符をパースする必要はありますが、引用符自体は不要です。
+* セミコロンで終わる文では、セミコロンの存在を確認する必要はありますが、セミコロン自体は不要です。
+* 空白区切りでは、空白の存在を確認する必要はありますが、実際の空白データは不要です。
 
-To handle these requirements, we will define some new combinators that throw away the results of a parser:
+これらの要件を扱うために、パーサーの結果を捨てる新しいコンビネータを定義します。
 
-* `p1 >>. p2` will apply `p1` and `p2` in sequence, just like `.>>.`, but throw away the result of `p1` and keep the result of `p2`.
-* `p1 .>> p2` will apply `p1` and `p2` in sequence, just like `.>>.`, but keep the result of `p1` and throw away the result of `p2`.
+* `p1 >>. p2`は`.>>.`と同様に`p1`と`p2`を順に適用しますが、`p1`の結果を捨てて`p2`の結果を保持します。
+* `p1 .>> p2`は`.>>.`と同様に`p1`と`p2`を順に適用しますが、`p1`の結果を保持し`p2`の結果を捨てます。
 
-These are easy to define -- just map over the result of `.>>.`, which is a tuple, and keep only one element of the pair.
+これらは簡単に定義できます。`.>>.`の結果（タプル）をマップし、ペアの1つの要素だけを保持します。
 
 ```fsharp
-/// Keep only the result of the left side parser
+/// 左側のパーサーの結果のみを保持
 let (.>>) p1 p2 = 
-    // create a pair
+    // ペアを作成
     p1 .>>. p2 
-    // then only keep the first value
+    // 最初の値のみを保持
     |> mapP (fun (a,b) -> a) 
 
-/// Keep only the result of the right side parser    
+/// 右側のパーサーの結果のみを保持   
 let (>>.) p1 p2 = 
-    // create a pair
+    // ペアを作成
     p1 .>>. p2 
-    // then only keep the second value
+    // 2番目の値のみを保持
     |> mapP (fun (a,b) -> b) 
 ```
 
-These combinators allow us to simplify the `digitThenSemicolon` example shown earlier:
+これらのコンビネータを使うと、先ほどの`digitThenSemicolon`の例を簡略化できます。
 
 ```fsharp
 let digit = anyOf ['0'..'9']
 
-// use .>> below
+// 以下で.>>を使用
 let digitThenSemicolon = digit .>> opt (pchar ';')  
 
 run digitThenSemicolon "1;"  // Success ('1', "")
 run digitThenSemicolon "1"   // Success ('1', "")
 ```
 
-You can see that the result now is the same, whether or not the semicolon was present.
+セミコロンの有無にかかわらず、結果が同じになっていることがわかります。
 
-How about an example with whitespace?
+空白を含む例を見てみましょう。
 
-The following code creates a parser that looks for "AB" followed by one or more whitespace chars, followed by "CD".
+以下のコードは、"AB"の後に1つ以上の空白文字、そして"CD"を探すパーサーを作成します。
 
 ```fsharp
 let whitespaceChar = anyOf [' '; '\t'; '\n']
@@ -728,21 +728,21 @@ let ab_cd = (ab .>> whitespace) .>>. cd
 run ab_cd "AB \t\nCD"   // Success (("AB", "CD"), "")
 ```
 
-The result contains "AB" and "CD" only. The whitespace between them has been discarded.
+結果には"AB"と"CD"のみが含まれています。その間の空白は破棄されました。
 
-### Introducing `between`
+### `between`の導入
 
-A particularly common requirement is to look for a parser between delimiters such as quotes or brackets.
+特に一般的な要件は、引用符や括弧などの区切り文字の間にあるパーサーを探すことです。
 
-Creating a combinator for this is trivial:
+このためのコンビネータを作るのは簡単です。
 
 ```fsharp
-/// Keep only the result of the middle parser
+/// 中央のパーサーの結果のみを保持
 let between p1 p2 p3 = 
     p1 >>. p2 .>> p3 
 ```
 
-And here it is in use, to parse a quoted integer:
+これを使って、引用符で囲まれた整数をパースする例を示します。
 
 ```fsharp
 let pdoublequote = pchar '"'
@@ -752,35 +752,35 @@ run quotedInteger "\"1234\""   // Success (1234, "")
 run quotedInteger "1234"       // Failure "Expecting '"'. Got '1'"
 ```
 
-## 7. Parsing lists with separators
+## 7. 区切り文字付きリストのパース
 
-Another common requirement is parsing lists, seperated by something like commas or whitespace.
+もう1つの一般的な要件は、コンマや空白のような何かで区切られたリストをパースすることです。
 
-To implement a "one or more" list, we need to:
+「1回以上」のリストを実装するには、以下の手順が必要です。
 
-* First combine the separator and parser into one combined parser, but using `>>.` to throw away the separator value.
-* Next, look for a list of the separator/parser combo using `many`.
-* Then prefix that with the first parser and combine the results.
+* まず、区切り文字とパーサーを1つの組み合わせたパーサーにしますが、`>>.`を使って区切り文字の値を捨てます。
+* 次に、`many`を使って区切り文字/パーサーの組み合わせのリストを探します。
+* そして、最初のパーサーをそれに前置し、結果を結合します。
 
-Here's the code:
+以下がコードです。
 
 ```fsharp
-/// Parses one or more occurrences of p separated by sep
+/// pをsepで区切って1回以上出現させる
 let sepBy1 p sep =
     let sepThenP = sep >>. p            
     p .>>. many sepThenP 
     |>> fun (p,pList) -> p::pList
 ```
 
-For the "zero or more" version, we can choose the empty list as an alternate if `sepBy1` does not find any matches:
+「0回以上」バージョンでは、`sepBy1`が一致を見つけられない場合に空のリストを代替として選択できます。
 
 ```fsharp
-/// Parses zero or more occurrences of p separated by sep
+/// pをsepで区切って0回以上出現させる
 let sepBy p sep =
     sepBy1 p sep <|> returnP []
 ```
 
-Here's some tests for `sepBy1` and `sepBy`, with results shown in the comments:
+以下は`sepBy1`と`sepBy`のテストで、コメントに結果を示しています。
 
 ```fsharp
 let comma = pchar ',' 
@@ -800,56 +800,56 @@ run zeroOrMoreDigitList "1,2,3;" // Success (['1'; '2'; '3'], ";")
 run zeroOrMoreDigitList "Z;"     // Success ([], "Z;")
 ```
 
-## What about `bind`?
+## `bind`はどうすればいいでしょうか？
 
-One combinator that we *haven't* implemented so far is `bind` (or `>>=`).
+これまで実装してこなかったコンビネータの1つに`bind`（または`>>=`）があります。
 
-If you know anything about functional programming, or have seen my talk on [FP patterns](http://fsharpforfunandprofit.com/fppatterns/), you'll know that `bind`
-is a powerful tool that can be used to implement many functions.
+関数型プログラミングについて少しでも知っているか、[FPパターン](https://fsharpforfunandprofit.com/fppatterns/)に関する私の講演を見たことがあれば、
+`bind`が多くの関数を実装するのに使える強力なツールであることをご存知でしょう。
 
-Up to this point, I thought that it would be better to show implementations for combinators such as `map` and `.>>.` that were explicit and thus, hopefully, easier to understand.
+ここまで、`map`や`.>>.`などのコンビネータの実装を明示的に示し、理解しやすくすることを優先してきました。
 
-But now that we have have some experience, let's implement `bind` and see what we can do with it.
+しかし、ここまで経験を積んだので、`bind`を実装してみて、何ができるか見てみましょう。
 
-Here's the implementation of `bindP` (as I'll call it)
+以下が`bindP`（私がそう呼ぶことにします）の実装です。
 
 ```fsharp
-/// "bindP" takes a parser-producing function f, and a parser p
-/// and passes the output of p into f, to create a new parser
+/// "bindP"はパーサー生成関数fとパーサーpを取り、
+/// pの出力をfに渡して新しいパーサーを作ります
 let bindP f p =
     let innerFn input =
         let result1 = run p input 
         match result1 with
         | Failure err -> 
-            // return error from parser1
+            // parser1のエラーを返す
             Failure err  
         | Success (value1,remainingInput) ->
-            // apply f to get a new parser
+            // fを適用して新しいパーサーを取得
             let p2 = f value1
-            // run parser with remaining input
+            // 残りの入力でパーサーを実行
             run p2 remainingInput
     Parser innerFn 
 ```
 
-The signature of `bindP` is:
+`bindP`のシグネチャは次のようになります。
 
 ```fsharp
 val bindP : 
     f:('a -> Parser<'b>) -> Parser<'a> -> Parser<'b>
 ```
 
-which conforms to a standard bind signature. The input `f` is a "diagonal" function (`'a -> Parser<'b>`) and the output is a "horizontal" function (`Parser<'a> -> Parser<'b>`).
-See [this post for more details on how `bind` works](../posts/elevated-world-2.md#bind).
+これは標準的な`bind`シグネチャに一致しています。入力`f`は「対角線」関数（`'a -> Parser<'b>`）で、出力は「水平」関数（`Parser<'a> -> Parser<'b>`）です。
+`bind`の動作に関する詳細は[この投稿](../posts/elevated-world-2.md#bind)を参照してください。
 
-The infix version of `bind` is `>>=`. Note that the parameters are flipped: `f` is now the second parameter which makes it more convenient for F#'s pipeline idiom.
+`bind`の中置バージョンは`>>=`です。パラメータが反転していることに注意してください。`f`が2番目のパラメータになり、F#のパイプラインイディオムに便利になります。
 
 ```fsharp
 let ( >>= ) p f = bindP f p
 ```
 
-### Reimplementing other combinators with `bindP` and `returnP`
+### `bindP`と`returnP`を使って他のコンビネータを再実装する
 
-The combination of `bindP` and `returnP` can be used to re-implement many of the other combinators. Here are some examples:
+`bindP`と`returnP`の組み合わせを使って、他の多くのコンビネータを再実装できます。以下にいくつかの例を示します。
 
 ```fsharp
 let mapP f =         
@@ -865,7 +865,7 @@ let applyP fP xP =
     xP >>= (fun x -> 
         returnP (f x) ))
 
-// (assuming "many" is defined)
+// （"many"が定義されていると仮定）
         
 let many1 p =         
     p      >>= (fun head -> 
@@ -874,57 +874,57 @@ let many1 p =
         
 ```
 
-Note that the combinators that check the `Failure` path can not be implemented using `bind`. These include `orElse` and `many`.
+`Failure`パスをチェックするコンビネータは`bind`を使って実装できないことに注意してください。これには`orElse`や`many`が含まれます。
 
-## Review
+## レビュー
 
-We could keep building combinators for ever, but I think we have everything we need to build a JSON parser now, so let's stop and review what we have done.
+コンビネータを際限なく作り続けることもできますが、ここまでで JSONパーサーを組み立てるのに必要なものはすべて揃ったと思います。ここで一度立ち止まって、これまでの成果を振り返ってみましょう。
 
-In the previous post we created these combinators:
+前回の投稿では、以下のコンビネータを作成しました。
 
-* `.>>.` (`andThen`) applies the two parsers in sequence and returns the results in a tuple.
-* `<|>` (`orElse`) applies the first parser, and if that fails, the second parsers.
-* `choice` extends `orElse` to choose from a list of parsers.
+* `.>>.`（`andThen`）は2つのパーサーを順番に適用し、結果をタプルで返します。
+* `<|>`（`orElse`）は最初のパーサーを適用し、失敗した場合は2番目のパーサーを適用します。
+* `choice`は`orElse`を拡張して、パーサーのリストから選択します。
 
-And in this post we created the following additional combinators:
+そして今回の投稿では、以下の追加コンビネータを作成しました。
 
-* `bindP` chains the result of a parser to another parser-producing function.
-* `mapP` transforms the result of a parser.
-* `returnP` lifts an normal value into the world of parsers.
-* `applyP` allows us to lift multi-parameter functions into functions that work on Parsers.
-* `lift2` uses `applyP` to lift two-parameter functions into Parser World.
-* `sequence` converts a list of Parsers into a Parser containing a list.
-* `many` matches zero or more occurences of the specified parser.
-* `many1` matches one or more occurences of the specified parser.
-* `opt` matches an optional occurrence of the specified parser.
-* `.>>` keeps only the result of the left side parser.
-* `>>.` keeps only the result of the right side parser.
-* `between` keeps only the result of the middle parser.
-* `sepBy` parses zero or more occurrences of a parser with a separator.
-* `sepBy1` parses one or more occurrences of a parser with a separator.
+* `bindP`はパーサーの結果を別のパーサー生成関数につなげます。
+* `mapP`はパーサーの結果を変換します。
+* `returnP`は通常の値をパーサーの世界に持ち上げます。
+* `applyP`は関数を含むパーサー（`Parser< 'a->'b >`）をパーサーの世界の関数（`Parser<'a> -> Parser<'b >`）に変換します。
+* `lift2`は`applyP`を使って2パラメータ関数をパーサーの世界に持ち上げます。
+* `sequence`はパーサーのリストをリストを含むパーサーに変換します。
+* `many`は指定されたパーサーの0回以上の出現に一致します。
+* `many1`は指定されたパーサーの1回以上の出現に一致します。
+* `opt`は指定されたパーサーのオプションの出現に一致します。
+* `.>>`は左側のパーサーの結果のみを保持します。
+* `>>。`は右側のパーサーの結果のみを保持します。
+* `between`は中央のパーサーの結果のみを保持します。
+* `sepBy`は区切り文字付きのパーサーの0回以上の出現をパースします。
+* `sepBy1`は区切り文字付きのパーサーの1回以上の出現をパースします。
 
-I hope you can see why the concept of "combinators" is so powerful; given just a few basic functions, we have built up a library of useful functions quickly and concisely.
+「コンビネータ」の概念がなぜそれほど強力なのか、おわかりいただけたと思います。基本的な関数をいくつか用意するだけで、有用な関数のライブラリを素早く簡潔に組み立てられました。
 
-## Listing of the parser library so far
+## これまでのパーサーライブラリのリスト
 
-Here's the complete listing for the parsing library so far -- it's about 200 lines of code now!
+以下はこれまでのパーシングライブラリの完全なリストです -- 200行ほどのコードになりました！
 
-*The source code displayed below is also available at [this gist](https://gist.github.com/swlaschin/a3dbb114a9ee95b2e30d#file-parserlibrary_v2-fsx).*
+*以下に表示されるソースコードは[このgist](https://gist.github.com/swlaschin/a3dbb114a9ee95b2e30d#file-parserlibrary_v2-fsx)でも利用可能です。*
 
 ```fsharp
 open System
 
-/// Type that represents Success/Failure in parsing
+/// パースの成功/失敗を表す型
 type Result<'a> =
     | Success of 'a
     | Failure of string 
 
-/// Type that wraps a parsing function
+/// パース関数をラップする型
 type Parser<'T> = Parser of (string -> Result<'T * string>)
 
-/// Parse a single character
+/// 1文字をパースする
 let pchar charToMatch = 
-    // define a nested inner function
+    // ネストした内部関数を定義
     let innerFn str =
         if String.IsNullOrEmpty(str) then
             Failure "No more input"
@@ -936,197 +936,197 @@ let pchar charToMatch =
             else
                 let msg = sprintf "Expecting '%c'. Got '%c'" charToMatch first
                 Failure msg
-    // return the "wrapped" inner function
+    // "ラップされた"内部関数を返す
     Parser innerFn 
 
-/// Run a parser with some input
+/// 入力でパーサーを実行する
 let run parser input = 
-    // unwrap parser to get inner function
+    // パーサーをアンラップして内部関数を取得
     let (Parser innerFn) = parser 
-    // call inner function with input
+    // 入力で内部関数を呼び出す
     innerFn input
 
-/// "bindP" takes a parser-producing function f, and a parser p
-/// and passes the output of p into f, to create a new parser
+/// "bindP"はパーサー生成関数fとパーサーpを取り、
+/// pの出力をfに渡して新しいパーサーを作ります
 let bindP f p =
     let innerFn input =
         let result1 = run p input 
         match result1 with
         | Failure err -> 
-            // return error from parser1
+            // parser1のエラーを返す
             Failure err  
         | Success (value1,remainingInput) ->
-            // apply f to get a new parser
+            // fを適用して新しいパーサーを取得
             let p2 = f value1
-            // run parser with remaining input
+            // 残りの入力でパーサーを実行
             run p2 remainingInput
     Parser innerFn 
 
-/// Infix version of bindP
+/// bindPの中置バージョン
 let ( >>= ) p f = bindP f p
 
-/// Lift a value to a Parser
+/// 値をパーサーに持ち上げる
 let returnP x = 
     let innerFn input =
-        // ignore the input and return x
+        // 入力を無視してxを返す
         Success (x,input)
-    // return the inner function
+    // 内部関数を返す
     Parser innerFn 
 
-/// apply a function to the value inside a parser
+/// パーサー内の値に関数を適用する
 let mapP f = 
     bindP (f >> returnP)
 
-/// infix version of mapP
+/// mapPの中置バージョン
 let ( <!> ) = mapP
 
-/// "piping" version of mapP
+/// mapPの"パイピング"バージョン
 let ( |>> ) x f = mapP f x
 
-/// apply a wrapped function to a wrapped value
+/// ラップされた関数をラップされた値に適用する
 let applyP fP xP =         
     fP >>= (fun f -> 
     xP >>= (fun x -> 
         returnP (f x) ))
 
-/// infix version of apply
+/// applyの中置バージョン
 let ( <*> ) = applyP
 
-/// lift a two parameter function to Parser World
+/// 2パラメータ関数をパーサーの世界に持ち上げる
 let lift2 f xP yP =
     returnP f <*> xP <*> yP
 
-/// Combine two parsers as "A andThen B"
+/// 2つのパーサーを"AそしてB"として組み合わせる
 let andThen p1 p2 =         
     p1 >>= (fun p1Result -> 
     p2 >>= (fun p2Result -> 
         returnP (p1Result,p2Result) ))
 
-/// Infix version of andThen
+/// andThenの中置バージョン
 let ( .>>. ) = andThen
 
-/// Combine two parsers as "A orElse B"
+/// 2つのパーサーを"AまたはB"として組み合わせる
 let orElse p1 p2 =
     let innerFn input =
-        // run parser1 with the input
+        // 入力でparser1を実行
         let result1 = run p1 input
 
-        // test the result for Failure/Success
+        // 結果を失敗/成功でテスト
         match result1 with
         | Success result -> 
-            // if success, return the original result
+            // 成功なら元の結果を返す
             result1
 
         | Failure err -> 
-            // if failed, run parser2 with the input
+            // 失敗なら入力でparser2を実行
             let result2 = run p2 input
 
-            // return parser2's result
+            // parser2の結果を返す
             result2 
 
-    // return the inner function
+    // 内部関数を返す
     Parser innerFn 
 
-/// Infix version of orElse
+/// orElseの中置バージョン
 let ( <|> ) = orElse
 
-/// Choose any of a list of parsers
+/// パーサーのリストから任意のものを選択
 let choice listOfParsers = 
     List.reduce ( <|> ) listOfParsers 
 
-/// Choose any of a list of characters
+/// 文字のリストから任意のものを選択
 let anyOf listOfChars = 
     listOfChars
-    |> List.map pchar // convert into parsers
+    |> List.map pchar // パーサーに変換
     |> choice
 
-/// Convert a list of Parsers into a Parser of a list
+/// パーサーのリストをリストのパーサーに変換
 let rec sequence parserList =
-    // define the "cons" function, which is a two parameter function
+    // "cons"関数を定義、これは2パラメータ関数
     let cons head tail = head::tail
 
-    // lift it to Parser World
+    // パーサーの世界に持ち上げる
     let consP = lift2 cons
 
-    // process the list of parsers recursively
+    // パーサーのリストを再帰的に処理
     match parserList with
     | [] -> 
         returnP []
     | head::tail ->
         consP head (sequence tail)
 
-/// (helper) match zero or more occurences of the specified parser
+/// (ヘルパー) 指定されたパーサーの0回以上の出現に一致
 let rec parseZeroOrMore parser input =
-    // run parser with the input
+    // 入力でパーサーを実行
     let firstResult = run parser input 
-    // test the result for Failure/Success
+    // 結果を失敗/成功でテスト
     match firstResult with
     | Failure err -> 
-        // if parse fails, return empty list
+        // パースが失敗したら空のリストを返す
         ([],input)  
     | Success (firstValue,inputAfterFirstParse) -> 
-        // if parse succeeds, call recursively
-        // to get the subsequent values
+        // パースが成功したら、再帰的に呼び出して
+        // 後続の値を取得
         let (subsequentValues,remainingInput) = 
             parseZeroOrMore parser inputAfterFirstParse
         let values = firstValue::subsequentValues
         (values,remainingInput)  
 
-/// matches zero or more occurences of the specified parser
+/// 指定されたパーサーの0回以上の出現に一致
 let many parser = 
     let rec innerFn input =
-        // parse the input -- wrap in Success as it always succeeds
+        // 入力をパース -- 常に成功するのでSuccessでラップ
         Success (parseZeroOrMore parser input)
 
     Parser innerFn
 
-/// matches one or more occurences of the specified parser
+/// 指定されたパーサーの1回以上の出現に一致
 let many1 p =         
     p      >>= (fun head -> 
     many p >>= (fun tail -> 
         returnP (head::tail) ))
 
-/// Parses an optional occurrence of p and returns an option value.
+/// pのオプションの出現をパースし、オプション値を返す
 let opt p = 
     let some = p |>> Some
     let none = returnP None
     some <|> none
 
-/// Keep only the result of the left side parser
+/// 左側のパーサーの結果のみを保持
 let (.>>) p1 p2 = 
-    // create a pair
+    // ペアを作成
     p1 .>>. p2 
-    // then only keep the first value
+    // 最初の値のみを保持
     |> mapP (fun (a,b) -> a) 
 
-/// Keep only the result of the right side parser
+/// 右側のパーサーの結果のみを保持
 let (>>.) p1 p2 = 
-    // create a pair
+    // ペアを作成
     p1 .>>. p2 
-    // then only keep the second value
+    // 2番目の値のみを保持
     |> mapP (fun (a,b) -> b) 
 
-/// Keep only the result of the middle parser
+/// 中央のパーサーの結果のみを保持
 let between p1 p2 p3 = 
     p1 >>. p2 .>> p3 
 
-/// Parses one or more occurrences of p separated by sep
+/// pをsepで区切って1回以上出現させる
 let sepBy1 p sep =
     let sepThenP = sep >>. p            
     p .>>. many sepThenP 
     |>> fun (p,pList) -> p::pList
 
-/// Parses zero or more occurrences of p separated by sep
+/// pをsepで区切って0回以上出現させる
 let sepBy p sep =
     sepBy1 p sep <|> returnP []
 ```
 
 
-## Summary
+## まとめ
 
-In this post, we have built on the basic parsing code from last time to create a library of a 15 or so combinators that can be combined to parse almost anything.
+この投稿では、前回の基本的なパースコードをもとに、15個ほどのコンビネータのライブラリを組み立てました。これらを組み合わせてほぼすべてのものをパースできます。
 
-Soon, we'll use them to build a JSON parser, but before that, let's pause and take time to clean up the error messages.
-That will be the topic of the [next post](../posts/understanding-parser-combinators-3.md).  
+これから、これらを使ってJSONパーサーを組み立てますが、その前に一旦立ち止まってエラーメッセージをクリーンアップしましょう。
+それが[次の投稿](../posts/understanding-parser-combinators-3.md)のトピックになります。
 
-*The source code for this post is available at [this gist](https://gist.github.com/swlaschin/a3dbb114a9ee95b2e30d#file-understanding_parser_combinators-2-fsx).*
+*この投稿のソースコードは[このgist](https://gist.github.com/swlaschin/a3dbb114a9ee95b2e30d#file-understanding_parser_combinators-2-fsx)で利用可能です。*
