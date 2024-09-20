@@ -1,63 +1,63 @@
 ---
 layout: post
-title: "Improving the parser library"
-description: "Adding more informative errors"
-categories: [Patterns]
-seriesId: "Understanding Parser Combinators"
+title: "パーサーライブラリの改善"
+description: "より詳細なエラーの追加"
+categories: [パターン]
+seriesId: "パーサーコンビネータを理解する"
 seriesOrder: 3
 ---
 
-*UPDATE: [Slides and video from my talk on this topic](http://fsharpforfunandprofit.com/parser/)*
+*更新：[このトピックに関する講演のスライドと動画](https://fsharpforfunandprofit.com/parser/)*
 
-In this series, we are looking at how applicative parsers and parser combinators work.
+このシリーズでは、アプリカティブパーサーとパーサーコンビネータの仕組みを解説しています。
 
-* In the [first post](../posts/understanding-parser-combinators.md), we created the foundations of a parsing library.
-* In the [second post](../posts/understanding-parser-combinators-2.md), we built out the library with many other useful combinators.
-* In this post, we'll rework the library to provide more helpful error messages.
+* [第1回](../posts/understanding-parser-combinators.md)では、パーシングライブラリの基礎を作りました。
+* [第2回](../posts/understanding-parser-combinators-2.md)では、他の多くの便利なコンビネータでライブラリを拡張しました。
+* 今回は、より役立つエラーメッセージを提供するようにライブラリを改良します。
 
 <hr>
 
-## 1. Labelling a Parser
+## 1. パーサーにラベルを付ける
 
-In some of the failing code examples from earlier posts, we got confusing errors:
+以前の投稿のいくつかの失敗したコード例では、混乱するようなエラーが出ました。
 
 ```fsharp
 let parseDigit = anyOf ['0'..'9']
 run parseDigit "|ABC"  // Failure "Expecting '9'. Got '|'"
 ```
 
-`parseDigit` is defined as a choice of digit characters, so when the last choice (`'9'`) fails, that is the error message we receive.
+`parseDigit`は数字の文字の選択として定義されているので、最後の選択（`'9'`）が失敗したときにそのエラーメッセージを受け取ります。
 
-But that message is quite confusing. What we *really* want is to receive is an error that mentions "digit", something like: `Failure "Expecting digit. Got '|'"`.
+しかし、このメッセージはかなり混乱を招きます。実際に欲しいのは、「数字」に言及するエラーです。例えば `Failure "Expecting digit. Got '|'"`のようなものです。
 
-That is, what we need is a way of labeling parsers with a word like "digit" and then showing that label when a failure occurs.
+つまり、パーサーに「数字」のようなラベルを付ける方法と、失敗が発生したときにそのラベルを表示する方法が必要です。
 
-As a reminder, this is how the `Parser` type was defined in earlier posts:
+以前の投稿での`Parser`型の定義を思い出してください。
 
 ```fsharp
 type Parser<'a> = Parser of (string -> Result<'a * string>)
 ```
 
-In order to add a label, we need to change it into a record structure:
+ラベルを追加するには、レコード構造に変更する必要があります。
 
 ```fsharp
 type ParserLabel = string
 
-/// A Parser structure has a parsing function & label
+/// パーサー構造はパース関数とラベルを持つ
 type Parser<'a> = {
     parseFn : (string -> Result<'a * string>)
     label:  ParserLabel 
     }
 ```
 
-The record contains two fields: the parsing function (`parseFn`) and the `label`.
+レコードには2つのフィールドがあります。パース関数（`parseFn`）とラベル（`label`）です。
 
-One problem is that the label is in the parser itself, but not in the `Result`, which means that clients will not know how to display the label along with the error.
+一つの問題は、ラベルがパーサー自体にあるものの、`Result`にはないことです。つまり、クライアントはエラーと一緒にラベルを表示する方法が分かりません。
 
-So let's add it to the `Failure` case of `Result` as well, in addition to the error message:
+そこで、エラーメッセージに加えて`Result`の`Failure`ケースにもラベルを追加しましょう。
 
 ```fsharp
-// Aliases 
+// エイリアス 
 type ParserLabel = string
 type ParserError = string
 
@@ -66,7 +66,7 @@ type Result<'a> =
     | Failure of ParserLabel * ParserError 
 ```
 
-And while we are at it, let's define a helper function to display the result of a parse:
+ついでに、パース結果を表示するヘルパー関数も定義しましょう。
 
 ```fsharp
 let printResult result =
@@ -77,59 +77,59 @@ let printResult result =
         printfn "Error parsing %s\n%s" label error
 ```
 
-### Updating the code
+### コードの更新
 
-With this change to the definition of `Parser` and `Result`, we have to change some of the basic functions, such as `bindP`:
+`Parser`と`Result`の定義を変更したので、`bindP`のような基本的な関数も変更する必要があります。
 
 ```fsharp
-/// "bindP" takes a parser-producing function f, and a parser p
-/// and passes the output of p into f, to create a new parser
+/// "bindP"はパーサー生成関数fとパーサーpを取り
+/// pの出力をfに渡して新しいパーサーを作成する
 let bindP f p =
-    let label = "unknown"           // <====== "label" is new!     
+    let label = "unknown"           // <====== "label"は新しい     
     let innerFn input =
         ...
         match result1 with
-        | Failure (label,err) ->    // <====== "label" is new!
+        | Failure (label,err) ->    // <====== "label"は新しい
             ...
         | Success (value1,remainingInput) ->
             ...
-    {parseFn=innerFn; label=label}  // <====== "parseFn" and "label" are new!
+    {parseFn=innerFn; label=label}  // <====== "parseFn"と"label"は新しい
 ```
 
-We have to make similar changes to `returnP`, `orElse`, and `many`.  For the complete code, see the gist linked to below.
+`returnP`、`orElse`、`many`にも同様の変更を加える必要があります。完全なコードは、以下にリンクされたgistをご覧ください。
 
-### Updating the label
+### ラベルの更新
 
-When we use a combinator to build a new compound parser, we will often want to assign a new label to it.
-In order to do this, we replace the original `parseFn` with another one that returns the new label.
+コンビネータを使って新しい複合パーサーを作成するとき、新しいラベルを割り当てたい場合があります。
+これを行うには、元の`parseFn`を新しいラベルを返す別の関数に置き換えます。
 
-Here's the code:
+コードは以下の通りです。
 
 ```fsharp
-/// Update the label in the parser
+/// パーサーのラベルを更新する
 let setLabel parser newLabel = 
-    // change the inner function to use the new label
+    // 内部関数を変更して新しいラベルを使用する
     let newInnerFn input = 
         let result = parser.parseFn input
         match result with
         | Success s ->
-            // if Success, do nothing
+            // 成功の場合、何もしない
             Success s 
         | Failure (oldLabel,err) -> 
-            // if Failure, return new label
-            Failure (newLabel,err)        // <====== use newLabel here
-    // return the Parser
-    {parseFn=newInnerFn; label=newLabel}  // <====== use newLabel here
+            // 失敗の場合、新しいラベルを返す
+            Failure (newLabel,err)        // <====== ここで新しいラベルを使用
+    // パーサーを返す
+    {parseFn=newInnerFn; label=newLabel}  // <====== ここで新しいラベルを使用
 ```
 
-And let's create an infix version of this called `<?>`:
+そして、これの中置バージョンを`<?>`として作成しましょう。
 
 ```fsharp
-/// infix version of setLabel
+/// setLabelの中置バージョン
 let ( <?> ) = setLabel
 ```
 
-Let's test our new toy!
+新しい機能をテストしてみましょう！
 
 ```fsharp
 let parseDigit_WithLabel = 
@@ -140,79 +140,79 @@ run parseDigit_WithLabel "|ABC"
 |> printResult
 ```
 
-And the output is:
+出力は以下のようになります。
 
 ```text
 Error parsing digit
 Unexpected '|'
 ```
 
-The error message is now `Error parsing digit` rather than `Expecting '9'`. Much better!
+エラーメッセージが`Expecting '9'`ではなく`Error parsing digit`になりました。かなり良くなりました！
 
-### Setting default labels:
+### デフォルトラベルの設定
 
-We can also set the default labels for certain combinators such as `andThen` and `orElse` based on the inputs:
+`andThen`や`orElse`などの特定のコンビネータのデフォルトラベルを、入力に基づいて設定することもできます。
 
 ```fsharp
-/// Combine two parsers as "A andThen B"
+/// 2つのパーサーを"A andThen B"として組み合わせる
 let andThen p1 p2 =         
     let label = sprintf "%s andThen %s" (getLabel p1) (getLabel p2)
     p1 >>= (fun p1Result -> 
     p2 >>= (fun p2Result -> 
         returnP (p1Result,p2Result) ))
-    <?> label         // <====== provide a custom label
+    <?> label         // <====== カスタムラベルを提供
 
-// combine two parsers as "A orElse B"
+// 2つのパーサーを"A orElse B"として組み合わせる
 let orElse parser1 parser2 =
-    // construct a new label
-    let label =       // <====== provide a custom label
+    // 新しいラベルを作る
+    let label =       // <====== カスタムラベルを提供
         sprintf "%s orElse %s" (getLabel parser1) (getLabel parser2)
             
             
     let innerFn input =
-       ... etc ...
+       ... など ...
 
-/// choose any of a list of characters
+/// 文字のリストのいずれかを選択
 let anyOf listOfChars = 
     let label = sprintf "any of %A" listOfChars 
     listOfChars
     |> List.map pchar 
     |> choice
-    <?> label         // <====== provide a custom label     
+    <?> label         // <====== カスタムラベルを提供     
 ```
 
 <hr>
 
-## 2. Replacing "pchar" with "satisfy"
+## 2. "pchar"を"satisfy"に置き換える
 
-One thing that has bothered me about all the implementations so far is `pchar`, the basic primitive that all the other functions have built on.
+これまでの実装で気になっていたのは、他のすべての関数の基礎となる基本的なプリミティブ`pchar`です。
 
-I don't like that it is so tightly coupled to the input model. What happens if we want to parse bytes from a binary format, or other kinds of input.
-All the combinators other than `pchar` are loosely coupled. If we could decouple `pchar` as well,
-we would be set up for parsing *any* stream of tokens, and that would make me happy!
+入力モデルと密接に結びついているのが問題です。バイナリ形式からバイトをパースしたり、他の種類の入力をパースしたりする場合はどうすればいいでしょうか。
+`pchar`以外のコンビネータは疎結合なので、`pchar`も疎結合にできれば、あらゆる種類のトークンストリームをパースできるようになります。
+それが理想的です。
 
-At this point, I'll repeat one of my favorite FP slogans: "parameterize all the things!" In the case of `pchar`, we'll remove the `charToMatch` parameter and
-replace it with a function -- a predicate. We'll call the new function `satisfy`:
+ここで、私の好きなFPのスローガン「すべてをパラメータ化せよ！」を思い出してください。`pchar`の場合、`charToMatch`パラメータを削除し、関数（述語）に置き換えます。
+新しい関数を`satisfy`と呼びましょう。
 
 ```fsharp
-/// Match an input token if the predicate is satisfied
+/// 述語を満たす入力トークンにマッチする
 let satisfy predicate label =
     let innerFn input =
         if String.IsNullOrEmpty(input) then
-            Failure (label,"No more input")
+            Failure (label,"入力がありません")
         else
             let first = input.[0] 
-            if predicate first then      // <====== use predicate here
+            if predicate first then      // <====== ここで述語を使用
                 let remainingInput = input.[1..]
                 Success (first,remainingInput)
             else
-                let err = sprintf "Unexpected '%c'" first
+                let err = sprintf "予期しない文字 '%c'" first
                 Failure (label,err)
-    // return the parser
+    // パーサーを返す
     {parseFn=innerFn;label=label}
 ```
 
-Other than the parameters, the only thing that has changed from the `pchar` implementation is this one line: 
+パラメータ以外で`pchar`の実装から変更されたのは、この1行だけです。
 
 ```fsharp
 let satisfy predicate label =
@@ -221,59 +221,59 @@ let satisfy predicate label =
     ...
 ```
 
-With `satisfy` available, we can rewrite `pchar`:
+`satisfy`を使って、`pchar`を書き直せます。
 
 ```fsharp
-/// parse a char 
+/// 文字をパースする
 let pchar charToMatch = 
     let predicate ch = (ch = charToMatch) 
     let label = sprintf "%c" charToMatch 
     satisfy predicate label 
 ```
 
-Note that we are setting the label to be the `charToMatch`. This refactoring would not have been as convenient before, because we didn't have the concept of "labels" yet,
-and so `pchar` would not have been able to return a useful error message.
+`charToMatch`をラベルとして設定している点に注目してください。以前はこのような改良は難しかったでしょう。
+「ラベル」の概念がなかったため、`pchar`は有用なエラーメッセージを返せなかったからです。
 
-The `satisfy` function also lets us write more efficient versions of other parsers. For example, parsing a digit looked like this originally:
+`satisfy`関数を使うと、他のパーサーもより効率的に書けます。例えば、数字のパースは元々このようでした。
 
 ```fsharp
-/// parse a digit
+/// 数字をパースする
 let digitChar = 
     anyOf ['0'..'9']
 ```
 
-But now we can rewrite it using a predicate directly, making it a lot more efficient:
+しかし、述語を直接使うことで、より効率的に書き直せます。
 
 ```fsharp
-/// parse a digit
+/// 数字をパースする
 let digitChar = 
     let predicate = Char.IsDigit 
-    let label = "digit"
+    let label = "数字"
     satisfy predicate label 
 ```
 
-Similarly, we can create a more efficient whitespace parser too:
+同様に、より効率的な空白文字パーサーも作れます。
 
 ```fsharp
-/// parse a whitespace char
+/// 空白文字をパースする
 let whitespaceChar = 
     let predicate = Char.IsWhiteSpace 
-    let label = "whitespace"
+    let label = "空白"
     satisfy predicate label 
 ```
 
-## 3. Adding position and context to error messages
+## 3. エラーメッセージに位置とコンテキストを追加する
 
-Another way to improve the error messages is to show the line and column that the error occurred on.
+エラーメッセージをさらに改善するには、エラーが発生した行と列を表示するとよいでしょう。
 
-Obviously, for simple one-liners, keeping track of the error location is not a problem, but when you are parsing a 100 line JSON file, it will be very helpful.
+単純な1行の入力なら、エラーの位置を追跡するのは簡単です。しかし、100行のJSONファイルをパースする場合、この情報は非常に役立ちます。
 
-In order to track the line and column we are going to have to abandon the simple `string` input and replace it with something more complex,
-so let's start with that.
+行と列を追跡するには、単純な`string`入力をより複雑なものに置き換える必要があります。
+まずはそこから始めましょう。
 
-### Defining a input that tracks position
+### 位置を追跡する入力の定義
 
-First, we will need a `Position` type to store the line and column, with helper functions to increment one column and one line:
+まず、行と列を保存する`Position`型と、列を1つ増やすヘルパー関数、行を1つ増やすヘルパー関数が必要です。
 
 ```fsharp
 type Position = {
@@ -281,33 +281,33 @@ type Position = {
     column : int
 }
 
-/// define an initial position
+/// 初期位置を定義する
 let initialPos = {line=0; column=0}
 
-/// increment the column number
+/// 列番号を増やす
 let incrCol pos = 
     {pos with column=pos.column + 1}
 
-/// increment the line number and set the column to 0
+/// 行番号を増やし、列を0にする
 let incrLine pos = 
     {line=pos.line + 1; column=0}
 ```
 
-Next, we'll need to combine the input string with a position into a single "input state" type.  Since we are line oriented, we can make our
-lives easier and store the input string as a array of lines rather than as one giant string:
+次に、入力文字列と位置を1つの「入力状態」型に結合します。
+行指向なので、入力文字列を1つの巨大な文字列ではなく行の配列として保存すると便利です。
 
 ```fsharp
-/// Define the current input state
+/// 現在の入力状態を定義する
 type InputState = {
     lines : string[]
     position : Position 
 }
 ```
 
-We will also need a way to convert a string into a initial `InputState`:
+また、文字列を初期の`InputState`に変換する方法も必要です。
 
 ```fsharp
-/// Create a new InputState from a string
+/// 文字列から新しいInputStateを作成する
 let fromStr str = 
     if String.IsNullOrEmpty(str) then
         {lines=[||]; position=initialPos}
@@ -317,46 +317,46 @@ let fromStr str =
         {lines=lines; position=initialPos}
 ```
 
-Finally, and most importantly, we need a way to read the next character from the input -- let's call it `nextChar`.
+最後に、そして最も重要なのは、入力から次の文字を読み取る方法です。これを`nextChar`と呼びましょう。
 
-We know what the input for `nextChar` will be (an `InputState`) but what should the output look like?
+`nextChar`の入力は`InputState`ですが、出力はどうすべきでしょうか。
 
-* If the input is at the end, we need a way to indicate that there is no next character, so in that case return `None`.
-* Therefore in the case when a character is available, we will return `Some`. 
-* In addition, the input state will have changed because the column (or line) will have been incremented as well.
+* 入力が終わりの場合、次の文字がないことを示すために`None`を返します。
+* 文字が利用可能な場合は`Some`を返します。
+* さらに、列（または行）が増加しているため、入力状態も変更されています。
 
-So, putting this together, the input for `nextChar` is an `InputState` and the output is a pair `char option * InputState`.
+つまり、`nextChar`の入力は`InputState`で、出力は`char option * InputState`のペアになります。
 
-The logic for returning the next char will be as follows then:
+次の文字を返すロジックは以下のようになります。
 
-* If we are at the last character of the input, return EOF (`None`) and don't change the state.
-* If the current column is *not* at the end of a line, return the character at that position and change the state by incrementing the column position.
-* If the current column *is* at the end of a line, return a newline character and change the state by incrementing the line position.
+* 入力の最後の文字にいる場合、EOF（`None`）を返し、状態は変更しません。
+* 現在の列が行の終わりでない場合、その位置の文字を返し、列位置を増やして状態を変更します。
+* 現在の列が行の終わりの場合、改行文字を返し、行位置を増やして状態を変更します。
 
-Here's the code:
+以下が`nextChar`の実装です。
 
 ```fsharp
-// return the current line
+// 現在の行を返す
 let currentLine inputState = 
     let linePos = inputState.position.line
     if linePos < inputState.lines.Length then
         inputState.lines.[linePos]
     else
-        "end of file"
+        "ファイル終端"
 
-/// Get the next character from the input, if any
-/// else return None. Also return the updated InputState
-/// Signature: InputState -> InputState * char option 
+/// 入力から次の文字を取得します（存在する場合）
+/// 存在しない場合はNoneを返します。更新された入力状態も返します
+/// 型シグネチャ: InputState -> InputState * char option 
 let nextChar input =
     let linePos = input.position.line
     let colPos = input.position.column
-    // three cases
-    // 1) if line >= maxLine -> 
-    //       return EOF
-    // 2) if col less than line length -> 
-    //       return char at colPos, increment colPos
-    // 3) if col at line length -> 
-    //       return NewLine, increment linePos
+    // 3つのケース
+    // 1) 行数が最大行数以上の場合 -> 
+    //       ファイル終端を返す
+    // 2) 列位置が行の長さより小さい場合 -> 
+    //       その位置の文字を返し、列位置を増やす
+    // 3) 列位置が行の長さと等しい場合 -> 
+    //       改行を返し、行位置を増やす
 
     if linePos >= input.lines.Length then
         input, None
@@ -368,18 +368,18 @@ let nextChar input =
             let newState = {input with position=newPos}
             newState, Some char
         else 
-            // end of line, so return LF and move to next line
+            // 行末なので、改行を返して次の行に移動
             let char = '\n'
             let newPos = incrLine input.position 
             let newState = {input with position=newPos}
             newState, Some char
 ```
 
-Unlike the earlier `string` implementation, the underlying array of lines is never altered or copied -- only the position is changed. This means that
-making a new state each time the position changes should be reasonably efficient, because the text is shared everywhere.
+以前の`string`実装とは異なり、元の行の配列は変更やコピーをしません。位置だけが変わります。これにより、位置が変わるたびに新しい状態を作成しても効率的です。
+テキストはどこでも共有されているからです。
 
-Let's quickly test that the implementation works. We'll create a helper function `readAllChars` and then see what it returns
-for different inputs:
+実装が機能するか簡単にテストしてみましょう。
+`readAllChars`というヘルパー関数を作り、異なる入力に対する結果を確認します。
 
 ```fsharp
 let rec readAllChars input =
@@ -387,17 +387,17 @@ let rec readAllChars input =
         let remainingInput,charOpt = nextChar input 
         match charOpt with
         | None -> 
-            // end of input
+            // 入力終了
             ()
         | Some ch -> 
-            // return first character
+            // 最初の文字を返す
             yield ch
-            // return the remaining characters
+            // 残りの文字を返す
             yield! readAllChars remainingInput
     ]
 ```
 
-Here it is with some example inputs:
+いくつかの入力例でテストします。
 
 ```fsharp
 fromStr "" |> readAllChars       // []
@@ -406,18 +406,18 @@ fromStr "ab" |> readAllChars     // ['a'; 'b'; '\n']
 fromStr "a\nb" |> readAllChars   // ['a'; '\n'; 'b'; '\n']
 ```
 
-Note that the implementation returns a newline at the end of the input, even if the input doesn't have one. I think that this is a feature, not a bug!
+この実装は、入力の最後に改行がなくても改行を追加します。これは不具合ではなく、むしろ有用な特徴だと考えています。
 
-### Changing the parser to use the input
+### パーサーを新しい入力形式に対応させる
 
-We now need to change the `Parser` type again. 
+ここで`Parser`型を再び変更する必要があります。
 
-To start with, the `Failure` case needs to return some kind of data that indicates the position, so we can show it in an error message.
+まず、`Failure`ケースで位置情報を返すようにします。エラーメッセージに表示するためです。
 
-We could just use the `InputState` as is, but let's be good and define a new type specially for this use, called `ParserPosition`:
+`InputState`をそのまま使うこともできますが、この用途に特化した新しい型`ParserPosition`を定義するのが良いでしょう。
 
 ```fsharp
-/// Stores information about the parser position for error messages
+/// パーサーの位置情報をエラーメッセージ用に保存する
 type ParserPosition = {
     currentLine : string
     line : int
@@ -425,7 +425,7 @@ type ParserPosition = {
     }
 ```
 
-We'll need some way to convert a `InputState` into a `ParserPosition`:
+`InputState`を`ParserPosition`に変換する方法も必要です。
 
 ```fsharp
 let parserPositionFromInputState (inputState:Input) = {
@@ -435,28 +435,28 @@ let parserPositionFromInputState (inputState:Input) = {
     }
 ```
 
-And finally, we can update the `Result` type to include `ParserPosition`:
+最後に、`ParserPosition`を含めるように`Result`型を更新します。
 
 ```fsharp
-// Result type
+// Result型
 type Result<'a> =
     | Success of 'a
     | Failure of ParserLabel * ParserError * ParserPosition 
 ```
 
-In addition, the `Parser` type needs to change from `string` to `InputState`:
+さらに、`Parser`型を`string`から`InputState`に変更します。
 
 ```fsharp
-type Input = TextInput.InputState  // type alias
+type Input = TextInput.InputState  // 型エイリアス
 
-/// A Parser structure has a parsing function & label
+/// Parser構造はパース関数とラベルを持つ
 type Parser<'a> = {
     parseFn : (Input -> Result<'a * Input>)
     label:  ParserLabel 
     }
 ```
 
-With all this extra information available, the `printResult` function can be enhanced to print the text of the current line, along with a caret where the error is:
+この追加情報を使って、`printResult`関数を拡張し、現在の行のテキストとエラーの位置を示す矢印を表示できます。
 
 ```fsharp
 let printResult result =
@@ -468,104 +468,104 @@ let printResult result =
         let colPos = parserPos.column
         let linePos = parserPos.line
         let failureCaret = sprintf "%*s^%s" colPos "" error
-        printfn "Line:%i Col:%i Error parsing %s\n%s\n%s" linePos colPos label errorLine failureCaret 
+        printfn "%d行目 %d列目 %sのパースでエラー\n%s\n%s" linePos colPos label errorLine failureCaret 
 ```
 
-Let's test `printResult` with a dummy error value:
+ダミーのエラー値で`printResult`をテストしてみましょう。
 
 ```fsharp
 let exampleError = 
-    Failure ("identifier", "unexpected |",
+    Failure ("識別子", "予期しない |",
              {currentLine = "123 ab|cd"; line=1; column=6})
 
 printResult exampleError 
 ```
 
-The output is shown below:
+出力は以下のようになります。
 
 ```text
-Line:1 Col:6 Error parsing identifier
+1行目 6列目 識別子のパースでエラー
 123 ab|cd
-      ^unexpected |
+      ^予期しない |
 ```
 
-Much nicer than before!
+以前よりもずっと分かりやすくなりました！
 
-### Fixing up the `run` function
+### `run`関数の修正
 
-The `run` function now needs to take an `InputState` not a string.  But we also want the convenience of running against string input,
-so let's create two `run` functions, one that takes an `InputState` and one that takes a `string`:
+`run`関数は今後、文字列ではなく`InputState`を受け取る必要があります。しかし、文字列入力に対しても実行できる便利さは残したいところです。
+そこで、2つの`run`関数を作成しましょう。1つは`InputState`を受け取り、もう1つは`string`を受け取ります。
 
 ```fsharp
-/// Run the parser on a InputState
-let runOnInput parser input = 
-    // call inner function with input
+/// InputStateに対してパーサーを実行
+let runOnInput parser input =
+    // 内部関数を入力で呼び出す
     parser.parseFn input
 
-/// Run the parser on a string
-let run parser inputStr = 
-    // call inner function with input
+/// 文字列に対してパーサーを実行
+let run parser inputStr =
+    // 内部関数を入力で呼び出す
     runOnInput parser (TextInput.fromStr inputStr)
 ```
 
-### Fixing up the combinators
+### コンビネータの修正
 
-We now have three items in the `Failure` case rather than two. This breaks some code but is easy to fix. I'm tempted to create a special `ParserError` type
-so that it never happens again, but for now, I'll just fix up the errors.
+`Failure`ケースに、これまでの2つではなく3つの項目が含まれるようになりました。
+これにより一部のコードが動作しなくなりますが、修正は簡単です。今後同じ問題が起きないよう、専用の`ParserError`型を作りたい気もします。ただし今回は、単にエラーを修正するにとどめておきます。
 
-Here's a new version of `satisfy`:
+新しい`satisfy`の実装です。
 
 ```fsharp
-/// Match an input token if the predicate is satisfied
+/// 述語を満たす入力トークンにマッチする
 let satisfy predicate label =
     let innerFn input =
-        let remainingInput,charOpt = TextInput.nextChar input 
+        let remainingInput,charOpt = TextInput.nextChar input
         match charOpt with
-        | None -> 
-            let err = "No more input"
+        | None ->
+            let err = "入力が終了しました"
             let pos = parserPositionFromInputState input
-            //Failure (label,err)     // <====== old version
-            Failure (label,err,pos)   // <====== new version
-        | Some first -> 
+            //Failure (label,err)     // <====== 旧バージョン
+            Failure (label,err,pos)   // <====== 新バージョン
+        | Some first ->
             if predicate first then
                 Success (first,remainingInput)
             else
-                let err = sprintf "Unexpected '%c'" first
+                let err = sprintf "予期しない文字 '%c'" first
                 let pos = parserPositionFromInputState input
-                //Failure (label,err)     // <====== old version
-                Failure (label,err,pos)   // <====== new version
-    // return the parser
+                //Failure (label,err)     // <====== 旧バージョン
+                Failure (label,err,pos)   // <====== 新バージョン
+    // パーサーを返す
     {parseFn=innerFn;label=label}
 ```
 
-Note that the failure case code is now `Failure (label,err,pos)` where the parser position is built from the input state.
+入力状態からパーサーの位置情報を作り、失敗時のコードは`Failure (label,err,pos)`となりました。
 
-And here is `bindP`:
+`bindP`も同様に修正します。
 
 ```fsharp
-/// "bindP" takes a parser-producing function f, and a parser p
-/// and passes the output of p into f, to create a new parser
+/// "bindP"はパーサー生成関数fとパーサーpを受け取り
+/// pの出力をfに渡して新しいパーサーを作成する
 let bindP f p =
     let label = "unknown"
     let innerFn input =
-        let result1 = runOnInput p input 
+        let result1 = runOnInput p input
         match result1 with
-        | Failure (label,err,pos) ->     // <====== new with pos
-            // return error from parser1
+        | Failure (label,err,pos) ->     // <====== 新しく位置情報（pos）を追加
+            // パーサー1からのエラーを返す
             Failure (label,err,pos)  
         | Success (value1,remainingInput) ->
-            // apply f to get a new parser
+            // fを適用して新しいパーサーを取得
             let p2 = f value1
-            // run parser with remaining input
+            // 残りの入力で新しいパーサーを実行
             runOnInput p2 remainingInput
     {parseFn=innerFn; label=label}
 ```
 
-We can fix up the other functions in the same way.
+他の関数も同様に修正します。
 
-### Testing the positional errors
+### 位置情報付きエラーのテスト
 
-Let's test with a real parser now:
+実際のパーサーでテストしてみましょう。
 
 ```fsharp
 let parseAB = 
@@ -576,75 +576,75 @@ run parseAB "A|C"
 |> printResult
 ```
 
-And the output is:
+出力は次のとおりです。
 
 ```text
-// Line:0 Col:1 Error parsing AB
-// A|C
-//  ^Unexpected '|'
+1行目 2列目 ABのパースでエラー
+A|C
+ ^予期しない文字 '|'
 ```
 
-Excellent!  I think we can stop now.
+これで大きく改善しました。
 
-## 4. Adding some standard parsers to the library
+## 4. ライブラリに標準パーサーを追加
 
-In the previous posts, we've built parsers for strings and ints in passing, but now let's add them to the core library, so that clients don't have to reinvent the wheel.
+前回の投稿では、文字列や整数のパーサーを作成しました。今回はそれらをコアライブラリに追加し、利用者がゼロから実装する必要がないようにします。
 
-These parsers are based on those in the [the FParsec library](http://www.quanttec.com/fparsec/reference/charparsers.html#).
+これらのパーサーは[FParsecライブラリ](https://www.quanttec.com/fparsec/reference/charparsers.html#)を参考にしています。
 
-Let's start with some string-related parsers. I will present them without comment -- I hope that the code is self-explanatory by now.
+まず、文字列関連のパーサーから始めましょう。コードはこれまでの説明で理解できるはずなので、コメントは省略します。
 
 ```fsharp
-/// parse a char 
-let pchar charToMatch = 
-    // label is just the character
-    let label = sprintf "%c" charToMatch 
+/// 文字をパースする
+let pchar charToMatch =
+    // ラベルは文字そのもの
+    let label = sprintf "%c" charToMatch
 
-    let predicate ch = (ch = charToMatch) 
-    satisfy predicate label 
+    let predicate ch = (ch = charToMatch)
+    satisfy predicate label
 
-/// Choose any of a list of characters
-let anyOf listOfChars = 
-    let label = sprintf "anyOf %A" listOfChars 
+/// 文字リストのいずれかを選択する
+let anyOf listOfChars =
+    let label = sprintf "anyOf %A" listOfChars
     listOfChars
-    |> List.map pchar // convert into parsers
+    |> List.map pchar // パーサーに変換
     |> choice
     <?> label
-    
-/// Convert a list of chars to a string
+   
+/// 文字リストを文字列に変換する
 let charListToStr charList =
-    String(List.toArray charList) 
+    String(List.toArray charList)
 
-/// Parses a sequence of zero or more chars with the char parser cp. 
-/// It returns the parsed chars as a string.
+/// 文字パーサーcpを使用して0個以上の文字の並びをパースする
+/// パースした文字を文字列として返す
 let manyChars cp =
     many cp
     |>> charListToStr
 
-/// Parses a sequence of one or more chars with the char parser cp. 
-/// It returns the parsed chars as a string.
+/// 文字パーサーcpを使用して1個以上の文字の並びをパースする
+/// パースした文字を文字列として返す
 let manyChars1 cp =
     many1 cp
     |>> charListToStr
 
-/// parse a specific string
-let pstring str = 
-    // label is just the string
-    let label = str 
+/// 特定の文字列をパースする
+let pstring str =
+    // ラベルは文字列そのもの
+    let label = str
 
     str
-    // convert to list of char
+    // 文字のリストに変換
     |> List.ofSeq
-    // map each char to a pchar
-    |> List.map pchar 
-    // convert to Parser<char list>
+    // 各文字をpcharにマップ
+    |> List.map pchar
+    // Parser<char list>に変換
     |> sequence
-    // convert Parser<char list> to Parser<string>
-    |> mapP charListToStr 
+    // Parser<char list>をParser<string>に変換
+    |> mapP charListToStr
     <?> label
 ```
 
-Let's test `pstring`, for example:
+`pstring`のテスト例です。
 
 ```fsharp
 run (pstring "AB") "ABC"  
@@ -654,30 +654,30 @@ run (pstring "AB") "ABC"
 
 run (pstring "AB") "A|C"  
 |> printResult
-// Line:0 Col:1 Error parsing AB
+// 1行目 2列目 ABのパースでエラー
 // A|C
-//  ^Unexpected '|'
+//  ^予期しない文字 '|'
 ```
 
-### Whitespace parsers
+### 空白文字のパーサー
 
-Whitespace is important in parsing, even if we do end up mostly throwing it away!
+パースにおいて、空白文字は重要です。最終的には無視することが多いですが、処理は必要です。
 
 ```fsharp
-/// parse a whitespace char
+/// 空白文字をパースする
 let whitespaceChar = 
     let predicate = Char.IsWhiteSpace 
-    let label = "whitespace"
+    let label = "空白"
     satisfy predicate label 
 
-/// parse zero or more whitespace char
+/// 0個以上の空白文字をパースする
 let spaces = many whitespaceChar
 
-/// parse one or more whitespace char
+/// 1個以上の空白文字をパースする
 let spaces1 = many1 whitespaceChar
 ```
 
-And here's some whitespace tests:
+空白文字のテスト例です。
 
 ```fsharp
 run spaces " ABC"  
@@ -694,62 +694,62 @@ run spaces1 " ABC"
 
 run spaces1 "A"  
 |> printResult
-// Line:0 Col:0 Error parsing many1 whitespace
+// 1行目 1列目 many1 空白のパースでエラー
 // A
-// ^Unexpected 'A'
+// ^予期しない文字 'A'
 ```
 
-### Numeric parsers
+### 数値のパーサー
 
-Finally, we need a parser for ints and floats.
+最後に、整数と浮動小数点数のパーサーが必要です。
 
 ```fsharp
-/// parse a digit
+/// 数字をパースする
 let digitChar = 
     let predicate = Char.IsDigit 
-    let label = "digit"
+    let label = "数字"
     satisfy predicate label 
 
-// parse an integer
+// 整数をパースする
 let pint = 
-    let label = "integer" 
+    let label = "整数" 
 
-    // helper
+    // ヘルパー関数
     let resultToInt (sign,digits) = 
-        let i = digits |> int  // ignore int overflow for now
+        let i = digits |> int  // オーバーフローは今のところ無視
         match sign with
-        | Some ch -> -i  // negate the int
+        | Some ch -> -i  // 整数を負にする
         | None -> i
         
-    // define parser for one or more digits
+    // 1つ以上の数字のパーサーを定義
     let digits = manyChars1 digitChar 
 
-    // an "int" is optional sign + one or more digits
+    // "整数"は、オプションの符号 + 1つ以上の数字
     opt (pchar '-') .>>. digits 
     |> mapP resultToInt
     <?> label
 
-// parse a float
+// 浮動小数点数をパースする
 let pfloat = 
-    let label = "float" 
+    let label = "浮動小数点数" 
 
-    // helper
+    // ヘルパー関数
     let resultToFloat (((sign,digits1),point),digits2) = 
         let fl = sprintf "%s.%s" digits1 digits2 |> float
         match sign with
-        | Some ch -> -fl  // negate the float
+        | Some ch -> -fl  // 浮動小数点数を負にする
         | None -> fl
         
-    // define parser for one or more digits 
+    // 1つ以上の数字のパーサーを定義 
     let digits = manyChars1 digitChar 
 
-    // a float is sign, digits, point, digits (ignore exponents for now)
+    // 浮動小数点数は、符号、数字、小数点、数字（指数は今のところ無視）
     opt (pchar '-') .>>. digits .>>. pchar '.' .>>. digits 
     |> mapP resultToFloat
     <?> label
 ```
 
-And some tests:
+テスト例です。
 
 ```fsharp
 run pint "-123Z" 
@@ -758,9 +758,9 @@ run pint "-123Z"
 
 run pint "-Z123" 
 |> printResult
-// Line:0 Col:1 Error parsing integer
+// 1行目 2列目 整数のパースでエラー
 // -Z123
-//  ^Unexpected 'Z'
+//  ^予期しない文字 'Z'
 
 run pfloat "-123.45Z" 
 |> printResult   
@@ -768,53 +768,53 @@ run pfloat "-123.45Z"
 
 run pfloat "-123Z45" 
 |> printResult
-// Line:0 Col:4 Error parsing float
+// 1行目 5列目 浮動小数点数のパースでエラー
 // -123Z45
-//     ^Unexpected 'Z'
+//     ^予期しない文字 'Z'
 ```
 
-## 5. Backtracking
+## 5. バックトラッキング
 
-One more topic that we should discuss is "backtracking".
+最後に議論すべき重要なトピックは「バックトラッキング」です。
 
-Let's say that you have two parsers: one to match the string `A-1` and and another to match the string `A-2`. If the input is
-`A-2` then the first parser will fail at the third character and the second parser will be attempted. 
+例えば、文字列`A-1`にマッチするパーサーと、文字列`A-2`にマッチするパーサーがあるとします。
+入力が`A-2`の場合、最初のパーサーは3文字目で失敗し、2番目のパーサーが試行されます。
 
-Now the second parser must start at the *beginning* of the original sequence of characters, not at the third character. That is, we
-need to undo the current position in the input stream and go back to the first position.
+このとき、2番目のパーサーは3文字目からではなく、元の文字列の*先頭*から開始する必要があります。
+つまり、入力ストリームの現在位置を元に戻し、最初の位置に戻る必要があるのです。
 
-If we were using a mutable input stream then this might be a tricky problem, but thankfully we are using immutable data, and so
-"undoing" the position just means using the original input value. And of course, this is exactly what combinators such as `orElse` (`<|>`) do.
+可変の入力ストリームを使用していれば、これは難しい問題かもしれません。しかし幸いなことに、私たちは不変データを使用しています。そのため、位置を「元に戻す」というのは、単に元の入力値を使用するだけです。
+そして、これはまさに`orElse`（`<|>`）のようなコンビネータが行っていることです。
 
-In other words, we get backtracking "for free" when we use immutable input state. Yay!
+言い換えると、不変の入力状態を使用することで、バックトラッキングが「無料で」得られるのです。素晴らしいですね！
 
-Sometimes however, we *don't* want to backtrack. For example, let's say we have these parsers:
+しかし、バックトラックしたくない場合もあります。例えば、次のようなパーサーがあるとします。
 
-* let `forExpression` = the "for" keyword, then an identifier, then the "in" keyword, etc. 
-* let `ifExpression` = the "if" keyword, then an identifier, then the "then" keyword, etc.
+* `forExpression` = "for"キーワード、識別子、"in"キーワードなど
+* `ifExpression` = "if"キーワード、識別子、"then"キーワードなど
 
-and we then create a combined expression parser that chooses between them:
+そして、これらを組み合わせた式パーサーを作成します。
 
-* let `expression` = `forExpression <|> ifExpression` 
+* `expression` = `forExpression <|> ifExpression` 
 
-Now, if the input stream is `for &&& in something` then the `forExpression` parser will error when it hits the sequence `&&&`, because it is expecting
-a valid identifier. At this point we *don't* want to backtrack and try the `ifExpression` -- we want to show an error such as "identifier expected after 'for'".
+ここで、入力ストリームが`for &&& in something`だった場合、`forExpression`パーサーは`&&&`のところでエラーになります。有効な識別子を期待しているからです。
+この時点で、`ifExpression`を試すためにバックトラックはしたくありません。むしろ、「'for'の後に識別子が必要です」といったエラーを表示したいのです。
 
-The rule then is that: *if* input has been consumed successfully (in this case, the `for` keyword was matched successfully) then do *not* backtrack.
+ルールは次のようになります。入力が正常に消費された場合（この例では「for」キーワードが正常にマッチした場合）は、バックトラックしません。
 
-We're not going to implement this rule in our simple library, but a proper library like FParsec does implement this and also has support
-for [bypassing it when needed](http://www.quanttec.com/fparsec/reference/primitives.html#members.attempt).
+このルールは、我々の単純なライブラリでは実装しませんが、FParsecのような本格的なライブラリではこれを実装しています。
+また、[必要に応じてこれを回避する方法](https://www.quanttec.com/fparsec/reference/primitives.html#members.attempt)も用意されています。
 
-## Listing of the final parser library 
+## 最終的なパーサーライブラリのリスト
 
-The parsing library is up to 500 lines of code now, so I won't show it here. You can see it at [this gist](https://gist.github.com/swlaschin/485f418fede6b6a36d89#file-parserlibrary-fsx).
+パーシングライブラリは現在500行ほどのコードになっているため、ここでは全てを示しません。[このgist](https://gist.github.com/swlaschin/485f418fede6b6a36d89#file-parserlibrary-fsx)で確認できます。
 
-## Summary
+## まとめ
 
-In this post, we added better error handling and some more parsers.
+この投稿では、より良いエラー処理といくつかの新しいパーサーを追加しました。
 
-Now we have everything we need to build a JSON parser!
-That will be the topic of the [next post](../posts/understanding-parser-combinators-4.md).  
+これで、JSONパーサーを組み立てるために必要なものが全て揃いました。
+それが[次の投稿](../posts/understanding-parser-combinators-4.md)のテーマです。
 
-*The source code for this post is available at [this gist](https://gist.github.com/swlaschin/485f418fede6b6a36d89#file-understanding_parser_combinators-3-fsx).*
+*この投稿のソースコードは[このgist](https://gist.github.com/swlaschin/485f418fede6b6a36d89#file-understanding_parser_combinators-3-fsx)で入手できます。*
 
