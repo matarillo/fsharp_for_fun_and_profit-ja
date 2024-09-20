@@ -1,7 +1,7 @@
 ---
-layout。series_index
-title。"パーサーコンビネータを理解する"
-seriesIndexId。"パーサーコンビネータを理解する"
+layout: series_index
+title: "パーサーコンビネータを理解する"
+seriesIndexId: "パーサーコンビネータを理解する"
 ---
 
 このシリーズでは、いわゆる「アプリカティブパーサー」がどのように動作するかを詳しく見ていきます。
