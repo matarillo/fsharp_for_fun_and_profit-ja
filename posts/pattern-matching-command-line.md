@@ -184,7 +184,7 @@ parseCommandLine ["/o"; "xyz"] defaultOptions
 let rec parseCommandLineRec args optionsSoFar = 
 	// 実装は上記と同じ
 
-// 「公開」解析関数を作る
+// 「公開」パース関数を作る
 let parseCommandLine args = 
     // デフォルト値を作る
     let defaultOptions = {
@@ -200,7 +200,7 @@ let parseCommandLine args =
 この場合、ヘルパー関数は独立して使えます。でも、本当に非公開にする場合は、 `parseCommandLine` の定義内にネストしたサブ関数として置くこともできます。
 
 ```fsharp
-// 「公開」解析関数を作る
+// 「公開」パース関数を作る
 let parseCommandLine args = 
     // デフォルト値を作る
     let defaultOptions = 
@@ -271,7 +271,7 @@ module CommandLineV1 =
             eprintfn "オプション '%s' は認識できません" x
             parseCommandLineRec xs optionsSoFar 
 
-    // 「公開」解析関数を作る
+    // 「公開」パース関数を作る
     let parseCommandLine args = 
         // デフォルト値を作る
         let defaultOptions = {
@@ -395,7 +395,7 @@ module CommandLineV2 =
             printfn "オプション '%s' は認識できません" x
             parseCommandLineRec xs optionsSoFar 
 
-    // 「公開」解析関数を作る
+    // 「公開」パース関数を作る
     let parseCommandLine args = 
         // デフォルト値を作る
         let defaultOptions = {
@@ -505,7 +505,7 @@ module CommandLineV3 =
             // 新しい状態を返す
             parseOrderBy element optionsSoFar
            
-    // 「公開」解析関数を作る
+    // 「公開」パース関数を作る
     let parseCommandLine args = 
 
         let defaultOptions = {
