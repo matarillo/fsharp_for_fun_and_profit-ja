@@ -216,7 +216,7 @@ Environment.GetEnvironmentVariable "ProgramFiles" =
 
 もちろん、.NETライブラリだけでなく、自分のコードをテストすることもできます。時には自分のコードをテストするのが非常に役立つことがあります。
 
-これを行うには、以下に示すようにDLLを参照し、名前空間を開くだけです。
+これを行うには、以下に示すようにDLLを参照し、名前空間をオープンするだけです。
 
 ```fsharp
 
@@ -226,7 +226,7 @@ System.IO.Directory.SetCurrentDirectory (__SOURCE_DIRECTORY__)
 // DLLへの相対パスを渡す
 #r @"bin\debug\myapp.dll"
 
-// 名前空間を開く
+// 名前空間をオープンする
 open MyApp
 
 // 何かを実行

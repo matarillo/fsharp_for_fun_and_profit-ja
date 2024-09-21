@@ -938,13 +938,13 @@ let anyOf listOfChars =
 ## 追加情報
 
 * この技術を本番環境で使うことに興味がある場合は、
-  F#用に最適化された[FParsecライブラリ](https://www.quanttec.com/fparsec/)を必ず調査してください。
+  実運用に最適化された、F#用の[FParsecライブラリ](https://www.quanttec.com/fparsec/)を必ず調査してください。
 * パーサーコンビネータ一般に関する詳細情報については、"Parsec"（FParsecとこの投稿に影響を与えたHaskellライブラリ）でインターネット検索してください。
 * FParsecの使用例については、以下の投稿のいずれかを試してみてください。
   * [FogCreekのKilnによる、フレーズ検索クエリの実装](https://web.archive.org/web/20160304040941/http://blog.fogcreek.com/fparsec/)
   * [LOGOパーサー](http://trelford.com/blog/post/FParsec.aspx)
   * [Small Basicパーサー](http://trelford.com/blog/post/parser.aspx)
-  * [C#パーサー](http://trelford.com/blog/post/parsecsharp.aspx)と[F#でのC#コンパイラの構築](https://neildanson.wordpress.com/2014/02/11/building-a-c-compiler-in-f/)
+  * [C#パーサー](http://trelford.com/blog/post/parsecsharp.aspx)と[F#でC#コンパイラを構築する](https://neildanson.wordpress.com/2014/02/11/building-a-c-compiler-in-f/)
   * [F#で48時間でSchemeを書く](https://lucabolognese.wordpress.com/2011/08/05/write-yourself-a-scheme-in-48-hours-in-f-part-vi/)
   * [OpenGLのシェーディング言語GLSLのパース](https://laurent.le-brun.eu/site/index.php/2010/06/07/54-fsharp-and-fparsec-a-glsl-parser-example)
 
