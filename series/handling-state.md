@@ -1,19 +1,19 @@
 ---
 layout: series_index
-title: "The 'Handling State' series"
-seriesIndexId: "Handling State"
+title: "「状態の扱い方」シリーズ"
+seriesIndexId: "状態の扱い方"
 ---
 
-In this series of posts, I'll look at how you can thread state through a series of pure functions in a convenient way.
+このシリーズでは、純粋関数を使って状態を効率的に受け渡す便利な方法を紹介します。
 
-To start with, I'll tell the story of Dr Frankenfunctor and the Monadster, and how the Doctor needed a way to create "recipes" that were activated when lightning struck.
+まず、フランケンファンクター博士とモナド怪物の物語から始めます。博士は稲妻が走る時に発動する「レシピ」を作る方法を必要としていました。
 
-The Doctor then devised ways to work with these recipes using functions such as `map`, `bind` and `apply`.
+次に、博士がこれらのレシピを扱うために考案した「map」「bind」「apply」などの関数について見ていきます。
 
-In the final post, we'll see how we can use a computation expression to make the coding cleaner, and how these techniques can be generalized into the so-called "state monad".
+最後の記事では、コンピュテーション式を使ってコーディングをより簡潔にする方法と、これらの技法を一般化して「Stateモナド」と呼ばれるものにする方法を紹介します。
 
-*Warning! These posts contains gruesome topics, strained analogies, discussion of monads*
+*警告：この記事には、グロテスクな話題、無理のある例え、モナドに関する議論が含まれています。*
 
-* [Dr Frankenfunctor and the Monadster](../posts/monadster.md). Or, how a 19th century scientist nearly invented the state monad.
-* [Completing the body of the Monadster](../posts/monadster-2.md). Dr Frankenfunctor and the Monadster, part 2.
-* [Refactoring the Monadster](../posts/monadster-3.md). Dr Frankenfunctor and the Monadster, part 3.
+* [フランケンファンクター博士とモナド怪物](../posts/monadster.md)。19世紀の科学者がStateモナドを発明しかけた話。
+* [モナド怪物の体を完成させる](../posts/monadster-2.md)。フランケンファンクター博士とモナド怪物、パート2。
+* [モナド怪物のリファクタリング](../posts/monadster-3.md)。フランケンファンクター博士とモナド怪物、パート3。

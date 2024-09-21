@@ -26,7 +26,7 @@ categories: [パターン]
 * [方法5. エージェントの前面にあるAPI](../posts/13-ways-of-looking-at-a-turtle.md#way5)：メッセージキューを使っててエージェントと通信するAPIを作ります。
 * [方法6. インターフェースを使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way6)：インターフェースまたは関数のレコードを使って、実装をAPIから分離します。
 * [方法7. 関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)：関数パラメータを渡すことで、実装をAPIから分離します。
-* [方法8. 状態モナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)：状態を追跡する特別な「タートルワークフロー」コンピュテーション式を作ります。
+* [方法8. Stateモナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)：状態を追跡する特別な「タートルワークフロー」コンピュテーション式を作ります。
 * [方法9. コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)：タートルのコマンドを表す型を作り、コマンドのリストを一括処理します。
 * [幕間：データ型を使った意識的な分離](../posts/13-ways-of-looking-at-a-turtle.md#decoupling)。データまたはインターフェースを使った分離に関するメモ。
 * [方法10. イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)：過去のイベントのリストから状態を構築します。

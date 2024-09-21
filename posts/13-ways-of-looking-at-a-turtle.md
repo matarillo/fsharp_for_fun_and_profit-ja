@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "タートルを見る13の方法"
-description: "API、依存性注入、状態モナドなどの例"
+description: "API、依存性注入、Stateモナドなどの例"
 categories: [パターン]
 ---
 
@@ -12,7 +12,7 @@ categories: [パターン]
 さまざまな技術を実演するのに最適な基盤になると思いつきました。
 
 そこで、この2部構成のメガ投稿では、タートルのモデルを極限まで拡張しながら、部分適用、Success/Failure結果を用いた検証、「リフティング」の概念、
-メッセージキューを持つエージェント、依存性注入、状態モナド、イベントソーシング、ストリーム処理、そして最後にカスタムインタープリターなどを実演します。
+メッセージキューを持つエージェント、依存性注入、Stateモナド、イベントソーシング、ストリーム処理、そして最後にカスタムインタープリターなどを実演します。
 
 では、早速ですが、タートルを実装する13の異なる方法をご紹介しましょう。
 
@@ -23,7 +23,7 @@ categories: [パターン]
 * [方法5. エージェントの前面にあるAPI](../posts/13-ways-of-looking-at-a-turtle.md#way5)：メッセージキューを使っててエージェントと通信するAPIを作ります。
 * [方法6. インターフェースを使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way6)：インターフェースまたは関数のレコードを使って、実装をAPIから分離します。
 * [方法7. 関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)：関数パラメータを渡すことで、実装をAPIから分離します。
-* [方法8. 状態モナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)：状態を追跡する特別な「タートルワークフロー」コンピュテーション式を作ります。
+* [方法8. Stateモナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)：状態を追跡する特別な「タートルワークフロー」コンピュテーション式を作ります。
 * [方法9. コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)：タートルのコマンドを表す型を作り、コマンドのリストを一括処理します。
 * [幕間：データ型を使った意識的な分離](../posts/13-ways-of-looking-at-a-turtle.md#decoupling)。データまたはインターフェースを使った分離に関するメモ。
 * [方法10. イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)：過去のイベントのリストから状態を構築します。
@@ -678,7 +678,7 @@ member this.Exec (commandStr:string) =
 APIは`Result`を返すので、クライアントはもはや各関数を順番に呼び出すことができません。
 呼び出しからのエラーを処理し、残りのステップを中止する必要があります。
 
-私たちの生活を楽にするために、`result`計算式（またはワークフロー）を使用して呼び出しを連鎖させ、OOバージョンの命令的な「感じ」を保持します。
+私たちの生活を楽にするために、`result`コンピュテーション式（またはワークフロー）を使用して呼び出しを連鎖させ、OOバージョンの命令的な「感じ」を保持します。
 
 ```fsharp
 let drawTriangle() = 
@@ -693,7 +693,7 @@ let drawTriangle() =
         }
 ```
 
-*`result`計算式のソースコードは[こちら](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/Common.fsx#L70)で入手できます。*
+*`result`コンピュテーション式のソースコードは[こちら](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/Common.fsx#L70)で入手できます。*
 
 同様に、`drawPolygon`コードでは、1辺を描くヘルパーを作成し、`result`式内で`n`回呼び出すことができます。
 
@@ -812,7 +812,7 @@ let distanceR = validateDistance distanceStr
 lift2R move distanceR stateR
 ```
 
-`result`計算式を使用します。そうすると、上記のコードは次のようになります：
+`result`コンピュテーション式を使用します。そうすると、上記のコードは次のようになります：
 
 ```fsharp
 result {
@@ -1088,7 +1088,7 @@ type TurtleApi(turtleFunctions: TurtleFunctions) =
 メインの`Exec`メソッドの実装は、以前に見たものと非常に似ていますが、次の違いがあります。
 
 * 関数はレコードから取得されます（例：`turtleFunctions.move`）。
-* すべての活動は`result`計算式で行われるため、検証の結果を使用できます。
+* すべての活動は`result`コンピュテーション式で行われるため、検証の結果を使用できます。
 
 以下がコードです。
 
@@ -1431,7 +1431,7 @@ drawTriangle(api)
 
 <a id="way8"></a>
 
-## 8: 状態モナドを使ったバッチ処理
+## 8: Stateモナドを使ったバッチ処理
 
 次の2つのセクションでは、命令を1つずつ処理する「インタラクティブ」モードから、
 一連の命令をグループ化して1つのユニットとして実行する「バッチ」モードに切り替えます。
@@ -1439,12 +1439,12 @@ drawTriangle(api)
 最初の設計では、クライアントがタートル関数を直接使用するモデルに戻ります。
 
 以前と同様に、クライアントは現在の状態を追跡し、次の関数呼び出しに渡す必要がありますが、
-今回はいわゆる「状態モナド」を使用して、様々な命令を通じて状態を渡すことで、状態を見えないようにします。
+今回はいわゆる「Stateモナド」を使用して、様々な命令を通じて状態を渡すことで、状態を見えないようにします。
 結果として、どこにも可変要素はありません！
 
-これは汎用の状態モナドではなく、このデモンストレーション用に簡略化したものです。`turtle`ワークフローと呼びます。
+これは汎用のStateモナドではなく、このデモンストレーション用に簡略化したものです。`turtle`ワークフローと呼びます。
 
-*（状態モナドについての詳細は、私の[「モナドスター」トークと投稿](https://fsharpforfunandprofit.com/monadster/)と[パーサーコンビネータに関する投稿](../posts/understanding-parser-combinators.md)を参照してください）*
+*（Stateモナドについての詳細は、私の[「モナド怪物」トークと投稿](https://fsharpforfunandprofit.com/monadster/)と[パーサーコンビネータに関する投稿](../posts/understanding-parser-combinators.md)を参照してください）*
 
 ![](../assets/img/turtle-monad.png)
 
@@ -1456,7 +1456,7 @@ drawTriangle(api)
 
 *（これまでのところ、タートル関数から使用可能な出力はありませんでしたが、後の例では、この出力を使用して決定を行う様子を見ることができます。）*
 
-これらの種類の関数を扱うための標準的な方法があります - 「状態モナド」です。
+これらの種類の関数を扱うための標準的な方法があります - 「Stateモナド」です。
 
 その構築方法を見てみましょう。
 
@@ -1485,7 +1485,7 @@ type TurtleStateComputation<'a> =
     TurtleStateComputation of (Turtle.TurtleState -> 'a * Turtle.TurtleState)
 ```
 
-これが「状態モナド」の基本的なアイデアです。しかし、状態モナドがこの型だけでなく、いくつかの関数（「return」と「bind」）も必要とし、それらがいくつかの合理的な法則に従う必要があることを理解することが重要です。
+これが「Stateモナド」の基本的なアイデアです。しかし、Stateモナドがこの型だけでなく、いくつかの関数（「return」と「bind」）も必要とし、それらがいくつかの合理的な法則に従う必要があることを理解することが重要です。
 
 ここでは`returnT`と`bindT`関数の定義は示しませんが、[完全なソース](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/8e4e8d23b838ca88702d0b318bfd57a87801305e/08-StateMonad.fsx#L46)でその定義を見ることができます。
 
@@ -1502,15 +1502,15 @@ let runT turtle state =
     innerFn state
 ```
 
-最後に、`turtle`ワークフローを作成できます。これは`TurtleStateComputation`型の操作を容易にする計算式です：
+最後に、`turtle`ワークフローを作成できます。これは`TurtleStateComputation`型の操作を容易にするコンピュテーション式です：
 
 ```fsharp
-// 計算式ビルダーを定義する
+// コンピュテーション式ビルダーを定義する
 type TurtleBuilder() =
     member this.Return(x) = returnT x
     member this.Bind(x,f) = bindT f x
 
-// 計算式ビルダーのインスタンスを作成する
+// コンピュテーション式ビルダーのインスタンスを作成する
 let turtle = TurtleBuilder()
 ```
 

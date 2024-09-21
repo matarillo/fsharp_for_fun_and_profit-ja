@@ -36,13 +36,13 @@ hasNoCode: 1
 これらの記事では、関数型プログラミングにおけるコアとなるパターン、つまり "map", "bind"、モナドなどの概念について説明します。
 
 * [鉄道指向プログラミング](../posts/recipe-part2.md): エラー処理のための関数型アプローチ
-* [State モナド](../series/handling-state.md): フランケンファンクター博士とモナドスターの物語を使って、状態の扱いを紹介します。
+* [Stateモナド](../series/handling-state.md): フランケンファンクター博士とモナド怪物の物語を使って、状態の扱いを紹介します。
 * [Reader モナド](../posts/elevated-world-6.md): Reader モナドの再発明
 * [Map, bind, apply, lift, sequence, traverse](../series/map-and-bind-and-apply-oh-my.md): ジェネリックデータ型を扱うためのコア関数の一部を説明するシリーズ
 * [つらくないモノイド](../posts/monoids-without-tears.md): 一般的な関数型パターンを、ほとんど数学を使わずに解説します。
 * [フォールドと再帰型](../series/recursive-types-and-folds.md): 再帰型、カタモーフィズム、末尾再帰、左フォールドと右フォールドの違いなどについて説明します。
 * [パーサーコンビネータの理解](../posts/understanding-parser-combinators.md): パーサーコンビネータライブラリをスクラッチから作成します。
-* [タートルを見る13の方法](../posts/13-ways-of-looking-at-a-turtle.md): State モナド、エージェント、インタープリターなど、さまざまな手法を使ってタートルグラフィック API を実装します。
+* [タートルを見る13の方法](../posts/13-ways-of-looking-at-a-turtle.md): Stateモナド、エージェント、インタープリターなど、さまざまな手法を使ってタートルグラフィック API を実装します。
 
 ## 実践例
 
