@@ -676,7 +676,7 @@ M<LiveRightLowerArm> -> M<LiveRightUpperArm> -> M<LiveRightArm>
 
 しかし、以前と同様に、これをさらに汎用的にできないでしょうか？`armSurgery`をハードコーディングする必要はありません。パラメータとして渡すことができます。
 
-より汎用的な関数を`map2M`と呼びましょう。`mapM`と同じですが、2つのパラメータを持ちます。
+ジェネリックにした関数を`map2M`と呼びましょう。`mapM`と同じですが、パラメータを2つ受け取ります。
 
 以下が実装です。
 
@@ -744,7 +744,7 @@ let rightArmM = armSurgeryM lowerRightArmM upperRightArmM
   
 いつものように、これらすべてを雷が落ちる前に前もって行うことができます。必要なときにすべてを実行するレシピ（または*計算*と呼んでもよいでしょう）を構築しているのです。
 
-生命力が利用可能になったら、`rightArmM`を生命力で実行できます。
+生命力が利用可能になったら、生命力を使って`rightArmM`を実行できます。
 
 ```fsharp
 let vf = {units = 10}
