@@ -155,16 +155,16 @@ let makeLiveLeftLeg deadLeftLeg vitalForce =
     liveLeftLeg, remainingVitalForce    
 ```
 
-2つ目の洞察は、この*同じ*コードが、「生き返る」関数を返す関数として解釈できることでした。
+2つ目の洞察は、この*同じ*コードが、「生き返す」関数を返す関数として解釈できることでした。
 
-つまり、死んだ部分は手元にありますが、雷が落ちる最後の瞬間まで生命力はありません。
-そこで、死んだ部分を今すぐ処理し、生命力が利用可能になったときに使える関数を返すのはどうでしょうか。
+つまり、死んだパーツは手元にありますが、雷が落ちる最後の瞬間まで生命力はありません。
+そこで、死んだパーツを今すぐ処理し、生命力が利用可能になったときに使える関数を返すのはどうでしょうか。
 
-言い換えると、死んだ部分を渡すと、生命力が与えられたときに生きた部分を作る関数が返ってくるのです。
+言い換えると、死んだパーツを渡すと、生命力が与えられたときに生きたパーツを作る関数が返ってくるのです。
 
 ![バージョン3](../assets/img/monadster3.png)
 
-これらの「生き返る」関数は、組み合わせる方法さえ見つかれば、「レシピの手順」として扱うことができます。
+これらの「生き返す」関数は、組み合わせる方法さえ見つかれば、「レシピの手順」として扱うことができます。
 
 コードは次のようになります。
 
@@ -364,19 +364,19 @@ let liveLeftLeg, remainingAfterLeftLeg = runM leftLegM vf
 
 次に、腕が作られました。左腕から始めます。
 
-しかし、問題がありました。研究室には*折れた*左腕しかありませんでした。最終的な体に使う前に、腕を治す必要がありました。
+しかし、問題がありました。研究室には*折れた*左腕しかありませんでした。最終的な体として使う前に、腕を治す必要がありました。
 
-フランケンファンクター博士は医者なので、折れた腕の治し方は知っていました。ただし、生きている腕に限ります。死んだ折れた腕を治そうとするのは不可能でしょう。
+フランケンファンクター博士は医者なので、折れた腕の治し方は知っていました。ただし、生きている腕に限ります。死んでいる腕の骨折を治そうとするのは不可能でしょう。
 
 コード的には、次のようになります。
 
 ```fsharp
 type DeadLeftBrokenArm = DeadLeftBrokenArm of Label 
 
-// 折れた腕の生きたバージョン
+// 折れた腕の生きているバージョン
 type LiveLeftBrokenArm = LiveLeftBrokenArm of Label * VitalForce
 
-// 健康な腕の生きたバージョン（死んだバージョンは利用不可）
+// 健康な腕の生きているバージョン（死んでいるバージョンは利用不可）
 type LiveLeftArm = LiveLeftArm of Label * VitalForce
 
 // 折れた左腕を健康な左腕に変える操作
@@ -389,15 +389,15 @@ type HealBrokenArm = LiveLeftBrokenArm -> LiveLeftArm
 
 ![死から死への変換](../assets/img/monadster_map1.png)
 
-しかし、`DeadLeftBrokenArm`を*生きた*折れた腕に変え、そして生きた折れた腕を治すことはできるのではないでしょうか。
+しかし、`DeadLeftBrokenArm`を*生きている*折れた腕に変え、そして生きている折れた腕を治すことはできるのではないでしょうか。
 
-![生きた折れた腕を直接作ることはできない](../assets/img/monadster_map2.png)
+![生きている折れた腕を直接作ることはできない](../assets/img/monadster_map2.png)
 
-いいえ、残念ながらそれはうまくいきません。生きた部分を直接作ることはできず、`M`レシピのコンテキスト内でのみ生きた部分を作ることができます。
+いいえ、残念ながらそれはうまくいきません。生きたパーツを直接作ることはできず、`M`レシピのコンテキスト内でのみ生きたパーツを作ることができます。
 
 必要なのは、`healBrokenArm`の特別なバージョン（`healBrokenArmM`と呼びましょう）を作ることです。これは`M<LiveBrokenArm>`を`M<LiveArm>`に変換します。
 
-![生きた折れた腕を直接作ることはできない](../assets/img/monadster_map3.png)
+![生きている折れた腕を直接作ることはできない](../assets/img/monadster_map3.png)
 
 しかし、そのような関数をどのように作ればよいでしょうか？そして、その中で`healBrokenArm`をどのように再利用できるでしょうか？
 
@@ -445,10 +445,10 @@ val makeHealedLeftArm : M<LiveLeftBrokenArm> -> M<LiveLeftArm>
 
 しかし、まだ改善の余地があります。
 
-`healBrokenArm`変換をハードコードしてしまいました。他の変換を行いたい場合や、他の体の部分に対して行いたい場合はどうすればよいでしょうか？
+`healBrokenArm`変換をハードコードしてしまいました。他の変換を行いたい場合や、体の他のパーツに対して行いたい場合はどうすればよいでしょうか？
 この関数をもう少し汎用的にできないでしょうか？
 
-はい、簡単です。体の部分を変換する関数（例えば「f」）を渡すだけです。次のようにします。
+はい、簡単です。体のパーツを変換する関数（例えば「f」）を渡すだけです。次のようにします。
 
 ```fsharp
 let makeGenericTransform f brokenArmM = 
@@ -464,7 +464,7 @@ let makeGenericTransform f brokenArmM =
     M healWhileAlive  
 ```
 
-驚くべきことに、`f`パラメータでその一つの変換をパラメータ化することで、*関数全体*が汎用的になりました！
+驚くべきことに、変換をパラメータ化して、 `f` を受け取るようにすることで、*関数全体*がジェネリックになりました！
 
 他の変更は加えていませんが、`makeGenericTransform`のシグネチャはもはや腕を参照していません。何にでも使えるのです！
  
@@ -475,7 +475,7 @@ val makeGenericTransform : f:('a -> 'b) -> M<'a> -> M<'b>
 ### mapMの導入
 
 現在の名前では紛らわしいので、改名しましょう。
-`mapM`と呼ぶことにします。これはどんな体の部分にも、どんな変換にも使えます。
+`mapM`と呼ぶことにします。これはどんな体のパーツにも、どんな変換にも使えます。
 
 以下は実装例です。内部の名前も修正しています。
  
@@ -488,7 +488,7 @@ let mapM f bodyPartM =
     M transformWhileAlive 
 ```
 
-特に、これは`healBrokenArm`関数でも機能するので、`M`で動作するように昇格された「heal」のバージョンを作るには、次のように書くだけです。
+特に、これは`healBrokenArm`関数でも機能するので、「heal」を昇格させ、`M`で動作するようにしたバージョンを作るには、次のように書くだけです。
 
 ```fsharp
 let healBrokenArmM = mapM healBrokenArm
@@ -503,7 +503,7 @@ let healBrokenArmM = mapM healBrokenArm
 ![mapM](../assets/img/monadster_mapm.png)
 
 `mapM`に似た関数は多くの状況で登場します。例えば、`Option.map`は「通常の」関数を入力と出力がオプションである関数に変換します。
-同様に、`List.map`は「通常の」関数を入力と出力がリストである関数に変換します。他にも多くの例があります。
+同様に、`List.map`は、「通常の」関数を、入力と出力がリストである関数に変換します。他にも多くの例があります。
 
 ```fsharp
 // mapはオプションで動作する
@@ -537,7 +537,7 @@ let isEmptyM = mapM isEmpty          // M<string> -> M<bool>
 
 再び、これまでの内容をテストしてみましょう。
 
-まず、死んだ折れた腕を作成し、`makeLiveLeftBrokenArm`を使ってそれを`M<BrokenLeftArm>`に変換します。
+まず、死んでいる折れた腕を作成し、`makeLiveLeftBrokenArm`を使ってそれを`M<BrokenLeftArm>`に変換します。
 
 ```fsharp
 let makeLiveLeftBrokenArm deadLeftBrokenArm = 
@@ -548,10 +548,10 @@ let makeLiveLeftBrokenArm deadLeftBrokenArm =
         liveLeftBrokenArm, remainingVitalForce    
     M becomeAlive
 
-/// 死んだ左折れ腕を作成
+/// 死んでいる折れた左腕を作成
 let deadLeftBrokenArm = DeadLeftBrokenArm "Victor"
 
-/// 死んだ腕からM<BrokenLeftArm>を作成
+/// 死んでいる腕からM<BrokenLeftArm>を作成
 let leftBrokenArmM = makeLiveLeftBrokenArm deadLeftBrokenArm 
 ```
 
@@ -561,7 +561,7 @@ let leftBrokenArmM = makeLiveLeftBrokenArm deadLeftBrokenArm
 let leftArmM = leftBrokenArmM |> mapM healBrokenArm 
 ```
 
-`leftArmM`に入っているのは、折れていない生きた左腕を作るためのレシピです。あとは生命力を加えるだけです。
+`leftArmM`に入っているのは、生きている健康な左腕を作るためのレシピです。あとは生命力を加えるだけです。
 
 以前と同様に、これらすべてを雷が落ちる前に前もって行うことができます。
 
@@ -597,14 +597,14 @@ type DeadRightLowerArm = DeadRightLowerArm of Label
 type DeadRightUpperArm = DeadRightUpperArm of Label 
 ```
 
-これらは対応する生きた部分に変換できます。
+これらは対応する生きたパーツに変換できます。
 
 ```fsharp
 type LiveRightLowerArm = LiveRightLowerArm of Label * VitalForce
 type LiveRightUpperArm = LiveRightUpperArm of Label * VitalForce
 ```
 
-フランケンファンクター博士は2つの腕の部分を結合して全体の腕にする手術を行うことにしました。
+フランケンファンクター博士は2つの腕のパーツを結合して全体の腕にする手術を行うことにしました。
 
 ```fsharp
 // 全体の腕を定義
@@ -613,16 +613,16 @@ type LiveRightArm = {
     upperArm : LiveRightUpperArm
     }
 
-// 2つの腕の部分を結合する手術
+// 2つの腕のパーツを結合する手術
 let armSurgery lowerArm upperArm =
     {lowerArm=lowerArm; upperArm=upperArm}
 ```
 
-折れた腕の手術と同様に、この手術も*生きている*部分でしか行えません。死んだ部分を使うなんて、気持ち悪くてゾッとします。
+折れた腕の手術と同様に、この手術も*生きている*パーツでしか行えません。死んだパーツを使うなんて、気持ち悪くてゾッとします。
 
-しかし、折れた腕の場合と同様に、生きた部分に直接アクセスすることはできず、`M`ラッパーのコンテキスト内でのみアクセスできます。
+しかし、折れた腕の場合と同様に、生きているパーツに直接アクセスすることはできず、`M`ラッパーのコンテキスト内でのみアクセスできます。
 
-言い換えると、通常の生きた部分で動作する`armSurgery`関数を、`M`で動作する`armSurgeryM`関数に変換する必要があります。
+言い換えると、通常の生きているパーツで動作する`armSurgery`関数を、`M`で動作する`armSurgeryM`関数に変換する必要があります。
 
 ![armsurgeryM](../assets/img/monadster_armsurgeryM.png)
 
@@ -705,7 +705,7 @@ f:('a -> 'b -> 'c) -> M<'a> -> M<'b> -> M<'c>
 
 再び、これまでの内容をテストしてみましょう。
 
-いつものように、死んだ部分を生きた部分に変換する関数が必要です。
+いつものように、死んだパーツを生きたパーツに変換する関数が必要です。
 
 ```fsharp
 let makeLiveRightLowerArm (DeadRightLowerArm label) = 
@@ -769,9 +769,9 @@ val remainingFromRightArm : VitalForce =
 
 ## まとめ
 
-この記事では、雷が落ちたときにのみ活性化できる「生き返る」関数をラップした`M`型を作成する方法を見ました。
+この記事では、雷が落ちたときにのみ活性化できる「生き返す」関数をラップした`M`型を作成する方法を見ました。
 
-また、様々なM値を`mapM`（折れた腕の場合）と`map2M`（2つの部分からなる腕の場合）を使って処理し、組み合わせる方法も見ました。
+また、様々なM値を`mapM`（折れた腕の場合）と`map2M`（2つのパーツからなる腕の場合）を使って処理し、組み合わせる方法も見ました。
 
 *この記事で使用したコードサンプルは[GitHubで入手可能](https://gist.github.com/swlaschin/54489d9586402e5b1e8a)です。*
 
