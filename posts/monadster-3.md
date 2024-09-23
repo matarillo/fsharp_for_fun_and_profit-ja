@@ -9,7 +9,7 @@ seriesOrder: 3
 
 *更新 [この話題に関する私の講演のスライドと動画](https://fsharpforfunandprofit.com/monadster/)*
 
-*警告！この記事には、残酷な話題、強引なたとえ、モナドの議論が含まれています*
+*警告：この記事には、ぞっとするような話題、無理のある例え、モナドに関する議論が含まれています。*
 
 フランケンファンクター博士とモナド怪物の物語、第3回にようこそ！
 
@@ -779,7 +779,7 @@ let fiveN = calculate five |> getValue   // 5
 ですので、これまでの内容とモナドの関係を簡単に説明します。
 
 **ファンクター**は、（プログラミングの意味では）それに関連付けられた`map`関数を持つデータ構造（OptionやList、Stateなど）です。
-そして、`map`関数は満たすべきいくつかの性質（["ファンクター則"](https://en.wikibooks.org/wiki/Haskell/The_Functor_class#The_functor_laws)）があります。
+そして、`map`関数は満たすべきいくつかの性質（[ファンクター則](https://en.wikibooks.org/wiki/Haskell/The_Functor_class#The_functor_laws)）があります。
 
 **アプリカティブファンクター**は、（プログラミングの意味では）それに関連付けられた2つの関数
 `apply`と`pure`（これは`return`と同じです）を持つデータ構造（OptionやList、Stateなど）です。
@@ -787,7 +787,7 @@ let fiveN = calculate five |> getValue   // 5
 
 最後に、**モナド**は、（プログラミングの意味では）それに関連付けられた2つの関数
 `bind`（しばしば`>>=`と書かれます）と`return` を持つデータ構造（OptionやList、Stateなど）です。
-そして再び、これらの関数には満たすべきいくつかの性質（["モナド則"](https://en.wikibooks.org/wiki/Haskell/Understanding_monads#Monad_Laws)）があります。
+そして再び、これらの関数には満たすべきいくつかの性質（[モナド則](https://en.wikibooks.org/wiki/Haskell/Understanding_monads#Monad_Laws)）があります。
 
 これら3つのうち、モナドが最も強力です。なぜなら、`bind`関数によってMを生成する関数を連鎖させることができ、
 見てきたように、`map`と`apply`は`bind`と`return`を使って書くことができるからです。
@@ -820,7 +820,7 @@ F#での他のモナドの実装を見たい場合は、[FSharpxプロジェク�
 また、同じ問題を解決する必要性が、現代のStateモナドとコンピュテーション式にどのようにつながったかも見てきました。
 
 この一連の投稿が啓発的だったことを望んでいます。
-そして密かに願っているのですが、モナドとそれに関連するコンビネータが、もはやあなたを戸惑わせるようなものではなくなっていることを期待しています...
+そして密かに願っているのですが、モナドとそれに関連するコンビネータが、もはやあなたを怖がらせるようなものではなくなっていることを期待しています...
 
 ![shocking](../assets/img/monadster_shocking300.gif)
 
