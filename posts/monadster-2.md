@@ -1,75 +1,75 @@
 ---
 layout: post
-title: "Completing the body of the Monadster"
-description: "Dr Frankenfunctor and the Monadster, part 2"
-categories: [Partial Application, Currying, Combinators]
+title: "モナド怪物の体を完成させる"
+description: "フランケンファンクター博士とモナド怪物、パート2"
+categories: [部分適用、カリー化、コンビネーター]
 image: "/assets/img/monadster_brain.jpg"
-seriesId: "Handling State"
+seriesId: "状態の取り扱い"
 seriesOrder: 2
 ---
 
-*UPDATE: [Slides and video from my talk on this topic](http://fsharpforfunandprofit.com/monadster/)*
+*更新：[このトピックに関する私の講演のスライドとビデオ](https://fsharpforfunandprofit.com/monadster/)*
 
-*Warning! This post contains gruesome topics, strained analogies, discussion of monads*
+*警告：この記事には、ぞっとするような話題、無理のある例え、モナドに関する議論が含まれています。*
 
-Welcome to the gripping tale of Dr Frankenfunctor and the Monadster!
+フランケンファンクター博士とモナド怪物の興味深い物語へようこそ。
 
-We saw [in the previous installment](../posts/monadster.md) how Dr Frankenfunctor created life out of dead body parts using "Monadster part generators" (or "M"s for short),
-that would, on being supplied with some vital force, return a live body part.
+[前回の記事](../posts/monadster.md)で、フランケンファンクター博士による「モナド怪物パーツ生成器」（略して「M」）の使用法を紹介しました。
+これらの生成器は、死体の部品から生命を作り出すもので、生命力を供給すると生きた体の部位を返します。
 
-We also saw how the leg and arms of the creature were created, and how these M-values could be processed
-and combined using `mapM` (for the broken arm) and `map2M` (for the arm in two parts).
+また、怪物の脚と腕の作成方法や、
+`mapM`（折れた腕用）と`map2M`（2つの部分からなる腕用）を使ったM値の処理と組み合わせについても説明しました。
 
-In this second installment, we'll look at the other techniques Dr Frankenfunctor used to create the head, the heart, and the complete body.
+この第2回では、フランケンファンクター博士が頭、心臓、そして完全な体を作るために使用した他のテクニックを紹介します。
 
-## The Head
+## 頭
 
-First, the head.
+最初に頭の作成について説明します。
 
-Just like the right arm, the head is composed of two parts, a brain and a skull.
+右腕と同じく、頭も脳と頭蓋骨の2つの部分で構成されています。
 
-Dr Frankenfunctor started by defining the dead brain and skull:
+フランケンファンクター博士はまず、死んだ脳と頭蓋骨を次のように定義しました。
 
 ```fsharp
 type DeadBrain = DeadBrain of Label 
 type Skull = Skull of Label 
 ```
 
-Unlike the two-part right arm, only the brain needs to become alive.
-The skull can be used as is and does not need to be transformed before being used in a live head.
+二つの部分からなる右腕とは異なり、生きている必要があるのは脳だけです。
+頭蓋骨はそのまま使用でき、生きた頭に使用される前に変換する必要はありません。
 
 ```fsharp
 type LiveBrain = LiveBrain of Label * VitalForce
 
 type LiveHead = {
     brain : LiveBrain
-    skull : Skull // not live
+    skull : Skull // 生きていない
     }
 ```
 
-The live brain is combined with the skull to make a live head using a `headSurgery` function, analogous to the `armSurgery` we had earlier.
+生きた脳は頭蓋骨と組み合わされて生きた頭になります。これには`headSurgery`関数を使用します。これは以前の`armSurgery`と似ています。
 
 ```fsharp
 let headSurgery brain skull =
     {brain=brain; skull=skull}
 ```
 
-Now we are ready to create a live head -- but how should we do it?
+これで生きた頭を作る準備が整いました。では、どのように進めればよいでしょうか。
 
-It would be great if we could reuse `map2M`, but there's a catch -- for `map2M` to work, it needs a skull wrapped in a `M`. 
+`map2M`を再利用できれば理想的ですが、問題があります。`map2M`が機能するためには、頭蓋骨が`M`でラップされている必要があります。
 
 ![head](../assets/img/monadster_head1.png)
 
-But the skull doesn't need to become alive or use vital force, so we will need to create a special function that converts a `Skull` to a `M<Skull>`.
+しかし、頭蓋骨は生きる必要がなく、生命力も使用しないので、`Skull`を`M<Skull>`に変換する特別な関数を作る必要があります。
 
-We can use the same approach as we did before:
+以前と同じアプローチを使用できます。
 
-* create a inner function that takes a vitalForce parameter
-* in this case, we leave the vitalForce untouched
-* from the inner function return the original skull and the untouched vitalForce 
-* wrap the inner function in an "M" and return it
+* vitalForceパラメーターを取る内部関数を作成する
+* この場合、vitalForceはそのまま残す
+* 内部関数から元の頭蓋骨と変更されていないvitalForceを返す
+* 内部関数を「M」でラップしてそれを返す
 
-Here's the code:
+コードは次のようになります。
 
 ```fsharp
 let wrapSkullInM skull = 
@@ -78,18 +78,18 @@ let wrapSkullInM skull =
     M becomeAlive
 ```
 
-But the signature of `wrapSkullInM` is quite interesting. 
+しかし、`wrapSkullInM`のシグネチャは非常に興味深いものです。
 
 ```fsharp
 val wrapSkullInM : 'a -> M<'a>
 ```
 
-No mention of skulls anywhere!  
+頭蓋骨への言及はどこにもありません！
 
-### Introducing returnM
+### returnMの導入
 
-We've created a completely generic function that will turn anything into an `M`.  So let's rename it.
-I'm going to call it `returnM`, but in other contexts it might be called `pure` or `unit`.
+完全に汎用的な関数を作成しました。これは何でも`M`に変換します。そこで、これの名前を変更しましょう。
+`returnM`と呼ぶことにしますが、他の文脈では`pure`や`unit`と呼ばれることもあります。
 
 ```fsharp
 let returnM x = 
@@ -98,11 +98,11 @@ let returnM x =
     M becomeAlive
 ```
 
-### Testing the head
+### 頭のテスト
 
-Let's put this into action.
+それでは、実際に試してみましょう。
 
-First, we need to define how to create a live brain.
+まず、生きた脳を作成する方法を定義する必要があります。
 
 ```fsharp
 let makeLiveBrain (DeadBrain label) = 
@@ -113,34 +113,34 @@ let makeLiveBrain (DeadBrain label) =
     M becomeAlive
 ```
 
-Next we obtain a dead brain and skull:
+次に、死んだ脳と頭蓋骨を用意します。
 
 ```fsharp
 let deadBrain = DeadBrain "Abby Normal"
 let skull = Skull "Yorick"
 ```
 
-*By the way, how this particular dead brain was obtained is an [interesting story](https://en.wikipedia.org/wiki/Young_Frankenstein) that I don't have time to go into right now.*
+*ちなみに、この変わった名前の脳の由来には、[面白い話](https://en.wikipedia.org/wiki/Young_Frankenstein)があるのですが、今はその詳細に立ち入る時間がありません。*
 
-![abnormal brain](../assets/img/monadster_brain.jpg)
+![異常な脳](../assets/img/monadster_brain.jpg)
 
-Next we build the "M" versions from the dead parts:
+次に、死んだ部品から「M」バージョンを構築します。
 
 ```fsharp
 let liveBrainM = makeLiveBrain deadBrain
 let skullM = returnM skull
 ```
 
-And combine the parts using `map2M`:
+そして、`map2M`を使用して部品を組み合わせます。
 
 ```fsharp
 let headSurgeryM = map2M headSurgery
 let headM = headSurgeryM liveBrainM skullM
 ```
 
-Once again, we can do all these things up front, before the lightning strikes.
+今回も、雷が落ちる前にこれらの準備をすべて整えておきます。
 
-When the vital force is available, we can run `headM` with the vital force...
+生命力が利用可能になったら、生命力を使って`headM`を呼び出せます。
 
 ```fsharp
 let vf = {units = 10}
@@ -148,7 +148,7 @@ let vf = {units = 10}
 let liveHead, remainingFromHead = runM headM vf
 ```
 
-...and we get this result:
+そして、次のような結果が得られます。
 
 ```text
 val liveHead : LiveHead = 
@@ -159,29 +159,29 @@ val remainingFromHead : VitalForce =
     {units = 9;}
 ```
 
-A live head, composed of two subcomponents, just as required.  
+要求通りの、2つのサブコンポーネントで構成された生きた頭が完成しました。
 
-Also note that the remaining vital force is just nine, as the skull did not use up any units.
+また、頭蓋骨が生命力を使わなかったため、残りの生命力はちょうど9単位になっていることにも注目してください。
 
-## The Beating Heart
+## 鼓動する心臓
 
-There is one more component we need, and that is a heart.
+もう1つ必要なコンポーネントがあります。それは心臓です。
 
-First, we have a dead heart and a live heart defined in the usual way:
+まず、死んだ心臓と生きた心臓を通常の方法で定義します。
 
 ```fsharp
 type DeadHeart = DeadHeart of Label 
 type LiveHeart = LiveHeart of Label * VitalForce
 ```
 
-But the creature needs more than a live heart -- it needs a *beating heart*.
-A beating heart is constructed from a live heart and some more vital force, like this:
+しかし、怪物に必要なのは生きた心臓以上のもの ― 鼓動する心臓です。
+鼓動する心臓は、生きた心臓ともう少しの生命力から構築されます。以下のようになります。
 
 ```fsharp
 type BeatingHeart = BeatingHeart of LiveHeart * VitalForce
 ```
 
-The code that creates a live heart is very similar to the previous examples:
+生きた心臓を作成するコードは、前の例と非常によく似ています。
 
 ```fsharp
 let makeLiveHeart (DeadHeart label) = 
@@ -192,8 +192,8 @@ let makeLiveHeart (DeadHeart label) =
     M becomeAlive
 ```
 
-The code that creates a beating heart is also very similar. It takes a live heart as a parameter, uses up another unit of vital force,
-and returns the beating heart and the remaining vital force.
+鼓動する心臓を作成するコードも非常によく似ています。生きた心臓をパラメータとして受け取り、さらに1単位の生命力を使用し、
+鼓動する心臓と残りの生命力を返します。
 
 ```fsharp
 let makeBeatingHeart liveHeart = 
@@ -205,95 +205,95 @@ let makeBeatingHeart liveHeart =
     M becomeAlive
 ```
 
-If we look at the signatures for these functions, we see that they are very similar; both of the form `Something -> M<SomethingElse>`.
+これらの関数のシグネチャを見ると、非常に似ていることがわかります。どちらも`Something -> M<SomethingElse>`の形式です。
 
 ```fsharp
 val makeLiveHeart : DeadHeart -> M<LiveHeart>
 val makeBeatingHeart : LiveHeart -> M<BeatingHeart>
 ```
 
-### Chaining together M-returning functions
+### Mを返す関数を連鎖させる
 
-We start with a dead heart, and we need to get a beating heat
+死んだ心臓を出発点とし、鼓動する心臓を得る必要があります。
 
 ![heart1](../assets/img/monadster_heart1.png)
 
-But we don't have the tools to do this directly.
+しかし、これを直接行うためのツールがありません。
 
-We have a function that turns a `DeadHeart` into a `M<LiveHeart>`, and we have a function that turns a `LiveHeart` into a `M<BeatingHeart>`.
+`DeadHeart`を`M<LiveHeart>`に変換する関数と、`LiveHeart`を`M<BeatingHeart>`に変換する関数はあります。
 
-But the output of the first is not compatible with the input of the second, so we can't glue them together. 
+ところが、最初の出力が2番目の入力と互換性がないため、それらを直接つなげることができません。
 
 ![heart2](../assets/img/monadster_heart2.png)
 
-What we want then, is a function that, given a `M<LiveHeart>` as input, can convert it to a `M<BeatingHeart>`.
+そこで、`M<LiveHeart>`を入力として受け取り、それを`M<BeatingHeart>`に変換する関数が必要になります。
 
-And furthermore, we want to build it from the `makeBeatingHeart` function we already have.
+さらに、この関数を既に持っている`makeBeatingHeart`関数から構築したいと考えています。
 
 ![heart2](../assets/img/monadster_heart3.png)
 
-Here's a first attempt, using the same pattern we've used many times before:
+以下は、これまで何度も使ってきたパターンを応用した第一案です。
 
 ```fsharp
 let makeBeatingHeartFromLiveHeartM liveHeartM = 
 
     let becomeAlive vitalForce = 
-        // extract the liveHeart from liveHeartM 
+        // liveHeartMからliveHeartを抽出
         let liveHeart, remainingVitalForce = runM liveHeartM vitalForce 
 
-        // use the liveHeart to create a beatingHeartM
+        // liveHeartを使ってbeatingHeartMを作成
         let beatingHeartM = makeBeatingHeart liveHeart
 
-        // what goes here?
+        // ここに何が入るでしょうか？
 
-        // return a beatingHeart and remaining vital force    
+        // beatingHeartと残りの生命力を返す
         beatingHeart, remainingVitalForce    
 
     M becomeAlive 
 ```
 
-But what goes in the middle? How can we get a beating heart from a `beatingHeartM`?  The answer is to run it with some vital force
-(which we happen to have on hand, because we are in the middle of the `becomeAlive` function).  
+しかし、真ん中には何が入るのでしょうか？`beatingHeartM`から鼓動する心臓を得るにはどうすればよいでしょうか？答えは、生命力を使ってbeatingHeartMを呼び出すことです
+（たまたま`becomeAlive`関数の中にいるので、手元に生命力があります）。
 
-What vital force though? It should be the remaining vital force after getting the `liveHeart`.
+どの生命力を使えばよいでしょうか？`liveHeart`を得た後に残った生命力を使用すべきです。
 
-So the final version looks like this:
+そこで、最終版は次のようになります。
 
 ```fsharp
 let makeBeatingHeartFromLiveHeartM liveHeartM = 
 
     let becomeAlive vitalForce = 
-        // extract the liveHeart from liveHeartM 
+        // liveHeartMからliveHeartを抽出
         let liveHeart, remainingVitalForce = runM liveHeartM vitalForce 
 
-        // use the liveHeart to create a beatingHeartM
+        // liveHeartを使ってbeatingHeartMを作成
         let beatingHeartM = makeBeatingHeart liveHeart
 
-        // run beatingHeartM to get a beatingHeart
+        // beatingHeartMを実行してbeatingHeartを取得
         let beatingHeart, remainingVitalForce2 = runM beatingHeartM remainingVitalForce 
 
-        // return a beatingHeart and remaining vital force    
+        // beatingHeartと残りの生命力を返す
         beatingHeart, remainingVitalForce2    
 
-    // wrap the inner function and return it        
+    // 内部関数をラップして返す
     M becomeAlive
 ```
 
-Notice that we return `remainingVitalForce2` at the end, the remainder after both steps are run.
+最後に`remainingVitalForce2`を返していることに注目してください。これは両方のステップを実行した後の残りです。
 
-If we look at the signature for this function, it is:
+この関数のシグネチャを見ると、次のようになっています。
 
 ```fsharp
 M<LiveHeart> -> M<BeatingHeart>
 ```
 
-which is just what we wanted!
+これこそ私たちが求めていたものです！
 
-### Introducing bindM
+### bindMの導入
 
-Once again, we can make this function generic by passing in a function parameter rather than hardcoding `makeBeatingHeart`.
+ここでも、`makeBeatingHeart`をハードコーディングする代わりに関数パラメーターを渡すことで、この関数を汎用化できます。
 
-I'll call it `bindM`. Here's the code:
+これを`bindM`と呼びましょう。以下がそのコードです。
 
 ```fsharp
 let bindM f bodyPartM = 
@@ -305,17 +305,17 @@ let bindM f bodyPartM =
     M becomeAlive
 ```
 
-and the signature is:
+そして、このシグネチャは次のようになります。
 
 ```fsharp
 f:('a -> M<'b>) -> M<'a> -> M<'b>
 ```
 
-In other words, given any function `Something -> M<SomethingElse>`, I can convert it to a function `M<Something> -> M<SomethingElse>` that has an `M` as input and output.
+つまり、`Something -> M<SomethingElse>`型の関数があれば、それを入力と出力の両方が`M`である`M<Something> -> M<SomethingElse>`型の関数に変換できるということです。
 
-By the way, functions with a signature like `Something -> M<SomethingElse>` are often called *monadic* functions.
+ちなみに、`Something -> M<SomethingElse>`のようなシグネチャを持つ関数は、しばしば*モナド的*関数と呼ばれます。
 
-Anyway, once you understand what is going on in `bindM`, a slightly shorter version can be implemented like this:
+`bindM`の仕組みを理解すれば、次のようなより簡潔な実装も可能です。
 
 ```fsharp
 let bindM f bodyPartM = 
@@ -325,25 +325,25 @@ let bindM f bodyPartM =
     M becomeAlive
 ```
 
-So finally, we have a way of creating a function, that given a `DeadHeart`, creates a `M<BeatingHeart>`.
+これで、`DeadHeart`を受け取り、`M<BeatingHeart>`を生成する関数を作成する方法がわかりました。
 
 ![heart3](../assets/img/monadster_heart4.png)
 
-Here's the code:
+以下がそのコードです。
 
 ```fsharp
-// create a dead heart
+// 死んだ心臓を作成
 let deadHeart = DeadHeart "Anne"
 
-// create a live heart generator (M<LiveHeart>)
+// 生きた心臓生成器（M<LiveHeart>）を作成
 let liveHeartM = makeLiveHeart deadHeart
 
-// create a beating heart generator (M<BeatingHeart>)
-// from liveHeartM and the makeBeatingHeart function
+// liveHeartMとmakeBeatingHeart関数から
+// 鼓動する心臓生成器（M<BeatingHeart>）を作成
 let beatingHeartM = bindM makeBeatingHeart liveHeartM 
 ```
 
-There are a lot of intermediate values in there, and it can be made simpler by using piping, like this:
+このコードには複数の中間ステップがありますが、パイピングを使うとより簡潔になります。
 
 ```fsharp
 let beatingHeartM = 
@@ -352,30 +352,30 @@ let beatingHeartM =
    |> bindM makeBeatingHeart 
 ```
 
-### The importance of bind
+### bindの重要性
 
-One way of thinking about `bindM` is that it is another "function converter", just like `mapM`.
-That is, given any "M-returning" function, it converts it to a function where the input and output are both `M`s.
+`bindM`の捉え方の一つは、`mapM`と同様に「関数変換器」だということです。
+つまり、任意の「Mを返す」関数を、入力と出力の両方が`M`である関数に変換するのです。
 
 ![bindM](../assets/img/monadster_bindm.png)
 
-Just like `map`, `bind` appears in many other contexts.
+`map`と同様に、`bind`も他の多くの文脈で登場します。
 
-For example, `Option.bind` transforms a option-generating function (`'a -> 'b option`) into a function whose inputs and outputs are options.
-Similarly, `List.bind` transforms a list-generating function (`'a -> 'b list`) into a function whose inputs and outputs are lists. 
+例えば、`Option.bind`はオプションを生成する関数（`'a -> 'b option`）を、入力と出力の両方がオプションである関数に変換します。
+同様に、`List.bind`はリストを生成する関数（`'a -> 'b list`）を、入力と出力の両方がリストである関数に変換します。
 
-And I discuss yet another version of bind at length in my talk on [functional error handling](http://fsharpforfunandprofit.com/rop/).
+また、[関数型エラーハンドリングに関する私の講演](https://fsharpforfunandprofit.com/rop/)でも、bindの別のバージョンについて詳しく説明しています。
 
-The reason that bind is so important is that "M-returning" functions crop up a lot, and they cannot be chained together easily because the output of one step does not match the input
-of the the next step.
+bindが重要な理由は、「Mを返す」関数がよく登場するからです。
+これらの関数は、一つのステップの出力が次のステップの入力と一致しないため、簡単に連鎖させることができません。
 
-By using `bindM`, we can convert each step into a function where the input and output are both `M`s, and then they *can* be chained together.
+`bindM`を使うことで、各ステップを入力と出力の両方が`M`である関数に変換できます。これにより、これらの関数を連結できるようになります。
 
 ![bindM](../assets/img/monadster_bindm2.png)
 
-### Testing the beating heart
+### 鼓動する心臓のテスト
 
-As always, we construct the recipe ahead of time, in this case, to make a `BeatingHeart`.
+いつものように、生命力が到着する前に手順を構築します。今回は、`BeatingHeart`を作る手順です。
 
 ```fsharp
 let beatingHeartM =
@@ -384,7 +384,7 @@ let beatingHeartM =
     |> bindM makeBeatingHeart 
 ```
 
-When the vital force is available, we can run `beatingHeartM` with the vital force...
+生命力が利用可能になったら、`beatingHeartM`に生命力を与えて実行します...
 
 ```fsharp
 let vf = {units = 10}
@@ -392,7 +392,7 @@ let vf = {units = 10}
 let beatingHeart, remainingFromHeart = runM beatingHeartM vf
 ```
 
-...and we get this result:
+...そして、次のような結果が得られます。
 
 ```text
 val beatingHeart : BeatingHeart = 
@@ -402,13 +402,13 @@ val remainingFromHeart : VitalForce =
     {units = 8;}
 ```
 
-Note that the remaining vital force is eight units, as we used up two units doing two steps.
+残りの生命力が8単位になっていることに注目してください。2つのステップを実行するのに2単位を使用したからです。
 
-## The Whole Body
+## 全身
 
-Finally, we have all the parts we need to assemble a complete body.
+ついに、完全な体を組み立てるために必要な部品がすべて揃いました。
 
-Here is Dr Frankenfunctor's definition of a live body:
+以下がフランケンファンクター博士による生きた体の定義です。
 
 ```fsharp
 type LiveBody = {
@@ -421,24 +421,24 @@ type LiveBody = {
     }
 ```
 
-You can see that it uses all the subcomponents that we have already developed.
+ご覧の通り、これまでに開発したすべてのサブコンポーネントが使われています。
 
-### Two left feet
+### 二つの左足
 
-Because there was no right leg available, Dr Frankenfunctor decided to take a short cut and use *two* left legs in the body, hoping that no one would notice.
+フランケンファンクター博士は右足を入手できませんでした。そこで近道を選び、体に*二つの*左足を使うことにしました。誰も気づかないことを願いながらです。
 
-The result of this was that the creature had two left feet, [which is not always a handicap](https://www.youtube.com/watch?v=DC_PACr5cT8&t=55), and indeed,
-the creature not only overcame this disadvantage but became a creditable dancer, as can be seen in this rare footage:
+その結果、怪物は二つの左足を持つことになりました。[これは必ずしも障害にはなりません](https://www.youtube.com/watch?v=DC_PACr5cT8&t=55)。実際、
+怪物はこの不利な条件を克服しただけでなく、かなりの腕前のダンサーになりました。以下の貴重な映像でそれを確認できます。
 
 <iframe width="854" height="510" src="https://www.youtube.com/embed/w1FLZPFI3jc" frameborder="0" allowfullscreen></iframe>
 
-### Assembling the subcomponents
+### サブコンポーネントの組み立て
 
-The `LiveBody` type has six fields. How can we construct it from the various `M<BodyPart>`s that we have?
+`LiveBody`型には6つのフィールドがあります。これらの様々な`M<BodyPart>`からどのようにして構築できるでしょうか。
 
-One way would be to repeat the technique that we used with `mapM` and `map2M`.  We could create a `map3M` and `map4M` and so on.
+一つの方法は、`mapM`と`map2M`で使用した技術を繰り返すことです。`map3M`、`map4M`などを作成できます。
 
-For example, `map3M` could be defined like this:
+例えば、`map3M`は次のように定義できます。
 
 ```fsharp
 let map3M f m1 m2 m3 =
@@ -451,14 +451,14 @@ let map3M f m1 m2 m3 =
     M becomeAlive  
 ```
 
-But that gets tedious quite quickly. Is there a better way? 
+しかし、こんな繰り返しはすぐに面倒になります。もっと良い方法はないでしょうか。
 
-Why, yes there is!
+実は、あります！
 
-To understand it, remember that record types like `LiveBody` have to be built all-or-nothing,
-but *functions* can be assembled step by step, thanks to the magic of currying and partial application.
+ここで、重要なポイントを思い出してください。
+`LiveBody`のようなレコード型は、一度にすべてを構築する必要があります。一方、*関数*は違います。カリー化と部分適用という魔法のおかげで、関数は段階的に組み立てることができるのです。
 
-So if we have a six parameter function that creates a `LiveBody`, like this:
+この考え方を使って、`LiveBody`を作成する6パラメータの関数を見てみましょう。
 
 ```fsharp
 val createBody : 
@@ -471,20 +471,20 @@ val createBody :
     LiveBody
 ```
 
-we can actually think of it as a *one* parameter function that returns a five parameter function, like this:
+これを実際には5パラメータの関数を返す*1*パラメータの関数として考えることができます。
 
 ```fsharp
 val createBody : 
-    leftLeg:LiveLeftLeg -> (five param function) 
+    leftLeg:LiveLeftLeg -> (5パラメータの関数) 
 ```
 
-and then when we apply the function to the first parameter ("leftLeg") we get back that five parameter function:
+そして、最初のパラメータ（"leftLeg"）に関数を適用すると、5パラメータの関数が返ってきます。
 
 ```fsharp
-(six param function) apply (first parameter) returns (five param function)
+(6パラメータの関数) apply (最初のパラメータ) returns (5パラメータの関数)
 ```
 
-where the five parameter function has the signature:
+この5パラメータの関数は、次のようなシグネチャになります。
 
 ```fsharp
     rightLeg:LiveLeftLeg ->
@@ -495,19 +495,19 @@ where the five parameter function has the signature:
     LiveBody
 ```
 
-This five parameter function can in turn be thought of as a one parameter function that returns a four parameter function:
+この5パラメータの関数も、4パラメータの関数を返す1パラメータの関数として考えることができます。
 
 ```fsharp
-    rightLeg:LiveLeftLeg -> (four parameter function)
+    rightLeg:LiveLeftLeg -> (4パラメータの関数)
 ```
 
-Again, we can apply a first parameter ("rightLeg") and get back that four parameter function:
+再び、最初のパラメータ（"rightLeg"）を適用すると、4パラメータの関数が返ってきます。
 
 ```fsharp
-(five param function) apply (first parameter) returns (four param function)
+(5パラメータの関数) apply (最初のパラメータ) returns (4パラメータの関数)
 ```
 
-where the four parameter function has the signature:
+4パラメータの関数は次のようなシグネチャになります。
 
 ```fsharp
     leftArm:LiveLeftArm ->
@@ -517,42 +517,42 @@ where the four parameter function has the signature:
     LiveBody
 ```
 
-And so on and so on, until eventually we get a function with one parameter. The function will have the signature `BeatingHeart -> LiveBody`.
+このプロセスは続き、最終的に1パラメータの関数になります。この関数のシグネチャは`BeatingHeart -> LiveBody`となります。
 
-When we apply the final parameter ("beatingHeart") then we get back our completed `LiveBody`.
+最後のパラメータ（"beatingHeart"）を適用すると、完成した`LiveBody`が返ってきます。
 
-We can use this trick for M-things as well!
+この巧妙な手法をM-関連のものにも使えます！
 
-We start with the six parameter function wrapped in an M, and an M<LiveLeftLeg> parameter. 
+まず、Mでラップされた6パラメータの関数と、M<LiveLeftLeg>パラメータから始めます。
 
-Let's assume there is some way to "apply" the M-function to the M-parameter. We should get back a five parameter function wrapped in an `M`.
-
-```fsharp
-// normal version
-(six param function) apply (first parameter) returns (five param function)
-
-// M-world version
-M<six param function> applyM M<first parameter> returns M<five param function>
-```
-
-And then doing that again, we can apply the next M-parameter
+M-関数をM-パラメータに「適用」する方法があると仮定しましょう。すると、Mでラップされた5パラメータの関数が返ってくるはずです。
 
 ```fsharp
-// normal version
-(five param function) apply (first parameter) returns (four param function)
+// 通常バージョン
+(6パラメータの関数) apply (最初のパラメータ) returns (5パラメータの関数)
 
-// M-world version
-M<five param function> applyM M<first parameter> returns M<four param function>
+// Mの世界バージョン
+M<6パラメータの関数> applyM M<最初のパラメータ> 返す M<5パラメータの関数>
 ```
 
-and so on, applying the parameters one by one until we get the final result.
+そして、これを繰り返すと、次のM-パラメータを適用できます。
 
-### Introducing applyM
+```fsharp
+// 通常バージョン
+(5パラメータの関数) apply (最初のパラメータ) returns (4パラメータの関数)
 
-This `applyM` function will have two parameters then, a function wrapped in an M, and a parameter wrapped in an M.
-The output will be the result of the function wrapped in an M.
+// Mの世界バージョン
+M<5パラメータの関数> applyM M<最初のパラメータ> 返す M<4パラメータの関数>
+```
 
-Here's the implementation:
+このように、パラメータを一つずつ適用していき、最終結果を得ます。
+
+### applyMの導入
+
+この`applyM`関数は、Mでラップされた関数とMでラップされたパラメータの2つのパラメータを持つことになります。
+出力は、関数の結果をMでラップしたものになります。
+
+以下が実装です。
 
 ```fsharp
 let applyM mf mx =
@@ -564,11 +564,11 @@ let applyM mf mx =
     M becomeAlive  
 ```
 
-As you can see it is quite similar to `map2M`, except that the "f" comes from unwrapping the first parameter itself.
+ご覧の通り、これは`map2M`とよく似ていますが、「f」は最初のパラメータ自体をアンラップすることで得られる点が異なります。
 
-Let's try it out!
+では、試してみましょう！
 
-First we need our six parameter function:
+まず、6パラメータの関数が必要です。
 
 ```fsharp
 let createBody leftLeg rightLeg leftArm rightArm head beatingHeart =
@@ -582,48 +582,48 @@ let createBody leftLeg rightLeg leftArm rightArm head beatingHeart =
     }
 ```
 
-And we're going to need to clone the left leg to use it for the right leg:
+そして、左足をクローンして右足として使用する必要があります。
 
 ```fsharp
 let rightLegM = leftLegM
 ```
 
-Next, we need to wrap this `createBody` function in an `M`. How can we do that? 
+次に、この`createBody`関数をMでラップする必要があります。どのようにすればいいでしょうか。
 
-With the `returnM` function we defined earlier for skull, of course!
+もちろん、先ほど頭蓋骨用に定義した`returnM`関数を使えばいいのです！
 
-So putting it together, we have this code:
+これらを組み合わせると、次のようなコードになります。
 
 ```fsharp
-// move createBody to M-world -- a six parameter function wrapped in an M
+// createBodyをM-世界に移動 -- Mでラップされた6パラメータの関数
 let fSixParamM = returnM createBody           
 
-// apply first M-param to get a five parameter function wrapped in an M
+// 最初のM-パラメータを適用して、Mでラップされた5パラメータの関数を得る
 let fFiveParamM = applyM fSixParamM leftLegM   
 
-// apply second M-param to get a four parameter function wrapped in an M
+// 2番目のM-パラメータを適用して、Mでラップされた4パラメータの関数を得る
 let fFourParamM = applyM fFiveParamM rightLegM 
 
-// etc
+// 以下同様
 let fThreeParamM = applyM fFourParamM leftArmM
 let fTwoParamM = applyM fThreeParamM rightArmM
 let fOneParamM = applyM fTwoParamM headM 
 
-// after last application, the result is a M<LiveBody>
+// 最後の適用後、結果はM<LiveBody>になる
 let bodyM = applyM fOneParamM beatingHeartM   
 ```
 
-It works! The result is a `M<LiveBody>` just as we want. 
+うまくいきました！結果は望み通りの`M<LiveBody>`になりました。
 
-But that code sure is ugly!  What can we do to make it look nicer?
+しかし、このコードは見栄えがよくありません。どうすれば良いのでしょうか。
 
-One trick is to turn `applyM` into an infix operation, just like normal function application. The operator used for this is commonly written `<*>`.
+一つの方法は、`applyM`を通常の関数適用のような中置演算子にすることです。この演算子は一般的に`<*>`と書かれます。
 
 ```fsharp
 let (<*>) = applyM
 ```
 
-With this in place, we can rewite the above code as:
+これを使用すると、上記のコードを次のように書き直すことができます。
 
 ```fsharp
 let bodyM = 
@@ -636,15 +636,15 @@ let bodyM =
     <*> beatingHeartM
 ```
 
-which is much nicer!
+これでずっと見やすくなりました！
 
-Another trick is to notice that the `returnM` followed by `applyM` is the same as `mapM`. So if we create an infix operator for `mapM` too...
+もう一つの工夫として、`returnM`に`applyM`を続けるのは`mapM`と同じであることに気づくことです。そこで、`mapM`用の中置演算子も作成すると...
 
 ```fsharp
 let (<!>) = mapM
 ```
 
-...we can get rid of the `returnM` as well and write the code like this:
+...`returnM`も取り除くことができ、次のようにコードを書けます。
 
 ```fsharp
 let bodyM = 
@@ -657,17 +657,17 @@ let bodyM =
     <*> beatingHeartM
 ```
 
-What's nice about this is that it reads almost as if you were just calling the original function (once you get used to the symbols!)
+この書き方には大きな利点があります。記号に慣れてしまえば、まるで元の関数をそのまま呼び出しているかのように読めるのです。
 
-### Testing the whole body
+### 全身のテスト
 
-As always, we want to construct the recipe ahead of time. In this case, we have already created the `bodyM` that will give us a complete `LiveBody` when the vital force arrives.
+いつものように、生命力が到着する前に事前に手順を構築しておきたいと思います。この場合、生命力が到着したときに完全な`LiveBody`を提供する`bodyM`をすでに作成しました。
 
-Now all we have to do is wait for lightning to strike and charge the machinery that generates the vital force!
+あとは稲妻が落ちて、生命力を生成する機械に電力が送られるのを待つだけです！
 
-![Electricity in the lab](../assets/img/monadster-lab-electricity.gif)<br><sub><a href="http://misfitdaydream.blogspot.co.uk/2012/10/frankenstein-1931.html">Source: Misfit Robot Daydream</a></sub>
+![研究室の電気](../assets/img/monadster-lab-electricity.gif)<br><sub><a href="https://misfitdaydream.blogspot.co.uk/2012/10/frankenstein-1931.html">出典：Misfit Robot Daydream</a></sub>
 
-Here it comes --  the vital force is available! Quickly we run `bodyM ` in the usual way...
+来ました ― 生命力が利用可能になりました！急いで通常の方法で`bodyM`を実行します...
 
 ```fsharp
 let vf = {units = 10}
@@ -675,7 +675,7 @@ let vf = {units = 10}
 let liveBody, remainingFromBody = runM bodyM vf
 ```
 
-...and we get this result:
+...すると、次のような結果が得られます。
 
 ```text
 val liveBody : LiveBody =
@@ -691,22 +691,22 @@ val liveBody : LiveBody =
 val remainingFromBody : VitalForce = {units = 2;}
 ```
 
-It's alive! We have successfully reproduced Dr Frankenfunctor's work!
+生きています！フランケンファンクター博士の成果を見事に再現できました！
 
-Note that the body contains all the correct subcomponents,
-and that the remaining vital force has been correctly reduced to two units, as we used up eight units creating the body.
+注目すべき点が2つあります。まず、体に正しいサブコンポーネントがすべて含まれていることです。
+そして、残りの生命力が正しく2単位に減少していることです。これは体を作るのに8単位使用したからです。
 
-## Summary
+## まとめ
 
-In this post, we extended our repertoire of manipulation techniques to include:
+この投稿では、以下の操作テクニックを追加で紹介しました。
 
-* `returnM` for the skull
-* `bindM` for the beating heart
-* `applyM` to assemble the whole body
+* 頭蓋骨用の`returnM`
+* 鼓動する心臓用の`bindM`
+* 全身を組み立てるための`applyM`
 
-*The code samples used in this post are [available on GitHub](https://gist.github.com/swlaschin/54489d9586402e5b1e8a)*.
+*この投稿で使用したコードサンプルは[GitHubで入手可能](https://gist.github.com/swlaschin/54489d9586402e5b1e8a)です。*
 
-## Next time
+## 次回
 
-In [the final installment](../posts/monadster-3.md), we'll refactor the code and review all the techniques used.
+[最終回](../posts/monadster-3.md)では、コードをリファクタリングし、使用したすべてのテクニックを振り返ります。
 
