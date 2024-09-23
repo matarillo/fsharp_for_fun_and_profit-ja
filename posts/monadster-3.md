@@ -1,45 +1,45 @@
 ---
 layout: post
-title: "Refactoring the Monadster"
-description: "Dr Frankenfunctor and the Monadster, part 3"
-categories: [Partial Application, Currying, Combinators]
-seriesId: "Handling State"
+title: "モナド怪物のリファクタリング"
+description: "フランケンファンクター博士とモナド怪物、パート3"
+categories: [部分適用、カリー化、コンビネータ]
+seriesId: "状態の扱い"
 seriesOrder: 3
 ---
 
-*UPDATE: [Slides and video from my talk on this topic](http://fsharpforfunandprofit.com/monadster/)*
+*更新 [この話題に関する私の講演のスライドと動画](https://fsharpforfunandprofit.com/monadster/)*
 
-*Warning! This post contains gruesome topics, strained analogies, discussion of monads*
+*警告！この記事には、残酷な話題、強引なたとえ、モナドの議論が含まれています*
 
-Welcome to the third installment in the gripping tale of Dr Frankenfunctor and the Monadster!
+フランケンファンクター博士とモナド怪物の物語、第3回にようこそ！
 
-We saw [in the first installment](../posts/monadster.md) how Dr Frankenfunctor created life out of dead body parts using "Monadster part generators" (or "M"s for short),
-that would, on being supplied with some vital force, return a live body part.
+[第1回](../posts/monadster.md)では、フランケンファンクター博士が死体のパーツから生命を作り出す過程を紹介しました。
+博士は「モナド怪物パーツ生成器」（略して「M」）を使い、生命力を供給すると生きた体のパーツを返すようにしました。
 
-We also saw how the leg and arms of the creature were created, and how these M-values could be processed and combined using `mapM` and `map2M`.
+また、生き物の脚と腕の作成方法、そしてこれらのM値が`mapM`と`map2M`を使ってどのように処理され組み合わされたかについて説明しました。
 
-In [the second installment](../posts/monadster-2.md) we learned how the head, heart and body were built using other powerful techniques such as `returnM`, `bindM` and `applyM`.
+[第2回](../posts/monadster-2.md)では、頭、心臓、胴体が`returnM`、`bindM`、`applyM`などの強力な技術を使ってどのように作られたかを解説しました。
 
-In this last installment, we'll review all the techniques used, refactor the code, and compare Dr Frankenfunctor's techniques to the modern-day state monad.
+この最終回では、使用したすべての技術を振り返り、コードをリファクタリングし、フランケンファンクター博士の技術を現代のステートモナドと比較します。
 
-Links for the complete series:
+シリーズの完全なリンク
 
-* [Part 1 - Dr Frankenfunctor and the Monadster](../posts/monadster.md) 
-* [Part 2 - Completing the body](../posts/monadster-2.md) 
-* [Part 3 - Review and refactoring](../posts/monadster-3.md) (*this post*)
+* [パート1 - フランケンファンクター博士とモナド怪物](../posts/monadster.md) 
+* [パート2 - 体の完成](../posts/monadster-2.md) 
+* [パート3 - 振り返りとリファクタリング](../posts/monadster-3.md) (*この記事*)
 
-## Review of the the techniques used
+## 使用した技術の振り返り
 
-Before we refactor, let's review all the techniques we have used.
+リファクタリングの前に、使用したすべての技術を振り返ってみましょう。
 
-### The M<BodyPart> type
+### M<BodyPart>型
 
-We couldn't create an actual live body part until the vital force was available, yet we wanted to manipulate them,
-combine them, etc. *before* the lightning struck.
-We did this by creating a type `M` that wrapped a "become alive" function for each part.
-We could then think of `M<BodyPart>` as a *recipe* or *instructions* for creating a `BodyPart` when the time came.
+生命力が手に入るまで生きた体のパーツは作れませんでしたが、
+雷が落ちる前にパーツを操作したり組み合わせたりする方法が必要でした。
+そこで、各パーツの「生き返す」関数をラップする`M`型を作りました。
+これにより、`M<BodyPart>`のことは、時が来たら`BodyPart`を作るための*レシピ*、または*指示書*として考えることができました。
 
-The definition of `M` was:
+`M`の定義は次のとおりです。
 
 ```fsharp
 type M<'a> = M of (VitalForce -> 'a * VitalForce)
@@ -47,10 +47,10 @@ type M<'a> = M of (VitalForce -> 'a * VitalForce)
 
 ### mapM
 
-Next, we wanted to transform the contents of an `M` without using any vital force. In our specific case, we wanted to turn a broken arm recipe (`M<BrokenLeftArm>`) into
-a unbroken arm recipe (`M<LeftArm>`). The solution was to implement a function `mapM` that took a normal function `'a -> 'b` and turned it into a `M<'a> -> M<'b>` function.
+次に、生命力を使わずにMの内容を変換したいと思いました。具体的には、折れた腕のレシピ（`M<BrokenLeftArm>`）を折れていない腕のレシピ（`M<LeftArm>`）に変えたいと思いました。
+解決策は、通常の関数`'a -> 'b`を`M<'a> -> M<'b>`関数に変換する`mapM`関数を実装することでした。
 
-The signature of `mapM` was:
+`mapM`は次のようなシグネチャです。
 
 ```fsharp
 val mapM : f:('a -> 'b) -> M<'a> -> M<'b>
@@ -58,10 +58,10 @@ val mapM : f:('a -> 'b) -> M<'a> -> M<'b>
 
 ### map2M
 
-We also wanted to combine two M-recipes to make a new one. In that particular case, it was combining an upper arm (`M<UpperRightArm>`) and lower arm (`M<LowerRightArm>`) into
-a whole arm (`M<RightArm>`). The solution was `map2M`.
+また、2つのMレシピを組み合わせて新しいレシピを作りたいと思いました。
+この場合、上腕（`M<UpperRightArm>`）と前腕（`M<LowerRightArm>`）を組み合わせて腕全体（`M<RightArm>`）を作ることでした。解決策は`map2M`でした。
 
-The signature of `map2M` was:
+`map2M`は次のようなシグネチャです。
 
 ```fsharp
 val map2M : f:('a -> 'b -> 'c) -> M<'a> -> M<'b> -> M<'c>
@@ -69,42 +69,42 @@ val map2M : f:('a -> 'b -> 'c) -> M<'a> -> M<'b> -> M<'c>
 
 ### returnM
 
-Another challenge was to lift a normal value into the world of M-recipes directly, without using any vital force. In that particular case, it was turning a `Skull` into
-an `M<Skull>` so it could be used with `map2M` to make a whole head.
+もう1つの課題は、通常の値を生命力なしでMレシピの世界に直接持ち上げることでした。
+この場合、`Skull`を`M<Skull>`に変換して、`map2M`で頭全体を作るのに使えるようにすることでした。
 
-The signature of `returnM` was:
+`returnM`は次のようなシグネチャです。
 
 ```fsharp
 val returnM : 'a -> M<'a>
 ```
 
-### Monadic functions
+### モナディック関数
 
-We created many functions that had a similar shape. They all take something as input and return a M-recipe as output.
-In other words, they have this signature:
+似たような形の関数をたくさん作りました。これらはすべて何かを入力として受け取り、Mレシピを出力として返します。
+つまり、これらの関数は次のようなシグネチャです。
 
 ```fsharp
 val monadicFunction : 'a -> M<'b>
 ```
 
-Here are some examples of actual monadic functions that we used:
+実際に使用したモナディック関数の例をいくつか示します。
 
 ```fsharp
 val makeLiveLeftLeg : DeadLeftLeg -> M<LiveLeftLeg>
 val makeLiveRightLowerArm : DeadRightLowerArm -> M<LiveRightLowerArm>
 val makeLiveHeart : DeadHeart -> M<LiveHeart>
 val makeBeatingHeart : LiveHeart -> M<BeatingHeart>
-// and also
+// そして
 val returnM : 'a -> M<'a>
 ```
 
 ### bindM
 
-The functions up to now did not require access to the vital force. But then we found that we needed to chain two monadic functions together.
-In particular, we needed to chain the output of `makeLiveHeart` (with signature `DeadHeart -> M<LiveHeart>`) to the input of `makeBeatingHeart` (with signature `LiveHeart -> M<BeatingHeart>`).
-The solution was `bindM`, which transforms monadic functions of the form `'a -> M<'b>` into functions in the M-world (`M<'a> -> M<'b>`) which could then be composed together.
+これまでの関数は生命力へのアクセスを必要としませんでしたが、次に2つのモナディック関数を連鎖させる必要が出てきました。
+具体的には、`makeLiveHeart`（シグネチャ：`DeadHeart -> M<LiveHeart>`）の出力を`makeBeatingHeart`（シグネチャ：`LiveHeart -> M<BeatingHeart>`）の入力につなげる必要がありました。
+解決策は`bindM`でした。これは`'a -> M<'b>`形式のモナディック関数をM世界の関数（`M<'a> -> M<'b>`）に変換し、それらを組み合わせることができるようにします。
 
-The signature of `bindM` was:
+`bindM`のシグネチャは次のとおりです。
 
 ```fsharp
 val bindM : f:('a -> M<'b>) -> M<'a> -> M<'b>
@@ -112,26 +112,26 @@ val bindM : f:('a -> M<'b>) -> M<'a> -> M<'b>
 
 ### applyM
 
-Finally, we needed a way to combine a large number of M-parameters to make the live body.
-Rather than having to create special versions of map (`map4M`, `map5M`, `map6M`, etc), we implemented a generic `applyM` function that could apply an M-function to an M-parameter.
-From that, we could work with a function of any size, step by step, using partial application to apply one M-parameter at a time.
+最後に、多くのMパラメータを組み合わせて生きた体を作る方法が求められました。
+mapの特別なバージョン（`map4M`、`map5M`、`map6M`など）を作る代わりに、M関数をMパラメータに適用する汎用的な`applyM`関数を実装しました。
+これにより、部分適用を使って1つずつMパラメータを適用し、任意の大きさの関数を扱えるようになりました。
 
-The signature of `applyM` was:
+`applyM`のシグネチャは次のとおりです。
 
 ```fsharp
 val applyM : M<('a -> 'b)> -> M<'a> -> M<'b>
 ```
 
-### Defining the others functions in terms of bind and return
+### bindとreturnを使って他の関数を定義する
 
-Note that of all these functions, only `bindM` needed access to the vital force.
+これらの関数のうち、`bindM`だけが生命力へのアクセスを必要としたことに注目してください。
 
-In fact, as we'll see below, the functions `mapM`, `map2M`, and `applyM` can actually be defined in terms of `bindM` and `returnM`!
+実際、以下で見るように、`mapM`、`map2M`、`applyM`は`bindM`と`returnM`を使って定義できます！
 
 
-## Refactoring to a computation expression
+## コンピュテーション式へのリファクタリング
 
-A lot of the functions we have created have a very similar shape, resulting in a lot of duplication. Here's one example:
+作成した関数の多くが非常に似た形をしており、結果として重複が多く生じています。以下は一例です。
 
 ```fsharp
 let makeLiveLeftLegM deadLeftLeg  = 
@@ -140,18 +140,18 @@ let makeLiveLeftLegM deadLeftLeg  =
         let oneUnit, remainingVitalForce = getVitalForce vitalForce 
         let liveLeftLeg = LiveLeftLeg (label,oneUnit)
         liveLeftLeg, remainingVitalForce    
-    M becomeAlive  // wrap the function in a single case union
+    M becomeAlive  // 関数を単一ケースユニオンでラップ
 ```
 
-In particular, there is a lot of explicit handling of the vital force.
+特に、生命力を明示的に処理する箇所が多く含まれています。
 
-In most functional languages, there is a way to hide this so that the code looks much cleaner.
+ほとんどの関数型言語には、これを隠蔽してコードをより簡潔にする方法があります。
 
-In Haskell, developers use "do-notation", in Scala people use "for-yield" (the "for comprehension"). And in F#, people use computation expressions.
+Haskellでは開発者が「do記法」を使用し、Scalaでは「for-yield」（for内包表記）を使用します。そしてF#では、コンピュテーション式を使用します。
 
-To create a computation expression in F#, you just need two things to start with, a "bind" and a "return", both of which we have.
+F#でコンピュテーション式を作成するには、まず「bind」と「return」の2つが必要です。これらは既に持っています。
 
-Next, you define a class with specially named methods `Bind` and `Return`:
+次に、特別な名前のメソッド`Bind`と`Return`を持つクラスを定義します。
 
 ```fsharp
 type MonsterBuilder()=
@@ -159,49 +159,49 @@ type MonsterBuilder()=
     member this.Bind(xM,f) = bindM f xM
 ```
 
-And finally, you create an instance of this class:
+最後に、このクラスのインスタンスを作成します。
 
 ```fsharp
 let monster = new MonsterBuilder()
 ```
 
-When this is done, we have access to the special syntax `monster {...}`, just like `async{...}`, `seq{...}`, etc.
+これが完了すると、`async{...}`や`seq{...}`などと同様に、特別な構文`monster {...}`が使用できるようになります。
 
-* The `let! x = xM` syntax requires that the right side is an M-type, say `M<X>`.<br>
-  `let!` unwraps the `M<X>` into an `X` and binds it to the left side -- "x" in this case.
-* The `return y` syntax requires that return value is a "normal" type, `Y` say.<br>
-  `return` wraps it into a `M<Y>` (using `returnM`) and returns it as the overall value of the `monster` expression.
+* `let! x = xM`構文では、右辺がM型、例えば`M<X>`である必要があります。<br>
+  `let!`は`M<X>`を`X`にアンラップし、左辺の「x」にバインドします。
+* `return y`構文では、戻り値が「通常の」型、例えば`Y`である必要があります。<br>
+  `return`はそれを`M<Y>`にラップし（`returnM`を使用）、`monster`式の全体の値として返します。
 
-So some example code would look like this:
+したがって、例のコードは次のようになります。
 
 ```fsharp
 monster {
-    let! x = xM  // unwrap an M<X> into an X and bind to "x"
-    return y     // wrap a Y and return an M<Y>
+    let! x = xM  // M<X>をXにアンラップし、「x」にバインド
+    return y     // YをラップしてM<Y>を返す
     }
 ```
 
-*If you want more on computation expressions, I have an [in-depth series of posts about them](../series/computation-expressions.md).*
+*コンピュテーション式についてもっと詳しく知りたい場合は、[私の詳細な一連の投稿](../series/computation-expressions.md)をご覧ください。*
 
-### Redefining mapM and friends
+### mapMと仲間の再定義
 
-With `monster` expressions available, let's rewrite `mapM` and the other functions.
+`monster`式が使用可能になったので、`mapM`やその他の関数を書き直してみましょう。
 
 **mapM**
 
-`mapM` takes a function and a wrapped M-value and returns the function applied to the inner value.
+`mapM`は関数とラップされたM値を受け取り、内部の値に関数を適用して返します。
 
-Here is an implementation using `monster`:
+`monster`を使用した実装は次のとおりです。
 
 ```fsharp
 let mapM f xM = 
     monster {
-        let! x = xM  // unwrap the M<X>
-        return f x   // return M of (f x)
+        let! x = xM  // M<X>をアンラップ
+        return f x   // (f x)のMを返す
         }
 ```
 
-If we compile this implementation, we get the same signature as the previous implementation:
+この実装をコンパイルすると、以前の実装と同じシグネチャが得られます。
 
 ```fsharp
 val mapM : f:('a -> 'b) -> M<'a> -> M<'b>
@@ -209,20 +209,20 @@ val mapM : f:('a -> 'b) -> M<'a> -> M<'b>
 
 **map2M**
 
-`map2M` takes a function and two wrapped M-values and returns the function applied to both the values.
+`map2M`は関数と2つのラップされたM値を受け取り、両方の値に関数を適用して返します。
 
-It's also easy to write using `monster` expressions:
+これも`monster`式を使って簡単に書くことができます。
 
 ```fsharp
 let map2M f xM yM = 
     monster {
-        let! x = xM  // unwrap M<X>
-        let! y = yM  // unwrap M<Y>
-        return f x y // return M of (f x y)
+        let! x = xM  // M<X>をアンラップ
+        let! y = yM  // M<Y>をアンラップ
+        return f x y // (f x y)のMを返す
         }
 ```
 
-If we compile this implementation, we again get the same signature as the previous implementation:
+この実装をコンパイルすると、再び以前の実装と同じシグネチャが得られます。
 
 ```fsharp
 val map2M : f:('a -> 'b -> 'c) -> M<'a> -> M<'b> -> M<'c>
@@ -230,120 +230,120 @@ val map2M : f:('a -> 'b -> 'c) -> M<'a> -> M<'b> -> M<'c>
 
 **applyM**
 
-`applyM` takes a wrapped function and a wrapped value and returns the function applied to the value.
+`applyM`はラップされた関数とラップされた値を受け取り、値に関数を適用して返します。
 
-Again, it's trivial  to write using `monster` expressions:
+これも`monster`式を使って簡単に書くことができます。
 
 ```fsharp
 let applyM fM xM = 
     monster {
-        let! f = fM  // unwrap M<F>
-        let! x = xM  // unwrap M<X>
-        return f x   // return M of (f x)
+        let! f = fM  // M<F>をアンラップ
+        let! x = xM  // M<X>をアンラップ
+        return f x   // (f x)のMを返す
         }
 ```
 
-And the signature is as expected
+シグネチャは期待通りです。
 
 ```fsharp
 val applyM : M<('a -> 'b)> -> M<'a> -> M<'b>
 ```
 
-## Manipulating the vital force from within a monster context
+## monsterコンテキスト内での生命力の操作
 
-We'd like to use the monster expression to rewrite all our other functions too, but there is a stumbling block.
+他のすべての関数も`monster`式を使って書き直したいのですが、そこには課題があります。
 
-Many of our functions have a body that looks like this:
+多くの関数の本体は次のような形をしています。
 
 ```fsharp
-// extract a unit of vital force from the context 
+// コンテキストから生命力の単位を抽出
 let oneUnit, remainingVitalForce = getVitalForce vitalForce 
 
-// do something
+// 何かを行う
 
-// return value and remaining vital force    
+// 値と残りの生命力を返す
 liveBodyPart, remainingVitalForce    
 ```
 
-In other words, we're *getting* some of the vital force and then *putting* a new vital force to be used for the next step.
+つまり、生命力の一部を*取得*し、次のステップで使用する新しい生命力を*設定*しています。
 
-We are familiar with "getters" and "setters" in object-oriented programming, so let's see if we can write similar ones that will work in the `monster` context.
+オブジェクト指向プログラミングでは「ゲッター」と「セッター」に慣れているので、`monster`コンテキストで動作する同様のものを書いてみましょう。
 
-### Introducing getM
+### getMの導入
 
-Let's start with the getter. How should we implement it?
+まずゲッターから始めましょう。どのように実装すべきでしょうか？
 
-Well, the vital force is only available in the context of becoming alive, so the function must follow the familiar template:
+生命力は生きている状態のコンテキストでのみ利用可能なので、関数は一般的な形式に従う必要があります。
 
 ```fsharp
 let getM = 
     let doSomethingWhileLive vitalForce = 
-        // what here ??
-        what to return??, vitalForce 
+        // ここで何をする？？
+        何を返す？？, vitalForce 
     M doSomethingWhileLive 
 ```
 
-Note that getting the `vitalForce` doesn't use any up, so the original amount can be returned untouched.
+`vitalForce`は取得しても使わないので、元の量をそのまま返します。
 
-But what should happen in the middle? And what should be returned as the first element of the tuple?
+では、中間部分で何をすべきでしょうか？そしてタプルの最初の要素として何を返すべきでしょうか？
 
-The answer is simple: just return the vital force itself!
+答えは簡単です。生命力自体を返すのです！
     
 ```fsharp
 let getM = 
     let doSomethingWhileLive vitalForce = 
-        // return the current vital force in the first element of the tuple
+        // タプルの最初の要素として現在の生命力を返す
         vitalForce, vitalForce 
     M doSomethingWhileLive 
 ```
 
-`getM` is a `M<VitalForce>` value, which means that we can unwrap it inside a monster expression like this:
+`getM`は`M<VitalForce>`値なので、monster式の中で次のようにアンラップできます。
 
 ```fsharp
 monster {
     let! vitalForce = getM
-    // do something with vital force
+    // 生命力で何かをする
     }
 ```
 
-### Introducing putM
+### putMの導入
 
-For the putter, the implementation is a function with a parameter for the new vital force.
+セッターについては、新しい生命力をパラメータとする関数として実装します。
 
 ```fsharp
 let putM newVitalForce  = 
     let doSomethingWhileLive vitalForce = 
-        what here ??
+        ここで何をする？？
     M doSomethingWhileLive 
 ```
 
-Again, what should we do in the middle?
+ここでも、中間部分で何をすべきでしょうか？
 
-The most important thing is that the `newVitalForce` becomes the value that is passed on to the next step. We must throw away the original vital force!
+最も重要なのは、`newVitalForce`が次のステップに渡される値になることです。元の生命力は捨てなければなりません！
 
-Which in turn means that `newVitalForce` *must* be used as the second part of the tuple that is returned.
+つまり、`newVitalForce`は返されるタプルの2番目の部分として使用*しなければなりません*。
 
-And what should be in the first part of the tuple that is returned? There is no sensible value to return, so we'll just use `unit`.
+そして、返されるタプルの1番目の部分には何を入れるべきでしょうか？適切な値がないので、単に`unit`を使用します。
 
-Here's the final implementation:
+最終的な実装は以下のようになります。
 
 ```fsharp
 let putM newVitalForce  = 
     let doSomethingWhileLive vitalForce = 
-        // return nothing in the first element of the tuple
-        // return the newVitalForce in the second element of the tuple
+        // タプルの1番目の要素には何も返さない
+        // タプルの2番目の要素にnewVitalForceを返す
         (), newVitalForce
     M doSomethingWhileLive 
 ```
 
-With `getM` and `putM` in place, we can now create a function that 
+`getM`と`putM`が用意できたので、次のような関数を作成できます。
 
-* gets the current vital force from the context
-* extracts one unit from that
-* replaces the current vital force with the remaining vital force
-* returns the one unit of vital force to the caller
+* コンテキストから現在の生命力を取得する
+* そこから1単位を抽出する
+* 現在の生命力を残りの生命力で置き換える
+* 1単位の生命力を呼び出し元に返す
 
-And here's the code:
+以下がそのコードです。
 
 ```fsharp
 let useUpOneUnitM = 
@@ -356,11 +356,11 @@ let useUpOneUnitM =
 ```
 
 
-## Using the monster expression to rewrite all the other functions
+## monster式を使って他のすべての関数を書き直す
 
-With `useUpOneUnitM`, we can start to rewrite all the other functions.
+`useUpOneUnitM`を使って、他のすべての関数の書き直しを始めることができます。
 
-For example, the original function `makeLiveLeftLegM` looked like this, with lots of explicit handling of the vital force.
+例えば、元の`makeLiveLeftLegM`関数は次のようになっており、生命力の明示的な処理がたくさん含まれています。
 
 ```fsharp
 let makeLiveLeftLegM deadLeftLeg  = 
@@ -369,10 +369,10 @@ let makeLiveLeftLegM deadLeftLeg  =
         let oneUnit, remainingVitalForce = getVitalForce vitalForce 
         let liveLeftLeg = LiveLeftLeg (label,oneUnit)
         liveLeftLeg, remainingVitalForce    
-    M becomeAlive  // wrap the function in a single case union
+    M becomeAlive  // 関数を単一ケースユニオンでラップ
 ```
 
-The new version, using a monster expression, has implicit handling of the vital force, and consequently looks much cleaner.
+monster式を使用した新しいバージョンでは、生命力の処理が暗黙的になり、結果としてずっとクリーンになります。
 
 ```fsharp
 let makeLiveLeftLegM deadLeftLeg = 
@@ -383,7 +383,7 @@ let makeLiveLeftLegM deadLeftLeg =
         }
 ```
 
-Similarly, we can rewrite all the arm surgery code like this:
+同様に、すべての腕の手術コードを次のように書き直すことができます。
 
 ```fsharp
 let makeLiveRightLowerArm (DeadRightLowerArm label) = 
@@ -398,21 +398,21 @@ let makeLiveRightUpperArm (DeadRightUpperArm label) =
         return LiveRightUpperArm (label,oneUnit)
         }
         
-// create the M-parts
+// M-パーツを作成
 let lowerRightArmM = DeadRightLowerArm "Tom" |> makeLiveRightLowerArm 
 let upperRightArmM = DeadRightUpperArm "Jerry" |> makeLiveRightUpperArm 
 
-// turn armSurgery into an M-function 
+// armSurgeryをM-関数に変換 
 let armSurgeryM  = map2M armSurgery 
 
-// do surgery to combine the two M-parts into a new M-part
+// 手術を行って2つのM-パーツを新しいM-パーツに組み合わせる
 let rightArmM = armSurgeryM lowerRightArmM upperRightArmM 
 ```
 
-And so on. This new code is much cleaner. 
+このように続けていきます。この新しいコードはずっとクリーンになりました。
 
-In fact, we can make it cleaner yet by eliminating the intermediate values such as `armSurgery` and `armSurgeryM`
-and putting everything in the one monster expression.
+実は、コードをもっと整理することができます。
+`armSurgery`や`armSurgeryM`のような中間的な値を排除し、すべてを1つのmonster式にまとめることができます。
 
 ```fsharp
 let rightArmM = monster {
@@ -422,7 +422,7 @@ let rightArmM = monster {
     }
 ```
 
-We can use this approach for the head as well. We don't need `headSurgery` or `returnM` any more.
+頭の場合も同様のアプローチを使用できます。`headSurgery`や`returnM`はもう必要ありません。
 
 ```fsharp
 let headM = monster {
@@ -431,10 +431,10 @@ let headM = monster {
     }
 ```
 
-Finally, we can use a `monster` expression to create the whole body too:
+最後に、monster式を使って体全体を作ることもできます。
 
 ```fsharp
-// a function to create a M-body given all the M-parts
+// M-パーツからM-体を作成する関数
 let createBodyM leftLegM rightLegM leftArmM rightArmM headM beatingHeartM = 
     monster {
         let! leftLeg = leftLegM
@@ -444,7 +444,7 @@ let createBodyM leftLegM rightLegM leftArmM rightArmM headM beatingHeartM =
         let! head = headM 
         let! beatingHeart = beatingHeartM
 
-        // create the record
+        // レコードを作成
         return {
             leftLeg = leftLeg
             rightLeg = rightLeg
@@ -455,17 +455,17 @@ let createBodyM leftLegM rightLegM leftArmM rightArmM headM beatingHeartM =
             }
         }
 
-// create the M-body 
+// M-体を作成 
 let bodyM = createBodyM leftLegM rightLegM leftArmM rightArmM headM beatingHeartM
 ```
 
-NOTE: The complete code using `monster` expressions is [available on GitHub](https://gist.github.com/swlaschin/54489d9586402e5b1e8a#file-monadster2-fsx).
+注意：monster式を使用した完全なコードは[GitHubで利用可能](https://gist.github.com/swlaschin/54489d9586402e5b1e8a#file-monadster2-fsx)です。
 
-### Monster expressions vs applyM
+### monster式 vs applyM
 
-We previously used an alternative way to create the body, using `applyM`.
+以前、`applyM`を使用して体を作成する別の方法を紹介しました。
 
-For reference, here's that way using `applyM`:
+参考までに、`applyM`を使用した方法を以下に示します。
 
 ```fsharp
 let createBody leftLeg rightLeg leftArm rightArm head beatingHeart =
@@ -488,53 +488,53 @@ let bodyM =
     <*> beatingHeartM
 ```
 
-So what's the difference?
+では、どこが違うのでしょうか？
 
-Aesthetically there is a bit of difference, but you could legitimately prefer either.
+見た目には少し違いがありますが、どちらの方法も、好みに応じて選択できる正当な手法です。
 
-However, there is a much more important difference between the `applyM` approach and the `monster` expression approach.
+しかし、`applyM`アプローチとmonster式アプローチの間には、もっと重要な違いがあります。
 
-The `applyM` approach allows the parameters to be run *independently* or *in parallel*,
-while the `monster` expression approach requires that the parameters are run *in sequence*, with the output of one being fed into the input of the next.
+`applyM`アプローチでは、パラメータを*独立して*または*並行して*実行できるのに対し、
+monster式アプローチでは、パラメータを*順序通りに*実行する必要があり、一つの出力が次の入力に渡されます。
 
-That's not relevant for this scenario, but can be important for other situations such as validation or async. For example, in a validation context, you may want to collect all the validation errors at once,
-rather than only returning the first one that fails.  
+この違いは今回のシナリオでは重要ではありませんが、バリデーションや非同期処理など、他の場面では大きな意味を持つことがあります。
+バリデーションを例に挙げると、最初に見つかったエラーだけを報告するのではなく、すべてのエラーを一度に集めて報告したい場合があります。
 
 
 <a name="statemonad"></a>
 
-## Relationship to the state monad
+## Stateモナドとの関係
 
-Dr Frankenfunctor was a pioneer in her time, blazing a new trail, but she did not generalize her discoveries to other domains.
+フランケンファンクター博士は当時の先駆者でしたが、自身の発見を他の領域に一般化することはありませんでした。
 
-Nowadays, this pattern of threading some information through a series of functions is very common, and we give it a standard name: "State Monad".
+現在では、一連の関数を通じて何らかの情報を受け渡すこのパターンは非常に一般的で、「Stateモナド」という標準的な名前が付けられています。
 
-Now to be a true monad, there are various properties that must be satisfied (the so-called monad laws), but I am not going to discuss them here, as
-this post is not intended to be a monad tutorial.
+真のモナドであるためには、様々な性質（いわゆるモナド則）を満たす必要がありますが、
+この記事はモナドのチュートリアルを意図したものではないので、ここでは議論しません。
 
-Instead, I'll just focus on how the state monad might be defined and used in practice.
+代わりに、Stateモナドが実際にどのように定義され、使用されるかに焦点を当てます。
 
-First off, to be truly reusable, we need to replace the `VitalForce` type with other types.  So our function-wrapping type (call it `S`) must have *two* type parameters,
-one for the type of the state, and one for the type of the value.
+まず、真に再利用可能にするためには、`VitalForce`型を他の型に置き換える必要があります。そのため、関数をラップする型（ここでは`S`と呼びます）には*2つ*の型パラメータが必要です。
+1つは状態の型用、もう1つは値の型用です。
 
 ```fsharp
 type S<'State,'Value> = 
     S of ('State -> 'Value * 'State)
 ```
  
-With this defined, we can create the usual suspects: `runS`, `returnS` and `bindS`.
+これを定義したら、通常の`runS`、`returnS`、`bindS`を作成できます。
 
 ```fsharp
-// encapsulate the function call that "runs" the state
+// 状態を「実行する」関数呼び出しをカプセル化
 let runS (S f) state = f state
 
-// lift a value to the S-world 
+// 値をS世界に持ち上げる 
 let returnS x = 
     let run state = 
         x, state
     S run
 
-// lift a monadic function to the S-world 
+// モナディック関数をS世界に持ち上げる 
 let bindS f xS = 
     let run state = 
         let x, newState = runS xS state
@@ -542,16 +542,16 @@ let bindS f xS =
     S run
 ```
 
-Personlly, I'm glad that we got to understood how these worked in the `M` context before making them completely generic. I don't know about you, but signatures like these
+個人的には、`M`コンテキストでのしくみをを理解した後で、完全に一般化したものを説明するという順序でよかったと思います。以下のようなシグネチャは、
 
 ```fsharp
 val runS : S<'a,'b> -> 'a -> 'b * 'a
 val bindS : f:('a -> S<'b,'c>) -> S<'b,'a> -> S<'b,'c>
 ```
 
-would be really hard to understand on their own, without any preparation.
+前提知識なしでは非常に理解しづらいものです。
 
-Anyway, with those basics in place we can create a `state` expression.
+さて、これらの基本が整ったら、`state`式を作成できます。
  
 ```fsharp
 type StateBuilder()=
@@ -561,47 +561,47 @@ type StateBuilder()=
 let state = new StateBuilder()
 ```
 
-`getS` and `putS` are defined in a similar way as `getM` and `putM` for `monster`.
+`getS`と`putS`は、`monster`の`getM`と`putM`と同様の方法で定義されます。
 
 ```fsharp
 let getS = 
     let run state = 
-        // return the current state in the first element of the tuple
+        // タプルの最初の要素に現在の状態を返す
         state, state
     S run
 // val getS : S<State> 
 
 let putS newState = 
     let run _ = 
-        // return nothing in the first element of the tuple
-        // return the newState in the second element of the tuple
+        // タプルの最初の要素には何も返さない
+        // タプルの2番目の要素に新しい状態を返す
         (), newState
     S run
 // val putS : 'State -> S<unit>
 ```
 
-### Property based testing of the state expression 
+### state式のプロパティベーステスト 
 
-Before moving on, how do we know that our `state` implementation is correct? What does it even *mean* to be correct?
+先に進む前に、`state`の実装が正しいことをどのように確認できるでしょうか？そもそも「正しい」とは何を意味するのでしょうか？
 
-Well, rather than writing lots of example based tests, this is a great candidate for a [property-based testing](http://fsharpforfunandprofit.com/pbt/) approach.
+これは、実例ベースのテストをたくさん書くよりも、[プロパティベーステスト](https://fsharpforfunandprofit.com/pbt/)のアプローチが適している場合の候補です。
 
-The properties we might expect to be satisfied include:
+満たすべきプロパティには以下のようなものがあります。
 
-* [**The monad laws**](https://stackoverflow.com/questions/18569656/explanation-of-monad-laws-in-f).
-* **Only the last put counts**. That is, putting X then putting Y should be the same as just putting Y. 
-* **Get should return the last put**. That is, putting X then doing a get should return the same X. 
+* [**モナド則**](https://stackoverflow.com/questions/18569656/explanation-of-monad-laws-in-f)
+* **最後のputだけが有効**。つまり、XをputしてからYをputするのは、単にYをputするのと同じであるべきです。 
+* **getは最後のputを返す**。つまり、Xをputしてからgetを行うと、同じXが返されるべきです。 
 
-and so on. 
+などです。 
 
-I won't go into this any more right now. I suggest watching [the talk](http://fsharpforfunandprofit.com/pbt/) for a more in-depth discussion.
+ここではこれ以上詳しく説明しません。より詳細な議論については、[講演](https://fsharpforfunandprofit.com/pbt/)をご覧ください。
 
-### Using the state expression instead of the monster expression
+### state式をmonster式の代わりに使用する
 
-We can now use `state` expressions exactly as we did `monster` expressions. Here's an example:
+これで、`state`式を`monster`式と全く同じように使用できます。以下に例を示します。
 
 ```fsharp
-// combine get and put to extract one unit
+// getとputを組み合わせて1単位を抽出する
 let useUpOneUnitS = state {
     let! vitalForce = getS
     let oneUnit, remainingVitalForce = getVitalForce vitalForce 
@@ -612,14 +612,14 @@ let useUpOneUnitS = state {
 type DeadLeftLeg = DeadLeftLeg of Label 
 type LiveLeftLeg = LiveLeftLeg of Label * VitalForce
 
-// new version with implicit handling of vital force
+// 生命力の暗黙的な処理を行う新バージョン
 let makeLiveLeftLeg (DeadLeftLeg label) = state {
     let! oneUnit = useUpOneUnitS
     return LiveLeftLeg (label,oneUnit)
     }
 ```
 
-Another example is how to build a `BeatingHeart`:
+もう一つの例として、`BeatingHeart`の作り方を示します。
 
 ```fsharp
 type DeadHeart = DeadHeart of Label 
@@ -644,47 +644,47 @@ let beatingHeartS = state {
 let beatingHeart, remainingFromHeart = runS beatingHeartS vf
 ```
 
-As you can see, the `state` expression automatically picked up that `VitalForce` was being used as the state -- we didn't need to specify it explicitly.
+ご覧のように、`state`式は自動的に`VitalForce`が状態として使用されていることを認識しました。明示的に指定する必要はありませんでした。
 
-So, if you have a `state` expression type available to you, you don't need to create your own expressions like `monster` at all!
+したがって、`state`式の型が利用可能な場合、`monster`のような独自の式を作成する必要はまったくありません！
 
-For a more detailed and complex example of the state monad in F#, check out the [FSharpx library](https://github.com/fsprojects/FSharpx.Extras/blob/master/src/FSharpx.Extras/ComputationExpressions/Monad.fs#L409).
+F#でのStateモナドのより詳細で複雑な例については、[FSharpxライブラリ](https://github.com/fsprojects/FSharpx.Extras/blob/master/src/FSharpx.Extras/ComputationExpressions/Monad.fs#L409)をチェックしてください。
 
-*NOTE: The complete code using `state` expressions is [available on GitHub](https://gist.github.com/swlaschin/54489d9586402e5b1e8a#file-monadster3-fsx).*
+*注：`state`式を使用した完全なコードは[GitHubで利用可能](https://gist.github.com/swlaschin/54489d9586402e5b1e8a#file-monadster3-fsx)です。*
 
-## Other examples of using a state expression
+## その他のstate式の使用例
 
-The state computation expression, once defined, can be used for all sorts of things. For example, we can use `state` to model a stack.
+stateコンピュテーション式は、一度定義すれば様々な用途に使用できます。例えば、stateを使ってスタックをモデル化することができます。
 
-Let's start by defining a `Stack` type and associated functions:
+まず、`Stack`型と関連する関数を定義してみましょう。
 
 ```fsharp
-// define the type to use as the state
+// 状態として使用する型を定義
 type Stack<'a> = Stack of 'a list
 
-// define pop outside of state expressions
+// state式の外でpopを定義
 let popStack (Stack contents) = 
     match contents with
     | [] -> failwith "Stack underflow"
     | head::tail ->     
         head, (Stack tail)
 
-// define push outside of state expressions
+// state式の外でpushを定義
 let pushStack newTop (Stack contents) = 
     Stack (newTop::contents)
 
-// define an empty stack
+// 空のスタックを定義
 let emptyStack = Stack []
 
-// get the value of the stack when run 
-// starting with the empty stack
+// 空のスタックから開始して
+// 実行した時のスタックの値を取得
 let getValue stackM = 
     runS stackM emptyStack |> fst
 ```
 
-Note that none of that code knows about or uses the `state` computation expression.
+これらのコードは、stateのコンピュテーション式について何も知らず、使用もしていないことに注意してください。
 
-To make it work with `state`, we need to define a customized getter and putter for use in a `state` context:
+stateで動作させるには、state式のコンテキストで使用するためのカスタマイズされたゲッターとセッターを定義する必要があります。
 
 ```fsharp
 let pop() = state {
@@ -702,11 +702,11 @@ let push newTop = state {
     }
 ```
 
-With these in place we can start coding our domain!
+これらが用意できたら、ドメインのコーディングを始めることができます！
 
-### Stack-based Hello World
+### スタックベースのHello World
 
-Here's a simple one. We push "world", then "hello", then pop the stack and combine the results.
+簡単な例を見てみましょう。「world」をプッシュし、次に「hello」をプッシュし、その後スタックをポップして結果を組み合わせます。
 
 ```fsharp
 let helloWorldS = state {
@@ -721,9 +721,9 @@ let helloWorldS = state {
 let helloWorld = getValue helloWorldS // "hello world"
 ```
 
-### Stack-based calculator
+### スタックベースの計算機
 
-Here's a simple stack-based calculator:
+こちらは簡単なスタックベースの計算機です。
 
 ```fsharp
 let one = state {do! push 1}
@@ -736,7 +736,7 @@ let add = state {
     }
 ```
 
-And now we can combine these basic states to build more complex ones:
+そして、これらの基本的なstate値を組み合わせて、より複雑なものを構築できます。
 
 ```fsharp
 let three = state {
@@ -752,9 +752,9 @@ let five = state {
     }
 ```
 
-Remember that, just as with the vital force, all we have now is a *recipe* for building a stack. We still need to *run* it to execute the recipe and get the result.
+生命力の場合と同様に、今のところスタックを構築する*レシピ*があるだけです。レシピを*実行*して結果を得るには、まだ実行する必要があります。
 
-Let's add a helper to run all the operations and return the top of the stack:
+すべての操作を実行してスタックのトップを返すヘルパーを追加しましょう。
 
 ```fsharp
 let calculate stackOperations = state {
@@ -764,7 +764,7 @@ let calculate stackOperations = state {
     }
 ```
 
-Now we can evaluate the operations, like this:
+これで、次のように演算を評価できます。
 
 ```fsharp
 let threeN = calculate three |> getValue // 3
@@ -772,59 +772,59 @@ let threeN = calculate three |> getValue // 3
 let fiveN = calculate five |> getValue   // 5
 ```
 
-## OK, OK, some monad stuff 
+## はいはい、モナドの話ですね。少しだけ触れておきましょう
 
-People always want to know about monads, even though I do not want these posts to degenerate into [yet another monad tutorial](../posts/why-i-wont-be-writing-a-monad-tutorial.md).
+モナドについて知りたがる人はいつもいますが、[これ以上モナドのチュートリアルを書くつもりはありません](../posts/why-i-wont-be-writing-a-monad-tutorial.md)。
 
-So here's how they fit in with what we have worked with in these posts.
+ですので、これまでの内容とモナドの関係を簡単に説明します。
 
-A **functor** (in a programming sense, anyway) is a data structure (such as Option, or List, or State) which has a `map` function associated with it.
-And the `map` function has some properties that it must satisfy (the ["functor laws"](https://en.wikibooks.org/wiki/Haskell/The_Functor_class#The_functor_laws)).
+**ファンクター**は、（プログラミングの意味では）それに関連付けられた`map`関数を持つデータ構造（OptionやList、Stateなど）です。
+そして、`map`関数は満たすべきいくつかの性質（["ファンクター則"](https://en.wikibooks.org/wiki/Haskell/The_Functor_class#The_functor_laws)）があります。
 
-A **applicative functor** (in a programming sense) is a data structure (such as Option, or List, or State) which has two functions associated with it:
-`apply` and `pure` (which is the same as `return`).
-And these functions have some properties that they must satisfy (the ["applicative functor laws"](https://en.wikibooks.org/wiki/Haskell/Applicative_functors#Applicative_functor_laws)).
+**アプリカティブファンクター**は、（プログラミングの意味では）それに関連付けられた2つの関数
+`apply`と`pure`（これは`return`と同じです）を持つデータ構造（OptionやList、Stateなど）です。
+そして、これらの関数には満たすべきいくつかの性質（[アプリカティブファンクター則](https://en.wikibooks.org/wiki/Haskell/Applicative_functors#Applicative_functor_laws)）があります。
 
-Finally, a **monad** (in a programming sense) is a data structure (such as Option, or List, or State) which has two functions associated with it:
-`bind` (often written as `>>=`) and `return`.
-And again, these functions have some properties that they must satisfy (the ["monad laws"](https://en.wikibooks.org/wiki/Haskell/Understanding_monads#Monad_Laws)).
+最後に、**モナド**は、（プログラミングの意味では）それに関連付けられた2つの関数
+`bind`（しばしば`>>=`と書かれます）と`return` を持つデータ構造（OptionやList、Stateなど）です。
+そして再び、これらの関数には満たすべきいくつかの性質（["モナド則"](https://en.wikibooks.org/wiki/Haskell/Understanding_monads#Monad_Laws)）があります。
 
-Of these three, the monad is most "powerful" in a sense, because the `bind` function allows you to chain M-producing functions together,
-and as we have seen, `map` and `apply` can be written in terms of `bind` and `return`.
+これら3つのうち、モナドが最も強力です。なぜなら、`bind`関数によってMを生成する関数を連鎖させることができ、
+見てきたように、`map`と`apply`は`bind`と`return`を使って書くことができるからです。
 
-So you can see that both our original `M` type and the more generic `State` type, in conjunction with their supporting functions, are monads,
-(assuming that our `bind` and `return` implementations satisfy the monad laws).
+したがって、元の`M`型も、より一般的な`State`型のどちらも、サポート関数との組み合わせで、モナドになっていることがわかるでしょう
+（`bind`と`return`の実装がモナド則を満たしていると仮定します）。
 
-For a visual version of these definitions, there is a great post called [Functors, Applicatives, And Monads In Pictures](http://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html).
+これらの定義の視覚的なバージョンについては、[Functors, Applicatives, And Monads In Pictures](https://www.adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html)という素晴らしい投稿があります。
 
-## Further reading
+## さらなる読み物
 
-There are a lot of posts about state monads on the web, of course. Most of them are Haskell oriented, but I hope that those explanations will make more sense after reading this series of posts,
-so I'm only going to mention a few follow up links.
+Web上にはStateモナドに関する多くの投稿がありますが、そのほとんどはHaskellに基づいています。しかし、この一連の投稿を読んだ後では、それらの説明がより理解しやすくなると思います。
+そのため、ここではフォローアップリンクをいくつか紹介するだけにとどめます。
 
-* [State monad in pictures](http://adit.io/posts/2013-06-10-three-useful-monads.html#the-state-monad)
-* ["A few monads more", from "Learn You A Haskell"](http://learnyouahaskell.com/for-a-few-monads-more)
-* [Much Ado About Monads](http://codebetter.com/matthewpodwysocki/2009/12/31/much-ado-about-monads-state-edition/). Discussion about state monad in F#.
+* [State monad in pictures](https://adit.io/posts/2013-06-10-three-useful-monads.html#the-state-monad)
+* ["A few monads more", from "Learn You A Haskell"](https://learnyouahaskell.com/for-a-few-monads-more)
+* [Much Ado About Monads](https://web.archive.org/web/20211016092319/http://codebetter.com/matthewpodwysocki/2009/12/31/much-ado-about-monads-state-edition/). F#でのStateモナドについての議論。
 
-And for another important use of "bind", you might find my talk on [functional error handling](http://fsharpforfunandprofit.com/rop/) useful.
+そして、「bind」のもう一つの重要な使用例については、[関数型エラー処理に関する私の講演](https://fsharpforfunandprofit.com/rop/)が役立つかもしれません。
 
-If you want to see F# implementations of other monads, look no further than [the FSharpx project](https://github.com/fsprojects/FSharpx.Extras/blob/master/src/FSharpx.Extras/ComputationExpressions/Monad.fs).
+F#での他のモナドの実装を見たい場合は、[FSharpxプロジェクト](https://github.com/fsprojects/FSharpx.Extras/blob/master/src/FSharpx.Extras/ComputationExpressions/Monad.fs)を見てください。
 
-## Summary 
+## まとめ 
 
-Dr Frankenfunctor was a groundbreaking experimentalist, and I'm glad that I have been able to share insights on her way of working.
+フランケンファンクター博士は画期的な実験者でした。彼女の仕事の方法について洞察を共有できて嬉しく思います。
 
-We've seen how she discovered a primitive monad-like type, `M<BodyPart>`, and how `mapM`, `map2M`, `returnM`, `bindM` and `applyM`
-were all developed to solve specific problems.
+彼女が原始的なモナドといえる型 M<BodyPart> を発見したこと、
+そして `mapM`、`map2M`、`returnM`、`bindM`、`applyM` がいずれも特定の問題を解決するために開発された経緯を学びました。
 
-We've also seen how the need to solve the same problems led to the modern-day state monad and computation expression.
+また、同じ問題を解決する必要性が、現代のStateモナドとコンピュテーション式にどのようにつながったかも見てきました。
 
-Anyway, I hope that this series of posts has been enlightening.
-My not-so-secret wish is that monads and their associated combinators will no longer be so shocking to you now...
+この一連の投稿が啓発的だったことを望んでいます。
+そして密かに願っているのですが、モナドとそれに関連するコンビネータが、もはやあなたを戸惑わせるようなものではなくなっていることを期待しています...
 
 ![shocking](../assets/img/monadster_shocking300.gif)
 
-...and that you can use them wisely in your own projects. Good luck!
+...また、それらをあなた自身のプロジェクトで上手く活用できるようになることも願っています。頑張ってください！
 
-*NOTE: The code samples used in this post are [available on GitHub](https://gist.github.com/swlaschin/54489d9586402e5b1e8a)*.
+*注：この投稿で使用されたコードサンプルは[GitHubで利用可能](https://gist.github.com/swlaschin/54489d9586402e5b1e8a)です。*
 
