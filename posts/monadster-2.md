@@ -120,7 +120,7 @@ let deadBrain = DeadBrain "Abby Normal"
 let skull = Skull "Yorick"
 ```
 
-*ちなみに、この変わった名前の脳の由来には、[面白い話](https://en.wikipedia.org/wiki/Young_Frankenstein)があるのですが、今はその詳細に立ち入る時間がありません。*
+*ちなみに、この変わった名前の脳の由来には、[面白い話](https://ja.wikipedia.org/wiki/%E3%83%A4%E3%83%B3%E3%82%B0%E3%83%BB%E3%83%95%E3%83%A9%E3%83%B3%E3%82%B1%E3%83%B3%E3%82%B7%E3%83%A5%E3%82%BF%E3%82%A4%E3%83%B3)があるのですが、今はその詳細に立ち入る時間がありません。*
 
 ![異常な脳](../assets/img/monadster_brain.jpg)
 
@@ -430,7 +430,7 @@ type LiveBody = {
 その結果、怪物は二つの左足を持つことになりました。[これは必ずしも障害にはなりません](https://www.youtube.com/watch?v=DC_PACr5cT8&t=55)。実際、
 怪物はこの不利な条件を克服しただけでなく、かなりの腕前のダンサーになりました。以下の貴重な映像でそれを確認できます。
 
-<iframe width="854" height="510" src="https://www.youtube.com/embed/w1FLZPFI3jc" frameborder="0" allowfullscreen></iframe>
+[Gene Wilder - Young Frankenstein (1974) - Puttin' on the Ritz](http://web.archive.org/web/20170730132220/https://www.youtube.com/watch?v=w1FLZPFI3jc)
 
 ### サブコンポーネントの組み立て
 
