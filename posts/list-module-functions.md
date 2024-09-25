@@ -1196,7 +1196,7 @@ let tupleComparer tuple1 tuple2  =
 ## 17. 各要素を別のものに変換する
 
 私は時々、関数型プログラミングを「変換指向プログラミング」と考えるのが好きです。`map`（LINQでは`Select`）は、このアプローチの最も基本的な要素の1つです。
-実際、私はこのテーマについて[ここ](./elevated-world.md)で一連の記事を書いています。
+実際、私はこのテーマについて[ここ](./elevated-world.md)で連載を書いています。
 
 * [`map: mapping:('T -> 'U) -> list:'T list -> 'U list`](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-listmodule.html#map)
   与えられた関数をコレクションの各要素に適用した結果を要素とする新しいコレクションを作成します。

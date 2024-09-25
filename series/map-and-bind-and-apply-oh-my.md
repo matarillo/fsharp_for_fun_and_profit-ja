@@ -1,27 +1,27 @@
 ---
 layout: series_index
-title: "Understanding Map and Apply and Bind"
-seriesIndexId: "Map and Bind and Apply, Oh my!"
+title: "Map, Bind, Apply を理解する"
+seriesIndexId: "Map, Bind, Apply, 大変だ！"
 ---
 
-In this series of posts, I'll attempt to describe some of the core functions for dealing with generic data types (such as `Option` and `List`).
-This is a follow-up post to [my talk on functional patterns](http://fsharpforfunandprofit.com/fppatterns/).
+この連載では、ジェネリックなデータ型（`Option`や`List`など）を扱うための核となる関数をいくつか説明します。
+これは[関数型パターンに関する私の講演](https://fsharpforfunandprofit.com/fppatterns/)の続編です。
 
-Yes, I know that [I promised not to do this kind of thing](../posts/why-i-wont-be-writing-a-monad-tutorial.md),
-but for this post I thought I'd take a different approach from most people. Rather than talking about abstractions such as type classes,
-I thought it might be useful to focus on the core functions themselves and how they are used in practice.
+[こういうことはしないと以前に約束した](../posts/why-i-wont-be-writing-a-monad-tutorial.md)のですが、
+今回は多くの人がとるアプローチとは違う方法をとってみようと思いました。型クラスのような抽象概念ではなく、
+コア関数自体とその実践的な使い方に焦点を当てる方が役に立つのではないかと思ったのです。
 
-In other words, a sort of "man page" for `map`, `return`, `apply`, and `bind`.  
+つまり、`map`、`return`、`apply`、`bind`のための「マニュアルページ」のようなものです。
 
-So, there is a section for each function, describing their name (and common aliases), common operators, their type signature,
-and then a detailed description of why they are needed and how they are used, along with some visuals (which I always find helpful).  
+各関数について、名前（と一般的な別名）、よく使われる演算子、型シグネチャを説明するセクションがあり、
+そしてそれらが必要な理由と使い方の詳細について説明します。また、（私自身いつも役立つと思っている）視覚的な説明も提供します。
 
 
 
-* [Understanding map and apply](../posts/elevated-world.md). A toolset for working with elevated worlds.
-* [Understanding bind](../posts/elevated-world-2.md). Or, how to compose world-crossing functions.
-* [Using the core functions in practice](../posts/elevated-world-3.md). Working with independent and dependent data.
-* [Understanding traverse and sequence](../posts/elevated-world-4.md). Mixing lists and elevated values.
-* [Using map, apply, bind and sequence in practice](../posts/elevated-world-5.md). A real-world example that uses all the techniques.
-* [Reinventing the Reader monad](../posts/elevated-world-6.md). Or, designing your own elevated world.
-* [Map and Bind and Apply, a summary](../posts/elevated-world-7.md). .
+* [[map と apply を理解する](../posts/elevated-world.md)。高次の世界を扱うためのツールセット。
+* [bind を理解する](../posts/elevated-world-2.md)。または、異世界をつなぐ関数を合成する方法。
+* [コア関数の実際的な使い方](../posts/elevated-world-3.md)。独立したデータと依存したデータの扱い方。
+* [traverse と sequence を理解する](../posts/elevated-world-4.md)。リストと高次の値を混ぜる。
+* [map, apply, bind, sequence の実際的な使い方](../posts/elevated-world-5.md)。全ての技法を使う実践例。
+* [Reader モナドの再発明](../posts/elevated-world-6.md)。または、自分だけの高次の世界をデザインする。
+* [Map, Bind, Apply のまとめ](../posts/elevated-world-7.md)。
