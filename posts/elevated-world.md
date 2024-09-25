@@ -2,273 +2,273 @@
 layout: post
 title: "map と apply を理解する"
 description: "高次の世界を扱うためのツールセット"
-categories: ["Patterns"]
+categories: ["パターン"]
 seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 1
 image: "/assets/img/vgfp_map.png"
 ---
 
-In this series of posts, I'll attempt to describe some of the core functions for dealing with generic data types (such as `Option` and `List`).
-This is a follow-up post to [my talk on functional patterns](http://fsharpforfunandprofit.com/fppatterns/).
+この一連の投稿では、`Option`や`List`などのジェネリックなデータ型を扱うためのコア関数を解説します。
+これは、[関数型パターンに関する私の講演](https://fsharpforfunandprofit.com/fppatterns/)の続編です。
 
-Yes, I know that [I promised not to do this kind of thing](../posts/why-i-wont-be-writing-a-monad-tutorial.md),
-but for this post I thought I'd take a different approach from most people. Rather than talking about abstractions such as type classes,
-I thought it might be useful to focus on the core functions themselves and how they are used in practice.
+[このような内容を書かないと約束した](../posts/why-i-wont-be-writing-a-monad-tutorial.md)のは承知していますが、
+今回は少し違うアプローチを試みました。
+型クラスなどの抽象概念ではなく、コア関数自体とその実践的な使用方法に焦点を当てることが有用だと考えたのです。
 
-In other words, a sort of ["man page"](https://en.wikipedia.org/wiki/Man_page) for `map`, `return`, `apply`, and `bind`.  
+つまり、これは`map`、`return`、`apply`、`bind`の一種の[「マニュアルページ」](https://en.wikipedia.org/wiki/Man_page)のようなものです。
 
-So, there is a section for each function, describing their name (and common aliases), common operators, their type signature,
-and then a detailed description of why they are needed and how they are used, along with some visuals (which I always find helpful).  
+各関数について、名前（と一般的な別名）、よく使われる演算子、型シグネチャを紹介します。
+さらに、なぜその関数が必要で、どのように使われるのかを詳しく説明します。その際、視覚的な補助も交えます（私はこれが常に役立つと感じています）。
 
-Haskellers and category-theorists may want to look away now! There will be no mathematics and quite a lot of hand-waving.
-I am going to avoid jargon and Haskell-specific concepts such as type classes and focus on the big picture as much as possible.
-The concepts here should be applicable to any kind of functional programming in any language.
+Haskellユーザーや圏論家の方々は、ここで目をそらしたくなるかもしれません。
+数学的な内容はなく、かなり大雑把な説明になります。専門用語やHaskell特有の概念（型クラスなど）は避け、できるだけ全体像に焦点を当てます。
+ここで紹介する概念は、どんな言語の関数型プログラミングにも応用できるはずです。
 
-I know that some people might dislike this approach. That's fine.
-There is [no shortage](https://wiki.haskell.org/Monad_tutorials_timeline) of more academic explanations on the web.
-Start with [this](http://homepages.inf.ed.ac.uk/wadler/papers/marktoberdorf/baastad.pdf) and [this](http://www.soi.city.ac.uk/~ross/papers/Applicative.html).
+このアプローチが好みに合わない方もいるでしょう。それで構いません。
+ウェブ上には[たくさんの](https://wiki.haskell.org/Monad_tutorials_timeline)、より学術的な説明があります。
+[これ](https://homepages.inf.ed.ac.uk/wadler/papers/marktoberdorf/baastad.pdf)や[これ](https://www.staff.city.ac.uk/~ross/papers/Applicative.html)から始めてみるのもいいでしょう。
 
-Finally, as with most of the posts on this site, I am writing this up for my own benefit as well, as part of my own learning process. I don't claim to be an expert at all,
-so if I have made any errors please let me know.
+最後に、このサイトの多くの投稿と同じく、これも私自身の学習過程の一環として書いています。
+私は決して専門家ではないので、間違いがあればぜひ指摘してください。
 
-## Background
+## 背景
 
-To start with, let me provide the background and some terminology.
+まずは背景と用語の説明から始めましょう。
 
-Imagine that there are two worlds that we could program in: a "normal" everyday world and a world that I will call the "elevated world" (for reasons that I will explain shortly).
+2つの世界でプログラミングできると想像してください。「通常の」日常的な世界と、「高次の世界」（この名前の理由はすぐに説明します）と呼ぶ世界です。
 
-The elevated world is very similar to the normal world. In fact, every thing in the normal world has a corresponding thing in the elevated world.
+高次の世界は通常の世界とよく似ています。実際、通常の世界のすべてのものには、高次の世界に対応するものがあります。
 
-So, for example, we have the set of values called `Int` in the normal world, and in the elevated world there is a parallel set of values called, say, `E<Int>`.
-Similarly, we have the set of values called `String` in the normal world, and in the elevated world there is a parallel set of values called `E<String>`.
+例えば、通常の世界には`Int`という値の集合がありますが、高次の世界にはそれに対応する`E<Int>`という値の集合があります。
+同様に、通常の世界の`String`に対して、高次の世界には`E<String>`があります。
 
 ![](../assets/img/vgfp_e_values.png)
 
-Also, just as there are functions between `Int`s and `String`s in the normal world, so there are functions between `E<Int>`s and `E<String>`s in the elevated world.
+また、通常の世界に`Int`と`String`の間の関数があるように、高次の世界にも`E<Int>`と`E<String>`の間の関数があります。
 
 ![](../assets/img/vgfp_e_functions.png)
 
-Note that I am deliberately using the term "world" rather than "type" to emphasis that the *relationships* between values in the world are just as important as the underlying data type.
+「世界」という言葉を「型」の代わりに意図的に使っていることに注意してください。世界内の値の間の*関係*が、基礎となるデータ型と同じくらい重要だということを強調するためです。
 
-### What exactly is an elevated world?
+### 高次の世界とは具体的に何か？
 
-I can't define what an elevated world is exactly, because there are too many different kinds of elevated worlds, and they don't have anything in common. 
+高次の世界を正確に定義するのは難しいです。高次の世界には多くの種類があり、それらに共通点がないからです。
 
-Some of them represent data structures (`Option<T>`), some of them represent workflows (`State<T>`),
-some of them represent signals (`Observable<T>`), or asychronous values (`Async<T>`), or other concepts.
+データ構造（`Option<T>`）を表すもの、ワークフロー（`State<T>`）を表すもの、
+シグナル（`Observable<T>`）を表すもの、非同期値（`Async<T>`）を表すもの、その他の概念を表すものがあります。
 
-But even though the various elevated worlds have nothing in common specifically, there *are* commonalities in the way they can be worked with.
-We find that certain issues occur over and over again in different elevated worlds, and we can use standard tools and patterns to deal with
-these issues.
+様々な高次の世界に具体的な共通点はありませんが、それらを扱う方法には共通点があります。
+異なる高次の世界でも同じような問題が繰り返し発生します。そして、
+これらの問題に対処するための標準的なツールやパターンを使うことができます。
 
-The rest of this series will attempt to document these tools and patterns.
+この一連の投稿では、これらのツールとパターンについて説明していきます。
 
-## Series contents
+## シリーズの内容
 
-This series is developed as follows:
+このシリーズは以下のように展開します。
 
-* First, I'll discuss the tools we have for lifting normal things into the elevated world. This includes functions such as `map`, `return`, `apply` and `bind`.
-* Next, I'll discuss how you can combine elevated values in different ways, based on whether the values are independent or dependent.
-* Next, we'll look at some ways of mixing lists with other elevated values.
-* Finally, we'll look at two real-world examples that put all these techniques to use, and we'll find ourselves accidentally inventing the Reader monad.
+* まず、通常のものを高次の世界に持ち上げるためのツールを説明します。これには`map`、`return`、`apply`、`bind`などの関数が含まれます。
+* 次に、高次の値を異なる方法で組み合わせる方法を見ていきます。これは値が独立しているか依存しているかによって変わってきます。
+* その後、リストと他の高次の値を混ぜる方法をいくつか紹介します。
+* 最後に、これらのテクニックをすべて使用する2つの実際の例を見ます。そこで偶然にもReaderモナドを発明することになります。
 
-Here's a list of shortcuts to the various functions:
+以下は、様々な関数へのショートカットリストです。
 
-* **Part 1: Lifting to the elevated world**
-  * [The `map` function](../posts/elevated-world.md#map)
-  * [The `return` function](../posts/elevated-world.md#return)
-  * [The `apply` function](../posts/elevated-world.md#apply)
-  * [The `liftN` family of functions](../posts/elevated-world.md#lift)
-  * [The `zip` function and ZipList world](../posts/elevated-world.md#zip)
-* **Part 2: How to compose world-crossing functions**    
-  * [The `bind` function](../posts/elevated-world-2.md#bind)
-  * [List is not a monad. Option is not a monad.](../posts/elevated-world-2.md#not-a-monad)
-* **Part 3: Using the core functions in practice**  
-  * [Independent and dependent data](../posts/elevated-world-3.md#dependent)
-  * [Example: Validation using applicative style and monadic style](../posts/elevated-world-3.md#validation)
-  * [Lifting to a consistent world](../posts/elevated-world-3.md#consistent)
-  * [Kleisli world](../posts/elevated-world-3.md#kleisli)
-* **Part 4: Mixing lists and elevated values**    
-  * [Mixing lists and elevated values](../posts/elevated-world-4.md#mixing)
-  * [The `traverse`/`MapM` function](../posts/elevated-world-4.md#traverse)
-  * [The `sequence` function](../posts/elevated-world-4.md#sequence)
-  * ["Sequence" as a recipe for ad-hoc implementations](../posts/elevated-world-4.md#adhoc)
-  * [Readability vs. performance](../posts/elevated-world-4.md#readability)
-  * [Dude, where's my `filter`?](../posts/elevated-world-4.md#filter)
-* **Part 5: A real-world example that uses all the techniques**    
-  * [Example: Downloading and processing a list of websites](../posts/elevated-world-5.md#asynclist)
-  * [Treating two worlds as one](../posts/elevated-world-5.md#asyncresult)
-* **Part 6: Designing your own elevated world** 
-  * [Designing your own elevated world](../posts/elevated-world-6.md#part6)
-  * [Filtering out failures](../posts/elevated-world-6.md#filtering)
-  * [The Reader monad](../posts/elevated-world-6.md#readermonad)
-* **Part 7: Summary** 
-  * [List of operators mentioned](../posts/elevated-world-7.md#operators)
-  * [Further reading](../posts/elevated-world-7.md#further-reading)
+* **パート1：高次の世界への持ち上げ**
+  * [`map`関数](../posts/elevated-world.md#map)
+  * [`return`関数](../posts/elevated-world.md#return)
+  * [`apply`関数](../posts/elevated-world.md#apply)
+  * [`liftN`関数ファミリー](../posts/elevated-world.md#lift)
+  * [`zip`関数とZipList世界](../posts/elevated-world.md#zip)
+* **パート2：世界を横断する関数の合成方法**    
+  * [`bind`関数](../posts/elevated-world-2.md#bind)
+  * [Listはモナドではありません。Optionもモナドではありません](../posts/elevated-world-2.md#not-a-monad)
+* **パート3：実践でのコア関数の使用**  
+  * [独立データと依存データ](../posts/elevated-world-3.md#dependent)
+  * [例：アプリカティブスタイルとモナディックスタイルを使用したバリデーション](../posts/elevated-world-3.md#validation)
+  * [一貫した世界への持ち上げ](../posts/elevated-world-3.md#consistent)
+  * [Kleisli世界](../posts/elevated-world-3.md#kleisli)
+* **パート4：リストと高次の値の混合**    
+  * [リストと高次の値の混合](../posts/elevated-world-4.md#mixing)
+  * [`traverse`/`MapM`関数](../posts/elevated-world-4.md#traverse)
+  * [`sequence`関数](../posts/elevated-world-4.md#sequence)
+  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.md#adhoc)
+  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.md#readability)
+  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.md#filter)
+* **パート5：すべてのテクニックを使用する実際の例**    
+  * [例：ウェブサイトのリストのダウンロードと処理](../posts/elevated-world-5.md#asynclist)
+  * [2つの世界を1つとして扱う](../posts/elevated-world-5.md#asyncresult)
+* **パート6：独自の高次の世界の設計** 
+  * [独自の高次の世界の設計](../posts/elevated-world-6.md#part6)
+  * [失敗のフィルタリング](../posts/elevated-world-6.md#filtering)
+  * [Readerモナド](../posts/elevated-world-6.md#readermonad)
+* **パート7：まとめ** 
+  * [言及された演算子のリスト](../posts/elevated-world-7.md#operators)
+  * [さらなる読み物](../posts/elevated-world-7.md#further-reading)
   
 <a id="part1"></a>
 <hr>
 
 
-## Part 1: Lifting to the elevated world 
+## パート1：高次の世界への持ち上げ 
 
-The first challenge is: how do we get from the normal world to the elevated world?  
+最初の課題は、通常の世界から高次の世界にどうやって到達するかです。
 
-First, we will assume that for any particular elevated world:
+まず、特定の高次の世界について以下を仮定します。
 
-* Every type in the normal world has a corresponding type in the elevated world.
-* Every value in the normal world has a corresponding value in the elevated world.
-* Every function in the normal world has a corresponding function in the elevated world.
+* 通常の世界のすべての型には、高次の世界に対応する型があります。
+* 通常の世界のすべての値には、高次の世界に対応する値があります。
+* 通常の世界のすべての関数には、高次の世界に対応する関数があります。
 
-The concept of moving something from the normal world to the elevated world is called "lifting" (which is why I used the term "elevated world" in the first place).
+通常の世界から高次の世界に何かを移動させる概念を「持ち上げ」と呼びます。これが「高次の世界」という言葉を使った理由です。
 
-We'll call these corresponding things "lifted types" and "lifted values" and "lifted functions".
+これらの対応するものを「持ち上げられた型」「持ち上げられた値」「持ち上げられた関数」と呼びます。
 
-Now because each elevated world is different, there is no common implementation for lifting, but we can give names to the various "lifting" patterns, such as `map` and `return`.
+各高次の世界は異なるので、持ち上げの共通の実装はありません。しかし、`map`や`return`などの様々な「持ち上げ」パターンに名前を付けることはできます。
 
-*NOTE: There is no standard name for these lifted types. I have seen them called "wrapper types" or "augmented types" or "monadic types". I'm
-not really happy with any of these names, so I invented [a new one](https://xkcd.com/927/)! Also, I'm trying avoid any assumptions, so
-I don't want to imply that the lifted types are somehow better or contain extra information. I hope that by using the word "elevated" in this post,
-I can focus on the *lifting process* rather than on the types themselves.*
+*注意：これらの持ち上げられた型に標準的な名前はありません。「ラッパー型」「拡張型」「モナド型」などと呼ばれているのを見たことがあります。
+これらの名前のどれにも満足できなかったので、[新しい名前を発明しました](https://xkcd.com/927/)！
+また、仮定を避けようとしているので、持ち上げられた型が何らかの形で優れているとか、追加情報を含んでいるとか示唆したくありません。
+この投稿で「高次」という言葉を使うことで、型自体よりも*持ち上げのプロセス*に焦点を当てられることを願っています。*
 
-*As for using the word "monadic", that would be inaccurate, as there is no requirement that these types are part of a monad.*
+*「モナディック」という言葉を使うのは正確ではありません。これらの型がモナドの一部である必要はないからです。*
 
 <a id="map"></a>
 <hr>
 
-## The `map` function
+## `map`関数
 
-**Common Names**: `map`, `fmap`, `lift`, `Select`
+**一般的な名前** `map`、`fmap`、`lift`、`Select`
 
-**Common Operators**: `<$>` `<!>` 
+**一般的な演算子** `<$>`、`<!>` 
 
-**What it does**:  Lifts a function into the elevated world
+**機能**  関数を高次の世界に持ち上げます
 
-**Signature**:  `(a->b) -> E<a> -> E<b>`. Alternatively with the parameters reversed: `E<a> -> (a->b) -> E<b>`
+**シグネチャ**  `(a->b) -> E<a> -> E<b>`。あるいはパラメータを逆にして `E<a> -> (a->b) -> E<b>`
 
-### Description
+### 説明
 
-"map" is the generic name for something that takes a function in the normal world and transforms it into a corresponding function in the elevated world.
+「map」は、通常の世界の関数を取り、高次の世界の対応する関数に変換するための一般的な名前です。
 
 ![](../assets/img/vgfp_map.png)
 
-Each elevated world will have its own implementation of map.
+各高次の世界では、mapが独自の方法で実装されています。
 
-### Alternative interpretation
+### 別の見方
 
-An alternative interpretation of `map` is that it is a *two* parameter function that takes an elevated value (`E<a>`) and a normal function (`a->b`),
-and returns a new elevated value (`E<b>`) generated by applying the function `a->b` to the internal elements of `E<a>`.
+`map`には別の見方もあります。高次の値（`E<a>`）と通常の関数（`a->b`）を受け取り、`E<a>`の内部要素に関数`a->b`を適用して生成された新しい高次の値（`E<b>`）を返す、
+*2つの*パラメータを持つ関数と考えることもできます。
 
 ![](../assets/img/vgfp_map2.png)
 
-In languages where functions are curried by default, such as F#, both these interpretation are the same. In other languages, you may need to curry/uncurry to
-switch between the two uses.
+F#のように関数がデフォルトでカリー化される言語では、これらの見方は同じことを意味します。
+他の言語では、2つの使い方を切り替えるために、カリー化や非カリー化が必要になることがあります。
 
-Note that the *two* parameter version often has the signature `E<a> -> (a->b) -> E<b>`, with the elevated value first and the normal function second.
-From an abstract point of view, there's no difference between them -- the map concept is the same -- but obviously,
-the parameter order affects how you might use map functions in practice.
+*2つの*パラメータを取るバージョンでは、シグネチャが`E<a> -> (a->b) -> E<b>`となることが多いです。
+高次の値が先で、通常の関数が後ろです。抽象的には同じことで、mapの概念は変わりません。
+しかし、パラメータの順序は実際にmap関数を使う際に影響します。
 
-### Implementation examples 
+### 実装例
 
-Here are two examples of how map can be defined for options and lists in F#.
+F#でのオプションとリストのmap実装例を見てみましょう。
 
 ```fsharp
-/// map for Options
+/// オプションのmap
 let mapOption f opt =
     match opt with
     | None -> 
         None
     | Some x -> 
         Some (f x)
-// has type : ('a -> 'b) -> 'a option -> 'b option
+// 型：('a -> 'b) -> 'a option -> 'b option
 
-/// map for Lists
+/// リストのmap
 let rec mapList f list =
     match list with
     | [] -> 
         []  
     | head::tail -> 
-        // new head + new tail
+        // 新しいhead + 新しいtail
         (f head) :: (mapList f tail)
-// has type : ('a -> 'b) -> 'a list -> 'b list
+// 型：('a -> 'b) -> 'a list -> 'b list
 ```
 
-These functions are built-in of course, so we don't need to define them, I've done it just to show what they might look for some common types.
+これらは実際には組み込み関数ですが、一般的な型のmapがどのようなものかを示すために実装例を挙げました。
 
-### Usage examples 
+### 使用例
 
-Here are some examples of how map can be used in F#:
+F#でのmapの使い方をいくつか見てみましょう。
 
 ```fsharp
-// Define a function in the normal world
+// 通常の世界で関数を定義
 let add1 x = x + 1
-// has type : int -> int
+// 型：int -> int
 
-// A function lifted to the world of Options
+// オプションの世界に持ち上げた関数
 let add1IfSomething = Option.map add1
-// has type : int option -> int option
+// 型：int option -> int option
 
-// A function lifted to the world of Lists
+// リストの世界に持ち上げた関数
 let add1ToEachElement = List.map add1
-// has type : int list -> int list
+// 型：int list -> int list
 ```
 
-With these mapped versions in place you can write code like this:
+これらのマップされた関数を使うと、次のようなコードが書けます。
 
 ```fsharp
 Some 2 |> add1IfSomething    // Some 3 
 [1;2;3] |> add1ToEachElement // [2; 3; 4]
 ```
 
-In many cases, we don't bother to create an intermediate function -- partial application is used instead:
+多くの場合、中間的な関数を作らずに、部分適用を直接使います。
 
 ```fsharp
 Some 2 |> Option.map add1    // Some 3 
 [1;2;3] |> List.map add1     // [2; 3; 4]
 ```
 
-### The properties of a correct map implementation
+### 正しいmap実装の特徴
 
-I said earlier that the elevated world is in some ways a mirror of the normal world. Every function in the normal world has a corresponding function in the elevated world,
-and so on. We want `map` to return this corresponding elevated function in a sensible way.
+高次の世界は、ある意味で通常の世界を映し出しています。通常の世界の関数には、高次の世界に対応する関数があります。
+`map`は、この対応関係を適切に保つ必要があります。
 
-For example, `map` of `add` should not (wrongly) return the elevated version of `multiply`, and `map` of `lowercase` should not return the elevated version of `uppercase`!
-But how can we be *sure* that a particular implementation of map does indeed return the *correct* corresponding function?
+例えば、`add`の`map`が誤って`multiply`の高次版を返したり、`lowercase`の`map`が`uppercase`の高次版を返したりしてはいけません。
+では、あるmap実装が本当に*正しい*対応関数を返しているかを、どうやって*確認*できるでしょうか？
 
-In [my post on property based testing](http://fsharpforfunandprofit.com/pbt/) I showed how a correct implementation of a function can be defined and tested using general properties rather than specific examples.
+[プロパティベーステストに関する私の投稿](http://fsharpforfunandprofit.com/pbt/)で説明したように、関数の正しい実装は、特定の例ではなく一般的な特性を使って定義し、テストすることができます。
 
-This is true for `map` as well. The implementation will vary with the specific elevated world, but in all cases,
-there are certain properties that the implementation should satisfy to avoid strange behavior.
+これは`map`にも当てはまります。
+実装は特定の高次の世界によって異なりますが、どの場合も、奇妙な動作を避けるために満たすべき特定の特性があります。
 
-First, if you take the `id` function in the normal world, and you lift it into the elevated world with `map`,
-the new function must be the *same* as the `id` function in the elevated world.
+まず、通常の世界の`id`関数を`map`で高次の世界に持ち上げると、
+結果の関数は高次の世界の`id`関数と*同じ*になるはずです。
 
 ![](../assets/img/vgfp_functor_law_id.png)
 
-Next, if you take two functions `f` and `g` in the normal world, and you compose them (into `h`, say), and then lift the resulting function using `map`,
-the resulting function should be the *same* as if you lifted `f` and `g` into the elevated world *first*, and then composed them there afterwards.
+次に、通常の世界で2つの関数`f`と`g`を取り、それらを合成して（例えば`h`とする）、その結果を`map`で持ち上げると、
+得られる関数は、`f`と`g`を*別々に*高次の世界に持ち上げてから合成した場合と*同じ*になるはずです。
 
 ![](../assets/img/vgfp_functor_law_compose.png)
 
-These two properties are the so-called ["Functor Laws"](https://en.wikibooks.org/wiki/Haskell/The_Functor_class#The_functor_laws),
-and a **Functor** (in the programming sense) is defined as a generic data type -- `E<T>` in our case -- plus a `map` function that obeys the functor laws.
+これら2つの特性は「[ファンクター則](https://en.wikibooks.org/wiki/Haskell/The_Functor_class#The_functor_laws)」と呼ばれ、
+**ファンクター**（プログラミングの文脈で）は、ジェネリックなデータ型 -- ここでは`E<T>` -- とファンクター則に従う`map`関数のペアとして定義されます。
 
-*NOTE: "Functor" is a confusing word. There is "functor" in the category theory sense, and there is "functor" in the programming sense (as defined above).
-There are also things called "functors" defined in libraries, such as [the `Functor` type class in Haskell](https://hackage.haskell.org/package/base-4.7.0.2/docs/Data-Functor.html),
-and the [`Functor` trait in Scalaz](https://scalaz.github.io/scalaz/scalaz-2.9.0-1-6.0/doc.sxr/scalaz/Functor.scala.html), 
-not to mention functors in SML and [OCaml](https://realworldocaml.org/v1/en/html/functors.html) (and [C++](http://www.cprogramming.com/tutorial/functors-function-objects-in-c++.html)),
-which are different yet again!*
+*注意：「ファンクター」という言葉は混乱を招きやすいです。圏論の意味でのファンクターと、プログラミングの意味でのファンクター（上記で定義）があります。
+さらに、ライブラリで定義された「ファンクター」もあります。
+例えば、[HaskellのFunctor型クラス](https://hackage.haskell.org/package/base-4.7.0.2/docs/Data-Functor.html)や、[ScalazのFunctorトレイト](https://scalaz.github.io/scalaz/scalaz-2.9.0-1-6.0/doc.sxr/scalaz/Functor.scala.html)です。
+SMLや[OCaml](https://realworldocaml.org/v1/en/html/functors.html)（そして[C++](http://www.cprogramming.com/tutorial/functors-function-objects-in-c++.html)）のファンクターには触れませんが、
+これらはまた別物です！*
 
-*Conseqently, I prefer to talk about "mappable" worlds. In practical programming, you will almost never run into a elevated world that does not support being mapped over somehow.*
+*そのため、私は「マッピング可能な」世界について話すことを好みます。実際のプログラミングでは、何らかの形でマッピングできない高次の世界を見つけるのは難しいでしょう。*
 
-### Variants of map
+### mapの変種
 
-There are some variants of map that are common:
+mapにはよく使われる変種がいくつかあります。
 
-* **Const map**. A const or "replace-by" map replaces all values with a constant rather than the output of a function.
-  In some cases, a specialized function like this can allow for a more efficient implementation.
-* **Maps that work with cross-world functions**. The map function `a->b` lives entirely in the normal world. But what if the function you want to map with
-  does not return something in the normal world, but a value in another, different, enhanced world?  We'll see how to address this challenge in [a later post](../posts/elevated-world-4.md).
+* **定数map**。定数map（別名を「置換」map）は、関数の出力ではなく定数ですべての値を置き換えます。
+  場合によっては、このような特殊な関数を使うとより効率的な実装が可能です。
+* **世界をまたぐ関数を扱うmap**。map関数`a->b`は完全に通常の世界に属しています。しかし、マッピングしたい関数が
+  通常の世界に戻らず、別の高次の世界の値を返す場合はどうでしょうか？ この課題への対処方法は[後の投稿](../posts/elevated-world-4.md)で見ていきます。
 
 <a id="return"></a>
 <hr>
