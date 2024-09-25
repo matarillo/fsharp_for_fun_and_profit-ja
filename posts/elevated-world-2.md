@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "bind を理解する"
-description: "または、異世界をつなぐ関数を合成する方法"
+description: "または、世界をまたぐ関数を合成する方法"
 categories: ["Patterns"]
 seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 2

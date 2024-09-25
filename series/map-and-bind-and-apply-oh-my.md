@@ -19,7 +19,7 @@ seriesIndexId: "Map, Bind, Apply なにもわからない"
 
 
 * [map と apply を理解する](../posts/elevated-world.md)。高次の世界を扱うためのツールセット。
-* [bind を理解する](../posts/elevated-world-2.md)。または、異世界をつなぐ関数を合成する方法。
+* [bind を理解する](../posts/elevated-world-2.md)。または、世界をまたぐ関数を合成する方法。
 * [コア関数の実際的な使い方](../posts/elevated-world-3.md)。独立したデータと依存したデータの扱い方。
 * [traverse と sequence を理解する](../posts/elevated-world-4.md)。リストと高次の値を混ぜる。
 * [map, apply, bind, sequence の実際的な使い方](../posts/elevated-world-5.md)。テクニックをすべて使う実践例。
