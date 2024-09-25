@@ -235,7 +235,7 @@ Some 2 |> Option.map add1    // Some 3
 例えば、`add`の`map`が誤って`multiply`の高次版を返したり、`lowercase`の`map`が`uppercase`の高次版を返したりしてはいけません。
 では、あるmap実装が本当に*正しい*対応関数を返しているかを、どうやって*確認*できるでしょうか？
 
-[プロパティベーステストに関する私の投稿](http://fsharpforfunandprofit.com/pbt/)で説明したように、関数の正しい実装は、特定の例ではなく一般的な特性を使って定義し、テストすることができます。
+[プロパティベーステストに関する私の投稿](https://fsharpforfunandprofit.com/pbt/)で説明したように、関数の正しい実装は、特定の例ではなく一般的な特性を使って定義し、テストすることができます。
 
 これは`map`にも当てはまります。
 実装は特定の高次の世界によって異なりますが、どの場合も、奇妙な動作を避けるために満たすべき特定の特性があります。
@@ -251,12 +251,12 @@ Some 2 |> Option.map add1    // Some 3
 ![](../assets/img/vgfp_functor_law_compose.png)
 
 これら2つの特性は「[ファンクター則](https://en.wikibooks.org/wiki/Haskell/The_Functor_class#The_functor_laws)」と呼ばれ、
-**ファンクター**（プログラミングの文脈で）は、ジェネリックなデータ型 -- ここでは`E<T>` -- とファンクター則に従う`map`関数のペアとして定義されます。
+**ファンクター**（プログラミングの文脈で）は、ジェネリックなデータ型（ここでは`E<T>`）とファンクター則に従う`map`関数のペアとして定義されます。
 
 *注意：「ファンクター」という言葉は混乱を招きやすいです。圏論の意味でのファンクターと、プログラミングの意味でのファンクター（上記で定義）があります。
 さらに、ライブラリで定義された「ファンクター」もあります。
 例えば、[HaskellのFunctor型クラス](https://hackage.haskell.org/package/base-4.7.0.2/docs/Data-Functor.html)や、[ScalazのFunctorトレイト](https://scalaz.github.io/scalaz/scalaz-2.9.0-1-6.0/doc.sxr/scalaz/Functor.scala.html)です。
-SMLや[OCaml](https://realworldocaml.org/v1/en/html/functors.html)（そして[C++](http://www.cprogramming.com/tutorial/functors-function-objects-in-c++.html)）のファンクターには触れませんが、
+SMLや[OCaml](https://realworldocaml.org/v1/en/html/functors.html)（そして[C++](https://www.cprogramming.com/tutorial/functors-function-objects-in-c++.html)）のファンクターには触れませんが、
 これらはまた別物です！*
 
 *そのため、私は「マッピング可能な」世界について話すことを好みます。実際のプログラミングでは、何らかの形でマッピングできない高次の世界を見つけるのは難しいでしょう。*
@@ -659,7 +659,7 @@ combineList [1;2] []
 ```
 
 欠けている値や不正な値を無視する別の種類の結合器を作ることも可能です。数値に「0」を足すのが無視されるのと同じような感じです。
-詳しい情報は、["涙なしのモノイド"](../posts/monoids-without-tears.md)に関する私の投稿をご覧ください。
+詳しい情報は、「[つらくないモノイド]」(../posts/monoids-without-tears.md)に関する私の投稿をご覧ください。
 
 ### 片側結合器 `<*` と `*>` 
 
