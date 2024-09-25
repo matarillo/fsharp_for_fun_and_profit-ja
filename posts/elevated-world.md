@@ -792,38 +792,38 @@ let resultAdd =
 
 最初のリストに`add`関数を1つだけ入れることはできない点に注意してください。2番目と3番目のリストの各要素に対して1つの`add`が必要になります！
 
-That could get annoying, so often, a "tupled" version of `zip` is used, whereby you don't specify a combining function at all, and just get back a list of tuples instead,
-which you can then process later using `map`.
-This is the same approach as was used in the `combine` functions discussed above, but for `zipList`.
+このやり方は少し面倒かもしれません。そのため、よく使われるのが`zip`の「タプル化」バージョンです。このバージョンでは、結合関数を指定する必要がなく、代わりにタプルのリストが返されます。
+このタプルのリストは、後から`map`を使って処理できます。
+これは、先ほど説明した`combine`関数で用いたアプローチと同じですが、`zipList`に適用したものです。
 
-### ZipList world 
+### ZipList世界 
 
-In standard List world, there is an `apply` and a `return`. But with our different version of `apply` we can create a different version of List world
-called ZipList world.
+標準のリスト世界には`apply`と`return`がありますが、先ほど見た異なるバージョンの`apply`を使うと、
+ZipList世界と呼ばれる、リストの別バージョンの世界を作れます。
 
-ZipList world is quite different from the standard List world.
+ZipList世界は標準のリスト世界とはかなり異なります。
 
-In ZipList world, the `apply` function is implemented as above. But more interestingly, ZipList world has a *completely different*
-implementation of `return` compared with standard List world.
-In the standard List world, `return` is just a list with a single element, but for
-ZipList world, it has to be an infinitely repeated value!  
+ZipList世界の`apply`関数は先ほど説明したように実装されますが、より興味深いのは`return`の実装です。
+ZipList世界の`return`は標準のリスト世界とは*まったく異なり*、
+単一要素のリストではなく
+無限に繰り返される値でなければなりません！
 
-In a non-lazy language like F#, we can't do this, but if we replace `List` with `Seq` (aka `IEnumerable`) then
-we *can* create an infinitely repeated value, as shown below:
+F#のような非遅延言語ではこれを直接実現できませんが、`List`を`Seq`（別名`IEnumerable`）に置き換えれば、
+次のように無限に繰り返される値を作成できます。
 
 ```fsharp
 module ZipSeq =
 
-    // define "return" for ZipSeqWorld
+    // ZipSeq世界の"return"を定義
     let retn x = Seq.initInfinite (fun _ -> x)
 
-    // define "apply" for ZipSeqWorld
-    // (where we can define apply in terms of "lift2", aka "map2")
+    // ZipSeq世界の"apply"を定義
+    // （ここでは"lift2"、別名"map2"を使ってapplyを定義できます）
     let apply fSeq xSeq  = 
         Seq.map2 (fun f x -> f x)  fSeq xSeq  
-    // has type : ('a -> 'b) seq -> 'a seq -> 'b seq
+    // 型：('a -> 'b) seq -> 'a seq -> 'b seq
 
-    // define a sequence that is a combination of two others
+    // 2つのシーケンスを組み合わせた新しいシーケンスを定義
     let triangularNumbers = 
         let (<*>) = apply
 
@@ -832,33 +832,33 @@ module ZipSeq =
         let squareNumbers = Seq.initInfinite (fun i -> i * i)
         (retn addAndDivideByTwo) <*> numbers <*> squareNumbers 
 
-    // evaulate first 10 elements 
-    // and display result            
+    // 最初の10要素を評価し
+    // 結果を表示            
     triangularNumbers |> Seq.take 10 |> List.ofSeq |> printfn "%A"
-    // Result =>
+    // 結果 =>
     // [0; 1; 3; 6; 10; 15; 21; 28; 36; 45]
 ```
 
-This example demonstrates that an elevated world is *not* just a data type (like the List type) but consists of the datatype *and* the functions that work with it.
-In this particular case, "List world" and "ZipList world" share the same data type but have quite different environments.
+この例は、高次の世界がデータ型（リスト型など）だけでなく、そのデータ型と共に働く関数で構成されることを示しています。
+この特定のケースでは、「リスト世界」と「ZipList世界」は同じデータ型を共有していますが、かなり異なる環境を持っています。
 
-## What types support `map` and `apply` and `return`?
+## どのような型が`map`と`apply`と`return`をサポートしているか？
 
-So far we have defined all these useful functions in an abstract way.
-But how easy is it to find real types that have implementations of them, including all the various laws?
+ここまで、これらの便利な関数をすべて抽象的な方法で定義してきました。
+では、これらの関数のすべて（および様々な法則）の実装を持つ実際の型を見つけるのは、どれほど簡単でしょうか？
 
-The answer is: very easy! In fact *almost all* types support these set of functions. You'd be hard-pressed to find a useful type that didn't. 
+答えは、とても簡単です！実際、*ほとんどすべての*型がこれらの関数のセットをサポートしています。むしろ、これらをサポートしていない有用な型を見つけるのが難しいほどです。
 
-That means that `map` and `apply` and `return` are available (or can be easily implemented) for standard types such as `Option`, `List`, `Seq`, `Async`, etc.,
-and also any types you are likely to define yourself.
+つまり、`map`と`apply`と`return`は、`Option`、`List`、`Seq`、`Async`などの標準的な型で利用可能（または簡単に実装可能）であり、
+さらに、あなたが自分で定義する可能性のある型でも同様にサポートできるということです。
 
-## Summary
+## まとめ
 
-In this post, I described three core functions for lifting simple "normal" values to elevated worlds:  `map`, `return`, and `apply`,
-plus some derived functions like `liftN` and `zip`.
+この投稿では、単純な「通常の」値を高次の世界に持ち上げるための3つのコア関数について説明しました。`map`、`return`、`apply`、
+そして`liftN`や`zip`のような派生関数です。
 
-In practice however, things are not that simple. We frequently have to work with functions that cross between the worlds.
-Their input is in the normal world but their output is in the elevated world.
+しかし実際には、事態はそれほど単純ではありません。世界をまたぐ関数を頻繁に扱う必要があるのです。
+これらの関数の入力は通常の世界にありますが、出力は高次の世界にあります。
 
-In the [next post](../posts/elevated-world-2.md) we'll show how these world-crossing functions can be lifted to the elevated world as well.
+[次の投稿](../posts/elevated-world-2.md)では、これらの世界をまたぐ関数も高次の世界に持ち上げる方法を紹介します。
 
