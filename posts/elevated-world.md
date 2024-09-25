@@ -682,7 +682,7 @@ let ( *> ) x y =
 [1;2] *> [3;4;5]   // [3; 4; 5; 3; 4; 5]
 ```
 
-We can turn this into a feature! We can replicate a value N times by crossing it with `[1..n]`.
+これを機能として活用できます！ある値をN回繰り返すには、`[1..n]`と組み合わせるだけです。
 
 ```fsharp
 let repeat n pattern =
@@ -698,70 +698,70 @@ replicate 5 "A"
 // ["A"; "A"; "A"; "A"; "A"]
 ```
 
-Of course, this is by no means an efficient way to replicate a value, but it does show that starting with just the two functions `apply` and `return`,
-you can build up some quite complex behavior.
+もちろん、これは値を複製する効率的な方法ではありません。
+ただ、`apply`と`return`という2つの関数から始めて、かなり複雑な動作を構築できることを示しています。
 
-On a more practical note though, why might this "throwing away data" be useful? Well in many cases, we might not want the values, but we *do* want the effects.
+では、より実用的な観点から、このような「データを捨てる」操作がなぜ役立つのでしょうか？多くの場合、値そのものは必要ないけれど、その効果は欲しい場合があります。
 
-For example, in a parser, you might see code like this:
+例えば、パーサーでは次のようなコードをよく目にします。
 
 ```fsharp
 let readQuotedString =
    readQuoteChar *> readNonQuoteChars <* readQuoteChar
 ```
 
-In this snippet, `readQuoteChar` means "match and read a quote character from the input stream" and
-`readNonQuoteChars` means "read a series of non-quote characters from the input stream".
+このスニペットで、`readQuoteChar`は「入力ストリームから引用符を見つけて読み取る」ことを意味し、
+`readNonQuoteChars`は「入力ストリームから引用符以外の文字列を読み取る」ことを意味します。
 
-When we are parsing a quoted string we want ensure the input stream that contains the quote character is read,
-but we don't care about the quote characters themselves, just the inner content.
+引用符で囲まれた文字列をパースする際、引用符を含む入力ストリームが確実に読み取られることを確認したいですが、
+引用符自体には興味がなく、内部の内容だけが欲しいのです。
 
-Hence the use of `*>` to ignore the leading quote and `<*` to ignore the trailing quote.
+そのため、先頭の引用符を無視するために`*>`を使い、末尾の引用符を無視するために`<*`を使っています。
 
 
 <a id="zip"></a>
 <hr>
 
-## The `zip` function and ZipList world
+## `zip`関数とZipList世界
 
-**Common Names**: `zip`, `zipWith`, `map2`
+**一般的な名前** `zip`、`zipWith`、`map2`
 
-**Common Operators**: `<*>` (in the context of ZipList world)
+**一般的な演算子** `<*>`（ZipList世界の文脈で）
 
-**What it does**:  Combines two lists (or other enumerables) using a specified function 
+**機能**  指定された関数を使って2つのリスト（または他の列挙可能なもの）を組み合わせます
 
-**Signature**:  `E<(a->b->c)> -> E<a> -> E<b> -> E<c>` where `E` is a list or other enumerable type,
-   or `E<a> -> E<b> -> E<a,b>` for the tuple-combined version.
+**シグネチャ**  `E<(a->b->c)> -> E<a> -> E<b> -> E<c>`（Eはリストまたは他の列挙可能な型）、
+   またはタプルで組み合わせる版では `E<a> -> E<b> -> E<a,b>`
 
-### Description
+### 説明
 
-Some data types might have more than one valid implementation of `apply`. For example, there is another possible implementation of `apply` for lists,
-commonly called `ZipList` or some variant of that.
+一部のデータ型では、`apply`の有効な実装が複数存在する可能性があります。
+例えば、リストには`ZipList`や類似の名前でよく知られる、もう1つの`apply`の実装があります。
 
-In this implementation, the corresponding elements in each list are processed at the same time, and then both lists are shifted to get the next element. 
-That is, the list of functions `[f; g]` applied to the list of values `[x; y]` becomes the two-element list `[f x; g y]`
+この実装では、各リストの対応する要素が同時に処理され、次の要素に移るために両方のリストが一緒にシフトされます。
+つまり、関数のリスト`[f; g]`を値のリスト`[x; y]`に適用すると、2要素のリスト`[f x; g y]`になります。
 
 ```fsharp
-// alternate "zip" implementation
-// [f;g] apply [x;y] becomes [f x; g y]
+// 代替の「zip」実装
+// [f;g] apply [x;y] は [f x; g y] になる
 let rec zipList fList xList  = 
     match fList,xList with
     | [],_ 
     | _,[] -> 
-        // either side empty, then done
+        // どちらかの側が空なら終了
         []  
     | (f::fTail),(x::xTail) -> 
-        // new head + new tail
+        // 新しいhead + 新しいtail
         (f x) :: (zipList fTail xTail)
-// has type : ('a -> 'b) -> 'a list -> 'b list
+// 型：('a -> 'b) -> 'a list -> 'b list
 ```
 
-*WARNING: This implementation is just for demonstration. It's not tail-recursive, so don't use it for large lists!*
+*注意：この実装はデモンストレーション用です。末尾再帰ではないので、大きなリストには使用しないでください！*
 
-If the lists are of different lengths, some implementations throw an exception (as the F# library functions `List.map2` and `List.zip` do),
-while others silently ignore the extra data (as the implementation above does).
+リストの長さが異なる場合の挙動は実装によって異なります。F#ライブラリ関数の`List.map2`や`List.zip`のように例外をスローするものもあれば、
+上記の実装のように余分なデータを静かに無視するものもあります。
 
-Ok, let's see it in use:
+では、実際に使ってみましょう。
 
 ```fsharp
 let add10 x = x + 10
@@ -774,11 +774,11 @@ let result =
 // result => [11; 22; 33]
 ```
 
-Note that the result is `[11; 22; 33]` -- only three elements. If we had used the standard `List.apply`, there would have been nine elements.
+結果が`[11; 22; 33]`、つまり3要素だけになっていることに注目してください。標準の`List.apply`を使っていたら、9要素になっていたでしょう。
 
-### Interpreting "zip" as a "combiner"
+### 「zip」を「結合器」として解釈する
 
-We saw above that `List.apply`, or rather `List.lift2`, could be intepreted as a combiner. Similarly, so can `zipList`. 
+先ほど`List.apply`、より正確には`List.lift2`を結合器として解釈できることを見ました。同様に、`zipList`も結合器として考えることができます。
 
 ```fsharp
 let add x y = x + y
@@ -790,7 +790,7 @@ let resultAdd =
 // [ (add 1 10); (add 2 20) ]
 ```
 
-Note that we can't just have *one* `add` function in the first list -- we have to have one `add` for every element in the second and third lists!  
+最初のリストに`add`関数を1つだけ入れることはできない点に注意してください。2番目と3番目のリストの各要素に対して1つの`add`が必要になります！
 
 That could get annoying, so often, a "tupled" version of `zip` is used, whereby you don't specify a combining function at all, and just get back a list of tuples instead,
 which you can then process later using `map`.
