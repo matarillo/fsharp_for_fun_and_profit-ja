@@ -1,7 +1,7 @@
 ---
 layout: series_index
 title: "Map, Bind, Apply を理解する"
-seriesIndexId: "Map, Bind, Apply, 大変だ！"
+seriesIndexId: "Map, Bind, Apply なにもわからない"
 ---
 
 この連載では、ジェネリックなデータ型（`Option`や`List`など）を扱うための核となる関数をいくつか説明します。
@@ -18,10 +18,10 @@ seriesIndexId: "Map, Bind, Apply, 大変だ！"
 
 
 
-* [[map と apply を理解する](../posts/elevated-world.md)。高次の世界を扱うためのツールセット。
+* [map と apply を理解する](../posts/elevated-world.md)。高次の世界を扱うためのツールセット。
 * [bind を理解する](../posts/elevated-world-2.md)。または、異世界をつなぐ関数を合成する方法。
 * [コア関数の実際的な使い方](../posts/elevated-world-3.md)。独立したデータと依存したデータの扱い方。
 * [traverse と sequence を理解する](../posts/elevated-world-4.md)。リストと高次の値を混ぜる。
-* [map, apply, bind, sequence の実際的な使い方](../posts/elevated-world-5.md)。全ての技法を使う実践例。
+* [map, apply, bind, sequence の実際的な使い方](../posts/elevated-world-5.md)。テクニックをすべて使う実践例。
 * [Reader モナドの再発明](../posts/elevated-world-6.md)。または、自分だけの高次の世界をデザインする。
 * [Map, Bind, Apply のまとめ](../posts/elevated-world-7.md)。

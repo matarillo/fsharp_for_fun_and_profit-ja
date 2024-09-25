@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Understanding traverse and sequence"
-description: "Mixing lists and elevated values"
+title: "traverse と sequence を理解する"
+description: "リストと高次の値を混ぜる"
 categories: ["Patterns"]
-seriesId: "Map and Bind and Apply, Oh my!"
+seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 4
 image: "/assets/img/vgfp_sequence_stack.png"
 ---

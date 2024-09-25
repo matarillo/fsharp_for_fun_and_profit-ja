@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Understanding map and apply"
-description: "A toolset for working with elevated worlds"
+title: "map と apply を理解する"
+description: "高次の世界を扱うためのツールセット"
 categories: ["Patterns"]
-seriesId: "Map and Bind and Apply, Oh my!"
+seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 1
 image: "/assets/img/vgfp_map.png"
 ---

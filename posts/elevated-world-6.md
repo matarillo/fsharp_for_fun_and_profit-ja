@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Reinventing the Reader monad"
-description: "Or, designing your own elevated world"
+title: "Reader モナドの再発明"
+description: "または、自分だけの高次の世界をデザインする"
 categories: ["Patterns"]
-seriesId: "Map and Bind and Apply, Oh my!"
+seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 6
 ---
 

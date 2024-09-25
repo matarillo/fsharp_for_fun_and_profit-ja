@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Using map, apply, bind and sequence in practice"
-description: "A real-world example that uses all the techniques"
+title: "map, apply, bind, sequence の実際的な使い方"
+description: "テクニックをすべて使う実践例"
 categories: ["Patterns"]
-seriesId: "Map and Bind and Apply, Oh my!"
+seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 5
 ---
 

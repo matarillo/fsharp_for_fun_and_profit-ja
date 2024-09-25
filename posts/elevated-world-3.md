@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Using the core functions in practice"
-description: "Working with independent and dependent data"
+title: "コア関数の実際的な使い方"
+description: "独立したデータと依存したデータの扱い方"
 categories: ["Patterns"]
-seriesId: "Map and Bind and Apply, Oh my!"
+seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 3
 image: "/assets/img/vgfp_rop_before.png"
 ---

@@ -156,7 +156,7 @@
   * [フランケンファンクター博士とモナド怪物](posts/monadster.md)
   * [モナド怪物の体を完成させる](posts/monadster-2.md)
   * [モナド怪物のリファクタリング](posts/monadster-3.md)
-* [「Map, Bind, Apply, 大変だ！」 シリーズ](series/map-and-bind-and-apply-oh-my.md)       
+* [「Map, Bind, Apply なにもわからない」 シリーズ](series/map-and-bind-and-apply-oh-my.md)       
   * [map と apply を理解する](posts/elevated-world.md)
   * [bind を理解する](posts/elevated-world-2.md)
   * [コア関数の実際的な使い方](posts/elevated-world-3.md)

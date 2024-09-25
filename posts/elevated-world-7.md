@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Map and Bind and Apply, a summary"
+title: "Map, Bind, Apply のまとめ"
 description: ""
 categories: ["Patterns"]
-seriesId: "Map and Bind and Apply, Oh my!"
+seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 7
 ---
 

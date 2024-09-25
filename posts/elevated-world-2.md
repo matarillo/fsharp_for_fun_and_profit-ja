@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Understanding bind"
-description: "Or, how to compose world-crossing functions"
+title: "bind を理解する"
+description: "または、異世界をつなぐ関数を合成する方法"
 categories: ["Patterns"]
-seriesId: "Map and Bind and Apply, Oh my!"
+seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 2
 image: "/assets/img/vgfp_bind.png"
 ---
