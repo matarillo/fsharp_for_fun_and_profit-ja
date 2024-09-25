@@ -542,130 +542,130 @@ addTripleOpt (Some 1) (Some 2) (Some 3)
 // 結果 => Some 6
 ```
 
-### Interpreting "lift2" as a "combiner"
+### 「lift2」を「結合器」として見る
 
-There is an alternative interpretation of `apply` as a "combiner" of elevated values, rather than as function application.
+`apply`には、関数適用とは別の見方があります。それは、高次の値を結合する「結合器」としての見方です。
 
-For example, when using `lift2`, the first parameter is a parameter specifying how to combine the values.
+例えば、`lift2`を使う場合、最初のパラメータは組み合わせ方を指定します。
 
-Here's an example where the same values are combined in two different ways: first with addition, then with multiplication.
+次の例では、同じ値を2つの異なる方法で組み合わています。最初は加算で、次は乗算です。
 
 ```fsharp
 Option.lift2 (+) (Some 2) (Some 3)   // Some 5
 Option.lift2 (*) (Some 2) (Some 3)   // Some 6
 ```
 
-Going further, can we eliminate the need for this first function parameter and have a *generic* way of combining the values?
+さらに一歩進んで、この最初の関数パラメータを取り除き、値を*汎用的に*組み合わせる方法はないでしょうか。
 
-Why, yes we can! We can just use a tuple constructor to combine the values.
-When we do this we are combining the values without making any decision about how they will be used yet.
+実はあります。タプルコンストラクタを使って値を組み合わせるのです。
+こうすることで、値の使い方をまだ決めずに組み合わせられます。
 
-Here's what it looks like in a diagram:
+図で表すとこんな感じです。
 
 ![](../assets/img/vgfp_apply_combine.png)
 
-and here's how you might implement it for options and lists:
+オプションとリスト用の実装例を見てみましょう。
 
 ```fsharp
-// define a tuple creation function
+// タプル作成関数を定義
 let tuple x y = x,y
 
-// create a generic combiner of options
-// with the tuple constructor baked in
+// タプルコンストラクタを組み込んだ
+// オプション用の汎用結合器を作成
 let combineOpt x y = Option.lift2 tuple x y 
 
-// create a generic combiner of lists
-// with the tuple constructor baked in
+// タプルコンストラクタを組み込んだ
+// リスト用の汎用結合器を作成
 let combineList x y = List.lift2 tuple x y 
 ```
 
-Let's see what happens when we use the combiners:
+これらの結合器を使うとどうなるか見てみましょう。
 
 ```fsharp
 combineOpt (Some 1) (Some 2)        
-// Result => Some (1, 2)
+// 結果 => Some (1, 2)
 
 combineList [1;2] [100;200]         
-// Result => [(1, 100); (1, 200); (2, 100); (2, 200)]
+// 結果 => [(1, 100); (1, 200); (2, 100); (2, 200)]
 ```
 
-Now that we have an elevated tuple, we can work with the pair in any way we want, we just need to use `map` to do the actual combining.
+高次のタプルができたので、あとは`map`を使って好きな方法でペアを処理できます。
 
-Want to add the values? Just use `+` in the `map` function:
+値を足したいなら、`map`関数で`+`を使うだけです。
 
 ```fsharp
 combineOpt (Some 2) (Some 3)        
 |> Option.map (fun (x,y) -> x + y)  
-// Result => // Some 5
+// 結果 => Some 5
 
 combineList [1;2] [100;200]         
 |> List.map (fun (x,y) -> x + y)    
-// Result => [101; 201; 102; 202]
+// 結果 => [101; 201; 102; 202]
 ```
 
-Want to multiply the values? Just use `*` in the `map` function:
+値を掛けたいなら、`map`関数で`*`を使います。
 
 ```fsharp
 combineOpt (Some 2) (Some 3)        
 |> Option.map (fun (x,y) -> x * y)  
-// Result => Some 6
+// 結果 => Some 6
 
 combineList [1;2] [100;200]         
 |> List.map (fun (x,y) -> x * y)    
-// Result => [100; 200; 200; 400]
+// 結果 => [100; 200; 200; 400]
 ```
 
-And so on. Obviously, real-world uses would be somewhat more interesting.
+このように、様々な処理が可能です。実際の使用例では、もっと複雑な操作を行うでしょう。
 
-### Defining `apply` in terms of `lift2`
+### lift2を使ってapplyを定義する
 
-Interestingly, the `lift2` function above can be actually used as an alternative basis for defining `apply`.
+面白いことに、上記の`lift2`関数を使って`apply`を定義することもできます。
 
-That is, we can define `apply` in terms of the `lift2` function by setting the combining function to be just function application.
+つまり、`lift2`関数を使って`apply`を定義できるのです。組み合わせ関数を単なる関数適用にするだけです。
 
-Here's a demonstration of how this works for `Option`:
+`Option`の場合、こんな感じになります。
 
 ```fsharp
 module Option = 
 
-    /// define lift2 from scratch
+    /// lift2をゼロから定義
     let lift2 f xOpt yOpt = 
         match xOpt,yOpt with
         | Some x,Some y -> Some (f x y)
         | _ -> None
 
-    /// define apply in terms of lift2
+    /// lift2を使ってapplyを定義
     let apply fOpt xOpt = 
         lift2 (fun f x -> f x) fOpt xOpt 
 ```
 
-This alternative approach is worth knowing about because for some types it's easier to define `lift2` than `apply`.
+この別のアプローチは覚えておく価値があります。というのも、一部の型では`apply`よりも`lift2`を定義する方が簡単だからです。
 
-### Combining missing or bad data
+### 欠けているデータや不正なデータの組み合わせ
 
-Notice that in all the combiners we've looked at, if one of the elevated values is "missing" or "bad" somehow, then the overall result is also bad.
+注目すべき点として、これまで見てきたすべての結合器には共通点があります。高次の値のどれかが「欠けている」か「不正」な場合、全体の結果も不正になるのです。
 
-For example, with `combineList`, if one of the parameters is an empty list, the result is also an empty list,
-and with `combineOpt`, if one of the parameters is `None`, the result is also `None`.
+例えば、`combineList`では、パラメータの1つが空リストの場合、結果も空リストになります。
+`combineOpt`では、パラメータの1つが`None`の場合、結果も`None`になります。
 
 ```fsharp
 combineOpt (Some 2) None    
 |> Option.map (fun (x,y) -> x + y)    
-// Result => None
+// 結果 => None
 
 combineList [1;2] []         
 |> List.map (fun (x,y) -> x * y)    
-// Result => Empty list
+// 結果 => 空リスト
 ```
 
-It's possible to create an alternative kind of combiner that ignores missing or bad values, just as adding "0" to a number is ignored.
-For more information, see my post on ["Monoids without tears"](../posts/monoids-without-tears.md).
+欠けている値や不正な値を無視する別の種類の結合器を作ることも可能です。数値に「0」を足すのが無視されるのと同じような感じです。
+詳しい情報は、["涙なしのモノイド"](../posts/monoids-without-tears.md)に関する私の投稿をご覧ください。
 
-### One sided combiners `<*` and `*>` 
+### 片側結合器 `<*` と `*>` 
 
-In some cases you might have two elevated values, and want to discard the value from one side or the other.
+場合によっては、2つの高次の値があり、どちらか一方の値を捨てたいことがあります。
 
-Here's an example for lists:
+リストの例を見てみましょう。
 
 ```fsharp
 let ( <* ) x y = 
@@ -675,7 +675,7 @@ let ( *> ) x y =
     List.lift2 (fun left right -> right) x y 
 ```
 
-We can then combine a 2-element list and a 3-element list to get a 6-element list as expected, but the contents come from only one side or the other.
+2要素のリストと3要素のリストを組み合わせると、期待通り6要素のリストができますが、内容は片側からだけ来ています。
 
 ```fsharp
 [1;2] <* [3;4;5]   // [1; 1; 1; 2; 2; 2]
