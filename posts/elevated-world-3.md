@@ -8,137 +8,137 @@ seriesOrder: 3
 image: "/assets/img/vgfp_rop_before.png"
 ---
 
-This post is the third in a series.
-In the [previous two posts](../posts/elevated-world.md), I described some of the core functions for dealing with generic data types: `map`, `apply`, `bind`, and so on.
+この投稿は、シリーズの3番目です。
+[前の2つの投稿](../posts/elevated-world.md)では、ジェネリックなデータ型を扱うためのコア関数について説明しました。`map`、`apply`、`bind`などです。
 
-In this post, I'll show how to use these functions in practice, and will explain the difference between the so-called "applicative" and "monadic" styles.
+今回の投稿では、これらの関数を実際にどう使うか、そして「アプリカティブ」スタイルと「モナディック」スタイルの違いについて説明します。
 
-## Series contents
+## シリーズの内容
 
-Here's a list of shortcuts to the various functions mentioned in this series:
+このシリーズで触れる様々な関数へのショートカットリストです。
 
-* **Part 1: Lifting to the elevated world**
-  * [The `map` function](../posts/elevated-world.md#map)
-  * [The `return` function](../posts/elevated-world.md#return)
-  * [The `apply` function](../posts/elevated-world.md#apply)
-  * [The `liftN` family of functions](../posts/elevated-world.md#lift)
-  * [The `zip` function and ZipList world](../posts/elevated-world.md#zip)
-* **Part 2: How to compose world-crossing functions**    
-  * [The `bind` function](../posts/elevated-world-2.md#bind)
-  * [List is not a monad. Option is not a monad.](../posts/elevated-world-2.md#not-a-monad)
-* **Part 3: Using the core functions in practice**  
-  * [Independent and dependent data](../posts/elevated-world-3.md#dependent)
-  * [Example: Validation using applicative style and monadic style](../posts/elevated-world-3.md#validation)
-  * [Lifting to a consistent world](../posts/elevated-world-3.md#consistent)
-  * [Kleisli world](../posts/elevated-world-3.md#kleisli)
-* **Part 4: Mixing lists and elevated values**    
-  * [Mixing lists and elevated values](../posts/elevated-world-4.md#mixing)
-  * [The `traverse`/`MapM` function](../posts/elevated-world-4.md#traverse)
-  * [The `sequence` function](../posts/elevated-world-4.md#sequence)
-  * ["Sequence" as a recipe for ad-hoc implementations](../posts/elevated-world-4.md#adhoc)
-  * [Readability vs. performance](../posts/elevated-world-4.md#readability)
-  * [Dude, where's my `filter`?](../posts/elevated-world-4.md#filter)
-* **Part 5: A real-world example that uses all the techniques**    
-  * [Example: Downloading and processing a list of websites](../posts/elevated-world-5.md#asynclist)
-  * [Treating two worlds as one](../posts/elevated-world-5.md#asyncresult)
-* **Part 6: Designing your own elevated world** 
-  * [Designing your own elevated world](../posts/elevated-world-6.md#part6)
-  * [Filtering out failures](../posts/elevated-world-6.md#filtering)
-  * [The Reader monad](../posts/elevated-world-6.md#readermonad)
-* **Part 7: Summary** 
-  * [List of operators mentioned](../posts/elevated-world-7.md#operators)
-  * [Further reading](../posts/elevated-world-7.md#further-reading)
+* **パート1：高次の世界への持ち上げ**
+  * [`map`関数](../posts/elevated-world.md#map)
+  * [`return`関数](../posts/elevated-world.md#return)
+  * [`apply`関数](../posts/elevated-world.md#apply)
+  * [`liftN`関数ファミリー](../posts/elevated-world.md#lift)
+  * [`zip`関数とZipList世界](../posts/elevated-world.md#zip)
+* **パート2：世界をまたぐ関数の合成方法**    
+  * [`bind`関数](../posts/elevated-world-2.md#bind)
+  * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.md#not-a-monad)
+* **パート3：コア関数の実際的な使い方**  
+  * [独立データと依存データ](../posts/elevated-world-3.md#dependent)
+  * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.md#validation)
+  * [一貫した世界への持ち上げ](../posts/elevated-world-3.md#consistent)
+  * [Kleisli世界](../posts/elevated-world-3.md#kleisli)
+* **パート4：リストと高次の値の混合**    
+  * [リストと高次の値の混合](../posts/elevated-world-4.md#mixing)
+  * [`traverse`/`MapM`関数](../posts/elevated-world-4.md#traverse)
+  * [`sequence`関数](../posts/elevated-world-4.md#sequence)
+  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.md#adhoc)
+  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.md#readability)
+  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.md#filter)
+* **パート5：全てのテクニックを使用する実世界の例**    
+  * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.md#asynclist)
+  * [2つの世界を1つとして扱う](../posts/elevated-world-5.md#asyncresult)
+* **パート6：独自の高次の世界の設計** 
+  * [独自の高次の世界の設計](../posts/elevated-world-6.md#part6)
+  * [失敗のフィルタリング](../posts/elevated-world-6.md#filtering)
+  * [Readerモナド](../posts/elevated-world-6.md#readermonad)
+* **パート7：まとめ** 
+  * [言及した演算子のリスト](../posts/elevated-world-7.md#operators)
+  * [さらなる読み物](../posts/elevated-world-7.md#further-reading)
 
 <a id="part2"></a>
 <hr>
 
-## Part 3: Using the core functions in practice
+## パート3：実践でのコア関数の使用
 
-Now that we have the basic tools for lifting normal values to elevated values and working with cross-world functions, it's time to start working with them!
+通常の値を高次の値に引き上げ、世界を超える関数を扱う基本的なツールを手に入れました。ここからは、これらを実際に使ってみましょう。
 
-In this section, we'll look at some examples how these functions are actually used.
+このセクションでは、これらの関数が実際にどのように使われるかを見ていきます。
 
 <a id="dependent"></a>
 <hr>
 
-## Independent vs. dependent data
+## 独立したデータと依存したデータ
 
-I briefly mentioned earlier that there is a important difference between using `apply` and `bind`. Let's go into this now.
+先ほど、`apply`と`bind`の使用には重要な違いがあると簡単に触れました。ここで詳しく見ていきましょう。
 
-When using `apply`, you can see that each parameter (`E<a>`, `E<b>`) is completely independent of the other. The value of `E<b>` does not depend on what `E<a>` is.
+`apply`を使う場合、各パラメータ（`E<a>`、`E<b>`）は完全に独立しています。`E<b>`の値は`E<a>`に依存しません。
 
 ![](../assets/img/vgfp_apply3.png)
 
-On the other hand, when using `bind`, the value of `E<b>` *does* depend on what `E<a>` is.
+一方、`bind`を使う場合、`E<b>`の値は`E<a>`に依存*します*。
 
 ![](../assets/img/vgfp_bind.png)
 
-The distinction between working with independent values or dependent values leads to two different styles:
+独立した値と依存した値を扱う違いにより、2つの異なるスタイルが生まれます。
 
-* The so-called "applicative" style uses functions such as `apply`, `lift`, and `combine` where each elevated value is independent.
-* The so-called "monadic" style uses functions such as `bind` to chain together functions that are dependent on a previous value.
+* いわゆる「アプリカティブ」スタイルでは、`apply`、`lift`、`combine`などの関数を使います。高次の値はそれぞれ独立しています。
+* いわゆる「モナディック」スタイルでは、`bind`などの関数を使って、前の値に依存する関数をつなげます。
 
-What does that mean in practice? Well, let's look at an example where you could choose from both approaches.
+実際にはどういう意味があるのでしょうか？両方のアプローチを選択できる例を見てみましょう。
 
-Say that you have to download data from three websites and combine them. And say that we have an action, say `GetURL`, that gets the data from a website on demand.
+3つのWebサイトからデータをダウンロードして組み合わせる必要があるとします。そして、`GetURL`というアクションがあり、これがオンデマンドでWebサイトからデータを取得するとします。
 
-Now you have a choice:
+ここで選択肢があります。
 
-* **Do you want to fetch all the URLs in parallel?**
-  If so, treat the `GetURL`s as independent data and use the applicative style. 
-* **Do you want to fetch each URL one at a time, and skip the next in line if the previous one fails?**
-  If so, treat the `GetURL`s as dependent data and use the monadic style. This linear approach will be slower overall
-  than the "applicative" version above, but will also avoid unnecessary I/O.
-* **Does the URL for the next site depend on what you download from the previous site?**
-  In this case, you are *forced* to use "monadic" style, because each `GetURL` depends on the output of the previous one.  
-  
-As you can see, the choice between applicative style and monadic style is not clear cut; it depends on what you want to do.
+* **全てのURLを並行してフェッチしたいですか？**
+  その場合、`GetURL`を独立したデータとして扱い、アプリカティブスタイルを使います。
+* **各URLを一度に1つずつフェッチし、前のフェッチが失敗した場合は次のフェッチをスキップしたいですか？**
+  その場合、`GetURL`を依存したデータとして扱い、モナディックスタイルを使います。
+  この線形アプローチは上記の「アプリカティブ」版よりも全体的に遅くなりますが、不要なI/Oを避けることができます。
+* **次のサイトのURLが前のサイトからダウンロードしたものに依存していますか？**
+  この場合、各`GetURL`が前の出力に依存するため、「モナディック」スタイルを*使わざるを得ません*。
 
-We'll look at a real implementation of this example in the [final post of this series](../posts/elevated-world-5.md#asynclist).
+見てわかるように、アプリカティブスタイルとモナディックスタイルの選択は明確ではありません。やりたいことによって変わります。
 
-**but...**
+この例の実際の実装は、[このシリーズの最終投稿](../posts/elevated-world-5.md#asynclist)で見ていきます。
 
-It's important to say that just because you *choose* a style doesn't mean it will be implemented as you expect. 
-As we have seen, you can easily implement `apply` in terms of `bind`, so even if you use `<*>` in your code, the implementation may be proceeding monadically.
+**ただし...**
 
-In the example above, the implementation does not have to run the downloads in parallel. It could run them serially instead.
-By using applicative style, you're just saying that you don't care about dependencies and so they *could* be downloaded in parallel.
+スタイルを*選択した*からといって、期待通りに実装されるとは限りません。
+既に見たように、`bind`を使って`apply`を簡単に実装できます。つまり、コードで`<*>`を使っていても、実装はモナディックに進行している可能性があります。
 
-### Static vs. dynamic structure
+上記の例では、実装がダウンロードを並行して実行する必要はありません。代わりに直列に実行することもできます。
+アプリカティブスタイルを使うことで、依存関係を気にせず、並行してダウンロード*できる*と言っているだけです。
 
-If you use the applicative style, that means that you define all the actions up front -- "statically", as it were.
+### 静的構造と動的構造
 
-In the downloading example, the applicative style requires that you specific *in advance* which URLs will be visited.
-And because there is more knowledge up front it means that we can potentially do things like parallelization or other optimizations.
+アプリカティブスタイルを使うと、全てのアクションを前もって定義することになります。いわば「静的」に定義するわけです。
 
-On the other hand, the monadic style means that only the initial action is known up front. The remainder of the actions are determined
-dynamically, based on the output of previous actions. This is more flexible, but also limits our ability to see the big picture in advance.
+ダウンロードの例では、アプリカティブスタイルでは、どのURLを訪れるかを*前もって*指定する必要があります。
+前もって多くの情報がわかるため、並列化やその他の最適化を潜在的に行うことができます。
 
-### Order of evaluation vs. dependency
+一方、モナディックスタイルでは、最初のアクションだけが前もってわかっています。
+残りのアクションは、前のアクションの出力に基づいて動的に決まります。これはより柔軟ですが、全体像を前もって把握する能力も制限されます。
 
-Sometimes *dependency* is confused with *order of evaluation*. 
+### 評価順序と依存関係
 
-Certainly, if one value depends on another then the first value must be evaluated before the second value.
-And in theory, if the values are completely independent (and have no side effects), then they can be evaluated in any order.
+時々、*依存関係*と*評価順序*が混同されることがあります。
 
-However, even if the values are completely independent, there can still be an *implicit* order in how they are evaluated.
+確かに、ある値が別の値に依存する場合、最初の値は2番目の値の前に評価されなければなりません。
+理論的には、値が完全に独立している（そして副作用がない）場合、どのような順序でも評価できます。
 
-For example, even if the list of `GetURL`s is done in parallel,
-it's likely that the urls will begin to be fetched in the order in which they are listed, starting with the first one. 
+しかし、値が完全に独立していても、評価方法に*暗黙の*順序がある場合があります。
 
-And in the `List.apply` implemented in the previous post, we saw that `[f; g] apply [x; y]` resulted in `[f x; f y; g x; g y]` rather than `[f x; g x; f y; g y]`.
-That is, all the `f` values are first, then all the `g` values.
+例えば、`GetURL`のリストが並行して行われる場合でも、
+URLは最初のものから順にリストされた順序でフェッチされ始める可能性が高いです。
 
-In general, then, there is a convention that values are evaluated in a left to right order, even if they are independent.
+そして、前回の投稿で実装した`List.apply`では、`[f; g] apply [x; y]`の結果は`[f x; g x; f y; g y]`ではなく`[f x; f y; g x; g y]`になりました。
+つまり、全ての`f`の値が最初に来て、次に全ての`g`の値が来ます。
+
+一般的に、値が独立していても、左から右の順序で評価されるという慣例があります。
 
 <a id="validation"></a>
 <hr>
 
-## Example: Validation using applicative style and monadic style 
+## 例：アプリカティブスタイルとモナディックスタイルを使用したバリデーション
 
-To see how both the applicative style and monadic style can be used, let's look at an example using validation.
+アプリカティブスタイルとモナディックスタイルの両方がどのように使用できるかを見るために、バリデーションの例を見てみましょう。
 
-Say that we have a simple domain containing a `CustomerId`, an `EmailAddress`, and a `CustomerInfo` which is a record containing both of these.
+`CustomerId`、`EmailAddress`、そしてこれら両方を含むレコードである`CustomerInfo`からなる簡単なドメインがあるとします。
 
 ```fsharp
 type CustomerId = CustomerId of int
@@ -149,12 +149,12 @@ type CustomerInfo = {
     }
 ```
 
-And let's say that there is some validation around creating a `CustomerId`. For example, that the inner `int` must be positive.
-And of course, there will be some validation around creating a `EmailAddress` too. For example, that it must contain an "@" sign at least.
+そして、`CustomerId`の作成にはバリデーションがあるとしましょう。例えば、内部の`int`は正の数でなければならないなどです。
+もちろん、`EmailAddress`の作成にもバリデーションがあります。例えば、少なくとも「@」記号を含んでいなければならないなどです。
 
-How would we do this?
+これをどのように実装しますか？
 
-First we create a type to represent the success/failure of validation.
+まず、バリデーションの成功/失敗を表す型を作ります。
 
 ```fsharp
 type Result<'a> = 
@@ -162,9 +162,9 @@ type Result<'a> =
     | Failure of string list
 ```
 
-Note that I have defined the `Failure` case to contain a *list* of strings, not just one. This will become important later.
+注意すべき点は、`Failure`ケースに文字列の*リスト*を含めていることです。これは後で重要になります。
 
-With `Result` in hand, we can go ahead and define the two constructor/validation functions as required:
+`Result`を手に入れたので、2つのコンストラクタ/バリデーション関数を定義できます。
 
 ```fsharp
 let createCustomerId id =
@@ -184,14 +184,14 @@ let createEmailAddress str =
 // string -> Result<EmailAddress>        
 ```
 
-Notice that `createCustomerId` has type `int -> Result<CustomerId>`, and `createEmailAddress` has type `string -> Result<EmailAddress>`.
+`createCustomerId`の型は`int -> Result<CustomerId>`で、`createEmailAddress`の型は`string -> Result<EmailAddress>`です。
 
-That means that both of these validation functions are world-crossing functions, going from the normal world to the `Result<_>` world.
+つまり、これらのバリデーション関数はどちらも世界をまたぐ関数で、通常の世界から`Result<_>`の世界に移動します。
 
 
-### Defining the core functions for `Result`
+### `Result`のコア関数の定義
 
-Since we are dealing with world-crossing functions, we know that we will have to use functions like `apply` and `bind`, so let's define them for our `Result` type.
+世界をまたぐ関数を扱っているので、`apply`や`bind`のような関数を使う必要があることがわかります。`Result`型に対してこれらを定義しましょう。
 
 ```fsharp
 module Result = 
@@ -202,12 +202,12 @@ module Result =
             Success (f x)
         | Failure errs ->
             Failure errs
-    // Signature: ('a -> 'b) -> Result<'a> -> Result<'b>
+    // シグネチャ：('a -> 'b) -> Result<'a> -> Result<'b>
 
-    // "return" is a keyword in F#, so abbreviate it
+    // "return"はF#のキーワードなので、省略形を使います
     let retn x = 
         Success x
-    // Signature: 'a -> Result<'a>
+    // シグネチャ：'a -> Result<'a>
 
     let apply fResult xResult = 
         match fResult,xResult with
@@ -218,9 +218,9 @@ module Result =
         | Success f, Failure errs ->
             Failure errs
         | Failure errs1, Failure errs2 ->
-            // concat both lists of errors
+            // 両方のエラーリストを連結します
             Failure (List.concat [errs1; errs2])
-    // Signature: Result<('a -> 'b)> -> Result<'a> -> Result<'b>
+    // シグネチャ：Result<('a -> 'b)> -> Result<'a> -> Result<'b>
 
     let bind f xResult = 
         match xResult with
@@ -228,47 +228,47 @@ module Result =
             f x
         | Failure errs ->
             Failure errs
-    // Signature: ('a -> Result<'b>) -> Result<'a> -> Result<'b>
+    // シグネチャ：('a -> Result<'b>) -> Result<'a> -> Result<'b>
 ```
 
-If we check the signatures, we can see that they are exactly as we want:
+シグネチャを確認すると、望んでいた通りになっています。
 
-* `map` has signature: `('a -> 'b) -> Result<'a> -> Result<'b>`
-* `retn` has signature: `'a -> Result<'a>`
-* `apply` has signature: `Result<('a -> 'b)> -> Result<'a> -> Result<'b>`
-* `bind` has signature: `('a -> Result<'b>) -> Result<'a> -> Result<'b>`
+* `map`のシグネチャ：`('a -> 'b) -> Result<'a> -> Result<'b>`
+* `retn`のシグネチャ：`'a -> Result<'a>`
+* `apply`のシグネチャ：`Result<('a -> 'b)> -> Result<'a> -> Result<'b>`
+* `bind`のシグネチャ：`('a -> Result<'b>) -> Result<'a> -> Result<'b>`
 
-I defined a `retn` function in the module to be consistent, but I don't bother to use it very often. The *concept* of `return` is important,
-but in practice, I'll probably just use the `Success` constructor directly. In languages with type classes, such as Haskell, `return` is used much more.
+モジュール内で`retn`関数を定義しましたが、あまり使わないかもしれません。`return`の*概念*は重要ですが、実際には`Success`コンストラクタを直接使うでしょう。
+Haskellのような型クラスを持つ言語では、`return`がもっと使われます。
 
-Also note that `apply` will concat the error messages from each side if both parameters are failures.
-This allows us to collect all the failures without discarding any. This is the reason why I made the `Failure` case have a list of strings, rather than a single string.
+また、`apply`は両方のパラメータが失敗の場合、各側のエラーメッセージを連結することに注意してください。
+これにより、エラーを捨てることなく全ての失敗を収集できます。`Failure`ケースに単一の文字列ではなく文字列のリストを持たせた理由はこれです。
 
-*NOTE: I'm using `string` for the failure case to make the demonstration easier. In a more sophisticated design I would list the possible failures explicitly.
-See my [functional error handling](http://fsharpforfunandprofit.com/rop/) talk for more details.*
+*注：デモを簡単にするため、失敗ケースに`string`を使っています。より洗練された設計では、可能な失敗を明示的にリストアップします。
+詳細は[関数型エラーハンドリング](http://fsharpforfunandprofit.com/rop/)の講演を参照してください。*
 
-### Validation using applicative style
+### アプリカティブスタイルを使ったバリデーション
 
-Now that we have have the domain and the toolset around `Result`, let's try using the applicative style to create a `CustomerInfo` record.
+`Result`に関するドメインとツールセットを手に入れたので、アプリカティブスタイルを使って`CustomerInfo`レコードを作成してみましょう。
 
-The outputs of the validation are already elevated to `Result`, so we know we'll need to use some sort of "lifting" approach to work with them.
+バリデーションの出力は既に`Result`に高次化されているので、それらを扱うには何らかの「リフティング」アプローチが必要だとわかります。
 
-First we'll create a function in the normal world that creates a `CustomerInfo` record given a normal `CustomerId` and a normal `EmailAddress`:
+まず、通常の`CustomerId`と通常の`EmailAddress`を受け取り、通常の世界で`CustomerInfo`レコードを作成する関数を作ります。
 ```fsharp
 let createCustomer customerId email = 
     { id=customerId;  email=email }
 // CustomerId -> EmailAddress -> CustomerInfo
 ```
 
-Note that the signature is `CustomerId -> EmailAddress -> CustomerInfo`.
+シグネチャは`CustomerId -> EmailAddress -> CustomerInfo`です。
 
-Now we can use the lifting technique with `<!>` and `<*>` that was explained in the previous post:
+ここで、前回の投稿で説明した`<!>`と`<*>`を使ったリフティング技法を使えます。
 
 ```fsharp
 let (<!>) = Result.map
 let (<*>) = Result.apply
 
-// applicative version
+// アプリカティブバージョン
 let createCustomerResultA id email = 
     let idResult = createCustomerId id
     let emailResult = createEmailAddress email
@@ -276,11 +276,11 @@ let createCustomerResultA id email =
 // int -> string -> Result<CustomerInfo>
 ```
 
-The signature of this shows that we start with a normal `int` and `string` and return a `Result<CustomerInfo>`
+このシグネチャを見ると、通常の`int`と`string`から始めて`Result<CustomerInfo>`を返すことがわかります。
 
 ![](../assets/img/vgfp_applicative_style.png)
 
-Let's try it out with some good and bad data:
+良いデータと悪いデータで試してみましょう。
 
 ```fsharp
 let goodId = 1
@@ -299,22 +299,22 @@ let badCustomerA =
 //   Failure ["CustomerId must be positive"; "Email must contain @-sign"]
 ```
 
-The `goodCustomerA` is a `Success` and contains the right data, but the `badCustomerA` is a `Failure` and contains two validation error messages. Excellent!
+`goodCustomerA`は`Success`で、正しいデータを含んでいます。一方、`badCustomerA`は`Failure`で、2つのバリデーションエラーメッセージを含んでいます。素晴らしい！
 
-### Validation using monadic style
+### モナディックスタイルを使ったバリデーション
 
-Now let's do another implementation, but this time using monadic style. In this version the logic will be:
+次に、モナディックスタイルを使って別の実装を行いましょう。このバージョンでは、以下のようなロジックになります。
 
-* try to convert an int into a `CustomerId`
-* if that is successful, try to convert a string into a `EmailAddress`
-* if that is successful, create a `CustomerInfo` from the customerId and email.
+* まず、intを`CustomerId`に変換しようとします。
+* それが成功したら、文字列を`EmailAddress`に変換しようとします。
+* それも成功したら、customerId と email から`CustomerInfo`を作成します。
 
-Here's the code:
+コードは以下の通りです。
 
 ```fsharp
 let (>>=) x f = Result.bind f x
 
-// monadic version
+// モナディックバージョン
 let createCustomerResultM id email = 
     createCustomerId id >>= (fun customerId ->
     createEmailAddress email >>= (fun emailAddress ->
@@ -324,8 +324,8 @@ let createCustomerResultM id email =
 // int -> string -> Result<CustomerInfo>
 ```
 
-The signature of the monadic-style `createCustomerResultM` is exactly the same as the applicative-style `createCustomerResultA` but internally it is doing something different,
-which will be reflected in the different results we get.
+モナディックスタイルの`createCustomerResultM`のシグネチャは、アプリカティブスタイルの`createCustomerResultA`と全く同じです。しかし、内部で行っていることが異なります。
+これは、得られる結果の違いに反映されます。
 
 ![](../assets/img/vgfp_monadic_style.png)
 
@@ -341,38 +341,38 @@ let badCustomerM =
 //   Failure ["CustomerId must be positive"]
 ```
 
-In the good customer case, the end result is the same, but in the bad customer case, only *one* error is returned, the first one.
-The rest of the validation was short circuited after the `CustomerId` creation failed.
+適切な顧客の場合、最終結果は同じですが、適切でない顧客の場合、エラーが*1つ*だけ返されます。最初のエラーです。
+`CustomerId`の作成が失敗した後、残りのバリデーションは短絡的に処理されました。
 
-### Comparing the two styles
+### 2つのスタイルの比較
 
-This example has demonstrated  the difference between applicative and monadic style quite well, I think. 
+この例は、アプリカティブスタイルとモナディックスタイルの違いをうまく示していると思います。
 
-* The *applicative* example did all the validations up front, and then combined the results.
-  The benefit was that we didn't lose any of the validation errors.
-  The downside was we did work that we might not have needed to do.
-  
+* *アプリカティブ*の例では、全てのバリデーションを前もって行い、その後で結果を組み合わせました。
+  利点は、バリデーションエラーを1つも失わなかったことです。
+  欠点は、必要でない可能性のある作業を行ったことです。
+
 ![](../assets/img/vgfp_applicative_style.png)
 
-* On the other hand, the monadic example did one validation at a time, chained together.
-  The benefit was that we short-circuited the rest of the chain as soon as an error occurred and avoided extra work.
-  The downside was that we only got the *first* error.
+* 一方、モナディックの例では、バリデーションを1つずつ、連鎖的に行いました。
+  利点は、エラーが発生するとすぐにチェーンの残りを短絡的に処理し、余分な作業を避けられたことです。
+  欠点は、*最初の*エラーしか得られなかったことです。
 
 ![](../assets/img/vgfp_monadic_style.png)
 
-### Mixing the two styles
+### 2つのスタイルの混合
 
-Now there is nothing to say that we can't mix and match applicative and monadic styles. 
+アプリカティブスタイルとモナディックスタイルを混ぜて使うことも可能です。
 
-For example, we might build a `CustomerInfo` using applicative style, so that we don't lose any errors,
-but later on in the program, when a validation is followed by a database update,
-we probably want to use monadic style, so that the database update is skipped if the validation fails.
-  
-### Using F# computation expressions
+例えば、エラーを失わないようにアプリカティブスタイルを使って`CustomerInfo`を構築し、
+その後のプログラムで、バリデーションの後にデータベースの更新が続く場合は、
+モナディックスタイルを使って、バリデーションが失敗した場合にデータベースの更新をスキップすることができます。
 
-Finally, let's build a computation expression for these `Result` types. 
+### F#のコンピュテーション式の使用
 
-To do this, we just define a class with members called `Return` and `Bind`, and then we create an instance of that class, called `result`, say:
+最後に、これらの`Result`型用のコンピュテーション式を作成しましょう。
+
+これを行うには、`Return`と`Bind`というメンバーを持つクラスを定義し、そのクラスのインスタンスを作成するだけです。例えば`result`という名前にします。
 
 ```fsharp
 module Result = 
@@ -384,7 +384,7 @@ module Result =
     let result = new ResultBuilder()
 ```
 
-We can then rewrite the `createCustomerResultM` function to look like this:
+これで`createCustomerResultM`関数を次のように書き直せます。
 
 ```fsharp
 let createCustomerResultCE id email = result {
@@ -394,24 +394,24 @@ let createCustomerResultCE id email = result {
     return customer }
 ```
 
-This computation expression version looks almost like using an imperative language. 
+このコンピュテーション式バージョンは、命令型言語を使用しているかのように見えます。
 
-Note that F# computation expressions are always monadic, as is Haskell do-notation and Scala for-comprehensions.
-That's not generally a problem, because if you need applicative style it is very easy to write without any language support.
+F#のコンピュテーション式は、HaskellのDo記法やScalaのfor内包表記と同様に、常にモナディックであることに注意してください。
+これは一般的に問題ではありません。アプリカティブスタイルが必要な場合、言語サポートなしで非常に簡単に書けるからです。
 
 <a id="consistent"></a>
 <hr>
 
 
-## Lifting to a consistent world
+## 一貫した世界への持ち上げ
 
-In practice, we often have a mish-mash of different kinds of values and functions that we need to combine together.
+実践では、しばしば異なる種類の値と関数が混在しており、それらを組み合わせる必要があります。
 
-The trick for doing this is to convert all them to the *same* type, after which they can be combined easily.
+これを行うコツは、全てを*同じ*型に変換することです。その後で簡単に組み合わせることができます。
 
-### Making values consistent
+### 値の一貫性を保つ
 
-Let's revisit the previous validation example, but let's change the record so that it has an extra property, a `name` of type string:
+前回のバリデーション例を再び見てみましょう。ただし、レコードに`name`という文字列型の追加プロパティがあるように変更します。
 
 ```fsharp
 type CustomerId = CustomerId of int
@@ -419,12 +419,12 @@ type EmailAddress = EmailAddress of string
 
 type CustomerInfo = {
     id: CustomerId
-    name: string  // New!
+    name: string  // 新規追加！
     email: EmailAddress
     }
 ```
 
-As before, we want to create a function in the normal world that we will later lift to the `Result` world.
+以前と同様に、通常の世界で`CustomerInfo`レコードを作成する関数を作成し、後で`Result`の世界に持ち上げます。
 
 ```fsharp
 let createCustomer customerId name email = 
@@ -432,7 +432,7 @@ let createCustomer customerId name email =
 // CustomerId -> String -> EmailAddress -> CustomerInfo
 ```
 
-Now we are ready to update the lifted `createCustomer` with the extra parameter:
+これで、追加パラメータを含む高次の`createCustomer`を更新する準備ができました。
 
 ```fsharp
 let (<!>) = Result.map
@@ -442,114 +442,114 @@ let createCustomerResultA id name email =
     let idResult = createCustomerId id
     let emailResult = createEmailAddress email
     createCustomer <!> idResult <*> name <*> emailResult
-// ERROR                            ~~~~     
+// エラー                            ~~~~     
 ```
 
-But this won't compile!  In the series of parameters `idResult <*> name <*> emailResult` one of them is not like the others. 
-The problem is that `idResult` and `emailResult` are both Results, but `name` is still a string.
+しかし、これはコンパイルできません！`idResult <*> name <*> emailResult`というパラメータの列の中で、1つだけ他と異なるものがあります。
+問題は、`idResult`と`emailResult`は両方とも Result ですが、`name`はまだ文字列のままだということです。
 
-The fix is just to lift `name` into the world of results (say `nameResult`) by using `return`, which for `Result` is just `Success`.
-Here is the corrected version of the function that does work:
+修正方法は、`name`を`return`を使って Result の世界に持ち上げる（`nameResult`とする）ことです。`Result`の場合、`return`は単に`Success`です。
+以下が修正版の関数で、これは機能します。
 
 ```fsharp
 let createCustomerResultA id name email = 
     let idResult = createCustomerId id
     let emailResult = createEmailAddress email
-    let nameResult = Success name  // lift name to Result
+    let nameResult = Success name  // name を Result に持ち上げる
     createCustomer <!> idResult <*> nameResult <*> emailResult
 ```
 
-### Making functions consistent 
+### 関数の一貫性を保つ
 
-The same trick can be used with functions too.
+同じテクニックを関数にも適用できます。
 
-For example, let's say that we have a simple customer update workflow with four steps:
+例えば、4つのステップからなる簡単な顧客更新ワークフローがあるとします。
 
-* First, we validate the input. The output of this is the same kind of `Result` type we created above.
-  Note that this validation function could *itself* be the result of combining other, smaller validation functions using `apply`.
-* Next, we canonicalize the data. For example: lowercasing emails, trimming whitespace, etc. This step never raises an error.
-* Next, we fetch the existing record from the database. For example, getting a customer for the `CustomerId`. This step could fail with an error too.
-* Finally, we update the database. This step is a "dead-end" function -- there is no output.
+* まず、入力を検証します。この出力は、先ほど作成した`Result`型と同じ種類のものです。
+  この検証関数*自体*が、`apply`を使って他の小さな検証関数を組み合わせた結果である可能性があります。
+* 次に、データを正規化します。例えば、メールアドレスを小文字にしたり、空白を削除したりします。このステップではエラーは発生しません。
+* 次に、既存のレコードをデータベースから取得します。例えば、`CustomerId`に対応する顧客を取得します。このステップでもエラーが発生する可能性があります。
+* 最後に、データベースを更新します。このステップは「行き止まり」関数です - 出力はありません。
 
-For error handling, I like to think of there being two tracks: a Success track and a Failure track.
-In this model, an error-generating function is analogous to a railway switch (US) or points (UK).
+エラー処理のために、成功トラックと失敗トラックの2つのトラックがあると考えるのが好きです。
+このモデルでは、エラーを生成する関数は鉄道のポイント（分岐器）に似ています。
 
 ![](../assets/img/vgfp_rop_before.png)
 
-The problem is that these functions cannot be glued together; they are all different shapes.
+問題は、これらの関数をつなげられないことです。全て形が異なります。
 
-The solution is to convert all of them to the *same* shape, in this case the two-track model with success and failure on different tracks.
-Let's call this *Two-Track world*! 
+解決策は、全ての関数を*同じ*形に変換することです。この場合、成功と失敗が異なるトラックにある2トラックモデルです。
+これを*2トラック世界*と呼びましょう！
 
-### Transforming functions using the toolset
+### ツールセットを使った関数の変換
 
-Each original function, then, needs to be elevated to Two-Track world, and we know just the tools that can do this!
+各オリジナルの関数を2トラック世界に高次化する必要があります。そのためのツールがあることを私たちは知っています！
 
-The `Canonicalize` function is a single track function. We can turn it into a two-track function using `map`.
+`Canonicalize`関数は単一トラック関数です。`map`を使って2トラック関数に変換できます。
 
 ![](../assets/img/vgfp_rop_map.png)
 
-The `DbFetch` function is a world-crossing function. We can turn it into a wholly two-track function using `bind`.
+`DbFetch`関数は世界をまたぐ関数です。`bind`を使って完全な2トラック関数に変換できます。
 
 ![](../assets/img/vgfp_rop_bind.png)
 
-The `DbUpdate` function is more complicated. We don't like dead-end functions, so first we need to transform it to a function where the data keeps flowing.
-I'll call this function `tee`.  The output of `tee` has one track in and one track out, so we need to convert it to a two-track function, again using `map`.
+`DbUpdate`関数はより複雑です。行き止まりの関数は好ましくないので、まずデータが流れ続ける関数に変換する必要があります。
+この関数を`tee`と呼びましょう。`tee`の出力は1つのトラックが入力され1つのトラックが出力されるので、再び`map`を使って2トラック関数に変換する必要があります。
 
 ![](../assets/img/vgfp_rop_tee.png)
 
-After all these transformations, we can reassemble the new versions of these functions. The result looks like this:
+これらの変換の後、新しいバージョンの関数を再構成できます。結果は次のようになります。
 
 ![](../assets/img/vgfp_rop_after.png)
 
-And of course, these functions can now be composed together very easily, so that we end up with a single function looking like this,
-with one input and a success/failure output:
+そしてもちろん、これらの関数を非常に簡単に組み合わせられるので、最終的に次のような1つの関数になります。
+1つの入力と成功/失敗の出力を持ちます。
 
 ![](../assets/img/vgfp_rop_after2.png)
 
-This combined function is yet another world-crossing function of the form `a->Result<b>`, and so it in turn can be used as a component part of a even bigger function.
+この組み合わされた関数は、`a->Result<b>`の形の別の世界をまたぐ関数であり、さらに大きな関数のコンポーネント部分として使用できます。
 
-For more examples of this "elevating everything to the same world" approach,
-see my posts on [functional error handling](http://fsharpforfunandprofit.com/rop/) and [threading state](../series/handling-state.md).
+この「全てを同じ世界に高次化する」アプローチの詳細な例については、
+[関数型エラー処理](http://fsharpforfunandprofit.com/rop/)と[状態のスレッド処理](../series/handling-state.md)に関する私の投稿を参照してください。
 
 <a id="kleisli"></a>
 <hr>
 
-## Kleisli world
+## Kleisli世界
 
-There is an alternative world which can be used as a basic for consistency which I will call "Kleisli" world,
-named after [Professor Kleisli](https://en.wikipedia.org/wiki/Heinrich_Kleisli) -- a mathematician, of course!
+一貫性の基礎として使用できる別の世界があります。これを「Kleisli」世界と呼びます。
+もちろん、数学者の[Kleisli教授](https://en.wikipedia.org/Heinrich_Kleisli)にちなんで名付けられました。
 
-In Kleisli world *everything* is a cross-world function! Or, using the railway track analogy, everything is a switch (or points).
+Kleisli世界では、*全て*が世界をまたぐ関数です！または、鉄道のアナロジーを使えば、全てがポイント（分岐器）です。
 
-In Kleisli world, the cross-world functions *can* be composed directly,
-using an operator called `>=>` for left-to-right composition or `<=<` for right-to-left composition.
+Kleisli世界では、世界をまたぐ関数を直接合成*できます*。
+左から右への合成には`>=>`演算子を、右から左への合成には`<=<`演算子を使います。
 
 ![](../assets/img/vgfp_kleisli_3.png)
 
-Using the same example as before, we can lift all our functions to Kleisli world.
+先ほどと同じ例を使って、全ての関数をKleisli世界に持ち上げることができます。
 
-* The `Validate` and `DbFetch` functions are already in the right form so they don't need to be changed.
-* The one-track `Canonicalize` function can be lifted to a switch just by lifting the output to a two-track value. Let's call this `toSwitch`.
+* `Validate`と`DbFetch`関数は既に正しい形なので、変更する必要はありません。
+* 単一トラックの`Canonicalize`関数は、出力を2トラック値に持ち上げるだけでスイッチに変換できます。これを`toSwitch`と呼びましょう。
 
 ![](../assets/img/vgfp_kleisli_1.png)
 
-* The tee-d `DbUpdate` function can be also lifted to a switch just by doing `toSwitch` after the tee.
+* Tee処理された`DbUpdate`関数も、Tee処理の後に`toSwitch`を行うだけでスイッチに変換できます。
 
 ![](../assets/img/vgfp_kleisli_2.png)
 
-Once all the functions have been lifted to Kleisli world, they can be composed with Kleisli composition:
+全ての関数がKleisli世界に持ち上げられたら、Kleisli合成で組み合わせることができます。
 
 ![](../assets/img/vgfp_kleisli_4.png)
 
-Kleisli world has some nice properties that Two-Track world doesn't but on the other hand, I find it hard to get my head around it! So I generally stick
-to using Two-Track world as my foundation for things like this.
+Kleisli世界には2トラック世界にはない素晴らしい特性がありますが、私にとっては理解が難しいものです！
+そのため、このようなことには通常、2トラック世界を基礎として使用しています。
 
-## Summary
+## まとめ
 
-In this post, we learned about "applicative" vs "monadic" style, and why the choice could have an important effect on which actions are executed, and what results are returned.
+この投稿では、「アプリカティブ」スタイルと「モナディック」スタイルについて学び、その選択がどのアクションが実行されるか、どのような結果が返されるかに重要な影響を与える可能性があることを理解しました。
 
-We also saw how to lift different kinds values and functions to a a consistent world so that the could be worked with easily.
+また、異なる種類の値と関数を一貫した世界に持ち上げて、簡単に扱えるようにする方法も見ました。
 
-In the [next post](../posts/elevated-world-4.md) we'll look at a common problem: working with lists of elevated values.
+[次の投稿](../posts/elevated-world-4.md)では、高次の値のリストを扱うという一般的な問題について見ていきます。
 
