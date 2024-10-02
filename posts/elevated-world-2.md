@@ -2,141 +2,141 @@
 layout: post
 title: "bind を理解する"
 description: "または、世界をまたぐ関数を合成する方法"
-categories: ["Patterns"]
+categories: ["パターン"]
 seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 2
 image: "/assets/img/vgfp_bind.png"
 ---
 
-This post is the second in a series. In the [previous post](../posts/elevated-world.md), I described some of the core functions for
-lifting a value from a normal world to an elevated world.
+この投稿は、シリーズの2番目です。
+[前回の投稿](../posts/elevated-world.md)では、通常の世界から高次の世界へ値を持ち上げるための主要な関数について説明しました。
 
-In this post, we'll look at "world-crossing" functions, and how they can be tamed with the `bind` function.
+今回は、「世界をまたぐ」関数と、`bind`関数を使ってそれらを制御する方法を見ていきます。
 
-## Series contents
+## シリーズの内容
 
-Here's a list of shortcuts to the various functions mentioned in this series:
+このシリーズで言及する様々な関数へのショートカットリストです。
 
-* **Part 1: Lifting to the elevated world**
-  * [The `map` function](../posts/elevated-world.md#map)
-  * [The `return` function](../posts/elevated-world.md#return)
-  * [The `apply` function](../posts/elevated-world.md#apply)
-  * [The `liftN` family of functions](../posts/elevated-world.md#lift)
-  * [The `zip` function and ZipList world](../posts/elevated-world.md#zip)
-* **Part 2: How to compose world-crossing functions**    
-  * [The `bind` function](../posts/elevated-world-2.md#bind)
-  * [List is not a monad. Option is not a monad.](../posts/elevated-world-2.md#not-a-monad)
-* **Part 3: Using the core functions in practice**  
-  * [Independent and dependent data](../posts/elevated-world-3.md#dependent)
-  * [Example: Validation using applicative style and monadic style](../posts/elevated-world-3.md#validation)
-  * [Lifting to a consistent world](../posts/elevated-world-3.md#consistent)
-  * [Kleisli world](../posts/elevated-world-3.md#kleisli)
-* **Part 4: Mixing lists and elevated values**    
-  * [Mixing lists and elevated values](../posts/elevated-world-4.md#mixing)
-  * [The `traverse`/`MapM` function](../posts/elevated-world-4.md#traverse)
-  * [The `sequence` function](../posts/elevated-world-4.md#sequence)
-  * ["Sequence" as a recipe for ad-hoc implementations](../posts/elevated-world-4.md#adhoc)
-  * [Readability vs. performance](../posts/elevated-world-4.md#readability)
-  * [Dude, where's my `filter`?](../posts/elevated-world-4.md#filter)
-* **Part 5: A real-world example that uses all the techniques**    
-  * [Example: Downloading and processing a list of websites](../posts/elevated-world-5.md#asynclist)
-  * [Treating two worlds as one](../posts/elevated-world-5.md#asyncresult)
-* **Part 6: Designing your own elevated world** 
-  * [Designing your own elevated world](../posts/elevated-world-6.md#part6)
-  * [Filtering out failures](../posts/elevated-world-6.md#filtering)
-  * [The Reader monad](../posts/elevated-world-6.md#readermonad)
-* **Part 7: Summary** 
-  * [List of operators mentioned](../posts/elevated-world-7.md#operators)
-  * [Further reading](../posts/elevated-world-7.md#further-reading)
+* **パート1：高次の世界への持ち上げ**
+  * [`map`関数](../posts/elevated-world.md#map)
+  * [`return`関数](../posts/elevated-world.md#return)
+  * [`apply`関数](../posts/elevated-world.md#apply)
+  * [`liftN`関数ファミリー](../posts/elevated-world.md#lift)
+  * [`zip`関数とZipList世界](../posts/elevated-world.md#zip)
+* **パート2：世界をまたぐ関数の合成方法**    
+  * [`bind`関数](../posts/elevated-world-2.md#bind)
+  * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.md#not-a-monad)
+* **パート3：実践での主要関数の使用**  
+  * [独立データと依存データ](../posts/elevated-world-3.md#dependent)
+  * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.md#validation)
+  * [一貫した世界への持ち上げ](../posts/elevated-world-3.md#consistent)
+  * [Kleisli世界](../posts/elevated-world-3.md#kleisli)
+* **パート4：リストと高次の値の混合**    
+  * [リストと高次の値の混合](../posts/elevated-world-4.md#mixing)
+  * [`traverse`/`MapM`関数](../posts/elevated-world-4.md#traverse)
+  * [`sequence`関数](../posts/elevated-world-4.md#sequence)
+  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.md#adhoc)
+  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.md#readability)
+  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.md#filter)
+* **パート5：全てのテクニックを使用する実世界の例**    
+  * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.md#asynclist)
+  * [2つの世界を1つとして扱う](../posts/elevated-world-5.md#asyncresult)
+* **パート6：独自の高次の世界の設計** 
+  * [独自の高次の世界の設計](../posts/elevated-world-6.md#part6)
+  * [失敗のフィルタリング](../posts/elevated-world-6.md#filtering)
+  * [Readerモナド](../posts/elevated-world-6.md#readermonad)
+* **パート7：まとめ** 
+  * [言及した演算子のリスト](../posts/elevated-world-7.md#operators)
+  * [さらなる読み物](../posts/elevated-world-7.md#further-reading)
 
 <a id="part2"></a>
 <hr>
 
-## Part 2: How to compose world-crossing functions
+## パート2：世界をまたぐ関数の合成方法
 
 <a id="bind"></a>
 <hr>
 
-## The `bind` function
+## `bind`関数
 
-**Common Names**: `bind`, `flatMap`, `andThen`, `collect`, `SelectMany`
+**一般的な名前**：`bind`、`flatMap`、`andThen`、`collect`、`SelectMany`
 
-**Common Operators**: `>>=` (left to right), `=<<` (right to left )
+**一般的な演算子**：`>>=`（左から右）、`=<<`（右から左）
 
-**What it does**:  Allows you to compose world-crossing ("monadic") functions
+**機能**：世界をまたぐ（「モナド的な」）関数の合成
 
-**Signature**:  `(a->E<b>) -> E<a> -> E<b>`. Alternatively with the parameters reversed: `E<a> -> (a->E<b>) -> E<b>`
+**シグネチャ**：`(a->E<b>) -> E<a> -> E<b>`、または引数を逆にして：`E<a> -> (a->E<b>) -> E<b>`
   
-### Description
+### 説明
 
-We frequently have to deal with functions that cross between the normal world and the elevated world.
+通常の世界と高次の世界を行き来する関数をよく扱います。
 
-For example: a function that parses a `string` to an `int` might return an `Option<int>` rather than a normal `int`,
-a function that reads lines from a file might return `IEnumerable<string>`,
-a function that fetches a web page might return `Async<string>`, and so on.
+例えば、`string`を`int`に解析する関数が通常の`int`ではなく`Option<int>`を返したり、
+ファイルから行を読み込む関数が`IEnumerable<string>`を返したり、
+Webページを取得する関数が`Async<string>`を返したりします。
 
-These kinds of "world-crossing" functions are recognizable by their signature `a -> E<b>`; their input is in the normal world but their output is in the elevated world.
-Unfortunately, this means that these kinds of functions cannot be linked together using standard composition.
+このような「世界をまたぐ」関数は、`a -> E<b>`というシグネチャで認識できます。入力は通常の世界にありますが、出力は高次の世界にあります。
+残念ながら、このタイプの関数は標準的な合成では連結できません。
 
 ![](../assets/img/vgfp_bind_noncomposition.png)
 
-What "bind" does is transform a world-crossing function (commonly known as a "monadic function") into a lifted function `E<a> -> E<b>`.
+「bind」の機能は、世界をまたぐ関数（一般に「モナド的関数」と呼ばれる）を持ち上げられた関数`E<a> -> E<b>`に変換することです。
 
 ![](../assets/img/vgfp_bind.png)
 
-The benefit of doing this is that the resulting lifted functions live purely in the elevated world, and so can be combined easily by composition.
+これを行う利点は、結果として得られる持ち上げられた関数が純粋に高次の世界に存在し、簡単に合成できることです。
 
-For example, a function of type `a -> E<b>` cannot be directly composed with a function of type `b -> E<c>`, but after `bind` is used, the second function
-becomes of type `E<b> -> E<c>`, which *can* be composed.
+例えば、`a -> E<b>`型の関数は`b -> E<c>`型の関数と直接合成できませんが、
+`bind`を使用すると、2番目の関数は`E<b> -> E<c>`型になり、合成*可能*になります。
 
 ![](../assets/img/vgfp_bind_composition.png)
 
-In this way, `bind` lets us chain together any number of monadic functions.
-    
-### Alternative interpretation
+このように、`bind`を使えば任意の数のモナド的関数を連鎖できます。
 
-An alternative interpretation of `bind` is that it is a *two* parameter function that takes a elevated value (`E<a>`) and a "monadic function" (`a -> E<b>`),
-and returns a new elevated value (`E<b>`) generated by "unwrapping" the value inside the input, and running the function `a -> E<b>` against it.
-Of course, the "unwrapping" metaphor does not work for every elevated world, but still it can often be useful to think of it this way.
+### 別の解釈
+
+`bind`の別の捉え方として、高次の値（`E<a>`）とモナド的関数（`a -> E<b>`）という*2つ*の引数を取り、
+入力の中身を「アンラップ」して`a -> E<b>`関数を実行することで新しい高次の値（`E<b>`）を生成する関数と考えられます。
+この「アンラップ」という比喩はすべての高次の世界に当てはまるわけではありませんが、こう考えると役立つことが多いです。
 
 ![](../assets/img/vgfp_bind2.png)
 
-### Implementation examples
+### 実装例
 
-Here are some examples of defining `bind` for two different types in F#:
+F#で2つの型に対して`bind`を定義した例を見てみましょう。
 
 ```fsharp
 module Option = 
 
-    // The bind function for Options
+    // オプション用のbind関数
     let bind f xOpt = 
         match xOpt with
         | Some x -> f x
         | _ -> None
-    // has type : ('a -> 'b option) -> 'a option -> 'b option
+    // 型：('a -> 'b option) -> 'a option -> 'b option
 
 module List = 
 
-    // The bind function for lists
+    // リスト用のbind関数
     let bindList (f: 'a->'b list) (xList: 'a list)  = 
         [ for x in xList do 
           for y in f x do 
               yield y ]
-    // has type : ('a -> 'b list) -> 'a list -> 'b list
+    // 型：('a -> 'b list) -> 'a list -> 'b list
 ```
 
-Notes: 
+注意：
 
-* Of course, in these two particular cases, the functions already exist in F#, called `Option.bind` and `List.collect`.
-* For `List.bind` I'm cheating again and using `for..in..do`, but I think that this particular implementation shows clearly how bind works with lists.
-  There is a purer recursive implementation, but I won't show that here.
+* この2つの場合、F#ではすでに`Option.bind`と`List.collect`として関数が存在します。
+* `List.bind`では再び`for..in..do`を使っていますが、この実装がリストでのbindの動きを明確に示しています。
+  純粋な再帰的実装もありますが、ここでは省略します。
 
-### Usage example
+### 使用例
 
-As explained at the beginning of this section, `bind` can be used to compose cross-world functions.
-Let's see how this works in practice with a simple example.
+冒頭で述べたように、`bind`は世界をまたぐ関数を合成するのに使えます。
+シンプルな例でその動きを見てみましょう。
 
-First let's say we have a function that parses certain `string`s into `int`s. Here's a very simple implementation:
+まず、特定の`string`を`int`に解析する関数があるとします。とてもシンプルな実装です。
 
 ```fsharp
 let parseInt str = 
@@ -145,15 +145,15 @@ let parseInt str =
     | "0" -> Some 0
     | "1" -> Some 1
     | "2" -> Some 2
-    // etc
+    // 以下同様
     | _ -> None
 
-// signature is string -> int option    
+// シグネチャはstring -> int option    
 ```
 
-Sometimes it returns a int, sometimes not. So the signature is `string -> int option` -- a cross-world function.
-  
-And let's say we have another function that takes an `int` as input and returns a `OrderQty` type:
+時には整数を返し、時には返しません。そのため、シグネチャは`string -> int option`となり、世界をまたぐ関数です。
+
+そして、`int`を入力として受け取り、`OrderQty`型を返す別の関数があるとします。
 
 ```fsharp
 type OrderQty = OrderQty of int
@@ -162,47 +162,47 @@ let toOrderQty qty =
     if qty >= 1 then 
         Some (OrderQty qty)
     else
-        // only positive numbers allowed
+        // 正の数のみ許可
         None
 
-// signature is int -> OrderQty option        
+// シグネチャはint -> OrderQty option        
 ```
 
-Again, it might not return an `OrderQty` if the input is not positive. The signature is therefore `int -> OrderQty option` -- another cross-world function.
+これも、入力が正でない場合は`OrderQty`を返さないかもしれません。したがって、シグネチャは`int -> OrderQty option`となり、これも世界をまたぐ関数です。
 
-Now, how can we create a function that starts with an string and returns an `OrderQty` in one step?
+では、文字列を直接`OrderQty`に変換する関数をどのように作れば良いでしょうか。
 
-The output of `parseInt` cannot be fed directly into `toOrderQty`, so this is where `bind` comes to the rescue!
+`parseInt`の出力を直接`toOrderQty`に渡せないので、ここで`bind`が役立ちます。
 
-Doing `Option.bind toOrderQty` lifts it to a `int option -> OrderQty option` function and so the output of `parseInt` can be used as input, just as we need.
+`Option.bind toOrderQty`を実行すると、`int option -> OrderQty option`関数に持ち上げられ、`parseInt`の出力を入力として使えます。
 
 ```fsharp
 let parseOrderQty str =
     parseInt str
     |> Option.bind toOrderQty
-// signature is string -> OrderQty option
+// シグネチャはstring -> OrderQty option
 ```
 
-The signature of our new `parseOrderQty` is `string -> OrderQty option`, yet another cross-world function. So if we want to do something with the `OrderQty` that is output
-we may well have to use `bind` again on the next function in the chain.
-  
-### Infix version of bind
+新しい`parseOrderQty`関数のシグネチャは`string -> OrderQty option`となり、これもまた世界をまたぐ関数です。
+そのため、出力の`OrderQty`を使って何かをする場合は、チェーンの次の関数でも`bind`を使う必要があるかもしれません。
 
-As with `apply`, using the named `bind` function can be awkward, so it is common to create an infix version,
-typically called `>>=` (for left to right data flow) or `=<<` (for right to left data flow) .
+### 中置演算子版のbind
 
-With this in place you can write an alternative version of `parseOrderQty` like this:
+`apply`と同様に、名前付きの`bind`関数は扱いづらいことがあります。そのため、中置演算子版を作るのが一般的です。
+通常、左から右へのデータの流れには`>>=`、右から左への流れには`=<<`を使います。
+
+これを使えば、`parseOrderQty`の別バージョンを次のように書けます。
 
 ```fsharp
 let parseOrderQty_alt str =
     str |> parseInt >>= toOrderQty
 ```
 
-You can see that `>>=` performs the same kind of role as pipe (`|>`) does, except that it works to pipe "elevated" values into cross-world functions.
+ご覧の通り、`>>=`はパイプ演算子（`|>`）と同じような役割を果たしますが、「高次の」値を世界をまたぐ関数にパイプするのに使います。
 
-### Bind as a "programmable semicolon"
+### 「プログラム可能なセミコロン」としてのbind
 
-Bind can be used to chain any number of functions or expressions together, so you often see code looking something like this:
+bindは任意の数の関数や式を連鎖させるのに使えるので、次のようなコードがよく見られます。
 
 ```fsharp
 expression1 >>= 
@@ -211,7 +211,7 @@ expression3 >>=
 expression4 
 ```
 
-This is not too different from how an imperative program might look if you replace the `>>=` with a `;`:
+これは、命令型プログラムで`>>=`をセミコロン（`;`）に置き換えたものとさほど変わりません。
 
 ```fsharp
 statement1; 
@@ -220,13 +220,13 @@ statement3;
 statement4;
 ```
 
-Because of this, `bind` is sometimes called a "programmable semicolon".
+このため、`bind`は「プログラム可能なセミコロン」と呼ばれることがあります。
 
-### Language support for bind/return
+### bindとreturnの言語サポート
 
-Most functional programming languages have some kind of syntax support for `bind` that lets you avoid having to write a series of continuations or use explicit binds.
+ほとんどの関数型プログラミング言語には、`bind`のための何らかの構文サポートがあり、一連の継続を書いたり、明示的にbindを使ったりしなくて済むようになっています。
 
-In F# it is (one component) of computation expressions, so the following explicit chaining of `bind`:
+F#では、これはコンピュテーション式の（一つの）要素です。次のような明示的なbindの連鎖は次のように書けます。
 
 ```fsharp
 initialExpression >>= (fun x ->
@@ -235,7 +235,7 @@ expressionUsingY  >>= (fun z ->
 x+y+z )))             // return
 ```
 
-becomes implicit, using `let!` syntax:
+これを`let!`構文を使って暗黙的に表現できます。
 
 ```fsharp
 elevated {
@@ -245,9 +245,9 @@ elevated {
     return x+y+z }
 ```
 
-In Haskell, the equivalent is the "do notation":
+Haskellでは、同等のものは「do記法」と呼ばれます。
 
-```fsharp
+```haskell
 do
     x <- initialExpression 
     y <- expressionUsingX x
@@ -255,9 +255,9 @@ do
     return x+y+z
 ```
 
-And in Scala, the equivalent is the "for comprehension":
+Scalaでは、同等のものは「for内包表記」と呼ばれます。
 
-```fsharp
+```scala
 for {
     x <- initialExpression 
     y <- expressionUsingX(x)
@@ -267,145 +267,145 @@ for {
 }     
 ```
 
-It's important to emphasize that you do not *have* to use the special syntax when using bind/return. You can always use `bind` or `>>=` in the same way as any other function.
+bind/returnを使う際に特別な構文を使う*必要はない*ことを強調しておくのは重要です。他の関数と同じように、`bind`や`>>=`を常に使えます。
 
 ### Bind vs. Apply vs. Map
 
-The combination of `bind` and `return` are considered even more powerful than `apply` and `return`,
-because if you have `bind` and `return`, you can construct `map` and `apply` from them, but not vice versa.
+`bind`と`return`の組み合わせは、`apply`と`return`よりもさらに強力だと考えられています。
+なぜなら、`bind`と`return`があれば`map`と`apply`を構築できますが、その逆はできないからです。
 
-Here's how bind can be used to emulate `map`, for example: 
+例えば、bindを使ってmapをエミュレートする方法を見てみましょう。
 
-* First, you construct a world-crossing function from a normal function by applying `return` to the output.
-* Next, convert this world-crossing function into a lifted function using `bind`. This gives you the same result as if you had simply done `map` in the first place.
+* まず、通常の関数から世界をまたぐ関数を構築します。出力に`return`を適用することでこれを行います。
+* 次に、この世界をまたぐ関数を`bind`を使って持ち上げられた関数に変換します。これにより、単に`map`を行った場合と同じ結果が得られます。
 
 ![](../assets/img/vgfp_bind_vs_map.png)
 
-Similarly, `bind` can emulate `apply`. Here is how `map` and `apply` can be defined using `bind` and `return` for Options in F#:
+同様に、`bind`は`apply`をエミュレートできます。以下は、F#でOptionに対する`map`と`apply`を`bind`と`return`（Some）を使って定義する方法です。
 
 ```fsharp
-// map defined in terms of bind and return (Some)
+// bindとreturn (Some)を使ってmapを定義
 let map f = 
     Option.bind (f >> Some) 
 
-// apply defined in terms of bind and return (Some)
+// bindとreturn (Some)を使ってapplyを定義
 let apply fOpt xOpt = 
     fOpt |> Option.bind (fun f -> 
         let map = Option.bind (f >> Some)
         map xOpt)
 ```
 
-At this point, people often ask "why should I use `apply` instead of `bind` when `bind` is more powerful?"
+この時点で、人々はしばしば「`bind`がより強力なのに、なぜ`apply`を使うべきなのか」と疑問に思います。
 
-The answer is that just because `apply` *can* be emulated by `bind`, doesn't mean it *should* be. For example, it is possible to implement `apply`
-in a way that cannot be emulated by a `bind` implementation.
+答えは、`apply`が`bind`でエミュレート*できる*からといって、そう*すべきだ*というわけではないということです。
+例えば、`bind`の実装ではエミュレートできない方法で`apply`を実装することも可能です。
 
-In fact, using `apply` ("applicative style") or `bind` ("monadic style") can have a profound effect on how your program works!
-We'll discuss these two approaches in more detail in [part 3 of this post](../posts/elevated-world-3.md#dependent).
+実際、`apply`（「アプリカティブスタイル」）や`bind`（「モナドスタイル」）を使うことで、プログラムの動作に大きな影響を与える可能性があります。
+これら2つのアプローチの詳細については、[このポストのパート3](../posts/elevated-world-3.md#dependent)で説明します。
 
-### The properties of a correct bind/return implementation
+### 正しいbind/return実装の特性
 
-As with `map`, and as with `apply`/`return`, a correct implementation of the `bind`/`return` pair should have
-some properties that are true no matter what elevated world we are working with.
+`map`の場合と同様に、また`apply`/`return`の場合と同様に、
+正しい`bind`/`return`の実装には、どの高次の世界で作業していても真となるべき特性がいくつかあります。
 
-There are three so-called ["Monad Laws"](https://en.wikibooks.org/wiki/Haskell/Understanding_monads#Monad_Laws),
-and one way of defining a **Monad** (in the programming sense) is to say that it consists of three things: a generic type constructor `E<T>` plus a pair of
-functions (`bind` and `return`) that obey the monad laws.  This is not the only way to define a monad, and mathematicians typically use a slightly different
-definition, but this one is most useful to programmers.
+いわゆる3つの「モナド則」があります。
+（プログラミングの観点での）**モナド**を定義する一つの方法は、ジェネリック型コンストラクタ`E<T>`とモナド則に従う関数のペア（`bind`と`return`）から成るものと言うことです。
+モナドを定義する方法はこれだけではありません。数学者は通常、少し異なる定義を使います。
+しかし、ジェネリック型コンストラクタと2つの関数によるこの定義が、プログラマにとって最も役立ちます。
 
-Just as with the the Functor and Applicative laws we saw earlier, these laws are quite sensible. 
+これまでに見たファンクターとアプリカティブの法則と同様に、これらの法則はかなり理にかなっています。
 
-First, note that `return` function is itself a cross-world function:
+まず、`return`関数自体が世界をまたぐ関数であることに注目してください。
 
 ![](../assets/img/vgfp_monad_law1_a.png)
 
-That means that we can use `bind` to lift it into a function in the elevated world. And what does this lifted function do?  Hopefully, nothing!
-It should just return its input.
+これは、`bind`を使ってそれを高次の世界の関数に持ち上げられることを意味します。そして、この持ち上げられた関数は何をするのでしょうか。うまくいけば、何もしません！
+単に入力を返すだけです。
 
-So that is exactly the first monad law: it says that this lifted function must be the same as the `id` function in the elevated world.
+そして、これがまさに最初のモナド則です。この持ち上げられた関数は、高次の世界での`id`関数と同じでなければならないと言っています。
 
 ![](../assets/img/vgfp_monad_law1_b.png)
 
-The second law is similar but with `bind` and `return` reversed. Say that we have a normal value `a` and cross-world function `f` that turns an `a` into a `E<b>`.
+2番目の法則は似ていますが、`bind`と`return`が逆になっています。通常の値`a`と、`a`を`E<b>`に変換する世界をまたぐ関数`f`があるとします。
 
 ![](../assets/img/vgfp_monad_law2_a.png)
 
-Let's lift both of them to the elevated world, using `bind` on `f` and `return` on `a`.
+`f`には`bind`を、`a`には`return`を使って、両方を高次の世界に持ち上げましょう。
 
 ![](../assets/img/vgfp_monad_law2_b.png)
 
-Now if we apply the elevated version of `f` to the elevated verson of `a` we get some value `E<b>`.
+ここで、`f`の高次バージョンを`a`の高次バージョンに適用すると、ある値`E<b>`が得られます。
 
 ![](../assets/img/vgfp_monad_law2_c.png)
 
-On the other hand if we apply the normal version of `f` to the normal verson of `a` we *also* get some value `E<b>`.
+一方、`f`の通常バージョンを`a`の通常バージョンに適用*しても*、ある値`E<b>`が得られます。
 
 ![](../assets/img/vgfp_monad_law2_d.png)
 
-The second monad law says that these two elevated values (`E<b>`) should be the same.  In other words, all this binding and returning should not distort the data.
+2番目のモナド則は、これら2つの高次の値（`E<b>`）が同じであるべきだと言っています。言い換えれば、これらの `bind` と `return` の適用はデータを歪めるべきではありません。
 
-The third monad law is about associativity.  
+3番目のモナド則は結合法則に関するものです。
 
-In the normal world, function composition is associative.
-For example, we could pipe a value into a function `f` and then take that result and pipe it into another function `g`.
-Alternatively, we can compose `f` and `g` first into a single function and then pipe `a` into it.
+通常の世界では、関数合成は結合法則を満たします。
+例えば、値を関数`f`にパイプし、その結果を関数`g`にパイプすることができます。
+あるいは、最初に`f`と`g`を合成して単一の関数にしてから、`a`をそれにパイプすることもできます。
 
 ```fsharp
 let groupFromTheLeft = (a |> f) |> g
 let groupFromTheRight = a |> (f >> g)
 ```
 
-In the normal world, we expect both of these alternatives to give the same answer.
+通常の世界では、これらの代替案が同じ答えを与えることを期待します。
 
-The third monad law says that, after using `bind` and `return`, the grouping doesn't matter either. The two examples below correspond to the examples above:
+3番目のモナド則は、`bind`と`return`を使用した後でも、グループ化は問題にならないと言っています。以下の2つの例は、上記の例に対応します。
 
 ```fsharp
 let groupFromTheLeft = (a >>= f) >>= g
 let groupFromTheRight = a >>= (fun x -> f x >>= g)
 ```
 
-And again, we expect both of these to give the same answer.
+そして再び、これらの両方が同じ答えを与えることを期待します。
 
 <a id="not-a-monad"></a>
 <hr>
 
-## List is not a monad. Option is not a monad.
+## リストはモナドではない。オプションもモナドではない。
 
-If you look at the definition above, a monad has a type constructor (a.k.a "generic type") *and* two functions *and* a set of properties that must be satisfied.  
+モナドは3つの要素から成ります。ジェネリック型（別名「型コンストラクタ」）、2つの関数、そして満たすべき一連の特性です。
 
-The `List` data type is therefore just one component of a monad, as is the `Option` data type. `List` and `Option`, by themselves, are not monads.
+したがって、`List`データ型はモナドの1つの構成要素にすぎず、`Option`データ型も同様です。`List`と`Option`は、それ自体ではモナドではありません。
 
-It might be better to think of a monad as a *transformation*, so that the "List monad" is the transformation that converts the normal world to the elevated "List world",
-and the "Option monad" is the transformation that converts the normal world to the elevated "Option world".
+モナドを*変換*として考えるのがより適切かもしれません。
+「リストモナド」は通常の世界を高次の「リスト世界」に変換するものであり、「オプションモナド」は通常の世界を高次の「オプション世界」に変換するものです。
 
-I think this is where a lot of the confusion comes in. The word "List" can mean many different things:
+ここに多くの混乱の源があると思います。「リスト」という言葉には多くの異なる意味があります。
 
-1. A concrete type or data structure such as `List<int>`.
-1. A type constructor (generic type): `List<T>`.
-1. A type constructor and some operations, such as a `List` class or module.
-1. A type constructor and some operations and the operations satisfy the monad laws.
+1. `List<int>`のような具体的な型またはデータ構造。
+2. 型コンストラクタ（ジェネリック型）：`List<T>`。
+3. `List`クラスやモジュールのような型コンストラクタと何らかの操作。
+4. 型コンストラクタと何らかの操作、そしてそれらの操作がモナド則を満たすもの。
 
-Only the last one is a monad! The other meanings are valid but contribute to the confusion.
+モナドなのは最後のものだけです！他の意味も有効ですが、混乱の原因となります。
 
-Also the last two cases are hard to tell apart by looking at the code. Unfortunately, there have been cases where implementations
-did not satisfy the monad laws. Just because it's a "Monad" doesn't mean that it's a monad.
+また、最後の2つのケースはコードを見ただけでは区別がつきにくいです。残念ながら、モナド則を満たしていない実装も存在します。
+「モナド」と呼ばれていても、必ずしも真のモナドではない場合があるのです。
 
-Personally, I try to avoid using the word "monad" on this site and focus on the `bind` function instead, as part of a toolkit of functions for solving problems
-rather than an abstract concept.
+個人的に、このサイトでは「モナド」という言葉の使用を避けています。代わりに、`bind`関数に焦点を当てています。
+抽象的な概念ではなく、問題解決のためのツールキットの一部として扱うためです。
 
-So don't ask: Do I have a monad?
+そのため、「これはモナドですか？」とは尋ねないでください。
 
-Do ask: Do I have useful bind and return functions? And are they implemented correctly?
+代わりに、次のように尋ねるべきです。使える`bind`と`return`関数がありますか？そして、それらは正しく実装されていますか？
 
 <hr>
 
-## Summary
+## まとめ
 
-We now have a set of four core functions:  `map`, `return`, `apply`, and `bind`, and I hope that you are clear on what each one does.
+これで4つの主要な関数のセットが揃いました。`map`、`return`、`apply`、そして`bind`です。これらの機能がそれぞれ明確になったことを願っています。
 
-But there are some questions that have not been addressed yet, such as "why should I choose `apply` instead of `bind`?",
-or "how can I deal with multiple elevated worlds at the same time?" 
+しかし、まだ答えていない質問もあります。例えば次のような疑問です。
+「なぜ`apply`の代わりに`bind`を選ぶべきなのか？」「複数の高次の世界を同時に扱うにはどうすればよいのか？」
 
-In the [next post](../posts/elevated-world-3.md) we'll address these questions and demonstrate how to use the toolset with a series of practical examples.
+[次の投稿](../posts/elevated-world-3.md)では、これらの疑問に答え、一連の実践的な例を通じてこのツールセットの使い方を示します。
 
-*UPDATE: Fixed error in monad laws pointed out by @joseanpg. Thanks!* 
+*更新：@joseanpgに指摘されたモナド則の誤りを修正しました。ありがとうございます！*
