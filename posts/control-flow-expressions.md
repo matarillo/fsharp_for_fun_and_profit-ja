@@ -139,7 +139,7 @@ let posNeg x = if x > 0 then "+" elif x < 0 then "-" else "0"
 
 ### 関数を返す
 
-if-then-else式は任意の値を返せます。これには関数値も含まれることを忘れないでください。例えば、
+if-then-else式は任意の値を返せます。これには関数値も含まれることを忘れないでください。たとえば、
 
 ```fsharp
 let greetings = 

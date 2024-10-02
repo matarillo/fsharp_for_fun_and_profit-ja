@@ -63,7 +63,7 @@ val t5 : string * int = ("hello", 42)
 val t6 : string * int = ("goodbye", 99)
 ```
 
-そして、2つの型を掛け合わせるだけに留める理由はありません。3つでも4つでも構いません。例えば、`int * bool * string` という型もできます。
+そして、2つの型を掛け合わせるだけに留める理由はありません。3つでも4つでも構いません。たとえば、`int * bool * string` という型もできます。
 
 ![int*bool*string タプル](../assets/img/tuple_int_bool_str.png)
 

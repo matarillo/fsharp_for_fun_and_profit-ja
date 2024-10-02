@@ -372,7 +372,7 @@ module MethodDependency_SeparateTypes3 =
 
         let observer = Observer.printNameChanged 
 
-        // この部分適用を一度だけ設定します（例えば、モジュールの先頭で）
+        // この部分適用を一度だけ設定します（たとえば、モジュールの先頭で）
         let changeName = Customer.changeName observer 
 
         // そして、オブザーバーを必要とせずにchangeNameを呼び出します
@@ -472,7 +472,7 @@ module MethodDependency_SeparateTypes_WithHookFunction =
     module TestWithPartialApplication = 
         open DomainTypes
 
-        // この部分適用を一度だけ設定します（例えば、モジュールの先頭で）
+        // この部分適用を一度だけ設定します（たとえば、モジュールの先頭で）
         let observer = Observer.printNameChanged 
         let changeName = hook2 observer Customer.changeName 
 
@@ -624,7 +624,7 @@ let alice = new Employee("Alice",location)
 
 上記のコードは、パラメータ化される特定のクラスが重要ではないことを前提としています。しかし、型の特定のプロパティに依存関係がある場合はどうでしょうか？
 
-例えば、`Employee`クラスが`Name`プロパティを期待し、`Location`クラスが`Age`プロパティを期待する場合を考えてみましょう：
+たとえば、`Employee`クラスが`Name`プロパティを期待し、`Location`クラスが`Age`プロパティを期待する場合を考えてみましょう：
 
 ```fsharp
 module StructuralDependency_WithAge = 
@@ -810,7 +810,7 @@ module StructuralDependencyExample_SeparateTypes2 =
 一歩下がって「location」の概念について考えてみましょう。なぜロケーションは従業員だけを含む必要があるのでしょうか？
 もう少し一般的にすれば、ロケーションを「場所」と「その場所にある物のリスト」と考えることができます。
 
-例えば、物が製品であれば、製品がある場所は倉庫かもしれません。物が本であれば、本がある場所は図書館かもしれません。
+たとえば、物が製品であれば、製品がある場所は倉庫かもしれません。物が本であれば、本がある場所は図書館かもしれません。
 
 以下は、これらの概念をコードで表現したものです：
 
@@ -887,7 +887,7 @@ module Employee =
 
 一つの方法は、これまで見てきたような相互依存を持たないことです。その設計では、同期（または同期の欠如）が大きな問題となります。
 
-例えば、Aliceのロケーションを変更しても、参照しているロケーションに知らせなければ、不整合が生じる可能性があります。しかし、ロケーションの内容も変更しようとすると、Bobの値も更新する必要があるため、無限に続く作業になってしまいます。基本的に、悪夢のようなシナリオです。
+たとえば、Aliceのロケーションを変更しても、参照しているロケーションに知らせなければ、不整合が生じる可能性があります。しかし、ロケーションの内容も変更しようとすると、Bobの値も更新する必要があるため、無限に続く作業になってしまいます。基本的に、悪夢のようなシナリオです。
 
 不変データでこれを正しく行う方法は、データベース設計から学び、関係を別の「テーブル」、つまり我々の場合は型に抽出することです。
 現在の関係は単一のマスターリストに保持され、変更が行われても同期は必要ありません。

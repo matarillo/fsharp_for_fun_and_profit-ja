@@ -89,7 +89,7 @@ Martin Fowlerは[DSLに関する彼の本](https://ptgmedia.pearsoncmg.com/image
 そして、こちらがそのDSLの[F#実装](https://www.fssnip.net/5h)です。
 
 より複雑なパーシングタスクには、[FParsec](https://www.quanttec.com/fparsec/)の使用を強くお勧めします。これはこの種のことに完璧に適しています。
-例えば、以下のパーシングに使われています：
+たとえば、以下のパーシングに使われています：
 [FogCreekの検索クエリ](https://web.archive.org/web/20130430065730/http://blog.fogcreek.com/fparsec/)、
 [CSVファイル](https://blog.jb55.com/post/4247991875/f-csv-parsing-with-fparsec)、
 [チェス表記](https://github.com/iigorr/pgn.net)、
@@ -100,7 +100,7 @@ Martin Fowlerは[DSLに関する彼の本](https://ptgmedia.pearsoncmg.com/image
 
 何かをパースまたは分析した後、データでいっぱいの表よりも、結果を視覚的に表示できると常に良いです。
 
-例えば、[以前の投稿](../posts/cycles-and-modularity-in-the-wild.md)で、[GraphViz](https://www.graphviz.org/)と組み合わせてF#を使い、
+たとえば、[以前の投稿](../posts/cycles-and-modularity-in-the-wild.md)で、[GraphViz](https://www.graphviz.org/)と組み合わせてF#を使い、
 依存関係のダイアグラムを作成しました。以下にサンプルを示します：
 
 ![](../assets/img/tickspec_svg.png)

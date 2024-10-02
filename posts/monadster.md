@@ -448,7 +448,7 @@ val makeHealedLeftArm : M<LiveLeftBrokenArm> -> M<LiveLeftArm>
 `healBrokenArm`変換をハードコードしてしまいました。他の変換を行いたい場合や、体の他のパーツに対して行いたい場合はどうすればよいでしょうか？
 この関数をもう少し汎用的にできないでしょうか？
 
-はい、簡単です。体のパーツを変換する関数（例えば「f」）を渡すだけです。次のようにします。
+はい、簡単です。体のパーツを変換する関数（たとえば「f」）を渡すだけです。次のようにします。
 
 ```fsharp
 let makeGenericTransform f brokenArmM = 
@@ -502,7 +502,7 @@ let healBrokenArmM = mapM healBrokenArm
 
 ![mapM](../assets/img/monadster_mapm.png)
 
-`mapM`に似た関数は多くの状況で登場します。例えば、`Option.map`は「通常の」関数を入力と出力がオプションである関数に変換します。
+`mapM`に似た関数は多くの状況で登場します。たとえば、`Option.map`は「通常の」関数を入力と出力がオプションである関数に変換します。
 同様に、`List.map`は、「通常の」関数を、入力と出力がリストである関数に変換します。他にも多くの例があります。
 
 ```fsharp

@@ -278,7 +278,7 @@ let stringLength s = s.Length
 let stringLength (s:string) = s.Length
 ```
 
-一見、十分な情報があるように見えても、コンパイラがそれを認識していないことがあります。例えば、以下の `List.map` 関数が文字列のリストに適用されているのは人間には明らかですが、なぜ `x.Length` がエラーになるのでしょうか？
+一見、十分な情報があるように見えても、コンパイラがそれを認識していないことがあります。たとえば、以下の `List.map` 関数が文字列のリストに適用されているのは人間には明らかですが、なぜ `x.Length` がエラーになるのでしょうか？
 
 ```fsharp
 List.map (fun x -> x.Length) ["hello"; "world"]       // OKではありません

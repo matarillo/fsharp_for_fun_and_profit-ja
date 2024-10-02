@@ -7,7 +7,7 @@ categories: []
 
 新しい言語を学ぶには、言語自体以上のものが必要です。
 生産性を上げるには、標準ライブラリの大部分を暗記し、残りの部分についても概ね把握しておく必要があります。
-例えば、C#を知っているなら、Java言語自体はすぐに習得できますが、Java Class Libraryに慣れるまでは本当の意味で上達したとは言えません。
+たとえば、C#を知っているなら、Java言語自体はすぐに習得できますが、Java Class Libraryに慣れるまでは本当の意味で上達したとは言えません。
 
 同様に、F#のコレクションを扱う関数すべてにある程度慣れるまでは、F#で本当に効率的に作業することはできません。
 
@@ -420,7 +420,7 @@ let listUnfold = List.unfold getInputFromConsole 1
 ```
 
 `unfold`はジェネレータを通じて状態を受け渡す必要があります。これを無視することもできますし（上の`ReadLine`の例のように）、
-これまでの処理内容を記録するために使うこともできます。例えば、`unfold`を使ってフィボナッチ数列のジェネレータを作成できます。
+これまでの処理内容を記録するために使うこともできます。たとえば、`unfold`を使ってフィボナッチ数列のジェネレータを作成できます。
 
 ```fsharp
 let fibonacciUnfolder max (f1,f2)  =
@@ -519,7 +519,7 @@ let badItemOpt =
 // val badItemOpt : int option = None
 ```
 
-前述のように、リストに対する`item`関数の使用は避けるべきです。例えば、リストの各項目を処理したい場合、命令型プログラミングの背景から
+前述のように、リストに対する`item`関数の使用は避けるべきです。たとえば、リストの各項目を処理したい場合、命令型プログラミングの背景から
 次のようなループを書きたくなるかもしれません。
 
 ```fsharp
@@ -615,7 +615,7 @@ listOfTuples |> List.pick ( fun (x,y) -> if y = "b" then Some (x,y) else None)
 
 `pick`関数は不要に見えるかもしれませんが、optionを返す関数を扱う際に便利です。
 
-例えば、文字列を解析してint型のSomeを返し、有効な整数でない場合はNoneを返す`tryInt`関数があるとします。
+たとえば、文字列を解析してint型のSomeを返し、有効な整数でない場合はNoneを返す`tryInt`関数があるとします。
 
 ```fsharp
 // string -> int option
@@ -1258,7 +1258,7 @@ let list2 = [4..6]
 
 最後に、`Seq.cast`は、ジェネリックではなく特殊なコレクションクラスを持つBCLの古い部分を扱う際に便利です。
 
-例えば、正規表現ライブラリにこの問題があります。以下のコードは、`MatchCollection`が`IEnumerable<T>`ではないためコンパイルできません。
+たとえば、正規表現ライブラリにこの問題があります。以下のコードは、`MatchCollection`が`IEnumerable<T>`ではないためコンパイルできません。
 
 ```fsharp
 open System.Text.RegularExpressions
@@ -1448,7 +1448,7 @@ let rec recursiveSum list =
 集計の場合、繰り返し方法（`fold`）の方が理解しやすいことが多いです。
 しかし、新しいリストの構築などの場合、再帰的な方法（`foldBack`）の方が理解しやすいです。
 
-例えば、各要素を対応する文字列に変換する関数をゼロから作成する場合、
+たとえば、各要素を対応する文字列に変換する関数をゼロから作成する場合、
 次のように書くかもしれません。
 
 ```fsharp
@@ -1497,7 +1497,7 @@ let foldToString list =
 前述のように、`fold`はリストを操作するための中核的な関数であり、ほとんどの他の関数をエミュレートできます。
 ただし、カスタム実装ほど効率的ではない場合があります。
 
-例えば、`fold`を使って`map`を実装すると次のようになります。
+たとえば、`fold`を使って`map`を実装すると次のようになります。
 
 ```fsharp
 /// 関数"f"をすべての要素にマップする
@@ -1712,7 +1712,7 @@ let add1 x = x + 1
 
 あるコレクションの種類から別のコレクションに変換する必要がよくあります。これらの関数がその役割を果たします。
 
-`ofXXX`関数は`XXX`からモジュールの型に変換するために使います。例えば、`List.ofArray`は配列をリストに変換します。
+`ofXXX`関数は`XXX`からモジュールの型に変換するために使います。たとえば、`List.ofArray`は配列をリストに変換します。
 
 * （Array以外）[`ofArray : array:'T[] -> 'T list`](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-listmodule.html#ofArray)
   与えられた配列から新しいコレクションを作成します。
@@ -1721,7 +1721,7 @@ let add1 x = x + 1
 * （List以外）[`ofList: source:'T list -> seq<'T>`](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-seqmodule.html#ofList)
   与えられたリストから新しいコレクションを作成します。
 
-`toXXX`関数はモジュールの型から`XXX`型に変換するために使います。例えば、`List.toArray`はリストを配列に変換します。
+`toXXX`関数はモジュールの型から`XXX`型に変換するために使います。たとえば、`List.toArray`はリストを配列に変換します。
   
 * （Array以外）[`toArray: list:'T list -> 'T[]`](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-listmodule.html#toArray)
   与えられたコレクションから配列を作成します。
@@ -1957,7 +1957,7 @@ List.foldBack2 (fun i1 i2 state -> i1 + i2 + (10*state)) intList1 intList2 0
 
 ### 必要な関数がない場合は？
 
-`fold2`と`foldBack2`を使えば、簡単に独自の関数を作成できます。例えば、`filter2`関数は次のように定義できます。
+`fold2`と`foldBack2`を使えば、簡単に独自の関数を作成できます。たとえば、`filter2`関数は次のように定義できます。
 
 ```fsharp
 /// ペアの各要素に関数を適用

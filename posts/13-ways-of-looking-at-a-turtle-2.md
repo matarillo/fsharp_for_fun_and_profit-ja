@@ -430,7 +430,7 @@ let inkUsedProcessor (eventStream:IObservable<Guid*obj>) =
 
 これらを試してみましょう！
 
-例えば、`drawTriangle`はこのようになります：
+たとえば、`drawTriangle`はこのようになります：
 
 ```fsharp
 let drawTriangle() = 
@@ -566,7 +566,7 @@ let inkUsedProcessor (eventStream:IObservable<Guid*obj>) =
 これまで、タートルの状態に基づいて決定を下す必要はありませんでした。そこで、最後の2つのアプローチでは、
 一部のコマンドが失敗する可能性があるようにタートルAPIを変更します。
 
-例えば、タートルが限られたアリーナ内で移動しなければならず、`move`命令によってタートルが障壁に衝突する可能性があるとしましょう。
+たとえば、タートルが限られたアリーナ内で移動しなければならず、`move`命令によってタートルが障壁に衝突する可能性があるとしましょう。
 この場合、`move`命令は`MovedOk`か`HitBarrier`の選択肢を返すことができます。
 
 または、色付きのインクの量が限られているとしましょう。この場合、色を設定しようとすると「インク切れ」の応答が返される可能性があります。
@@ -658,7 +658,7 @@ let setColor log color state =
 このアプローチでは、[方法8](../posts/13-ways-of-looking-at-a-turtle.md#way8)の`turtle`ワークフローを再利用します。
 ただし今回は、前のコマンドの結果に基づいて次のコマンドの決定を行います。
 
-その前に、`move`の変更がコードにどのような影響を与えるか見てみましょう。例えば、`move 40.0`を使って何回か前進したいとします。
+その前に、`move`の変更がコードにどのような影響を与えるか見てみましょう。たとえば、`move 40.0`を使って何回か前進したいとします。
 
 以前のように`do!`を使ってコードを書くと、厄介なコンパイラエラーが発生します：
 
@@ -830,7 +830,7 @@ type TurtleResponse =
     | ColorSet of SetColorResponse
 ```
 
-問題は、応答がコマンドと正しく一致することを保証できないことです。例えば、`Move`コマンドを送信した場合、`MoveResponse`を期待し、
+問題は、応答がコマンドと正しく一致することを保証できないことです。たとえば、`Move`コマンドを送信した場合、`MoveResponse`を期待し、
 決して`SetColorResponse`を期待しません。しかし、この実装ではそれを強制していません！
 
 [不正な状態を表現不可能にする](../posts/designing-with-types-making-illegal-states-unrepresentable.md)方法を見つける必要があります - どうすればいいでしょうか？
@@ -911,7 +911,7 @@ let drawTriangle =
 
 次のステップは、このデータ構造を解釈することです。
 
-実際のタートル関数を呼び出すインタープリターを作成しましょう。例えば、`Move`ケースをどのように実装すればよいでしょうか？
+実際のタートル関数を呼び出すインタープリターを作成しましょう。たとえば、`Move`ケースをどのように実装すればよいでしょうか？
 
 上記で説明したとおりです：
 
@@ -1249,7 +1249,7 @@ let drawTwoLines log = turtleProgram {
 *利点*
 
 * *分離。* 抽象構文木は、プログラムフローを実装から完全に分離し、多くの柔軟性を可能にします。
-* *最適化*。抽象構文木は、実行前に操作や変更を加えて、最適化やその他の変換を行うことができます。例えば、タートルプログラムでは、
+* *最適化*。抽象構文木は、実行前に操作や変更を加えて、最適化やその他の変換を行うことができます。たとえば、タートルプログラムでは、
   ツリーを処理して、連続するすべての`Turn`を単一の`Turn`操作に集約することができます。
   これは、物理的なタートルとの通信回数を節約する単純な最適化です。[TwitterのStitchライブラリ](https://web.archive.org/web/20160617143939/https://engineering.twitter.com/university/videos/introducing-stitch)
   は、より洗練された方法でこのようなことを行っています。[この動画に良い説明があります](https://www.youtube.com/watch?v=VVpmMfT8aYw&feature=youtu.be&t=625)。
@@ -1278,7 +1278,7 @@ let drawTwoLines log = turtleProgram {
 * **部分適用**。[最もシンプルなFPの例（方法2）](../posts/13-ways-of-looking-at-a-turtle.md#way2)で初めて見られ、メインフローがパイピングを使用できるようにタートル関数にロギング関数が適用されました。
   その後、特に[「関数を使った依存性注入アプローチ」（方法7）](../posts/13-ways-of-looking-at-a-turtle.md#way7)で広く使用されました。
 * **オブジェクト式**。クラスを作成せずにインターフェースを実装するために使用されました（[方法6](../posts/13-ways-of-looking-at-a-turtle.md#way6)参照）。
-* **Result型**（別名Eitherモナド）。すべての関数型APIの例（[例えば方法4](../posts/13-ways-of-looking-at-a-turtle.md#way4)）で、例外を投げる代わりにエラーを返すために使用されました。
+* **Result型**（別名Eitherモナド）。すべての関数型APIの例（[たとえば方法4](../posts/13-ways-of-looking-at-a-turtle.md#way4)）で、例外を投げる代わりにエラーを返すために使用されました。
 * **アプリカティブ「リフティング」**（例：`lift2`）。通常の関数を`Result`の世界に持ち上げるために使用されました（[方法4](../posts/13-ways-of-looking-at-a-turtle.md#way4)など）。
 * **状態管理の様々な方法**：
   * 可変フィールド（方法1）
