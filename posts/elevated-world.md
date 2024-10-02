@@ -83,7 +83,7 @@ Haskellユーザーや圏論家の方々は、ここで目をそらしたくな�
 * **パート2：世界をまたぐ関数の合成方法**    
   * [`bind`関数](../posts/elevated-world-2.md#bind)
   * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.md#not-a-monad)
-* **パート3：実践での主要関数の使用**  
+* **パート3：コア関数の実際的な使い方**  
   * [独立データと依存データ](../posts/elevated-world-3.md#dependent)
   * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.md#validation)
   * [一貫した世界への持ち上げ](../posts/elevated-world-3.md#consistent)

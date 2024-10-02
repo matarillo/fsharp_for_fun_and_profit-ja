@@ -313,7 +313,7 @@ f:('a -> M<'b>) -> M<'a> -> M<'b>
 
 つまり、`Something -> M<SomethingElse>`型の関数があれば、それを入力と出力の両方が`M`である`M<Something> -> M<SomethingElse>`型の関数に変換できるということです。
 
-ちなみに、`Something -> M<SomethingElse>`のようなシグネチャを持つ関数は、しばしば*モナド的*関数と呼ばれます。
+ちなみに、`Something -> M<SomethingElse>`のようなシグネチャを持つ関数は、しばしば*モナディック*関数と呼ばれます。
 
 `bindM`の仕組みを理解すれば、次のようなより簡潔な実装も可能です。
 
