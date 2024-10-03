@@ -171,15 +171,15 @@
   * [畳み込みを理解する](posts/recursive-types-and-folds-2b.md)
   * [ジェネリック再帰型](posts/recursive-types-and-folds-3.md)
   * [木構造の実践的な利用](posts/recursive-types-and-folds-3b.md)
-* [「認可の関数型アプローチ」 シリーズ](series/a-functional-approach-to-authorization.md)       
-  * [認可の関数型アプローチ](posts/capability-based-security.md)
-  * [ID とロールに基づく機能の制約](posts/capability-based-security-2.md)
-  * [型をアクセス トークンとして使う](posts/capability-based-security-3.md)
+* [「関数型アプローチによる認可」 シリーズ](series/a-functional-approach-to-authorization.md)       
+  * [関数型アプローチによる認可](posts/capability-based-security.md)
+  * [IDとロールによるケイパビリティの制約](posts/capability-based-security-2.md)
+  * [型をアクセストークンとして使う](posts/capability-based-security-3.md)
 
 ### テスト
 
-* [プロパティベースドテストのはじめに](posts/property-based-testing.md)
-* [プロパティベースドテストのプロパティ選択](posts/property-based-testing-2.md)
+* [プロパティベースのテスト入門](posts/property-based-testing.md)
+* [プロパティベースのテストのプロパティ選択](posts/property-based-testing-2.md)
 
 ### 例とチュートリアル
 

@@ -467,12 +467,12 @@ FsCheckはリファクタリングにも非常に役立ちます。テストが�
 
 FsCheckに関するその他のリンク：
 
-* [プロパティベーステストの入門](../posts/property-based-testing.md)と[プロパティベーステストのプロパティ選択に関するフォローアップ](../posts/property-based-testing-2.md)を書きました。
+* [プロパティベースのテスト入門](../posts/property-based-testing.md)と[プロパティベースのテストのプロパティ選択](../posts/property-based-testing-2.md)に関するフォローアップを書きました。
 * [FsCheckのドキュメント](https://github.com/fsharp/FsCheck/blob/master/Docs/Documentation.md)。
 * [実践でのFsCheckの使用に関する記事](https://brandewinder.com/2014/03/22/fscheck-and-xunit-is-the-bomb/)。
 * [FsCheckに言及しているローマ数字kata](../posts/roman-numeral-kata.md)に関する私の投稿。
 
-プロパティベーステスト一般については、QuickCheckに関する記事やビデオを探してください。
+プロパティベースのテスト一般については、QuickCheckに関する記事やビデオを探してください。
 
 * [John HughesによるQuickCheckの紹介](https://www.researchgate.net/publication/254051198_Specification_based_testing_with_QuickCheck)
 * [QuickCheckを使ってRiakのバグを見つける](https://web.archive.org/web/20140703090110/https://skillsmatter.com/skillscasts/4505-quickchecking-riak)に関する興味深い講演（ビデオ）
@@ -750,7 +750,7 @@ public void GivenIHaveNBlackJumpersLeftInStock(int n)
 
 もちろん、これまで見てきたすべてのテスト技術を組み合わせることができます（[このスライドデッキが示すように](https://www.slideshare.net/slideshow/testing-cinfdublinaltnet2013/27590095)）：
 
-* 単体テスト（FsUnit、Unquote）とプロパティベーステスト（FsCheck）。
+* 単体テスト（FsUnit、Unquote）とプロパティベースのテスト（FsCheck）。
 * BDD（TickSpec）で書かれた自動化された受け入れテスト（または少なくともスモークテスト）をブラウザ自動化（Canopy）で駆動。
 * 両方のタイプのテストを毎ビルド時に実行（FAKEで）。
 

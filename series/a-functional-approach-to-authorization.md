@@ -1,18 +1,18 @@
 ---
 layout: series_index
-title: "The 'functional approach to authorization' series"
-seriesIndexId: "A functional approach to authorization"
+title: "「関数型アプローチによる認可」シリーズ"
+seriesIndexId: "関数型アプローチによる認可"
 ---
 
-In this series of posts, I'll look at how you might handle the common security challenge of authorization.
-That is, how can you ensure that clients of your code can only do what you want them to do?
+この連載では、セキュリティにおけるよくありがちな課題である「認可」について、どのように扱えるかを見ていきます。
+つまり、コードを利用するユーザーが、意図した操作のみを実行できるようにする方法です。
 
-This series will sketch out two different approaches, first using an approach called *capability based security*, and second using statically checked types to emulate access tokens.
+本シリーズでは、2つの異なるアプローチを概説します。1つ目は *ケイパビリティベースのセキュリティ* と呼ばれる手法、2つ目は静的にチェックされる型を使用してアクセストークンを模倣する方法です。
 
-Interestingly, both approaches tend to produce a cleaner, more modular design as a side effect, which is why I like them! 
+興味深いことに、どちらのアプローチも副作用として、よりクリーンでモジュール性の高い設計を生み出す傾向があります。だからこそ、私はこれらのアプローチを好んでいるのです！
 
 
 
-* [A functional approach to authorization](../posts/capability-based-security.md). Capability based security and more.
-* [Constraining capabilities based on identity and role](../posts/capability-based-security-2.md). A functional approach to authorization, part 2.
-* [Using types as access tokens](../posts/capability-based-security-3.md). A functional approach to authorization, part 3.
+* [関数型アプローチによる認可](../posts/capability-based-security.md)。ケイパビリティベースのセキュリティとその他。
+* [IDとロールによるケイパビリティの制約](../posts/capability-based-security-2.md)。関数型アプローチによる認可 パート2。
+* [型をアクセストークンとして使う](../posts/capability-based-security-3.md)。関数型アプローチによる認可 パート3。
