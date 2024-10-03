@@ -38,7 +38,7 @@ image: "/assets/img/vgfp_bind.png"
   * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.md#adhoc)
   * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.md#readability)
   * [ねえ、`filter`はどこ？](../posts/elevated-world-4.md#filter)
-* **パート5：全てのテクニックを使用する実世界の例**    
+* **パート5：すべてのテクニックを使用する実世界の例**    
   * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.md#asynclist)
   * [2つの世界を1つとして扱う](../posts/elevated-world-5.md#asyncresult)
 * **パート6：独自の高次の世界の設計** 

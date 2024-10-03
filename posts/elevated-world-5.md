@@ -2,89 +2,89 @@
 layout: post
 title: "map, apply, bind, sequence の実際的な使い方"
 description: "テクニックをすべて使う実践例"
-categories: ["Patterns"]
+categories: ["パターン"]
 seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 5
 ---
 
-This post is the fifth in a series.
-In the [first two posts](../posts/elevated-world.md), I described some of the core functions for dealing with generic data types:  `map`, `bind`, and so on.
-In the [third post](../posts/elevated-world-3.md), I discussed "applicative" vs "monadic" style, and how to lift values and functions to be consistent with each other.
-In the [previous post](../posts/elevated-world-4.md), I introduced `traverse` and `sequence` as a way of working with lists of elevated values.
+この投稿は、一連の投稿の5番目です。
+[最初の2つの投稿](../posts/elevated-world.md)では、ジェネリックデータ型を扱うためのいくつかのコア関数、`map`、`bind`などについて説明しました。
+[3番目の投稿](../posts/elevated-world-3.md)では、「アプリカティブ」と「モナディック」のスタイルの違い、そして値と関数を一貫性のあるものにするための持ち上げ方について議論しました。
+[前回の投稿](../posts/elevated-world-4.md)では、高次の値のリストを扱う方法として、`traverse`と`sequence`を紹介しました。
 
-In this post, we'll finish up by working through a practical example that uses all the techniques that have been discussed so far.
+この投稿では、これまでに議論してきたすべてのテクニックを使用する実用的な例を検討することで、締めくくりとします。
 
-## Series contents
+## シリーズの内容
 
-Here's a list of shortcuts to the various functions mentioned in this series:
+このシリーズで触れる様々な関数へのショートカットリストです。
 
-* **Part 1: Lifting to the elevated world**
-  * [The `map` function](../posts/elevated-world.md#map)
-  * [The `return` function](../posts/elevated-world.md#return)
-  * [The `apply` function](../posts/elevated-world.md#apply)
-  * [The `liftN` family of functions](../posts/elevated-world.md#lift)
-  * [The `zip` function and ZipList world](../posts/elevated-world.md#zip)
-* **Part 2: How to compose world-crossing functions**    
-  * [The `bind` function](../posts/elevated-world-2.md#bind)
-  * [List is not a monad. Option is not a monad.](../posts/elevated-world-2.md#not-a-monad)
-* **Part 3: Using the core functions in practice**  
-  * [Independent and dependent data](../posts/elevated-world-3.md#dependent)
-  * [Example: Validation using applicative style and monadic style](../posts/elevated-world-3.md#validation)
-  * [Lifting to a consistent world](../posts/elevated-world-3.md#consistent)
-  * [Kleisli world](../posts/elevated-world-3.md#kleisli)
-* **Part 4: Mixing lists and elevated values**    
-  * [Mixing lists and elevated values](../posts/elevated-world-4.md#mixing)
-  * [The `traverse`/`MapM` function](../posts/elevated-world-4.md#traverse)
-  * [The `sequence` function](../posts/elevated-world-4.md#sequence)
-  * ["Sequence" as a recipe for ad-hoc implementations](../posts/elevated-world-4.md#adhoc)
-  * [Readability vs. performance](../posts/elevated-world-4.md#readability)
-  * [Dude, where's my `filter`?](../posts/elevated-world-4.md#filter)
-* **Part 5: A real-world example that uses all the techniques**    
-  * [Example: Downloading and processing a list of websites](../posts/elevated-world-5.md#asynclist)
-  * [Treating two worlds as one](../posts/elevated-world-5.md#asyncresult)
-* **Part 6: Designing your own elevated world** 
-  * [Designing your own elevated world](../posts/elevated-world-6.md#part6)
-  * [Filtering out failures](../posts/elevated-world-6.md#filtering)
-  * [The Reader monad](../posts/elevated-world-6.md#readermonad)
-* **Part 7: Summary** 
-  * [List of operators mentioned](../posts/elevated-world-7.md#operators)
-  * [Further reading](../posts/elevated-world-7.md#further-reading)
+* **パート1：高次の世界への持ち上げ**
+  * [`map`関数](../posts/elevated-world.md#map)
+  * [`return`関数](../posts/elevated-world.md#return)
+  * [`apply`関数](../posts/elevated-world.md#apply)
+  * [`liftN`関数ファミリー](../posts/elevated-world.md#lift)
+  * [`zip`関数とZipList世界](../posts/elevated-world.md#zip)
+* **パート2：世界をまたぐ関数の合成方法**    
+  * [`bind`関数](../posts/elevated-world-2.md#bind)
+  * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.md#not-a-monad)
+* **パート3：コア関数の実際的な使い方**  
+  * [独立データと依存データ](../posts/elevated-world-3.md#dependent)
+  * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.md#validation)
+  * [一貫した世界への持ち上げ](../posts/elevated-world-3.md#consistent)
+  * [Kleisli世界](../posts/elevated-world-3.md#kleisli)
+* **パート4：リストと高次の値の混合**    
+  * [リストと高次の値の混合](../posts/elevated-world-4.md#mixing)
+  * [`traverse`/`MapM`関数](../posts/elevated-world-4.md#traverse)
+  * [`sequence`関数](../posts/elevated-world-4.md#sequence)
+  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.md#adhoc)
+  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.md#readability)
+  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.md#filter)
+* **パート5：すべてのテクニックを使用する実世界の例**    
+  * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.md#asynclist)
+  * [2つの世界を1つとして扱う](../posts/elevated-world-5.md#asyncresult)
+* **パート6：独自の高次の世界の設計** 
+  * [独自の高次の世界の設計](../posts/elevated-world-6.md#part6)
+  * [失敗のフィルタリング](../posts/elevated-world-6.md#filtering)
+  * [Readerモナド](../posts/elevated-world-6.md#readermonad)
+* **パート7：まとめ** 
+  * [言及した演算子のリスト](../posts/elevated-world-7.md#operators)
+  * [さらなる読み物](../posts/elevated-world-7.md#further-reading)
 
 <a id="part5"></a>
 <hr>
   
-## Part 5: A real-world example that uses all the techniques
+## パート5：すべてのテクニックを使用する実世界の例
   
 <a id="asynclist"></a>
 <hr>
 
-## Example: Downloading and processing a list of websites 
+## 例：Webサイトのリストをダウンロードして処理する
 
-The example will be a variant of the one mentioned at the beginning of the [third post](../posts/elevated-world-3.md):
+この例は、[3番目の投稿](../posts/elevated-world-3.md)の冒頭で述べたものの変形版になります。
 
-* Given a list of websites, create an action that finds the site with the largest home page.
+* Webサイトのリストが与えられたら、最大のホームページを持つサイトを見つけるアクションを作成します。
 
-Let's break this down into steps:
+これを手順に分解しましょう。
 
-First we'll need to transform the urls into a list of actions, where each action downloads the page and gets the size of the content.
+まず、URLをアクションのリストに変換する必要があります。各アクションでは、ページをダウンロードしてコンテンツのサイズを取得します。
 
-And then we need to find the largest content, but in order to do this we'll have to convert  the list of actions into a single action containing a list of sizes. 
-And that's where `traverse` or `sequence` will come in.
+次に、最大のコンテンツを見つける必要がありますが、そのためには、アクションのリストをサイズのリストを含む単一のアクションに変換する必要があります。
+そこで、`traverse`または`sequence`の出番です。
 
-Let's get started!
+始めましょう！
 
-### The downloader
+### ダウンローダー
 
-First we need to create a downloader. I would use the built-in `System.Net.WebClient` class, but for some reason it doesn't allow override of the timeout.
-I'm going to want to have a small timeout for the later tests on bad uris, so this is important.
+まず、ダウンローダーを作成する必要があります。組み込みの`System.Net.WebClient`クラスを使用したいところですが、何らかの理由でタイムアウトのオーバーライドが許可されていません。
+後のテストで不正なURIに対して小さなタイムアウトを設定したいので、オーバーライドできないのは重大です。
 
-One trick is to just subclass `WebClient` and intercept the method that builds a request. So here it is:
+1つのトリックは、`WebClient`をサブクラス化して、リクエストを構築するメソッドをインターセプトすることです。これがそのコードです。
 
 ```fsharp
-// define a millisecond Unit of Measure
+// ミリ秒の単位を定義
 type [<Measure>] ms
 
-/// Custom implementation of WebClient with settable timeout
+/// カスタムのタイムアウト設定可能なWebClientの実装
 type WebClientWithTimeout(timeout:int<ms>) =
     inherit System.Net.WebClient()
 
@@ -94,356 +94,356 @@ type WebClientWithTimeout(timeout:int<ms>) =
         result
 ```
 
-Notice that I'm using units of measure for the timeout value. I find that units of measure are invaluable to distiguish seconds from milliseconds.
-I once accidentally set a timeout to 2000 seconds rather than 2000 milliseconds and I don't want to make that mistake again!
+タイムアウト値に単位を使用していることに注意してください。秒とミリ秒を区別することができるので、単位は非常に価値があると思います。
+かつて、2000ミリ秒ではなく2000秒にタイムアウトを設定してしまったことがあり、二度とそのような間違いはしたくありません！
 
-The next bit of code defines our domain types.  We want to be able to keep the url and the size together as we process them. We could use a tuple,
-but I am a proponent of [using types to model your domain](../posts/designing-with-types-single-case-dus.md), if only for documentation.
+次のコードは、ドメインの型を定義しています。URLとサイズを一緒に保持できるようにしたいと思います。タプルを使用することもできますが、
+[ドメインのモデル化に型を使用する](../posts/designing-with-types-single-case-dus.md)ことを提唱しています。ドキュメンテーションのためだけでも、そうすべきだと思います。
 
 ```fsharp
-// The content of a downloaded page 
+// ダウンロードしたページのコンテンツ
 type UriContent = 
     UriContent of System.Uri * string
 
-// The content size of a downloaded page 
+// ダウンロードしたページのコンテンツサイズ  
 type UriContentSize = 
     UriContentSize of System.Uri * int
 ```
 
-Yes, this might be overkill for a trivial example like this, but in a more serious project I think it is very much worth doing.
+これは些細な例では過剰かもしれませんが、より重要なプロジェクトでは非常に価値があると思います。
 
-Now for the code that does the downloading:
+次は、ダウンロードを行うコードです。
 
 ```fsharp
-/// Get the contents of the page at the given Uri
+/// 指定されたUriのページのコンテンツを取得する
 /// Uri -> Async<Result<UriContent>>
 let getUriContent (uri:System.Uri) = 
     async {
-        use client = new WebClientWithTimeout(1000<ms>) // 1 sec timeout
+        use client = new WebClientWithTimeout(1000<ms>) // 1秒のタイムアウト
         try
-            printfn "  [%s] Started ..." uri.Host
+            printfn "  [%s] 開始..." uri.Host
             let! html = client.AsyncDownloadString(uri) 
-            printfn "  [%s] ... finished" uri.Host
+            printfn "  [%s] ...完了" uri.Host
             let uriContent = UriContent (uri, html)
             return (Result.Success uriContent)
         with
         | ex -> 
-            printfn "  [%s] ... exception" uri.Host
+            printfn "  [%s] ...例外" uri.Host
             let err = sprintf "[%s] %A" uri.Host ex.Message
-            return Result.Failure [err ]
+            return Result.Failure [err]
         }
 ```
 
-Notes:
+注意点：
 
-* The .NET library will throw on various errors, so I am catching that and turning it into a `Failure`.
-* The `use client =` section ensures that the client will be correctly disposed at the end of the block.
-* The whole operation is wrapped in an `async` workflow, and the `let! html = client.AsyncDownloadString` is where the download happens asynchronously. 
-* I've added some `printfn`s for tracing, just for this example. In real code, I wouldn't do this of course!
+* .NETライブラリは、さまざまなエラーで例外をスローするので、それをキャッチして`Failure`に変換しています。
+* `use client =`セクションでは、ブロックの最後でクライアントが正しく破棄されるようにしています。
+* 全体の操作は`async`ワークフローでラップされており、`let! html = client.AsyncDownloadString`でダウンロードが非同期で行われます。
+* トレース用に`printfn`を追加しましたが、これはこの例のためだけです。実際のコードでは、もちろんこのようなことはしません！
 
-Before moving on, let's test this code interactively. First we need a helper to print the result:
+先に進む前に、このコードをインタラクティブにテストしてみましょう。まず、結果を出力するためのヘルパーが必要です。
 
 ```fsharp
 let showContentResult result =
     match result with
     | Success (UriContent (uri, html)) -> 
-        printfn "SUCCESS: [%s] First 100 chars: %s" uri.Host (html.Substring(0,100)) 
+        printfn "成功: [%s] 最初の100文字: %s" uri.Host (html.Substring(0,100)) 
     | Failure errs -> 
-        printfn "FAILURE: %A" errs
+        printfn "失敗: %A" errs
 ```
 
-And then we can try it out on a good site:
+それでは、正常なサイトで試してみましょう。
 
 ```fsharp
-System.Uri ("http://google.com") 
+System.Uri ("https://google.com") 
 |> getUriContent 
 |> Async.RunSynchronously 
 |> showContentResult 
 
-//  [google.com] Started ...
-//  [google.com] ... finished
-// SUCCESS: [google.com] First 100 chars: <!doctype html><html itemscope="" itemtype="http://schema.org/WebPage" lang="en-GB"><head><meta cont
+//  [google.com] 開始...
+//  [google.com] ...完了
+// 成功: [google.com] 最初の100文字: <!doctype html><html itemscope="" itemtype="https://schema.org/WebPage" lang="ja"><head><meta cont
 ```
 
-and a bad one:
+そして、不正なサイトでも試してみましょう。
 
 ```fsharp
-System.Uri ("http://example.bad") 
+System.Uri ("https://example.bad") 
 |> getUriContent 
 |> Async.RunSynchronously 
 |> showContentResult 
 
-//  [example.bad] Started ...
-//  [example.bad] ... exception
-// FAILURE: ["[example.bad] "The remote name could not be resolved: 'example.bad'""]
+//  [example.bad] 開始...
+//  [example.bad] ...例外
+// 失敗: ["[example.bad] "リモート名 'example.bad' を解決できませんでした。""]
 ```
 
-### Extending the Async type with `map` and `apply` and `bind`
+### `map`、`apply`、`bind`で`Async`型を拡張する
 
-At this point, we know that we are going to be dealing with the world of `Async`, so before we go any further, let's make sure that we have our four core functions available:
+この時点で、`Async`の世界を扱うことになるのは分かっているので、先に進む前に、4つのコア関数が使えることを確認しましょう。
 
 ```fsharp
 module Async = 
 
     let map f xAsync = async {
-        // get the contents of xAsync 
+        // xAsyncの中身を取得
         let! x = xAsync 
-        // apply the function and lift the result
+        // 関数を適用し、結果を持ち上げる
         return f x
         }
 
     let retn x = async {
-        // lift x to an Async
+        // xをAsyncに持ち上げる
         return x
         }
 
     let apply fAsync xAsync = async {
-        // start the two asyncs in parallel
+        // 2つの非同期を並列で開始
         let! fChild = Async.StartChild fAsync
         let! xChild = Async.StartChild xAsync
 
-        // wait for the results
+        // 結果を待つ
         let! f = fChild
         let! x = xChild 
 
-        // apply the function to the results
+        // 結果に関数を適用する
         return f x 
         }
 
     let bind f xAsync = async {
-        // get the contents of xAsync 
+        // xAsyncの中身を取得
         let! x = xAsync 
-        // apply the function but don't lift the result
-        // as f will return an Async
+        // 関数を適用するが、結果を持ち上げない
+        // fはAsyncを返すため
         return! f x
         }
 ```
 
-These implementations are straightforward:
+これらの実装は素直です。
 
-* I'm using the `async` workflow to work with `Async` values.
-* The `let!` syntax in `map` extracts the content from the `Async` (meaning run it and await the result).
-* The `return` syntax in `map`, `retn`, and `apply` lifts the value to an `Async` using `return`.
-* The `apply` function runs the two parameters in parallel using a fork/join pattern.
-  If I had instead written `let! fChild = ...` followed by a `let! xChild = ...`
-  that would have been monadic and sequential, which is not what I wanted.
-* The `return!` syntax in `bind` means that the value is already lifted and *not* to call `return` on it.
+* `async`ワークフローを使って`Async`の値を扱っています。
+* `map`の`let!`構文は、`Async`からコンテンツを抽出します（つまり、実行して結果を待ちます）。
+* `map`、`retn`、`apply`の`return`構文は、値を`return`を使って`Async`に持ち上げます。
+* `apply`関数は、与えられた2つの処理を並列に実行します。これは、fork/joinと呼ばれるパターンを使っています。
+  もし、`let! fChild = ...`の後に`let! xChild = ...`と書いていたら、
+  モナディックな順次処理になってしまい、私の意図とは異なる結果になっていたでしょう。
+* `bind`の`return!`構文は、値がすでに持ち上げられていて、それに`return`を呼び出さない*ない*ことを意味します。
 
-### Getting the size of the downloaded page
+### ダウンロードしたページのサイズを取得する
 
-Getting back on track, we can continue from the downloading step and move on to the process of converting the result to a `UriContentSize`:
+ダウンロードの手順の次に、結果を`UriContentSize`に変換するプロセスに進みましょう。
 
 ```fsharp
-/// Make a UriContentSize from a UriContent
+/// UriContentからUriContentSizeを作成する
 /// UriContent -> Result<UriContentSize>
 let makeContentSize (UriContent (uri, html)) = 
     if System.String.IsNullOrEmpty(html) then
-        Result.Failure ["empty page"]
+        Result.Failure ["空のページ"]
     else
         let uriContentSize = UriContentSize (uri, html.Length)
         Result.Success uriContentSize 
 ```
 
-If the input html is null or empty we'll treat this an error, otherwise we'll return a `UriContentSize`.
+入力のhtmlがnullまたは空の場合は、これをエラーとして扱い、そうでない場合は`UriContentSize`を返します。
 
-Now we have two functions and we want to combine them into one "get UriContentSize given a Uri" function. The problem is that the outputs and inputs don't match:
+これで2つの関数ができました。それらを1つの「UriからUriContentSizeを取得する」関数に組み合わせたいと思います。問題は、出力と入力が一致しないことです。
 
-* `getUriContent` is `Uri -> Async<Result<UriContent>>`
-* `makeContentSize` is `UriContent -> Result<UriContentSize>`
+* `getUriContent`は`Uri -> Async<Result<UriContent>>`
+* `makeContentSize`は`UriContent -> Result<UriContentSize>`
 
-The answer is to transform `makeContentSize` from a function that takes a `UriContent` as input into
-a function that takes a `Async<Result<UriContent>>` as input. How can we do that?
+解決策は、`makeContentSize`を`UriContent`を入力とする関数から、`Async<Result<UriContent>>`を入力とする関数に変換することです。
+どうすればいいのでしょうか。
 
-First, use `Result.bind` to convert it from an `a -> Result<b>` function to a `Result<a> -> Result<b>` function.
-In this case, `UriContent -> Result<UriContentSize>` becomes `Result<UriContent> -> Result<UriContentSize>`.
+まず、`Result.bind`を使って、`a -> Result<b>`関数を`Result<a> -> Result<b>`関数に変換します。
+この場合、`UriContent -> Result<UriContentSize>`は`Result<UriContent> -> Result<UriContentSize>`になります。
 
-Next, use `Async.map` to convert it from an `a -> b` function to a `Async<a> -> Async<b>` function.
-In this case, `Result<UriContent> -> Result<UriContentSize>` becomes `Async<Result<UriContent>> -> Async<Result<UriContentSize>>`.
+次に、`Async.map`を使って、`a -> b`関数を`Async<a> -> Async<b>`関数に変換します。
+この場合、`Result<UriContent> -> Result<UriContentSize>`は`Async<Result<UriContent>> -> Async<Result<UriContentSize>>`になります。
 
 ![](../assets/img/vgfp_urlcontentsize.png)
 
-And now that it has the right kind of input, so we can compose it with `getUriContent`:
+そして、正しい種類の入力を受け取れるようになったので、`getUriContent`と合成することができます。
 
 ```fsharp
-/// Get the size of the contents of the page at the given Uri
+/// 指定されたUriのページのコンテンツのサイズを取得する
 /// Uri -> Async<Result<UriContentSize>>
 let getUriContentSize uri =
     getUriContent uri 
     |> Async.map (Result.bind makeContentSize)
 ```
 
-That's some gnarly type signature, and it's only going to get worse!  It's at times like these that I really appreciate type inference.
+これは複雑な型シグネチャですが、これからもっと悪化していくでしょう！このような時に型推論に本当に感謝します。
 
-Let's test again. First a helper to format the result:
+もう一度テストしてみましょう。まず、結果をフォーマットするためのヘルパーを用意します。
 
 ```fsharp
 let showContentSizeResult result =
     match result with
     | Success (UriContentSize (uri, len)) -> 
-        printfn "SUCCESS: [%s] Content size is %i" uri.Host len 
+        printfn "成功: [%s] コンテンツのサイズは %i" uri.Host len 
     | Failure errs -> 
-        printfn "FAILURE: %A" errs
+        printfn "失敗: %A" errs
 ```
 
-And then we can try it out on a good site:
+そして、正常なサイトで試してみましょう。
 
 ```fsharp
-System.Uri ("http://google.com") 
+System.Uri ("https://google.com") 
 |> getUriContentSize 
 |> Async.RunSynchronously 
 |> showContentSizeResult 
 
-//  [google.com] Started ...
-//  [google.com] ... finished
-//SUCCESS: [google.com] Content size is 44293
+//  [google.com] 開始...
+//  [google.com] ...完了
+//成功: [google.com] コンテンツのサイズは 44293
 ```
 
-and a bad one:
+そして、不正なサイトでも。
 
 ```fsharp
-System.Uri ("http://example.bad") 
+System.Uri ("https://example.bad") 
 |> getUriContentSize
 |> Async.RunSynchronously 
 |> showContentSizeResult 
 
-//  [example.bad] Started ...
-//  [example.bad] ... exception
-//FAILURE: ["[example.bad] "The remote name could not be resolved: 'example.bad'""]
+//  [example.bad] 開始...
+//  [example.bad] ...例外
+//失敗: ["[example.bad] "リモート名 'example.bad' を解決できませんでした。""]
 ```
 
-### Getting the largest size from a list 
+### リストから最大のサイズを取得する
 
-The last step in the process is to find the largest page size.
+このプロセスの最後のステップは、最大のページサイズを見つけることです。
 
-That's easy. Once we have a list of `UriContentSize`, we can easily find the largest one using `List.maxBy`:
+それは簡単です。いったん`UriContentSize`のリストが得られれば、`List.maxBy`を使って最大のものを簡単に見つけることができます。
 
 ```fsharp
-/// Get the largest UriContentSize from a list
+/// リストから最大のUriContentSizeを取得する
 /// UriContentSize list -> UriContentSize
 let maxContentSize list = 
 
-    // extract the len field from a UriContentSize 
+    // UriContentSizeからlenフィールドを抽出する
     let contentSize (UriContentSize (_, len)) = len
 
-    // use maxBy to find the largest            
+    // maxByを使って最大のものを見つける           
     list |> List.maxBy contentSize 
 ```
 
-### Putting it all together
+### すべてをまとめる
 
-We're ready to assemble all the pieces now, using the following algorithm:
+これで、すべてのピースを組み立てる準備ができました。以下のアルゴリズムを使用します。
 
-* Start with a list of urls
-* Turn the list of strings into a list of uris (`Uri list`)
-* Turn the list of `Uri`s into a list of actions (`Async<Result<UriContentSize>> list`) 
-* Next we need to swap the top two parts of the stack. That is, transform a `List<Async>` into a `Async<List>`.
+* URLのリストを用意する
+* 文字列のリストを`Uri`のリストに変換する（`Uri list`）
+* `Uri`のリストをアクションのリストに変換する（`Async<Result<UriContentSize>> list`）
+* 次に、スタックの上位2つの部分を入れ替える必要があります。つまり、`List<Async>`を`Async<List>`に変換します。
 
 ![](../assets/img/vgfp_download_stack_1.png)
 
-* Next we need to swap the *bottom* two parts of the stack -- transform a `List<Result>` into a `Result<List>`.
-   But the two bottom  parts of the stack are wrapped in an `Async` so we need to use `Async.map` to do this.
+* 次に、スタックの*下位*2つの部分を入れ替える必要があります。つまり、`List<Result>`を`Result<List>`に変換します。
+   しかし、スタックの下位2つの部分は`Async`でラップされているので、これを行うには`Async.map`を使用する必要があります。
     
 ![](../assets/img/vgfp_download_stack_2.png)
 
-* Finally we need to use `List.maxBy` on the bottom `List` to convert it into a single value. That is, transform a `List<UriContentSize>` into a `UriContentSize`.
-   But the bottom of the stack is wrapped in a `Result` wrapped in an `Async` so we need to use `Async.map` and `Result.map` to do this.
+* 最後に、一番下の`List`に`List.maxBy`を使用して、それを単一の値に変換する必要があります。つまり、`List<UriContentSize>`を`UriContentSize`に変換します。
+   しかし、スタックの一番下は`Result`でラップされ、さらに`Async`でラップされているので、これを行うには`Async.map`と`Result.map`を使用する必要があります。
 
 ![](../assets/img/vgfp_download_stack_3.png)
 
-Here's the complete code:
+完全なコードは以下の通りです。
 
 ```fsharp
-/// Get the largest page size from a list of websites
+/// Webサイトのリストから最大のページサイズを取得する
 let largestPageSizeA urls = 
     urls
-    // turn the list of strings into a list of Uris
-    // (In F# v4, we can call System.Uri directly!)
+    // 文字列のリストをUriのリストに変換する
+    // （F# v4では、System.Uriを直接呼び出すことができます！）
     |> List.map (fun s -> System.Uri(s))   
     
-    // turn the list of Uris into a "Async<Result<UriContentSize>> list" 
+    // UriのリストをAsync<Result<UriContentSize>> listに変換する
     |> List.map getUriContentSize
     
-    // turn the "Async<Result<UriContentSize>> list" 
-    //   into an "Async<Result<UriContentSize> list>"
+    // Async<Result<UriContentSize>> listを
+    //   Async<Result<UriContentSize> list>に変換する
     |> List.sequenceAsyncA
     
-    // turn the "Async<Result<UriContentSize> list>" 
-    //   into a "Async<Result<UriContentSize list>>"
+    // Async<Result<UriContentSize> list>を
+    //   Async<Result<UriContentSize list>>に変換する
     |> Async.map List.sequenceResultA
     
-    // find the largest in the inner list to get 
-    //   a "Async<Result<UriContentSize>>"
+    // 内部のリストで最大のものを見つけて
+    //   Async<Result<UriContentSize>>を取得する
     |> Async.map (Result.map maxContentSize)
 ```
 
-This function has signature `string list -> Async<Result<UriContentSize>>`, which is just what we wanted!
+この関数のシグネチャは`string list -> Async<Result<UriContentSize>>`で、これはまさに私たちが望んでいたものです！
 
-There are two `sequence` functions involved here: `sequenceAsyncA` and `sequenceResultA`. The implementations are as you would expect from
-all the previous discussion, but I'll show the code anyway:
+ここでは、2つの`sequence`関数が使われています。`sequenceAsyncA`と`sequenceResultA`です。
+実装は、これまでの議論から期待されるものですが、コードを見せておきましょう。
 
 ```fsharp
 module List =
 
-    /// Map a Async producing function over a list to get a new Async 
-    /// using applicative style
+    /// アプリカティブスタイルを使用して、リストに対してAsync生成関数をマップし、
+    /// 新しいAsyncを取得する
     /// ('a -> Async<'b>) -> 'a list -> Async<'b list>
     let rec traverseAsyncA f list =
 
-        // define the applicative functions
+        // アプリカティブ関数を定義する
         let (<*>) = Async.apply
         let retn = Async.retn
 
-        // define a "cons" function
+        // "cons"関数を定義する
         let cons head tail = head :: tail
 
-        // right fold over the list
+        // リストを右畳み込みする
         let initState = retn []
         let folder head tail = 
             retn cons <*> (f head) <*> tail
 
         List.foldBack folder list initState 
 
-    /// Transform a "list<Async>" into a "Async<list>" 
-    /// and collect the results using apply.
+    /// "list<Async>"を"Async<list>"に変換し、
+    /// applyを使用して結果を収集する
     let sequenceAsyncA x = traverseAsyncA id x
 
-    /// Map a Result producing function over a list to get a new Result 
-    /// using applicative style
+    /// アプリカティブスタイルを使用して、リストに対してResult生成関数をマップし、
+    /// 新しいResultを取得する
     /// ('a -> Result<'b>) -> 'a list -> Result<'b list>
     let rec traverseResultA f list =
 
-        // define the applicative functions
+        // アプリカティブ関数を定義する
         let (<*>) = Result.apply
         let retn = Result.Success
 
-        // define a "cons" function
+        // "cons"関数を定義する
         let cons head tail = head :: tail
 
-        // right fold over the list
+        // リストを右畳み込みする
         let initState = retn []
         let folder head tail = 
             retn cons <*> (f head) <*> tail
 
         List.foldBack folder list initState 
 
-    /// Transform a "list<Result>" into a "Result<list>" 
-    /// and collect the results using apply.
+    /// "list<Result>"を"Result<list>"に変換し、
+    /// applyを使用して結果を収集する
     let sequenceResultA x = traverseResultA id x
 ```
 
-### Adding a timer
+### タイマーの追加
 
-It will be interesting to see how long the download takes for different scenarios,
-so let's create a little timer that runs a function a certain number of times and takes the average:
+ダウンロードにかかる時間がシナリオによってどう変わるのか見てみましょう。
+そこで、ある関数を一定の回数実行し、平均を取るための小さなタイマーを作成しましょう。
 
 ```fsharp
-/// Do countN repetitions of the function f and print the time per run
+/// 関数fをcountN回繰り返し実行し、1回あたりの時間を表示する
 let time countN label f  = 
 
     let stopwatch = System.Diagnostics.Stopwatch()
     
-    // do a full GC at the start but not thereafter
-    // allow garbage to collect for each iteration
+    // 開始時に完全なGCを行うが、その後は行わない
+    // 各繰り返しでガベージを収集できるようにする
     System.GC.Collect()  
 
     printfn "======================="         
@@ -456,37 +456,37 @@ let time countN label f  =
         stopwatch.Restart() 
         f()
         stopwatch.Stop() 
-        printfn "#%2i elapsed:%6ims " iteration stopwatch.ElapsedMilliseconds 
+        printfn "#%2i 経過時間:%6ims " iteration stopwatch.ElapsedMilliseconds 
         totalMs <- totalMs + stopwatch.ElapsedMilliseconds
 
     let avgTimePerRun = totalMs / int64 countN
-    printfn "%s: Average time per run:%6ims " label avgTimePerRun 
+    printfn "%s: 1回あたりの平均時間:%6ims " label avgTimePerRun 
 ```
 
 
-### Ready to download at last
+### いよいよダウンロード
 
-Let's download some sites for real!
+それでは、実際のサイトをダウンロードしてみましょう。
 
-We'll define two lists of sites: a "good" one, where all the sites should be accessible, and a "bad" one, containing invalid sites.
+2つのサイトのリストを定義します。「良い」リストは、すべてのサイトにアクセスできるはずです。「悪い」リストには、無効なサイトが含まれています。
 
 ```fsharp
 let goodSites = [
-    "http://google.com"
-    "http://bbc.co.uk"
-    "http://fsharp.org"
-    "http://microsoft.com"
+    "https://google.com"
+    "https://bbc.co.uk"
+    "https://fsharp.org"
+    "https://microsoft.com"
     ]
 
 let badSites = [
-    "http://example.com/nopage"
-    "http://bad.example.com"
-    "http://verybad.example.com"
-    "http://veryverybad.example.com"
+    "https://example.com/nopage"
+    "https://bad.example.com"
+    "https://verybad.example.com"
+    "https://veryverybad.example.com"
     ]
 ```
 
-Let's start by running `largestPageSizeA` 10 times with the good sites list: 
+まず、良いサイトのリストで`largestPageSizeA`を10回実行してみましょう。
  
 ```fsharp
 let f() = 
@@ -496,25 +496,25 @@ let f() =
 time 10 "largestPageSizeA_Good" f
 ```
 
-The output is something like this:
+出力は次のようになります。
 
 ```text
-[google.com] Started ...
-[bbc.co.uk] Started ...
-[fsharp.org] Started ...
-[microsoft.com] Started ...
-[bbc.co.uk] ... finished
-[fsharp.org] ... finished
-[google.com] ... finished
-[microsoft.com] ... finished
+[google.com] 開始...
+[bbc.co.uk] 開始...
+[fsharp.org] 開始...
+[microsoft.com] 開始...
+[bbc.co.uk] ...完了
+[fsharp.org] ...完了
+[google.com] ...完了
+[microsoft.com] ...完了
 
-SUCCESS: [bbc.co.uk] Content size is 108983
-largestPageSizeA_Good: Average time per run:   533ms 
+成功: [bbc.co.uk] コンテンツのサイズは 108983
+largestPageSizeA_Good: 1回あたりの平均時間:   533ms 
 ```
 
-We can see immediately that the downloads are happening in parallel -- they have all started before the first one has finished. 
+ダウンロードが並列に行われていることがすぐにわかります。すべてのダウンロードが最初のダウンロードの完了を待たずに開始されています。
 
-Now what about if some of the sites are bad?
+では、いくつかのサイトが不正な場合はどうでしょうか？
 
 ```fsharp
 let f() = 
@@ -524,38 +524,38 @@ let f() =
 time 10 "largestPageSizeA_Bad" f
 ```
  
-The output is something like this: 
+出力は次のようになります。
 
 ```text
-[example.com] Started ...
-[bad.example.com] Started ...
-[verybad.example.com] Started ...
-[veryverybad.example.com] Started ...
-[verybad.example.com] ... exception
-[veryverybad.example.com] ... exception
-[example.com] ... exception
-[bad.example.com] ... exception
+[example.com] 開始...
+[bad.example.com] 開始...
+[verybad.example.com] 開始...
+[veryverybad.example.com] 開始...
+[verybad.example.com] ...例外
+[veryverybad.example.com] ...例外
+[example.com] ...例外
+[bad.example.com] ...例外
 
-FAILURE: [
- "[example.com] "The remote server returned an error: (404) Not Found."";
- "[bad.example.com] "The remote name could not be resolved: 'bad.example.com'"";
- "[verybad.example.com] "The remote name could not be resolved: 'verybad.example.com'"";
- "[veryverybad.example.com] "The remote name could not be resolved: 'veryverybad.example.com'""]
+失敗: [
+ "[example.com] "リモート サーバーがエラーを返しました: (404) 見つかりません。"";
+ "[bad.example.com] "リモート名 'bad.example.com' を解決できませんでした。"";
+ "[verybad.example.com] "リモート名 'verybad.example.com' を解決できませんでした。"";
+ "[veryverybad.example.com] "リモート名 'veryverybad.example.com' を解決できませんでした。""]
 
-largestPageSizeA_Bad: Average time per run:  2252ms 
+largestPageSizeA_Bad: 1回あたりの平均時間:  2252ms 
 ```
 
-Again, all the downloads are happening in parallel, and all four failures are returned. 
+ここでも、すべてのダウンロードが並列に行われており、4つのエラーすべてが返されています。
 
-### Optimizations
+### 最適化
 
-The `largestPageSizeA` has a series of maps and sequences in it which means that the list is being iterated over three times and the async mapped over twice. 
+`largestPageSizeA`には、マップとシーケンスが連続して並んでいます。つまり、リストが3回反復され、非同期が2回マップされることになります。
 
-As [I said earlier](../posts/elevated-world-4.md#readability), I prefer clarity over micro-optimizations unless there is proof otherwise, and so this does not bother me.
+[以前にも述べた](../posts/elevated-world-4.md#readability)ように、私は明快さをマイクロ最適化よりも優先します。証拠がない限り、これは気にしません。
 
-However, let's look at what you *could* do if you wanted to.
+しかし、もしやりたいのであれば、何ができるか見てみましょう。
 
-Here's the original version, with comments removed:
+以下は、コメントを取り除いた元のバージョンです。
 
 ```fsharp
 let largestPageSizeA urls = 
@@ -567,7 +567,7 @@ let largestPageSizeA urls =
     |> Async.map (Result.map maxContentSize)
 ```
 
-The first two `List.map`s could be combined:
+最初の2つの`List.map`は組み合わせることができます。
 
 ```fsharp
 let largestPageSizeA urls = 
@@ -578,7 +578,7 @@ let largestPageSizeA urls =
     |> Async.map (Result.map maxContentSize)
 ```
 
-The  `map-sequence` can be replaced with a `traverse`:
+`map-sequence`は`traverse`に置き換えることができます。
 
 ```fsharp
 let largestPageSizeA urls = 
@@ -588,7 +588,7 @@ let largestPageSizeA urls =
     |> Async.map (Result.map maxContentSize)
 ```
 
-and finally the two `Async.map`s can be combined too:
+そして、最後に2つの`Async.map`も組み合わせることができます。
 
 ```fsharp
 let largestPageSizeA urls = 
@@ -597,31 +597,31 @@ let largestPageSizeA urls =
     |> Async.map (List.sequenceResultA >> Result.map maxContentSize)
 ```
 
-Personally, I think we've gone too far here. I prefer the original version to this one!
+個人的には、ここまでやると可読性が下がってしまうと思います。私は元のバージョンの方が好みですね。
 
-As an aside, one way to get the best of both worlds is to use a "streams" library that automatically merges the maps for you.
-In F#, a good one is [Nessos Streams](https://nessos.github.io/Streams/). Here is [a blog post showing the difference](http://trelford.com/blog/post/SeqVsStream.aspx) between streams and 
-the standard `seq`. 
+ついでに言えば、マップを自動的にマージしてくれる「ストリーム」ライブラリを使うのも一つの方法です。
+F#では、[Nessos Streams](https://nessos.github.io/Streams/)が優れています。
+ストリームと標準の`seq`の違いを示した[ブログ記事](http://trelford.com/blog/post/SeqVsStream.aspx)もあります。
 
-### Downloading the monadic way
+### モナディックなダウンロード
 
-Let's reimplement the downloading logic using monadic style and see what difference it makes.
+モナディックなスタイルでダウンロードロジックを再実装し、それがどのような違いをもたらすか見てみましょう。
 
-First we need a monadic version of the downloader:
+まず、モナディックなダウンローダーが必要です。
 
 ```fsharp
 let largestPageSizeM urls = 
     urls
     |> List.map (fun s -> System.Uri(s))
     |> List.map getUriContentSize
-    |> List.sequenceAsyncM              // <= "M" version
-    |> Async.map List.sequenceResultM   // <= "M" version
+    |> List.sequenceAsyncM              // <= "M"バージョン
+    |> Async.map List.sequenceResultM   // <= "M"バージョン
     |> Async.map (Result.map maxContentSize)
 ```
  
-This one uses the monadic `sequence` functions (I won't show them -- the implementation is as you expect).
+このバージョンでは、モナディックな`sequence`関数を使用しています（実装は省略します。期待通りのものです）。
 
-Let's run `largestPageSizeM` 10 times with the good sites list and see if there is any difference from the applicative version: 
+良いサイトのリストで`largestPageSizeM`を10回実行し、アプリカティブなバージョンとの違いがあるかどうか見てみましょう。
  
 ```fsharp
 let f() = 
@@ -631,28 +631,28 @@ let f() =
 time 10 "largestPageSizeM_Good" f
 ```
 
-The output is something like this:
+出力は次のようになります。
 
 ```text
-  [google.com] Started ...
-  [google.com] ... finished
-  [bbc.co.uk] Started ...
-  [bbc.co.uk] ... finished
-  [fsharp.org] Started ...
-  [fsharp.org] ... finished
-  [microsoft.com] Started ...
-  [microsoft.com] ... finished
+  [google.com] 開始...
+  [google.com] ...完了
+  [bbc.co.uk] 開始...
+  [bbc.co.uk] ...完了
+  [fsharp.org] 開始...
+  [fsharp.org] ...完了
+  [microsoft.com] 開始...
+  [microsoft.com] ...完了
 
-SUCCESS: [bbc.co.uk] Content size is 108695
-largestPageSizeM_Good: Average time per run:   955ms 
+成功: [bbc.co.uk] コンテンツのサイズは 108695
+largestPageSizeM_Good: 1回あたりの平均時間:   955ms 
 ```
 
-There is a big difference now -- it is obvious that the downloads are happening in series -- each one starts only when the previous one has finished. 
+今回は大きな違いがあります。ダウンロードが直列に行われていることが明らかです。各ダウンロードは、前のダウンロードが完了してから開始されています。
 
-As a result, the average time is 955ms per run, almost twice that of the applicative version.  
+その結果、1回あたりの平均時間は955msで、アプリカティブなバージョンのほぼ2倍になっています。
 
-Now what about if some of the sites are bad?  What should we expect? Well, because it's monadic, we should expect that after the first error,
-the remaining sites are skipped, right?  Let's see if that happens! 
+では、サイトの一部が不正な場合はどうでしょうか？何が起こると予想されますか？モナディックなので、最初のエラーの後、残りのサイトはスキップされるはずですよね？
+実際にそうなるか見てみましょう！
 
 ```fsharp
 let f() = 
@@ -662,70 +662,70 @@ let f() =
 time 10 "largestPageSizeM_Bad" f
 ```
  
-The output is something like this: 
+出力は次のようになります。
 
 ```text
-[example.com] Started ...
-[example.com] ... exception
-[bad.example.com] Started ...
-[bad.example.com] ... exception
-[verybad.example.com] Started ...
-[verybad.example.com] ... exception
-[veryverybad.example.com] Started ...
-[veryverybad.example.com] ... exception
+[example.com] 開始...
+[example.com] ...例外
+[bad.example.com] 開始...
+[bad.example.com] ...例外
+[verybad.example.com] 開始...
+[verybad.example.com] ...例外
+[veryverybad.example.com] 開始...
+[veryverybad.example.com] ...例外
 
-FAILURE: ["[example.com] "The remote server returned an error: (404) Not Found.""]
-largestPageSizeM_Bad: Average time per run:  2371ms 
+失敗: ["[example.com] "リモート サーバーがエラーを返しました: (404) 見つかりません。""]
+largestPageSizeM_Bad: 1回あたりの平均時間:  2371ms 
 ```
 
-Well that was unexpected! All of the sites were visited in series, even though the first one had an error. But in that case, why is only the *first* error returned,
-rather than *all* the the errors? 
+予想外の結果でした！すべてのサイトが直列に訪問されましたが、最初のサイトでエラーが発生していました。
+しかし、その場合、*すべて*のエラーではなく、*最初*のエラーのみが返されるのはなぜでしょうか？
 
-Can you see what went wrong?
+何が問題だったのかわかりますか？
 
-### Explaining the problem
+### 問題の説明
 
-The reason why the implementation did not work as expected is that the chaining of the `Async`s was independent of the chaining of the `Result`s.
+実装がうまくいかなかった理由は、`Async`のチェーンと`Result`のチェーンが独立していたためです。
 
-If you step through this in a debugger you can see what is happening:
+デバッガでステップ実行すると、何が起こっているのかがわかります。
 
-* The first `Async` in the list was run, resulting in a failure.
-* `Async.bind` was used with the next `Async` in the list. But `Async.bind` has no concept of error, so the next `Async` was run, producing another failure.
-* In this way, all the `Async`s were run, producing a list of failures.
-* This list of failures was then traversed using `Result.bind`. Of course, because of the bind, only the first one was processed and the rest ignored.
-* The final result was that all the `Async`s were run but only the first failure was returned.
+* リスト内の最初の`Async`が実行され、失敗しました。
+* 次の`Async`で`Async.bind`が使用されました。しかし、`Async.bind`にはエラーの概念がないため、次の`Async`が実行され、別の失敗が発生しました。
+* このようにして、すべての`Async`が実行され、失敗のリストが生成されました。
+* この失敗のリストは、`Result.bind`を使ってトラバースされました。もちろん、bindのために、最初の失敗のみが処理され、残りは無視されました。
+* 最終的な結果は、すべての`Async`が実行されたが、最初の失敗のみが返されたということです。
 
 <a id="asyncresult"></a>
 <hr>
 
-## Treating two worlds as one
+## 2つの世界を1つとして扱う
 
-The fundamental problem is that we are treating the `Async` list and `Result` list as *separate* things to be traversed over.
-But that means that a failed `Result` has no influence on whether the next `Async` is run.
+根本的な問題は、`Async`のリストと`Result`のリストを*別々*のトラバース対象として扱っていることです。
+しかし、それでは、`Result`が失敗しても、次の`Async`が実行されるかどうかに影響を与えません。
 
-What we want to do, then, is tie them together so that a bad result *does* determine whether the next `Async` is run.
+そこで、`Async`と`Result`をを結びつけて、失敗した結果が次の`Async`を実行するかどうかを決定するようにしたいと思います。
 
-And in order to do that, we need to treat the `Async` and the `Result` as a *single* type -- let's imaginatively call it `AsyncResult`.
+そのためには、`Async`と`Result`を*1つの*型として扱う必要があります。想像力をたくましくして、`AsyncResult`と呼ぶことにしましょう。
 
-If they are a single type, then `bind` looks like this:
+それらが1つの型であれば、`bind`は次のようになります。
 
 ![](../assets/img/vgfp_asyncresult-1.png)
 
-meaning that the previous value will determine the next value.
+つまり、前の値が次の値を決定するということです。
 
-And also, the "swapping" becomes much simpler:
+また、「入れ替え」がはるかに簡単になります。
 
 ![](../assets/img/vgfp_asyncresult-2.png)
 
-### Defining the AsyncResult type
+### AsyncResult型の定義
 
-OK, let's define the `AsyncResult` type and it's associated `map`, `return`, `apply` and `bind` functions.
+さて、`AsyncResult`型とそれに関連する`map`、`return`、`apply`、`bind`関数を定義しましょう。
 
 ```fsharp
-/// type alias (optional)
+/// 型エイリアス（オプション）
 type AsyncResult<'a> = Async<Result<'a>>
 
-/// functions for AsyncResult 
+/// AsyncResultの関数
 module AsyncResult =
 module AsyncResult =
 
@@ -748,33 +748,33 @@ module AsyncResult =
         }
 ```
 
-Notes:
+注意点：
 
-* The type alias is optional. We can use `Async<Result<'a>>` directly in the code and it wil work fine.  The point is that *conceptually* `AsyncResult` is a separate type.
-* The `bind` implementation is new. The continuation function `f` is now crossing *two* worlds, and has the signature `'a -> Async<Result<'b>>`.
-  * If the inner `Result` is successful, the continuation function `f` is evaluated with the result. The `return!` syntax means that the return value is already lifted.
-  * If the inner `Result` is a failure, we have to lift the failure to an Async.
+* 型エイリアスはオプションです。コードでは`Async<Result<'a>>`を直接使えば、うまく動作します。重要なのは、*概念的*に`AsyncResult`が別の型であるということです。
+* `bind`の実装は新しいものです。継続関数`f`は*2つ*の世界をまたいでおり、`'a -> Async<Result<'b>>`というシグネチャを備えています。
+  * 内側の`Result`が成功した場合、結果で継続関数`f`が評価されます。`return!`構文は、戻り値がすでに持ち上げられていることを意味します。
+  * 内側の`Result`が失敗した場合、失敗をAsyncに持ち上げる必要があります。
 
-### Defining the traverse and sequence functions
+### traverseおよびsequence関数の定義
 
-With `bind` and `return` in place, we can create the appropriate `traverse` and `sequence` functions for `AsyncResult`:
+`bind`と`return`が整ったところで、`AsyncResult`に適した`traverse`と`sequence`関数を作成しましょう。
 
 ```fsharp
 module List =
 
-    /// Map an AsyncResult producing function over a list to get a new AsyncResult
-    /// using monadic style
+    /// モナディックスタイルを使用して、リストに対してAsyncResult生成関数をマップし、
+    /// 新しいAsyncResultを取得する
     /// ('a -> AsyncResult<'b>) -> 'a list -> AsyncResult<'b list>
     let rec traverseAsyncResultM f list =
 
-        // define the monadic functions
+        // モナディック関数を定義する
         let (>>=) x f = AsyncResult.bind f x
         let retn = AsyncResult.retn
 
-        // define a "cons" function
+        // "cons"関数を定義する
         let cons head tail = head :: tail
 
-        // right fold over the list
+        // リストを右畳み込みする
         let initState = retn []
         let folder head tail = 
             f head >>= (fun h -> 
@@ -783,14 +783,14 @@ module List =
 
         List.foldBack folder list initState 
 
-    /// Transform a "list<AsyncResult>" into a "AsyncResult<list>"
-    /// and collect the results using bind.
+    /// "list<AsyncResult>"を"AsyncResult<list>"に変換し、
+    /// bindを使用して結果を収集する
     let sequenceAsyncResultM x = traverseAsyncResultM id x
 ```
+
+### ダウンロード関数の定義とテスト
  
-### Defining and testing the downloading functions
- 
-Finally, the `largestPageSize` function is simpler now, with only one sequence needed.
+最後に、`largestPageSize`関数は、シーケンスが1つだけになったので、よりシンプルになりました。
  
 ```fsharp
 let largestPageSizeM_AR urls = 
@@ -800,7 +800,7 @@ let largestPageSizeM_AR urls =
     |> AsyncResult.map maxContentSize
 ```
 
-Let's run `largestPageSizeM_AR` 10 times with the good sites list and see if there is any difference from the applicative version: 
+良いサイトのリストで`largestPageSizeM_AR`を10回実行し、アプリカティブなバージョンとの違いがあるかどうか見てみましょう。
  
 ```fsharp
 let f() = 
@@ -810,25 +810,25 @@ let f() =
 time 10 "largestPageSizeM_AR_Good" f
 ```
 
-The output is something like this:
+出力は次のようになります。
 
 ```text
-[google.com] Started ...
-[google.com] ... finished
-[bbc.co.uk] Started ...
-[bbc.co.uk] ... finished
-[fsharp.org] Started ...
-[fsharp.org] ... finished
-[microsoft.com] Started ...
-[microsoft.com] ... finished
+[google.com] 開始...
+[google.com] ...完了
+[bbc.co.uk] 開始...
+[bbc.co.uk] ...完了
+[fsharp.org] 開始...
+[fsharp.org] ...完了
+[microsoft.com] 開始...
+[microsoft.com] ...完了
 
-SUCCESS: [bbc.co.uk] Content size is 108510
-largestPageSizeM_AR_Good: Average time per run:  1026ms 
+成功: [bbc.co.uk] コンテンツのサイズは 108510
+largestPageSizeM_AR_Good: 1回あたりの平均時間:  1026ms 
 ```
 
-Again, the downloads are happening in series. And again, the time per run is almost twice that of the applicative version.  
+今回も、ダウンロードは直列に行われています。そして再び、1回あたりの時間は、アプリカティブなバージョンのほぼ2倍になっています。
 
-And now the moment we've been waiting for! Will it skip the downloading after the first bad site?
+さて、待望の瞬間がやってきました！最初の不正なサイトの後、ダウンロードをスキップするでしょうか？
 
 ```fsharp
 let f() = 
@@ -838,23 +838,23 @@ let f() =
 time 10 "largestPageSizeM_AR_Bad" f
 ```
  
-The output is something like this: 
+出力は次のようになります。
 
 ```text
-  [example.com] Started ...
-  [example.com] ... exception
+  [example.com] 開始...
+  [example.com] ...例外
 
-FAILURE: ["[example.com] "The remote server returned an error: (404) Not Found.""]
-largestPageSizeM_AR_Bad: Average time per run:   117ms 
+失敗: ["[example.com] "リモート サーバーがエラーを返しました: (404) 見つかりません。""]
+largestPageSizeM_AR_Bad: 1回あたりの平均時間:   117ms 
 ```
 
-Success! The error from the first bad site prevented the rest of the downloads, and the short run time is proof of that.
+成功です！最初の不正なサイトでのエラーによって残りのダウンロードがスキップされました。実行時間が短くなったことがそれを裏付けています。
 
-## Summary
+## まとめ
 
-In this post, we worked through a small practical example. I hope that this example demonstrated that
-`map`, `apply`, `bind`, `traverse`, and `sequence` are not just academic abstractions but essential tools in your toolbelt.
+この投稿では、小さな実用的な例を見てきました。
+この例から、`map`、`apply`、`bind`、`traverse`、`sequence`が単なる学問的な抽象概念ではなく、ツールベルトに欠かせない重要なツールであることがわかったと思います。
 
-In the [next post](../posts/elevated-world-6.md) we'll working through another practical example, but this time
-we will end up creating our *own* elevated world.  See you then!
+[次の投稿](../posts/elevated-world-6.md)では、別の実用的な例を見ていきますが、今度は*独自の*高次の世界を作ることになります。
+では、そのときまで！
 
