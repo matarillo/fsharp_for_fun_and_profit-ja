@@ -2,94 +2,94 @@
 layout: post
 title: "Reader モナドの再発明"
 description: "または、自分だけの高次の世界をデザインする"
-categories: ["Patterns"]
+categories: ["パターン"]
 seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 6
 ---
 
-This post is the sixth in a series.
-In the [first two posts](../posts/elevated-world.md), I described some of the core functions for dealing with generic data types:  `map`, `bind`, and so on.
-In the [third post](../posts/elevated-world-3.md), I discussed "applicative" vs "monadic" style, and how to lift values and functions to be consistent with each other.
-In the [fourth](../posts/elevated-world-4.md) and [previous](../posts/elevated-world-5.md) posts, I introduced `traverse` and `sequence`
-as a way of working with lists of elevated values, and we saw this used in a practical example: downloading some URLs.
+この記事は、シリーズの6回目になります。
+[最初の2つの記事](../posts/elevated-world.md)では、ジェネリックなデータ型を扱う上で重要な関数、`map`や`bind`などを紹介しました。
+[3番目の記事](../posts/elevated-world-3.md)では、「アプリカティブ」スタイルと「モナディック」スタイルの違いを論じ、値と関数を一貫性を保ちつつ高次の世界に持ち上げる方法を説明しました。
+[4番目](../posts/elevated-world-4.md)と[前回](../posts/elevated-world-5.md)の記事では、高次の値のリストを扱うための`traverse`と`sequence`を紹介し、
+URLのダウンロードという実践的な例でそれらの使用方法を示しました。
 
-In this post, we'll finish up by working through another practical example, but this time we'll create our own "elevated world" as a way to deal with awkward code.
-We'll see that this approach is so common that it has a name -- the "Reader monad".
+この記事では、別の実践的な例を通じてシリーズを締めくくります。今回は扱いにくいコードに対処するため、独自の「高次の世界」を作り出してみましょう。
+このアプローチは実は非常に一般的で、「Readerモナド」という名前が付いていることを学びます。
 
-## Series contents
+## シリーズの内容
 
-Here's a list of shortcuts to the various functions mentioned in this series:
+このシリーズで触れる様々な関数へのショートカットリストです。
 
-* **Part 1: Lifting to the elevated world**
-  * [The `map` function](../posts/elevated-world.md#map)
-  * [The `return` function](../posts/elevated-world.md#return)
-  * [The `apply` function](../posts/elevated-world.md#apply)
-  * [The `liftN` family of functions](../posts/elevated-world.md#lift)
-  * [The `zip` function and ZipList world](../posts/elevated-world.md#zip)
-* **Part 2: How to compose world-crossing functions**    
-  * [The `bind` function](../posts/elevated-world-2.md#bind)
-  * [List is not a monad. Option is not a monad.](../posts/elevated-world-2.md#not-a-monad)
-* **Part 3: Using the core functions in practice**  
-  * [Independent and dependent data](../posts/elevated-world-3.md#dependent)
-  * [Example: Validation using applicative style and monadic style](../posts/elevated-world-3.md#validation)
-  * [Lifting to a consistent world](../posts/elevated-world-3.md#consistent)
-  * [Kleisli world](../posts/elevated-world-3.md#kleisli)
-* **Part 4: Mixing lists and elevated values**    
-  * [Mixing lists and elevated values](../posts/elevated-world-4.md#mixing)
-  * [The `traverse`/`MapM` function](../posts/elevated-world-4.md#traverse)
-  * [The `sequence` function](../posts/elevated-world-4.md#sequence)
-  * ["Sequence" as a recipe for ad-hoc implementations](../posts/elevated-world-4.md#adhoc)
-  * [Readability vs. performance](../posts/elevated-world-4.md#readability)
-  * [Dude, where's my `filter`?](../posts/elevated-world-4.md#filter)
-* **Part 5: A real-world example that uses all the techniques**    
-  * [Example: Downloading and processing a list of websites](../posts/elevated-world-5.md#asynclist)
-  * [Treating two worlds as one](../posts/elevated-world-5.md#asyncresult)
-* **Part 6: Designing your own elevated world** 
-  * [Designing your own elevated world](../posts/elevated-world-6.md#part6)
-  * [Filtering out failures](../posts/elevated-world-6.md#filtering)
-  * [The Reader monad](../posts/elevated-world-6.md#readermonad)
-* **Part 7: Summary** 
-  * [List of operators mentioned](../posts/elevated-world-7.md#operators)
-  * [Further reading](../posts/elevated-world-7.md#further-reading)
+* **パート1：高次の世界への持ち上げ**
+  * [`map`関数](../posts/elevated-world.md#map)
+  * [`return`関数](../posts/elevated-world.md#return)
+  * [`apply`関数](../posts/elevated-world.md#apply)
+  * [`liftN`関数ファミリー](../posts/elevated-world.md#lift)
+  * [`zip`関数とZipList世界](../posts/elevated-world.md#zip)
+* **パート2：世界をまたぐ関数の合成方法**    
+  * [`bind`関数](../posts/elevated-world-2.md#bind)
+  * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.md#not-a-monad)
+* **パート3：コア関数の実際的な使い方**  
+  * [独立データと依存データ](../posts/elevated-world-3.md#dependent)
+  * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.md#validation)
+  * [一貫した世界への持ち上げ](../posts/elevated-world-3.md#consistent)
+  * [Kleisli世界](../posts/elevated-world-3.md#kleisli)
+* **パート4：リストと高次の値の混合**    
+  * [リストと高次の値の混合](../posts/elevated-world-4.md#mixing)
+  * [`traverse`/`MapM`関数](../posts/elevated-world-4.md#traverse)
+  * [`sequence`関数](../posts/elevated-world-4.md#sequence)
+  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.md#adhoc)
+  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.md#readability)
+  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.md#filter)
+* **パート5：すべてのテクニックを使用する実世界の例**    
+  * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.md#asynclist)
+  * [2つの世界を1つとして扱う](../posts/elevated-world-5.md#asyncresult)
+* **パート6：独自の高次の世界を設計する** 
+  * [独自の高次の世界を設計する](../posts/elevated-world-6.md#part6)
+  * [失敗のフィルタリング](../posts/elevated-world-6.md#filtering)
+  * [Readerモナド](../posts/elevated-world-6.md#readermonad)
+* **パート7：まとめ** 
+  * [言及した演算子のリスト](../posts/elevated-world-7.md#operators)
+  * [さらなる読み物](../posts/elevated-world-7.md#further-reading)
 
 <a id="part6"></a>
 <hr>
   
-## Part 6: Designing your own elevated world
+## パート6: 独自の高次の世界を設計する
 
-The scenario we'll be working with in this post is just this:
+このポストでは、以下のようなシナリオを扱います。
 
-*A customer comes to your site and wants to view information about the products they have purchased.*
+*顧客があなたのサイトを訪れ、購入した製品に関する情報を閲覧したい。*
 
-In this example, we'll assume that you have a API for a key/value store (such as Redis or a NoSql database), and all the information
-you need is stored there.
+この例では、キー/バリューストア（RedisやNoSqlデータベースなど）のAPIがあり、
+必要な情報がすべてそこに格納されていると仮定します。
 
-So the code we need will look something like this:
+したがって、必要なコードは以下のようになります。
 
 ```text
-Open API connection
-Get product ids purchased by customer id using the API
-For each product id:
-    get the product info for that id using the API
-Close API connection
-Return the list of product infos
+APIコネクションを開く
+APIを使って、顧客IDから購入済み製品IDを取得する
+各製品IDに対して、
+    APIを使ってその製品IDの製品情報を取得する
+APIコネクションを閉じる
+製品情報のリストを返す
 ```
   
-How hard can that be?  
+これがどれほど難しいことでしょうか？  
 
-Well, it turns out to be surprisingly tricky! Luckily, we can find a way to make it easier using the concepts in this series.
+実際には、意外なほど複雑です。幸いなことに、このシリーズで紹介した概念を使って簡単にする方法があります。
 
 <a id="apidomain"></a>
 <hr>
 
-## Defining the domain and a dummy ApiClient
+## ドメイン型とダミーのApiClientを定義する
 
-First let's define the domain types:
+まずドメインの型を定義しましょう。
 
-* There will be a `CustomerId` and `ProductId` of course.
-* For the product information, we'll just define a simple `ProductInfo` with a `ProductName` field.
+* `CustomerId`と`ProductId`があります。
+* 製品情報については、`ProductName`フィールドを持つ単純な`ProductInfo`を定義します。
 
-Here are the types:
+以下が型です。
 
 ```fsharp
 type CustId = CustId of string
@@ -97,65 +97,65 @@ type ProductId = ProductId of string
 type ProductInfo = {ProductName: string; } 
 ```
 
-For testing our api, let's create an `ApiClient` class with some `Get` and `Set` methods, backed by a static mutable dictionary.
-This is based on similar APIs such as the Redis client.
+APIのテストのために、静的な可変ディクショナリをバックエンドとする`Get`メソッドと`Set`メソッドを持つ`ApiClient`クラスを作成しましょう。
+これはRedisクライアントなどの類似のAPIに基づいています。
 
-Notes:
+注意点：
 
-* The `Get` and `Set` both work with objects, so I've added a casting mechanism.
-* In case of errors such as a failed cast, or a missing key, I'm using the `Result` type that we've been using throughout this series.
-  Therefore, both `Get` and `Set` return `Result`s rather than plain objects.
-* To make it more realistic, I've also added dummy methods for `Open`, `Close` and `Dispose`.
-* All methods trace a log to the console.
+* `Get`と`Set`はどちらもオブジェクトを扱うので、キャスト機構を追加しました。
+* キャストの失敗やキーが見つからないなどのエラーに対応するため、このシリーズで使ってきた`Result`型を採用しています。
+したがって、`Get`と`Set`は単純なオブジェクトではなく`Result`を返します。
+* より実際の使用に近づけるため、`Open`、`Close`、`Dispose`のダミーメソッドも追加しています。
+* すべてのメソッドはログをコンソールに出力します。
 
 ```fsharp
 type ApiClient() =
-    // static storage
+    // 静的な保存領域
     static let mutable data = Map.empty<string,obj>
 
-    /// Try casting a value
-    /// Return Success of the value or Failure on failure
+    /// 値のキャストを試みる
+    /// 値が成功した場合はSuccessを、失敗した場合はFailureを返す
     member private this.TryCast<'a> key (value:obj) =
         match value with
         | :? 'a as a ->
             Result.Success a 
         | _  ->                 
             let typeName = typeof<'a>.Name
-            Result.Failure [sprintf "Can't cast value at %s to %s" key typeName]
+            Result.Failure [sprintf "%sの値を%sにキャストできません" key typeName]
 
-    /// Get a value
+    /// 値を取得する
     member this.Get<'a> (id:obj) = 
         let key =  sprintf "%A" id
-        printfn "[API] Get %s" key
+        printfn "[API] %sを取得" key
         match Map.tryFind key data with
         | Some o -> 
             this.TryCast<'a> key o
         | None -> 
-            Result.Failure [sprintf "Key %s not found" key]
+            Result.Failure [sprintf "キー%sが見つかりません" key]
 
-    /// Set a value
+    /// 値を設定する
     member this.Set (id:obj) (value:obj) = 
         let key =  sprintf "%A" id
-        printfn "[API] Set %s" key
-        if key = "bad" then  // for testing failure paths
-            Result.Failure [sprintf "Bad Key %s " key]
+        printfn "[API] %sを設定" key
+        if key = "bad" then  // 失敗パスのテスト用
+            Result.Failure [sprintf "不正なキー %s " key]
         else
             data <- Map.add key value data 
             Result.Success ()
            
     member this.Open() =
-        printfn "[API] Opening"
+        printfn "[API] オープン中"
 
     member this.Close() =
-        printfn "[API] Closing"
+        printfn "[API] クローズ中"
 
     interface System.IDisposable with
         member this.Dispose() =
-            printfn "[API] Disposing"
+            printfn "[API] 破棄中"
 ```
 
 
-Let's do some tests:
+いくつかテストをしてみましょう。
 
 ```fsharp
 do
@@ -169,105 +169,105 @@ do
     api.Get<int> "K3" |> printfn "[K3] %A"
 ```
 
-And the results are:
+結果は以下のとおりです。
 
 ```text
-[API] Get "K1"
-[K1] Failure ["Key "K1" not found"]
-[API] Set "K2"
-[API] Get "K2"
+[API] "K1"を取得
+[K1] Failure ["キー"K1"が見つかりません"]
+[API] "K2"を設定
+[API] "K2"を取得
 [K2] Success "hello"
-[API] Set "K3"
-[API] Get "K3"
-[K3] Failure ["Can't cast value at "K3" to Int32"]
-[API] Disposing
+[API] "K3"を設定
+[API] "K3"を取得
+[K3] Failure ["K3"の値をInt32にキャストできません"]
+[API] 破棄中
 ```
   
 <a id="impl1"></a>
 <hr>
 
-## A first implementation attempt 
+## 最初の実装の試み 
 
-For our first attempt at implementing the scenario, let's start with the pseudo-code from above:
+このシナリオの最初の実装として、先ほどの擬似コードをベースに始めてみましょう。
 
 ```fsharp
 let getPurchaseInfo (custId:CustId) : Result<ProductInfo list> =
 
-    // Open api connection       
+    // APIコネクションを開く       
     use api = new ApiClient()
     api.Open()
 
-    // Get product ids purchased by customer id
+    // 顧客IDで購入した製品IDを取得する
     let productIdsResult = api.Get<ProductId list> custId
 
     let productInfosResult = ??
 
-    // Close api connection
+    // APIコネクションを閉じる
     api.Close()
 
-    // Return the list of product infos
+    // 製品情報のリストを返す
     productInfosResult
 ```
 
-So far so good, but there is a bit of a problem already. 
+ここまではうまくいっていますが、すでに少し問題があります。 
 
-The `getPurchaseInfo` function takes a `CustId` as input, but it can't just output a list of `ProductInfo`s, because there might be a failure.
-That means that the return type needs to be `Result<ProductInfo list>`.
+`getPurchaseInfo`関数は入力として`CustId`を受け取りますが、単に`ProductInfo`のリストを出力することはできません。失敗の可能性があるからです。
+つまり、戻り値の型は`Result<ProductInfo list>`である必要があります。
 
-Ok, how do we create our `productInfosResult`?  
+では、`productInfosResult`をどのように作成すればよいでしょうか？  
 
-Well that should be easy. If the `productIdsResult` is Success, then loop through each id and get the info for each id.
-If the `productIdsResult` is Failure, then just return that failure.
+簡単なはずです。`productIdsResult`が成功の場合、各IDをループして各IDの情報を取得します。
+`productIdsResult`が失敗の場合は、その失敗をそのまま返します。
 
 ```fsharp
 let getPurchaseInfo (custId:CustId) : Result<ProductInfo list> =
 
-    // Open api connection       
+    // APIコネクションを開く       
     use api = new ApiClient()
     api.Open()
 
-    // Get product ids purchased by customer id
+    // 顧客IDで購入した製品IDを取得する
     let productIdsResult = api.Get<ProductId list> custId
 
     let productInfosResult =
         match productIdsResult with
         | Success productIds -> 
-            let productInfos = ResizeArray()  // Same as .NET List<T>
+            let productInfos = ResizeArray()  // .NET List<T>と同じ
             for productId in productIds do
                 let productInfo = api.Get<ProductInfo> productId
-                productInfos.Add productInfo  // mutation! 
+                productInfos.Add productInfo  // ミューテーション！ 
             Success productInfos
         | Failure err ->    
             Failure err 
 
-    // Close api connection
+    // APIコネクションを閉じる
     api.Close()
     
-    // Return the list of product infos
+    // 製品情報のリストを返す
     productInfosResult
 ```
 
-Hmmm. It's looking a bit ugly. And I'm having to use a mutable data structure (`productInfos`) to accumulate each product info and then wrap it in `Success`.
+うーん。少し扱いにくくなってきました。各製品情報を蓄積し、それを`Success`でラップするために可変データ構造（`productInfos`）を使わなければなりません。
 
-And there's a worse problem The `productInfo` that I'm getting from `api.Get<ProductInfo>` is not a `ProductInfo` at all, but a `Result<ProductInfo>`,
-so `productInfos` is not the right type at all!
+さらに悪いことに、`api.Get<ProductInfo>`から取得している`productInfo`は`ProductInfo`ではなく`Result<ProductInfo>`なので、
+`productInfos`は全く正しい型ではありません！
 
-Let's add code to test each `ProductInfo` result. If it's a success, then add it to the list of product infos, and if it's a failure, then return the failure.
+各`ProductInfo`結果をテストするコードを追加しましょう。成功の場合は製品情報のリストに追加し、失敗の場合はその失敗を返します。
 
 ```fsharp
 let getPurchaseInfo (custId:CustId) : Result<ProductInfo list> =
 
-    // Open api connection       
+    // APIコネクションを開く       
     use api = new ApiClient()
     api.Open()
 
-    // Get product ids purchased by customer id
+    // 顧客IDで購入した製品IDを取得する
     let productIdsResult = api.Get<ProductId list> custId
 
     let productInfosResult =
         match productIdsResult with
         | Success productIds -> 
-            let productInfos = ResizeArray()  // Same as .NET List<T>
+            let productInfos = ResizeArray()  // .NET List<T>と同じ
             let mutable anyFailures = false
             for productId in productIds do
                 let productInfoResult = api.Get<ProductInfo> productId
@@ -280,65 +280,65 @@ let getPurchaseInfo (custId:CustId) : Result<ProductInfo list> =
         | Failure err ->    
             Failure err 
 
-    // Close api connection
+    // APIコネクションを閉じる
     api.Close()
 
-    // Return the list of product infos
+    // 製品情報のリストを返す
     productInfosResult
 
 ```
 
-Um, no. That won't work at all. The code above will not compile. We can't do an "early return" in the loop when a failure happens.
+いや、これはまったくうまくいきません。上のコードはコンパイルできません。失敗が発生したときにループ内で「早期リターン」できません。
 
-So what do we have so far? Some really ugly code that won't even compile.
+結局どうなったでしょうか？コンパイルすらできない、非常に扱いにくいコードになってしまいました。
 
-There has to be a better way.
+もっと良い方法があるはずです。
 
 <a id="impl2"></a>
 <hr>
 
-## A second implementation attempt 
+## 2回目の実装の試み 
 
-It would be great if we could hide all this unwrapping and testing of `Result`s.  And there is -- computation expressions to the rescue.
+`Result`の展開とテストをすべて隠せたら便利ですね。実はそれが可能です。コンピュテーション式を使えば実現できます。
 
-If we create a computation expression for `Result` we can write the code like this:
+`Result`用のコンピュテーション式を作成すると、以下のようにコードを書けます。
 
 ```fsharp
 /// CustId -> Result<ProductInfo list>
 let getPurchaseInfo (custId:CustId) : Result<ProductInfo list> =
    
-    // Open api connection       
+    // APIコネクションを開く       
     use api = new ApiClient()
     api.Open()
 
     let productInfosResult = Result.result {
 
-        // Get product ids purchased by customer id
+        // 顧客IDで購入した製品IDを取得する
         let! productIds = api.Get<ProductId list> custId
 
-        let productInfos = ResizeArray()  // Same as .NET List<T>
+        let productInfos = ResizeArray()  // .NET List<T>と同じ
         for productId in productIds do
             let! productInfo = api.Get<ProductInfo> productId
             productInfos.Add productInfo 
         return productInfos |> List.ofSeq
         }
 
-    // Close api connection
+    // APIコネクションを閉じる
     api.Close()
 
-    // Return the list of product infos
+    // 製品情報のリストを返す
     productInfosResult
 ```
 
-In `let productInfosResult = Result.result { .. }` code we create a `result` computation expression that simplifies all the unwrapping (with `let!`) and wrapping (with `return`).
+`let productInfosResult = Result.result { .. }`というコードで、`result`コンピュテーション式を作成しています。これにより、`let!`による展開と`return`によるラッピングがすべて簡素化されます。
 
-And so this implementation has no explicit `xxxResult` values anywhere. However, it still has to use a mutable collection class to do the accumulation,
-because the `for productId in productIds do` is not actually a real `for` loop, and we can't replace it with `List.map`, say.
+そのため、この実装には明示的な`xxxResult`値がどこにもありません。しかし、蓄積のために可変コレクションクラスを使用する必要があります。
+`for productId in productIds do`は実際には本当の`for`ループではなく、例えば`List.map`で置き換えることはできないからです。
 
-### The `result` computation expression. 
+### `result`コンピュテーション式 
 
-Which brings us onto the implementation of the `result` computation expression.  In the previous posts, `ResultBuilder` only had two methods, `Return` and `Bind`,
-but in order to get the `for..in..do` functionality, we have to implement a lot of other methods too, and it ends up being a bit more complicated.
+ここで、`result`コンピュテーション式の実装について触れてみましょう。前回の記事では、`ResultBuilder`には`Return`と`Bind`の2つのメソッドしかありませんでしたが、
+`for..in..do`機能を実現するには、他にもたくさんのメソッドを実装する必要があり、少し複雑になります。
 
 ```fsharp
 module Result = 
@@ -379,43 +379,43 @@ module Result =
     let result = new ResultBuilder()
 ```
 
-I have a series about the [internals of computation expressions](../series/computation-expressions.md),
-so I don't want to explain all that code here. Instead, for the rest of the post
-we'll work on refactoring `getPurchaseInfo`, and by the end of it we'll see that we don't need the `result` computation expression at all.
+コンピュテーション式の内部については、[別のシリーズ](../series/computation-expressions.md)で詳しく説明しているので、
+ここでこのコード全体を説明するつもりはありません。代わりに、この投稿の残りの部分では
+`getPurchaseInfo`のリファクタリングに取り組みます。最終的には`result`コンピュテーション式がまったく必要ないことがわかるでしょう。
 
 <a id="impl3"></a>
 <hr>
 
-## Refactoring the function
+## 関数のリファクタリング
 
-The problem with the `getPurchaseInfo` function as it stands is that it mixes concerns: it both creates the `ApiClient` and does some work with it.
+現在の`getPurchaseInfo`関数には問題があります。`ApiClient`の作成とその使用という、本来分離すべき2つの役割を1つの関数で行っているのです。
 
-There a number of problems with this approach:
+このアプローチには以下のような問題があります。
 
-* If we want to do different work with the API, we have to repeat the open/close part of this code. 
-  And it's possible that one of the implementations might open the API but forget to close it.
-* It's not testable with a mock API client.
+* APIを使って異なる作業をしたい場合、このコードのopen/close部分を繰り返さなければなりません。
+  そして、実装の一つがAPIを開いたが閉じ忘れる可能性があります。
+* モックAPIクライアントでテストできません。
 
-We can solve both of these problems by separating the creation of an `ApiClient` from its use by parameterizing the action, like this.
+これらの問題は、`ApiClient`の作成をその使用から分離し、アクションをパラメータ化することで解決できます。以下のようにしてみましょう。
 
 ```fsharp
 let executeApiAction apiAction  =
    
-    // Open api connection       
+    // APIコネクションを開く       
     use api = new ApiClient()
     api.Open()
 
-    // do something with it
+    // それを使って何かを行う
     let result = apiAction api
 
-    // Close api connection
+    // APIコネクションを閉じる
     api.Close()
 
-    // return result
+    // 結果を返す
     result
 ```
 
-The action function that is passed in would look like this, with a parameter for the `ApiClient` as well as for the `CustId`:
+渡されるアクション関数は、`ApiClient`用のパラメータと`CustId`用のパラメータを含む、以下のようなものになります。
 
 ```fsharp
 /// CustId -> ApiClient -> Result<ProductInfo list>
@@ -424,31 +424,31 @@ let getPurchaseInfo (custId:CustId) (api:ApiClient) =
     let productInfosResult = Result.result {
         let! productIds = api.Get<ProductId list> custId
 
-        let productInfos = ResizeArray()  // Same as .NET List<T>
+        let productInfos = ResizeArray()  // .NET List<T>と同じ
         for productId in productIds do
             let! productInfo = api.Get<ProductInfo> productId
             productInfos.Add productInfo 
         return productInfos |> List.ofSeq
         }
 
-    // return result
+    // 結果を返す
     productInfosResult
 ```
 
-Note that `getPurchaseInfo` has *two* parameters, but `executeApiAction` expects a function with only one.
+`getPurchaseInfo`には*2つの*パラメータがありますが、`executeApiAction`は1つだけのパラメータを期待する関数を想定していることに注意してください。
 
-No problem! Just use partial application to bake in the first parameter:
+心配ありません。部分適用を使って最初のパラメータを固定すれば解決します。
 
 ```fsharp
-let action = getPurchaseInfo (CustId "C1")  // partially apply
+let action = getPurchaseInfo (CustId "C1")  // 部分適用
 executeApiAction action 
 ```
 
-That's why the `ApiClient` is the *second* parameter in the parameter list -- so that we can do partial application.
+これが、パラメータリストで`ApiClient`が*2番目*のパラメータである理由です。部分適用ができるようにするためです。
 
-### More refactoring
+### さらなるリファクタリング
 
-We might need to get the product ids for some other purpose, and also the productInfo, so let's refactor those out into separate functions too:
+製品IDを他の目的で取得する必要があるかもしれませんし、製品情報も同様です。これらを別の関数に分割してリファクタリングしてみましょう。
 
 ```fsharp
 /// CustId -> ApiClient -> Result<ProductId list>
@@ -472,13 +472,13 @@ let getPurchaseInfo (custId:CustId) (api:ApiClient) =
         return productInfos |> List.ofSeq
         }
 
-    // return result
+    // 結果を返す
     result
 ```
 
-Now, we have these nice core functions `getPurchaseIds` and `getProductInfo`, but I'm annoyed that I have to write messy code to glue them together in `getPurchaseInfo`.
+これで、`getPurchaseIds`と`getProductInfo`という素晴らしい中核的な関数ができましたが、`getPurchaseInfo`の中でこれらをつなぎ合わせるのに乱雑なコードを書かなければならないのが気になります。
 
-Ideally, what I'd like to do is pipe the output of `getPurchaseIds` into `getProductInfo` like this:
+理想を言えば、`getPurchaseIds`の出力を`getProductInfo`にパイプで渡せるような、次のようなコードを書きたいところです。
 
 ```fsharp
 let getPurchaseInfo (custId:CustId) =
@@ -487,140 +487,140 @@ let getPurchaseInfo (custId:CustId) =
     |> List.map getProductInfo
 ```
 
-Or as a diagram:
+図で表すと以下のようになります。
 
 ![](../assets/img/vgfp_api_pipe.png)
 
-But I can't, and there are two reasons why:
+ところが、これには2つの障害があります。
 
-* First, `getProductInfo` has *two* parameters. Not just a `ProductId` but also the `ApiClient`.
-* Second, even if `ApiClient` wasn't there, the input of `getProductInfo` is a simple `ProductId` but the output of `getPurchaseIds` is a `Result`.
+* まず、`getProductInfo`には*2つ*のパラメータがあります。`ProductId`だけでなく`ApiClient`もです。
+* 次に、`ApiClient`がなかったとしても、`getProductInfo`の入力は単純な`ProductId`ですが、`getPurchaseIds`の出力は`Result`です。
 
-Wouldn't it be great if we could solve both of these problems!
+これら両方の問題を解決できたら素晴らしいですね！
 
 <a id="apiAction"></a>
 <hr>
 
-## Introducing our own elevated world
+## 独自の高次の世界の導入
 
-Let's address the first problem. How can we compose functions when the extra `ApiClient` parameter keeps getting in the way?
+最初の問題に取り組みましょう。追加の`ApiClient`パラメータが邪魔をしているとき、関数をどのように合成すればよいでしょうか？
 
-This is what a typical API calling function looks like:
+典型的なAPI呼び出し関数は以下のようになっています。
 
 ![](../assets/img/vgfp_api_action1.png)
 
-If we look at the type signature we see this, a function with two parameters:
+型シグネチャを見ると、2つのパラメータを含む関数だとわかります。
 
 ![](../assets/img/vgfp_api_action2.png)
 
-But *another* way to interpret this function is as a function with *one* parameter that returns another function. The returned function has an `ApiClient` parameter
-and returns the final ouput.
+しかし、この関数を解釈する*もう1つの*方法があります。1つのパラメータを含む関数で、別の関数を返すものとして見ることです。返される関数は`ApiClient`パラメータを含み、
+最終的な出力を返します。
 
 ![](../assets/img/vgfp_api_action3.png)
 
-You might think of it like this: I have an input right now, but I won't have an actual `ApiClient` until later,
-so let me use the input to create a api-consuming function that can I glue together in various ways right now, without needing a `ApiClient` at all.
+次のように考えることもできます。今は入力がありますが、実際の`ApiClient`は後で得られるので、
+今すぐに`ApiClient`を必要とせずに、入力を使ってAPIを消費する関数を作成し、それを様々な方法で組み合わせられます。
 
-Let's give this api-consuming function a name. Let's call it `ApiAction`.
+このAPIを消費する関数に名前を付けましょう。`ApiAction`とします。
 
 ![](../assets/img/vgfp_api_action4.png)
 
-In fact, let's do more than that -- let's make it a type!
+実際、それ以上のことをしてみましょう。型にしてしまうのです！
 
 ```fsharp
 type ApiAction<'a> = (ApiClient -> 'a)
 ```
 
-Unfortunately, as it stands, this is just a type alias for a function, not a separate type.
-We need to wrap it in a [single case union](../posts/designing-with-types-single-case-dus.md) to make it a distinct type.
+しかし、このままでは単なる関数の型エイリアスにすぎず、独立した型ではありません。
+そこで、[単一ケースの判別共用体](../posts/designing-with-types-single-case-dus.md)でラップし、独立した型として定義する必要があります。
 
 ```fsharp
 type ApiAction<'a> = ApiAction of (ApiClient -> 'a)
 ```
 
-### Rewriting to use ApiAction
+### ApiActionを使って書き直す
 
-Now that we have a real type to use, we can rewrite our core domain functions to use it. 
+実際の型ができたので、中核となるドメイン関数をApiActionを使って書き直してみましょう。
 
-First `getPurchaseIds`:
+まず`getPurchaseIds`から取り掛かりましょう。
 
 ```fsharp
 // CustId -> ApiAction<Result<ProductId list>>
 let getPurchaseIds (custId:CustId) =
        
-    // create the api-consuming function
+    // APIを消費する関数を作成
     let action (api:ApiClient) = 
         api.Get<ProductId list> custId
 
-    // wrap it in the single case
+    // 単一ケースでラップ
     ApiAction action
 ```
 
-The signature is now `CustId -> ApiAction<Result<ProductId list>>`, which you can interpret as meaning: "give me a CustId and I will give a you a ApiAction that, when
-given an api, will make a list of ProductIds". 
+シグネチャは`CustId -> ApiAction<Result<ProductId list>>`となり、
+これは「CustIdを与えると、後でAPIが提供されたときにProductIdのリストを作るApiActionを返す」と解釈できます。
 
-Similarly, `getProductInfo` can be rewritten to return an `ApiAction`:
+同様に、`getProductInfo`もApiActionを返すように書き換えてみましょう。
 
 ```fsharp
 // ProductId -> ApiAction<Result<ProductInfo>>
 let getProductInfo (productId:ProductId) =
 
-    // create the api-consuming function
+    // APIを消費する関数を作成
     let action (api:ApiClient) = 
         api.Get<ProductInfo> productId
 
-    // wrap it in the single case
+    // 単一ケースでラップ
     ApiAction action
 ```
 
-Notice those signatures:
+これらのシグネチャに注目してください。
 
 * `CustId -> ApiAction<Result<ProductId list>>`
 * `ProductId -> ApiAction<Result<ProductInfo>>`
 
-This is starting to look awfully familiar. Didn't we see something just like this in the previous post, with `Async<Result<_>>`?
+これは見覚えがありませんか？前回の投稿で`Async<Result<_>>`で見たものとよく似ています。
 
-### ApiAction as an elevated world
+### ApiActionを高次の世界として扱う
 
-If we draw diagrams of the various types involved in these two functions, we can clearly see that `ApiAction` is an elevated world, just like `List` and `Result`.
-And that means that we should be able to use the *same* techniques as we have used before: `map`, `bind`, `traverse`, etc.
+これら2つの関数に関わる様々な型の図を描くと、`ApiAction`が`List`や`Result`と同じように高次の世界であることが明確に分かります。
+そして、これは以前と同じテクニックを使えるはずだということを意味します。`map`、`bind`、`traverse`などです。
 
-Here's `getPurchaseIds` as a stack diagram. The input is a `CustId` and the output is an `ApiAction<Result<List<ProductId>>>`:
+`getPurchaseIds`をスタック図で表すと、入力は`CustId`で、出力は`ApiAction<Result<List<ProductId>>>`です。
 
 ![](../assets/img/vgfp_api_getpurchaseids.png)
 
-and with `getProductInfo` the input is a `ProductId` and the output is an `ApiAction<Result<ProductInfo>>`:
+そして`getProductInfo`では、入力は`ProductId`で、出力は`ApiAction<Result<ProductInfo>>`です。
 
 ![](../assets/img/vgfp_api_getproductinfo.png)
 
-The combined function that we want, `getPurchaseInfo`, should look like this:
+私たちが求めている結合関数`getPurchaseInfo`は、以下のようになるはずです。
 
 ![](../assets/img/vgfp_api_getpurchaseinfo.png)
 
-And now the problem in composing the two functions is very clear: the output of `getPurchaseIds` can not be used as the input for `getProductInfo`:
+そして今、2つの関数を合成する際の問題が非常に明確になりました。`getPurchaseIds`の出力は`getProductInfo`の入力として使用できません。
 
 ![](../assets/img/vgfp_api_noncompose.png)
 
-But I think that you can see that we have some hope! There should be some way of manipulating these layers so that they *do* match up, and then we can compose them easily.
+しかし、方法はあります。これらの層を操作して一致させれば、簡単に合成できるはずです。
 
-So that's what we will work on next.
+そこで次に取り組むのはこれです。
 
-### Introducting ApiActionResult
+### ApiActionResultの導入
 
-In the last post we merged `Async` and `Result` into the compound type `AsyncResult`.  We can do the same here, and create the type `ApiActionResult`.
+前回の投稿で`Async`と`Result`を`AsyncResult`という複合型にマージしました。ここでも同じように、`ApiActionResult`型を作れます。
 
-When we make this change, our two functions become slightly simpler:
+この変更を加えると、2つの関数はより単純になります。
 
 ![](../assets/img/vgfp_api_apiactionresult_functions.png)
 
-Enough diagrams -- let's write some code now. 
+図は十分でしょう。ここからはコードを書いていきます。
 
-First, we need to define `map`, `apply`, `return` and `bind` for `ApiAction`:
+まず、`ApiAction`のための`map`、`apply`、`return`、`bind`を定義する必要があります。
 
 ```fsharp
 module ApiAction = 
 
-    /// Evaluate the action with a given api
+    /// 与えられたAPIでアクションを評価
     /// ApiClient -> ApiAction<'a> -> 'a
     let run api (ApiAction action) = 
         let resultOfAction = action api
@@ -654,7 +654,7 @@ module ApiAction =
             run api (f x)
         ApiAction newAction
 
-    /// Create an ApiClient and run the action on it
+    /// ApiClientを作成し、そのアクションを実行
     /// ApiAction<'a> -> 'a
     let execute action =
         use api = new ApiClient()
@@ -664,15 +664,15 @@ module ApiAction =
         result
 ```
 
-Note that all the functions use a helper function called `run` which unwraps an `ApiAction` to get the function inside,
-and applies this to the `api` that is also passed in. The result is the value wrapped in the `ApiAction`.
+すべての関数が`run`というヘルパー関数を使用していることに注意してください。これは`ApiAction`をアンラップして内部の関数を取得し、
+これを渡された`api`に適用します。結果は`ApiAction`にラップされた値です。
 
-For example, if we had an `ApiAction<int>` then `run api myAction` would result in an `int`.
+例えば、`ApiAction<int>`があれば、`run api myAction`の結果は`int`になります。
 
-And at the bottom, there is a `execute` function that creates an `ApiClient`, opens the connection, runs the action, and then closes the connection.
+そして最後に、`ApiClient`を作成し、接続を開き、アクションを実行し、接続を閉じる`execute`関数があります。
 
-And with the core functions for `ApiAction` defined, we can go ahead and define the functions for the compound type `ApiActionResult`,
-just as we did for `AsyncResult` in the [previous post](../posts/elevated-world-5.md#asyncresult):
+`ApiAction`のコア関数が定義されたので、[前回の投稿](../posts/elevated-world-5.md#asyncresult)で`AsyncResult`に対して行ったのと同じように、
+複合型`ApiActionResult`のための関数を定義できます。
 
 ```fsharp
 module ApiActionResult = 
@@ -693,98 +693,98 @@ module ApiActionResult =
     let bind f xActionResult = 
         let newAction api =
             let xResult = ApiAction.run api xActionResult 
-            // create a new action based on what xResult is
+            // xResultに基づいて新しいアクションを作成
             let yAction = 
                 match xResult with
                 | Success x -> 
-                    // Success? Run the function
+                    // 成功？関数を実行
                     f x
                 | Failure err -> 
-                    // Failure? wrap the error in an ApiAction
+                    // 失敗？エラーをApiActionにラップ
                     (Failure err) |> ApiAction.retn
             ApiAction.run api yAction  
         ApiAction newAction
 ```
 
-## Working out the transforms
+## 変換の決定
 
-Now that we have all the tools in place, we must decide on what transforms to use to change the shape of `getProductInfo` so that the input matches up.
+これで必要なツールがすべて揃いました。次は`getProductInfo`の形を変えるためにどの変換を使うべきか決める必要があります。
 
-Should we choose `map`, or `bind`, or `traverse`?
+`map`、`bind`、`traverse`のどれを選ぶべきでしょうか？
 
-Let's play around with the stacks visually and see what happens for each kind of transform.
+スタックを視覚的に操作して、各種の変換で何が起こるかを確認します。
 
-Before we get started, let's be explicit about what we are trying to achieve:
+始める前に、達成しようとしていることを明確にしましょう。
 
-* We have two functions `getPurchaseIds` and `getProductInfo` that we want to combine into a single function `getPurchaseInfo`.
-* We have to manipulate the *left* side (the input) of `getProductInfo` so that it matches the output of `getPurchaseIds`.
-* We have to manipulate the *right* side (the output) of `getProductInfo` so that it matches the output of our ideal `getPurchaseInfo`.
+* `getPurchaseIds`と`getProductInfo`という2つの関数があり、これらを1つの関数`getPurchaseInfo`に結合したいです。
+* `getProductInfo`の*左側*（入力）を操作して、`getPurchaseIds`の出力と一致するようにする必要があります。
+* `getProductInfo`の*右側*（出力）を操作して、理想的な`getPurchaseInfo`の出力と一致するようにする必要があります。
 
 ![](../assets/img/vgfp_api_wanted.png)
 
 ### Map
 
-As a reminder, `map` adds a new stack on both sides. So if we start with a generic world-crossing function like this:
+念のため、`map`は両側に新しいスタックを追加します。例えば、このような一般的な世界をまたぐ関数から始めます。
 
 ![](../assets/img/vgfp_api_generic.png)
 
-Then, after `List.map` say, we will have a new `List` stack on each site.
+`List.map`を使用すると、各側に新しい`List`スタックが追加されます。
 
 ![](../assets/img/vgfp_api_map_generic.png)
 
-Here's our `getProductInfo` before transformation:
+変換前の`getProductInfo`はこのようになっています。
 
 ![](../assets/img/vgfp_api_getproductinfo2.png)
 
-And here is what it would look like after using `List.map`
+そして`List.map`を使用した後はこのようになります。
 
 ![](../assets/img/vgfp_api_map_getproductinfo.png)
 
-This might seem promising -- we have a `List` of `ProductId` as input now, and if we can stack a `ApiActionResult` on top we would match the output of `getPurchaseId`.
+これは有望に見えるかもしれません - 入力として`ProductId`の`List`ができました。そして上に`ApiActionResult`を重ねれば、`getPurchaseId`の出力と一致するでしょう。
 
-But the output is all wrong. We want the `ApiActionResult` to stay on the top. That is, we don't want a `List` of `ApiActionResult` but a `ApiActionResult` of `List`.
+しかし、出力が間違っています。`ApiActionResult`を一番上に保ちたいのです。つまり、`ApiActionResult`の`List`ではなく、`List`の`ApiActionResult`が欲しいのです。
 
 ### Bind
 
-Ok, what about `bind`?
+では、`bind`はどうでしょうか？
 
-If you recall, `bind` turns a "diagonal" function into a horizontal function by adding a new stack on the *left* sides. So for example,
-whatever the top elevated world is on the right, that will be added to the left.
+覚えていますか。`bind`は「対角線」状の関数を水平方向の関数に変換します。この変換は、*左側*に新しいスタックを追加することで実現します。
+具体的には、右側の最上位にある高次の世界が、そのまま左側に追加されます。
 
 ![](../assets/img/vgfp_api_generic.png)
 
 ![](../assets/img/vgfp_api_bind_generic.png)
 
-And here is what our `getProductInfo` would look like after using `ApiActionResult.bind`
+そして、`ApiActionResult.bind`を使用した後の`getProductInfo`はこのようになります。
 
 ![](../assets/img/vgfp_api_bind_getproductinfo.png)
 
-This is no good to us. We need to have a `List` of `ProductId` as input.
+これは我々には役に立ちません。入力として`ProductId`の`List`が必要です。
 
 ### Traverse
 
-Finally, let's try `traverse`.
+最後に、`traverse`を試してみましょう。
 
-`traverse` turns a diagonal function of values into diagonal function with lists wrapping the values. That is, `List` is added as the top stack
-on the left hand side, and the second-from-top stack on the right hand side.
+`traverse`は値の対角線関数をリストで包まれた値の対角線関数に変換します。具体的には、`List`が左側の一番上のスタックとして追加されます。
+同時に、右側では上から2番目のスタックとして追加されます。
 
 ![](../assets/img/vgfp_api_generic.png)
 
 ![](../assets/img/vgfp_api_traverse_generic.png)
 
-if we try that out on `getProductInfo` we get something very promising. 
+`getProductInfo`にこれを適用すると、非常に有望な結果が得られます。 
 
 ![](../assets/img/vgfp_api_traverse_getproductinfo.png)
 
-The input is a list as needed. And the output is perfect. We wanted a `ApiAction<Result<List<ProductInfo>>>` and we now have it.
+入力は必要なリストになっています。そして出力は完璧です。`ApiAction<Result<List<ProductInfo>>>`が欲しかったのですが、今それができました。
 
-So all we need to do now is add an `ApiActionResult` to the left side. 
+あとは左側に`ApiActionResult`を追加するだけです。
 
-Well, we just saw this! It's `bind`.  So if we do that as well, we are finished.
+これも先ほど見ました。それは`bind`です。これも適用すれば完成です。
 
 ![](../assets/img/vgfp_api_complete_getproductinfo.png)
 
-And here it is expressed as code:
+コードで表現すると、次のようになります。
 
 ```fsharp
 let getPurchaseInfo =
@@ -793,7 +793,7 @@ let getPurchaseInfo =
     getPurchaseIds >> getProductInfo2
 ```
 
-Or to make it a bit less ugly:
+もう少し見栄えを良くすると、このようになります。
 
 ```fsharp
 let getPurchaseInfo =
@@ -804,7 +804,7 @@ let getPurchaseInfo =
     getPurchaseIds >> getProductInfoLifted
 ```
 
-Let's compare that with the earlier version of `getPurchaseInfo`:
+`getPurchaseInfo`の以前のバージョンと比較してみましょう。
 
 ```fsharp
 let getPurchaseInfo (custId:CustId) (api:ApiClient) =
@@ -819,53 +819,53 @@ let getPurchaseInfo (custId:CustId) (api:ApiClient) =
         return productInfos |> List.ofSeq
         }
 
-    // return result
+    // 結果を返す
     result
 ```
 
-Let's compare the two versions in a table:
+2つのバージョンを表で比較してみましょう。
 
 <table class="table table-condensed table-striped">
 <tr>
-<th>Earlier verson</th>
-<th>Latest function</th>
+<th>以前のバージョン</th>
+<th>最新の関数</th>
 </tr>
 <tr>
-<td>Composite function is non-trivial and needs special code to glue the two smaller functions together</td>
-<td>Composite function is just piping and composition</td>
+<td>複合関数が複雑で、2つの小さな関数を結合するために特別なコードが必要</td>
+<td>複合関数は単なるパイプと関数合成</td>
 </tr>
 <tr>
-<td>Uses the "result" computation expression </td>
-<td>No special syntax needed</td>
+<td>"result"コンピュテーション式を使用</td>
+<td>特別な構文が不要</td>
 </tr>
 <tr>
-<td>Has special code to loop through the results </td>
-<td>Uses "traverse"</td>
+<td>結果をループ処理するための特別なコードあり</td>
+<td>"traverse"を使用</td>
 </tr>
 <tr>
-<td>Uses a intermediate (and mutable) List object to accumulate the list of product infos </td>
-<td>No intermediate values needed. Just a data pipeline. </td>
+<td>製品情報のリストを蓄積するための中間的な（そして可変な）Listオブジェクトを使用</td>
+<td>中間値が不要。単純なデータパイプライン</td>
 </tr>
 </table>
 
 
-### Implementing traverse
+### traverseの実装
 
-The code above uses `traverse`, but we haven't implemented it yet.
-As I noted earlier, it can be implemented mechanically, following a template. 
+上記のコードでは`traverse`を使っていますが、まだ実装していませんでした。
+前述したように、これはテンプレートに従って機械的に実装できます。
 
-Here it is:
+以下がその実装です。
 
 ```fsharp
 let traverse f list =
-    // define the applicative functions
+    // アプリカティブ関数を定義
     let (<*>) = ApiActionResult.apply
     let retn = ApiActionResult.retn
 
-    // define a "cons" function
+    // "cons"関数を定義
     let cons head tail = head :: tail
 
-    // right fold over the list
+    // リストを右畳み込み
     let initState = retn []
     let folder head tail = 
         retn cons <*> f head <*> tail
@@ -873,49 +873,49 @@ let traverse f list =
     List.foldBack folder list initState 
 ```
 
-### Testing the implementation
+### 実装のテスト
 
-Let's test it!
+テストしてみましょう！
 
-First we need a helper function to show results:
+まず、結果を表示するためのヘルパー関数が必要です。
 
 ```fsharp
 let showResult result =
     match result with
     | Success (productInfoList) -> 
-        printfn "SUCCESS: %A" productInfoList
+        printfn "成功： %A" productInfoList
     | Failure errs -> 
-        printfn "FAILURE: %A" errs
+        printfn "失敗： %A" errs
 ```
 
-Next, we need to load the API with some test data:
+次に、APIにテストデータを読み込む必要があります。
 
 ```fsharp
 let setupTestData (api:ApiClient) =
-    //setup purchases
+    //購入をセットアップ
     api.Set (CustId "C1") [ProductId "P1"; ProductId "P2"] |> ignore
     api.Set (CustId "C2") [ProductId "PX"; ProductId "P2"] |> ignore
 
-    //setup product info
-    api.Set (ProductId "P1") {ProductName="P1-Name"} |> ignore
-    api.Set (ProductId "P2") {ProductName="P2-Name"} |> ignore
-    // P3 missing
+    //製品情報をセットアップ
+    api.Set (ProductId "P1") {ProductName="P1-名前"} |> ignore
+    api.Set (ProductId "P2") {ProductName="P2-名前"} |> ignore
+    // P3は欠落
 
-// setupTestData is an api-consuming function
-// so it can be put in an ApiAction 
-// and then that apiAction can be executed
+// setupTestDataはAPIを消費する関数なので
+// ApiActionに入れて
+// そのapiActionを実行できます
 let setupAction = ApiAction setupTestData
 ApiAction.execute setupAction 
 ```
 
-* Customer C1 has purchased two products: P1 and P2.
-* Customer C2 has purchased two products: PX and P2.
-* Products P1 and P2 have some info.
-* Product PX does *not* have any info.
+* 顧客C1は製品P1とP2を購入しています。
+* 顧客C2は製品PXとP2を購入しています。
+* 製品P1とP2には情報があります。
+* 製品PXには情報がありません。
 
-Let's see how this works out for different customer ids. 
+異なる顧客IDでどのように動作するか確認してみましょう。
 
-We'll start with Customer C1. For this customer we expect both product infos to be returned:
+顧客C1から始めましょう。この顧客については、両方の製品情報が返されることを期待しています。
 
 ```fsharp
 CustId "C1"
@@ -924,19 +924,19 @@ CustId "C1"
 |> showResult
 ```
 
-And here are the results:
+結果は以下のとおりです。
 
 ```text
-[API] Opening
-[API] Get CustId "C1"
-[API] Get ProductId "P1"
-[API] Get ProductId "P2"
-[API] Closing
-[API] Disposing
-SUCCESS: [{ProductName = "P1-Name";}; {ProductName = "P2-Name";}]
+[API] オープン中
+[API] CustId "C1"を取得
+[API] ProductId "P1"を取得
+[API] ProductId "P2"を取得
+[API] クローズ中
+[API] 破棄中
+成功： [{ProductName = "P1-名前";}; {ProductName = "P2-名前";}]
 ```
 
-What happens if we use a missing customer, such as CX?
+存在しない顧客、例えばCXを使用するとどうなるでしょうか？
 
 ```fsharp
 CustId "CX"
@@ -945,17 +945,17 @@ CustId "CX"
 |> showResult
 ```
 
-As expected, we get a nice "key not found" failure, and the rest of the operations are skipped as soon as the key is not found.
+予想通り、キーが見つからないという適切な失敗が発生し、キーが見つからない時点で残りの操作はスキップされます。
 
 ```text
-[API] Opening
-[API] Get CustId "CX"
-[API] Closing
-[API] Disposing
-FAILURE: ["Key CustId "CX" not found"]
+[API] オープン中
+[API] CustId "CX"を取得
+[API] クローズ中
+[API] 破棄中
+失敗： ["キーCustId "CX"が見つかりません"]
 ```
 
-What about if one of the purchased products has no info? For example, customer C2 purchased PX and P2, but there is no info for PX.
+購入した製品の1つに情報がない場合はどうでしょうか？例えば、顧客C2はPXとP2を購入しましたが、PXには情報がありません。
 
 ```fsharp
 CustId "C2"
@@ -964,40 +964,40 @@ CustId "C2"
 |> showResult
 ```
 
-The overall result is a failure. Any bad product causes the whole operation to fail.
+全体の結果は失敗です。1つでも不良な製品があると、操作全体が失敗します。
 
 ```text
-[API] Opening
-[API] Get CustId "C2"
-[API] Get ProductId "PX"
-[API] Get ProductId "P2"
-[API] Closing
-[API] Disposing
-FAILURE: ["Key ProductId "PX" not found"]
+[API] オープン中
+[API] CustId "C2"を取得
+[API] ProductId "PX"を取得
+[API] ProductId "P2"を取得
+[API] クローズ中
+[API] 破棄中
+失敗： ["キーProductId "PX"が見つかりません"]
 ```
 
-But note that the data for product P2 is fetched even though product PX failed. Why? Because we are using the applicative version of `traverse`,
-so every element of the list is fetched "in parallel".  
+しかし、製品PXが失敗したにもかかわらず、製品P2のデータが取得されていることに注目してください。なぜでしょうか？アプリカティブバージョンの`traverse`を使用しているため、
+リストの各要素が「並列に」取得されるからです。
 
-If we wanted to only fetch P2 once we knew that PX existed, then we should be using monadic style instead. We already seen how to write a monadic version of `traverse`,
-so I leave that as an exercise for you!
+PXが存在することを確認してからP2を取得したい場合は、代わりにモナディックスタイルを使用する必要があります。モナディックバージョンの`traverse`の書き方はすでに見ましたので、
+それは練習問題としてあなたに任せます！
 
 <a id="filtering"></a>
 <hr>
   
-## Filtering out failures
+## 失敗のフィルタリング
 
-In the implementation above, the `getPurchaseInfo` function failed if *any* product failed to be found. Harsh!
+上記の実装では、1つでも製品が見つからない場合に`getPurchaseInfo`関数が失敗してしまいます。少し厳しすぎるようです。
 
-A real application would probably be more forgiving. Probably what should happen is that the failed products are logged, but all the successes are accumulated
-and returned.
+実際のアプリケーションではもっと寛容でしょう。
+おそらく、失敗した製品はログに記録されますが、成功したものはすべて蓄積されて返されるべきです。
 
-How could we do this?
+これをどのように実現できるでしょうか？
 
-The answer is simple -- we just need to modify the `traverse` function to skip failures.
+答えは簡単です。失敗をスキップするように`traverse`関数を修正するだけです。
 
-First, we need to create a new helper function for `ApiActionResult`. It will allow us to pass in two functions, one for the success case
-and one for the error case:
+まず、`ApiActionResult`用の新しいヘルパー関数を作成する必要があります。
+これにより、成功の場合と失敗の場合の2つの関数を渡せます。
 
 ```fsharp
 module ApiActionResult = 
@@ -1018,31 +1018,31 @@ module ApiActionResult =
         ApiAction newAction
 ```
 
-This helper function helps us match both cases inside a `ApiAction` without doing complicated unwrapping. We will need this for our `traverse` that skips failures.
+このヘルパー関数は、`ApiAction`内の両方のケースを複雑なアンラッピングなしでマッチングするのに役立ちます。失敗をスキップする`traverse`を実装する際に、この関数が必要になります。
 
-By the way, note that `ApiActionResult.bind` can be defined in terms of `either`:
+ちなみに、`ApiActionResult.bind`は`either`を使って定義できます。
 
 ```fsharp
 let bind f = 
     either 
-        // Success? Run the function
+        // 成功？関数を実行
         (fun x -> f x)
-        // Failure? wrap the error in an ApiAction
+        // 失敗？エラーをApiActionにラップ
         (fun err -> (Failure err) |> ApiAction.retn)
 ```
 
-Now we can define our "traverse with logging of failures" function:
+これで、「失敗のログ付きtraverse」関数を定義できます。
 
 ```fsharp
 let traverseWithLog log f list =
-    // define the applicative functions
+    // アプリカティブ関数を定義
     let (<*>) = ApiActionResult.apply
     let retn = ApiActionResult.retn
 
-    // define a "cons" function
+    // "cons"関数を定義
     let cons head tail = head :: tail
 
-    // right fold over the list
+    // リストを右畳み込み
     let initState = retn []
     let folder head tail = 
         (f head) 
@@ -1052,7 +1052,7 @@ let traverseWithLog log f list =
     List.foldBack folder list initState 
 ```
 
-The only difference between this and the previous implementation is this bit:
+前回の実装と異なるのは、次の部分だけです。
 
 ```fsharp
 let folder head tail = 
@@ -1062,18 +1062,18 @@ let folder head tail =
         (fun errs -> log errs; tail)
 ```
 
-This says that:
+これは以下のことを意味します。
 
-* If the new first element (`f head`) is a success, lift the inner value (`retn h`) and `cons` it with the tail to build a new list.
-* But if the new first element is a failure, then log the inner errors (`errs`) with the passed in logging function (`log`)
-  and just reuse the current tail.
-  In this way, failed elements are not added to the list, but neither do they cause the whole function to fail.
+* 新しい先頭要素（`f head`）が成功の場合、内部の値（`retn h`）を持ち上げ、それをtailと`cons`して新しいリストを作ります。
+* しかし、新しい先頭要素が失敗の場合、渡されたログ関数（`log`）で内部のエラー（`errs`）をログに記録し、
+  現在のtailをそのまま使用します。
+  このようにして、失敗した要素はリストに追加されませんが、全体の関数を失敗させることもありません。
 
-Let's create a new function `getPurchasesInfoWithLog` and try it with customer C2 and the missing product PX:
+新しい関数`getPurchasesInfoWithLog`を作成し、顧客C2と欠落した製品PXで試してみましょう。
 
 ```fsharp
 let getPurchasesInfoWithLog =
-    let log errs = printfn "SKIPPED %A" errs 
+    let log errs = printfn "スキップしました %A" errs 
     let getProductInfoLifted =
         getProductInfo 
         |> traverseWithLog log 
@@ -1086,60 +1086,60 @@ CustId "C2"
 |> showResult
 ```
 
-The result is a Success now, but only one `ProductInfo`, for P2, is returned. The log shows that PX was skipped.
+結果は成功になりましたが、P2の`ProductInfo`のみが返されています。ログにはPXがスキップされたことが示されています。
 
 ```text
-[API] Opening
-[API] Get CustId "C2"
-[API] Get ProductId "PX"
-SKIPPED ["Key ProductId "PX" not found"]
-[API] Get ProductId "P2"
-[API] Closing
-[API] Disposing
-SUCCESS: [{ProductName = "P2-Name";}]
+[API] オープン中
+[API] CustId "C2"を取得
+[API] ProductId "PX"を取得
+スキップしました ["キーProductId "PX"が見つかりません"]
+[API] ProductId "P2"を取得
+[API] クローズ中
+[API] 破棄中
+成功： [{ProductName = "P2-名前";}]
 ```
 
 <a id="readermonad"></a>
 <hr>
   
-## The Reader monad
+## Readerモナド
 
-If you look closely at the `ApiResult` module, you will see that `map`, `bind`, and all the other functions do not use any information about the `api`
-that is passed around.  We could have made it any type and those functions would still have worked.
+`ApiResult`モジュールをよく見ると、`map`、`bind`、その他すべての関数が、渡される`api`の情報を使っていないことに気づきます。
+どんな型にしても、これらの関数は同じように動作したでしょう。
 
-So in the spirit of "parameterize all the things", why not make it a parameter?
+「すべてをパラメータ化する」精神に則って、それをパラメータにしてはどうでしょうか？
 
-That means that we could have defined `ApiAction` as follows:
+つまり、`ApiAction`を次のように定義することも可能でした。
 
 ```fsharp
 type ApiAction<'anything,'a> = ApiAction of ('anything -> 'a)
 ```
 
-But if it can be *anything*, why call it `ApiAction` any more? It could represent any set of things that depend on an object
-(such as an `api`) being passed in to them.
+しかし、何でもよいのなら、もはや`ApiAction`と呼ぶ必要はありません。
+（`api`のような）オブジェクトが渡されることに依存する任意の処理のセットを表せます。
 
-We are not the first people to discover this! This type is commonly called the `Reader` type and is defined like this:  
+私たちが初めてこれを発見したわけではありません！この型は一般的に`Reader`型と呼ばれ、以下のように定義されます。
 
 ```fsharp
 type Reader<'environment,'a> = Reader of ('environment -> 'a)
 ```
 
-The extra type `'environment` plays the same role that `ApiClient` did in our definition of `ApiAction`. There is some environment
-that is passed around as an extra parameter to all your functions, just as a `api` instance was.
+追加の型`'environment`は、`ApiAction`の定義における`ApiClient`と同じ役割を果たします。`api`インスタンスがすべての関数に追加のパラメータとして渡されていたのと同様に、
+何らかの環境が渡されます。
 
-In fact, we can actually define `ApiAction` in terms of `Reader` very easily:
+実際、`ApiAction`を`Reader`を使って非常に簡単に定義できます。
 
 ```fsharp
 type ApiAction<'a> = Reader<ApiClient,'a>
 ```
 
-The set of functions for `Reader` are exactly the same as for `ApiAction`. I have just taken the code and replaced `ApiAction` with `Reader` and
-`api` with `environment`!  
+`Reader`の関数セットは`ApiAction`のものとまったく同じです。コードを取り、`ApiAction`を`Reader`に、
+`api`を`environment`に置き換えただけです！
 
 ```fsharp
 module Reader = 
 
-    /// Evaluate the action with a given environment
+    /// 与えられた環境でアクションを評価
     /// 'env -> Reader<'env,'a> -> 'a
     let run environment (Reader action) = 
         let resultOfAction = action environment
@@ -1174,33 +1174,33 @@ module Reader =
         Reader newAction
 ```
 
-The type signatures are a bit harder to read now though!
+型シグネチャの可読性が少し下がりましたね。
 
-The `Reader` type, plus `bind` and `return`, plus the fact that `bind` and `return` implement the monad laws, means that `Reader` is typically called "the Reader monad" .
+`Reader`型に加えて`bind`と`return`、そして`bind`と`return`がモナド則を満たすことから、`Reader`は通常「Readerモナド」と呼ばれます。
 
-I'm not going to delve into the Reader monad here, but I hope that you can see how it is actually a useful thing and not some bizarre ivory tower concept.
+ここではReaderモナドについて深く掘り下げませんが、これが実際に役立つものであり、単なる理論上の概念ではないことがお分かりいただけたと思います。
 
-### The Reader monad vs. an explicit type
+### Readerモナド vs. 明示的な型
 
-Now if you like, you could replace all the `ApiAction` code above with `Reader` code, and it would work just the same. But *should* you?
+ここまでの`ApiAction`コードをすべて`Reader`コードに置き換えることもできますし、同じように動作するでしょう。しかし、そうすべきでしょうか？
 
-Personally, I think that while understanding the concept behind the Reader monad is important and useful, I prefer the actual implementation of `ApiAction`
-as I defined it originally, an explicit type rather than an alias for `Reader<ApiClient,'a>`.  
+個人的には、Readerモナドの背後にある概念を理解することは重要で有用だと思いますが、
+私が元々定義した`ApiAction`の実装、つまり`Reader<ApiClient,'a>`のエイリアスではなく明示的な型を好みます。
 
-Why? Well, F# doesn't have typeclasses, F# doesn't have partial application of type constructors, F# doesn't have "newtype". 
-Basically, F# isn't Haskell! I don't think that idioms that work well in Haskell should be carried over to F# directly when the language does not offer support for it. 
+なぜでしょうか？F#には型クラスがありません。F#には型コンストラクタの部分適用がありません。F#には「newtype」がありません。
+要するに、F#はHaskellではありません。言語のサポートがない場合、Haskellでうまく機能するイディオムをF#に直接持ち込むのは適切ではないでしょう。
 
-If you understand the concepts, you can implement all the necessary transformations in a few lines of code.  Yes, it's a little extra work, but the
-upside is less abstraction and fewer dependencies.
+概念を理解していれば、必要なすべての変換を数行のコードで実装できます。確かに少し余分な作業が必要ですが、
+抽象化が少なく、依存関係も少ないというメリットがあります。
 
-I would make an exception, perhaps, if your team were all Haskell experts, and the Reader monad was familiar to everyone. But for teams of different abilities, I would err on being too concrete
-rather than too abstract.
+チームのメンバー全員がHaskellの専門家で、Readerモナドが皆にとって馴染みのあるものである場合は例外かもしれません。しかし、能力の異なるチームの場合、
+抽象的すぎるよりも具体的すぎる方が良いでしょう。
 
-## Summary
+## まとめ
 
-In this post, we worked through another practical example, created our own elevated world which made things *much* easier, and in
-the process, accidentally re-invented the reader monad.
+この記事では、別の実践的な例を通じて、作業をかなり簡単にする独自の高次の世界を作成しました。
+その過程で、偶然にもReaderモナドを再発明することになりました。
 
-If you liked this, you can see a similar practical example, this time for the State monad, in my series on ["Dr Frankenfunctor and the Monadster"](../posts/monadster.md).
+これが気に入ったなら、["Dr Frankenfunctor and the Monadster"](../posts/monadster.md)シリーズで、今度はStateモナドについての同様の実践的な例を見れます。
 
-The [next and final post](../posts/elevated-world-7.md) has a quick summary of the series, and some further reading.
+[次の最終回](../posts/elevated-world-7.md)では、このシリーズを要約し、関連記事を案内します。

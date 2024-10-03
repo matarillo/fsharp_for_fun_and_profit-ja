@@ -41,8 +41,8 @@ image: "/assets/img/vgfp_rop_before.png"
 * **パート5：すべてのテクニックを使用する実世界の例**    
   * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.md#asynclist)
   * [2つの世界を1つとして扱う](../posts/elevated-world-5.md#asyncresult)
-* **パート6：独自の高次の世界の設計** 
-  * [独自の高次の世界の設計](../posts/elevated-world-6.md#part6)
+* **パート6：独自の高次の世界を設計する** 
+  * [独自の高次の世界を設計する](../posts/elevated-world-6.md#part6)
   * [失敗のフィルタリング](../posts/elevated-world-6.md#filtering)
   * [Readerモナド](../posts/elevated-world-6.md#readermonad)
 * **パート7：まとめ** 
