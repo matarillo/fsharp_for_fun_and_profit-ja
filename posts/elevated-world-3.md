@@ -47,7 +47,7 @@ image: "/assets/img/vgfp_rop_before.png"
   * [Readerモナド](../posts/elevated-world-6.md#readermonad)
 * **パート7：まとめ** 
   * [言及した演算子のリスト](../posts/elevated-world-7.md#operators)
-  * [さらなる読み物](../posts/elevated-world-7.md#further-reading)
+  * [補足文献](../posts/elevated-world-7.md#further-reading)
 
 <a id="part2"></a>
 <hr>

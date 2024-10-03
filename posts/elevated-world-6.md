@@ -50,7 +50,7 @@ URLのダウンロードという実践的な例でそれらの使用方法を�
   * [Readerモナド](../posts/elevated-world-6.md#readermonad)
 * **パート7：まとめ** 
   * [言及した演算子のリスト](../posts/elevated-world-7.md#operators)
-  * [さらなる読み物](../posts/elevated-world-7.md#further-reading)
+  * [補足文献](../posts/elevated-world-7.md#further-reading)
 
 <a id="part6"></a>
 <hr>
@@ -1203,4 +1203,4 @@ module Reader =
 
 これが気に入ったなら、["Dr Frankenfunctor and the Monadster"](../posts/monadster.md)シリーズで、今度はStateモナドについての同様の実践的な例を見れます。
 
-[次の最終回](../posts/elevated-world-7.md)では、このシリーズを要約し、関連記事を案内します。
+[次の最終回](../posts/elevated-world-7.md)では、このシリーズを要約し、補足文献を案内します。

@@ -7,124 +7,124 @@ seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 7
 ---
 
-## Series summary
+## シリーズのまとめ
 
-Well, [this series](../series/map-and-bind-and-apply-oh-my.md) turned out to be longer than I originally planned. Thanks for making it to the end!
+[このシリーズ](../series/map-and-bind-and-apply-oh-my.md)は、当初の予定よりも長くなってしまいました。最後までお付き合いいただき、ありがとうございます！
 
-I hope that this discussion has been helpful in understanding the various function transformations like `map` and `bind`, and given you
-some useful techniques for dealing with world-crossing functions -- maybe even demystified the m-word a bit!
+この議論が、`map`や`bind`といった様々な関数の変換について理解を深める上で、参考になったことを願っています。世界をまたぐ関数を取り扱う上での有用なテクニックも、少しは理解いただけたのではないでしょうか。
+もしかしたら、m-wordの神秘性も、少しは解けたかもしれませんね。
 
-If you want to start using these kinds of functions in your own code, I hope that you can see how easy they are to write, but
-you should also consider using one of the excellent F# utility libraries that contain these and much more:
+これらの関数を自分のコードで使ってみたいと思った方は、その実装がいかに簡単かお分かりいただけたと思います。
+sしかし、これらの関数やさらに多くの機能を含む優れたF#ユーティリティライブラリの使用も検討してみてください：
 
-* **ExtCore** ([source](https://github.com/jack-pappas/ExtCore), [NuGet](https://www.nuget.org/packages/ExtCore/)). 
-  ExtCore provides extensions to the F# core library (FSharp.Core) and aims to help you build industrial-strength F# applications. 
-  These extensions include additional functions for modules such as Array, List, Set, and Map; immutable IntSet, IntMap, LazyList, and 
-  Queue collections; a variety of computation expressions (workflows); and "workflow collections" -- collections modules which have been 
-  adapted to work seamlessly from within workflows.
+* **ExtCore** ([ソース](https://github.com/jack-pappas/ExtCore), [NuGet](https://www.nuget.org/packages/ExtCore/)). 
+  ExtCoreはF#コアライブラリ（FSharp.Core）を拡張し、実用的なF#アプリケーションの構築をサポートすることを目的としています。
+  これらの拡張には、Array、List、Set、Mapなどのモジュールの追加関数、不変のIntSet、IntMap、LazyList、Queueコレクション、
+  様々なコンピュテーション式（ワークフロー）、
+  そして「ワークフローコレクション」（ワークフロー内でシームレスに動作するように適応されたコレクションモジュール）が含まれます。
   
-* **FSharpx.Extras** ([home page](https://fsprojects.github.io/FSharpx.Extras/)). 
-  FSharpx.Extras is part of the FSharpx series of libraries.
-  It implements several standard monads (State, Reader, Writer, Either, Continuation, Distribution), 
-  validation with applicative functors, general functions like flip, and some asynchronous programming utilities,
-  and functions to make C# - F# interop easier.
+* **FSharpx.Extras** ([ホームページ](https://fsprojects.github.io/FSharpx.Extras/)). 
+  FSharpx.ExtrasはFSharpxシリーズのライブラリの一部です。
+  いくつかの標準的なモナド（State、Reader、Writer、Either、Continuation、Distribution）、
+  アプリカティブファンクターによるバリデーション、flipのような一般的な関数、非同期プログラミングユーティリティ、
+  そしてC# - F#の相互運用を容易にする関数を実装しています。
   
-For example, the monadic traverse `List.traverseResultM` that I implemented [in this post](../posts/elevated-world-4.md#traverse) is already available in ExtCore 
-[here](https://github.com/jack-pappas/ExtCore/blob/4fc2302e74a9b5217d980e5ce2680f0b3db26c3d/ExtCore/ControlCollections.Choice.fs#L398).
+例えば、[この投稿](../posts/elevated-world-4.md#traverse)で実装したモナディックな走査`List.traverseResultM`は、すでにExtCoreで
+[ここ](https://github.com/jack-pappas/ExtCore/blob/4fc2302e74a9b5217d980e5ce2680f0b3db26c3d/ExtCore/ControlCollections.Choice.fs#L398)で利用可能です。
   
-And if you liked this series, I have posts explaining the State monad in my series on ["Dr Frankenfunctor and the Monadster"](../posts/monadster.md)
-and the Either monad in my talk ["Railway Oriented Programming"](http://fsharpforfunandprofit.com/rop/).
+このシリーズが気に入った方は、["Dr Frankenfunctor and the Monadster"](../posts/monadster.md)シリーズでStateモナドについての投稿や、
+「[Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/)」というトークでEitherモナドについての説明もご覧いただけます。
 
-As I said at the very beginning, writing this up has been a learning process for me too.
-I am not an expert, so if I have made any errors please do let me know.
+最初に述べたように、これを書くことは私にとっても学習プロセスでした。
+私も専門家ではありませんので、もし間違いを見つけられたら、ぜひご指摘ください。
 
-Thanks!
+ありがとうございました！
 
-## Series contents
+## シリーズの内容
 
-Here's a list of shortcuts to the various functions mentioned in this series:
+このシリーズで触れた様々な関数へのショートカットリストです：
 
-* **Part 1: Lifting to the elevated world**
-  * [The `map` function](../posts/elevated-world.md#map)
-  * [The `return` function](../posts/elevated-world.md#return)
-  * [The `apply` function](../posts/elevated-world.md#apply)
-  * [The `liftN` family of functions](../posts/elevated-world.md#lift)
-  * [The `zip` function and ZipList world](../posts/elevated-world.md#zip)
-* **Part 2: How to compose world-crossing functions**    
-  * [The `bind` function](../posts/elevated-world-2.md#bind)
-  * [List is not a monad. Option is not a monad.](../posts/elevated-world-2.md#not-a-monad)
-* **Part 3: Using the core functions in practice**  
-  * [Independent and dependent data](../posts/elevated-world-3.md#dependent)
-  * [Example: Validation using applicative style and monadic style](../posts/elevated-world-3.md#validation)
-  * [Lifting to a consistent world](../posts/elevated-world-3.md#consistent)
-  * [Kleisli world](../posts/elevated-world-3.md#kleisli)
-* **Part 4: Mixing lists and elevated values**    
-  * [Mixing lists and elevated values](../posts/elevated-world-4.md#mixing)
-  * [The `traverse`/`MapM` function](../posts/elevated-world-4.md#traverse)
-  * [The `sequence` function](../posts/elevated-world-4.md#sequence)
-  * ["Sequence" as a recipe for ad-hoc implementations](../posts/elevated-world-4.md#adhoc)
-  * [Readability vs. performance](../posts/elevated-world-4.md#readability)
-  * [Dude, where's my `filter`?](../posts/elevated-world-4.md#filter)
-* **Part 5: A real-world example that uses all the techniques**    
-  * [Example: Downloading and processing a list of websites](../posts/elevated-world-5.md#asynclist)
-  * [Treating two worlds as one](../posts/elevated-world-5.md#asyncresult)
-* **Part 6: Designing your own elevated world** 
-  * [Designing your own elevated world](../posts/elevated-world-6.md#part6)
-  * [Filtering out failures](../posts/elevated-world-6.md#filtering)
-  * [The Reader monad](../posts/elevated-world-6.md#readermonad)
-* **Part 7: Summary** 
-  * [List of operators mentioned](../posts/elevated-world-7.md#operators)
-  * [Further reading](../posts/elevated-world-7.md#further-reading)
+* **パート1：高次の世界への持ち上げ**
+  * [`map`関数](../posts/elevated-world.md#map)
+  * [`return`関数](../posts/elevated-world.md#return)
+  * [`apply`関数](../posts/elevated-world.md#apply)
+  * [`liftN`関数ファミリー](../posts/elevated-world.md#lift)
+  * [`zip`関数とZipList世界](../posts/elevated-world.md#zip)
+* **パート2：世界をまたぐ関数の合成方法**    
+  * [`bind`関数](../posts/elevated-world-2.md#bind)
+  * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.md#not-a-monad)
+* **パート3：コア関数の実際的な使い方**  
+  * [独立データと依存データ](../posts/elevated-world-3.md#dependent)
+  * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.md#validation)
+  * [一貫した世界への持ち上げ](../posts/elevated-world-3.md#consistent)
+  * [Kleisli世界](../posts/elevated-world-3.md#kleisli)
+* **パート4：リストと高次の値の混合**    
+  * [リストと高次の値の混合](../posts/elevated-world-4.md#mixing)
+  * [`traverse`/`MapM`関数](../posts/elevated-world-4.md#traverse)
+  * [`sequence`関数](../posts/elevated-world-4.md#sequence)
+  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.md#adhoc)
+  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.md#readability)
+  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.md#filter)
+* **パート5：すべてのテクニックを使用する実世界の例**    
+  * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.md#asynclist)
+  * [2つの世界を1つとして扱う](../posts/elevated-world-5.md#asyncresult)
+* **パート6：独自の高次の世界を設計する** 
+  * [独自の高次の世界を設計する](../posts/elevated-world-6.md#part6)
+  * [失敗のフィルタリング](../posts/elevated-world-6.md#filtering)
+  * [Readerモナド](../posts/elevated-world-6.md#readermonad)
+* **パート7：まとめ** 
+  * [言及した演算子のリスト](../posts/elevated-world-7.md#operators)
+  * [補足文献](../posts/elevated-world-7.md#further-reading)
 
 <a id="operators"></a>
 <hr>
   
-## Appendix: List of operators mentioned
+## 付録：言及した演算子のリスト
 
-Unlike OO languages, functional programming languages are known for their [strange operators](http://en.cppreference.com/w/cpp/language/operator_precedence),
-so I thought it would be helpful to document the ones that have been used in this series, with links back to the relevant discussion.
+関数型プログラミング言語は、オブジェクト指向言語と違って[変わった演算子](https://en.cppreference.com/w/cpp/language/operator_precedence)が多いことで知られています。
+そこで、このシリーズで使用された演算子を、関連する議論へのリンクとともにドキュメント化することが役立つと考えました。
 
-Operator  | Equivalent function | Discussion
+演算子  | 同等の関数 | 議論
 -------------|---------|----
-`>>`  | Left-to-right composition | Not part of this series, but [discussed here](../posts/function-composition.md)
-`<<`  | Right-to-left composition | As above
-<code>&#124;></code>  | Left-to-right piping | As above
-<code>&lt;&#124;</code> | Right-to-left piping | As above
-`<!>` | `map` | [Discussed here](../posts/elevated-world.md#map)
-`<$>` | `map` | Haskell operator for map, but not a valid operator in F#, so I'm using `<!>` in this series.
-`<*>` | `apply` | [Discussed here](../posts/elevated-world.md#apply)
-`<*`  | - | One sided combiner. [Discussed here](../posts/elevated-world.md#lift)
-`*>`  | - | One sided combiner. [Discussed here](../posts/elevated-world.md#lift)
-`>>=` | Left-to-right `bind` | [Discussed here](../posts/elevated-world-2.md#bind)
-`=<<` | Right-to-left `bind` | As above
-`>=>` | Left-to-right Kleisli composition | [Discussed here](../posts/elevated-world-3.md#kleisli)
-`<=<` | Right-to-left Kleisli composition | As above
+`>>`  | 左から右への合成 | このシリーズの一部ではありませんが、[ここで議論されています](../posts/function-composition.md)
+`<<`  | 右から左への合成 | 上記と同様
+<code>&#124;></code>  | 左から右へのパイピング | 上記と同様
+<code>&lt;&#124;</code> | 右から左へのパイピング | 上記と同様
+`<!>` | `map` | [ここで議論されています](../posts/elevated-world.md#map)
+`<$>` | `map` | Haskellのmap演算子ですが、F#では有効な演算子ではないため、このシリーズでは`<!>`を使用しています。
+`<*>` | `apply` | [ここで議論されています](../posts/elevated-world.md#apply)
+`<*`  | - | 片側の結合子。[ここで議論されています](../posts/elevated-world.md#lift)
+`*>`  | - | 片側の結合子。[ここで議論されています](../posts/elevated-world.md#lift)
+`>>=` | 左から右への`bind` | [ここで議論されています](../posts/elevated-world-2.md#bind)
+`=<<` | 右から左への`bind` | 上記と同様
+`>=>` | 左から右へのKleisli合成 | [ここで議論されています](../posts/elevated-world-3.md#kleisli)
+`<=<` | 右から左へのKleisli合成 | 上記と同様
 
 
 <a id="further-reading"></a>
 <hr>
   
-## Appendix: Further reading
+## 付録：補足文献
 
-Alternative tutorials:
+代替チュートリアル：
 
 * [You Could Have Invented Monads! (And Maybe You Already Have)](http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html).
-* [Functors, Applicatives and Monads in pictures](http://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html).
-* [Kleisli composition ? la Up-Goer Five](http://mergeconflict.com/kleisli-composition-a-la-up-goer-five/). I think this one is funny.
-* [Eric Lippert's series on monads in C#](http://ericlippert.com/category/monads/).
+* [Functors, Applicatives and Monads in pictures](https://www.adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html).
+* [Kleisli composition ? la Up-Goer Five](https://web.archive.org/web/20181215060626/http://mergeconflict.com/kleisli-composition-a-la-up-goer-five/). これはユーモアがあって面白いですよ。
+* [Eric LippertのC#におけるモナドのシリーズ](https://ericlippert.com/category/monads/).
 
-For the academically minded:
+学術的な方向け：
 
-* [Monads for Functional Programming](http://homepages.inf.ed.ac.uk/wadler/papers/marktoberdorf/baastad.pdf) (PDF), by Philip Wadler. One of the first monad papers.
-* [Applicative Programming with Effects](http://www.soi.city.ac.uk/~ross/papers/Applicative.pdf) (PDF), by Conor McBride and Ross Paterson.
-* [The Essence of the Iterator Pattern](http://www.comlab.ox.ac.uk/jeremy.gibbons/publications/iterator.pdf) (PDF), by Jeremy Gibbons and Bruno Oliveira.
+* [Monads for Functional Programming](https://homepages.inf.ed.ac.uk/wadler/papers/marktoberdorf/baastad.pdf) (PDF), by Philip Wadler. 最初のモナド論文の1つです。
+* [Applicative Programming with Effects](https://www.staff.city.ac.uk/~ross/papers/Applicative.pdf) (PDF), by Conor McBride and Ross Paterson.
+* [The Essence of the Iterator Pattern](https://www.cs.ox.ac.uk/jeremy.gibbons/publications/iterator.pdf) (PDF), by Jeremy Gibbons and Bruno Oliveira.
 
-F# examples:
+F#の例：
 
-* [F# ExtCore](https://github.com/jack-pappas/ExtCore) and
-  [FSharpx.Extras](https://github.com/fsprojects/FSharpx.Extras/blob/master/src/FSharpx.Extras/ComputationExpressions/Monad.fs) have lots of useful code.
-* [FSharpx.Async](https://github.com/fsprojects/FSharpx.Async/blob/master/src/FSharpx.Async/Async.fs) has `map`, `apply`, `liftN` (called "Parallel"), `bind`, and other useful extensions for `Async`.
-* Applicatives are very well suited for parsing, as explained in these posts:
-  * [Parsing with applicative functors in F#](http://bugsquash.blogspot.co.uk/2011/01/parsing-with-applicative-functors-in-f.html).
-  * [Dive into parser combinators: parsing search queries with F# and FParsec in Kiln](http://blog.fogcreek.com/fparsec/).
+* [F# ExtCore](https://github.com/jack-pappas/ExtCore)と
+  [FSharpx.Extras](https://github.com/fsprojects/FSharpx.Extras/blob/master/src/FSharpx.Extras/ComputationExpressions/Monad.fs)には多くの有用なコードがあります。
+* [FSharpx.Async](https://github.com/fsprojects/FSharpx.Async/blob/master/src/FSharpx.Async/Async.fs)には`Async`用の`map`、`apply`、`liftN`（「Parallel」と呼ばれています）、`bind`、その他の便利な拡張機能があります。
+* アプリカティブはパーシングに非常に適しています。以下の投稿で説明されています：
+  * [Parsing with applicative functors in F#](https://bugsquash.blogspot.co.uk/2011/01/parsing-with-applicative-functors-in-f.html).
+  * [Dive into parser combinators: parsing search queries with F# and FParsec in Kiln](https://web.archive.org/web/20160330092851/http://blog.fogcreek.com/fparsec/).
 

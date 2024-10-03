@@ -170,7 +170,7 @@ RunTargetOrDefault "Default"
 
 構文に慣れるまで少し時間がかかりますが、その努力は十分に価値があります。
 
-FAKEに関するさらなる読み物：
+FAKEに関する補足文献：
 
 * [FAKEへの移行](https://bugsquash.blogspot.com/2010/11/migrating-to-fake.html)
 * [HanselmanのFAKEについて](https://www.hanselman.com/blog/exploring-fake-an-f-build-system-for-all-of-net)。多くのコメントは実際にFAKEを使っている人々からのものです。

@@ -797,7 +797,7 @@ let fiveN = calculate five |> getValue   // 5
 
 これらの定義の視覚的なバージョンについては、[Functors, Applicatives, And Monads In Pictures](https://www.adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html)という素晴らしい投稿があります。
 
-## さらなる読み物
+## 補足文献
 
 Web上にはStateモナドに関する多くの投稿がありますが、そのほとんどはHaskellに基づいています。しかし、この連載を読んだ後では、それらの説明がより理解しやすくなると思います。
 そのため、ここではフォローアップリンクをいくつか紹介するだけにとどめます。
