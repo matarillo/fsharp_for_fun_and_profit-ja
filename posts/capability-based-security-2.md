@@ -210,7 +210,7 @@ public class CustomerDatabaseCapabilityProvider
 }
 ```
 
-F\#バージョンと同じコードを次に示します。
+同じコードのF\#版を次に示します。
 
 ```fsharp
 /// ビジネスレイヤーからアクセスできない
@@ -238,10 +238,10 @@ module CustomerDatabaseCapabilityProvider =
 
 このモデルでは、呼び出し元は`CustomerDatabase`から分離され、`CustomerDatabaseCapabilityProvider`は呼び出し元と`CustomerDatabase`の間のプロキシとして機能します。
 
-つまり、現在の設計では、`CustomerDatabase`で使用可能なすべての関数に対して、`CustomerDatabaseCapabilityProvider`でも並列関数が使用可能でなければなりません。
+つまり、現在の設計では、`CustomerDatabase`で使用可能なすべての関数に対して、`CustomerDatabaseCapabilityProvider`でも対応する関数が使用可能でなければなりません。
 このアプローチはうまくスケールしないことがわかります。
 
-一度に1つずつではなく、*関数全体*のケイパビリティを一般的に取得する方法があればいいのですが。それができるかどうか見てみましょう！
+一度に1つずつではなく、データベース関数*すべて*のケイパビリティを一般的に取得する方法があればいいのですが。それができるかどうか見てみましょう！
 
 ## ケイパビリティの制限と変換
 
@@ -325,7 +325,7 @@ match getCustomerOnlyForSameIdOrAgents with
 
 ![例3](../assets/img/auth_3.png)
 
-### ケーパビリティに対する追加の変換
+### ケイパビリティに対する追加の変換
 
 ケイパビリティは関数であるため、変換を連結または組み合わせることで、簡単に新しいケイパビリティを作成できます。
 
@@ -358,7 +358,7 @@ module CustomerCapabilityFilter =
 リストから最初の有効なケイパビリティを返す汎用コンビネーターを作成することもできます。
 
 ```fsharp
-// ケーパビリティオプションのリストが与えられた場合、 
+// ケイパビリティオプションのリストが与えられた場合、 
 // 最初の適切なものを返す（存在する場合）
 let first capabilityList = 
     capabilityList |> List.tryPick id
@@ -390,7 +390,7 @@ let onlyIfDuringBusinessHours (time:DateTime) f =
 元のケイパビリティを制限する別のコンビネーターを作成できます。これは単なる「バインド」のバージョンです。
 
 ```fsharp
-// ケーパビリティオプションが与えられた場合、それを制限する
+// ケイパビリティオプションが与えられた場合、それを制限する
 let restrict filter originalCap = 
     originalCap
     |> Option.bind filter 
@@ -440,12 +440,12 @@ let getCustomerOnlyForSameId_OrForAgentsInBusinessHours =
 最初の3つの実装を次に示します。
 
 ```fsharp
-/// ケーパビリティの使用は監査される
+/// ケイパビリティの使用は監査される
 let auditable capabilityName f = 
     fun x -> 
         // シンプルな監査ログ！
         printfn "AUDIT: calling %s with %A" capabilityName  x
-        // ケーパビリティを使う
+        // ケイパビリティを使う
         f x
 
 /// 関数を1回だけ呼び出すことができるようにする
@@ -584,9 +584,9 @@ module Domain =
         | CapabilityRevoked
 ```
 
-`FailureCase`型は、アプリケーションのトップレベルで発生する可能性のあるすべてのエラーを文書化します。これについては、「[Railway Oriented Programmingのトーク](https://fsharpforfunandprofit.com/rop/)」で詳しく説明しています。
+`FailureCase`型は、アプリケーションのトップレベルで発生する可能性のあるすべてのエラーを文書化します。これについては、「[鉄道指向プログラミング](https://fsharpforfunandprofit.com/rop/)」のトークで詳しく説明しています。
 
-### ケーパビリティの定義
+### ケイパビリティの定義
 
 次に、アプリケーションで使用可能なすべてのケイパビリティを文書化します。 
 コードを明確にするために、各ケイパビリティには名前（つまり、型エイリアス）が付けられています。
@@ -605,7 +605,7 @@ module Capabilities =
     open Rop
     open Domain
         
-    // ケーパビリティ
+    // ケイパビリティ
     type GetCustomerCap = unit -> SuccessFailure<CustomerData,FailureCase>
     type UpdateCustomerCap = unit -> CustomerData -> SuccessFailure<unit,FailureCase>
     type UpdatePasswordCap = Password -> SuccessFailure<unit,FailureCase>
