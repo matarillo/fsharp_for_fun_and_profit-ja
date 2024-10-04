@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "アイデンティティとロールに基づいてケイパビリティを制限する"
-description: "認可のための関数型アプローチ パート2"
-seriesId: "認可のための関数型アプローチ"
+title: "IDとロールによるケイパビリティの制約"
+description: "関数型アプローチによる認可 パート2"
+seriesId: "関数型アプローチによる認可"
 seriesOrder: 2
 categories: []
 image: "/assets/img/auth_3.png"

@@ -1,58 +1,58 @@
 ---
 layout: post
-title: "Using types as access tokens"
-description: "A functional approach to authorization, part 3"
-seriesId: "A functional approach to authorization"
+title: "型をアクセストークンとして使う"
+description: "関数型アプローチによる認可 パート3"
+seriesId: "関数型アプローチによる認可"
 seriesOrder: 3
 categories: []
 image: "/assets/img/auth_token.png"
 ---
 
-*UPDATE: [Slides and video from my talk on this topic](http://fsharpforfunandprofit.com/cap/)*
+*更新：[このトピックに関する講演のスライドとビデオ](https://fsharpforfunandprofit.com/cap/)*
 
-In the previous posts ([link](../posts/capability-based-security.md), [link](../posts/capability-based-security-2.md))
-we looked at "capabilities" as the basis for locking down code.
+以前の記事（[リンク](../posts/capability-based-security.md)、[リンク](../posts/capability-based-security-2.md)）では、
+コードを制限するための基礎として「ケイパビリティ」について検討しました。
 
-But in most of the examples so far, we've been relying on self-discipline to avoid using the global capabilities,
-or by trying to hide the "raw" capabilities using the `internal` keyword.
+しかし、これまでの例のほとんどでは、グローバルなケイパビリティを使わないように自制することに頼るか、
+`internal`キーワードを使って「生の」ケイパビリティを隠そうとしてきました。
 
-It's a bit ugly -- can we do better?
+あまりきれいではありませんね。もっと良い方法があるでしょうか？
 
-In this post, we'll show that we can by using types to emulate "access tokens".
+この記事では、型を使って「アクセストークン」をエミュレートすることで、それが可能であることを示します。
 
-## Real-world authorization
+## 実際の認可
 
-First, let's step back and look at how authorization works in the real world.
+まず、現実世界で認可がどのように機能するかを見てみましょう。
 
-Here's a simplified diagram of a basic authorization system (such as [OAuth 2.0](https://developers.google.com/accounts/docs/OAuth2#basicsteps)).
+基本的な認可システム（[OAuth 2.0](https://developers.google.com/accounts/docs/OAuth2#basicsteps)など）を簡略化した図を次に示します。
 
 ![Simplified authentication](../assets/img/auth_token.png)
 
-The steps, in their crudest form, are:
+最も単純な形式での手順は次のとおりです。
 
-* The client presents some claims to the Authorization Service, including identity and the id and scope (capability) of the service it wants to access.
-* The Authorization Service checks whether the client is authorized, and if so, creates an access token which is returned to the client.
-* The client then presents this access token to the Resource Service (the service the client wants to use). 
-* In general, the access token will only let the client do certain things. In our terminology, it has been granted a limited set of capabilities. 
+  * クライアントは、アイデンティティ、アクセスしたいサービスのIDとスコープ（ケイパビリティ）を含むいくつかのクレームを認可サービスに提示します。
+  * 認可サービスは、クライアントが認可されているかどうかを確認し、認可されている場合はアクセストークンを作成してクライアントに返します。
+  * クライアントは、このアクセストークンをリソースサービス（クライアントが使用したいサービス）に提示します。
+  * 一般的に、アクセストークンはクライアントが特定のことだけを実行できるようにします。この用語では、クライアントには制限されたケイパビリティのセットが付与されていることになります。
 
-Obviously, there's a lot more to it than that, but it will be enough to give us some ideas.
+実際には、もっと複雑なプロセスです。しかし、いくつかのアイデアを与えるにはこれで十分でしょう。
 
-## Implementing an Access Token
+## アクセストークンを実装する
 
-If we want to emulate this in our design, it's clear that we need some sort of "access token". Since we're running in a single process, and the primary goal
-is to stop accidental errors, we don't need to do cryptographic signatures and all that. All we need is some object that can *only* be created by an authorization service.
+これを設計でエミュレートしたい場合、「アクセストークン」のようなものが必要になることは明らかです。
+単一プロセスで実行しており、主な目標は偶発的なエラーを止めることなので、暗号署名などを行う必要はありません。必要なのは、認可サービスによってのみ作成できるオブジェクトだけです。
 
-That's easy. We can just use a type with a private constructor!  
+簡単です。プライベートコンストラクターを持つ型を使えばいいだけです。
 
-We'll set it up so that the type can only be created by an Authorization Service, but is required to be passed in to the database service. 
+型は認可サービスによってのみ作成できるように設定します。それをデータベースサービスに渡す必要があります。
 
-For example, here's an F# implementation of the `AccessToken` type. The constructor is private, and there's a static member that returns an instance if
-authorization is allowed.
+たとえば、`AccessToken`型のF\#実装を次に示します。
+コンストラクターはプライベートで、認可が許可されている場合はインスタンスを返す静的メンバーがあります。
 
 ```fsharp
 type AccessToken private() = 
 
-    // create an AccessToken that allows access to a particular customer
+    // 特定の顧客へのアクセスを許可するアクセストークンを作成する。
     static member getAccessToCustomer id principal = 
         let principalId = GetIdForPrincipal(principal)
         if (principalId = id) || principal.IsInRole("CustomerAgent") then
@@ -61,96 +61,96 @@ type AccessToken private() =
             None   
 ```
 
-Next, in the database module, we will add an extra parameter to each function, which is the AccessToken.
+次に、データベースモジュールで、各関数に、アクセストークンである追加パラメーターを追加します。
 
-Because the AccessToken token is required, we can safely make the database module public now, as no unauthorized client can call the functions.
+アクセストークントークンが必要なので、データベースモジュールをパブリックにしても安全です。許可されていないクライアントは関数を呼び出すことができないからです。
 
 ```fsharp
 let getCustomer (accessToken:AccessToken) (id:CustomerId) = 
-    // get customer data
+    // 顧客データを取得する。
 
 let updateCustomer (accessToken:AccessToken) (id:CustomerId) (data:CustomerData) = 
-    // update database
+    // データベースを更新する。
 ```
 
-Note that the accessToken is not actually used in the implementation. It is just there to force callers to obtain a token at compile time.
+アクセストークンは実際には実装で使われていないことに注意してください。呼び出し側がコンパイル時にトークンを取得することを強制するためだけに存在します。
 
-So let's look at how this might be used in practice.
+では、実際にどのように使われるのかを見てみましょう。
 
 ```fsharp
-let principal = // from context
-let id = // from context
+let principal = // コンテキストから取得
+let id = // コンテキストから取得
 
-// attempt to get an access token
+// アクセストークンの取得を試みる。
 let accessToken = AuthorizationService.AccessToken.getAccessToCustomer id principal
 ```
 
-At this point we have an optional access token. Using `Option.map`, we can apply it to `CustomerDatabase.getCustomer` to get an optional capability.
-And by partially applying the access token, the user of the capability is isolated from the authentication process.
+オプション型のアクセストークンが取得できました。`Option.map`を使って、`CustomerDatabase.getCustomer`に適用して、オプション型のケイパビリティを取得できます。
+また、アクセストークンを部分的に適用することで、ケイパビリティのユーザーは認証プロセスから分離されます。
 
 ```fsharp
 let getCustomerCapability = 
     accessToken |> Option.map CustomerDatabase.getCustomer
 ```
 
-And finally, we can attempt to use the capability, if present.
+そして最後に、ケイパビリティが存在する場合は、それを使ってみましょう。
 
 ```fsharp
 match getCustomerCapability with
 | Some getCustomer -> getCustomer id
-| None -> Failure AuthorizationFailed // error
+| None -> Failure AuthorizationFailed // エラー
 ```
 
-So now we have a statically typed authorization system that will prevent us from accidentally getting too much access to the database.
+これで、データベースへの過剰なアクセスを誤って行うことを防ぐ、静的に型付けされた認可システムができました。
 
-## Oops! We have made a big mistake... 
+## うっかりミス！大きな間違いです…。
 
-This design looks fine on the surface, but we haven't actually made anything more secure.
+この設計は表面上は問題ないように見えますが、実際には安全ではありません。
 
-The first problem is that the `AccessToken` type is too broad. If I can somehow get hold of an access token for innocently writing to a config file,
-I might also be able to use it to maliciously update passwords as well.
+最初の問題は、`AccessToken`型のケイパビリティが広すぎることです。無害なはずの、設定ファイルへ書き込むためのアクセストークンを何らかの方法で入手できれば、
+悪意をもって、パスワードの更新にも使うことができるかもしれません。
 
-The second problem is that the `AccessToken` throws away the context of the operation. For example, I might get an access token for updating `CustomerId 1`,
-but when I actually *use* the capability, I could pass in `CustomerId 2` as the the customer id instead!
+2番目の問題は、`AccessToken`が操作のコンテキストを捨ててしまうことです。たとえば、`CustomerId 1`を更新するためのアクセストークンを取得したとしても、
+実際にケイパビリティを*使う*ときに、顧客IDとして`CustomerId 2`を渡してしまう可能性があります。
 
-The answer to both these issues is to store information in the access token itself, at the point when the authorization is granted. 
+これらの問題の両方に対する解決法は、認可が許可された時点で、アクセストークン自体に情報を保存することです。
 
-For example, if the token stores the operation that was requested, the service can check that the token matches the operation being called,
-which ensures that the token can only be used for that particular operation. 
-In fact, as we'll see in a minute, we can be lazy and have the *compiler* do this checking for us!
+たとえば、要求された操作をトークンが保存している場合、サービスは呼び出されている操作とトークンが一致するかどうかを確認できます。
+これにより、トークンはその特定の操作にのみ使われることが保証されます。
+実際、後ほど説明するように、このチェックを*コンパイラ*に任せてしまうことができます。
 
-And, if we also store any data (such as the customer id) that was part of the authorization request, then we don't need to ask for it again in the service.
+また、認可要求の一部であったデータ（顧客IDなど）も保存する場合、サービスで再度要求する必要はありません。
 
-What's more, we can trust that the information stored in the token is not forged or tampered with because only the Authorization Service can create the token.
-In other words, this is the equivalent of the token being "signed". 
+さらに、トークンに保存されている情報は、認可サービスのみがトークンを作成できるため、偽造または改ざんされていないと信頼できます。
+言い換えれば、これはトークンが「署名されている」ことと同等です。
 
-## Revisiting the Access Token design
+## アクセストークンの設計を見直す
 
-So let's revisit the design and fix it up.
+では、設計を見直し、修正しましょう。
 
-First we will define a *distinct type* for each capability. The type will also contain any data needed at authorization time, such as the customer id.
+まず、ケイパビリティごとに*個別*の型を定義します。型には、顧客IDなど、認可時に必要なデータも含まれます。
 
-For example, here are two types that represent access to capabilities, one for accessing a customer (both read and update), and another one updating a password.
-Both of these will store the `CustomerId` that was provided at authorization time.
+たとえば、ケイパビリティへのアクセスを表す2つの型を次に示します。1つは顧客へのアクセス（読み取りと更新の両方）、もう1つはパスワードの更新です。
+どちらも、認可時に提供された`CustomerId`を格納します。
 
 ```fsharp
 type AccessCustomer = AccessCustomer of CustomerId
 type UpdatePassword = UpdatePassword of CustomerId
 ```
 
-Next, the `AccessToken` type is redefined to be a generic container with a `data` field.
-The constructor is still private, but a public getter is added so clients can access the data field.
+次に、`AccessToken`型を、`data`フィールドを持つジェネリックコンテナとして再定義します。
+コンストラクターはまだプライベートですが、クライアントがデータフィールドにアクセスできるようにパブリックゲッターが追加されています。
 
 ```fsharp
 type AccessToken<'data> = private {data:'data} with 
-    // but do allow read access to the data
+    // データへの読み取りアクセスは許可する。
     member this.Data = this.data
 ```
 
-The authorization implementation is similar to the previous examples, except that this time the capability type and customer id are stored in the token.
+認可の実装は前の例と似ていますが、今回はケイパビリティの型と顧客IDがトークンに格納される点が異なります。
 
 ```fsharp
-// create an AccessToken that allows access to a particular customer
+// 特定の顧客へのアクセスを許可するアクセストークンを作成する。
 let getAccessCustomerToken id principal = 
     if customerIdBelongsToPrincipal id principal ||
         principal.IsInRole("CustomerAgent") 
@@ -159,7 +159,7 @@ let getAccessCustomerToken id principal =
     else
         None   
 
-// create an AccessToken that allows access to UpdatePassword 
+// パスワードの更新へのアクセスを許可するアクセストークンを作成する。
 let getUpdatePasswordToken id principal = 
     if customerIdBelongsToPrincipal id principal then
         Some {data=UpdatePassword id}
@@ -167,72 +167,72 @@ let getUpdatePasswordToken id principal =
         None
 ```
 
-## Using Access Tokens in the database
+## データベースでのアクセストークンの使用
 
-With these access token types in place the database functions can be rewritten to require a token of a particular type.
-The `customerId` is no longer needed as an explicit parameter, because it will be passed in as part of the access token's data.
+これらのアクセストークン型を設定すると、特定の型のトークンを要求するようにデータベース関数を書き直すことができます。
+`customerId`はアクセストークンのデータの一部として渡されるため、明示的なパラメーターとして必要なくなりました。
 
-Note also that both `getCustomer` and `updateCustomer` can use the same type of token (`AccessCustomer`), but `updatePassword` requires a different type (`UpdatePassword`).
+また、`getCustomer`と`updateCustomer`の両方が同じ型のトークン（`AccessCustomer`）を使用できますが、`updatePassword`には異なる型（`UpdatePassword`）が必要であることにも注意してください。
 
 ```fsharp
 let getCustomer (accessToken:AccessToken<AccessCustomer>) = 
-    // get customer id
+    // 顧客IDを取得する。
     let (AccessCustomer id) = accessToken.Data
 
-    // now get customer data using the id
+    // IDを使って顧客データを取得する。
     match db.TryGetValue id with
     | true, value -> Success value 
     | false, _ -> Failure (CustomerIdNotFound id)
 
 let updateCustomer (accessToken:AccessToken<AccessCustomer>) (data:CustomerData) = 
-    // get customer id
+    // 顧客IDを取得する。
     let (AccessCustomer id) = accessToken.Data
 
-    // update database
+    // データベースを更新する。
     db.[id] <- data
     Success ()
 
 let updatePassword (accessToken:AccessToken<UpdatePassword>) (password:Password) = 
-    Success ()   // dummy implementation
+    Success ()   // ダミー実装
 ```
 
-## Putting it all together
+## 全てをまとめる
 
-So now let's see all this in action.
+では、これらすべてが実際にどのように動作するかを見てみましょう。
 
-The steps to getting a customer are:
+顧客を取得する手順は次のとおりです。
 
-* Attempt to get the access token from the authorization service
-* If you have the access token, get the `getCustomer` capability from the database
-* Finally, if you have the capability, you can use it. 
+* 認可サービスからアクセストークンの取得を試みる。
+* アクセストークンがある場合は、データベースから`getCustomer`ケイパビリティを取得する。
+* 最後に、ケイパビリティがある場合は、それを使う。
 
-Note that, as always, the `getCustomer` capability does not take a customer id parameter. It was baked in when the capability was created.
+いつものように、`getCustomer`ケイパビリティは顧客IDパラメーターを受け取りません。ケイパビリティの作成時に組み込まれています。
 
 ```fsharp
-let principal =  // from context
-let customerId = // from context
+let principal =  // コンテキストから取得
+let customerId = // コンテキストから取得
 
-// attempt to get a capability
+// ケイパビリティの取得を試みる。
 let getCustomerCap = 
-    // attempt to get a token
+    // トークンの取得を試みる。
     let accessToken = AuthorizationService.getAccessCustomerToken customerId principal
     match accessToken with
-    // if token is present pass the token to CustomerDatabase.getCustomer, 
-    // and return a unit->CustomerData 
+    // トークンが存在する場合は、トークンをCustomerDatabase.getCustomerに渡し、
+    // unit->CustomerDataを返す。
     | Some token -> 
         Some (fun () -> CustomerDatabase.getCustomer token)
     | None -> None
 
-// use the capability, if available               
+// 使用可能な場合は、ケイパビリティを使う。               
 match getCustomerCap with
 | Some getCustomer -> getCustomer()
-| None -> Failure AuthorizationFailed // error
+| None -> Failure AuthorizationFailed // エラー
 ```
 
-Now what happens if we accidentally get the *wrong* type of access token? For example, let us try to access the `updatePassword` function with an `AccessCustomer` token.
+では、*間違った*型のアクセストークンを誤って取得した場合はどうなるでしょうか？たとえば、`AccessCustomer`トークンで`updatePassword`関数にアクセスしてみましょう。
 
 ```fsharp
-// attempt to get a capability
+// ケイパビリティの取得を試みる。
 let getUpdatePasswordCap = 
     let accessToken = AuthorizationService.getAccessCustomerToken customerId principal
     match accessToken with
@@ -245,145 +245,145 @@ match getUpdatePasswordCap with
     let password = Password "p@ssw0rd"
     updatePassword password 
 | None -> 
-    Failure AuthorizationFailed // error
+    Failure AuthorizationFailed // エラー
 ```
 
-This code will not even compile!  The line `CustomerDatabase.updatePassword token password` has an error.
+このコードはコンパイルさえされません！ `CustomerDatabase.updatePassword token password`の行にエラーがあります。
 
 ```text
-error FS0001: Type mismatch. Expecting a
+error FS0001: 型の不一致。
     AccessToken<Capabilities.UpdatePassword>    
-but given a
+が期待されていますが、
     AccessToken<Capabilities.AccessCustomer>    
-The type 'Capabilities.UpdatePassword' does not match the type 'Capabilities.AccessCustomer'
+が指定されました。型 'Capabilities.UpdatePassword' は型 'Capabilities.AccessCustomer' と一致しません。
 ```
 
-We have accidentally fetched the wrong kind of Access Token, but we have been stopped from accessing the wrong database method at *compile time*.
+誤った種類のアクセストークンを誤って取得しましたが、誤ったデータベースメソッドにアクセスすることが*コンパイル時*に阻止されました。
 
-Using types in this way is a nice solution to the problem of global access to a potentially dangerous capability.
+このように型を使うことは、潜在的に危険なケイパビリティへのグローバルアクセスという問題に対する優れた解決策です。
 
-## A complete example in F# ##
+## F#での完全な例
 
-In the last post, I showed a complete console application in F# that used capabilities to update a database.
+前の投稿では、ケイパビリティを使ってデータベースを更新するF#の完全なコンソールアプリケーションを示しました。
 
-Now let's update it to use access tokens as well. (The code is available as a [gist here](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample_withtypes-fsx)).
+今度は、アクセストークンも使うように更新してみましょう。（コードは[gist here](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample_withtypes-fsx)で入手できます）。
 
-Since this is an update of the example, I'll focus on just the changes.
+これは例の更新なので、変更点だけに焦点を当てます。
 
-### Defining the capabilities
+### ケイパビリティの定義
 
-The capabilities are as before except that we have defined the two new types (`AccessCustomer` and `UpdatePassword`) to be stored inside the access tokens.
+ケイパビリティは、アクセストークン内に格納される2つの新しい型（`AccessCustomer`と`UpdatePassword`）を定義したことを除いて、以前と同じです。
 
 ```fsharp
 module Capabilities = 
-    open Rop
-    open Domain
+    open Rop
+    open Domain
 
-    // each access token gets its own type
-    type AccessCustomer = AccessCustomer of CustomerId
-    type UpdatePassword = UpdatePassword of CustomerId
+    // 各アクセストークンは独自の型を取得します
+    type AccessCustomer = AccessCustomer of CustomerId
+    type UpdatePassword = UpdatePassword of CustomerId
 
-    // capabilities
-    type GetCustomerCap = unit -> SuccessFailure<CustomerData,FailureCase>
-    type UpdateCustomerCap = CustomerData -> SuccessFailure<unit,FailureCase>
-    type UpdatePasswordCap = Password -> SuccessFailure<unit,FailureCase>
+    // ケイパビリティ
+    type GetCustomerCap = unit -> SuccessFailure<CustomerData,FailureCase>
+    type UpdateCustomerCap = CustomerData -> SuccessFailure<unit,FailureCase>
+    type UpdatePasswordCap = Password -> SuccessFailure<unit,FailureCase>
 
-    type CapabilityProvider = {
-        /// given a customerId and IPrincipal, attempt to get the GetCustomer capability
-        getCustomer : CustomerId -> IPrincipal -> GetCustomerCap option
-        /// given a customerId and IPrincipal, attempt to get the UpdateCustomer capability
-        updateCustomer : CustomerId -> IPrincipal -> UpdateCustomerCap option
-        /// given a customerId and IPrincipal, attempt to get the UpdatePassword capability
-        updatePassword : CustomerId -> IPrincipal -> UpdatePasswordCap option 
-        }
+    type CapabilityProvider = {
+        /// customerIdとIPrincipalが与えられた場合、GetCustomerケイパビリティの取得を試みます
+        getCustomer : CustomerId -> IPrincipal -> GetCustomerCap option
+        /// customerIdとIPrincipalが与えられた場合、UpdateCustomerケイパビリティの取得を試みます
+        updateCustomer : CustomerId -> IPrincipal -> UpdateCustomerCap option
+        /// customerIdとIPrincipalが与えられた場合、UpdatePasswordケイパビリティの取得を試みます
+        updatePassword : CustomerId -> IPrincipal -> UpdatePasswordCap option 
+        }
 ```
 
-### Implementing authorization
+### 認可の実装
 
-The authorization implementation must be changed to return `AccessTokens` now.  The `onlyIfDuringBusinessHours` restriction applies to capabilities, not access tokens, so it is unchanged.
+認可の実装は、`AccessToken`を返すように変更する必要があります。 `onlyIfDuringBusinessHours`の制限はケイパビリティに適用され、アクセストークンには適用されないため、変更されていません。
 
 ```fsharp
-// the constructor is protected
+// コンストラクターは保護されている。
 type AccessToken<'data> = private {data:'data} with 
-    // but do allow read access to the data
-    member this.Data = this.data
+    // データへの読み取りアクセスは許可する。
+    member this.Data = this.data
 
 let onlyForSameId (id:CustomerId) (principal:IPrincipal) = 
-    if Authentication.customerIdOwnedByPrincipal id principal then
-        Some {data=AccessCustomer id}
-    else
-        None
+    if Authentication.customerIdOwnedByPrincipal id principal then
+        Some {data=AccessCustomer id}
+    else
+        None
 
-let onlyForAgents (id:CustomerId) (principal:IPrincipal)  = 
-    if principal.IsInRole(Authentication.customerAgentRole) then
-        Some {data=AccessCustomer id}
-    else
-        None
+let onlyForAgents (id:CustomerId) (principal:IPrincipal)  = 
+    if principal.IsInRole(Authentication.customerAgentRole) then
+        Some {data=AccessCustomer id}
+    else
+        None
 
 let onlyIfDuringBusinessHours (time:DateTime) f = 
-    if time.Hour >= 8 && time.Hour <= 17 then
-        Some f
-    else
-        None
+    if time.Hour >= 8 && time.Hour <= 17 then
+        Some f
+    else
+        None
 
-// constrain who can call a password update function
+// パスワード更新関数を呼び出すことができる人を制限する。
 let passwordUpdate (id:CustomerId) (principal:IPrincipal) = 
-    if Authentication.customerIdOwnedByPrincipal id principal then
-        Some {data=UpdatePassword id}
-    else
-        None
+    if Authentication.customerIdOwnedByPrincipal id principal then
+        Some {data=UpdatePassword id}
+    else
+        None
 ```
 
-### Implementing the database 
+### データベースの実装
 
-Compared with the example from the previous post, the database functions have the `CustomerId` parameter replaced with an `AccessToken` instead.
+前の投稿の例と比較して、データベース関数では`CustomerId`パラメーターが`AccessToken`に置き換えられています。
 
-Here's what the database implementation looked like *before* using access tokens:
+アクセストークンを使う*前*のデータベース実装は次のとおりです。
 
 ```fsharp
 let getCustomer id = 
-    // code
+    // コード
 
 let updateCustomer id data = 
-    // code
+    // コード
 
 let updatePassword (id:CustomerId,password:Password) = 
-    // code
+    // コード
 ```
 
-And here's what the code looks like *after* using access tokens:
+アクセストークンを使った*後*のコードは次のとおりです。
 
 ```fsharp
 let getCustomer (accessToken:AccessToken<AccessCustomer>) = 
-    // get customer id
-    let (AccessCustomer id) = accessToken.Data
+    // 顧客IDを取得する。
+    let (AccessCustomer id) = accessToken.Data
 
-    // now get customer data using the id
-    // as before
+    // IDを使って顧客データを取得する。
+    // 前と同様
 
 let updateCustomer (accessToken:AccessToken<AccessCustomer>) (data:CustomerData) = 
-    // get customer id
-    let (AccessCustomer id) = accessToken.Data
+    // 顧客IDを取得する。
+    let (AccessCustomer id) = accessToken.Data
 
-    // update database
-    // as before
+    // データベースを更新する。
+    // 前と同様
 
 let updatePassword (accessToken:AccessToken<UpdatePassword>) (password:Password) = 
-    // as before
+    // 前と同様
 ```
 
-### Implementing the business services and user interface
+### ビジネスサービスとユーザーインターフェースの実装
 
-The code relating to the business services and UI is completely unchanged. 
+ビジネスサービスとUIに関連するコードは完全に変更されていません。
 
-Because these functions have been passed capabilities only, they are decoupled from both the lower levels and higher levels of the application,
-so any change in the authorization logic has no effect on these layers.
+これらの関数にはケイパビリティのみが渡されているため、アプリケーションの下位レベルと上位レベルの両方から分離されているため、
+認可ロジックの変更はこれらのレイヤーに影響を与えません。
 
-### Implementing the top-level module
+### トップレベルモジュールの実装
 
-The major change in the top-level module is how the capabilities are fetched.  We now have an additional step of getting the access token first.
+トップレベルモジュールでの主な変更点は、ケイパビリティの取得方法です。今回は、最初にアクセストークンを取得するという追加の手順があります。
 
-Here's what the code looked like *before* using access tokens:
+アクセストークンを使う*前*のコードは次のとおりです。
 
 ```fsharp
 let getCustomerOnlyForSameId id principal  = 
@@ -395,7 +395,7 @@ let getCustomerOnlyForAgentsInBusinessHours id principal =
     cap1 |> restrict restriction 
 ```
 
-And here's what the code looks like *after* using access tokens:
+アクセストークンを使った*後*のコードは次のとおりです。
 
 ```fsharp
 let getCustomerOnlyForSameId id principal  = 
@@ -406,80 +406,80 @@ let getCustomerOnlyForAgentsInBusinessHours id principal =
     let accessToken = Authorization.onlyForAgents id principal
     let cap1 = accessToken |> tokenToCap CustomerDatabase.getCustomer 
     let restriction f = onlyIfDuringBusinessHours (DateTime.Now) f
-    cap1 |> restrict restriction 
+    cap1 |> restrict restriction
 ```
 
-The `tokenToCap` function is a little utility that applies the (optional) token to a given function as the first parameter. The output is an (equally optional) capability.
+`tokenToCap`関数は、指定された関数の最初のパラメーターとして（オプションの）トークンを適用する小さなユーティリティです。出力は（同様にオプションの）ケイパビリティです。
 
 ```fsharp
 let tokenToCap f token =
-    token 
-    |> Option.map (fun token -> 
-        fun () -> f token)
+    token 
+    |> Option.map (fun token -> 
+        fun () -> f token)
 ```
 
-And that's it for the changes needed to support access tokens. 
-You can see all the code for this example [here](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample_withtypes-fsx).
+これで、アクセストークンをサポートするために必要な変更は完了です。
+この例のすべてのコードは[こちら]([invalid URL removed]。
 
-## Summary of Part 3
+## パート3のまとめ
 
-In this post, we used types to represent access tokens, as follows:
+この投稿では、次のように、型を使ってアクセストークンを表しました。
 
-* The `AccessToken` type is the equivalent of a signed ticket in a distributed authorization system. It has a private constructor and can only be created by the Authorization Service (ignoring reflection, of course!).
-* A specific type of `AccessToken` is needed to access a specific operation, which ensures that we can't accidentally do unauthorized activities.
-* Each specific type of `AccessToken` can store custom data collected at authorization time, such as a `CustomerId`.
-* Global functions, such as the database, are modified so that they cannot be accessed without an access token. This means that they can safely be made public.
+* `AccessToken`型は、分散認可システムにおける署名付きチケットに相当します。プライベートコンストラクターを持ち、認可サービスによってのみ作成できます（もちろん、リフレクションは無視します！）。
+* 特定の操作にアクセスするには、特定の型の`AccessToken`が必要になります。これにより、誤って不正なアクティビティを実行することがなくなります。
+* 特定の型の`AccessToken`ごとに、`CustomerId`などの認可時に収集されたカスタムデータを格納できます。
+* データベースなどのグローバル関数は、アクセストークンなしではアクセスできないように変更されます。これは、それらを安全にパブリックにすることができることを意味します。
 
-**Question: Why not also store the caller in the access token, so that no other client can use it?**
+**質問：他のクライアントが使用できないように、アクセストークンに呼び出し元も保存しないのはなぜですか？**
 
-This is not needed because of the authority-based approach we're using.
-As discussed in the [first post](../posts/capability-based-security.md#authority), once a client has a capability,
-they can pass it around to other people to use, so there is no point limiting it to a specific caller.  
+権限ベースのアプローチを使用しているため、必要ありません。
+[最初の投稿](../posts/capability-based-security.md#authority)で説明したように、クライアントがケイパビリティを取得すると、
+他のユーザーが使用できるようにそれを渡すことができるため、特定の呼び出し元に制限しても意味がありません。
 
-**Question: The authorization module needs to know about the capability and access token types now. Isn't that adding extra coupling?**
+**質問：認可モジュールは、ケイパビリティとアクセストークンの型を認識する必要があります。それは余分な結合を追加していませんか？**
 
-If the authorization service is going to do its job, it has to know *something* about what capabilities are available, so there is always some coupling, whether it
-is implicit ("resources" and "actions" in XACML) or explicit via types, as in this model. 
+認可サービスがその役割を果たす場合、使用可能なケイパビリティについて*何か*を知る必要があるため、
+このモデルのように、暗黙的（XACMLの「リソース」と「アクション」）であるか、型を介して明示的であるかにかかわらず、常に何らかの結合があります。
 
-So yes, the authorization service and database service both have a dependency on the set of capabilities, but they are not coupled to each other directly.
+そのため、認可サービスとデータベースサービスの両方がケイパビリティのセットに依存していますが、互いに直接結合されていません。
 
-**Question: How do you use this model in a distributed system?**
+**質問：分散システムでこのモデルをどのように使用しますか？**
 
-This model is really only designed to be used in a single codebase, so that type checking can occur.
+このモデルは、実際には、型チェックを実行できるように、単一のコードベースで使用するためだけに設計されています。
 
-You could probably hack it so that types are turned into tickets at the boundary, and conversely, but I haven't looked at that at all.
+おそらく、型が境界でチケットに変換され、逆に変換されるようにハックすることはできますが、私はそれをまったく見ていません。
 
-**Question: Where can I read more on using types as access tokens?**
+**質問：型をアクセストークンとして使用する方法の詳細については、どこで読むことができますか？**
 
-This type-oriented version of an access token is my own design, although I very much doubt that I'm the first person to think of using types this way.
-There are some related things for Haskell [(example)](http://hackage.haskell.org/package/Capabilities) but I don't know of any directly
-analogous work that's accessible to mainstream developers.
+この型指向のアクセストークンは私自身の設計ですが、私がこの方法で型を使用することを考えた最初の人ではないことは間違いありません。
+Haskellの関連するもの（[例](https://hackage.haskell.org/package/Capabilities)）がいくつかありますが、
+主流の開発者がアクセスできる直接類似した作業は知りません。
 
-**I've got more questions...**
+**さらに質問があります...**
 
-Some additional questions are answered at the end of [part 1](../posts/capability-based-security.md#summary) and [part 2](../posts/capability-based-security-2.md#summary), so read those answers first.
-Otherwise please add your question in the comments below, and I'll try to address it.
+[パート1](../posts/capability-based-security.md#summary)と[パート2](../posts/capability-based-security-2.md#summary)の最後で、いくつかの追加の質問に回答しているので、最初にそれらの回答を読んでください。
+それ以外の場合は、以下のコメントに質問を追加してください。対応させていただきます。
 
-## Conclusion
+## まとめ
 
-Thanks for making it all the way to the end!
+最後までお読みいただきありがとうございました！
 
-As I said at the beginning, the goal is not to create an absolutely safe system, but instead encourage you to think about and integrate authorization constraints
-into the design of your system from the beginning, rather than treating it as an afterthought. 
+冒頭で述べたように、目標は完全に安全なシステムを作成することではありません。
+認可を後から考えるのではなく、システムの設計に最初から認可の制約を組み込むことを促すことです。
 
-What's more, the point of doing this extra work is not just to improve *security*,
-but also to *improve the general design* of your code. If you follow the principle of least authority, you get modularity, decoupling, explicit dependencies, etc., for free!
+さらに、この追加作業を行う目的は、*セキュリティ*を向上させることだけでなく、*コードの一般的な設計*を向上させることでもあります。
+最小権限の原則に従うと、モジュール性、分離、明示的な依存関係などが無料で得られます。
 
-In my opinion, a capability-based system works very well for this:
+私の意見では、ケイパビリティベースのシステムはこれに非常に適しています。
 
-* Functions map well to capabilities, and the need to pass capabilities around fits in very well with standard functional programming patterns.
-* Once created, capabilities hide all the ugliness of authorization from the client,
-and so the model succeeds in "making security user-friendly by making the security invisible".
-* Finally, with the addition of type-checked access tokens, we can have high confidence that no part of our code can access global functions to do unauthorized operations.
+* 関数はケイパビリティによく対応しており、ケイパビリティを渡す必要があることは、標準的な関数型プログラミングパターンに非常によく適合します。
+* 作成されると、ケイパビリティはクライアントから認可のすべての醜さを隠し、
+そのため、モデルは「セキュリティを目に見えないようにすることでセキュリティをユーザーフレンドリーにする」ことに成功しています。
+* 最後に、型チェックされたアクセストークンを追加することで、コードのどの部分も、不正な操作を実行するためにグローバル関数にアクセスできないという高い確信を持つことができます。
 
 
 
-I hope you found this series useful, and might inspire you to investigate some of these ideas more fully.
+このシリーズがお役に立てば幸いです。これらのアイデアのいくつかをより完全に調査するきっかけになれば幸いです。
 
-*NOTE: All the code for this post is available as a [gist here](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_typeexample-fsx)
-and [here](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample_withtypes-fsx).*
+*注：この記事のすべてのコードは、[こちらのgist](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_typeexample-fsx)
+および[こちら](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample_withtypes-fsx)から入手できます。*
