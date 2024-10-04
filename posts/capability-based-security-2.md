@@ -1,43 +1,43 @@
 ---
 layout: post
-title: "Constraining capabilities based on identity and role"
-description: "A functional approach to authorization, part 2"
-seriesId: "A functional approach to authorization"
+title: "アイデンティティとロールに基づいてケイパビリティを制限する"
+description: "認可のための関数型アプローチ パート2"
+seriesId: "認可のための関数型アプローチ"
 seriesOrder: 2
 categories: []
 image: "/assets/img/auth_3.png"
 ---
 
-*UPDATE: [Slides and video from my talk on this topic](http://fsharpforfunandprofit.com/cap/)*
+*更新：[このトピックに関する講演のスライドとビデオ](https://fsharpforfunandprofit.com/cap/)*
 
-In the [previous post](../posts/capability-based-security.md), we started looking at "capabilities" as the basis for ensuring that code could not do any more than it was supposed to do.
-And I demonstrated this with a simple application that changed a configuration flag.
+[前の投稿](../posts/capability-based-security.md)では、コードが想定以上のことをしないようにするための基礎として、「ケイパビリティ」について検討し始めました。
+そして、設定フラグを変更する単純なアプリケーションでこれをデモンストレーションしました。
 
-In this post, we'll look at how to constrain capabilities based on the current user's identity and role.
+この投稿では、現在のユーザーのアイデンティティとロールに基づいてケイパビリティを制限する方法を見ていきます。
 
-So let's switch from the configuration example to a typical situation where stricter authorization is required.  
- 
-## Database capabilities example 
+設定の例から、より厳密な認可が必要となる典型的な状況に切り替えましょう。
 
-Consider a website and call-centre with a backing database. We have the following security rules:
+## データベースケイパビリティの例
 
-* A customer can only view or update their own record in the database (via the website)
-* A call-centre operator can view or update any record in the database
+バックエンドデータベースを持つWebサイトとコールセンターを考えてみましょう。次のセキュリティルールがあります。
 
-This means that at some point, we'll have to do some authorization based on the identity and role of the user. (We'll assume that the user has been authenticated successfully).
+* 顧客はデータベース内の自分のレコードのみを表示または更新できます（Webサイト経由）。
+* コールセンターのオペレーターはデータベース内のすべてのレコードを表示または更新できます。
 
-The tendency in many web frameworks is to put the authorization in the UI layer, often [in the controller](https://msdn.microsoft.com/en-us/library/system.web.mvc.authorizeattribute.aspx).
-My concern about this approach is that once you are "inside" (past the gateway), any part of the app has full authority to access the database,
-and it is all to easy for code to do the wrong thing by mistake, resulting in a security breach.  
+これは、ある時点で、ユーザーのアイデンティティとロールに基づいて認可を行う必要があることを意味します。（ユーザーが正常に認証されていることを前提とします）。
 
-Not only that, but because the authority is everywhere ("ambient"), it is hard to review the code for potential security issues.
+多くのWebフレームワークでは、UIレイヤー、多くの場合[コントローラー](https://msdn.microsoft.com/en-us/library/system.web.mvc.authorizeattribute.aspx)に認可を配置する傾向があります。
+このアプローチに関する懸念点は、「内部」（ゲートウェイを通過した後）に入ると、アプリのどの部分もデータベースにアクセスする完全な権限を持っていることです。
+うっかりしてコードが間違ったことを行い、セキュリティ侵害が発生するという事故が起こりやすくなります。
 
-To avoid these issues, let's instead put the access logic as "low" as possible, in the database access layer in this case.
+それだけでなく、権限がどこにでもある（「アンビエント」）ため、潜在的なセキュリティ問題についてコードをレビューすることが困難です。
 
-We'll start with an obvious approach. We'll add the identity and role to each database call and then do authorization there.
+これらの問題を回避するために、代わりに、この場合はデータベースアクセスレイヤーで、アクセスロジックをできるだけ「低い」場所に配置しましょう。
 
-The following method assumes that there is a `CustomerIdBelongsToPrincipal` function that checks whether the customer id being accessed is owned by the principal requesting access.
-Then, if the `customerId` does belong to the principal, or the principal has the role of "CustomerAgent", the access is granted.
+明白なアプローチから始めます。各データベース呼び出しにアイデンティティとロールを追加し、そこで認可を行います。
+
+次のメソッドは、アクセスされている顧客IDがアクセスを要求しているプリンシパルによって所有されているかどうかを確認する`CustomerIdBelongsToPrincipal`関数があることを前提としています。
+そして、`customerId`がプリンシパルに属している場合、またはプリンシパルが「CustomerAgent」のロールを持っている場合、アクセスが許可されます。
 
 ```csharp
 public class CustomerDatabase
@@ -47,119 +47,119 @@ public class CustomerDatabase
         if ( CustomerIdBelongsToPrincipal(id, principal) || 
              principal.IsInRole("CustomerAgent") )
         {
-            // get customer data
+            // 顧客データを取得する
         }
         else
         {
-            // throw authorization exception
+            // 認可例外をスローする
         }
     }
 }
 ```
 
-*Note that I have deliberately added the `IPrincipal` to the method signature -- we are not allowing any "magic" where the principal is fetched from a global context.
-As with the use of any global, having implicit access hides the dependencies and makes it hard to test in isolation.*
+*意図的にメソッドシグネチャに`IPrincipal`を追加したことに注意してください。プリンシパルがグローバルコンテキストからフェッチされる「マジック」は許可していません。
+グローバル変数の使用と同様に、暗黙的なアクセスがあると依存関係が隠され、分離してテストすることが難しくなります。*
 
-Here's the F# equivalent, using a [Success/Failure return value](http://fsharpforfunandprofit.com/rop/) rather than throwing exceptions:
+例外をスローするのではなく、[成功/失敗の戻り値](https://fsharpforfunandprofit.com/rop/)を使用する、F#の同等のコードを次に示します。
 
 ```fsharp
 let getCustomer id principal = 
     if customerIdBelongsToPrincipal id principal ||
        principal.IsInRole("CustomerAgent") 
     then
-        // get customer data
+        // 顧客データを取得する
         Success "CustomerData"
     else
         Failure AuthorizationFailed
 ```
 
-This "inline" authorization approach is all too common, but unfortunately it has many problems.
+この「インライン」認可アプローチは非常に一般的ですが、残念ながら多くの問題があります。
 
-* It mixes up security concerns with the database logic. If the authorization logic gets more complicated, the code will also get more complicated.
-* It throws an exception (C#) or returns an error (F#) if the authorization fails.  It would be nice if we could tell *in advance* if we had the authorization rather than waiting until the last minute.
+* セキュリティの関心事とデータベースロジックが混在しています。認可ロジックが複雑になると、コードも複雑になります。
+* 認可が失敗した場合、例外をスローします（C#）またはエラーを返します（F#）。最後の瞬間まで待つのではなく、事前に認可があるかどうかがわかればよいでしょう。
 
-Let's compare this with a capability-based approach. Instead of directly getting a customer, we first obtain the *capability* of doing it.
+これをケイパビリティベースのアプローチと比較してみましょう。顧客を直接取得する代わりに、まず顧客を取得する*ケイパビリティ*を取得します。
 
 ```csharp
 class CustomerDatabase
 {
-    // "real" code is hidden from public view
+    // 「実際の」コードはパブリックビューから隠されています
     private CustomerData GetCustomer(CustomerId id)
     {  
-        // get customer data
+        // 顧客データを取得する
     }
 
-    // Get the capability to call GetCustomer
+    // GetCustomerを呼び出すケイパビリティを取得する
     public Func<CustomerId,CustomerData> GetCustomerCapability(CustomerId id, IPrincipal principal)
     {  
         if ( CustomerIdBelongsToPrincipal(id, principal) || 
              principal.IsInRole("CustomerAgent") )
         {
-            // return the capability (the real method)
+            // ケイパビリティ（実際のメソッド）を返す
             return GetCustomer;
         }
         else
         {
-            // throw authorization exception
+            // 認可例外をスローする
         }
     }
 }
 ```
 
-As you can see, if the authorization succeeds, a reference to the `GetCustomer` method is returned to the caller.
+ご覧のとおり、認可が成功すると、`GetCustomer`メソッドへの参照が呼び出し元に返されます。
 
-It might not be obvious, but the code above has a rather large security hole. I can request the capability for a particular customer id, but I get back a function that can called for *any*
-customer id! That's not very safe, is it?
+明らかではないかもしれませんが、上記のコードにはかなり大きなセキュリティホールがあります。特定の顧客IDのケイパビリティを要求できますが、*任意の*顧客IDに対して呼び出すことができる関数が返されます！
+これはあまり安全ではありませんね？
 
-What we need to is "bake in" the customer id to the capability, so that it can't be misused.  The return value will now be a `Func<CustomerData>`, with the customer id not available
-to be passed in any more.
+必要なのは、顧客IDをケイパビリティに「組み込む」ことで、悪用されないようにすることです。戻り値は`Func<CustomerData>`になり、
+顧客IDはもはや引数として渡されなくなります。
 
 ```csharp
 class CustomerDatabase
 {
-    // "real" code is hidden from public view
+    // 「実際の」コードはパブリックビューから隠されています
     private CustomerData GetCustomer(CustomerId id)
     {  
-        // get customer data
+        // 顧客データを取得する
     }
 
-    // Get the capability to call GetCustomer
+    // GetCustomerを呼び出すケイパビリティを取得する
     public Func<CustomerData> GetCustomerCapability(CustomerId id, IPrincipal principal)
     {  
         if ( CustomerIdBelongsToPrincipal(id, principal) || 
              principal.IsInRole("CustomerAgent") )
         {
-            // return the capability (the real method)
+            // ケイパビリティ（実際のメソッド）を返す
             return ( () => GetCustomer(id) );
         }
         else
         {
-            // throw authorization exception
+            // 認可例外をスローする
         }
     }
 }
 ```
 
-With this separation of concerns in place, we can now handle failure nicely, by returning an *optional* value which is present if we get the capability, or absent if not.  That is,
-we know whether we have the capability *at the time of trying to obtain it*, not later on when we try to use it.
+関心事をこのように分離することで、ケイパビリティを取得できれば存在し、そうでなければ存在しない*オプション*値を返すことで、エラーをうまく処理できるようになりました。つまり、
+ケイパビリティの有無は、後で使おうとしたときではなく、*取得しようとしたとき*にわかります。
 
 ```csharp
 class CustomerDatabase
 {
-    // "real" code is hidden from public view
-    // and doesn't need any checking of identity or role
+    // 「実際の」コードはパブリックビューから隠されており、
+    // アイデンティティやロールのチェックは必要ありません
     private CustomerData GetCustomer(CustomerId id)
     {  
-        // get customer data
+        // 顧客データを取得する
     }
 
-    // Get the capability to call GetCustomer. If not allowed, return None.
+    // GetCustomerを呼び出すケイパビリティを取得します。許可されていない場合は、Noneを返します。
     public Option<Func<CustomerData>> GetCustomerCapability(CustomerId id, IPrincipal principal)
     {
         if (CustomerIdBelongsToPrincipal(id, principal) ||
              principal.IsInRole("CustomerAgent"))
         {
-            // return the capability (the real method)
+            // ケイパビリティ（実際のメソッド）を返す
             return Option<Func<CustomerData>>.Some( () => GetCustomer(id) );
         }
         else
@@ -170,36 +170,36 @@ class CustomerDatabase
 }
 ```
 
-This assumes that we're using some sort of `Option` type in C# rather than just returning null!
+これは、C#でnullを返すのではなく、何らかの`Option`型を使用していることを前提としています！
 
-Finally, we can put the authorization logic into its own class (say `CustomerDatabaseCapabilityProvider`), to keep the authorization concerns separate from the `CustomerDatabase`. 
+最後に、認可ロジックを独自のクラス（たとえば`CustomerDatabaseCapabilityProvider`）に配置して、認可の関心事を`CustomerDatabase`から分離します。
 
-We'll have to find some way of keeping the "real" database functions private to all other callers though.
-For now, I'll just assume the database code is in a different assembly, and mark the code `internal`.
+ただし、「実際の」データベース関数を他のすべての呼び出し元に対してプライベートに保つ方法を見つける必要があります。
+とりあえず、データベースコードが別のアセンブリにあると仮定し、コードを`internal`とマークします。
 
 ```csharp
-// not accessible to the business layer
+// ビジネスレイヤーからアクセスできない
 internal class CustomerDatabase
 {
-    // "real" code is hidden from public view
+    // 「実際の」コードはパブリックビューから隠されています
     private CustomerData GetCustomer(CustomerId id)
     {  
-        // get customer data
+        // 顧客データを取得する
     }
 }
 
-// accessible to the business layer
+// ビジネスレイヤーからアクセスできる
 public class CustomerDatabaseCapabilityProvider
 {
     CustomerDatabase _customerDatabase;
     
-    // Get the capability to call GetCustomer
+    // GetCustomerを呼び出すケイパビリティを取得する
     public Option<Func<CustomerData>> GetCustomerCapability(CustomerId id, IPrincipal principal)
     {
         if (CustomerIdBelongsToPrincipal(id, principal) ||
              principal.IsInRole("CustomerAgent"))
         {
-            // return the capability (the real method)
+            // ケイパビリティ（実際のメソッド）を返す
             return Option<Func<CustomerData>>.Some( () => _customerDatabase.GetCustomer(id) );
         }
         else
@@ -210,18 +210,18 @@ public class CustomerDatabaseCapabilityProvider
 }
 ```
 
-And here's the F# version of the same code:
+F\#バージョンと同じコードを次に示します。
 
 ```fsharp
-/// not accessible to the business layer
+/// ビジネスレイヤーからアクセスできない
 module internal CustomerDatabase = 
     let getCustomer (id:CustomerId) :CustomerData = 
-        // get customer data
+        // 顧客データを取得する
 
-/// accessible to the business layer        
+/// ビジネスレイヤーからアクセスできる        
 module CustomerDatabaseCapabilityProvider =         
  
-    // Get the capability to call getCustomer
+    // getCustomerを呼び出すケイパビリティを取得する
     let getCustomerCapability (id:CustomerId) (principal:IPrincipal) = 
         let principalId = GetIdForPrincipal(principal)
         if (principalId = id) || principal.IsInRole("CustomerAgent") then
@@ -230,38 +230,38 @@ module CustomerDatabaseCapabilityProvider =
             None
 ```
 
-Here's a diagram that represents this design:
+この設計を表す図を次に示します。
 
-![Example 2](../assets/img/auth_2.png)
+![例2](../assets/img/auth_2.png)
 
-**Problems with this model**
+**このモデルの問題点**
 
-In this model, the caller is isolated from the `CustomerDatabase`, and the `CustomerDatabaseCapabilityProvider` acts as a proxy between them.
+このモデルでは、呼び出し元は`CustomerDatabase`から分離され、`CustomerDatabaseCapabilityProvider`は呼び出し元と`CustomerDatabase`の間のプロキシとして機能します。
 
-Which means, as currently designed, for every function available in `CustomerDatabase` there must be a parallel function available in `CustomerDatabaseCapabilityProvider` as well.
-We can see that this approach will not scale well.
+つまり、現在の設計では、`CustomerDatabase`で使用可能なすべての関数に対して、`CustomerDatabaseCapabilityProvider`でも並列関数が使用可能でなければなりません。
+このアプローチはうまくスケールしないことがわかります。
 
-It would be nice if we had a way to generally get capabilities for a *whole set* of database functions rather than one at a time. Let's see if we can do that!
+一度に1つずつではなく、*関数全体*のケイパビリティを一般的に取得する方法があればいいのですが。それができるかどうか見てみましょう！
 
-## Restricting and transforming capabilities
+## ケイパビリティの制限と変換
 
-The `getCustomer` function in `CustomerDatabase` can be thought of as a capability with no restrictions, while the `getCustomerCapability`
-returns a capability restricted by identity and role.
+`CustomerDatabase`の`getCustomer`関数は制限のないケイパビリティと考えることができますが、
+`getCustomerCapability`はアイデンティティとロールによって制限されたケイパビリティを返します。
 
-But note that the two function signatures are similar (`CustomerId -> CustomerData` vs `unit -> CustomerData`), and so they are almost interchangeable from the callers point of view.
-In a sense, then, the second capability is a transformed version of the first, with additional restrictions.
+ただし、2つの関数シグネチャは似ており（`CustomerId -> CustomerData`と`unit -> CustomerData`）、呼び出し元の観点からはほとんど交換可能です。
+ある意味では、2番目のケイパビリティは、追加の制限が加えられた、最初のケイパビリティの変換バージョンです。
 
-Transforming functions to new functions! This is something we can easily do.
+関数を新しい関数に変換する！これは簡単にできます。
 
-So, let's write a transformer that, given *any* function of type `CustomerId -> 'a`, we return a function with the customer id baked in (`unit -> 'a`),
-but only if the authorization requirements are met.
+それでは、`CustomerId -> 'a`型の*任意の*関数が与えられた場合に、顧客IDが組み込まれた関数（`unit -> 'a`）を返すトランスフォーマーを作成しましょう。
+ただし、認可要件が満たされている場合に限ります。
 
 ```fsharp
 module CustomerCapabilityFilter =         
  
-    // Get the capability to use any function that has a CustomerId parameter
-    // but only if the caller has the same customer id or is a member of the 
-    // CustomerAgent role.
+    // CustomerIdパラメーターを持つ任意の関数を使用するケイパビリティを取得する
+    // ただし、呼び出し元が同じ顧客IDを持っているか、
+    // CustomerAgentロールのメンバーである場合に限る。
     let onlyForSameIdOrAgents (id:CustomerId) (principal:IPrincipal) (f:CustomerId -> 'a) = 
         let principalId = GetIdForPrincipal(principal)
         if (principalId = id) || principal.IsInRole("CustomerAgent") then
@@ -270,28 +270,28 @@ module CustomerCapabilityFilter =
             None
 ```
 
-The type signature for the `onlyForSameIdOrAgents` function is `(CustomerId -> 'a) -> (unit -> 'a) option`. It accepts any `CustomerId` based function
-and returns, maybe, the same function *with the customer id already applied* if the authorization succeeds.  If the authorization does not succeed, `None` is returned instead.
+`onlyForSameIdOrAgents`関数の型シグネチャは `(CustomerId -> 'a) -> (unit -> 'a) option` です。`CustomerId`ベースの関数をすべて受け入れます
+認可が成功した場合は、*顧客IDがすでに適用されている*同じ関数を返します。認可が成功しなかった場合は、代わりに`None`が返されます。
 
-You can see that this function will work generically with *any* function that has a `CustomerId` as the first parameter. That could be "get", "update", "delete", etc.
+この関数は、最初のパラメーターとして`CustomerId`を持つ*任意の*関数で一般的に機能することがわかります。それは「取得」、「更新」、「削除」などです。
 
-So for example, given:
+たとえば、次のように指定します。
 
 ```fsharp
 module internal CustomerDatabase = 
     let getCustomer (id:CustomerId) = 
-        // get customer data 
+        // 顧客データを取得する 
     let updateCustomer (id:CustomerId) (data:CustomerData) = 
-        // update customer data 
+        // 顧客データを更新する 
 ```
 
-We can create restricted versions now, for example at the top level bootstrapper or controller:
+たとえば、トップレベルのブートストラッパーまたはコントローラーで、制限付きバージョンを作成できるようになりました。
 
 ```fsharp
-let principal = // from context
-let id = // from context
+let principal = // コンテキストから
+let id = // コンテキストから
 
-// attempt to get the capabilities
+// ケイパビリティの取得を試みる
 let getCustomerOnlyForSameIdOrAgents = 
     onlyForSameIdOrAgents id principal CustomerDatabase.getCustomer
 
@@ -299,8 +299,8 @@ let updateCustomerOnlyForSameIdOrAgents =
     onlyForSameIdOrAgents id principal CustomerDatabase.updateCustomer
 ```
     
-The types of `getCustomerOnlyForSameIdOrAgents` and `updateCustomerOnlyForSameIdOrAgents` are similar to the original functions in the database module,
-but with `CustomerId` replaced with `unit`:
+`getCustomerOnlyForSameIdOrAgents`と`updateCustomerOnlyForSameIdOrAgents`の型は、データベースモジュールの元の関数に似ていますが、
+`CustomerId`が`unit`に置き換えられています。
 
 ```text
 val getCustomerOnlyForSameIdOrAgents : 
@@ -309,27 +309,27 @@ val updateCustomerOnlyForSameIdOrAgents :
       (unit -> CustomerData -> unit) option 
 ```
 
-*The `updateCustomerOnlyForSameIdOrAgents` has a extra `CustomerData` parameter, so the extra unit where the `CustomerId` used to be is a bit ugly.
-If this is too annoying, you could easily create other versions of the function which handle this more elegantly. I'll leave that as an exercise for the reader!*
+*`updateCustomerOnlyForSameIdOrAgents`には追加の`CustomerData`パラメーターがあるため、`CustomerId`があった場所に追加のユニットがあるのは少し醜いです。
+これが面倒な場合は、これをよりエレガントに処理する関数の他のバージョンを簡単に作成できます。それは読者の演習として残しておきます！*
 
-So now we have an option value that might or might not contain the capability we wanted. If it does, we can create a child component and pass in the capability.
-If it does not, we can return some sort of error, or hide a element from a view, depending on the type of application.
+これで、目的のケイパビリティが含まれている場合と含まれていない場合があるオプション値ができました。含まれている場合は、子コンポーネントを作成し、ケイパビリティを渡すことができます。
+含まれていない場合は、アプリケーションの種類に応じて、何らかのエラーを返すか、ビューから要素を非表示にすることができます。
 
 ```fsharp
 match getCustomerOnlyForSameIdOrAgents with
-| Some cap -> // create child component and pass in the capability
-| None ->     // return error saying that you don't have the capability to get the data
+| Some cap -> // 子コンポーネントを作成し、ケイパビリティを渡す
+| None ->     // データを取得するケイパビリティがないことを示すエラーを返す
 ```
 
-Here's a diagram that represents this design:
+この設計を表す図を次に示します。
 
-![Example 3](../assets/img/auth_3.png)
+![例3](../assets/img/auth_3.png)
 
-## More transforms on capabilities
+### ケーパビリティに対する追加の変換
 
-Because capabilities are functions, we can easily create new capabilities by chaining or combining transformations.
+ケイパビリティは関数であるため、変換を連結または組み合わせることで、簡単に新しいケイパビリティを作成できます。
 
-For example, we could create a separate filter function for each business rule, like this:
+たとえば、次のように、ビジネスルールごとに個別のフィルター関数を作成できます。
 
 ```fsharp
 module CustomerCapabilityFilter =         
@@ -347,26 +347,26 @@ module CustomerCapabilityFilter =
             None
 ```
 
-For the first business rule, `onlyForSameId`, we return a capability with the customer id baked in, as before.
+最初のビジネスルールである`onlyForSameId`については、前と同じように、顧客IDが組み込まれたケイパビリティを返します。
 
-The second business rule, `onlyForAgents`, doesn't mention customer ids anywhere, so why do we restrict the function parameter to `CustomerId -> 'a`?
-The reason is that it enforces that this rule *only* applies to customer centric capabilities, not ones relating to products or payments, say.
+2番目のビジネスルールである`onlyForAgents`は、顧客IDについてはどこにも言及していません。では、なぜ関数パラメーターを`CustomerId -> 'a`に制限するのでしょうか？
+その理由は、このルールが、製品や支払いなどに関連するケイパビリティではなく、顧客中心のケイパビリティに*のみ*適用されるようにするためです。
 
-But now, to make the output of this filter compatible with the first rule (`unit -> 'a`), we need to pass in a customer id and partially apply it too.
-It's a bit of a hack but it will do for now.
+しかし、このフィルターの出力を最初のルール（`unit -> 'a`）と互換性を持たせるには、顧客IDを渡して、部分的に適用する必要があります。
+少しハックですが、今のところはこれで大丈夫です。
 
-We can also write a generic combinator that returns the first valid capability from a list.
+リストから最初の有効なケイパビリティを返す汎用コンビネーターを作成することもできます。
 
 ```fsharp
-// given a list of capability options, 
-// return the first good one, if any
+// ケーパビリティオプションのリストが与えられた場合、 
+// 最初の適切なものを返す（存在する場合）
 let first capabilityList = 
     capabilityList |> List.tryPick id
 ```
 
-It's a trivial implementation really -- this is the kind of helper function that is just to help the code be a little more self-documenting.
+実装は本当に些細なものです。これは、コードの自己文書化を少しだけ支援するためのヘルパー関数のようなものです。
 
-With this in place, we can apply the rules separately, take the two filters and combine them into one.
+これを導入することで、ルールを個別に適用し、2つのフィルターを取得して1つに組み合わせることができます。
 
 ```fsharp
 let getCustomerOnlyForSameIdOrAgents = 
@@ -377,7 +377,7 @@ let getCustomerOnlyForSameIdOrAgents =
 // val getCustomerOnlyForSameIdOrAgents : (CustomerId -> CustomerData) option
 ```
 
-Or let's say we have some sort of restriction; the operation can only be performed during business hours, say.
+または、何らかの制限があるとしましょう。たとえば、操作は営業時間中にのみ実行できるとします。
 
 ```fsharp
 let onlyIfDuringBusinessHours (time:DateTime) f = 
@@ -387,16 +387,16 @@ let onlyIfDuringBusinessHours (time:DateTime) f =
         None
 ```
 
-We can write another combinator that restricts the original capability. This is just a version of "bind".
+元のケイパビリティを制限する別のコンビネーターを作成できます。これは単なる「バインド」のバージョンです。
 
 ```fsharp
-// given a capability option, restrict it
+// ケーパビリティオプションが与えられた場合、それを制限する
 let restrict filter originalCap = 
     originalCap
     |> Option.bind filter 
 ```
 
-With this in place, we can restrict the "agentsOnly" capability to business hours:
+これを導入することで、「agentsOnly」ケイパビリティを営業時間に制限できます。
 
 ```fsharp
 let getCustomerOnlyForAgentsInBusinessHours = 
@@ -406,12 +406,12 @@ let getCustomerOnlyForAgentsInBusinessHours =
     cap1 |> restrict restriction 
 ```
 
-So now we have created a new capability, "Customer agents can only access customer data during business hours", which tightens the data access logic a bit more.
+これで、新しいケイパビリティ「顧客エージェントは営業時間中にのみ顧客データにアクセスできる」が作成され、データアクセスロジックが少し強化されました。
 
-We can combine this with the previous `onlyForSameId` filter to build a compound capability which can access customer data:
+これを前の`onlyForSameId`フィルターと組み合わせて、顧客データにアクセスできる複合ケイパビリティを構築できます。
 
-* if you have the same customer id (at any time of day)
-* if you are a customer agent (only during business hours)
+* 同じ顧客IDを持っている場合（1日中いつでも）
+* 顧客エージェントである場合（営業時間中のみ）
 
 ```fsharp
 let getCustomerOnlyForSameId = 
@@ -424,46 +424,46 @@ let getCustomerOnlyForSameId_OrForAgentsInBusinessHours =
     first [cap1; cap2]
 ```
 
-As you can see, this approach is a useful way to build complex capabilities from simpler ones.
+ご覧のとおり、このアプローチは、単純なケイパビリティから複雑なケイパビリティを構築するための便利な方法です。
 
-## Additional transforms
+## 追加の変換
 
-It should be obvious that you can easily create additional transforms which can extend capabilities in other ways. Some examples:
+他の方法でケイパビリティを拡張できる追加の変換を簡単に作成できることは明らかです。いくつかの例を次に示します。
 
-* a capability that writes to an audit log on each execution.
-* a capability that can only be performed once.
-* a capability that can be revoked when needed.
-* a capability that is throttled and can only be performed a limited number of times in a given time period (such as password change attempts).
+* 実行ごとに監査ログに書き込むケイパビリティ。
+* 1回だけ実行できるケイパビリティ。
+* 必要に応じて取り消すことができるケイパビリティ。
+* スロットルされ、特定の期間内に限られた回数しか実行できないケイパビリティ（パスワード変更の試行など）。
 
-And so on.
+など。
 
-Here are implementations of the first three of them:
+最初の3つの実装を次に示します。
 
 ```fsharp
-/// Uses of the capability will be audited
+/// ケーパビリティの使用は監査される
 let auditable capabilityName f = 
     fun x -> 
-        // simple audit log!
+        // シンプルな監査ログ！
         printfn "AUDIT: calling %s with %A" capabilityName  x
-        // use the capability
+        // ケーパビリティを使う
         f x
 
-/// Allow the function to be called once only
+/// 関数を1回だけ呼び出すことができるようにする
 let onlyOnce f = 
     let allow = ref true
     fun x -> 
-        if !allow then   //! is dereferencing not negation!
+        if !allow then   //! 否定ではなく逆参照です！
             allow := false
             f x
         else
             Failure OnlyAllowedOnce
 
-/// Return a pair of functions: the revokable capability, 
-/// and the revoker function
+/// 取り消し可能なケイパビリティと、
+/// 取り消しを行う関数のペアを返す
 let revokable f = 
     let allow = ref true
     let capability = fun x -> 
-        if !allow then  //! is dereferencing not negation!
+        if !allow then  //! 否定ではなく逆参照です！
             f x
         else
             Failure Revoked
@@ -472,7 +472,7 @@ let revokable f =
     capability, revoker
 ```
 
-Let's say that we have an `updatePassword` function, such as this:
+次のような`updatePassword`関数があるとします。
 
 ```fsharp
 module internal CustomerDatabase = 
@@ -480,56 +480,56 @@ module internal CustomerDatabase =
         Success "OK"
 ```
 
-We can then create a auditable version of `updatePassword`:
+`updatePassword`の監査可能なバージョンを作成できます。
 
 ```fsharp
 let updatePasswordWithAudit x = 
     auditable "updatePassword" CustomerDatabase.updatePassword x
 ```
 
-And then test it:
+そして、テストします。
 
 ```fsharp
 updatePasswordWithAudit (1,"password") 
 updatePasswordWithAudit (1,"new password") 
 ```
 
-The results are:
+結果は次のとおりです。
 
 ```text
 AUDIT: calling updatePassword with (1, "password")
 AUDIT: calling updatePassword with (1, "new password")
 ```
 
-Or, we could create a one-time only version:
+または、1回限りのバージョンを作成することもできます。
 
 ```fsharp
 let updatePasswordOnce = 
     onlyOnce CustomerDatabase.updatePassword 
 ```
 
-And then test it:
+そして、テストします。
 
 ```fsharp
 updatePasswordOnce (1,"password") |> printfn "Result 1st time: %A"
 updatePasswordOnce (1,"password") |> printfn "Result 2nd time: %A"
 ```
 
-The results are:
+結果は次のとおりです。
 
 ```text
 Result 1st time: Success "OK"
 Result 2nd time: Failure OnlyAllowedOnce
 ```
 
-Finally, we can create a revokable function:
+最後に、取り消し可能な関数を作成できます。
 
 ```fsharp
 let revokableUpdatePassword, revoker = 
     revokable CustomerDatabase.updatePassword 
 ```
 
-And then test it:
+そして、テストします。
 
 ```fsharp
 revokableUpdatePassword (1,"password") |> printfn "Result 1st time before revoking: %A"
@@ -538,7 +538,7 @@ revoker()
 revokableUpdatePassword (1,"password") |> printfn "Result 3nd time after revoking: %A"
 ```
 
-With the following results:
+結果は次のとおりです。
 
 ```text
 Result 1st time before revoking: Success "OK"
@@ -546,26 +546,26 @@ Result 2nd time before revoking: Success "OK"
 Result 3nd time after revoking: Failure Revoked
 ```
 
-The code for all these F# examples is available as a [gist here](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_dbexample-fsx).
+これらのF#の例のコードは、[ここ](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_dbexample-fsx)のgistとして入手できます。
 
-## A complete example in F# ##
+## F#の完全な例 ##
 
-Here's the code to a complete application in F# (also available as a [gist here](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample-fsx)).
+F#の完全なアプリケーションのコードを次に示します（[ここ](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample-fsx)のgistとしても入手できます）。
 
-This example consists of a simple console app that allows you to get and update customer records.
+この例は、顧客レコードの取得と更新を可能にする単純なコンソールアプリで構成されています。
 
-* The first step is to login as a user. "Alice" and "Bob" are normal users, while "Zelda" has a customer agent role.
-* Once logged in, you can select a customer to edit. Again, you are limited to a choice between "Alice" and "Bob". (I'm sure you can hardly contain your excitement)
-* Once a customer is selected, you are presented with some (or none) of the following options:
-  * Get a customer's data.
-  * Update a customer's data.
-  * Update a customer's password.
+* 最初の手順は、ユーザーとしてログインすることです。「Alice」と「Bob」は通常のユーザーですが、「Zelda」は顧客エージェントの役割を持っています。
+* ログインすると、編集する顧客を選択できます。ここでも、「Alice」と「Bob」のどちらかを選択できます。（興奮を抑えきれないでしょう）
+* 顧客が選択されると、次のオプションの一部（またはなし）が表示されます。
+  * 顧客のデータを取得する。
+  * 顧客のデータを更新する。
+  * 顧客のパスワードを更新する。
         
-Which options are shown depend on which capabilities you have. These in turn are based on who you are logged in as, and which customer is selected.
+どのオプションが表示されるかは、所有しているケイパビリティによって異なります。これは、ログインしているユーザーと、選択されている顧客に基づいています。
 
-### Implementing the domain
+### ドメインの実装
         
-We'll start with the core domain types that are shared across the application:
+アプリケーション全体で共有されるコアドメイン型から始めます。
 
 ```fsharp
 module Domain = 
@@ -584,47 +584,47 @@ module Domain =
         | CapabilityRevoked
 ```
 
-The `FailureCase` type documents all possible things that can go wrong at the top-level of the application. See the ["Railway Oriented Programming" talk](http://fsharpforfunandprofit.com/rop/) for more discussion on this.
+`FailureCase`型は、アプリケーションのトップレベルで発生する可能性のあるすべてのエラーを文書化します。これについては、「[Railway Oriented Programmingのトーク](https://fsharpforfunandprofit.com/rop/)」で詳しく説明しています。
 
-### Defining the capabilities
+### ケーパビリティの定義
 
-Next, we document all the capabilities that are available in the application. 
-To add clarity to the code, each capability is given a name (i.e. a type alias).
+次に、アプリケーションで使用可能なすべてのケイパビリティを文書化します。 
+コードを明確にするために、各ケイパビリティには名前（つまり、型エイリアス）が付けられています。
 
 ```fsharp
 type GetCustomerCap = unit -> SuccessFailure<CustomerData,FailureCase>                
 ```
 
-Finally, the `CapabilityProvider` is a record of functions, each of which accepts a customer id and principal, and returns an optional capability of the specified type.
-This record is created in the top level model and then passed around to the child components.
+最後に、`CapabilityProvider`は関数のレコードであり、各関数は顧客IDとプリンシパルを受け取り、指定された型のオプションのケイパビリティを返します。
+このレコードはトップレベルのモデルで作成され、子コンポーネントに渡されます。
 
-Here's the complete code for this module:
+このモジュールの完全なコードを次に示します。
 
 ```fsharp
 module Capabilities = 
     open Rop
     open Domain
         
-    // capabilities
+    // ケーパビリティ
     type GetCustomerCap = unit -> SuccessFailure<CustomerData,FailureCase>
     type UpdateCustomerCap = unit -> CustomerData -> SuccessFailure<unit,FailureCase>
     type UpdatePasswordCap = Password -> SuccessFailure<unit,FailureCase>
 
     type CapabilityProvider = {
-        /// given a customerId and IPrincipal, attempt to get the GetCustomer capability
+        /// customerIdとIPrincipalが与えられた場合、GetCustomerケイパビリティの取得を試みる
         getCustomer : CustomerId -> IPrincipal -> GetCustomerCap option
-        /// given a customerId and IPrincipal, attempt to get the UpdateCustomer capability
+        /// customerIdとIPrincipalが与えられた場合、UpdateCustomerケイパビリティの取得を試みる
         updateCustomer : CustomerId -> IPrincipal -> UpdateCustomerCap option
-        /// given a customerId and IPrincipal, attempt to get the UpdatePassword capability
+        /// customerIdとIPrincipalが与えられた場合、UpdatePasswordケイパビリティの取得を試みる
         updatePassword : CustomerId -> IPrincipal -> UpdatePasswordCap option 
         }
 ```
 
-This module references a `SuccessFailure` result type similar to the one [discussed here](http://fsharpforfunandprofit.com/rop/), but which I won't show.
+このモジュールは、[ここで説明](https://fsharpforfunandprofit.com/rop/)されているのと同様の`SuccessFailure`結果型を参照していますが、ここでは示しません。
 
-### Implementing authentication
+### 認証の実装
 
-Next, we'll roll our own little authentication system. Note that when the user "Zelda" is authenticated, the role is set to "CustomerAgent".
+次に、独自の小さな認証システムを作成します。ユーザー「Zelda」が認証されると、ロールが「CustomerAgent」に設定されることに注意してください。
 
 ```fsharp
 module Authentication = 
@@ -661,12 +661,12 @@ module Authentication =
         |> Rop.orElse false
 ```
 
-The `customerIdForName` function attempts to find the customer id associated with a particular name,
-while the `customerIdOwnedByPrincipal` compares this id with another one.
+`customerIdForName`関数は、特定の名前に関連付けられている顧客IDを見つけようとしますが、
+`customerIdOwnedByPrincipal`はこのIDを別のIDと比較します。
 
-### Implementing authorization
+### 認可の実装
 
-Here are the functions related to authorization, very similar to what was discussed above.
+認可に関連する関数を次に示します。上記で説明したものと非常によく似ています。
 
 ```fsharp
 module Authorization = 
@@ -691,37 +691,37 @@ module Authorization =
         else
             None
 
-    // constrain who can call a password update function
+    // パスワード更新関数を呼び出すことができるユーザーを制限する
     let passwordUpdate (id:CustomerId) (principal:IPrincipal) (f:CustomerId*Password -> 'a) = 
         if Authentication.customerIdOwnedByPrincipal id principal then
             Some (fun password -> f (id,password))
         else
             None
 
-    // return the first good capability, if any
+    // 最初の適切なケイパビリティを返す（存在する場合）
     let first capabilityList = 
         capabilityList |> List.tryPick id
 
-    // given a capability option, restrict it
+    // ケイパビリティオプションが与えられた場合、それを制限する
     let restrict filter originalCap = 
         originalCap
         |> Option.bind filter 
 
-    /// Uses of the capability will be audited
+    /// ケイパビリティの使用は監査される
     let auditable capabilityName principalName f = 
         fun x -> 
-            // simple audit log!
+            // シンプルな監査ログ！
             let timestamp = DateTime.UtcNow.ToString("u")
             printfn "AUDIT: User %s used capability %s at %s" principalName capabilityName timestamp 
-            // use the capability
+            // ケイパビリティを使う
             f x
 
-    /// Return a pair of functions: the revokable capability, 
-    /// and the revoker function
+    /// 取り消し可能なケイパビリティと、
+    /// 取り消しを行う関数のペアを返す
     let revokable f = 
         let allow = ref true
         let capability = fun x -> 
-            if !allow then  //! is dereferencing not negation!
+            if !allow then  //! 否定ではなく逆参照です！
                 f x
             else
                 Failure CapabilityRevoked
@@ -730,9 +730,9 @@ module Authorization =
         capability, revoker
 ```
 
-### Implementing the database 
+### データベースの実装
 
-The functions related to database access are similar to those in the earlier examples, only this time we have implemented a crude in-memory database (just a `Dictionary`).
+データベースアクセスに関連する関数は、以前の例のものと似ていますが、今回は素朴なインメモリデータベース（単なる`Dictionary`）を実装しています。
 
 ```fsharp
 module CustomerDatabase = 
@@ -752,25 +752,25 @@ module CustomerDatabase =
         Success ()
 
     let updatePassword (id:CustomerId,password:Password) = 
-        Success ()   // dummy implementation
+        Success ()   // ダミー実装
 ```
 
-### Implementing the business services
+### ビジネスサービスの実装
 
-Next we have the "business services" (for lack of better word) where all the work gets done.
+次に、「ビジネスサービス」（より良い言葉がないため）があり、すべての作業がここで行われます。
 
 ```fsharp
 module BusinessServices =
     open Rop
     open Domain
     
-    // use the getCustomer capability
+    // getCustomerケイパビリティを使う
     let getCustomer capability =
         match capability() with
         | Success data -> printfn "%A" data
         | Failure err -> printfn ".. %A" err
 
-    // use the updateCustomer capability
+    // updateCustomerケイパビリティを使う
     let updateCustomer capability =
         printfn "Enter new data: "
         let customerData = Console.ReadLine() |> CustomerData
@@ -778,7 +778,7 @@ module BusinessServices =
         | Success _ -> printfn "Data updated" 
         | Failure err -> printfn ".. %A" err
 
-    // use the updatePassword capability
+    // updatePasswordケイパビリティを使う
     let updatePassword capability =
         printfn "Enter new password: "
         let password = Console.ReadLine() |> Password
@@ -788,42 +788,42 @@ module BusinessServices =
     
 ```
 
-Note that each of these functions is passed in only the capability needed to do its job. This code knows nothing about databases, or anything else. 
+これらの各関数には、ジョブを実行するために必要なケイパビリティのみが渡されることに注意してください。このコードは、データベースなどについては何も知りません。
 
-Yes, in this crude example, the code is reading and writing directly to the console. Obviously in a more complex (and less crude!) design,
-the inputs to these functions would be passed in as parameters.  
+見ればわかるように、この簡素な例では、コードはコンソールに直接読み書きしています。
+明らかに、より複雑な（そして洗練された！）設計では、これらの関数への入力はパラメーターとして渡されます。
 
-*Here's a simple exercise: replace the direct access to the console with a capability such as `getDataWithPrompt`?*
+*簡単な練習問題：コンソールへの直接アクセスを、`getDataWithPrompt`などのケイパビリティに置き換えてみましょう。*
 
-### Implementing the user interface
+### ユーザーインターフェースの実装
 
-Now for the user interface module, where most of the complex code lies.
+次に、複雑なコードのほとんどが存在するユーザーインターフェースモジュールについて説明します。
 
-First up is a type (`CurrentState`) that represents the state of the user interface.
+最初は、ユーザーインターフェースの状態を表す型（`CurrentState`）です。
 
-* When we're `LoggedOut` there is no `IPrincipal` available.
-* When we're `LoggedIn` there is a `IPrincipal` available, but no selected customer.
-* When we're in the `CustomerSelected` state there is both a `IPrincipal` and a `CustomerId` available.
-* Finally, the `Exit` state is a signal to the app to shutdown.
+* `LoggedOut`の場合、`IPrincipal`は使用できません。
+* `LoggedIn`の場合、`IPrincipal`は使用できますが、選択された顧客はいません。
+* `CustomerSelected`状態の場合、`IPrincipal`と`CustomerId`の両方が使用できます。
+* 最後に、`Exit`状態はアプリをシャットダウンするためのシグナルです。
 
-I very much like using a "state" design like this, because it ensures that we can't accidentally access data that we shouldn't. For example, we literally cannot
-access a customer when none is selected, because there is no customer id in that state!
+このような「状態」設計を使うのがとても好きです。なぜなら、誤ってアクセスすべきでないデータにアクセスできないようにするためです。
+たとえば、顧客が選択されていない場合、その状態には顧客IDがないため、顧客にアクセスすることはできません。
 
-For each state, there is a corresponding function.
+各状態には、対応する関数があります。
 
-`loggedOutActions` is run when we are in the `LoggedOut` state. It presents the available actions to you, and changes the state accordingly.
-You can log in as a user, or exit. If the login is successful (`authenticate name` worked) then the state is changed to `LoggedIn`.
+`loggedOutActions`は、`LoggedOut`状態のときに実行されます。使用可能なアクションを表示し、それに応じて状態を変更します。
+ユーザーとしてログインするか、終了することができます。ログインが成功した場合（`authenticate name`が機能した場合）、状態は`LoggedIn`に変更されます。
 
-`loggedInActions` is run when we are in the `LoggedIn` state. You can select a customer, or log out.
-If the customer selection is successful (`customerIdForName customerName` worked) then the state is changed to `CustomerSelected`.
+`loggedInActions`は、`LoggedIn`状態のときに実行されます。顧客を選択するか、ログアウトすることができます。
+顧客の選択が成功した場合（`customerIdForName customerName`が機能した場合）、状態は`CustomerSelected`に変更されます。
 
-`selectedCustomerActions` is run when we are in the `CustomerSelected` state. This works as follows:
+`selectedCustomerActions`は、`CustomerSelected`状態のときに実行されます。これは次のように機能します。
 
-* First, find out what capabilities we have.
-* Next convert each capability into a corresponding menu text (using `Option.map` because the capability might be missing), then remove the ones that are None.
-* Next, read a line from input, and depending on what it is, call one of the "business services" (`getCustomer`, `updateCustomer`, or `updatePassword`). 
+* 最初に、どのようなケイパビリティを持っているかを調べます。
+* 次に、各ケイパビリティを対応するメニューテキストに変換し（ケイパビリティがない可能性があるため、`Option.map`を使用します）、Noneのものを削除します。
+* 次に、入力から行を読み取り、それが何であるかに応じて、「ビジネスサービス」（`getCustomer`、`updateCustomer`、または`updatePassword`）のいずれかを呼び出します。
 
-Finally the `mainUiLoop` function loops around until the state is set to `Exit`.
+最後に、`mainUiLoop`関数は、状態が`Exit`に設定されるまでループします。
 
 ```fsharp
 module UserInterface =
@@ -837,16 +837,16 @@ module UserInterface =
         | CustomerSelected of IPrincipal * CustomerId
         | Exit
 
-    /// do the actions available while you are logged out. Return the new state
+    /// ログアウト中に使用可能なアクションを実行する。新しい状態を返す
     let loggedOutActions originalState = 
         printfn "[Login] enter Alice, Bob, Zelda, or Exit: "
         let action = Console.ReadLine()
         match action with
         | "Exit"  -> 
-            // Change state to Exit
+            // 状態をExitに変更する
             Exit
         | name -> 
-            // otherwise try to authenticate the name
+            // それ以外の場合は、名前の認証を試みる
             match Authentication.authenticate name with
             | Success principal -> 
                 LoggedIn principal
@@ -854,24 +854,24 @@ module UserInterface =
                 printfn ".. %A" err
                 originalState
 
-    /// do the actions available while you are logged in. Return the new state
+    /// ログイン中に使用可能なアクションを実行する。新しい状態を返す
     let loggedInActions originalState (principal:IPrincipal) = 
         printfn "[%s] Pick a customer to work on. Enter Alice, Bob, or Logout: " principal.Identity.Name
         let action = Console.ReadLine()
 
         match action with
         | "Logout"  -> 
-            // Change state to LoggedOut
+            // 状態をLoggedOutに変更する
             LoggedOut
-        // otherwise treat it as a customer name
+        // それ以外の場合は、顧客名として扱う
         | customerName -> 
-            // Attempt to find customer            
+            // 顧客の検索を試みる           
             match Authentication.customerIdForName customerName with
             | Success customerId -> 
-                // found -- change state
+                // 見つかった - 状態を変更する
                 CustomerSelected (principal,customerId)
             | Failure err -> 
-                // not found -- stay in originalState 
+                // 見つからない - 元の状態のままにする
                 printfn ".. %A" err
                 originalState 
 
@@ -881,14 +881,14 @@ module UserInterface =
         let updatePassword = capabilityProvider.updatePassword customerId principal 
         getCustomer,updateCustomer,updatePassword  
 
-    /// do the actions available when a selected customer is available. Return the new state
+    /// 選択された顧客が使用可能なときに使用可能なアクションを実行する。新しい状態を返す
     let selectedCustomerActions originalState capabilityProvider customerId principal = 
         
-        // get the individual component capabilities from the provider
+        // プロバイダーから個々のコンポーネントケイパビリティを取得する
         let getCustomerCap,updateCustomerCap,updatePasswordCap = 
             getAvailableCapabilities capabilityProvider customerId principal
 
-        // get the text for menu options based on capabilities that are present
+        // 存在するケイパビリティに基づいて、メニューオプションのテキストを取得する
         let menuOptionTexts = 
             [
             getCustomerCap |> Option.map (fun _ -> "(G)et");
@@ -897,24 +897,24 @@ module UserInterface =
             ] 
             |> List.choose id
 
-        // show the menu        
+        // メニューを表示する        
         let actionText =
             match menuOptionTexts with
             | [] -> " (no other actions available)"
             | texts -> texts |> List.reduce (fun s t -> s + ", " + t) 
         printfn "[%s] (D)eselect customer, %s" principal.Identity.Name actionText 
 
-        // process the user action
+        // ユーザーアクションを処理する
         let action = Console.ReadLine().ToUpper()
         match action with
         | "D" -> 
-            // revert to logged in with no selected customer
+            // 選択された顧客なしでログイン状態に戻る
             LoggedIn principal
         | "G" -> 
-            // use Option.iter in case we don't have the capability
+            // ケイパビリティがない場合に備えて、Option.iterを使う
             getCustomerCap 
               |> Option.iter BusinessServices.getCustomer 
-            originalState  // stay in same state
+            originalState  // 同じ状態にとどまる
         | "U" -> 
             updateCustomerCap 
               |> Option.iter BusinessServices.updateCustomer 
@@ -924,7 +924,7 @@ module UserInterface =
               |> Option.iter BusinessServices.updatePassword
             originalState  
         | _ -> 
-            // unknown option
+            // 不明なオプション
             originalState  
 
     let rec mainUiLoop capabilityProvider state =
@@ -939,19 +939,19 @@ module UserInterface =
             let newState = selectedCustomerActions state capabilityProvider customerId principal 
             mainUiLoop capabilityProvider newState 
         | Exit -> 
-            () // done 
+            () // 完了
 
     let start capabilityProvider  = 
         mainUiLoop capabilityProvider LoggedOut
 ```
 
-### Implementing the top-level module
+### トップレベルモジュールの実装
 
-With all this in place, we can implement the top-level module.
+これらすべてが揃ったので、トップレベルモジュールを実装できます。
 
-This module fetches all the capabilities, adds restrictions as explained previously, and creates a `capabilities` record.
+このモジュールは、すべてのケイパビリティを取得し、前述のように制限を追加して、`capabilities`レコードを作成します。
 
-The `capabilities` record is then passed into the user interface when the app is started.
+`capabilities`レコードは、アプリの起動時にユーザーインターフェースに渡されます。
 
 ```fsharp
 module Application=
@@ -997,7 +997,7 @@ module Application=
             cap 
             |> Option.map (auditable "UpdatePassword" principal.Identity.Name) 
 
-        // create the record that contains the capabilities
+        // ケイパビリティを含むレコードを作成する
         {
         getCustomer = getCustomerOnlyForSameId_OrForAgentsInBusinessHours 
         updateCustomer = updateCustomerOnlyForSameId_OrForAgentsInBusinessHours 
@@ -1005,112 +1005,112 @@ module Application=
         }         
 
     let start() = 
-        // pass capabilities to UI
+        // ケイパビリティをUIに渡す
         UserInterface.start capabilities 
 ```
  
-The complete code for this example is available as a [gist here](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample-fsx).
+この例の完全なコードは、[ここ](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample-fsx)のgistとして入手できます。
 
 <a id="summary"></a>
  
-## Summary of Part 2
+## パート2のまとめ
 
-In part 2, we added authorization and other transforms as a separate concern that could be applied to restrict authority.
-Again, there is nothing particularly clever about using functions like this, but I hope that this has given you some ideas that might be useful.
+パート2では、権限を制限するために適用できる別の関心事として、認可とその他の変換を追加しました。
+繰り返しますが、このような関数の使い方は特に巧妙なものではありませんが、これが役立つ可能性のあるアイデアをいくつか提供してくれることを願っています。
 
-**Question: Why go to all this trouble? What's the benefit over just testing an "IsAuthorized" flag or something?**
+**質問：なぜこんなに苦労するのですか？「IsAuthorized」フラグなどをチェックするだけよりも、どのような利点がありますか？**
 
-Here's a typical use of a authorization flag:
+認可フラグの一般的な使い方は次のとおりです。
 
 ```fsharp
 if user.CanUpdate() then
    doTheAction()
 ```
 
-Recall the quote from the previous post: "Capabilities should 'fail safe'. If a capability cannot be obtained, or doesn't work, we must not allow any progress
-on paths that assumed that it was successful."
+前の投稿からの引用を思い出してください。「ケイパビリティは「フェールセーフ」である必要があります。
+ケイパビリティを取得できない場合、または機能しない場合は、成功したと想定されるパスで進行を許可してはいけません。」
 
-The problem with testing a flag like this is that **it's easy to forget, and the compiler won't complain if you do**.
-And then you have a possible security breach, as in the following code. 
+フラグをチェックすることの問題点は、**忘れやすく、コンパイラは忘れても文句を言わない**ことです。
+そして、次のコードのように、セキュリティ侵害の可能性があります。
 
 ```fsharp
 if user.CanUpdate() then
-    // ignore
+    // 無視する
     
-// now do the action anyway!
+// とにかくアクションを実行する！
 doTheAction()
 ```
 
-Not only that, but by "inlining" the test like this, we're mixing security concerns into our main code, as pointed out earlier.
+それだけでなく、このようにテストを「インライン化」することで、前述のように、セキュリティの関心事をメインコードに混在させています。
 
-In contrast, a simple capability approach looks like this:
+対照的に、単純なケイパビリティアプローチは次のようになります。
 
 ```fsharp
-let updateCapability = // attempt to get the capability
+let updateCapability = // ケイパビリティの取得を試みる
 
 match updateCapability with
-| Some update -> update()  // call the function
-| None -> ()               // can't call the function
+| Some update -> update()  // 関数を呼び出す
+| None -> ()               // 関数を呼び出すことができない
 ```
 
-In this example, it is **not possible to accidentally use the capability** if you are not allowed to, as you literally don't have a function to call!
-And this has to be handled at compile-time, not at runtime.
+この例では、文字通り呼び出す関数がないため、許可されていない場合に誤ってケイパビリティを使用することは**不可能**です！
+そして、これは実行時ではなくコンパイル時に処理する必要があります。
 
-Furthermore, as we have just seen, capabilities are just functions, so we get all the benefits of filtering, etc., which are not available with the inlined boolean test version.
+さらに、見てきたように、ケイパビリティは単なる関数であるため、インラインブールテストバージョンでは使用できないフィルタリングなどのすべての利点が得られます。
 
-**Question: In many situations, you don't know whether you can access a resource until you try. So aren't capabilities just extra work?**
+**質問：多くの場合、試してみるまでリソースにアクセスできるかどうかがわかりません。では、ケイパビリティは単なる余分な作業ではないでしょうか？**
 
-This is indeed true. For example, you might want to test whether a file exists first, and only then try to access it. 
-The IT gods are always ruthless in these cases, and in the time between checking the file's existence and trying to open it, the file will probably be deleted!
+これは確かに当てはまります。たとえば、最初にファイルが存在するかどうかをテストし、それからファイルにアクセスしようとする場合があります。
+ITの神様は常にこのような場合は容赦なく、ファイルの存在を確認してから開こうとするまでの間に、ファイルはおそらく削除されてしまいます！
 
-So since we will have to check for exceptions anyway, why do two slow I/O operations when one would have sufficed?
+それでは、とにかく例外をチェックする必要があるため、1回で済むのに、なぜ2回の低速なI/O操作を行うのでしょうか？
 
-The answer is that the capability model is not about physical or system-level authority, but logical authority -- only having the minimum you need to accomplish a task.
+答えは、ケイパビリティモデルは、物理的またはシステムレベルの権限ではなく、論理的な権限、つまりタスクを実行するために必要な最小限のものだけを持っているということです。
 
-For example, a web service process may be operating at a high level of system authority, and can access any database record.
-But we don't want to expose that to most of our code. We want to make sure that any failures in programming logic cannot accidentally expose unauthorized data.
+たとえば、Webサービスプロセスは高レベルのシステム権限で動作しており、任意のデータベースレコードにアクセスできます。
+しかし、ほとんどのコードにそれを公開したくはありません。プログラミングロジックのエラーが誤って不正なデータを公開することがないようにしたいと考えています。
 
-Yes, of course, the capability functions themselves must do error handling,
-and as you can see in the snippets above, I'm using the `Success/Failure` result type as described [here](http://fsharpforfunandprofit.com/rop/).
-As a result, we will need to merge failures from core functions (e.g. database errors) with capability-specific failures such as `Failure OnlyAllowedOnce`.
+もちろん、ケイパビリティ関数自体がエラー処理を行う必要があり、
+上記のコードスニペットでわかるように、[ここ](https://fsharpforfunandprofit.com/rop/)で説明されている`Success/Failure`結果型を使用しています。
+その結果、`Failure OnlyAllowedOnce`などのケイパビリティ固有のエラーと、コア関数（データベースエラーなど）からのエラーをマージする必要があります。
 
-**Question: You've created a whole module with types defined for each capability. I might have hundreds of capabilities. Do you really expect me to do all this extra work?**
+**質問：各ケイパビリティに型が定義されたモジュール全体を作成しました。何百ものケイパビリティがあるかもしれません。本当にこの余分な作業をすべて行うことを期待していますか？**
 
-There are two points here, so let's address each one in turn:
+ここでは2つのポイントがありますので、順番に説明します。
 
-First, do you have a system that already uses fine-grained authorization,
-or has business-critical requirements about not leaking data, or performing actions in an unauthorized context, or needs a security audit?  
+まず、きめ細かい認可をすでに使用しているシステム、
+またはデータを漏洩したり、不正なコンテキストでアクションを実行したりしないことについてのビジネスクリティカルな要件があるシステム、またはセキュリティ監査が必要なシステムがありますか？
 
-If none of these apply, then indeed, this approach is complete overkill!
+これらのいずれにも該当しない場合は、実際、このアプローチは完全にやり過ぎです！
 
-But if you *do* have such a system, that raises some new questions:
+ただし、*そのような*システムが*ある*場合は、いくつかの新しい疑問が生じます。
 
-* should the capabilities that are authorized be explicitly described in the code somewhere?
-* and if so, should the capabilities be explicit throughout the code, or only at the top-level (e.g. in the controller) and implicit everywhere else.
+* 認可されているケイパビリティは、コード内のどこかで明示的に記述する必要がありますか？
+* もしそうなら、ケイパビリティはコード全体で明示的であるべきですか、それともトップレベル（コントローラーなど）でのみ明示的で、他の場所では暗黙的であるべきですか？
 
-The question comes to down to whether you want to be explicit or implicit. 
+この質問は、明示的にするか暗黙的にするかのどちらかになります。
 
-Personally, I prefer things like this to be explicit. It may be a little extra work initially,
-just a few lines to define each capability, but I find that it generally stops problems from occurring further down the line.
+個人的には、このようなものは明示的である方が好きです。
+最初は少し余分な作業が必要になるかもしれませんが、各ケイパビリティを定義するためのほんの数行ですが、一般的に、後で問題が発生するのを防ぐことができることがわかりました。
 
-And it has the benefit of acting as a single place to document all the security-related capabilities that you support. Any new requirements would
-require a new entry here, so can be sure that no capabilities can sneak in under the radar (assuming developers follow these practices).
+また、サポートするすべてのセキュリティ関連のケイパビリティを文書化する単一の場所として機能するという利点があります。
+新しい要件はここに新しいエントリを必要とするため、（開発者がこれらのプラクティスに従っていることを前提として）ケイパビリティがレーダーの下に忍び寄ることができないようにすることができます。
 
-**Question: In this code, you've rolled your own authorization. Wouldn't you use a proper authorization provider instead?**
+**質問：このコードでは、独自の認可を作成しています。適切な認可プロバイダーを使うべきではないですか？**
 
-Yes. This code is just an example. The authorization logic is completely separate from the domain logic, so it should be easy to substitute any authorization provider, such as
-[`ClaimsAuthorizationManager`](https://msdn.microsoft.com/en-us/library/system.security.claims.claimsauthorizationmanager.aspx) class, or something like
-[XACML](https://en.wikipedia.org/wiki/XACML).
+はい。このコードは単なる例です。
+認可ロジックはドメインロジックとは完全に分離されているため、[`ClaimsAuthorizationManager`]([https://msdn.microsoft.com/en-us/library/system.security.claims.claimsauthorizationmanager.aspx)クラスや
+[XACML](https://en.wikipedia.org/wiki/XACML)などの認可プロバイダーで簡単に置き換えることができます。
 
-**I've got more questions...**
+**質問がもっとあります...**
 
-If you missed them, some additional questions are answered at the [end of part 1](../posts/capability-based-security.md#summary).
-Otherwise please add your question in the comments below, and I'll try to address it.
+見逃した場合は、[パート1の最後](../posts/capability-based-security.md#summary)で追加の質問に回答しています。
+それ以外の場合は、以下に質問を追加してください。対応させていただきます。
 
 
-## Coming up
+## 次回予告
 
-In the [next post](../posts/capability-based-security-3.md), we'll look at how to use types to emulate access tokens and prevent unauthorized access to global functions.
+[次の投稿](../posts/capability-based-security-3.md)では、型を使ってアクセストークンをエミュレートし、グローバル関数への不正アクセスを防ぐ方法を見ていきます。
 
-*NOTE: All the code for this post is available as a [gist here](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_dbexample-fsx)
-and [here](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample-fsx).*
+*注：この投稿のすべてのコードは、[ここ](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_dbexample-fsx)と
+[ここ](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample-fsx)のgistとして入手できます。*
