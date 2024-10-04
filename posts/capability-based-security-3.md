@@ -266,7 +266,7 @@ error FS0001: 型の不一致。
 
 前の投稿では、ケイパビリティを使ってデータベースを更新するF#の完全なコンソールアプリケーションを示しました。
 
-今度は、アクセストークンも使うように更新してみましょう。（コードは[gist here](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample_withtypes-fsx)で入手できます）。
+今度は、アクセストークンも使うように更新してみましょう。（コードは[このgist](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample_withtypes-fsx)で入手できます）。
 
 これは例の更新なので、変更点だけに焦点を当てます。
 
@@ -419,7 +419,7 @@ let tokenToCap f token =
 ```
 
 これで、アクセストークンをサポートするために必要な変更は完了です。
-この例のすべてのコードは[こちら]([invalid URL removed]。
+この例のすべてのコードは[こちら](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample_withtypes-fsx)。
 
 ## パート3のまとめ
 
@@ -481,5 +481,5 @@ Haskellの関連するもの（[例](https://hackage.haskell.org/package/Capabil
 
 このシリーズがお役に立てば幸いです。これらのアイデアのいくつかをより完全に調査するきっかけになれば幸いです。
 
-*注：この記事のすべてのコードは、[こちらのgist](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_typeexample-fsx)
-および[こちら](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample_withtypes-fsx)から入手できます。*
+*注：この記事のすべてのコードは、[このgist](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_typeexample-fsx)
+および[ここ](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample_withtypes-fsx)から入手できます。*
