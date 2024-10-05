@@ -19,7 +19,7 @@ image: "/assets/img/property_commutative.png"
 
 私の経験では、多くのプロパティは、以下に挙げる7つのアプローチのいずれかを使うことで発見できます。
 
-* [「異なるパス、同じ目的地」](#different-paths)
+* [「異なるパス、同じ結果」](#different-paths)
 * [「行って帰って元通り」](#there-and-back)
 * [「変わらないものもある」](#some-things-never-change)
 * [「変われば変わるほど、元のままだ」](#idempotence)
@@ -33,7 +33,7 @@ image: "/assets/img/property_commutative.png"
 
 <a id="different-paths"></a>
 
-### 「異なるパス、同じ目的地」
+### 「異なるパス、同じ結果」
 
 この種のプロパティは、操作を異なる順序で組み合わせても、同じ結果になることを前提としています。
 例えば、下の図では、`X` を実行してから `Y` を実行しても、`Y` を実行してから `X` を実行しても、同じ結果になります。
@@ -90,7 +90,7 @@ image: "/assets/img/property_commutative.png"
 大きなものについてもそのプロパティが真であることを証明できることがよくあります。
 
 下の図では、4つの項目からなるリストを、1つの項目と3つの項目からなるリストに分割し、さらにそれを1つの項目と2つの項目からなるリストに分割できることがわかります。
-2つの項目からなるリストについてプロパティが成り立つことが証明できれば、3つの項目からなるリスト、そして4つの項目からなるリストについても成り立つと推測できます。
+2つの項目からなるリストについてプロパティが成立することが証明できれば、3つの項目からなるリスト、そして4つの項目からなるリストについても成立すると推測できます。
 
 ![帰納法](../assets/img/property_induction.png)
 
@@ -128,9 +128,9 @@ image: "/assets/img/property_commutative.png"
 
 このセクションでは、これらのカテゴリーを適用して、「リストをソートする」「リストを反転する」などの単純な関数のプロパティを考えられるかどうかを見ていきます。
 
-### リストのソートに「異なるパス、同じ目的地」を適用する
+### リストのソートに「異なるパス、同じ結果」を適用する
 
-では、まず「*異なるパス、同じ目的地*」から始めて、「リストのソート」関数に適用してみましょう。
+では、まず「*異なるパス、同じ結果*」を選び、「リストのソート」関数に適用してみましょう。
 
 `List.sort`の*前*に1つの操作を組み合わせ、*後*に別の操作を組み合わせることで、最終的に同じ結果になるような方法を考えられるでしょうか？
 つまり、「上に行ってから上を横切る」のと「下を横切ってから上に行く」のが同じになるようにです。
@@ -148,7 +148,7 @@ image: "/assets/img/property_commutative.png"
 このプロパティを実装したコードを以下に示します。
 
 ```fsharp
-let ``+1 then sort should be same as sort then +1`` sortFn aList = 
+let ``+1してからソートした結果は、ソートしてから+1した結果と同じである`` sortFn aList = 
     let add1 x = x + 1
     
     let result1 = aList |> sortFn |> List.map add1
@@ -157,16 +157,16 @@ let ``+1 then sort should be same as sort then +1`` sortFn aList =
 
 // テスト    
 let goodSort = List.sort
-Check.Quick (``+1 then sort should be same as sort then +1`` goodSort)
+Check.Quick (``+1してからソートした結果は、ソートしてから+1した結果と同じである`` goodSort)
 // OK、100個のテストに合格しました。
 ```
 
 さて、これはうまくいきますが、他の多くの変換でもうまくいきます。
-例えば、`List.sort` を単なる恒等関数として実装した場合でも、このプロパティは同様に満たされます。これは自分でテストできます。
+例えば、`List.sort` を単なる恒等関数として実装した場合でも、このプロパティは同様に成立します。これは自分でテストできます。
 
 ```fsharp
 let badSort aList = aList
-Check.Quick (``+1 then sort should be same as sort then +1`` badSort)
+Check.Quick (``+1してからソートした結果は、ソートしてから+1した結果と同じである`` badSort)
 // OK、100個のテストに合格しました。
 ```
 
@@ -183,7 +183,7 @@ Check.Quick (``+1 then sort should be same as sort then +1`` badSort)
 コードは以下の通りです。
 
 ```fsharp
-let ``append minValue then sort should be same as sort then prepend minValue`` sortFn aList = 
+let ``最小値を追加してからソートした結果は、ソートしてから最小値を先頭に追加した結果と同じである`` sortFn aList = 
     let minValue = Int32.MinValue
    
     let appendThenSort = (aList @ [minValue]) |> sortFn 
@@ -191,29 +191,28 @@ let ``append minValue then sort should be same as sort then prepend minValue`` s
     appendThenSort = sortThenPrepend 
 
 // テスト
-Check.Quick (``append minValue then sort should be same as sort then prepend minValue`` goodSort)
+Check.Quick (``最小値を追加してからソートした結果は、ソートしてから最小値を先頭に追加した結果と同じである`` goodSort)
 // OK、100個のテストに合格しました。
 ```
 
 悪い実装は今度は失敗します。
 
 ```fsharp
-Check.Quick (``append minValue then sort should be same as sort then prepend minValue`` badSort)
+Check.Quick (``最小値を追加してからソートした結果は、ソートしてから最小値を先頭に追加した結果と同じである`` badSort)
 // 反証可能、1回のテスト（2回の縮小）後
 // [0]
 ```
 
 つまり、`[0; minValue]` の不正なソートは `[minValue; 0]` とは*同じではない*ということです。
 
-これはいいですね。
+これは良い結果ですね。
 
-しかし…そこには、エンタープライズデベロッパーフロムヘル（[前回の投稿](../posts/property-based-testing.md)を参照）が利用できるハードコードされたものがあります。
-EDFHは、常に `Int32.MinValue` を使用し、常にテストリストの先頭または末尾に追加するという事実を悪用します。
+しかし…油断は禁物です。このコードにはハードコードされた値があるので、「最悪なエンタープライズ開発者」（[前回の投稿](../posts/property-based-testing.md)を参照）のつけ込む隙があります。 EDFHは、私たちが常に `Int32.MinValue` を使用し、常にテストリストの先頭または末尾に追加しているという事実を突いてくるでしょう。
 
-つまり、EDFHは私たちがどちらのパスにいるのかを特定し、それぞれの場合に特別な処理をすることができます。
+言い換えれば、EDFHは私たちがどちらのパスにいるのかを把握し、それぞれの場合に特化した処理を組み込む可能性があるのです。
 
 ```fsharp
-// エンタープライズデベロッパーフロムヘルが再び襲来
+// 最悪なエンタープライズ開発者が再び襲来
 let badSort2 aList = 
     match aList with
     | [] -> []
@@ -231,7 +230,7 @@ let badSort2 aList =
 
 ```fsharp
 // おやおや、悪い実装がパスしてしまいました。
-Check.Quick (``append minValue then sort should be same as sort then prepend minValue`` badSort2)
+Check.Quick (``最小値を追加してからソートした結果は、ソートしてから最小値を先頭に追加した結果と同じである`` badSort2)
 // OK、100個のテストに合格しました。
 ```
 
@@ -244,7 +243,7 @@ Check.Quick (``append minValue then sort should be same as sort then prepend min
 ![符号の反転を使ったリストのソート](../assets/img/property_list_sort3.png)
 
 ```fsharp
-let ``negate then sort should be same as sort then negate then reverse`` sortFn aList = 
+let ``符号を反転してからソートした結果は、ソートしてから符号を反転し、反転した結果と同じである`` sortFn aList = 
     let negate x = x * -1
 
     let negateThenSort = aList |> List.map negate |> sortFn 
@@ -256,25 +255,25 @@ let ``negate then sort should be same as sort then negate then reverse`` sortFn 
 
 ```fsharp
 // テスト
-Check.Quick ( ``negate then sort should be same as sort then negate then reverse`` goodSort)
+Check.Quick ( ``符号を反転してからソートした結果は、ソートしてから符号を反転し、反転した結果と同じである`` goodSort)
 // OK、100個のテストに合格しました。
 
 // テスト
-Check.Quick ( ``negate then sort should be same as sort then negate then reverse``  badSort)
+Check.Quick ( ``符号を反転してからソートした結果は、ソートしてから符号を反転し、反転した結果と同じである``  badSort)
 // 反証可能、1回のテスト（1回の縮小）後
 // [1; 0]
 
 // テスト
-Check.Quick ( ``negate then sort should be same as sort then negate then reverse``  badSort2)
+Check.Quick ( ``符号を反転してからソートした結果は、ソートしてから符号を反転し、反転した結果と同じである``  badSort2)
 // 反証可能、5回のテスト（3回の縮小）後
 // [1; 0]
 ```
 
-整数のリストのソートしかテストしていないと主張する人もいるかもしれません。
-しかし、`List.sort` 関数はジェネリックであり、整数自体については何も知らないので、このプロパティがソートのコアロジックをテストしていることに私は大きな自信を持っています。
+もしかしたら、これは整数のリストのソートしかテストしていないと考える方がいるかもしれません。
+しかし、`List.sort` 関数はジェネリックであり、整数自体については何も知りません。そのため、このプロパティはソートのコアロジックを確実にテストしていると、私は確信しています。
 
 
-### リストの反転関数に「異なるパス、同じ目的地」を適用する
+### リストの反転関数に「異なるパス、同じ結果」を適用する
 
 さて、`List.sort` については十分です。同じ考え方をリストの反転関数に適用してみるのはどうでしょうか？
 
@@ -285,7 +284,7 @@ Check.Quick ( ``negate then sort should be same as sort then negate then reverse
 プロパティのコードは以下の通りです。
 
 ```fsharp
-let ``append any value then reverse should be same as reverse then prepend same value`` revFn anyValue aList = 
+let ``任意の値を追加してから反転した結果は、反転してから同じ値を先頭に追加した結果と同じである`` revFn anyValue aList = 
   
     let appendThenReverse = (aList @ [anyValue]) |> revFn 
     let reverseThenPrepend = anyValue :: (aList |> revFn)
@@ -297,18 +296,18 @@ let ``append any value then reverse should be same as reverse then prepend same 
 ```fsharp
 // テスト
 let goodReverse = List.rev
-Check.Quick (``append any value then reverse should be same as reverse then prepend same value`` goodReverse)
+Check.Quick (``任意の値を追加してから反転した結果は、反転してから同じ値を先頭に追加した結果と同じである`` goodReverse)
 // OK、100個のテストに合格しました。
 
 // 悪い実装は失敗する
 let badReverse aList = []
-Check.Quick (``append any value then reverse should be same as reverse then prepend same value`` badReverse)
+Check.Quick (``任意の値を追加してから反転した結果は、反転してから同じ値を先頭に追加した結果と同じである`` badReverse)
 // 反証可能、1回のテスト（2回の縮小）後
 // true, []
 
 // 悪い実装は失敗する
 let badReverse2 aList = aList 
-Check.Quick (``append any value then reverse should be same as reverse then prepend same value`` badReverse2)
+Check.Quick (``任意の値を追加してから反転した結果は、反転してから同じ値を先頭に追加した結果と同じである`` badReverse2)
 // 反証可能、1回のテスト（1回の縮小）後
 // true, [false]
 ```
@@ -319,15 +318,15 @@ Check.Quick (``append any value then reverse should be same as reverse then prep
 
 どちらの失敗例でも、`anyValue` はboolです。つまり、FsCheckは最初にboolのリストを使用しています。
 
-練習問題です。このプロパティは十分でしょうか？EDFHが合格する実装を作成できる方法はありますか？
+それでは、練習問題です。このプロパティは十分でしょうか？ テストをパスするような実装をEDFHが作成する隙はあるでしょうか？
 
 ## 「行って帰って元通り」
 
 複数パスのスタイルのプロパティが利用できない場合や複雑すぎる場合があるので、他のアプローチを見てみましょう。
 
-まずは、逆演算を含むプロパティから始めます。
+まずは、逆演算を含むプロパティからです。
 
-リストのソートからもう一度始めましょう。ソートの逆演算はありますか？うーん、ないですね。なので、ソートは今は飛ばします。
+もう一度、リストのソートを考えましょう。ソートの逆演算はありますか？うーん、ないですね。なので、ソートは今は飛ばします。
 
 リストの反転はどうでしょうか？ 実は、反転はそれ自体が逆演算なのです。
 
@@ -336,7 +335,7 @@ Check.Quick (``append any value then reverse should be same as reverse then prep
 これをプロパティにしてみましょう。
 
 ```fsharp
-let ``reverse then reverse should be same as original`` revFn aList = 
+let ``反転してから反転した結果は、元と同じである`` revFn aList = 
     let reverseThenReverse = aList |> revFn |> revFn
     reverseThenReverse = aList
 ```
@@ -345,7 +344,7 @@ let ``reverse then reverse should be same as original`` revFn aList =
 
 ```fsharp
 let goodReverse = List.rev
-Check.Quick (``reverse then reverse should be same as original`` goodReverse)
+Check.Quick (``反転してから反転した結果は、元と同じである`` goodReverse)
 // OK、100個のテストに合格しました。
 ```
 
@@ -353,7 +352,7 @@ Check.Quick (``reverse then reverse should be same as original`` goodReverse)
 
 ```fsharp
 let badReverse aList = aList 
-Check.Quick (``reverse then reverse should be same as original`` badReverse)
+Check.Quick (``反転してから反転した結果は、元と同じである`` badReverse)
 // OK、100個のテストに合格しました。
 ```
 
@@ -375,7 +374,7 @@ Check.Quick (``reverse then reverse should be same as original`` badReverse)
 
 この原則は非常に一般的に適用できます。
 
-例えば、`文字列の分割`関数が機能しているかどうかを確認したいとします。トークナイザを書く必要はありません。
+例えば、文字列の分割関数が機能しているかどうかを確認したいとします。トークナイザを書く必要はありません。
 トークンを連結すると元の文字列に戻ることだけを確認すればよいのです。
 
 ![文字列分割プロパティ](../assets/img/property_string_split.png)
@@ -403,7 +402,7 @@ FsCheckがランダムデータを生成する方法を正確に制御する方�
 このプロパティの完全なコードは以下の通りです。
 
 ```fsharp
-let ``concatting the elements of a string split by commas recreates the original string`` aListOfStrings = 
+let ``カンマで分割された文字列の要素を連結すると、元の文字列が再作成される`` aListOfStrings = 
     // 文字列を作成するためのヘルパー
     let addWithComma s t = s + "," + t
     let originalString = aListOfStrings |> List.fold addWithComma ""
@@ -421,7 +420,7 @@ let ``concatting the elements of a string split by commas recreates the original
 これをテストすると、満足のいく結果が得られます。
 
 ```fsharp
-Check.Quick ``concatting the elements of a string split by commas recreates the original string`` 
+Check.Quick ``カンマで分割された文字列の要素を連結すると、元の文字列が再作成される`` 
 // OK、100個のテストに合格しました。
 ```
 
@@ -437,7 +436,7 @@ Check.Quick ``concatting the elements of a string split by commas recreates the 
 これをプロパティにしてみましょう。
 
 ```fsharp
-let ``adjacent pairs from a list should be ordered`` sortFn aList = 
+let ``リストの隣接する要素は、順序付けられている`` sortFn aList = 
     let pairs = aList |> sortFn |> Seq.pairwise
     pairs |> Seq.forall (fun (x,y) -> x <= y )
 ```
@@ -446,7 +445,7 @@ let ``adjacent pairs from a list should be ordered`` sortFn aList =
 
 ```fsharp
 let goodSort = List.sort
-Check.Quick (``adjacent pairs from a list should be ordered`` goodSort)
+Check.Quick (``リストの隣接する要素は、順序付けられている`` goodSort)
 ```
 
 ```text
@@ -462,7 +461,7 @@ System.Exception: Geneflect: type not handled System.IComparable
 これを防ぐにはどうすればよいでしょうか？解決策は、次のように、プロパティに `int list` などの特定の型を指定することです。
 
 ```fsharp
-let ``adjacent pairs from a list should be ordered`` sortFn (aList:int list) = 
+let ``リストの隣接する要素は、順序付けられている`` sortFn (aList:int list) = 
     let pairs = aList |> sortFn |> Seq.pairwise
     pairs |> Seq.forall (fun (x,y) -> x <= y )
 ```
@@ -471,18 +470,18 @@ let ``adjacent pairs from a list should be ordered`` sortFn (aList:int list) =
 
 ```fsharp
 let goodSort = List.sort
-Check.Quick (``adjacent pairs from a list should be ordered`` goodSort)
+Check.Quick (``リストの隣接する要素は、順序付けられている`` goodSort)
 // OK、100個のテストに合格しました。
 ```
 
 プロパティが制約されているにもかかわらず、プロパティは依然として非常に一般的なものであることに注意してください。例えば、代わりに `string list` を使用することもでき、同じように動作します。
 
 ```fsharp
-let ``adjacent pairs from a string list should be ordered`` sortFn (aList:string list) = 
+let ``文字列リストの隣接する要素は、順序付けられている`` sortFn (aList:string list) = 
     let pairs = aList |> sortFn |> Seq.pairwise
     pairs |> Seq.forall (fun (x,y) -> x <= y )
 
-Check.Quick (``adjacent pairs from a string list should be ordered`` goodSort)
+Check.Quick (``文字列リストの隣接する要素は、順序付けられている`` goodSort)
 // OK、100個のテストに合格しました。
 ```
 
@@ -493,7 +492,7 @@ Check.Quick (``adjacent pairs from a string list should be ordered`` goodSort)
 ```fsharp
 // 悪い実装がパスする
 let badSort aList = []
-Check.Quick (``adjacent pairs from a list should be ordered`` badSort)
+Check.Quick (``リストの隣接する要素は、順序付けられている`` badSort)
 // OK、100個のテストに合格しました。
 ```
 
@@ -511,15 +510,15 @@ Check.Quick (``adjacent pairs from a list should be ordered`` badSort)
 
 それらは通常、それ自体では正しい実装を保証するのに十分ではありませんが、より一般的なプロパティに対するカウンターチェックとして機能することがよくあります。
 
-例えば、[前回の投稿](../posts/property-based-testing.md)では、加算の可換性と結合性を表すプロパティを作成しましたが、単にゼロを返す実装でも同様に満たされてしまうことに気づきました。
+例えば、[前回の投稿](../posts/property-based-testing.md)では、加算の可換性と結合性を表すプロパティを作成しましたが、単にゼロを返す実装でも同様に成立してしまうことに気づきました。
 `x + 0 = x` をプロパティとして追加して初めて、その特定の悪意のある実装を排除することができました。
 
-そして、上記の「リストのソート」の例では、空のリストを返すだけの関数で「ペアワイズ順序」プロパティを満たすことができました。どうすれば修正できるでしょうか？
+そして、上記の「リストのソート」の例では、空のリストを返すだけの関数で「ペアワイズ順序」プロパティが成立しました。どうすれば修正できるでしょうか？
 
-最初の試みとして、ソートされたリストの長さを確認することができます。長さが異なる場合、ソート関数は明らかに不正行為をしています。
+最初の試みとして、ソートされたリストの長さを確認するという方法が考えられます。もし長さが異なるならば、ソート関数は明らかに不正を行ったと言えるでしょう。
 
 ```fsharp
-let ``sort should have same length as original`` sortFn (aList:int list) = 
+let ``ソートされたリストの長さは、元と同じである`` sortFn (aList:int list) = 
     let sorted = aList |> sortFn 
     List.length sorted = List.length aList
 ```
@@ -528,7 +527,7 @@ let ``sort should have same length as original`` sortFn (aList:int list) =
 
 ```fsharp
 let goodSort = List.sort
-Check.Quick (``sort should have same length as original`` goodSort )
+Check.Quick (``ソートされたリストの長さは、元と同じである`` goodSort )
 // OK、100個のテストに合格しました。
 ```
 
@@ -536,12 +535,12 @@ Check.Quick (``sort should have same length as original`` goodSort )
 
 ```fsharp
 let badSort aList = []
-Check.Quick (``sort should have same length as original`` badSort )
+Check.Quick (``ソートされたリストの長さは、元と同じである`` badSort )
 // 反証可能、1回のテスト（1回の縮小）後
 // [0]
 ```
 
-残念ながら、BDFHは敗北せず、別の準拠した実装を考え出すことができます。最初の要素をN回繰り返すだけです。
+残念ながら、BDFHはまだ諦めていません。なんと、最初の要素をN回繰り返すという、別の抜け道を見つけてしまうのです。
 
 ```fsharp
 // 悪い実装は同じ長さを持つ
@@ -557,14 +556,14 @@ let badSort2 aList =
 これでこれをテストすると、合格します。
 
 ```fsharp
-Check.Quick (``sort should have same length as original`` badSort2)
+Check.Quick (``ソートされたリストの長さは、元と同じである`` badSort2)
 // OK、100個のテストに合格しました。
 ```
 
-さらに、ペアワイズプロパティも満たしています。
+さらに、ペアワイズプロパティも成立しています。
 
 ```fsharp
-Check.Quick (``adjacent pairs from a list should be ordered`` badSort2)
+Check.Quick (``リストの隣接する要素は、順序付けられている`` badSort2)
 // OK、100個のテストに合格しました。
 ```
 
@@ -579,7 +578,7 @@ Check.Quick (``adjacent pairs from a list should be ordered`` badSort2)
 これは新しいプロパティにつながります。ソートされたリストは常に元のリストの順列です。なるほど！では、プロパティを順列で書いてみましょう。
 
 ```fsharp
-let ``a sorted list is always a permutation of the original list`` sortFn (aList:int list) = 
+let ``ソートされたリストは、常に元のリストの順列である`` sortFn (aList:int list) = 
     let sorted = aList |> sortFn 
     let permutationsOfOriginalList = permutations aList 
 
@@ -648,12 +647,12 @@ permutations [3;3] |> Seq.toList
 素晴らしい！では、FsCheckを実行してみましょう。
 
 ```fsharp
-Check.Quick (``a sorted list is always a permutation of the original list`` goodSort)
+Check.Quick (``ソートされたリストは、常に元のリストの順列である`` goodSort)
 ```
 
-うーん。おかしいですね。何も起こっていないようです。そして、なぜかCPUの使用率が最大になっています。何が起こっているのでしょうか？
+うーん。おかしいですね。何も起こっていないようですが、CPUの使用率がなぜか最大になっています。一体何が起きているのでしょうか？
 
-何が起こっているかというと、あなたは長い間そこに座っていることになるということです。家で一緒にやっている場合は、今すぐ右クリックして対話型セッションをキャンセルすることをお勧めします。
+実は、このままでは処理が終わるまで非常に長い時間がかかってしまうのです。もしご自宅で試しているのであれば、今すぐ右クリックして対話型セッションをキャンセルすることをお勧めします。
 
 一見無害に見える `permutations` は、通常のサイズのリストでは*本当に*遅いです。
 例えば、わずか10個の項目のリストには3,628,800個の順列があります。20個の項目になると、天文学的な数字になります。
@@ -662,8 +661,8 @@ Check.Quick (``a sorted list is always a permutation of the original list`` good
 
 **ヒント: プロパティチェックが非常に高速であることを確認してください。何度も実行することになります。**
 
-すでに見てきたように、最良の場合でも、FsCheckはプロパティを100回評価します。そして、縮小が必要な場合は、さらに多くなります。
-そのため、テストの実行速度が速いことを確認してください。
+すでに見てきたように、最良の場合でも、FsCheckはプロパティを100回評価します。そして、縮小が必要な場合は、さらに多くの回数評価を行います。
+そのため、テストの実行速度が速いことを確実にする必要があります。
 
 しかし、データベース、ネットワーク、その他の低速な依存関係など、実際のシステムを扱っている場合はどうでしょうか？
 
@@ -679,7 +678,7 @@ Check.Quick (``a sorted list is always a permutation of the original list`` good
 わかりました。順列をループで処理することはできません。では、同じ考え方を使いますが、この場合に特化した関数、`isPermutationOf` 関数を記述しましょう。
 
 ```fsharp
-let ``a sorted list has same contents as the original list`` sortFn (aList:int list) = 
+let ``ソートされたリストは、元のリストと同じ内容を持つ`` sortFn (aList:int list) = 
     let sorted = aList |> sortFn 
     isPermutationOf aList sorted
 ```
@@ -721,22 +720,22 @@ let rec isPermutationOf list1 list2 =
             isPermutationOf t1 t2
 ```
 
-もう一度テストしてみましょう。そして、今回は宇宙の熱的死の前に完了します。
+もう一度テストを実行してみましょう。今回は、宇宙が熱的死を迎える前に完了しました。
 
 ```fsharp
-Check.Quick (``a sorted list has same contents as the original list``  goodSort)
+Check.Quick (``ソートされたリストは、元のリストと同じ内容を持つ``  goodSort)
 // OK、100個のテストに合格しました。
 ```
 
-素晴らしいのは、悪意のある実装がこのプロパティを満たさなくなったことです。
+素晴らしいのは、悪意のある実装ではこのプロパティが成立しなくなったことです。
 
 ```fsharp
-Check.Quick (``a sorted list has same contents as the original list``  badSort2)
+Check.Quick (``ソートされたリストは、元のリストと同じ内容を持つ``  badSort2)
 // 反証可能、2回のテスト（5回の縮小）後
 // [1; 0]
 ```
 
-実際、`adjacent pairs from a list should be ordered` と `a sorted list has same contents as the original list` という2つのプロパティがあれば、
+実際、`リストの隣接する要素は、順序付けられている` と `ソートされたリストは、元のリストと同じ内容を持つ` という2つのプロパティがあれば、
 *実装が正しいこと*を保証できます。
 
 ## 補足: プロパティの組み合わせ
@@ -754,9 +753,9 @@ FsCheckの出番です。プロパティを組み合わせるための組み込�
 使用例を以下に示します。
 
 ```fsharp
-let ``list is sorted``sortFn (aList:int list) = 
-    let prop1 = ``adjacent pairs from a list should be ordered`` sortFn aList 
-    let prop2 = ``a sorted list has same contents as the original list`` sortFn aList 
+let ``リストはソート済みである``sortFn (aList:int list) = 
+    let prop1 = ``リストの隣接する要素は、順序付けられている`` sortFn aList 
+    let prop2 = ``ソートされたリストは、元のリストと同じ内容を持つ`` sortFn aList 
     prop1 .&. prop2 
 ```
 
@@ -764,7 +763,7 @@ let ``list is sorted``sortFn (aList:int list) =
 
 ```fsharp
 let goodSort = List.sort
-Check.Quick (``list is sorted`` goodSort )
+Check.Quick (``リストはソート済みである`` goodSort )
 // OK、100個のテストに合格しました。
 ```
 
@@ -772,7 +771,7 @@ Check.Quick (``list is sorted`` goodSort )
 
 ```fsharp
 let badSort aList = []
-Check.Quick (``list is sorted`` badSort )
+Check.Quick (``リストはソート済みである`` badSort )
 // 反証可能、1回のテスト（0回の縮小）後
 // [0]
 ```
@@ -782,20 +781,20 @@ Check.Quick (``list is sorted`` badSort )
 そこで、各プロパティに「ラベル」を追加して、区別できるようにしたいところです。FsCheckでは、これは `|@` 演算子を使って行います。
 
 ```fsharp
-let ``list is sorted (labelled)``sortFn (aList:int list) = 
-    let prop1 = ``adjacent pairs from a list should be ordered`` sortFn aList 
-                |@ "adjacent pairs from a list should be ordered"
-    let prop2 = ``a sorted list has same contents as the original list`` sortFn aList 
-                |@ "a sorted list has same contents as the original list"
+let ``リストはソート済みである（ラベル付き）``sortFn (aList:int list) = 
+    let prop1 = ``リストの隣接する要素は、順序付けられている`` sortFn aList 
+                |@ "リストの隣接する要素は、順序付けられている"
+    let prop2 = ``ソートされたリストは、元のリストと同じ内容を持つ`` sortFn aList 
+                |@ "ソートされたリストは、元のリストと同じ内容を持つ"
     prop1 .&. prop2 
 ```
 
-そして、悪いソートでテストすると、「Label of failing property: a sorted list has same contents as the original list」というメッセージが表示されます。
+そして、悪いソートでテストすると、「Label of failing property: ソートされたリストは、元のリストと同じ内容を持つ」というメッセージが表示されます。
 
 ```fsharp
-Check.Quick (``list is sorted (labelled)`` badSort )
+Check.Quick (``リストはソート済みである（ラベル付き）`` badSort )
 //  反証可能、1回のテスト（2回の縮小）後
-//  失敗したプロパティのラベル: a sorted list has same contents as the original list
+//  失敗したプロパティのラベル: ソートされたリストは、元のリストと同じ内容を持つ
 //  [0]
 ```
 
@@ -803,11 +802,11 @@ Check.Quick (``list is sorted (labelled)`` badSort )
 
 それでは、プロパティを考案する戦略に戻りましょう。
 
-## "小さな問題を解く"
+## 「小さな問題を解く」
 
-再帰的なデータ構造や再帰的な問題を抱えている場合があります。このような場合、小さな部分に当てはまるプロパティを見つけることができます。
+再帰的なデータ構造や再帰的な問題を扱う場合があります。このような場合、より小さな部分で成立するプロパティを見つけることができるでしょう。
 
-例えば、ソートの場合、次のようなことを言うことができます。
+例えば、ソートについて考えてみましょう。次のようなプロパティが考えられます。
 
 ```text
 リストがソートされているとは、次の場合です。
@@ -818,7 +817,7 @@ Check.Quick (``list is sorted (labelled)`` badSort )
 このロジックをコードで表現すると、次のようになります。
 
 ```fsharp
-let rec ``First element is <= than second, and tail is also sorted`` sortFn (aList:int list) = 
+let rec ``最初の要素は2番目の要素以下であり、残りの要素もソート済みである`` sortFn (aList:int list) = 
     let sortedList = aList |> sortFn 
     match sortedList with
     | [] -> true
@@ -828,14 +827,14 @@ let rec ``First element is <= than second, and tail is also sorted`` sortFn (aLi
     | first::second::tail -> 
         first <= second &&
         let subList = second::tail 
-        ``First element is <= than second, and tail is also sorted`` sortFn subList  
+        ``最初の要素は2番目の要素以下であり、残りの要素もソート済みである`` sortFn subList  
 ```
 
-このプロパティは、実際のソート関数で満たされます。
+このプロパティは、実際のソート関数で成立します。
 
 ```fsharp
 let goodSort = List.sort
-Check.Quick (``First element is <= than second, and tail is also sorted`` goodSort )
+Check.Quick (``最初の要素は2番目の要素以下であり、残りの要素もソート済みである`` goodSort )
 // OK、100個のテストに合格しました。
 ```
 
@@ -843,7 +842,7 @@ Check.Quick (``First element is <= than second, and tail is also sorted`` goodSo
 
 ```fsharp
 let badSort aList = []
-Check.Quick (``First element is <= than second, and tail is also sorted`` badSort )
+Check.Quick (``最初の要素は2番目の要素以下であり、残りの要素もソート済みである`` badSort )
 // OK、100個のテストに合格しました。
 
 let badSort2 aList = 
@@ -851,7 +850,7 @@ let badSort2 aList =
     | [] -> []
     | head::_ -> List.replicate (List.length aList) head 
 
-Check.Quick (``First element is <= than second, and tail is also sorted`` badSort2)
+Check.Quick (``最初の要素は2番目の要素以下であり、残りの要素もソート済みである`` badSort2)
 // OK、100個のテストに合格しました。
 ```
 
@@ -861,13 +860,13 @@ Check.Quick (``First element is <= than second, and tail is also sorted`` badSor
 
 ## EDFHは本当に問題なのか？
 
-最後のいくつかの例では、些細な、しかし間違った実装が、良い実装と同じようにプロパティを満たすことがよくあることに触れました。
+最後のいくつかの例では、些細な、しかし間違った実装でも、良い実装と同じようにプロパティが成立することがよくあることに触れました。
 
 しかし、*本当に*これに時間を費やす必要があるのでしょうか？つまり、最初の要素を複製するだけのソートアルゴリズムを実際にリリースした場合、すぐに明らかになるのではないでしょうか？
 
 確かに、本当に悪意のある実装が問題になる可能性は低いでしょう。
 一方、プロパティベースのテストは*テスト*プロセスではなく、*設計*プロセス、つまりシステムが実際に何をしようとしているのかを明確にするのに役立つ手法と考えるべきです。
-そして、設計の重要な側面が単純な実装だけで満たされている場合、見落としているものがあるのかもしれません。それを発見することで、設計がより明確になり、より堅牢になるでしょう。
+そして、設計の重要な側面が単純な実装だけで成立する場合、見落としているものがあるのかもしれません。それを発見することで、設計がより明確になり、より堅牢になるでしょう。
 
 ## 「変われば変わるほど、元のままだ」
 
@@ -884,14 +883,14 @@ Check.Quick (``First element is <= than second, and tail is also sorted`` badSor
 まず、古い友人である `sort` は冪等ですが（安定性を無視）、`reverse` は明らかに冪等ではありません。
 
 ```fsharp
-let ``sorting twice gives the same result as sorting once`` sortFn (aList:int list) =
+let ``2回ソートした結果は、1回ソートした結果と同じである`` sortFn (aList:int list) =
     let sortedOnce = aList |> sortFn 
     let sortedTwice = aList |> sortFn |> sortFn 
     sortedOnce = sortedTwice
 
 // テスト
 let goodSort = List.sort
-Check.Quick (``sorting twice gives the same result as sorting once`` goodSort )
+Check.Quick (``2回ソートした結果は、1回ソートした結果と同じである`` goodSort )
 // OK、100個のテストに合格しました。
 ```
 
@@ -911,7 +910,7 @@ type NonIdempotentService() =
     member this.Set value = 
         data <- value
 
-let ``querying NonIdempotentService after update gives the same result`` value1 value2 =
+let ``NonIdempotentServiceを更新後にクエリしても、同じ結果が得られる`` value1 value2 =
     let service = NonIdempotentService()
     service.Set value1
 
@@ -926,10 +925,10 @@ let ``querying NonIdempotentService after update gives the same result`` value1 
     get1 = get2 
 ```
 
-しかし、今テストしてみると、必要な冪等性プロパティを満たしていないことがわかります。
+しかし、今テストしてみると、必要な冪等性プロパティが成立していないことがわかります。
 
 ```fsharp
-Check.Quick ``querying NonIdempotentService after update gives the same result``
+Check.Quick ``NonIdempotentServiceを更新後にクエリしても、同じ結果が得られる``
 // 反証可能、2回のテスト後
 ```
 
@@ -944,7 +943,7 @@ type IdempotentService() =
     member this.SetAsOf (dt:DateTime) value = 
         data <- data |> Map.add dt value
 
-let ``querying IdempotentService after update gives the same result`` value1 value2 =
+let ``IdempotentServiceを更新後にクエリしても、同じ結果が得られる`` value1 value2 =
     let service = IdempotentService()
     let dt1 = DateTime.Now.AddMinutes(-1.0)
     service.SetAsOf dt1 value1
@@ -964,7 +963,7 @@ let ``querying IdempotentService after update gives the same result`` value1 val
 そして、これは動作します。
 
 ```fsharp
-Check.Quick ``querying IdempotentService after update gives the same result``
+Check.Quick ``IdempotentServiceを更新後にクエリしても、同じ結果が得られる``
 // OK、100個のテストに合格しました。
 ```
 
@@ -972,7 +971,7 @@ Check.Quick ``querying IdempotentService after update gives the same result``
 
 これを行う方法のヒントが必要な場合は、[冪等性パターン](https://blog.jonathanoliver.com/idempotency-patterns/)を検索すると、いくつかの良い結果が得られます。
 
-## "2つの頭脳は1つよりも優れている"
+## 「2つの頭脳は1つよりも優れている」
 
 そして最後に、重要なことですが、「テストオラクル」について説明します。テストオラクルとは、単に正しい答えを与える代替実装であり、結果をチェックするために使用できます。
 
@@ -1008,7 +1007,7 @@ module InsertionSort =
 これを用意したら、挿入ソートの結果と比較してテストするプロパティを書くことができます。
 
 ```fsharp
-let ``sort should give same result as insertion sort`` sortFn (aList:int list) = 
+let ``ソートの結果は、挿入ソートと同じである`` sortFn (aList:int list) = 
     let sorted1 = aList |> sortFn 
     let sorted2 = aList |> InsertionSort.sort
     sorted1 = sorted2 
@@ -1018,7 +1017,7 @@ let ``sort should give same result as insertion sort`` sortFn (aList:int list) =
 
 ```fsharp
 let goodSort = List.sort
-Check.Quick (``sort should give same result as insertion sort`` goodSort)
+Check.Quick (``ソートの結果は、挿入ソートと同じである`` goodSort)
 // OK、100個のテストに合格しました。
 ```
 
@@ -1026,7 +1025,7 @@ Check.Quick (``sort should give same result as insertion sort`` goodSort)
 
 ```fsharp
 let badSort aList = aList 
-Check.Quick (``sort should give same result as insertion sort`` badSort)
+Check.Quick (``ソートの結果は、挿入ソートと同じである`` badSort)
 // 反証可能、4回のテスト（6回の縮小）後
 // [1; 0]
 ```
@@ -1035,7 +1034,7 @@ Check.Quick (``sort should give same result as insertion sort`` badSort)
 
 また、*どちらの*実装が正しいかわからない場合に、2つの異なる実装をクロスチェックするために、テストオラクルアプローチを使用することもできます。
 
-例えば、私の投稿「['ローマ数字Kataの解説付き解説'](../posts/roman-numeral-kata.md)」では、ローマ数字を生成するための2つの全く異なるアルゴリズムを考え出しました。
+例えば、私の投稿「[「解説付きローマ数字カタ」の解説](../posts/roman-numeral-kata.md)」では、ローマ数字を生成するための2つの全く異なるアルゴリズムを考え出しました。
 これらを互いに比較して、一挙に両方をテストすることはできるでしょうか？
 
 最初のアルゴリズムは、ローマ数字がタリーに基づいていることを理解した上で、次のような単純なコードを作成しました。
@@ -1089,7 +1088,7 @@ let arabicToRomanUsingBiQuinary arabic =
 これで、2つの全く異なるアルゴリズムができました。これらを互いにクロスチェックして、同じ結果が得られるかどうかを確認できます。
 
 ```fsharp
-let ``biquinary should give same result as tallying`` arabic = 
+let ``バイナリ法とタリー法は、同じ結果を与える`` arabic = 
     let tallyResult = arabicToRomanUsingTallying arabic 
     let biquinaryResult = arabicToRomanUsingBiQuinary arabic 
     tallyResult = biquinaryResult 
@@ -1098,7 +1097,7 @@ let ``biquinary should give same result as tallying`` arabic =
 しかし、このコードを実行しようとすると、`String.replicate` の呼び出しにより、`ArgumentException: The input must be non-negative` が発生します。
 
 ```fsharp
-Check.Quick ``biquinary should give same result as tallying``
+Check.Quick ``バイナリ法とタリー法は、同じ結果を与える``
 // ArgumentException: The input must be non-negative.
 ```
 
@@ -1117,17 +1116,17 @@ let arabicNumber = Arb.Default.Int32() |> Arb.filter (fun i -> i > 0 && i <= 400
 
 次に、`Prop.forAll` ヘルパーを使用して、*「arabicNumber」のみを使用するように制約された*新しいプロパティを作成します。
 
-このプロパティには、「arabicNumberのすべての値について、バイナリはタリーと同じ結果を返す」という、かなり巧妙な名前を付けます。
+このプロパティには、「arabicNumberのすべての値について、バイナリ法とタリー法は同じ結果を与える」という、かなり巧妙な名前を付けます。
 
 ```fsharp
-let ``for all values of arabicNumber biquinary should give same result as tallying`` = 
+let ``arabicNumberのすべての値について、バイナリ法とタリー法は同じ結果を与える`` = 
     Prop.forAll arabicNumber ``biquinary should give same result as tallying`` 
 ```
 
 最後に、クロスチェックテストを実行できます。
 
 ```fsharp
-Check.Quick ``for all values of arabicNumber biquinary should give same result as tallying``
+Check.Quick ``arabicNumberのすべての値について、バイナリ法とタリー法は同じ結果を与える``
 // OK、100個のテストに合格しました。
 ```
 
@@ -1163,7 +1162,7 @@ Check.Quick ``for all values of arabicNumber biquinary should give same result a
 
 ![Zendo](../assets/img/zendo1.png)
 
-白い石はプロパティが満たされていることを意味し、黒い石は失敗を意味します。ここのルールがわかりますか？
+白い石はプロパティが成立していることを意味し、黒い石は失敗を意味します。ここのルールがわかりますか？
 「セットには地面に触れていない黄色のピラミッドがなければならない」のようなものだと思います。
 
 なるほど、Zendoは実際にはプロパティベースのテストからインスピレーションを得たものではありませんが、
@@ -1219,12 +1218,12 @@ d.Amount  // 7
 
 もう一度すべてを検討してみましょう。
 
-* 同じ結果に至る異なるパス
+* 異なるパス、同じ結果
 * 逆演算
 * 不変条件
 * 冪等性
 * 構造帰納法
-* 検証が容易
+* 検証は簡単
 * テストオラクル
 
 今のところ、「異なるパス」は飛ばしましょう。逆演算はどうでしょうか？使用できる逆演算はありますか？
@@ -1232,13 +1231,13 @@ d.Amount  // 7
 はい、セッターとゲッターは、プロパティを作成できる逆演算を形成します。
 
 ```fsharp
-let ``set then get should give same result`` value = 
+let ``設定してから取得した結果は、同じである`` value = 
     let obj = Dollar.Create 0
     obj.Amount <- value
     let newValue = obj.Amount
     value = newValue 
 
-Check.Quick ``set then get should give same result`` 
+Check.Quick ``設定してから取得した結果は、同じである`` 
 // OK、100個のテストに合格しました。
 ```
 
@@ -1246,7 +1245,7 @@ Check.Quick ``set then get should give same result``
 そのためのプロパティを以下に示します。
 
 ```fsharp
-let ``set amount is idempotent`` value = 
+let ``金額の設定は冪等である`` value = 
     let obj = Dollar.Create 0
     obj.Amount <- value
     let afterFirstSet = obj.Amount
@@ -1254,20 +1253,20 @@ let ``set amount is idempotent`` value =
     let afterSecondSet = obj.Amount
     afterFirstSet = afterSecondSet 
 
-Check.Quick ``set amount is idempotent`` 
+Check.Quick ``金額の設定は冪等である`` 
 // OK、100個のテストに合格しました。
 ```
 
 「構造帰納法」のプロパティはありますか？ いいえ、このケースには関係ありません。
 
-「検証が容易」なプロパティはありますか？ 明らかなものはありません。
+「検証は簡単」なプロパティはありますか？ 明らかなものはありません。
  
 最後に、テストオラクルはありますか？ いいえ。これも関係ありませんが、実際に複雑な通貨管理システムを設計している場合は、
 サードパーティシステムと結果をクロスチェックすると非常に役立つ可能性があります。
 
 ### 不変のDollarのプロパティ
 
-告白します！上記のコードでは少しズルをして、可変クラスを作成しました。これは、ほとんどのOOオブジェクトが設計される方法です。
+実は、上記のコードでは少しばかりズルをしてしまい、値を変更できるクラスを作成してしまいました。オブジェクト指向のプログラミングでは、多くの場合、このように設計されるのですが……。
 
 しかし、「テスト駆動開発入門」では、Kentはすぐにその問題に気づき、不変クラスに変更しているので、私も同じことをしましょう。
 
@@ -1300,14 +1299,14 @@ d3.Amount  // 7
 
 `Times` メソッドを見てみましょう。どのようにテストすればよいでしょうか？どの戦略を使用できるでしょうか？
 
-「同じ結果に至る異なるパス」が非常に適用できると思います。「ソート」で行ったのと同じように、「内側」と「外側」の両方でtimes演算を行い、同じ結果が得られるかどうかを確認できます。
+「異なるパス、同じ結果」の戦略が有効だと考えられます。ソートの場合と同様に、times演算を「内側」と「外側」の両方で行い、結果が同じになるかどうかを確認できます。
 
 ![Dollar times](../assets/img/property_dollar_times.png)
 
 このプロパティをコードで表現すると、次のようになります。
 
 ```fsharp
-let ``create then times should be same as times then create`` start multiplier = 
+let ``作成してから乗算した結果は、乗算してから作成した結果と同じである`` start multiplier = 
     let d0 = Dollar.Create start
     let d1 = d0.Times(multiplier)
     let d2 = Dollar.Create (start * multiplier)     
@@ -1317,7 +1316,7 @@ let ``create then times should be same as times then create`` start multiplier =
 素晴らしい！動作するかどうか見てみましょう。
 
 ```fsharp
-Check.Quick ``create then times should be same as times then create``
+Check.Quick ``作成してから乗算した結果は、乗算してから作成した結果と同じである``
 // 反証可能、1回のテスト後
 ```
 
@@ -1329,18 +1328,19 @@ Check.Quick ``create then times should be same as times then create``
 忘れないうちに、それをコード化しましょう。
 
 ```fsharp
-let ``dollars with same amount must be equal`` amount = 
+let ``同じ金額を持つドルは、等しい`` amount = 
     let d1 = Dollar.Create amount 
     let d2 = Dollar.Create amount 
     d1 = d2
 
-Check.Quick ``dollars with same amount must be equal`` 
+Check.Quick ``同じ金額を持つドルは、等しい`` 
 // 反証可能、1回のテスト後
 ```
 
-そこで、`IEquatable` などをサポートすることで、これを修正する必要があります。
+さて、コードを修正して、`IEquatable` などをサポートする必要がありますね。
 
-よろしければ、そうしてください。私はF#のレコード型に切り替えて、等価性を無料で手に入れます。
+そうやっても良いのですが、私はF#のレコード型に切り替えるので、等価比較は自動的にできます！
+
 
 ### Dollarプロパティ - バージョン3
 
@@ -1357,13 +1357,13 @@ type Dollar = {amount:int }
         {amount=amount}
 ```
 
-そして、2つのプロパティが満たされました。
+そして、2つのプロパティが成立しました。
 
 ```fsharp
-Check.Quick ``dollars with same amount must be equal`` 
+Check.Quick ``同じ金額を持つドルは、等しい`` 
 // OK、100個のテストに合格しました。
 
-Check.Quick ``create then times should be same as times then create``
+Check.Quick ``作成してから乗算した結果は、乗算してから作成した結果と同じである``
 // OK、100個のテストに合格しました。
 ```
 
@@ -1374,14 +1374,14 @@ Check.Quick ``create then times should be same as times then create``
 コードは以下のようになります。
 
 ```fsharp
-let ``create then times then get should be same as times`` start multiplier = 
+let ``作成してから乗算し、値を取得した結果は、乗算した結果と同じである`` start multiplier = 
     let d0 = Dollar.Create start
     let d1 = d0.Times(multiplier)
     let a1 = d1.amount
     let a2 = start * multiplier     
     a1 = a2
 
-Check.Quick ``create then times then get should be same as times``
+Check.Quick ``作成してから乗算し、値を取得した結果は、乗算した結果と同じである``
 // OK、100個のテストに合格しました。
 ```
 
@@ -1394,7 +1394,7 @@ Check.Quick ``create then times then get should be same as times``
 コードは以下の通りです。
 
 ```fsharp
-let ``create then times then add should be same as times then add then create`` start multiplier adder = 
+let ``作成してから乗算し、加算した結果は、乗算し、加算してから作成した結果と同じである`` start multiplier adder = 
     let d0 = Dollar.Create start
     let d1 = d0.Times(multiplier)
     let d2 = d1.Add(adder)
@@ -1402,7 +1402,7 @@ let ``create then times then add should be same as times then add then create`` 
     let d3 = Dollar.Create directAmount 
     d2 = d3
 
-Check.Quick ``create then times then add should be same as times then add then create`` 
+Check.Quick ``作成してから乗算し、加算した結果は、乗算し、加算してから作成した結果と同じである`` 
 // OK、100個のテストに合格しました。
 ```
 
@@ -1410,9 +1410,9 @@ Check.Quick ``create then times then add should be same as times then add then c
 
 ### Dollarプロパティ - バージョン4
 
-では、これで終わりにしましょうか？私はそうは思いません。
+では、これで完成としてしまって良いのでしょうか？ いえ、まだです！
 
-コードの臭いがし始めています。この `(start * multiplier) + adder` コードは、ロジックが重複しているように見え、脆くなる可能性があります。
+コードから嫌な臭いが漂ってきています。この `(start * multiplier) + adder` のようなコードは、ロジックの重複があり、変更に弱くなってしまいそうです。
 
 これらのケースすべてに共通する部分を抽象化することはできるでしょうか？
 
@@ -1446,7 +1446,7 @@ type Dollar = {amount:int }
 これで、プロパティのコードは以下のようになります。
 
 ```fsharp
-let ``create then map should be same as map then create`` start f = 
+let ``作成してからマップした結果は、マップしてから作成した結果と同じである`` start f = 
     let d0 = Dollar.Create start
     let d1 = d0.Map f  
     let d2 = Dollar.Create (f start)     
@@ -1460,7 +1460,7 @@ let ``create then map should be same as map then create`` start f =
 試してみてください。動作します。
 
 ```fsharp
-Check.Quick ``create then map should be same as map then create`` 
+Check.Quick ``作成してからマップした結果は、マップしてから作成した結果と同じである`` 
 // OK、100個のテストに合格しました。
 ```
 
@@ -1471,7 +1471,7 @@ Check.Quick ``create then map should be same as map then create``
 現状のプロパティにはちょっとした問題があります。FsCheckが生成している関数が何であるかを確認したい場合、Verboseモードは役に立ちません。
 
 ```fsharp
-Check.Verbose ``create then map should be same as map then create`` 
+Check.Verbose ``作成してからマップした結果は、マップしてから作成した結果と同じである`` 
 ```
 
 出力は以下のようになります。
@@ -1498,7 +1498,7 @@ OK、100個のテストに合格しました。
 しかし、次のように、関数を特別な `F` ケースでラップすることで、FsCheckにさらに役立つ情報を表示するように指示できます。
 
 ```fsharp
-let ``create then map should be same as map then create2`` start (F (_,f)) = 
+let ``作成してからマップした結果は、マップしてから作成した結果と同じである２`` start (F (_,f)) = 
     let d0 = Dollar.Create start
     let d1 = d0.Map f  
     let d2 = Dollar.Create (f start)     
@@ -1508,7 +1508,7 @@ let ``create then map should be same as map then create2`` start (F (_,f)) =
 そして、Verboseモードを使用すると...
 
 ```fsharp
-Check.Verbose ``create then map should be same as map then create2`` 
+Check.Verbose ``作成してからマップした結果は、マップしてから作成した結果と同じである２`` 
 ```
 
 ...使用された各関数の詳細なログが表示されます。
@@ -1535,22 +1535,22 @@ OK、100個のテストに合格しました。
 
 各 `{ 2->-2 }`、`{ 10->28 }` などは、その反復で使用された関数を表しています。
 
-＠  tdd-vs-pbt
+<a id="tdd-vs-pbt"></a>
 
 ## TDDとプロパティベースのテスト
 
-プロパティベースのテスト（PBT）はTDDとどのように適合するのでしょうか？これはよくある質問なので、私の考えを簡単に説明しましょう。
+プロパティベースのテスト（PBT）はTDDとどのように連携するのでしょうか？これはよくある質問なので、私の考えを簡単に説明させてください。
 
 まず、TDDは*具体的な例*を扱いますが、PBTは*普遍的なプロパティ*を扱います。
 
-前回の投稿で述べたように、例は設計への入り口として有用であり、ドキュメントの一種になり得ると考えています。
-しかし、私の意見では、例に基づいたテスト*だけ*に頼るのは間違いです。
+前回の投稿で述べたように、実例は設計への入り口として有用であり、ドキュメントの一種になり得ると考えています。
+しかし、私の意見では、実例に基づいたテスト*だけ*に頼るのは間違いです。
 
 プロパティベースのアプローチは、例に基づいたテストに比べて、次のような多くの利点があります。
 
 * プロパティベースのテストはより一般的であるため、脆さが軽減されます。
-* プロパティベースのテストは、一連の例よりも、要件をより適切かつ簡潔に記述します。
-* その結果、1つのプロパティベースのテストで、多くの例に基づいたテストを置き換えることができます。
+* プロパティベースのテストは、実例をいくつも並べるよりも、要件をより適切かつ簡潔に記述します。
+* その結果、1つのプロパティベースのテストで、多くの実例に基づいたテストを置き換えることができます。
 * ランダムな入力を生成することで、プロパティベースのテストは、nullの処理、データの欠落、ゼロ除算、負の数など、見落としていた問題を明らかにすることがよくあります。
 * プロパティベースのテストは、あなたに考えさせます。
 * プロパティベースのテストは、あなたにクリーンな設計を強制します。
