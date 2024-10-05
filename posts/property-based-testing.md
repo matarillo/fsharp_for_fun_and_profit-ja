@@ -1207,10 +1207,10 @@ let rightIdentityProperty x =
  
 ```fsharp
 type AdditionSpecification =
-    static member ``Commutative`` x y = commutativeProperty x y
-    static member ``Associative`` x y z = associativeProperty x y z 
-    static member ``Left Identity`` x = leftIdentityProperty x 
-    static member ``Right Identity`` x = rightIdentityProperty x 
+    static member ``交換法則`` x y = commutativeProperty x y
+    static member ``結合法則`` x y z = associativeProperty x y z 
+    static member ``左単位元`` x = leftIdentityProperty x 
+    static member ``右単位元`` x = rightIdentityProperty x 
 
 Check.QuickAll<AdditionSpecification>()
 ```
@@ -1227,10 +1227,10 @@ Check.QuickAll<AdditionSpecification>()
 
 ```fsharp
 type AdditionSpecification =
-    static member ``Commutative`` x y = commutativeProperty x y
-    static member ``Associative`` x y z = associativeProperty x y z 
-    static member ``Left Identity`` x = leftIdentityProperty x 
-    static member ``Right Identity`` x = rightIdentityProperty x 
+    static member ``交換法則`` x y = commutativeProperty x y
+    static member ``結合法則`` x y z = associativeProperty x y z 
+    static member ``左単位元`` x = leftIdentityProperty x 
+    static member ``右単位元`` x = rightIdentityProperty x 
 
     // いくつかの例も
     static member ``1 + 2 = 3``() =  
