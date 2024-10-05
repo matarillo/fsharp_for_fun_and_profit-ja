@@ -1,110 +1,110 @@
 ---
 layout: post
-title: "An introduction to property-based testing"
-description: "Or, why you should be using FsCheck and QuickCheck"
+title: "プロパティベースのテスト入門"
+description: "または、FsCheckとQuickCheckを使うべき理由"
 categories: ["TDD"]
 ---
 
-> This post is part of the [F# Advent Calendar in English 2014](https://sergeytihon.wordpress.com/2014/11/24/f-advent-calendar-in-english-2014/) project.
-> Check out all the other great posts there! And special thanks to Sergey Tihon for organizing this.
+> この記事は[F# Advent Calendar in English 2014](https://sergeytihon.wordpress.com/2014/11/24/f-advent-calendar-in-english-2014/) の一部です。
+> 他の素晴らしい記事もぜひご覧ください！ また、企画してくれたSergey Tihonに感謝します。
 
-*UPDATE: I did a talk on property-based testing based on these posts. [Slides and video here.](http://fsharpforfunandprofit.com/pbt/)*
+*更新：これらの記事に基づいて、プロパティベースのテストに関する講演を行いました。[スライドとビデオはこちら](http://fsharpforfunandprofit.com/pbt/)*
 
-Let's start with a discussion that I hope never to have:
+こんなやり取りは、できればしたくありません。
 
 ```text
-Me to co-worker: "We need a function that will add two numbers together, would you mind implementing it?" 
-(a short time later) 
-Co-worker: "I just finished implementing the 'add' function" 
-Me: "Great, have you written unit tests for it?" 
-Co-worker: "You want tests as well?" (rolls eyes) "Ok." 
-(a short time later) 
-Co-worker: "I just wrote a test. Look! 'Given 1 + 2, I expect output is 3'. " 
-Co-worker: "So can we call it done now?" 
-Me: "Well that's only *one* test. How do you know that it doesn't fail for other inputs?" 
-Co-worker: "Ok, let me do another one." 
-(a short time later) 
-Co-worker: "I just wrote a another awesome test. 'Given 2 + 2, I expect output is 4'" 
-Me: "Yes, but you're still only testing for special cases. How do you know that it doesn't fail for other inputs you haven't thought of?" 
-Co-worker: "You want even *more* tests?"
-(mutters "slavedriver" under breath and walks away) 
+私「2つの数字を足し合わせる関数が必要なんだけど、実装してくれる？」
+（少し後）
+同僚「'add'関数の実装が終わったよ」
+私「いいね。単体テストは書いた？」
+同僚「テストも必要なの？」（目を回す）「わかったよ」
+（少し後）
+同僚「テストを書いたよ。見て！ '1 + 2を入力したら、出力は3になるはず'」
+同僚「これで完了でいいよね？」
+私「それは1つのテストでしかないよ。他の入力で失敗しないってどうしてわかるの？」
+同僚「わかった、もう1つやってみるよ」
+（少し後）
+同僚「すごいテストをもう1つ書いたよ。'2 + 2を入力したら、出力は4になるはず'。これでどう？」
+私「でも、まだ特別な場合しかテストしてないよ。考えつかなかった他の入力で失敗しないってどうしてわかるの？」
+同僚「もっとテストが必要なの？」
+（「鬼だ」とつぶやいて立ち去る）
 ```
 
-But seriously, my imaginary co-worker's complaint has some validity: **How many tests are enough? **
+冗談はさておき、想像上の同僚の不満には一理あります。**テストはいくつ書けば十分なのでしょうか？**
 
-So now imagine that rather than being a developer, you are a test engineer who is responsible for testing that the "add" function is implemented correctly.
+今度は、開発者ではなく、「add」関数が正しく実装されているかをテストするテストエンジニアだと想像してみてください。
 
-Unfortunately for you, the implementation is being written by a burned-out, always lazy and often malicious programmer,
-who I will call *The Enterprise Developer From Hell*, or "EDFH".
-(The EDFH has a [cousin who you might have heard of](https://en.wikipedia.org/wiki/Bastard_Operator_From_Hell)).
+あいにく、実装を担当しているのは、やる気をなくしていて、いつも怠けていて、しばしば悪意のあるプログラマーです。
+このプログラマーを*地獄のエンタープライズ開発者*、略して「EDFH」と呼ぶことにします
+（EDFHには[従兄弟がいます](https://en.wikipedia.org/wiki/Bastard_Operator_From_Hell)。もしかしたら聞いたことがあるかもしれません）。
 
-You are practising test-driven-development, enterprise-style, which means that you write a test, and then the EDFH implements code that passes the test.
- 
-So you start with a test like this (using vanilla NUnit style):
+あなたは、テスト駆動開発をエンタープライズスタイルで実践しています。つまり、テストを書いてから、EDFHがテストに合格するコードを実装します。
+ 
+そこで、（普通のNUnitスタイルを使って）次のようなテストから始めます。
 
 ```fsharp
 [<Test>]
 let ``When I add 1 + 2, I expect 3``()=
-    let result = add 1 2
-    Assert.AreEqual(3,result)
+    let result = add 1 2
+    Assert.AreEqual(3,result)
 ```
 
-The EDFH then implements the `add` function like this:
+EDFHは、次のように`add`関数を実装します。
 
 ```fsharp
 let add x y =
-    if x=1 && y=2 then 
-        3
-    else
-        0    
+    if x=1 && y=2 then 
+        3
+    else
+        0    
 ```
 
-And your test passes!
+そして、テストはパスします！
 
-When you complain to the EDFH, they say that they are doing TDD properly, and only [writing the minimal code that will make the test pass](http://www.typemock.com/test-driven-development-tdd/).
+EDFHに文句を言うと、彼らはTDDを正しく行っており、[テストに合格する最小限のコードしか書いていない](https://www.typemock.com/general-unit-testing-page-page4/)と言うのです。
 
-Fair enough. So you write another test:
+なるほど。そこで、別のテストを書きます。
 
 ```fsharp
 [<Test>]
 let ``When I add 2 + 2, I expect 4``()=
-    let result = add 2 2
-    Assert.AreEqual(4,result)
+    let result = add 2 2
+    Assert.AreEqual(4,result)
 ```
 
-The EDFH then changes the implementation of the `add` function to this:
+EDFHは、`add`関数の実装を次のように変更します。
 
 ```fsharp
 let add x y =
-    if x=1 && y=2 then 
-        3
-    else if x=2 && y=2 then 
-        4
-    else
-        0    
+    if x=1 && y=2 then 
+        3
+    else if x=2 && y=2 then 
+        4
+    else
+        0    
 ```
 
-When you again complain to the EDFH, they point out that this approach is actually a best practice. Apparently it's called ["The Transformation Priority Premise"](http://blog.8thlight.com/uncle-bob/2013/05/27/TheTransformationPriorityPremise.html).
+再びEDFHに文句を言うと、このアプローチは実際にはベストプラクティスであると指摘してきます。どうやらこれは「[変換優先原則](https://blog.cleancoder.com/uncle-bob/2013/05/27/TheTransformationPriorityPremise.html)」と呼ばれているようです。
 
-At this point, you start thinking that the EDFH is being malicious, and that this back-and-forth could go on forever!
+この時点で、EDFHが悪意を持っているのではないかと考え始め、このやり取りが永遠に続くのではないかと不安になります！
 
-## Beating the malicious programmer
+## 悪意のあるプログラマーに打ち勝つ
 
-So the question is, what kind of test could you write so that a malicious programmer could not create an incorrect implementation, even if they wanted to?
+そこで問題は、悪意のあるプログラマーがどんなに頑張っても、間違った実装を作成できないようなテストをどのように書けばよいのでしょうか？
 
-Well, you could start with a much larger list of known results, and mix them up a bit.
+そうですね、既知の結果をもっとたくさんリストアップして、少し混ぜ合わせてみるところから始められます。
 
 ```fsharp
 [<Test>]
 let ``When I add two numbers, I expect to get their sum``()=
-    for (x,y,expected) in [ (1,2,3); (2,2,4); (3,5,8); (27,15,42); ]
-        let actual = add x y
-        Assert.AreEqual(expected,actual)
+    for (x,y,expected) in [ (1,2,3); (2,2,4); (3,5,8); (27,15,42); ]
+        let actual = add x y
+        Assert.AreEqual(expected,actual)
 ```
 
-But the EDFH is tireless, and will update the implementation to include all of these cases as well.
+しかし、EDFHは疲れを知らず、これらのケースもすべて含むように実装を更新してしまいます。
 
-A much better approach is to generate random numbers and use those for inputs, so that a malicious programmer could not possibly know what to do in advance.
+もっと良い方法は、乱数を生成して入力に使うことです。そうすれば、悪意のあるプログラマーは事前に何をするべきかを知ることはできません。
 
 ```fsharp
 let rand = System.Random()
@@ -112,283 +112,283 @@ let randInt() = rand.Next()
 
 [<Test>]
 let ``When I add two random numbers, I expect their sum``()=
-    let x = randInt()
-    let y = randInt()
-    let expected = x + y
-    let actual = add x y
-    Assert.AreEqual(expected,actual)
+    let x = randInt()
+    let y = randInt()
+    let expected = x + y
+    let actual = add x y
+    Assert.AreEqual(expected,actual)
 ```
 
 
-If the test looks like this, then the EDFH will be *forced* to implement the `add` function correctly! 
+テストがこのように書かれていれば、EDFHは`add`関数を正しく実装せざるを得なくなります！
 
-One final improvement -- the EDFH might just get lucky and have picked numbers that work by chance, so let's repeat the random number test a number of times, say 100 times.
+最後の改良点は、EDFHがたまたまうまくいく数字を選んでしまうかもしれないので、乱数テストを何回か、例えば100回繰り返してみましょう。
 
 ```fsharp
 [<Test>]
 let ``When I add two random numbers (100 times), I expect their sum``()=
-    for _ in [1..100] do
-        let x = randInt()
-        let y = randInt()
-        let expected = x + y
-        let actual = add x y
-        Assert.AreEqual(expected,actual)
+    for _ in [1..100] do
+        let x = randInt()
+        let y = randInt()
+        let expected = x + y
+        let actual = add x y
+        Assert.AreEqual(expected,actual)
 ```
 
 
-So now we're done!
+これで完了です！
 
-Or are we?
-    
-## Property based testing
+本当にそうでしょうか？
+    
+## プロパティベースのテスト
 
-There's just one problem. In order to test the `add` function, you're making use of the `+` function. In other words, you are using one implementation to test another.
+1つだけ問題があります。`add`関数をテストするために、`+`関数を使っています。つまり、ある実装を使って別のものをテストしているのです。
 
-In some cases that is acceptable (see the use of "test oracles" in a following post), but in general, it's a bad idea to have your tests duplicate the code that you are testing!
-It's a waste of time and effort, and now you have two implementations to build and keep up to date.
+場合によっては許容されますが（後の記事の「テストオラクル」の使用を参照）、一般的に、テスト対象のコードをテストで複製するのは悪い考えです！
+時間と労力の無駄であり、2つの実装を構築して最新の状態に保つ必要が出てきます。
 
-So if you can't test by using `+`, how *can* you test?
+では、`+`を使わずにテストできない場合、どのようにテストすればよいのでしょうか？
 
-The answer is to create tests that focus on the *properties* of the function -- the "requirements".
-These properties should be things that are true for *any* correct implementation.
+答えは、関数の*プロパティ*、つまり「要件」に焦点を当てたテストを作成することです。
+これらのプロパティは、*どんな*正しい実装でも当てはまるものでなければなりません。
 
-So let's think about what the properties of an `add` function are.
+では、`add`関数のプロパティについて考えてみましょう。
 
-One way of getting started is to think about how `add` differs from other similar functions. 
+始めるにあたって、`add`関数が他の類似関数とどう違うのかを考えてみましょう。
 
-So for example, what is the difference between `add` and `subtract`? Well, for `subtract`, the order of the parameters makes a difference, while for `add` it doesn't.
+例えば、`add`と`subtract`の違いは何でしょうか？ `subtract`ではパラメーターの順序が重要ですが、`add`では重要ではありません。
 
-So there's a good property to start with. It doesn't depend on addition itself, but it does eliminate a whole class of incorrect implementations.
+ですから、良いプロパティがあります。それは加算自体に依存しませんが、間違った実装のクラス全体を除外してくれます。
 
 ```fsharp
 [<Test>]
 let ``When I add two numbers, the result should not depend on parameter order``()=
-    for _ in [1..100] do
-        let x = randInt()
-        let y = randInt()
-        let result1 = add x y
-        let result2 = add y x // reversed params
-        Assert.AreEqual(result1,result2)
+    for _ in [1..100] do
+        let x = randInt()
+        let y = randInt()
+        let result1 = add x y
+        let result2 = add y x // パラメーターを逆にする
+        Assert.AreEqual(result1,result2)
 ```
 
-That's a good start, but it doesn't stop the EDFH. The EDFH could still implement `add` using `x * y` and this test would pass!
+良いスタートですが、これではEDFHを止めることはできません。EDFHは`x * y`を使って`add`を実装することもでき、このテストはパスしてしまいます。
 
-So now what about the difference between `add` and `multiply`? What does addition really mean?
+では、`add`と`multiply`の違いはどうでしょうか？ 加算とは実際にはどういう意味でしょうか？
 
-We could start by testing with something like this, which says that `x + x` should the same as `x * 2`:
+例えば、`x + x` は `x * 2` と同じになるはず、というようなテストから始めてみましょうか。
 
 ```fsharp
-let result1 = add x x   
-let result2 = x * 2     
+let result1 = add x x   
+let result2 = x * 2     
 Assert.AreEqual(result1,result2)
 ```
 
-But now we are assuming the existence of multiplication!  Can we define a property that *only* depends on `add` itself?
+でも、これだと乗算の存在を前提としてしまいますね！ `add` だけで定義できるプロパティって、作れるのでしょうか？
 
-One very useful approach is to see what happens when the function is repeated more than once. That is, what if you `add` and then `add` to the result of that?
+1つの有効な方法は、関数を複数回繰り返すとどうなるかを見てみることです。 `add` した結果に、さらに `add` するとどうなるでしょう？
 
-That leads to the idea that two `add 1`s is the same as one `add 2`. Here's the test:
+そこから、「`add 1` を2回行う」のと「`add 2` を1回行う」のは同じ、という考えが導き出せます。テストはこんな感じです。
 
 ```fsharp
 [<Test>]
 let ``Adding 1 twice is the same as adding 2``()=
-    for _ in [1..100] do
-        let x = randInt()
-        let y = randInt()
-        let result1 = x |> add 1 |> add 1
-        let result2 = x |> add 2 
-        Assert.AreEqual(result1,result2)
+    for _ in [1..100] do
+        let x = randInt()
+        let y = randInt()
+        let result1 = x |> add 1 |> add 1
+        let result2 = x |> add 2 
+        Assert.AreEqual(result1,result2)
 ```
 
-That's great! `add` works perfectly with this test, while `multiply` doesn't. 
+素晴らしいですね！ `add` はこのテストで完璧に動作しますが、 `multiply` は動作しません。
 
-However, note that the EDFH could still implement `add` using `y - x` and this test would pass!
+ただし、EDFHは `y - x` を使って `add` を実装することもできてしまい、このテストもパスしてしまう可能性があることに注意してください。
 
-Luckily, we have the "parameter order" test above as well.
-So the combination of both of these tests should narrow it down so that there is only one correct implementation, surely?
+幸いなことに、先ほど「パラメーターの順序」テストも作成しました。
+2つのテストを組み合わせれば、正しい実装に絞り込めるはずです。きっと。
 
-After submitting this test suite we find out the EDFH has written an implementation that passes both these tests. Let's have a look:
+このテストスイートを提出した後、EDFHが両方のテストに合格する実装を書いたことが判明しました。見てみましょう。
 
 ```fsharp
-let add x y = 0  // malicious implementation
+let add x y = 0  // 悪意のある実装
 ```
 
-Aarrghh! What happened? Where did our approach go wrong?
+うあー！ どうして？ どこで間違えたのでしょうか？
 
-Well, we forgot to force the implementation to actually use the random numbers we were generating! 
+実は、生成した乱数を実際に使うように実装を強制することを忘れていました！
 
-So we need to ensure that the implementation does indeed *do* something with the parameters that are passed into it.
-We're going to have to check that the result is somehow connected to the input in a specific way.
+実装が、渡されたパラメーターを使って実際に何かをするようにする必要があります。
+結果が入力と特定の方法でちゃんと繋がっていることを確認しなければなりません。
 
-Is there a trivial property of `add` that we know the answer to without reimplementing our own version?
+独自のバージョンを再実装せずに答えがわかるような、`add`の単純なプロパティは、何かないでしょうか？
 
-Yes! 
+あります！
 
-What happens when you add zero to a number? You always get the same number back.
+ある数にゼロを足すとどうなるでしょう？ 常に同じ数が返ってきます。
 
 ```fsharp
 [<Test>]
 let ``Adding zero is the same as doing nothing``()=
-    for _ in [1..100] do
-        let x = randInt()
-        let result1 = x |> add 0
-        let result2 = x  
-        Assert.AreEqual(result1,result2)
+    for _ in [1..100] do
+        let x = randInt()
+        let result1 = x |> add 0
+        let result2 = x  
+        Assert.AreEqual(result1,result2)
 ```
 
-So now we have a set of properties that can be used to test any implementation of `add`, and that force the EDFH to create a correct implementation:
+これで、どんな`add`の実装でもテストできるプロパティのセットができました。EDFHは正しい実装を作成せざるを得なくなります。
 
-## Refactoring the common code
+## 共通コードのリファクタリング
 
-There's quite a bit of duplicated code in these three tests. Let's do some refactoring.
+これらの3つのテストには、重複したコードがかなりありますね。リファクタリングしましょう。
 
-First, we'll write a function called `propertyCheck` that does the work of generating 100 pairs of random ints. 
+まず、100組のランダムな整数を生成する処理を行う`propertyCheck`という関数を記述します。
 
-`propertyCheck` will also need a parameter for the property itself. This will be a function that takes two ints and returns a bool:
+`propertyCheck`は、プロパティ自体のパラメーターも必要です。これは、2つの整数を受け取り、ブール値を返す関数になります。
 
 ```fsharp
 let propertyCheck property = 
-    // property has type: int -> int -> bool
-    for _ in [1..100] do
-        let x = randInt()
-        let y = randInt()
-        let result = property x y
-        Assert.IsTrue(result)
+    // property の型は int -> int -> bool
+    for _ in [1..100] do
+        let x = randInt()
+        let y = randInt()
+        let result = property x y
+        Assert.IsTrue(result)
 ```
 
-With this in place, we can redefine one of the tests by pulling out the property into a separate function, like this:
+これで、プロパティを別の関数に抜き出すことで、テストの1つを次のように再定義できます。
 
 ```fsharp
 let commutativeProperty x y = 
-    let result1 = add x y
-    let result2 = add y x // reversed params
-    result1 = result2
+    let result1 = add x y
+    let result2 = add y x // パラメーターを逆にする
+    result1 = result2
 
 [<Test>]
 let ``When I add two numbers, the result should not depend on parameter order``()=
-    propertyCheck commutativeProperty 
+    propertyCheck commutativeProperty 
 ```
 
-We can also do the same thing for the other two properties.
+他の2つのプロパティについても、同じことができます。
 
-After the refactoring, the complete code looks like this:
+リファクタリング後、完全なコードは次のようになります。
 
 ```fsharp
 let rand = System.Random()
 let randInt() = rand.Next()
 
-let add x y = x + y  // correct implementation
+let add x y = x + y  // 正しい実装
 
 let propertyCheck property = 
-    // property has type: int -> int -> bool
-    for _ in [1..100] do
-        let x = randInt()
-        let y = randInt()
-        let result = property x y
-        Assert.IsTrue(result)
+    // property の型は int -> int -> bool
+    for _ in [1..100] do
+        let x = randInt()
+        let y = randInt()
+        let result = property x y
+        Assert.IsTrue(result)
 
 let commutativeProperty x y = 
-    let result1 = add x y
-    let result2 = add y x // reversed params
-    result1 = result2
+    let result1 = add x y
+    let result2 = add y x // パラメーターを逆にする
+    result1 = result2
 
 [<Test>]
 let ``When I add two numbers, the result should not depend on parameter order``()=
-    propertyCheck commutativeProperty 
+    propertyCheck commutativeProperty 
 
 let adding1TwiceIsAdding2OnceProperty x _ = 
-    let result1 = x |> add 1 |> add 1
-    let result2 = x |> add 2 
-    result1 = result2
+    let result1 = x |> add 1 |> add 1
+    let result2 = x |> add 2 
+    result1 = result2
 
 [<Test>]
 let ``Adding 1 twice is the same as adding 2``()=
-    propertyCheck adding1TwiceIsAdding2OnceProperty 
+    propertyCheck adding1TwiceIsAdding2OnceProperty 
 
 let identityProperty x _ = 
-    let result1 = x |> add 0
-    result1 = x
+    let result1 = x |> add 0
+    result1 = x
 
 [<Test>]
 let ``Adding zero is the same as doing nothing``()=
-    propertyCheck identityProperty 
+    propertyCheck identityProperty 
 ```
 
 
-## Reviewing what we have done so far
+## ここまでのまとめ
 
-We have defined a set of properties that any implementation of `add` should satisfy:
+ここまでで、どんな`add`の実装でも満たすべきプロパティのセットを定義しました。
 
-* The parameter order doesn't matter ("commutativity" property)
-* Doing `add` twice with 1 is the same as doing `add` once with 2
-* Adding zero does nothing  ("identity" property)
+* パラメーターの順序は関係ない（「交換法則」プロパティ）
+* `add`を1で2回行うのは、`add`を2で1回行うのと同じ
+* ゼロを足しても何も変わらない（「単位元」プロパティ）
 
-What's nice about these properties is that they work with *all* inputs, not just special magic numbers. But more importantly, they show us the core essence of addition.
+これらのプロパティの良い点は、特別なマジックナンバーだけでなく、*すべての*入力で機能することです。しかし、もっと重要なのは、加算の本質を示していることです。
 
-In fact, you can take this approach to the logical conclusion and actually *define* addition as anything that has these properties.
+実際、このアプローチを論理的な結論まで持っていくと、これらのプロパティを持つものを*加算として定義する*ことができます。
 
-This is exactly what mathematicians do. If you look up [addition on Wikipedia](https://en.wikipedia.org/wiki/Addition#Properties), you'll see that it is defined entirely
-in terms of commutativity, associativity, identity, and so on.
+これはまさに数学者が行っていることです。
+[Wikipediaで加算を調べると](https://en.wikipedia.org/wiki/Addition#Properties)、交換法則、結合法則、単位元などによって完全に定義されていることがわかります。
 
-You'll note that in our experiment, we missed defining "associativity", but instead created a weaker property (`x+1+1 = x+2`).
-We'll see later that the EDFH can indeed write a malicious implementation that satisfies this property, and that associativity is better.  
+私たちの実験では、「結合法則」の定義を見逃し、代わりに、より弱いプロパティ（`x+1+1 = x+2`）を作成したことに注意してください。
+後で、EDFHがこのプロパティを満たす悪意のある実装を書くことができ、結合法則の方が優れていることを見ていきます。  
 
-Alas, it's hard to get properties perfect on the first attempt, but even so, by using the three properties we came up with,
-we have got a much higher confidence that the implementation is correct, and in fact, we have learned something too -- we have understood the requirements in a deeper way.
+残念ながら、最初の試みでプロパティを完璧にするのは難しいですが、それでも、私たちが思いついた3つのプロパティを使うことで、実装が正しいという自信を深めることができました。
+そして実際、私たちも何かを学びました。要件をより深く理解できたのです。
 
-## Specification by properties
+## プロパティによる仕様
 
-A collection of properties like this can be considered a *specification*.
+このようなプロパティの集合は、*仕様*と考えることができます。
 
-Historically, unit tests, as well as being functional tests, have been [used as a sort of specification](https://en.wikipedia.org/wiki/Unit_testing#Documentation) as well.
-But an approach to specification using properties instead of tests with "magic" data is an alternative which I think is often shorter and less ambiguous.
+歴史的に、単体テストは、機能テストであると同時に、[一種の仕様としても使われてきました](https://en.wikipedia.org/wiki/Unit_testing#Documentation)。
+しかし、「マジック」データを使ったテストの代わりにプロパティを使った仕様へのアプローチは、多くの場合、より短く、曖昧さが少ない代替手段だと思います。
 
-You might be thinking that only mathematical kinds of functions can be specified this way, but in future posts, we'll see how this approach can be used to test web services and databases too.
+数学的な種類の関数だけがこのように指定できると思うかもしれませんが、今後の記事では、このアプローチがWebサービスやデータベースのテストにもどのように使用できるかを見ていきます。
 
-Of course, not every business requirement can be expressed as properties like this, and we must not neglect the social component of software development.
-[Specification by example](https://en.wikipedia.org/wiki/Specification_by_example) and domain driven design can play a valuable role when working with non-technical customers.
+もちろん、すべてのビジネス要件をこのようなプロパティとして表現できるわけではなく、ソフトウェア開発の社会的側面を軽視してはいけません。
+技術者ではない顧客と仕事をする場合は、[実例による仕様](https://en.wikipedia.org/wiki/Specification_by_example)やドメイン駆動設計が役立ちます。
 
-You also might be thinking that designing all these properties is a lot of work -- and you'd be right! It is the hardest part.
-In a follow-up post, I'll present some tips for coming up with properties which might reduce the effort somewhat. 
+また、これらのプロパティをすべて設計するのは大変な作業だと思うかもしれません。そして、それは正しいです！ それが一番難しい部分です。
+フォローアップ記事では、労力をいくらか軽減できる可能性のあるプロパティを考え出すためのヒントを紹介します。 
 
-But even with the extra effort involved upfront (the technical term for this activity is called "thinking about the problem", by the way) the overall time
-saved by having automated tests and unambigous specifications will more than pay for the upfront cost later.
+しかし、事前に追加の労力をかけても（ちなみに、この活動の専門用語は「問題について考える」といいます）、
+自動テストと明確な仕様を持つことで節約できる全体的な時間は、後から先行コストを補って余りあるものになります。
 
-In fact, the arguments that are used to promote the benefits of unit testing can equally well be applied to property-based testing!
-So if a TDD fan tells you that they don't have the time to come up with property-based tests, then they might not be looking at the big picture.
+実際、単体テストの利点を促進するために使用される議論は、プロパティベースのテストにも同様に適用できます！
+そのため、TDDのファンがプロパティベースのテストを考え出す時間がないと言う場合は、全体像を見ていない可能性があります。
 
-## Introducing QuickCheck and FsCheck
+## QuickCheckとFsCheckの紹介
 
-We have implemented our own property checking system, but there are quite a few problems with it:
+独自のプロパティチェックシステムを実装しましたが、いくつかの問題があります。
 
-* It only works with integer functions.
-  It would be nice if we could use the same approach for functions that had string parameters, or in fact any type of parameter, including ones we defined ourselves.
-* It only works with two parameter functions (and we had to ignore one of them for the `adding1TwiceIsAdding2OnceProperty` and `identity` properties).
-  It would be nice if we could use the same approach for functions with any number of parameters. 
-* When there is a counter-example to the property, we don't know what it is! Not very helpful when the tests fail!
-* There's no logging of the random numbers that we generated, and there's no way to set the seed, which means that we can't debug and reproduce errors easily.
-* It's not configurable. For example, we can't easily change the number of loops from 100 to something else.
+* 整数関数にしか使えません。
+  文字列パラメーターを持つ関数、あるいは実際には、自分で定義したものも含めて、あらゆる型のパラメーターを持つ関数に、同じアプローチを使えると良いでしょう。
+* 2つのパラメーターを持つ関数にしか使えません（`adding1TwiceIsAdding2OnceProperty`プロパティと`identity`プロパティでは、一方のパラメーターを無視しなければなりませんでした）。
+  任意の数のパラメーターを持つ関数に、同じアプローチを使えると良いでしょう。
+* プロパティに対する反例がある場合、それが何であるかわかりません！ テストが失敗したときに、あまり役に立ちません！
+* 生成した乱数のログがなく、シードを設定する方法もないため、エラーを簡単にデバッグして再現することができません。
+* 設定できません。たとえば、ループの回数を100から他の値に簡単に変更することができません。
 
-It would be nice if there was a framework that did all that for us!
+これらすべてをやってくれるフレームワークがあれば良いのに！
 
-Thankfully there is! The ["QuickCheck"](https://en.wikipedia.org/wiki/QuickCheck) library was originally developed for Haskell
-by Koen Claessen and John Hughes, and has been ported to many other languages.
+ありがたいことに、あります！ 「[QuickCheck](https://en.wikipedia.org/wiki/QuickCheck)」ライブラリは、もともとKoen ClaessenとJohn HughesによってHaskell用に開発され、
+その後、他の多くの言語に移植されました。
 
-The version of QuickCheck used in F# (and C# too) is the excellent ["FsCheck"](https://fsharp.github.io/FsCheck/) library created by Kurt Schelfthout.
-Although based on the Haskell QuickCheck, it has some nice additional features, including integration with test frameworks such as NUnit and xUnit.
+F#（そしてC#）で使われているQuickCheckのバージョンは、Kurt Schelfthoutによって作られた素晴らしい「[FsCheck](https://fsharp.github.io/FsCheck/)」ライブラリです。
+Haskell QuickCheckをベースにしていますが、NUnitやxUnitなどのテストフレームワークとの統合など、いくつかの優れた追加機能があります。
 
-So let's look at how FsCheck would do the same thing as our homemade property-testing system.
+では、FsCheckが私たちの手作りのプロパティテストシステムと同じことをどのように行うかを見てみましょう。
 
-## Using FsCheck to test the addition properties
+## FsCheckを使って加算のプロパティをテストする
 
-First, you need to install FsCheck and load the DLL (FsCheck can be a bit finicky -- see the bottom of this page for instructions and troubleshooting).
+まず、FsCheckをインストールしてDLLを読み込む必要があります（FsCheckは少し扱いにくい場合があります。手順とトラブルシューティングについては、このページの下部を参照してください）。
 
-The top of your script file should look something like this:
+スクリプトファイルの先頭は次のようになります。
 
 ```fsharp
 System.IO.Directory.SetCurrentDirectory (__SOURCE_DIRECTORY__)
 #I @"Packages\FsCheck.1.0.3\lib\net45"
-//#I @"Packages\FsCheck.0.9.2.0\lib\net40-Client"  // use older version for VS2012
+//#I @"Packages\FsCheck.0.9.2.0\lib\net40-Client"  // VS2012の場合は古いバージョンを使う
 #I @"Packages\NUnit.2.6.3\lib"
 #r @"FsCheck.dll"
 #r @"nunit.framework.dll"
@@ -398,101 +398,101 @@ open FsCheck
 open NUnit.Framework
 ```
 
-Once FsCheck is loaded, you can use `Check.Quick` and pass in any "property" function. For now, let's just say that a "property" function is any function (with any parameters) that returns a boolean.
+FsCheckが読み込まれたら、`Check.Quick`を使って「プロパティ」関数を渡すことができます。ここでは、「プロパティ」関数はブール値を返す（任意のパラメーターを持つ）関数であるとだけ言っておきましょう。
 
 ```fsharp
-let add x y = x + y  // correct implementation
+let add x y = x + y  // 正しい実装
 
 let commutativeProperty (x,y) = 
-	let result1 = add x y
-	let result2 = add y x // reversed params
-	result1 = result2
+    let result1 = add x y
+    let result2 = add y x // パラメーターを逆にする
+    result1 = result2
 
-// check the property interactively            
+// プロパティを対話的にチェック            
 Check.Quick commutativeProperty 
 
 let adding1TwiceIsAdding2OnceProperty x = 
-	let result1 = x |> add 1 |> add 1
-	let result2 = x |> add 2 
-	result1 = result2
+    let result1 = x |> add 1 |> add 1
+    let result2 = x |> add 2 
+    result1 = result2
 
-// check the property interactively            
+// プロパティを対話的にチェック            
 Check.Quick adding1TwiceIsAdding2OnceProperty 
 
 let identityProperty x = 
-	let result1 = x |> add 0
-	result1 = x
+    let result1 = x |> add 0
+    result1 = x
 
-// check the property interactively            
+// プロパティを対話的にチェック            
 Check.Quick identityProperty 
 ```
 
-If you check one of the properties interactively, say with `Check.Quick commutativeProperty`,  you'll see the message:
+プロパティの1つを対話的にチェックすると、例えば`Check.Quick commutativeProperty`を使うと、次のメッセージが表示されます。
 
 ```text
 Ok, passed 100 tests.
 ```
 
-## Using FsCheck to find unsatified properties
+## FsCheckを使って満たされないプロパティを見つける
 
-Let's see what happens when we have a malicious implementation of `add`. In the code below, the EDFH implements `add` as multiplication!
+`add`の悪意のある実装がある場合にどうなるかを見てみましょう。以下のコードでは、EDFHは`add`を乗算として実装しています！
 
-That implementation *will* satisfy the commutative property, but what about the `adding1TwiceIsAdding2OnceProperty`?
+この実装は交換法則のプロパティを*満たしますが*、`adding1TwiceIsAdding2OnceProperty`はどうでしょうか？
 
 ```fsharp
 let add x y =
-	x * y // malicious implementation
+    x * y // 悪意のある実装
 
 let adding1TwiceIsAdding2OnceProperty x = 
-	let result1 = x |> add 1 |> add 1
-	let result2 = x |> add 2 
-	result1 = result2
+    let result1 = x |> add 1 |> add 1
+    let result2 = x |> add 2 
+    result1 = result2
 
-// check the property interactively            
+// プロパティを対話的にチェック            
 Check.Quick adding1TwiceIsAdding2OnceProperty 
 ```
 
-The result from FsCheck is:
+FsCheckの結果は次のとおりです。
 
 ```text
 Falsifiable, after 1 test (1 shrink) (StdGen (1657127138,295941511)):
 1
 ```
 
-That means that using `1` as the input to `adding1TwiceIsAdding2OnceProperty` will result in `false`, which you can easily see that it does.
+これは、`adding1TwiceIsAdding2OnceProperty`への入力として`1`を使うと`false`になることを意味し、実際にそうなっていることが簡単にわかります。
 
-## The return of the malicious EDFH
+## 悪意のあるEDFHの再来
 
-By using random testing, we have made it harder for a malicious implementor. They will have to change tactics now!
+ランダムテストを使うことで、悪意のある実装者にとって、作業は難しくなりました。今度は戦術を変える必要があります！
 
-The EDFH notes that we are still using some magic numbers in the `adding1TwiceIsAdding2OnceProperty` -- namely 1 and 2,
-and decides to create an implementation that exploits this. They'll use a correct implementation for low input values and an incorrect implementation for high input values:
+EDFHは、`adding1TwiceIsAdding2OnceProperty`でまだいくつかのマジックナンバー（つまり1と2）を使っていることに気づき、これを悪用する実装を作成することにしました。
+低い入力値には正しい実装を、高い入力値には間違った実装を使います。
 
 ```fsharp
 let add x y = 
-	if (x < 10) || (y < 10) then
-		x + y  // correct for low values
-	else
-		x * y  // incorrect for high values
+    if (x < 10) || (y < 10) then
+        x + y  // 低い値には正しい実装
+    else
+        x * y  // 高い値には間違った実装
 ```
 
-Oh no! If we retest all our properties, they all pass now!  
+なんてこった！ すべてのプロパティを再テストすると、今度はすべてパスしてしまいます！  
 
-That'll teach us to use magic numbers in our tests!
+テストでマジックナンバーを使うと、こういうことになるんですね！
 
-What's the alternative? Well, let's steal from the mathematicians and create an associative property test.
+他に方法はないのでしょうか？ 数学者からヒントを得て、結合法則のプロパティテストを作成しましょう。
 
 ```fsharp
 let associativeProperty x y z = 
-	let result1 = add x (add y z)    // x + (y + z)
-	let result2 = add (add x y) z    // (x + y) + z
-	result1 = result2
+    let result1 = add x (add y z)    // x + (y + z)
+    let result2 = add (add x y) z    // (x + y) + z
+    result1 = result2
 
-// check the property interactively            
+// プロパティを対話的にチェック            
 Check.Quick associativeProperty 
 ```
 
-Aha! Now we get a falsification:
+おや！ 反例が見つかりました。
 
 ```text
 Falsifiable, after 38 tests (4 shrinks) (StdGen (127898154,295941554)):
@@ -501,41 +501,41 @@ Falsifiable, after 38 tests (4 shrinks) (StdGen (127898154,295941554)):
 10
 ```
 
-That means that using `(8+2)+10` is not the same as `8+(2+10)`. 
+これは、`(8+2)+10` は `8+(2+10)` と同じではないことを意味します。 
 
-Note that not only has FsCheck found some inputs that break the property, but it has found a lowest example. 
-It knows that the inputs `8,2,9` pass but going one higher (`8,2,10`) fails. That's very nice!
+FsCheckはプロパティを壊す入力を見つけただけでなく、最小の例を見つけたことに注意してください。 
+入力`8,2,9`はパスするのに、1つ大きくすると (`8,2,10`) 失敗することを知っています。 これはとても便利ですね！
 
-## Understanding FsCheck: Generators
+## FsCheckのしくみ：ジェネレーター
 
-Now that we have used FsCheck for real, let's pause and have a look at how it works.
+実際にFsCheckを使ってみたので、ここで少し立ち止まって、そのしくみを見てみましょう。
 
-The first thing that FsCheck does is generate random inputs for you. This is called "generation", and for each type, there is an associated generator.
+FsCheckが行う最初のことは、ランダムな入力を生成することです。これは「生成」と呼ばれ、それぞれの型に関連付けられたジェネレーターがあります。
 
-For example, to generate a list of sample data, you use the generator along with two parameters: the number of elements in the list and a "size".
-The precise meaning of "size" depends on the type being generated and the context. Examples of things "size" is used for are: the maximum value of an int; the length of a list; the depth of a tree; etc.
+例えば、サンプルデータのリストを生成するには、ジェネレーターと2つのパラメーター（リストの要素数と「サイズ」）を使います。
+「サイズ」の正確な意味は、生成される型とコンテキストによって異なります。「サイズ」が使用されるものの例としては、整数の最大値、リストの長さ、ツリーの深さなどがあります。
 
-Here's some code that generates ints:
+整数を生成するコードの例を次に示します。
 
 ```fsharp
-// get the generator for ints
+// 整数のジェネレーターを取得
 let intGenerator = Arb.generate<int>
 
-// generate three ints with a maximum size of 1
-Gen.sample 1 3 intGenerator    // e.g. [0; 0; -1]
+// 最大サイズ1の整数を3つ生成
+Gen.sample 1 3 intGenerator    // 例：[0; 0; -1]
 
-// generate three ints with a maximum size of 10
-Gen.sample 10 3 intGenerator   // e.g. [-4; 8; 5]
+// 最大サイズ10の整数を3つ生成
+Gen.sample 10 3 intGenerator   // 例：[-4; 8; 5]
 
-// generate three ints with a maximum size of 100
-Gen.sample 100 3 intGenerator  // e.g. [-37; 24; -62] 
+// 最大サイズ100の整数を3つ生成
+Gen.sample 100 3 intGenerator  // 例：[-37; 24; -62] 
 ```
 
-In this example, the ints are not generated uniformly, but clustered around zero.
-You can see this for yourself with a little code:
+この例では、整数は均一に生成されず、ゼロの周りに集中しています。
+ちょっとしたコードで、これを自分で確認できます。
 
 ```fsharp
-// see how the values are clustered around the center point
+// 値が中心点の周りにどのように集中しているかを確認
 intGenerator 
 |> Gen.sample 10 1000 
 |> Seq.groupBy id 
@@ -544,17 +544,17 @@ intGenerator
 |> Seq.toList 
 ```
 
-The result is something like this:
+結果は次のようになります。
 
 ```fsharp
 [(-10, 3); (-9, 14); (-8, 18); (-7, 10); (-6, 27); (-5, 42); (-4, 49);
-   (-3, 56); (-2, 76); (-1, 119); (0, 181); (1, 104); (2, 77); (3, 62);
-   (4, 47); (5, 44); (6, 26); (7, 16); (8, 14); (9, 12); (10, 3)]
+   (-3, 56); (-2, 76); (-1, 119); (0, 181); (1, 104); (2, 77); (3, 62);
+   (4, 47); (5, 44); (6, 26); (7, 16); (8, 14); (9, 12); (10, 3)]
 ```
 
-You can see that most of the values are in the center (0 is generated 181 times, 1 is generated 104 times), and the outlying values are rare (10 is generated only 3 times).
+ほとんどの値が中央にあり（0は181回、1は104回生成されます）、外側の値はまれである（10は3回しか生成されません）ことがわかります。
 
-You can repeat with larger samples too. This one generates 10000 elements in the range [-30,30]
+より大きなサンプルでも繰り返すことができます。これは、[-30,30]の範囲で10000個の要素を生成します。
 
 ```fsharp
 intGenerator 
@@ -565,67 +565,67 @@ intGenerator
 |> Seq.toList 
 ```
 
-There are plenty of other generator functions available as well as `Gen.sample` (more documentation [here](https://fsharp.github.io/FsCheck/TestData.html)).
+`Gen.sample`以外にも、たくさんのジェネレーター関数が用意されています（詳細なドキュメントは[こちら](https://fsharp.github.io/FsCheck/TestData.html)）。
 
-## Understanding FsCheck: Generating all sorts of types automatically
+## FsCheckのしくみ：あらゆる型の自動生成
 
-What's great about the generator logic is that it will automatically generate compound values as well.
+ジェネレーターロジックの素晴らしい点は、複合値も自動的に生成してくれることです。
 
-For example, here is a generator for a tuple of three ints: 
+例えば、3つの整数のタプルのジェネレーターは次のようになります。
 
 ```fsharp
 let tupleGenerator = Arb.generate<int*int*int>
 
-// generate 3 tuples with a maximum size of 1
+// 最大サイズ1のタプルを3つ生成
 Gen.sample 1 3 tupleGenerator 
-// result: [(0, 0, 0); (0, 0, 0); (0, 1, -1)]
+// 結果：[(0, 0, 0); (0, 0, 0); (0, 1, -1)]
 
-// generate 3 tuples with a maximum size of 10
+// 最大サイズ10のタプルを3つ生成
 Gen.sample 10 3 tupleGenerator 
-// result: [(-6, -4, 1); (2, -2, 8); (1, -4, 5)]
+// 結果：[(-6, -4, 1); (2, -2, 8); (1, -4, 5)]
 
-// generate 3 tuples with a maximum size of 100
+// 最大サイズ100のタプルを3つ生成
 Gen.sample 100 3 tupleGenerator 
-// result: [(-2, -36, -51); (-5, 33, 29); (13, 22, -16)]
+// 結果：[(-2, -36, -51); (-5, 33, 29); (13, 22, -16)]
 ```
 
 
-Once you have a generator for a base type, `option` and `list` generators follow.
-Here is a generator for `int option`s:
+基本型のジェネレーターを作成したら、`option`型と`list`型のジェネレーターも作成できます。
+`int option`型のジェネレーターの例を次に示します。
 
 ```fsharp
 let intOptionGenerator = Arb.generate<int option>
-// generate 10 int options with a maximum size of 5
+// 最大サイズ5のint optionを10個生成
 Gen.sample 5 10 intOptionGenerator 
-// result:  [Some 0; Some -1; Some 2; Some 0; Some 0; 
-//           Some -4; null; Some 2; Some -2; Some 0]
+// 結果：[Some 0; Some -1; Some 2; Some 0; Some 0; 
+//           Some -4; null; Some 2; Some -2; Some 0]
 ```
 
-And here is a generator for `int list`s:
+`int list`型のジェネレーターの例を次に示します。
 
 ```fsharp
 let intListGenerator = Arb.generate<int list>
-// generate 10 int lists with a maximum size of 5
+// 最大サイズ5のint listを10個生成
 Gen.sample 5 10 intListGenerator 
-// result:  [ []; []; [-4]; [0; 3; -1; 2]; [1]; 
-//            [1]; []; [0; 1; -2]; []; [-1; -2]]
+// 結果：[ []; []; [-4]; [0; 3; -1; 2]; [1]; 
+//            [1]; []; [0; 1; -2]; []; [-1; -2]]
 ```
 
-And of course you can generate random strings too!
-	
+そしてもちろん、ランダムな文字列も生成できます！
+    
 ```fsharp
 let stringGenerator = Arb.generate<string>
 
-// generate 3 strings with a maximum size of 1
+// 最大サイズ1の文字列を3つ生成
 Gen.sample 1 3 stringGenerator 
-// result: [""; "!"; "I"]
+// 結果：[""; "!"; "I"]
 
-// generate 3 strings with a maximum size of 10
+// 最大サイズ10の文字列を3つ生成
 Gen.sample 10 3 stringGenerator 
-// result: [""; "eiX$a^"; "U%0Ika&r"]
+// 結果：[""; "eiX$a^"; "U%0Ika&r"]
 ```
 
-The best thing is that the generator will work with your own user-defined types too!
+ジェネレーターの最も優れた点は、ユーザー定義型でも動作することです！
 
 
 ```fsharp
@@ -633,208 +633,208 @@ type Color = Red | Green of int | Blue of bool
 
 let colorGenerator = Arb.generate<Color>
 
-// generate 10 colors with a maximum size of 50
+// 最大サイズ50の色を10個生成
 Gen.sample 50 10 colorGenerator 
 
-// result:  [Green -47; Red; Red; Red; Blue true; 
-//           Green 2; Blue false; Red; Blue true; Green -12]
+// 結果：[Green -47; Red; Red; Red; Blue true; 
+//           Green 2; Blue false; Red; Blue true; Green -12]
 ```
 
-Here's one that generates a user-defined record type containing another user-defined type.
+これは、別のユーザー定義型を含むユーザー定義レコード型を生成する例です。
 
 ```fsharp
 type Point = {x:int; y:int; color: Color}
 
 let pointGenerator = Arb.generate<Point>
 
-// generate 10 points with a maximum size of 50
+// 最大サイズ50の点を10個生成
 Gen.sample 50 10 pointGenerator 
 
-(* result
+(* 結果
 [{x = -8; y = 12; color = Green -4;}; 
- {x = 28; y = -31; color = Green -6;}; 
- {x = 11; y = 27; color = Red;}; 
- {x = -2; y = -13; color = Red;};
- {x = 6; y = 12; color = Red;};
- // etc
+ {x = 28; y = -31; color = Green -6;}; 
+ {x = 11; y = 27; color = Red;}; 
+ {x = -2; y = -13; color = Red;};
+ {x = 6; y = 12; color = Red;};
+ // etc
 *)
 ```
 
-There are ways to have more fine-grained control over how your types are generated, but that will have to wait for another post! 
+型の生成方法をより細かく制御する方法もありますが、それは別の記事で説明します。
 
-## Understanding FsCheck: Shrinking
+## FsCheckのしくみ：縮小
 
-Creating minimum counter-examples is one of the cool things about QuickCheck-style testing. 
+最小の反例を作成することは、QuickCheckスタイルのテストの優れた点の1つです。
 
-How does it do this?  
+これはどのように行われるのでしょうか？
 
-There are two parts to the process that FsCheck uses:
+FsCheckが使用するプロセスには、2つの部分があります。
 
-First it generates a sequence of random inputs, starting small and getting bigger. This is the "generator" phase as described above.
+まず、小さいものから始めて大きくしていく、ランダムな入力のシーケンスを生成します。これは、上記で説明した「ジェネレーター」フェーズです。
 
-If any inputs cause the property to fail, it starts "shrinking" the first parameter to find a smaller number.
-The exact process for shrinking varies depending on the type (and you can override it too), but let's say that for numbers, they get smaller in a sensible way.
+いずれかの入力が原因でプロパティが失敗した場合、最初のパラメーターを「縮小」して、より小さい数を見つけ始めます。
+縮小の正確なプロセスは型によって異なります（オーバーライドすることもできます）が、数値の場合は、適切な方法で小さくなるとしましょう。
 
-For example, let's say that you have a silly property `isSmallerThan80`:
+例えば、`isSmallerThan80`という単純なプロパティがあるとします。
 
 ```fsharp
 let isSmallerThan80 x = x < 80
 ```
 
-You have generated random numbers and found that then property fails for `100`, and you want to try a smaller number. `Arb.shrink` will generate a sequence of ints, all of which are smaller than 100.
-Each one of these is tried with the property in turn until the property fails again.
+乱数を生成した結果、プロパティが`100`で失敗することがわかり、より小さい数を試したいとします。`Arb.shrink`は、すべて100より小さい整数のシーケンスを生成します。
+これらのそれぞれが、プロパティが再び失敗するまで、順番にプロパティで試されます。
 
 ```fsharp
-isSmallerThan80 100 // false, so start shrinking
+isSmallerThan80 100 // falseなので、縮小を開始
 
 Arb.shrink 100 |> Seq.toList 
-//  [0; 50; 75; 88; 94; 97; 99]
+//  [0; 50; 75; 88; 94; 97; 99]
 ```
 
-For each element in the list, test the property against it until you find another failure:
+リストの各要素について、別の失敗が見つかるまで、プロパティをテストします。
 
 ```fsharp
 isSmallerThan80 0 // true
 isSmallerThan80 50 // true
 isSmallerThan80 75 // true
-isSmallerThan80 88 // false, so shrink again
+isSmallerThan80 88 // falseなので、再び縮小
 ```
 
-The property failed with `88`, so shrink again using that as a starting point:
+プロパティは`88`で失敗したので、それを開始点として再び縮小します。
 
 ```fsharp
 Arb.shrink 88 |> Seq.toList 
-//  [0; 44; 66; 77; 83; 86; 87]
+//  [0; 44; 66; 77; 83; 86; 87]
 isSmallerThan80 0 // true
 isSmallerThan80 44 // true
 isSmallerThan80 66 // true
 isSmallerThan80 77 // true
-isSmallerThan80 83 // false, so shrink again
+isSmallerThan80 83 // falseなので、再び縮小
 ```
 
-The property failed with `83` now, so shrink again using that as a starting point:
+今度はプロパティが`83`で失敗したので、それを開始点として再び縮小します。
 
 ```fsharp
 Arb.shrink 83 |> Seq.toList 
-//  [0; 42; 63; 73; 78; 81; 82]
-// smallest failure is 81, so shrink again
+//  [0; 42; 63; 73; 78; 81; 82]
+// 最小の失敗は81なので、再び縮小
 ```
 
-The property failed with `81`, so shrink again using that as a starting point:
+プロパティは`81`で失敗したので、それを開始点として再び縮小します。
 
 ```fsharp
 Arb.shrink 81 |> Seq.toList 
-//  [0; 41; 61; 71; 76; 79; 80]
-// smallest failure is 80
+//  [0; 41; 61; 71; 76; 79; 80]
+// 最小の失敗は80
 ```
 
-After this point, shrinking on 80 doesn't work -- no smaller value will be found.
+この時点以降、80の縮小は機能しません。これ以上小さい値は見つかりません。
 
-In this case then, FsCheck will report that `80` falsifies the property and that 4 shrinks were needed.
+この場合、FsCheckは`80`がプロパティの反例であり、4回の縮小が必要であったことを報告します。
 
-Just as with generators, FsCheck will generate shrink sequences for almost any type:
+ジェネレーターと同様に、FsCheckはほとんどすべての型に対して縮小シーケンスを生成します。
 
 
 ```fsharp
 Arb.shrink (1,2,3) |> Seq.toList 
-//  [(0, 2, 3); (1, 0, 3); (1, 1, 3); (1, 2, 0); (1, 2, 2)]
+//  [(0, 2, 3); (1, 0, 3); (1, 1, 3); (1, 2, 0); (1, 2, 2)]
 
 Arb.shrink "abcd" |> Seq.toList 
-//  ["bcd"; "acd"; "abd"; "abc"; "abca"; "abcb"; "abcc"; "abad"; "abbd"; "aacd"]
+//  ["bcd"; "acd"; "abd"; "abc"; "abca"; "abcb"; "abcc"; "abad"; "abbd"; "aacd"]
 
 Arb.shrink [1;2;3] |> Seq.toList 
-//  [[2; 3]; [1; 3]; [1; 2]; [1; 2; 0]; [1; 2; 2]; [1; 0; 3]; [1; 1; 3]; [0; 2; 3]]
+//  [[2; 3]; [1; 3]; [1; 2]; [1; 2; 0]; [1; 2; 2]; [1; 0; 3]; [1; 1; 3]; [0; 2; 3]]
 ```
 
-And, as with generators, there are ways to customize how shrinking works if needed.
+そして、ジェネレーターと同様に、必要に応じて縮小の動作をカスタマイズする方法があります。
 
-## Configuring FsCheck: Changing the number of tests
+## FsCheckの設定：テスト回数の変更
 
-I mentioned a silly property `isSmallerThan80` -- let's see how FsCheck does with it.
+`isSmallerThan80`という単純なプロパティについて触れましたが、FsCheckがどのように処理するかを見てみましょう。
 
 ```fsharp
-// silly property to test
+// テストする単純なプロパティ
 let isSmallerThan80 x = x < 80
 
 Check.Quick isSmallerThan80 
-// result: Ok, passed 100 tests.
+// 結果：Ok, passed 100 tests.
 ```
 
-Oh dear! FsCheck didn't find a counter-example!
+おやおや！ FsCheckは反例を見つけられませんでした！
 
-At this point, we can try a few things. First, we can try increasing the number of tests.
+この時点で、いくつかのことを試すことができます。まず、テストの回数を増やしてみましょう。
 
-We do this by changing the default ("Quick") configuration. There is a field called `MaxTest` that we can set. The default is 100, so let's increase it to 1000.
+デフォルト（「Quick」）設定を変更することで、これを行います。`MaxTest`という設定できるフィールドがあります。デフォルトは100なので、1000に増やしてみましょう。
 
-Finally, to use a specific config, you'll need to use `Check.One(config,property)` rather than just `Check.Quick(property)`.
+最後に、特定の設定を使うには、`Check.Quick(property)`ではなく`Check.One(config,property)`を使う必要があります。
 
 ```fsharp
 let config = {
-	Config.Quick with 
-		MaxTest = 1000
-	}
+    Config.Quick with 
+        MaxTest = 1000
+    }
 Check.One(config,isSmallerThan80 )
-// result: Ok, passed 1000 tests.
+// 結果：Ok, passed 1000 tests.
 ```
 
-Oops! FsCheck didn't find a counter-example with 1000 tests either! Let's try once more with 10000 tests:
+あれ？ FsCheckは1000回のテストでも反例を見つけられませんでした！ もう一度、10000回のテストで試してみましょう。
 
 ```fsharp
 let config = {
-	Config.Quick with 
-		MaxTest = 10000
-	}
+    Config.Quick with 
+        MaxTest = 10000
+    }
 Check.One(config,isSmallerThan80 )
-// result: Falsifiable, after 8660 tests (1 shrink) (StdGen (539845487,295941658)):
-//         80
+// 結果：Falsifiable, after 8660 tests (1 shrink) (StdGen (539845487,295941658)):
+//         80
 ```
 
-Ok, so we finally got it to work. But why did it take so many tests?
+なるほど、ようやくうまくいきましたね。でも、なぜこんなにたくさんのテストが必要だったのでしょうか？
 
-The answer lies in some other configuration settings: `StartSize` and `EndSize`.
+その答えは、`StartSize`と`EndSize`という他の設定にあります。
 
-Remember that the generators start with small numbers and gradually increase them.  This is controlled by the `StartSize` and `EndSize` settings.
-By default, `StartSize` is 1 and `EndSize` is 100. So at the end of the test, the "size" parameter to the generator will be 100.
+ジェネレーターは小さい数値から始めて、徐々に大きくしていくことを思い出してください。これは、`StartSize`と`EndSize`の設定によって制御されます。
+デフォルトでは、`StartSize`は1、`EndSize`は100です。つまり、テストの最後には、ジェネレーターへの「サイズ」パラメーターは100になります。
 
-But, as we saw, even if the size is 100, very few numbers are generated at the extremes. In this case it means that numbers greater than 80 are unlikely to be generated.
+しかし、見てきたように、サイズが100であっても、極端な値の数はほとんど生成されません。この場合、80より大きい数は生成されにくいということです。
 
-So let's change the `EndSize` to something larger and see what happens!
+そこで、`EndSize`をもっと大きくして、どうなるか見てみましょう！
 
 ```fsharp
 let config = {
-	Config.Quick with 
-		EndSize = 1000
-	}
+    Config.Quick with 
+        EndSize = 1000
+    }
 Check.One(config,isSmallerThan80 )
-// result: Falsifiable, after 21 tests (4 shrinks) (StdGen (1033193705,295941658)):
-//         80
+// 結果：Falsifiable, after 21 tests (4 shrinks) (StdGen (1033193705,295941658)):
+//         80
 ```
 
-That's more like it! Only 21 tests needed now rather than 8660 tests!
+これならいいですね！ 8660回ではなく、わずか21回のテストで済みました！
 
-## Configuring FsCheck: Verbose mode and logging
+## FsCheckの設定：詳細モードとロギング
 
-I mentioned that one of the benefits of FsCheck over a home-grown solution is the logging and reproducibility, so let's have a look at that.
+FsCheckの自作ソリューションに対する利点の1つは、ロギングと再現性であると述べましたが、それを見てみましょう。
 
-We'll tweak the malicious implementation to have a boundary of `25`. Let's see how FsCheck detects this boundary via logging.
+悪意のある実装を調整して、境界を`25`にします。FsCheckがロギングによってこの境界をどのように検出するかを見てみましょう。
 
 ```fsharp
 let add x y = 
-	if (x < 25) || (y < 25) then
-		x + y  // correct for low values
-	else
-		x * y  // incorrect for high values
+    if (x < 25) || (y < 25) then
+        x + y  // 低い値には正しい実装
+    else
+        x * y  // 高い値には間違った実装
 
 let associativeProperty x y z = 
-	let result1 = add x (add y z)    // x + (y + z)
-	let result2 = add (add x y) z    // (x + y) + z
-	result1 = result2
+    let result1 = add x (add y z)    // x + (y + z)
+    let result2 = add (add x y) z    // (x + y) + z
+    result1 = result2
 
-// check the property interactively            
+// プロパティを対話的にチェック            
 Check.Quick associativeProperty 
 ```
 
-The result is:
+結果は次のとおりです。
 
 ```text
 Falsifiable, after 66 tests (12 shrinks) (StdGen (1706196961,295941556)):
@@ -843,276 +843,276 @@ Falsifiable, after 66 tests (12 shrinks) (StdGen (1706196961,295941556)):
 25
 ```
 
-Again, FsCheck has found that `25` is the exact boundary point quite quickly.  But how did it do it?
+ここでも、FsCheckは`25`が正確な境界点であることを非常に迅速に見つけました。しかし、どのようにして見つけたのでしょうか？
 
-First, the simplest way to see what FsCheck is doing is to use "verbose" mode. That is, use `Check.Verbose` rather than `Check.Quick`:
+まず、FsCheckが何をしているかを確認する最も簡単な方法は、「詳細」モードを使用することです。つまり、`Check.Quick`ではなく`Check.Verbose`を使用します。
 
 ```fsharp
-// check the property interactively            
+// プロパティを対話的にチェック            
 Check.Quick associativeProperty 
 
-// with tracing/logging
+// トレース/ロギングあり
 Check.Verbose associativeProperty 
 ```
 
-When do this, you'll see an output like that shown below. I've added all the comments to explain the various elements.
+このようにすると、以下に示すような出力が表示されます。さまざまな要素を説明するために、すべてのコメントを追加しました。
 
 ```text
-0:    // test 1
--1    // param 1
--1    // param 2 
-0     // param 3 
-      // associativeProperty -1 -1 0  => true, keep going
-1:    // test 2
+0:    // テスト 1
+-1    // パラメーター 1
+-1    // パラメーター 2 
+0     // パラメーター 3 
+      // associativeProperty -1 -1 0  => true、続行
+1:    // テスト 2
 0
 0
-0     // associativeProperty 0 0 0  => true, keep going
-2:    // test 3
+0     // associativeProperty 0 0 0  => true、続行
+2:    // テスト 3
 -2
 0
--3    // associativeProperty -2 0 -3  => true, keep going
-3:    // test 4
+-3    // associativeProperty -2 0 -3  => true、続行
+3:    // テスト 4
 1
 2
-0     // associativeProperty 1 2 0  => true, keep going
+0     // associativeProperty 1 2 0  => true、続行
 // etc
-49:   // test 50
+49:   // テスト 50
 46
 -4
-50    // associativeProperty 46 -4 50  => false, start shrinking
+50    // associativeProperty 46 -4 50  => false、縮小開始
 // etc
 shrink:
 35
 -4
-50    // associativeProperty 35 -4 50  => false, keep shrinking
+50    // associativeProperty 35 -4 50  => false、縮小続行
 shrink:
 27
 -4
-50    // associativeProperty 27 -4 50  => false, keep shrinking
+50    // associativeProperty 27 -4 50  => false、縮小続行
 // etc
 shrink:
 25
 1
-29    // associativeProperty 25 1 29  => false, keep shrinking
+29    // associativeProperty 25 1 29  => false、縮小続行
 shrink:
 25
 1
-26    // associativeProperty 25 1 26  => false, keep shrinking
-// next shrink fails
+26    // associativeProperty 25 1 26  => false、縮小続行
+// 次の縮小は失敗
 Falsifiable, after 50 tests (10 shrinks) (StdGen (995282583,295941602)):
 25
 1
 26
 ```
 
-This display takes up a lot of space! Can we make it more compact?
+この表示は多くのスペースを占有します！ もっとコンパクトにできますか？
 
-Yes -- you can control how each test and shrink is displayed by writing your own custom functions, and telling FsCheck to use them via its `Config` structure.
+はい。独自のカスタム関数を記述し、FsCheckの`Config`構造体を介してそれらを使用するように指示することで、各テストと縮小の表示方法を制御できます。
 
-These functions are generic, and the list of parameters is represented by a list of unknown length (`obj list`).
-But since I know I am testing a three parameter property I can hard-code a three-element list parameter and print them all on one line.
+これらの関数はジェネリックであり、パラメーターのリストは不明な長さのリスト（`obj list`）で表されます。
+しかし、3つのパラメーターを持つプロパティをテストしていることがわかっているので、3つの要素を持つリストパラメーターをハードコードし、すべてを1行に出力できます。
 
-The configuration also has a slot called `Replay` which is normally `None`, which means that each run will be different. 
+設定には`Replay`と呼ばれるスロットもあり、通常は`None`です。これは、実行ごとに結果が異なることを意味します。
 
-If you set `Replay` to `Some seed`, then the test will be replayed exactly the same way.
-The seed looks like `StdGen (someInt,someInt)` and is printed on each run, so if you want to preserve a run all you need to do is paste that seed into the config.
+`Replay`を`Some seed`に設定すると、テストはまったく同じ方法で再生されます。
+シードは`StdGen (someInt,someInt)`のように見え、実行ごとに表示されるため、実行を保存したい場合は、そのシードを設定に貼り付けるだけで済みます。
 
-And again, to use a specific config, you'll need to use `Check.One(config,property)` rather than just `Check.Quick(property)`.
+繰り返しになりますが、特定の設定を使うには、`Check.Quick(property)`ではなく`Check.One(config,property)`を使う必要があります。
 
-Here's the code with the default tracing functions changed, and the replay seed set explicitly.
+デフォルトのトレース関数を変更し、再生シードを明示的に設定したコードを次に示します。
 
 ```fsharp
-// create a function for displaying a test
+// テストを表示するための関数を定義
 let printTest testNum [x;y;z] = 
-	sprintf "#%-3i %3O %3O %3O\n" testNum x y z
+    sprintf "#%-3i %3O %3O %3O\n" testNum x y z
 
-// create a function for displaying a shrink
+// 縮小を表示するための関数を定義
 let printShrink [x;y;z] = 
-	sprintf "shrink %3O %3O %3O\n" x y z
+    sprintf "shrink %3O %3O %3O\n" x y z
 
-// create a new FsCheck configuration
+// 新しいFsCheck設定を作成
 let config = {
-	Config.Quick with 
-		Replay = Random.StdGen (995282583,295941602) |> Some 
-		Every = printTest 
-		EveryShrink = printShrink
-	}
+    Config.Quick with 
+        Replay = Random.StdGen (995282583,295941602) |> Some 
+        Every = printTest 
+        EveryShrink = printShrink
+    }
 
-// check the given property with the new configuration
+// 新しい設定で指定されたプロパティをチェック
 Check.One(config,associativeProperty)
 ```
 
-The output is now much more compact, and looks like this:
+出力ははるかにコンパクトになり、次のようになります。
 
 ```text
-#0    -1  -1   0
-#1     0   0   0
-#2    -2   0  -3
-#3     1   2   0
-#4    -4   2  -3
-#5     3   0  -3
-#6    -1  -1  -1
+#0    -1  -1   0
+#1     0   0   0
+#2    -2   0  -3
+#3     1   2   0
+#4    -4   2  -3
+#5     3   0  -3
+#6    -1  -1  -1
 // etc
-#46  -21 -25  29
-#47  -10  -7 -13
-#48   -4 -19  23
-#49   46  -4  50
-// start shrinking first parameter
-shrink  35  -4  50
-shrink  27  -4  50
-shrink  26  -4  50
-shrink  25  -4  50
-// start shrinking second parameter
-shrink  25   4  50
-shrink  25   2  50
-shrink  25   1  50
-// start shrinking third parameter
-shrink  25   1  38
-shrink  25   1  29
-shrink  25   1  26
+#46  -21 -25  29
+#47  -10  -7 -13
+#48   -4 -19  23
+#49   46  -4  50
+// 最初のパラメーターの縮小を開始
+shrink  35  -4  50
+shrink  27  -4  50
+shrink  26  -4  50
+shrink  25  -4  50
+// 2番目のパラメーターの縮小を開始
+shrink  25   4  50
+shrink  25   2  50
+shrink  25   1  50
+// 3番目のパラメーターの縮小を開始
+shrink  25   1  38
+shrink  25   1  29
+shrink  25   1  26
 Falsifiable, after 50 tests (10 shrinks) (StdGen (995282583,295941602)):
 25
 1
 26
 ```
 
-So there you go -- it's quite easy to customize the FsCheck logging if you need to.
+これで、必要に応じてFsCheckのロギングをカスタマイズするのが非常に簡単であることがわかりました。
 
-Let's look at how the shrinking was done in detail.
-The last set of inputs (46,-4,50) was false, so shrinking started.
- 
+縮小がどのように行われたかを詳しく見てみましょう。
+入力の最後のセット（46、-4、50）はfalseだったので、縮小が開始されました。
+ 
 ```fsharp
-// The last set of inputs (46,-4,50) was false, so shrinking started
-associativeProperty 46 -4 50  // false, so shrink
+// 入力値の最後のセット (46,-4,50) は false だったので、縮小が開始されました
+associativeProperty 46 -4 50  // false なので縮小
 
-// list of possible shrinks starting at 46
+// 46 から始まる可能性のある縮小のリスト
 Arb.shrink 46 |> Seq.toList 
-// result [0; 23; 35; 41; 44; 45]
+// 結果 [0; 23; 35; 41; 44; 45]
 ```
 
-We'll loop through the list `[0; 23; 35; 41; 44; 45]` stopping at the first element that causes the property to fail:
+リスト `[0; 23; 35; 41; 44; 45]` をループして、プロパティを失敗させる最初の要素で停止します。
 
 ```fsharp
-// find the next test that fails when shrinking the x parameter 
+// x パラメーターを縮小するときに失敗する次のテストを見つける
 let x,y,z = (46,-4,50) 
 Arb.shrink x
 |> Seq.tryPick (fun x -> if associativeProperty x y z then None else Some (x,y,z) )
-// answer (35, -4, 50)
+// 答え (35, -4, 50)
 ```
 
-The first element that caused a failure was `x=35`, as part of the inputs `(35, -4, 50)`.
+失敗を引き起こした最初の要素は、入力 `(35, -4, 50)` の一部である `x=35` でした。
 
-So now we start at 35 and shrink that:
+そこで、今度は 35 から始めて、それを縮小します。
 
 ```fsharp
-// find the next test that fails when shrinking the x parameter 
+// x パラメーターを縮小するときに失敗する次のテストを見つける
 let x,y,z = (35,-4,50) 
 Arb.shrink x
 |> Seq.tryPick (fun x -> if associativeProperty x y z then None else Some (x,y,z) )
-// answer (27, -4, 50)
+// 答え (27, -4, 50)
 ```
 
-The first element that caused a failure was now `x=27`, as part of the inputs `(27, -4, 50)`.
+失敗を引き起こした最初の要素は、今度は入力 `(27, -4, 50)` の一部である `x=27` になりました。
 
-So now we start at 27 and keep going:
+そこで、今度は 27 から始めて、続行します。
 
 ```fsharp
-// find the next test that fails when shrinking the x parameter 
+// x パラメーターを縮小するときに失敗する次のテストを見つける
 let x,y,z = (27,-4,50) 
 Arb.shrink x
 |> Seq.tryPick (fun x -> if associativeProperty x y z then None else Some (x,y,z) )
-// answer (26, -4, 50)
+// 答え (26, -4, 50)
 
-// find the next test that fails when shrinking the x parameter 
+// x パラメーターを縮小するときに失敗する次のテストを見つける
 let x,y,z = (26,-4,50) 
 Arb.shrink x
 |> Seq.tryPick (fun x -> if associativeProperty x y z then None else Some (x,y,z) )
-// answer (25, -4, 50)
+// 答え (25, -4, 50)
 
-// find the next test that fails when shrinking the x parameter 
+// x パラメーターを縮小するときに失敗する次のテストを見つける
 let x,y,z = (25,-4,50) 
 Arb.shrink x
 |> Seq.tryPick (fun x -> if associativeProperty x y z then None else Some (x,y,z) )
-// answer None
+// 答え None
 ```
 
-At this point, `x=25` is as low as you can go. None of its shrink sequence caused a failure.
-So we're finished with the `x` parameter!
+この時点で、`x=25`はこれ以上小さくできません。縮小シーケンスのどれも失敗を引き起こしませんでした。
+これで`x`パラメーターは完了です！
 
-Now we just repeat this process with the `y` parameter
+今度は、このプロセスを`y`パラメーターで繰り返します。
 
 ```fsharp
-// find the next test that fails when shrinking the y parameter 
+// y パラメーターを縮小するときに失敗する次のテストを見つける
 let x,y,z = (25,-4,50) 
 Arb.shrink y
 |> Seq.tryPick (fun y -> if associativeProperty x y z then None else Some (x,y,z) )
-// answer (25, 4, 50)
+// 答え (25, 4, 50)
 
-// find the next test that fails when shrinking the y parameter 
+// y パラメーターを縮小するときに失敗する次のテストを見つける
 let x,y,z = (25,4,50) 
 Arb.shrink y
 |> Seq.tryPick (fun y -> if associativeProperty x y z then None else Some (x,y,z) )
-// answer (25, 2, 50)
+// 答え (25, 2, 50)
 
-// find the next test that fails when shrinking the y parameter 
+// y パラメーターを縮小するときに失敗する次のテストを見つける
 let x,y,z = (25,2,50) 
 Arb.shrink y
 |> Seq.tryPick (fun y -> if associativeProperty x y z then None else Some (x,y,z) )
-// answer (25, 1, 50)
+// 答え (25, 1, 50)
 
-// find the next test that fails when shrinking the y parameter 
+// y パラメーターを縮小するときに失敗する次のテストを見つける
 let x,y,z = (25,1,50) 
 Arb.shrink y
 |> Seq.tryPick (fun y -> if associativeProperty x y z then None else Some (x,y,z) )
-// answer None
+// 答え None
 ```
 
-At this point, `y=1` is as low as you can go. None of its shrink sequence caused a failure.
-So we're finished with the `y` parameter!
+この時点で、`y=1`はこれ以上小さくできません。縮小シーケンスのどれも失敗を引き起こしませんでした。
+これで`y`パラメーターは完了です！
 
-Finally, we repeat this process with the `z` parameter
+最後に、このプロセスを`z`パラメーターで繰り返します。
 
 ```fsharp
-// find the next test that fails when shrinking the z parameter 
+// z パラメーターを縮小するときに失敗する次のテストを見つける
 let x,y,z = (25,1,50) 
 Arb.shrink z
 |> Seq.tryPick (fun z -> if associativeProperty x y z then None else Some (x,y,z) )
-// answer (25, 1, 38)
+// 答え (25, 1, 38)
 
-// find the next test that fails when shrinking the z parameter 
+// z パラメーターを縮小するときに失敗する次のテストを見つける
 let x,y,z = (25,1,38) 
 Arb.shrink z
 |> Seq.tryPick (fun z -> if associativeProperty x y z then None else Some (x,y,z) )
-// answer (25, 1, 29)
+// 答え (25, 1, 29)
 
-// find the next test that fails when shrinking the z parameter 
+// z パラメーターを縮小するときに失敗する次のテストを見つける
 let x,y,z = (25,1,29) 
 Arb.shrink z
 |> Seq.tryPick (fun z -> if associativeProperty x y z then None else Some (x,y,z) )
-// answer (25, 1, 26)
+// 答え (25, 1, 26)
 
-// find the next test that fails when shrinking the z parameter 
+// z パラメーターを縮小するときに失敗する次のテストを見つける
 let x,y,z = (25,1,26) 
 Arb.shrink z
 |> Seq.tryPick (fun z -> if associativeProperty x y z then None else Some (x,y,z) )
-// answer None
+// 答え None
 ```
 
-And now we're finished with all the parameters!
+これで、すべてのパラメーターが完了しました！
 
-The final counter-example after shrinking is `(25,1,26)`.
+縮小後の最終的な反例は `(25,1,26)` です。
 
-## Adding pre-conditions
+## 事前条件の追加
 
-Let's say that we have a new idea for a property to check. We'll create a property called `addition is not multiplication` which will help to stop any malicious (or even accidental) mixup in the implementations.
+チェックするプロパティの新しいアイデアがあるとしましょう。「加算は乗算ではない」というプロパティを作成します。これは、実装における悪意のある（または偶発的な）混同を防ぐのに役立ちます。
 
-Here's our first attempt:
+最初の試みは次のとおりです。
 ```fsharp
 let additionIsNotMultiplication x y = 
-	x + y <> x * y
+    x + y <> x * y
 ```
 
-Bt when we run this test, we get a failure!
+しかし、このテストを実行すると、失敗します！
 
 ```fsharp
 Check.Quick additionIsNotMultiplication 
@@ -1121,24 +1121,24 @@ Check.Quick additionIsNotMultiplication
 // 0
 ```
 
-Well duh, obviously `0+0` and `0*0` are equal. But how can we tell FsCheck to ignore just those inputs and leave all the other ones alone?
+ええと、明らかに`0+0`と`0*0`は等しいです。しかし、FsCheckにこれらの入力だけを無視して、他のすべての入力をそのままにするように指示するにはどうすればよいでしょうか？
 
-This is done via a "condition" or filter expression that is prepended to the property function using `==>` (an operator defined by FsCheck).
+これは、「条件」またはフィルター式を使用して行います。フィルター式は、`==>`（FsCheckによって定義された演算子）を使用してプロパティ関数の前に追加されます。
 
-Here's an example:
+例を次に示します。
 
 ```fsharp
 let additionIsNotMultiplication x y = 
-	x + y <> x * y
+    x + y <> x * y
 
 let preCondition x y = 
-	(x,y) <> (0,0)
+    (x,y) <> (0,0)
 
 let additionIsNotMultiplication_withPreCondition x y = 
-	preCondition x y ==> additionIsNotMultiplication x y 
+    preCondition x y ==> additionIsNotMultiplication x y 
 ```
 
-The new property is `additionIsNotMultiplication_withPreCondition` and can be passed to `Check.Quick` just like any other property.
+新しいプロパティは`additionIsNotMultiplication_withPreCondition`であり、他のプロパティと同様に`Check.Quick`に渡すことができます。
 
 ```fsharp
 Check.Quick additionIsNotMultiplication_withPreCondition
@@ -1147,110 +1147,110 @@ Check.Quick additionIsNotMultiplication_withPreCondition
 // 2
 ```
 
-Oops! We forgot another case! Let's fix up our precondition again:
+おっと！ もう1つのケースを忘れていました！ 事前条件をもう一度修正しましょう。
 
 ```fsharp
 let preCondition x y = 
-	(x,y) <> (0,0)
-	&& (x,y) <> (2,2)
+    (x,y) <> (0,0)
+    && (x,y) <> (2,2)
 
 let additionIsNotMultiplication_withPreCondition x y = 
-	preCondition x y ==> additionIsNotMultiplication x y 
+    preCondition x y ==> additionIsNotMultiplication x y 
 ```
 
-And now this works.
+これでうまくいきます。
 
 ```fsharp
 Check.Quick additionIsNotMultiplication_withPreCondition
 // Ok, passed 100 tests.
 ```
-	
-This kind of precondition should only be used if you want to filter out a small number of cases.
+    
+この種の事前条件は、少数のケースを除外したい場合にのみ使用する必要があります。
 
-If most of the inputs will be invalid, then this filtering will be expensive. In this case there is a better way to do it, which will be discussed in a future post.
+ほとんどの入力が無効になる場合、このフィルタリングはコストがかかります。この場合、より良い方法があり、それは将来の記事で説明します。
 
-The FsCheck documentation has more on how you can tweak properties [here](https://fsharp.github.io/FsCheck/Properties.html).
-	
-## Naming convention for properties
+FsCheckのドキュメントには、プロパティを調整する方法の詳細が[こちら](https://fsharp.github.io/FsCheck/Properties.html)にあります。
+    
+## プロパティの命名規則
 
-These properties functions have a different purpose from "normal" functions, so how should we name them?
+これらのプロパティ関数は、「通常の」関数とは目的が異なるため、どのように名前を付けるべきでしょうか？
 
-In the Haskell and Erlang world, properties are given a `prop_` prefix by convention. In the .NET world, it is more common to use a suffix like `AbcProperty`.
+HaskellやErlangの世界では、慣例によりプロパティに`prop_`というプレフィックスを付けます。.NETの世界では、`AbcProperty`のようなサフィックスを使う方が一般的です。
 
-Also, in F# we have namespaces, modules, and attributes (like `[<Test>]`) that we can use to organize properties and distinguish them from other functions.
+また、F#では、プロパティを整理し、他の関数と区別するために使用できる名前空間、モジュール、属性（`[<Test>]`など）があります。
 
-## Combining multiple properties 
+## 複数のプロパティの組み合わせ
 
-Once you have a set of properties, you can combine them into a group (or even, gasp, a *specification*!), by adding them as static members of a class type.
+プロパティのセットを作成したら、クラス型の静的メンバーとして追加することで、それらをグループに（いや、さらに進んで、なんと*仕様*としても！）まとめることができます。
 
-You can then do `Check.QuickAll` and pass in the name of the class. 
+その後、`Check.QuickAll`を実行し、クラスの名前を渡すことができます。
 
-For example, here are our three addition properties:
+例えば、3つの加算プロパティは次のとおりです。
 
 ```fsharp
-let add x y = x + y // good implementation
+let add x y = x + y // 正しい実装
 
 let commutativeProperty x y = 
-	add x y = add y x    
+    add x y = add y x    
 
 let associativeProperty x y z = 
-	add x (add y z) = add (add x y) z    
+    add x (add y z) = add (add x y) z    
 
 let leftIdentityProperty x = 
-	add x 0 = x
+    add x 0 = x
 
 let rightIdentityProperty x = 
-	add 0 x = x
+    add 0 x = x
 ```
 
-And here's the corresponding static class to be used with `Check.QuickAll`:
- 
+`Check.QuickAll`で使用する対応する静的クラスは次のとおりです。
+ 
 ```fsharp
 type AdditionSpecification =
-	static member ``Commutative`` x y = commutativeProperty x y
-	static member ``Associative`` x y z = associativeProperty x y z 
-	static member ``Left Identity`` x = leftIdentityProperty x 
-	static member ``Right Identity`` x = rightIdentityProperty x 
+    static member ``Commutative`` x y = commutativeProperty x y
+    static member ``Associative`` x y z = associativeProperty x y z 
+    static member ``Left Identity`` x = leftIdentityProperty x 
+    static member ``Right Identity`` x = rightIdentityProperty x 
 
 Check.QuickAll<AdditionSpecification>()
 ```
 
-## Combining property-based tests with example-based tests
+## プロパティベースのテストと実例ベースのテストの組み合わせ
 
-At the beginning of this post, I was dismissive of tests that used "magic" numbers to test a very small part of the input space.
+この記事の冒頭では、「マジック」ナンバーを使って入力空間のごく一部をテストするテストを軽視していました。
 
-However, I do think that example-based tests have a role that complements property-based tests. 
+しかし、実例ベースのテストは、プロパティベースのテストを補完する役割があると私は考えています。
 
-An example-based test is often easier to understand because it is less abstract, and so provides a good entry point and documentation in conjuction with the properties.
+実例ベースのテストは、抽象度が低いため、理解しやすい場合が多く、プロパティと組み合わせて優れたエントリポイントとドキュメントを提供します。
 
-Here's an example:
+例を次に示します。
 
 ```fsharp
 type AdditionSpecification =
-	static member ``Commutative`` x y = commutativeProperty x y
-	static member ``Associative`` x y z = associativeProperty x y z 
-	static member ``Left Identity`` x = leftIdentityProperty x 
-	static member ``Right Identity`` x = rightIdentityProperty x 
+    static member ``Commutative`` x y = commutativeProperty x y
+    static member ``Associative`` x y z = associativeProperty x y z 
+    static member ``Left Identity`` x = leftIdentityProperty x 
+    static member ``Right Identity`` x = rightIdentityProperty x 
 
-	// some examples as well
-	static member ``1 + 2 = 3``() =  
-		add 1 2 = 3
+    // いくつかの例も
+    static member ``1 + 2 = 3``() =  
+        add 1 2 = 3
 
-	static member ``1 + 2 = 2 + 1``() =  
-		add 1 2 = add 2 1 
+    static member ``1 + 2 = 2 + 1``() =  
+        add 1 2 = add 2 1 
 
-	static member ``42 + 0 = 0 + 42``() =  
-		add 42 0 = add 0 42 
+    static member ``42 + 0 = 0 + 42``() =  
+        add 42 0 = add 0 42 
 ```
 
-## Using FsCheck from NUnit
+## NUnitからFsCheckを使う
 
-You can use FsCheck from NUnit and other test frameworks, with an extra plugin (e.g. `FsCheck.NUnit` for Nunit).
+追加のプラグイン（NUnitの場合は`FsCheck.NUnit`など）を使用することで、NUnitやその他のテストフレームワークからFsCheckを使用できます。
 
-Rather than marking a test with `Test` or `Fact`, you use the `Property` attribute.
-And unlike normal tests, these tests can have parameters!
+テストに`Test`や`Fact`のマークを付けるのではなく、`Property`属性を使用します。
+通常のテストとは異なり、これらのテストにはパラメーターを付けることができます！
 
-Here's an example of some tests.
+テストの例を次に示します。
 
 ```fsharp
 open NUnit.Framework
@@ -1259,64 +1259,64 @@ open FsCheck.NUnit
 
 [<Property(QuietOnSuccess = true)>]
 let ``Commutative`` x y = 
-    commutativeProperty x y
+    commutativeProperty x y
 
 [<Property(Verbose= true)>]
 let ``Associative`` x y z = 
-    associativeProperty x y z 
-    
+    associativeProperty x y z 
+    
 [<Property(EndSize=300)>]
 let ``Left Identity`` x = 
-    leftIdentityProperty x 
+    leftIdentityProperty x 
 ```
 
-As you can see, you can change the configuration for each test (such as `Verbose` and `EndSize`) via properties of the annotation.
+ご覧のとおり、アノテーションのプロパティを介して、テストごとに設定（`Verbose`や`EndSize`など）を変更できます。
 
-And the `QuietOnSuccess` flag is available to make FsCheck compatible with standard test frameworks, which are silent on success and only show messages if something goes wrong.
+また、`QuietOnSuccess`フラグを使用すると、FsCheckを標準のテストフレームワークと互換性を持たせることができます。標準のテストフレームワークは、成功した場合はサイレントになり、何か問題が発生した場合にのみメッセージを表示します。
 
 
-## Summary
+## まとめ
 
-In this post I've introduced you to the basics of property-based checking. 
+この記事では、プロパティベースのテストの基本を紹介しました。
 
-There's much more to cover though! In future posts I will cover topics such as:
+しかし、扱うべきことはまだまだたくさんあります！ 今後の記事では、次のようなトピックについて説明します。
 
-* **[How to come up with properties that apply to your code](../posts/property-based-testing-2)**. The properties don't have to be mathematical. 
-  We'll look at more general properties such as inverses (for testing serialization/deserialization), idempotence (for safe handling of multiple updates or duplicate messages),
-  and also look at test oracles.
-* **How to create your own generators and shrinkers**. We've seen that FsCheck can generate random values nicely.
-  But what about values with constraints such as positive numbers, or valid email addresses, or phone numbers. FsCheck gives you the tools to build your own.
-* **How to do model-based testing**, and in particular, how to test for concurrency issues.
+* **[コードに適用できるプロパティを考え出す方法](../posts/property-based-testing-2)**。プロパティは数学的なものである必要はありません。
+  逆関数（シリアライズ/デシリアライズのテスト用）、冪等性（複数回の更新や重複メッセージの安全な処理用）など、
+  より一般的なプロパティと、テストオラクルについて見ていきます。
+* **独自のジェネレーターと縮小器を作成する方法**。FsCheckがランダムな値をうまく生成できることを確認しました。
+  しかし、正の数、有効なメールアドレス、電話番号など、制約のある値はどうでしょうか。FsCheckは、独自の値を構築するためのツールを提供します。
+* **モデルベースのテストを行う方法**、特に、同時実行性の問題をテストする方法。
 
-I've also introduced the notion of an evil malicious programmer. You might think that such a malicious programmer is unrealistic and over-the-top. 
+また、悪意のあるプログラマーの概念も紹介しました。このような悪意のあるプログラマーは非現実的で行き過ぎていると思うかもしれません。
 
-But in many cases *you* act like an unintentionally malicious programmer. You happily create a implementation that works for some special cases,
-but doesn't work more generally, not out of evil intent, but out of unawareness and blindness. 
+しかし、多くの場合、*私たち自身*が、意図せず悪意のあるプログラマーのように振る舞ってしまうことがあります。
+いくつかの特別な場合にうまくいく実装を、喜んで作ってしまいがちです。これは悪意からではなく、単に、より一般的なケースを考慮できていない、あるいは、その必要性に気づいていないことから起こります。
 
-Like fish unaware of water, we are often unaware of the assumptions we make. Property-based testing can force us to become aware of them.
+水の中にいる魚が水に気づかないように、私たちも自分が立てている前提に気づかないことがよくあります。プロパティベースのテストは、そうした前提を意識することを強制します。
 
-Until next time -- happy testing!
+それでは、また次回。テストがんばりましょう！
 
-*The code samples used in this post are [available on GitHub](https://github.com/swlaschin/PropertyBasedTesting/blob/master/part1.fsx)*.
+*この記事で使用されているコードサンプルは、[GitHubで入手できます](https://github.com/swlaschin/PropertyBasedTesting/blob/master/part1.fsx)。*
 
-**Want more? I have written [a follow up post on choosing properties for property-based testing](http://fsharpforfunandprofit.com/posts/property-based-testing-2/)**
+**もっと知りたいですか？ [プロパティベースのテストのプロパティを選択する方法に関するフォローアップ記事](https://fsharpforfunandprofit.com/posts/property-based-testing-2/)を書きました**
 
-*UPDATE: I did a talk on property-based testing based on these posts. [Slides and video here.](http://fsharpforfunandprofit.com/pbt/)*
+*更新：これらの記事に基づいて、プロパティベースのテストに関する講演を行いました。[スライドとビデオはこちら](https://fsharpforfunandprofit.com/pbt/)。*
 
-## Appendix: Installing and troubleshooting FsCheck 
+## 付録：FsCheckのインストールとトラブルシューティング
 
-The easiest way to make FsCheck available to you is to create an F# project and add the NuGet package "FsCheck.NUnit". This will install both FsCheck and NUnit in the `packages` directory.
+FsCheckを使用する最も簡単な方法は、F#プロジェクトを作成し、NuGetパッケージ「FsCheck.NUnit」を追加することです。これにより、FsCheckとNUnitの両方が`packages`ディレクトリにインストールされます。
 
-If you are using a FSX script file for interactive development, you'll need to load the DLLs from the appropriate package location, like this:
+対話型開発にFSXスクリプトファイルを使用している場合は、次のように、適切なパッケージの場所からDLLを読み込む必要があります。
 
 ```fsharp
-// sets the current directory to be same as the script directory
+// 現在のディレクトリをスクリプトディレクトリと同じに設定します
 System.IO.Directory.SetCurrentDirectory (__SOURCE_DIRECTORY__)
 
-// assumes nuget install FsCheck.Nunit has been run 
-// so that assemblies are available under the current directory
+// nuget install FsCheck.Nunit が実行済みであり、
+// アセンブリが現在のディレクトリ以下で使用可能であることを前提としています
 #I @"Packages\FsCheck.1.0.3\lib\net45"
-//#I @"Packages\FsCheck.0.9.2.0\lib\net40-Client"  // use older version for VS2012
+//#I @"Packages\FsCheck.0.9.2.0\lib\net40-Client"  // VS2012の場合は古いバージョンを使用します
 #I @"Packages\NUnit.2.6.3\lib"
 
 #r @"FsCheck.dll"
@@ -1327,7 +1327,7 @@ open FsCheck
 open NUnit.Framework
 ```
 
-Next, test that FsCheck is working correctly by running the following:
+次に、以下を実行して、FsCheckが正しく機能していることをテストします。
 
 ```fsharp
 let revRevIsOrig (xs:list<int>) = List.rev(List.rev xs) = xs
@@ -1335,17 +1335,17 @@ let revRevIsOrig (xs:list<int>) = List.rev(List.rev xs) = xs
 Check.Quick revRevIsOrig 
 ```
 
-If you get no errors, then everything is good.
+エラーが発生しない場合は、すべて正常です。
 
-If you *do* get errors, it's probably because you are on an older version of Visual Studio. Upgrade to VS2013 or failing that, do the following:
+*エラーが*発生した場合は、おそらく古いバージョンのVisual Studioを使用しているためです。VS2013にアップグレードするか、それができない場合は、次の手順を実行します。
 
-* First make sure you have the latest F# core installed ([currently 3.1](https://stackoverflow.com/questions/20332046/correct-version-of-fsharp-core)).
-* Make sure your that your `app.config` has the [appropriate binding redirects](http://blog.ploeh.dk/2014/01/30/how-to-use-fsharpcore-430-when-all-you-have-is-431/).
-* Make sure that your NUnit assemblies are being referenced locally rather than from the GAC.
+* まず、最新のF#コアがインストールされていることを確認します（[現在は3.1](https://stackoverflow.com/questions/20332046/correct-version-of-fsharp-core)）。
+* `app.config`に[適切なバインディングリダイレクト](https://blog.ploeh.dk/2014/01/30/how-to-use-fsharpcore-430-when-all-you-have-is-431/)があることを確認します。
+* NUnitアセンブリがGACからではなく、ローカルで参照されていることを確認します。
 
-These steps should ensure that compiled code works. 
+これらの手順により、コンパイルされたコードが機能するはずです。
 
-With F# interactive, it can be trickier. If you are not using VS2013, you might run into errors such as `System.InvalidCastException: Unable to cast object of type 'Arrow'`.
+F#インタラクティブでは、さらに難しい場合があります。VS2013を使用していない場合は、`System.InvalidCastException: Unable to cast object of type 'Arrow'`などのエラーが発生する可能性があります。
 
-The best cure for this is to upgrade to VS2013!  Failing that, you can use an older version of FsCheck, such as 0.9.2 (which I have tested successfully with VS2012)
+これに対する最善の解決策は、VS2013にアップグレードすることです！ それができない場合は、0.9.2などの古いバージョンのFsCheckを使用できます（VS2012で正常にテスト済みです）
 
