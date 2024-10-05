@@ -1,441 +1,448 @@
 ---
 layout: post
-title: "Choosing properties for property-based testing"
-description: "Or, I want to use FsCheck and Quickcheck, but I can never think of any properties to use"
+title: "プロパティベースのテストのプロパティ選択"
+description: "FsCheckやQuickCheckを使いたいけど、どんなプロパティを使えばいいのかわからない"
 categories: ["TDD"]
 image: "/assets/img/property_commutative.png"
 ---
 
-*UPDATE: I did a talk on property-based testing based on these posts. [Slides and video here.](http://fsharpforfunandprofit.com/pbt/)*
+*更新情報: これらの投稿に基づいて、プロパティベースのテストに関する講演を行いました。[スライドとビデオはこちら](https://fsharpforfunandprofit.com/pbt/) です。*
 
-In [the previous post](../posts/property-based-testing.md), I described the basics of property-based testing, and showed how it could save a lot of time by generating random tests.  
+[前回の投稿](../posts/property-based-testing.md)では、プロパティベースのテストの基本と、ランダムなテストを生成することで時間を大幅に節約できることを説明しました。
 
-But here's a common problem. Everyone who sees a property-based testing tool like FsCheck or QuickCheck thinks that it is amazing... but
-when it times come to start creating your own properties, the universal complaint is: "what properties should I use? I can't think of any!"
+しかし、よくある問題があります。FsCheckやQuickCheckのようなプロパティベースのテストツールを見ると、誰もが素晴らしいと思うのですが…
+いざ自分でプロパティを作成しようとすると、「どんなプロパティを使えばいいんだ？何も思いつかない！」という不満が必ず出てきます。
 
-The goal of this post is to show some common patterns that can help you discover the properties that are applicable to your code.
+この投稿の目的は、コードに適用できるプロパティを発見するのに役立つ、いくつかの一般的なパターンを紹介することです。
 
-## Categories for properties
+## プロパティのカテゴリー
 
-In my experience, many properties can be discovered by using one of the seven approaches listed below.
+私の経験では、多くのプロパティは、以下に挙げる7つのアプローチのいずれかを使うことで発見できます。
 
-* ["Different paths, same destination"](#different-paths)
-* ["There and back again"](#there-and-back)
-* ["Some things never change"](#some-things-never-change)
-* ["The more things change, the more they stay the same"](#idempotence)
-* ["Solve a smaller problem first"](#structural-induction)
-* ["Hard to prove, easy to verify"](#hard-to-prove-easy-to-verify)
-* ["The test oracle"](#test-oracle)
+* [「異なるパス、同じ目的地」](#different-paths)
+* [「行って帰って元通り」](#there-and-back)
+* [「変わらないものもある」](#some-things-never-change)
+* [「変われば変わるほど、元のままだ」](#idempotence)
+* [「まずは小さな問題を解く」](#structural-induction)
+* [「証明は難しくても、検証は簡単」](#hard-to-prove-easy-to-verify)
+* [「テストオラクル」](#test-oracle)
 
-This is by no means a comprehensive list, just the ones that have been most useful to me.
-For a different perspective, check out [the list of patterns](http://research.microsoft.com/en-us/projects/pex/patterns.pdf) that the PEX team at Microsoft have compiled.
+これは決して包括的なリストではなく、私にとって最も役立ったものです。
+他の視点については、マイクロソフトのPEXチームがまとめた[パターンのリスト](https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=feeaae51dfdd95372fb3518b40884f6ade17dfcc)をご覧ください。
 
 
 <a id="different-paths"></a>
-### "Different paths, same destination" 
 
-These kinds of properties are based on combining operations in different orders, but getting the same result.
-For example, in the diagram below, doing `X` then `Y` gives the same result as doing `Y` followed by `X`. 
+### 「異なるパス、同じ目的地」
 
-![Commutative property](../assets/img/property_commutative.png)
+この種のプロパティは、操作を異なる順序で組み合わせても、同じ結果になることを前提としています。
+例えば、下の図では、`X` を実行してから `Y` を実行しても、`Y` を実行してから `X` を実行しても、同じ結果になります。
 
-The commutative property of addition is an obvious example of this pattern. For example, the result of `add 1` then `add 2` is the same as the result of `add 2` followed by `add 1`. 
+![可換プロパティ](../assets/img/property_commutative.png)
 
-This pattern, generalized, can produce a wide range of useful properties. We'll see some more uses of this pattern later in this post.
+加算の可換性は、このパターンの分かりやすい例です。例えば、「1を足す」を実行してから「2を足す」を実行した結果は、「2を足す」を実行してから「1を足す」を実行した結果と同じです。
+
+このパターンを一般化すると、広範囲にわたる有用なプロパティを生成できます。この投稿の後半で、このパターンの使い方をさらに紹介します。
 
 <a id="there-and-back"></a>
-### "There and back again"
 
-These kinds of properties are based on combining an operation with its inverse, ending up with the same value you started with.
+### 「行って帰って元通り」
 
-In the diagram below, doing `X` serializes `ABC` to some kind of binary format, and the inverse of `X` is some sort of deserialization that returns the same `ABC` value again.
+この種のプロパティは、ある操作とその逆の操作を組み合わせることで、元の値と同じ値になることを前提としています。
+
+下の図では、`X` を実行すると `ABC` が何らかのバイナリ形式にシリアル化され、`X` の逆の操作である何らかのデシリアライズを実行すると、同じ `ABC` の値が返されます。
   
-![Inverse](../assets/img/property_inverse.png)
+![逆演算](../assets/img/property_inverse.png)
 
-In addition to serialization/deserialization, other pairs of operations can be checked this way: `addition`/`subtraction`, `write`/`read`, `setProperty`/`getProperty`, and so on. 
+シリアル化/デシリアライズに加えて、`addition`/`subtraction`、`write`/`read`、`setProperty`/`getProperty` など、他の操作のペアもこの方法でチェックできます。
 
-Other pair of functions fit this pattern too, even though they are not strict inverses, pairs such as `insert`/`contains`, `create`/`exists` , etc.
+厳密な逆演算ではない場合でも、`insert`/`contains`、`create`/`exists` などのペアもこのパターンに当てはまります。
 
 <a id="some-things-never-change"></a>
-### "Some things never change"
 
-These kinds of properties are based on an invariant that is preserved after some transformation.
+### 「変わらないものもある」
 
-In the diagram below, the transform changes the order of the items, but the same four items are still present afterwards. 
+この種のプロパティは、何らかの変換後も保持される不変条件に基づいています。
 
-![Invariant](../assets/img/property_invariant.png)
+下の図では、変換によって項目の順序が変わりますが、変換後も同じ4つの項目が存在しています。
 
-Common invariants include size of a collection (for `map` say), the contents of a collection (for `sort` say), the height or depth of something in proportion to size (e.g. balanced trees). 
+![不変条件](../assets/img/property_invariant.png)
+
+一般的な不変条件には、コレクションのサイズ（例えば `map` の場合）、コレクションの内容（例えば `sort` の場合）、サイズに比例した高さや深さ（例えば平衡木）などがあります。
 
 <a id="idempotence"></a>
-### "The more things change, the more they stay the same"
 
-These kinds of properties are based on "idempotence" -- that is, doing an operation twice is the same as doing it once.
+### 「変われば変わるほど、元のままだ」
 
-In the diagram below, using `distinct` to filter the set returns two items, but doing `distinct` twice returns the same set again. 
+この種のプロパティは、「冪等性」に基づいています。つまり、操作を2回行っても、1回行った場合と同じ結果になるということです。
 
-![Idempotence](../assets/img/property_idempotence.png)
+下の図では、`distinct` を使って集合をフィルタリングすると2つの項目が返されますが、`distinct` を2回行っても、同じ集合が返されます。
 
-Idempotence properties are very useful, and can be extended to things like database updates and message processing. 
+![冪等性](../assets/img/property_idempotence.png)
+
+この冪等性という概念は、データベースの更新やメッセージ処理など、様々な場面で役立ちます。
 
 <a id="structural-induction"></a>
-### "Solve a smaller problem first"
 
-These kinds of properties are based on "structural induction" -- that is, if a large thing can be broken into smaller parts,
-and some property is true for these smaller parts, then you can often  prove that the property is true for a large thing as well.
+### 「まずは小さな問題を解く」
 
-In the diagram below, we can see that the four-item list can be partitioned into an item plus a three-item list, which in turn can be
-partitioned into an item plus a two-item list. If we can prove the property holds for two-item list, then we can infer that it holds for the three-item list, and for the four-item list as well.
+この種のプロパティは、「構造帰納法」に基づいています。つまり、大きなものを小さな部分に分解することができ、その小さな部分について何らかのプロパティが真である場合、
+大きなものについてもそのプロパティが真であることを証明できることがよくあります。
 
-![Induction](../assets/img/property_induction.png)
+下の図では、4つの項目からなるリストを、1つの項目と3つの項目からなるリストに分割し、さらにそれを1つの項目と2つの項目からなるリストに分割できることがわかります。
+2つの項目からなるリストについてプロパティが成り立つことが証明できれば、3つの項目からなるリスト、そして4つの項目からなるリストについても成り立つと推測できます。
 
-Induction properties are often naturally applicable to recursive structures such as lists and trees. 
+![帰納法](../assets/img/property_induction.png)
+
+帰納法のプロパティは、リストや木などの再帰的な構造に自然に適用できることがよくあります。
 
 <a id="hard-to-prove-easy-to-verify"></a>
-### "Hard to prove, easy to verify"
 
-Often an algorithm to find a result can be complicated, but verifying the answer is easy.
+### 「証明は難しくても、検証は簡単」
 
-In the diagram below, we can see that finding a route through a maze is hard, but checking that it works is trivial!
+結果を求めるアルゴリズムは複雑でも、答えの検証は簡単なことがよくあります。
 
-![Hard to find, easy to verify](../assets/img/property_easy_verification.png)
+下の図では、迷路のルートを見つけるのは難しいですが、それが正しいかどうかを確認するのは簡単です。
 
-Many famous problems are of this sort, such as prime number factorization. But this approach can be used for even simple problems. 
+![見つけるのは難しくても、検証は簡単](../assets/img/property_easy_verification.png)
 
-For example, you might check that a string tokenizer works by just concatenating all the tokens again. The resulting string should be the same as what you started with.
+素因数分解など、有名な問題の多くはこの種の問題です。しかし、このアプローチは、単純な問題にも使うことができます。
+
+例えば、文字列のトークナイザが正しく動作するかどうかを、すべてのトークンを再び連結することで確認できます。結果の文字列は、元の文字列と同じになるはずです。
 
 <a id="test-oracle"></a>
-### "The test oracle"
 
-In many situations you often have an alternate version of an algorithm or process (a "test oracle") that you can use to check your results.
+### 「テストオラクル」
 
-![Test Oracle](../assets/img/property_test_oracle.png)
+多くの場合、結果を確認するために使用できる、アルゴリズムまたはプロセスの代替バージョン（「テストオラクル」）があります。
 
-For example, you might have a high-performance algorithm with optimization tweaks that you want to test. In this case,
-you might compare it with a brute force algorithm that is much slower but is also much easier to write correctly.
+![テストオラクル](../assets/img/property_test_oracle.png)
 
-Similarly, you might compare the result of a parallel or concurrent algorithm with the result of a linear, single thread version.
+例えば、最適化の調整を行った高性能なアルゴリズムをテストしたい場合があります。
+この場合、はるかに遅いが、正しく書くのがはるかに簡単な、ブルートフォースアルゴリズムと比較することができます。
+
+同様に、並列または並行アルゴリズムの結果を、線形なシングルスレッドバージョンと比較することもできます。
 
 
-## Putting the categories to work with some real examples
+## カテゴリーを実際の例で活用する
 
-In this section, we'll apply these categories to see if we can come up with properties for some simple functions such as "sort a list" and "reverse a list".
+このセクションでは、これらのカテゴリーを適用して、「リストをソートする」「リストを反転する」などの単純な関数のプロパティを考えられるかどうかを見ていきます。
 
-### "Different paths, same destination" applied to a list sort
+### リストのソートに「異なるパス、同じ目的地」を適用する
 
-Let's start with *"different paths, same destination"* and apply it to a "list sort" function. 
+では、まず「*異なるパス、同じ目的地*」から始めて、「リストのソート」関数に適用してみましょう。
 
-Can we think of any way of combining an operation *before* `List.sort`, and another operation *after* `List.sort`,
-so that you should end up with the same result?  That is, so that "going up then across the top" is the same as "going across the bottom then up".
+`List.sort`の*前*に1つの操作を組み合わせ、*後*に別の操作を組み合わせることで、最終的に同じ結果になるような方法を考えられるでしょうか？
+つまり、「上に行ってから上を横切る」のと「下を横切ってから上に行く」のが同じになるようにです。
 
-![List sort?](../assets/img/property_list_sort.png)
+![リストのソート？](../assets/img/property_list_sort.png)
 
-How about this?
+これはどうでしょうか？
 
-* **Path 1:** We add one to each element of the list, then sort. 
-* **Path 2:** We sort, then add one to each element of the list. 
-* Both lists should be equal.
+* **パス1:** リストの各要素に1を足してから、ソートします。
+* **パス2:** ソートしてから、リストの各要素に1を足します。
+* 両方のリストは等しくなるはずです。
 
-![List sort with +1](../assets/img/property_list_sort1.png)
+![1を足してからソートする場合と、ソートしてから1を足す場合](../assets/img/property_list_sort1.png)
 
-Here's some code that implements that property:
+このプロパティを実装したコードを以下に示します。
 
 ```fsharp
 let ``+1 then sort should be same as sort then +1`` sortFn aList = 
-	let add1 x = x + 1
-	
-	let result1 = aList |> sortFn |> List.map add1
-	let result2 = aList |> List.map add1 |> sortFn 
-	result1 = result2
+    let add1 x = x + 1
+    
+    let result1 = aList |> sortFn |> List.map add1
+    let result2 = aList |> List.map add1 |> sortFn 
+    result1 = result2
 
-// test	
+// テスト    
 let goodSort = List.sort
 Check.Quick (``+1 then sort should be same as sort then +1`` goodSort)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-Well, that works, but it also would work for a lot of other transformations too.
-For example, if we implemented `List.sort` as just the identity, then this property would be satisfied equally well! You can test this for yourself:
+さて、これはうまくいきますが、他の多くの変換でもうまくいきます。
+例えば、`List.sort` を単なる恒等関数として実装した場合でも、このプロパティは同様に満たされます。これは自分でテストできます。
 
 ```fsharp
 let badSort aList = aList
 Check.Quick (``+1 then sort should be same as sort then +1`` badSort)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-The problem with this property is that it is not exploiting any of the "sortedness". We know that a sort will probably reorder a list, and certainly, the smallest element should be first.
+このプロパティの問題点は、「ソート済みであること」を全く活用していないことです。ソートはおそらくリストの順序を変更するでしょうし、確かに最小の要素が最初に来るはずです。
 
-How about adding an item that we *know* will come at the front of the list after sorting?
+*確実に*ソート後にリストの先頭に来る項目を追加するのはどうでしょうか？
 
-* **Path 1:** We append `Int32.MinValue` to the *end* of the list, then sort. 
-* **Path 2:** We sort, then prepend `Int32.MinValue` to the *front* of the list. 
-* Both lists should be equal.
+* **パス1:** リストの*末尾*に `Int32.MinValue` を追加してから、ソートします。
+* **パス2:** ソートしてから、リストの*先頭*に `Int32.MinValue` を追加します。
+* 両方のリストは等しくなるはずです。
 
-![List sort with minValue](../assets/img/property_list_sort2.png)
+![最小値を使ったリストのソート](../assets/img/property_list_sort2.png)
 
-Here's the code:
+コードは以下の通りです。
 
 ```fsharp
 let ``append minValue then sort should be same as sort then prepend minValue`` sortFn aList = 
-	let minValue = Int32.MinValue
-   
-	let appendThenSort = (aList @ [minValue]) |> sortFn 
-	let sortThenPrepend = minValue :: (aList |> sortFn)
-	appendThenSort = sortThenPrepend 
+    let minValue = Int32.MinValue
+   
+    let appendThenSort = (aList @ [minValue]) |> sortFn 
+    let sortThenPrepend = minValue :: (aList |> sortFn)
+    appendThenSort = sortThenPrepend 
 
-// test
+// テスト
 Check.Quick (``append minValue then sort should be same as sort then prepend minValue`` goodSort)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-The bad implementation fails now!
+悪い実装は今度は失敗します。
 
 ```fsharp
 Check.Quick (``append minValue then sort should be same as sort then prepend minValue`` badSort)
-// Falsifiable, after 1 test (2 shrinks) 
+// 反証可能、1回のテスト（2回の縮小）後
 // [0]
 ```
 
-In other words, the bad sort of `[0; minValue]` is *not* the same as `[minValue; 0]`.
+つまり、`[0; minValue]` の不正なソートは `[minValue; 0]` とは*同じではない*ということです。
 
-So that's good! 
+これはいいですね。
 
-But... we've got some hard coded things in there that the Enterprise Developer From Hell ([see previous post](../posts/property-based-testing.md))
-could take advantage of! The EDFH will exploit the fact that we always use `Int32.MinValue` and that we always prepend or append it to the test list.
+しかし…そこには、エンタープライズデベロッパーフロムヘル（[前回の投稿](../posts/property-based-testing.md)を参照）が利用できるハードコードされたものがあります。
+EDFHは、常に `Int32.MinValue` を使用し、常にテストリストの先頭または末尾に追加するという事実を悪用します。
 
-In other words, the EDFH can identify which path we are on and have special cases for each one:
+つまり、EDFHは私たちがどちらのパスにいるのかを特定し、それぞれの場合に特別な処理をすることができます。
 
 ```fsharp
-// The Enterprise Developer From Hell strikes again
+// エンタープライズデベロッパーフロムヘルが再び襲来
 let badSort2 aList = 
-	match aList with
-	| [] -> []
-	| _ -> 
-		let last::reversedTail = List.rev aList 
-		if (last = Int32.MinValue) then
-			// if min is last, move to front
-			let unreversedTail = List.rev reversedTail
-			last :: unreversedTail 
-		else
-			aList // leave alone
+    match aList with
+    | [] -> []
+    | _ -> 
+        let last::reversedTail = List.rev aList 
+        if (last = Int32.MinValue) then
+            // 最小値が最後にある場合は、先頭に移動する
+            let unreversedTail = List.rev reversedTail
+            last :: unreversedTail 
+        else
+            aList // そのままにする
 ```
 
-And when we check it...
+そこで、この関数をテストしてみると…
 
 ```fsharp
-// Oh dear, the bad implementation passes!
+// おやおや、悪い実装がパスしてしまいました。
 Check.Quick (``append minValue then sort should be same as sort then prepend minValue`` badSort2)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-We could fix this by (a) picking a random number smaller than any number in the list and (b) inserting it at a random location rather than always appending it.
-But rather than getting too complicated, let's stop and reconsider.
+これを修正するには、(a) リスト内のどの数値よりも小さい乱数を生成し、(b) 常に追加するのではなく、乱数で決めた位置に挿入します。
+しかし、複雑になりすぎるので、ここで一旦立ち止まって考え直してみましょう。
 
-An alternative approach which also exploits the "sortedness" is to first negate all the values,
-then on the path that negates *after* the sort, add an extra reverse as well.
+「ソート済みであること」を利用した別の方法として、最初にすべての値の符号を反転し、
+ソートの*後*に符号を反転するパスでは、さらに反転を追加するという方法があります。
 
-![List sort with negate](../assets/img/property_list_sort3.png)
+![符号の反転を使ったリストのソート](../assets/img/property_list_sort3.png)
 
 ```fsharp
 let ``negate then sort should be same as sort then negate then reverse`` sortFn aList = 
-	let negate x = x * -1
+    let negate x = x * -1
 
-	let negateThenSort = aList |> List.map negate |> sortFn 
-	let sortThenNegateAndReverse = aList |> sortFn |> List.map negate |> List.rev
-	negateThenSort = sortThenNegateAndReverse 
+    let negateThenSort = aList |> List.map negate |> sortFn 
+    let sortThenNegateAndReverse = aList |> sortFn |> List.map negate |> List.rev
+    negateThenSort = sortThenNegateAndReverse 
 ```
 
-This property is harder for the EDFH to beat because there are no magic numbers to help identify which path you are on:
+このプロパティは、どちらのパスにいるのかを特定するのに役立つマジックナンバーがないため、EDFHが打ち負かすのは困難です。
 
 ```fsharp
-// test
+// テスト
 Check.Quick ( ``negate then sort should be same as sort then negate then reverse`` goodSort)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 
-// test
-Check.Quick ( ``negate then sort should be same as sort then negate then reverse``  badSort)
-// Falsifiable, after 1 test (1 shrinks) 
+// テスト
+Check.Quick ( ``negate then sort should be same as sort then negate then reverse``  badSort)
+// 反証可能、1回のテスト（1回の縮小）後
 // [1; 0]
 
-// test
-Check.Quick ( ``negate then sort should be same as sort then negate then reverse``  badSort2)
-// Falsifiable, after 5 tests (3 shrinks) 
+// テスト
+Check.Quick ( ``negate then sort should be same as sort then negate then reverse``  badSort2)
+// 反証可能、5回のテスト（3回の縮小）後
 // [1; 0]
 ```
 
-You might argue that we are only testing sorting for lists of integers. But the `List.sort` function is generic and knows nothing about integers per se,
-so I have high confidence that this property does test the core sorting logic.
+整数のリストのソートしかテストしていないと主張する人もいるかもしれません。
+しかし、`List.sort` 関数はジェネリックであり、整数自体については何も知らないので、このプロパティがソートのコアロジックをテストしていることに私は大きな自信を持っています。
 
 
-### Applying "different paths, same destination" to a list reversal function
+### リストの反転関数に「異なるパス、同じ目的地」を適用する
 
-Ok, enough of `List.sort`. What about applying the same ideas to the list reversal function?
+さて、`List.sort` については十分です。同じ考え方をリストの反転関数に適用してみるのはどうでしょうか？
 
-We can do the same append/prepend trick:
+同じ追加/先頭に追加のトリックを実行できます。
 
-![List reverse](../assets/img/property_list_rev.png)
+![リストの反転](../assets/img/property_list_rev.png)
 
-Here's the code for the property:
+プロパティのコードは以下の通りです。
 
 ```fsharp
 let ``append any value then reverse should be same as reverse then prepend same value`` revFn anyValue aList = 
-  
-	let appendThenReverse = (aList @ [anyValue]) |> revFn 
-	let reverseThenPrepend = anyValue :: (aList |> revFn)
-	appendThenReverse = reverseThenPrepend 
+  
+    let appendThenReverse = (aList @ [anyValue]) |> revFn 
+    let reverseThenPrepend = anyValue :: (aList |> revFn)
+    appendThenReverse = reverseThenPrepend 
 ```
 
-Here are the test results for the correct function and for two incorrect functions:
+正しい関数と2つの正しくない関数のテスト結果を以下に示します。
 
 ```fsharp
-// test
+// テスト
 let goodReverse = List.rev
 Check.Quick (``append any value then reverse should be same as reverse then prepend same value`` goodReverse)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 
-// bad implementation fails
+// 悪い実装は失敗する
 let badReverse aList = []
 Check.Quick (``append any value then reverse should be same as reverse then prepend same value`` badReverse)
-// Falsifiable, after 1 test (2 shrinks) 
+// 反証可能、1回のテスト（2回の縮小）後
 // true, []
 
-// bad implementation fails
+// 悪い実装は失敗する
 let badReverse2 aList = aList 
 Check.Quick (``append any value then reverse should be same as reverse then prepend same value`` badReverse2)
-// Falsifiable, after 1 test (1 shrinks) 
+// 反証可能、1回のテスト（1回の縮小）後
 // true, [false]
 ```
 
-You might notice something interesting here.  I never specified the type of the list. The property works with *any* list.
+ここで興味深いことに気づくかもしれません。リストの型を指定していません。このプロパティは*どんな*リストでも機能します。
 
-In cases like these, FsCheck will generate random lists of bools, strings, ints, etc.
+このような場合、FsCheckはbool、文字列、整数などのランダムなリストを生成します。
 
-In both failing cases, the `anyValue` is a bool. So FsCheck is using lists of bools to start with.
+どちらの失敗例でも、`anyValue` はboolです。つまり、FsCheckは最初にboolのリストを使用しています。
 
-Here's an exercise for you: Is this property good enough? Is there some way that the EDFH can create an implementation that will pass? 
+練習問題です。このプロパティは十分でしょうか？EDFHが合格する実装を作成できる方法はありますか？
 
-## "There and back again" 
+## 「行って帰って元通り」
 
-Sometimes the multi-path style properties are not available or too complicated, so let's look at some other approaches.
+複数パスのスタイルのプロパティが利用できない場合や複雑すぎる場合があるので、他のアプローチを見てみましょう。
 
-We'll start with properties involving inverses.
+まずは、逆演算を含むプロパティから始めます。
 
-Let's start with list sorting again. Is there an inverse to sorting? Hmmm, not really. So we'll skip sorting for now.
+リストのソートからもう一度始めましょう。ソートの逆演算はありますか？うーん、ないですね。なので、ソートは今は飛ばします。
 
-What about list reversal?  Well, as it happens, reversal is its own inverse!  
+リストの反転はどうでしょうか？ 実は、反転はそれ自体が逆演算なのです。
 
-![List reverse with inverse](../assets/img/property_list_rev_inverse.png)
+![逆演算を使ったリストの反転](../assets/img/property_list_rev_inverse.png)
 
-Let's turn that into a property:
+これをプロパティにしてみましょう。
 
 ```fsharp
 let ``reverse then reverse should be same as original`` revFn aList = 
-	let reverseThenReverse = aList |> revFn |> revFn
-	reverseThenReverse = aList
+    let reverseThenReverse = aList |> revFn |> revFn
+    reverseThenReverse = aList
 ```
 
-And it passes:
+そして、合格します。
 
 ```fsharp
 let goodReverse = List.rev
 Check.Quick (``reverse then reverse should be same as original`` goodReverse)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-Unfortunately, a bad implementation satisfies the property too!
+しかし、残念ながら、このプロパティでは、誤った実装でもテストをパスしてしまう可能性があります。
 
 ```fsharp
 let badReverse aList = aList 
 Check.Quick (``reverse then reverse should be same as original`` badReverse)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-Nevertheless, the use of properties involving inverses can be very useful to verify that your inverse function
-(such as deserialization) does indeed "undo" the primary function (such as serialization).
+それでも、逆演算を含むプロパティを使用することは、
+逆関数（デシリアライズなど）が実際に主関数（シリアル化など）を「元に戻す」ことを検証するのに非常に役立ちます。
 
-We'll see some real examples of using this in the next post.
+次の投稿では、これを使った実際の例をいくつか紹介します。
 
-## "Hard to prove, easy to verify" 
+## 「証明は難しくても、検証は簡単」
 
-So far we've been testing properties without actually caring about the end result of an operation.
+ここまでは、操作の最終結果を気にせずにプロパティをテストしてきました。
 
-But of course in practice, we do care about the end result! 
+しかし、実際には最終結果が重要です。
 
-Now we normally can't really tell if the result is right without duplicating the function under test.
-But often we can tell that the result is *wrong* quite easily.  In the maze diagram from above, we can easily check whether the path works or not. 
+通常、テスト対象の関数を複製しなければ、結果が正しいかどうかを判断することはできません。
+しかし、多くの場合、結果が*間違っている*かどうかはかなり簡単に判断できます。上記の迷路の図では、パスが機能するかどうかを簡単に確認できます。
 
-If we are looking for the *shortest* path, we might not be able to check it, but at least we know that we have *some* valid path.
+*最短*パスを探している場合は、それを確認できないかもしれませんが、少なくとも*有効な*パスがあることはわかります。
 
-This principle can be applied quite generally.  
+この原則は非常に一般的に適用できます。
 
-For example, let's say that we want to check whether a `string split` function is working.  We don't have to write a tokenizer -- all we have to do is ensure that the tokens,
-when concatenated, give us back the original string!
+例えば、`文字列の分割`関数が機能しているかどうかを確認したいとします。トークナイザを書く必要はありません。
+トークンを連結すると元の文字列に戻ることだけを確認すればよいのです。
 
-![String split property](../assets/img/property_string_split.png)
+![文字列分割プロパティ](../assets/img/property_string_split.png)
 
-Here's the core code from that property:
+このプロパティのコアコードは以下の通りです。
 
 ```fsharp
 let concatWithComma s t = s + "," + t
 
 let tokens = originalString.Split [| ',' |] 
 let recombinedString = 
-	// can use reduce safely because there is always at least one token
-	tokens |> Array.reduce concatWithComma 
+    // 常に少なくとも1つのトークンがあるので、reduceを安全に使用できる
+    tokens |> Array.reduce concatWithComma 
 
-// compare the result with the original
+// 結果を元のものと比較する
 originalString = recombinedString 
 ```
 
-But how can we create an original string? The random strings generated by FsCheck are unlikely to contain many commas!
+しかし、どのようにして元の文字列を作成すればよいのでしょうか？FsCheckによって生成されたランダムな文字列には、カンマがほとんど含まれていない可能性があります。
 
-There are ways that you can control exactly how FsCheck generates random data, which we'll look at later. 
+FsCheckがランダムデータを生成する方法を正確に制御する方法がありますが、それについては後で説明します。
 
-For now though, we'll use a trick. The trick is to let FsCheck generate a list of random strings, and then we'll build an `originalString` from them by concatting them together.
+ここでは、トリックを使います。そのトリックとは、FsCheckにランダムな文字列のリストを生成させ、それらを連結して `originalString` を構築するというものです。
 
-So here's the complete code for the property:
+このプロパティの完全なコードは以下の通りです。
 
 ```fsharp
 let ``concatting the elements of a string split by commas recreates the original string`` aListOfStrings = 
-	// helper to make a string
-	let addWithComma s t = s + "," + t
-	let originalString = aListOfStrings |> List.fold addWithComma ""
-	
-	// now for the property
-	let tokens = originalString.Split [| ',' |] 
-	let recombinedString = 
-		// can use reduce safely because there is always at least one token
-		tokens |> Array.reduce addWithComma 
+    // 文字列を作成するためのヘルパー
+    let addWithComma s t = s + "," + t
+    let originalString = aListOfStrings |> List.fold addWithComma ""
+    
+    // プロパティ
+    let tokens = originalString.Split [| ',' |] 
+    let recombinedString = 
+        // 常に少なくとも1つのトークンがあるので、reduceを安全に使用できる
+        tokens |> Array.reduce addWithComma 
 
-	// compare the result with the original
-	originalString = recombinedString 
+    // 結果を元のものと比較する
+    originalString = recombinedString 
 ```
 
-When we test this we are happy:
+これをテストすると、満足のいく結果が得られます。
 
 ```fsharp
 Check.Quick ``concatting the elements of a string split by commas recreates the original string`` 
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-### "Hard to prove, easy to verify" for list sorting
+### リストのソートにおける「証明は難しくても、検証は簡単」
 
-So how can we apply this principle to a sorted list?  What property is easy to verify?
+では、この原則をソートされたリストにどのように適用すればよいのでしょうか？どのようなプロパティが簡単に検証できるのでしょうか？
 
-The first thing that pops into my mind is that for each pair of elements in the list, the first one will be smaller than the second.
+最初に思いつくのは、リスト内の要素の各ペアについて、最初の要素が2番目の要素よりも小さくなるということです。
 
-![Pairwise property](../assets/img/property_list_sort_pairwise.png)
+![ペアワイズプロパティ](../assets/img/property_list_sort_pairwise.png)
 
 
-So let's make that into a property:
+これをプロパティにしてみましょう。
 
 ```fsharp
 let ``adjacent pairs from a list should be ordered`` sortFn aList = 
-	let pairs = aList |> sortFn |> Seq.pairwise
-	pairs |> Seq.forall (fun (x,y) -> x <= y )
+    let pairs = aList |> sortFn |> Seq.pairwise
+    pairs |> Seq.forall (fun (x,y) -> x <= y )
 ```
 
-But something funny happens when we try to check it. We get an error! 
+しかし、チェックしようとするとおかしなことが起こります。エラーが発生します。
 
 ```fsharp
 let goodSort = List.sort
@@ -444,1030 +451,1030 @@ Check.Quick (``adjacent pairs from a list should be ordered`` goodSort)
 
 ```text
 System.Exception: Geneflect: type not handled System.IComparable
-   at FsCheck.ReflectArbitrary.reflectObj@102-4.Invoke(String message)
-   at Microsoft.FSharp.Core.PrintfImpl.go@523-3[b,c,d](String fmt, Int32 len, FSharpFunc`2 outputChar, FSharpFunc`2 outa, b os, FSharpFunc`2 finalize, FSharpList`1 args, Int32 i)
-   at Microsoft.FSharp.Core.PrintfImpl.run@521[b,c,d](FSharpFunc`2 initialize, String fmt, Int32 len, FSharpList`1 args)
+   at FsCheck.ReflectArbitrary.reflectObj@102-4.Invoke(String message)
+   at Microsoft.FSharp.Core.PrintfImpl.go@523-3[b,c,d](String fmt, Int32 len, FSharpFunc`2 outputChar, FSharpFunc`2 outa, b os, FSharpFunc`2 finalize, FSharpList`1 args, Int32 i)
+   at Microsoft.FSharp.Core.PrintfImpl.run@521[b,c,d](FSharpFunc`2 initialize, String fmt, Int32 len, FSharpList`1 args)
 ```
 
-What does `System.Exception: type not handled System.IComparable` mean?  It means that FsCheck is trying to generate a random list, but all it knows is that the elements must be `IComparable`.
-But `IComparable` is not a type than can be instantiated, so FsCheck throws an error.
+`System.Exception: type not handled System.IComparable` はどういう意味でしょうか？これは、FsCheckがランダムなリストを生成しようとしていますが、要素が `IComparable` 型である必要があることしか理解していないために起こります。
+`IComparable` はインスタンス化できる型ではありません。そのため、FsCheckはエラーを発生させてしまうのです。
 
-How can we prevent this from happening? The solution is to specify a particular type for the property, such as `int list`, like this:
+これを防ぐにはどうすればよいでしょうか？解決策は、次のように、プロパティに `int list` などの特定の型を指定することです。
 
 ```fsharp
 let ``adjacent pairs from a list should be ordered`` sortFn (aList:int list) = 
-	let pairs = aList |> sortFn |> Seq.pairwise
-	pairs |> Seq.forall (fun (x,y) -> x <= y )
+    let pairs = aList |> sortFn |> Seq.pairwise
+    pairs |> Seq.forall (fun (x,y) -> x <= y )
 ```
 
-This code works now.
+これで、コードがちゃんと動くようになりました。
 
 ```fsharp
 let goodSort = List.sort
 Check.Quick (``adjacent pairs from a list should be ordered`` goodSort)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-Note that even though the property has been constrained, the property is still a very general one. We could have used `string list` instead, for example, and it would work just the same.
+プロパティが制約されているにもかかわらず、プロパティは依然として非常に一般的なものであることに注意してください。例えば、代わりに `string list` を使用することもでき、同じように動作します。
 
 ```fsharp
 let ``adjacent pairs from a string list should be ordered`` sortFn (aList:string list) = 
-	let pairs = aList |> sortFn |> Seq.pairwise
-	pairs |> Seq.forall (fun (x,y) -> x <= y )
+    let pairs = aList |> sortFn |> Seq.pairwise
+    pairs |> Seq.forall (fun (x,y) -> x <= y )
 
 Check.Quick (``adjacent pairs from a string list should be ordered`` goodSort)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-**TIP: If FsCheck throws "type not handled", add explicit type constraints to your property**
+**ヒント: FsCheckが「type not handled」をスローする場合は、プロパティに明示的な型制約を追加してください**
 
-Are we done now?  No! One problem with this property is that it doesn't catch malicious implementations by the EDFH.
+これで終わりでしょうか？いいえ！このプロパティの問題点の1つは、EDFHによる悪意のある実装を捕捉できないことです。
 
 ```fsharp
-// bad implementation passes
+// 悪い実装がパスする
 let badSort aList = []
 Check.Quick (``adjacent pairs from a list should be ordered`` badSort)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-Is it a surprise to you that a silly implementation also works?
+馬鹿げた実装も動作することに驚きましたか？
 
-Hmmm. That tells us that there must be some property *other than pairwise ordering* associated with sorting that we've overlooked. What are we missing here?
+うーん。これは、ソートに関連する*ペアワイズ順序以外の*プロパティが見落とされているに違いないということを示しています。何が欠けているのでしょうか？
 
-This is a good example of how doing property-based testing can lead to insights about design.  We thought we knew what sorting meant, but we're being forced to be a bit stricter in our definition.
+これは、プロパティベースのテストを行うことで、設計に関する洞察が得られる良い例です。ソートの意味を理解していると思っていましたが、定義をもう少し厳密にする必要に迫られています。
 
-As it happens, we'll fix this particular problem by using the next principle!
+実際には、次の原則を使うことで、この特定の問題を解決します。
 
-## "Some things never change" 
+## 「変わらないものもある」
 
-A useful kind of property is based on an invariant that is preserved after some transformation, such as preserving length or contents. 
+有用な種類のプロパティは、長さや内容を保持するなど、何らかの変換後も保持される不変条件に基づいています。
 
-They are not normally sufficient in themselves to ensure a correct implementation, but they *do* often act as a counter-check to more general properties.
+それらは通常、それ自体では正しい実装を保証するのに十分ではありませんが、より一般的なプロパティに対するカウンターチェックとして機能することがよくあります。
 
-For example, in [the previous post](../posts/property-based-testing.md), we created commutative and associative properties for addition, but then noticed that simply having
-an implementation that returned zero would satisfy them just as well!  It was only when we added `x + 0 = x` as a property that we could eliminate that particular malicious implementation.
+例えば、[前回の投稿](../posts/property-based-testing.md)では、加算の可換性と結合性を表すプロパティを作成しましたが、単にゼロを返す実装でも同様に満たされてしまうことに気づきました。
+`x + 0 = x` をプロパティとして追加して初めて、その特定の悪意のある実装を排除することができました。
 
-And in the "list sort" example above, we could satisfy the "pairwise ordered" property with a function that just returned an empty list!  How could we fix that?
+そして、上記の「リストのソート」の例では、空のリストを返すだけの関数で「ペアワイズ順序」プロパティを満たすことができました。どうすれば修正できるでしょうか？
 
-Our first attempt might be to check the length of the sorted list. If the lengths are different, then the sort function obviously cheated!
+最初の試みとして、ソートされたリストの長さを確認することができます。長さが異なる場合、ソート関数は明らかに不正行為をしています。
 
 ```fsharp
 let ``sort should have same length as original`` sortFn (aList:int list) = 
-	let sorted = aList |> sortFn 
-	List.length sorted = List.length aList
+    let sorted = aList |> sortFn 
+    List.length sorted = List.length aList
 ```
 
-We check it and it works:
+チェックしてみると、動作します。
 
 ```fsharp
 let goodSort = List.sort
 Check.Quick (``sort should have same length as original`` goodSort )
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-And yes, the bad implementation fails:
+そして、確かに悪い実装は失敗します。
 
 ```fsharp
 let badSort aList = []
 Check.Quick (``sort should have same length as original`` badSort )
-// Falsifiable, after 1 test (1 shrink) 
+// 反証可能、1回のテスト（1回の縮小）後
 // [0]
 ```
 
-Unfortunately, the BDFH is not defeated and can come up with another compliant implementation! Just repeat the first element N times!
+残念ながら、BDFHは敗北せず、別の準拠した実装を考え出すことができます。最初の要素をN回繰り返すだけです。
 
 ```fsharp
-// bad implementation has same length
+// 悪い実装は同じ長さを持つ
 let badSort2 aList = 
-	match aList with 
-	| [] -> []
-	| head::_ -> List.replicate (List.length aList) head 
+    match aList with 
+    | [] -> []
+    | head::_ -> List.replicate (List.length aList) head 
 
-// for example	
-// badSort2 [1;2;3]  => [1;1;1]
+// 例えば    
+// badSort2 [1;2;3]  => [1;1;1]
 ```
 
-Now when we test this, it passes:
+これでこれをテストすると、合格します。
 
 ```fsharp
 Check.Quick (``sort should have same length as original`` badSort2)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-What's more, it also satisfies the pairwise property too!
+さらに、ペアワイズプロパティも満たしています。
 
 ```fsharp
 Check.Quick (``adjacent pairs from a list should be ordered`` badSort2)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-### Sort invariant - 2nd attempt
+### ソートの不変条件 - 2回目の試み
 
-So now we have to try again. What is the difference between the real result `[1;2;3]` and the fake result `[1;1;1]`?
+では、もう一度試してみましょう。真の結果 `[1;2;3]` と偽の結果 `[1;1;1]` の違いは何でしょうか？
 
-Answer: the fake result is throwing away data. The real result always contains the same contents as the original list, but just in a different order.
+答え: 偽の結果はデータを捨てています。真の結果は常に元のリストと同じ内容を含んでいますが、順序が異なります。
 
-![Permutation property](../assets/img/property_list_sort_permutation.png)
+![順列プロパティ](../assets/img/property_list_sort_permutation.png)
 
-That leads us to a new property: a sorted list is always a permutation of the original list. Aha! Let's write the property in terms of permutations now:
+これは新しいプロパティにつながります。ソートされたリストは常に元のリストの順列です。なるほど！では、プロパティを順列で書いてみましょう。
 
 ```fsharp
 let ``a sorted list is always a permutation of the original list`` sortFn (aList:int list) = 
-	let sorted = aList |> sortFn 
-	let permutationsOfOriginalList = permutations aList 
+    let sorted = aList |> sortFn 
+    let permutationsOfOriginalList = permutations aList 
 
-	// the sorted list must be in the seq of permutations
-	permutationsOfOriginalList 
-	|> Seq.exists (fun permutation -> permutation = sorted) 
+    // ソートされたリストは順列のシーケンスに含まれていなければならない
+    permutationsOfOriginalList 
+    |> Seq.exists (fun permutation -> permutation = sorted) 
 ```
 
-Great, now all we need is a permutation function. 
+いいですね。あとは順列関数だけです。
 
-Let's head over to StackOverflow and ~~steal~~ [borrow an implementation](http://stackoverflow.com/a/4610704/1136133). Here it is:
+Stack Overflowに行って、~~盗んで~~[実装を借用して](https://stackoverflow.com/a/4610704/1136133)きましょう。以下になります。
 
 ```fsharp
-/// given aList and anElement to insert,
-/// generate all possible lists with anElement 
-/// inserted into aList 
+/// aListと挿入するanElementが与えられた場合、
+/// anElementがaListに挿入された、
+/// 可能なすべてのリストを生成する
 let rec insertElement anElement aList =
-	// From http://stackoverflow.com/a/4610704/1136133
-	seq { 
-		match aList with
-		// empty returns a singleton
-		| [] -> yield [anElement] 
-		// not empty? 
-		| first::rest ->
-			// return anElement prepended to the list
-			yield anElement::aList
-			// also return first prepended to all the sublists
-			for sublist in insertElement anElement rest do
-				yield first::sublist
-		}
+    // https://stackoverflow.com/a/4610704/1136133 より
+    seq { 
+        match aList with
+        // 空の場合はシングルトンを返す
+        | [] -> yield [anElement] 
+        // 空でない場合？
+        | first::rest ->
+            // anElementをリストの先頭に追加して返す
+            yield anElement::aList
+            // また、すべてのサブリストの先頭にfirstを追加して返す
+            for sublist in insertElement anElement rest do
+                yield first::sublist
+        }
 
-/// Given a list, return all permutations of it
+/// リストが与えられた場合、そのすべての順列を返す
 let rec permutations aList =
-	seq { 
-		match aList with
-		| [] -> yield []
-		| first::rest ->
-			// for each sub-permutation, 
-			// return the first inserted into it somewhere
-			for sublist in permutations rest do
-				yield! insertElement first sublist
-		}
+    seq { 
+        match aList with
+        | [] -> yield []
+        | first::rest ->
+            // 各サブ順列について、
+            // firstをどこかに挿入して返す
+            for sublist in permutations rest do
+                yield! insertElement first sublist
+        }
 ```
 
-Some quick interactive tests confirm that it works as expected:
+いくつかの簡単な対話型テストで、期待通りに動作することを確認します。
 
 ```fsharp
 permutations ['a';'b';'c'] |> Seq.toList
-//  [['a'; 'b'; 'c']; ['b'; 'a'; 'c']; ['b'; 'c'; 'a']; ['a'; 'c'; 'b'];
-//  ['c'; 'a'; 'b']; ['c'; 'b'; 'a']]
+//  [['a'; 'b'; 'c']; ['b'; 'a'; 'c']; ['b'; 'c'; 'a']; ['a'; 'c'; 'b'];
+//  ['c'; 'a'; 'b']; ['c'; 'b'; 'a']]
 
 permutations ['a';'b';'c';'d'] |> Seq.toList
-//  [['a'; 'b'; 'c'; 'd']; ['b'; 'a'; 'c'; 'd']; ['b'; 'c'; 'a'; 'd'];
-//   ['b'; 'c'; 'd'; 'a']; ['a'; 'c'; 'b'; 'd']; ['c'; 'a'; 'b'; 'd'];
-//   ['c'; 'b'; 'a'; 'd']; ['c'; 'b'; 'd'; 'a']; ['a'; 'c'; 'd'; 'b'];
-//   ['c'; 'a'; 'd'; 'b']; ['c'; 'd'; 'a'; 'b']; ['c'; 'd'; 'b'; 'a'];
-//   ['a'; 'b'; 'd'; 'c']; ['b'; 'a'; 'd'; 'c']; ['b'; 'd'; 'a'; 'c'];
-//   ['b'; 'd'; 'c'; 'a']; ['a'; 'd'; 'b'; 'c']; ['d'; 'a'; 'b'; 'c'];
-//   ['d'; 'b'; 'a'; 'c']; ['d'; 'b'; 'c'; 'a']; ['a'; 'd'; 'c'; 'b'];
-//   ['d'; 'a'; 'c'; 'b']; ['d'; 'c'; 'a'; 'b']; ['d'; 'c'; 'b'; 'a']]
+//  [['a'; 'b'; 'c'; 'd']; ['b'; 'a'; 'c'; 'd']; ['b'; 'c'; 'a'; 'd'];
+//   ['b'; 'c'; 'd'; 'a']; ['a'; 'c'; 'b'; 'd']; ['c'; 'a'; 'b'; 'd'];
+//   ['c'; 'b'; 'a'; 'd']; ['c'; 'b'; 'd'; 'a']; ['a'; 'c'; 'd'; 'b'];
+//   ['c'; 'a'; 'd'; 'b']; ['c'; 'd'; 'a'; 'b']; ['c'; 'd'; 'b'; 'a'];
+//   ['a'; 'b'; 'd'; 'c']; ['b'; 'a'; 'd'; 'c']; ['b'; 'd'; 'a'; 'c'];
+//   ['b'; 'd'; 'c'; 'a']; ['a'; 'd'; 'b'; 'c']; ['d'; 'a'; 'b'; 'c'];
+//   ['d'; 'b'; 'a'; 'c']; ['d'; 'b'; 'c'; 'a']; ['a'; 'd'; 'c'; 'b'];
+//   ['d'; 'a'; 'c'; 'b']; ['d'; 'c'; 'a'; 'b']; ['d'; 'c'; 'b'; 'a']]
 
 permutations [3;3] |> Seq.toList
-//  [[3; 3]; [3; 3]]
+//  [[3; 3]; [3; 3]]
 ```
 
-Excellent! Now let's run FsCheck:
+素晴らしい！では、FsCheckを実行してみましょう。
 
 ```fsharp
 Check.Quick (``a sorted list is always a permutation of the original list`` goodSort)
 ```
 
-Hmmm. That's funny, nothing seems to be happening. And my CPU is maxing out for some reason. What's going on?
+うーん。おかしいですね。何も起こっていないようです。そして、なぜかCPUの使用率が最大になっています。何が起こっているのでしょうか？
 
-What's going on is that you are going to be sitting there for a long time! If you are following along at home, I suggest you right-click and cancel the interactive session now.
+何が起こっているかというと、あなたは長い間そこに座っていることになるということです。家で一緒にやっている場合は、今すぐ右クリックして対話型セッションをキャンセルすることをお勧めします。
 
-The innocent looking `permutations` is really *really* slow for any normal sized list.
-For example, a list of just 10 items has 3,628,800 permutations. While with 20 items, you are getting to astronomical numbers.
+一見無害に見える `permutations` は、通常のサイズのリストでは*本当に*遅いです。
+例えば、わずか10個の項目のリストには3,628,800個の順列があります。20個の項目になると、天文学的な数字になります。
 
-And of course, FsCheck will be doing hundreds of these tests! So this leads to an important tip:
+そしてもちろん、FsCheckは何百回もこれらのテストを行うことになります。そのため、重要なヒントがあります。
 
-**TIP: Make sure your property checks are very fast. You will be running them a LOT!**
+**ヒント: プロパティチェックが非常に高速であることを確認してください。何度も実行することになります。**
 
-We've already seen that even in the best case, FsCheck will evaluate the property 100 times. And if shrinking is needed, even more.
-So make sure your tests are fast to run! 
+すでに見てきたように、最良の場合でも、FsCheckはプロパティを100回評価します。そして、縮小が必要な場合は、さらに多くなります。
+そのため、テストの実行速度が速いことを確認してください。
 
-But what happens if you are dealing with real systems such as databases, networks, or other slow dependencies?
+しかし、データベース、ネットワーク、その他の低速な依存関係など、実際のシステムを扱っている場合はどうでしょうか？
 
-In his (highly recommended) [video on using QuickCheck](http://vimeo.com/68383317), John Hughes tells of
-when his team was trying to detect flaws in a distributed data store that could be caused by network partitions and node failures. 
+[QuickCheckの使用に関するビデオ](https://vimeo.com/68383317)（強くお勧めします）の中で、John Hughesは、
+彼のチームがネットワークのパーティションやノードの障害によって引き起こされる可能性のある、分散データストアの欠陥を検出しようとしていたときのことを語っています。
 
-Of course, killing real nodes thousands of times was too slow, so they extracted the core logic into a virtual model, and tested that instead.
-As a result, the code was *later refactored* to make this kind of testing easier.  In other words, property-based testing influenced the design of the code, just as TDD would.
+もちろん、実際のノードを何千回も強制終了するのは遅すぎるので、コアロジックを仮想モデルに抽出して、代わりにそれをテストしました。
+その結果、この種のテストを容易にするために、コードは*後でリファクタリング*されました。つまり、プロパティベースのテストは、TDDと同様に、コードの設計に影響を与えたのです。
 
 
-### Sort invariant - 3rd attempt
+### ソートの不変条件 - 3回目の試み
 
-Ok, so we can't use permutations by just looping through them. So let's use the same idea but write a function that is specific for this case, a `isPermutationOf` function. 
+わかりました。順列をループで処理することはできません。では、同じ考え方を使いますが、この場合に特化した関数、`isPermutationOf` 関数を記述しましょう。
 
 ```fsharp
 let ``a sorted list has same contents as the original list`` sortFn (aList:int list) = 
-	let sorted = aList |> sortFn 
-	isPermutationOf aList sorted
+    let sorted = aList |> sortFn 
+    isPermutationOf aList sorted
 ```
-	
-Here's the code for `isPermutationOf` and its associated helper functions:
+    
+`isPermutationOf` とその関連ヘルパー関数のコードは以下の通りです。
 
 ```fsharp
-/// Given an element and a list, and other elements previously skipped,
-/// return a new list without the specified element.
-/// If not found, return None
+/// 要素とリスト、および以前にスキップされた他の要素が与えられた場合、
+/// 指定された要素を含まない新しいリストを返す。
+/// 見つからない場合は、Noneを返す
 let rec withoutElementRec anElement aList skipped = 
-	match aList with
-	| [] -> None
-	| head::tail when anElement = head -> 
-		// matched, so create a new list from the skipped and the remaining
-		// and return it
-		let skipped' = List.rev skipped
-		Some (skipped' @ tail)
-	| head::tail  -> 
-		// no match, so prepend head to the skipped and recurse 
-		let skipped' = head :: skipped
-		withoutElementRec anElement tail skipped' 
+    match aList with
+    | [] -> None
+    | head::tail when anElement = head -> 
+        // 一致したので、スキップされたものと残りのものから新しいリストを作成し、
+        // それを返す
+        let skipped' = List.rev skipped
+        Some (skipped' @ tail)
+    | head::tail  -> 
+        // 一致しないので、headをスキップされたものの先頭に追加して再帰する
+        let skipped' = head :: skipped
+        withoutElementRec anElement tail skipped' 
 
-/// Given an element and a list
-/// return a new list without the specified element.
-/// If not found, return None
+/// 要素とリストが与えられた場合、
+/// 指定された要素を含まない新しいリストを返す。
+/// 見つからない場合は、Noneを返す
 let withoutElement x aList = 
-	withoutElementRec x aList [] 
+    withoutElementRec x aList [] 
 
-/// Given two lists, return true if they have the same contents
-/// regardless of order
+/// 2つのリストが与えられた場合、
+/// 順序に関係なく同じ内容であればtrueを返す
 let rec isPermutationOf list1 list2 = 
-	match list1 with
-	| [] -> List.isEmpty list2 // if both empty, true
-	| h1::t1 -> 
-		match withoutElement h1 list2 with
-		| None -> false
-		| Some t2 -> 
-			isPermutationOf t1 t2
+    match list1 with
+    | [] -> List.isEmpty list2 // 両方とも空の場合はtrue
+    | h1::t1 -> 
+        match withoutElement h1 list2 with
+        | None -> false
+        | Some t2 -> 
+            isPermutationOf t1 t2
 ```
 
-Let's try the test again. And yes, this time it completes before the heat death of the universe.
+もう一度テストしてみましょう。そして、今回は宇宙の熱的死の前に完了します。
 
 ```fsharp
-Check.Quick (``a sorted list has same contents as the original list``  goodSort)
-// Ok, passed 100 tests.
+Check.Quick (``a sorted list has same contents as the original list``  goodSort)
+// OK、100個のテストに合格しました。
 ```
 
-What's also great is that the malicious implementation now fails to satisfy this property!
+素晴らしいのは、悪意のある実装がこのプロパティを満たさなくなったことです。
 
 ```fsharp
-Check.Quick (``a sorted list has same contents as the original list``  badSort2)
-// Falsifiable, after 2 tests (5 shrinks) 
+Check.Quick (``a sorted list has same contents as the original list``  badSort2)
+// 反証可能、2回のテスト（5回の縮小）後
 // [1; 0]
 ```
 
-In fact, these two properties, `adjacent pairs from a list should be ordered` and `a sorted list has same contents as the original list` should indeed ensure that
-any implementation is correct.
+実際、`adjacent pairs from a list should be ordered` と `a sorted list has same contents as the original list` という2つのプロパティがあれば、
+*実装が正しいこと*を保証できます。
 
-## Sidebar: Combining properties
+## 補足: プロパティの組み合わせ
 
-Just above, we noted that there were *two* properties needed to define the "is sorted" property.  It would be nice if we could combine them into one property
-`is sorted` so that we can have a single test.
+上で、`ソート済み`プロパティを定義するには*2つ*のプロパティが必要であることに触れました。
+単一のテストができるように、これらを1つのプロパティ `ソート済み` にまとめることができればよいのですが。
 
-Well, of course we can always merge the two sets of code into one function, but it's preferable to keep functions as small as possible.
-Furthermore, a property like `has same contents` might be reusable in other contexts as well.
+もちろん、2つのコードを1つの関数にマージすることはできますが、関数はできるだけ小さくしておくことが望ましいです。
+さらに、`同じ内容を持つ`のようなプロパティは、他のコンテキストでも再利用できる可能性があります。
 
-What we want then, is an equivalent to `AND` and `OR` that is designed to work with properties. 
+では、プロパティで動作するように設計された `AND` と `OR` に相当するものが必要になります。
 
-FsCheck to the rescue! There are built in operators to combine properties: `.&.` for `AND` and `.|.` for `OR`. 
+FsCheckの出番です。プロパティを組み合わせるための組み込み演算子があります。`AND` の場合は `.&.`、`OR` の場合は `.|.` です。
 
-Here is an example of them in use:
+使用例を以下に示します。
 
 ```fsharp
 let ``list is sorted``sortFn (aList:int list) = 
-	let prop1 = ``adjacent pairs from a list should be ordered`` sortFn aList 
-	let prop2 = ``a sorted list has same contents as the original list`` sortFn aList 
-	prop1 .&. prop2 
+    let prop1 = ``adjacent pairs from a list should be ordered`` sortFn aList 
+    let prop2 = ``a sorted list has same contents as the original list`` sortFn aList 
+    prop1 .&. prop2 
 ```
 
-When we test the combined property with a good implementation of `sort`, everything works as expected.
+`sort` の適切な実装で結合されたプロパティをテストすると、すべてが期待通りに動作します。
 
 ```fsharp
 let goodSort = List.sort
 Check.Quick (``list is sorted`` goodSort )
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-And if we test a bad implementation, the combined property fails as well.
+そして、悪い実装をテストすると、結合されたプロパティも失敗します。
 
 ```fsharp
 let badSort aList = []
 Check.Quick (``list is sorted`` badSort )
-// Falsifiable, after 1 test (0 shrinks) 
+// 反証可能、1回のテスト（0回の縮小）後
 // [0]
 ```
 
-But there's a problem now. Which of the two properties failed?
+しかし、ここで問題があります。2つのプロパティのどちらが失敗したのでしょうか？
 
-What we would like to do is add a "label" to each property so that we can tell them apart. In FsCheck, this is done with the `|@` operator:
+そこで、各プロパティに「ラベル」を追加して、区別できるようにしたいところです。FsCheckでは、これは `|@` 演算子を使って行います。
 
 ```fsharp
 let ``list is sorted (labelled)``sortFn (aList:int list) = 
-	let prop1 = ``adjacent pairs from a list should be ordered`` sortFn aList 
-				|@ "adjacent pairs from a list should be ordered"
-	let prop2 = ``a sorted list has same contents as the original list`` sortFn aList 
-				|@ "a sorted list has same contents as the original list"
-	prop1 .&. prop2 
+    let prop1 = ``adjacent pairs from a list should be ordered`` sortFn aList 
+                |@ "adjacent pairs from a list should be ordered"
+    let prop2 = ``a sorted list has same contents as the original list`` sortFn aList 
+                |@ "a sorted list has same contents as the original list"
+    prop1 .&. prop2 
 ```
 
-And now, when we test with the bad sort, we get a message `Label of failing property: a sorted list has same contents as the original list`:
+そして、悪いソートでテストすると、「Label of failing property: a sorted list has same contents as the original list」というメッセージが表示されます。
 
 ```fsharp
 Check.Quick (``list is sorted (labelled)`` badSort )
-//  Falsifiable, after 1 test (2 shrinks)
-//  Label of failing property: a sorted list has same contents as the original list
-//  [0]
+//  反証可能、1回のテスト（2回の縮小）後
+//  失敗したプロパティのラベル: a sorted list has same contents as the original list
+//  [0]
 ```
 
-For more on these operators, [see the FsCheck documentation under "And, Or and Labels"](https://fsharp.github.io/FsCheck/Properties.html).
+これらの演算子の詳細については、[FsCheckのドキュメントの「And, Or and Labels」](https://fsharp.github.io/FsCheck/Properties.html)を参照してください。
 
-And now, back to the property-divising strategies.
+それでは、プロパティを考案する戦略に戻りましょう。
 
-## "Solving a smaller problem" 
+## "小さな問題を解く"
 
-Sometimes you have a recursive data structure or a recursive problem.  In these cases, you can often find a property that is true of a smaller part.
+再帰的なデータ構造や再帰的な問題を抱えている場合があります。このような場合、小さな部分に当てはまるプロパティを見つけることができます。
 
-For example, for a sort, we could say something like:
+例えば、ソートの場合、次のようなことを言うことができます。
 
 ```text
-A list is sorted if:
-* The first element is smaller (or equal to) the second.
-* The rest of the elements after the first element are also sorted.
+リストがソートされているとは、次の場合です。
+* 最初の要素が2番目の要素よりも小さい（または等しい）。
+* 最初の要素の後の残りの要素もソートされている。
 ```
 
-Here is that logic expressed in code:
+このロジックをコードで表現すると、次のようになります。
 
 ```fsharp
 let rec ``First element is <= than second, and tail is also sorted`` sortFn (aList:int list) = 
-	let sortedList = aList |> sortFn 
-	match sortedList with
-	| [] -> true
-	| [first] -> true
-	| [first;second] -> 
-		first <= second
-	| first::second::tail -> 
-		first <= second &&
-		let subList = second::tail 
-		``First element is <= than second, and tail is also sorted`` sortFn subList  
+    let sortedList = aList |> sortFn 
+    match sortedList with
+    | [] -> true
+    | [first] -> true
+    | [first;second] -> 
+        first <= second
+    | first::second::tail -> 
+        first <= second &&
+        let subList = second::tail 
+        ``First element is <= than second, and tail is also sorted`` sortFn subList  
 ```
 
-This property is satisfied by the real sort function:
+このプロパティは、実際のソート関数で満たされます。
 
 ```fsharp
 let goodSort = List.sort
 Check.Quick (``First element is <= than second, and tail is also sorted`` goodSort )
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-But unfortunately, just like previous examples, the malicious implementations also pass.
+しかし、残念ながら、前の例と同様に、悪意のある実装も合格してしまいます。
 
 ```fsharp
 let badSort aList = []
 Check.Quick (``First element is <= than second, and tail is also sorted`` badSort )
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 
 let badSort2 aList = 
-	match aList with 
-	| [] -> []
-	| head::_ -> List.replicate (List.length aList) head 
+    match aList with 
+    | [] -> []
+    | head::_ -> List.replicate (List.length aList) head 
 
 Check.Quick (``First element is <= than second, and tail is also sorted`` badSort2)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-So as before, we'll need another property (such as the `has same contents` invariant) to ensure that the code is correct.
+そのため、前と同様に、コードが正しいことを保証するためには、別のプロパティ（`同じ内容を持つ` 不変条件など）が必要です。
 
-If you do have a recursive data structure, then try looking for recursive properties. They are pretty obvious and low hanging, when you get the hang of it.
+再帰的なデータ構造がある場合は、再帰的なプロパティを探してみてください。コツをつかめば、かなり明白で、簡単に手に入れることができます。
 
-## Is the EDFH really a problem?
+## EDFHは本当に問題なのか？
 
-In the last few examples, I've noted that trivial but wrong implementations often satisfy the properties as well as good implementations.
+最後のいくつかの例では、些細な、しかし間違った実装が、良い実装と同じようにプロパティを満たすことがよくあることに触れました。
 
-But should we *really* spend time worrying about this? I mean, if we ever really released a sort algorithm that just duplicated the first element it would be obvious immediately, surely?
+しかし、*本当に*これに時間を費やす必要があるのでしょうか？つまり、最初の要素を複製するだけのソートアルゴリズムを実際にリリースした場合、すぐに明らかになるのではないでしょうか？
 
-So yes, it's true that truly malicious implementations are unlikely to be a problem. On the other hand, you should think of property-based testing not as a *testing* process, but as a *design*
-process -- a technique that helps you clarify what your system is really trying to do. And if a key aspect of your design is satisfied with just a simple implementation,
-then perhaps there is something you have overlooked -- something that, when you discover it, will make your design both clearer and more robust.
+確かに、本当に悪意のある実装が問題になる可能性は低いでしょう。
+一方、プロパティベースのテストは*テスト*プロセスではなく、*設計*プロセス、つまりシステムが実際に何をしようとしているのかを明確にするのに役立つ手法と考えるべきです。
+そして、設計の重要な側面が単純な実装だけで満たされている場合、見落としているものがあるのかもしれません。それを発見することで、設計がより明確になり、より堅牢になるでしょう。
 
-## "The more things change, the more they stay the same" 
+## 「変われば変わるほど、元のままだ」
 
-Our next type of property is "idempotence".  Idempotence simply means that doing something twice is the same as doing it once.
-If I tell you to "sit down" and then tell you to "sit down" again, the second command has no effect.
+次のタイプのプロパティは「冪等性」です。冪等性とは、単に何かを2回行っても1回行った場合と同じ結果になることを意味します。
+「座ってください」と言ってからもう一度「座ってください」と言っても、2回目の命令は何の効果もありません。
 
-Idempotence is [essential for reliable systems](https://queue.acm.org/detail.cfm?id=2187821)
-and is [a key aspect of service oriented](http://soapatterns.org/design_patterns/idempotent_capability) and message-based architectures.
+冪等性は、[信頼性の高いシステムに不可欠](https://queue.acm.org/detail.cfm?id=2187821)であり、
+サービス指向およびメッセージベースのアーキテクチャの[重要な側面](https://web.archive.org/web/20170606080642/http://soapatterns.org/design_patterns/idempotent_capability)です。
 
-If you are designing these kinds of real-world systems it is well worth ensuring that your requests and processes are idempotent.
+これらの種類の現実世界のシステムを設計している場合は、要求とプロセスが冪等であることを保証する価値があります。
 
-I won't go too much into this right now, but let's look at two simple examples.
+今はこれ以上詳しく説明しませんが、2つの簡単な例を見てみましょう。
 
-First, our old friend `sort` is idempotent (ignoring stability) while `reverse` is not, obviously.
+まず、古い友人である `sort` は冪等ですが（安定性を無視）、`reverse` は明らかに冪等ではありません。
 
 ```fsharp
 let ``sorting twice gives the same result as sorting once`` sortFn (aList:int list) =
-	let sortedOnce = aList |> sortFn 
-	let sortedTwice = aList |> sortFn |> sortFn 
-	sortedOnce = sortedTwice
+    let sortedOnce = aList |> sortFn 
+    let sortedTwice = aList |> sortFn |> sortFn 
+    sortedOnce = sortedTwice
 
-// test
+// テスト
 let goodSort = List.sort
 Check.Quick (``sorting twice gives the same result as sorting once`` goodSort )
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-In general, any kind of query should be idempotent, or to put it another way: ["asking a question should not change the answer"](https://en.wikipedia.org/wiki/Command%E2%80%93query_separation).
+一般に、あらゆる種類のクエリは冪等であるべきです。言い換えれば、[「質問をしても答えは変わらない」](https://en.wikipedia.org/wiki/Command%E2%80%93query_separation)べきです。
 
-In the real world, this may not be the case. A simple query on a datastore run at different times may give different results.
+現実の世界では、そうではないかもしれません。データストアに対する単純なクエリを異なる時間に実行すると、異なる結果が得られる可能性があります。
 
-Here's a quick demonstration.
+簡単なデモを以下に示します。
 
-First we'll create a `NonIdempotentService` that gives different results on each query.
+まず、クエリごとに異なる結果を返す `NonIdempotentService` を作成します。
 
 ```fsharp
 type NonIdempotentService() =
-	let mutable data = 0
-	member this.Get() = 
-		data
-	member this.Set value = 
-		data <- value
+    let mutable data = 0
+    member this.Get() = 
+        data
+    member this.Set value = 
+        data <- value
 
 let ``querying NonIdempotentService after update gives the same result`` value1 value2 =
-	let service = NonIdempotentService()
-	service.Set value1
+    let service = NonIdempotentService()
+    service.Set value1
 
-	// first GET 
-	let get1 = service.Get()
+    // 最初のGET
+    let get1 = service.Get()
 
-	// another task updates the data store
-	service.Set value2
+    // 別のタスクがデータストアを更新する
+    service.Set value2
 
-	// second GET called just like first time
-	let get2 = service.Get() 
-	get1 = get2 
+    // 最初の時と同じように2回目のGETを呼び出す
+    let get2 = service.Get() 
+    get1 = get2 
 ```
 
-But if we test it now, we find that it does not satisfy the required idempotence property:
+しかし、今テストしてみると、必要な冪等性プロパティを満たしていないことがわかります。
 
 ```fsharp
 Check.Quick ``querying NonIdempotentService after update gives the same result``
-// Falsifiable, after 2 tests 
+// 反証可能、2回のテスト後
 ```
 
-As an alternative, we can create a (crude) `IdempotentService` that requires a timestamp for each transaction.
-In this design, multiple GETs using the same timestamp will always retrieve the same data.
+代わりに、各トランザクションにタイムスタンプを要求する（粗雑な） `IdempotentService` を作成できます。
+この設計では、同じタイムスタンプを使用した複数のGETは、常に同じデータを取得します。
 
 ```fsharp
 type IdempotentService() =
-	let mutable data = Map.empty
-	member this.GetAsOf (dt:DateTime) = 
-		data |> Map.find dt
-	member this.SetAsOf (dt:DateTime) value = 
-		data <- data |> Map.add dt value
+    let mutable data = Map.empty
+    member this.GetAsOf (dt:DateTime) = 
+        data |> Map.find dt
+    member this.SetAsOf (dt:DateTime) value = 
+        data <- data |> Map.add dt value
 
 let ``querying IdempotentService after update gives the same result`` value1 value2 =
-	let service = IdempotentService()
-	let dt1 = DateTime.Now.AddMinutes(-1.0)
-	service.SetAsOf dt1 value1
+    let service = IdempotentService()
+    let dt1 = DateTime.Now.AddMinutes(-1.0)
+    service.SetAsOf dt1 value1
 
-	// first GET 
-	let get1 = service.GetAsOf dt1 
+    // 最初のGET
+    let get1 = service.GetAsOf dt1 
 
-	// another task updates the data store
-	let dt2 = DateTime.Now
-	service.SetAsOf dt2 value2
+    // 別のタスクがデータストアを更新する
+    let dt2 = DateTime.Now
+    service.SetAsOf dt2 value2
 
-	// second GET called just like first time
-	let get2 = service.GetAsOf dt1 
-	get1 = get2 
+    // 最初の時と同じように2回目のGETを呼び出す
+    let get2 = service.GetAsOf dt1 
+    get1 = get2 
 ```
 
-And this one works:
+そして、これは動作します。
 
 ```fsharp
 Check.Quick ``querying IdempotentService after update gives the same result``
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-So, if you are building a REST GET handler or a database query service, and you want idempotence, you should consider using techniques such as etags, "as-of" times, date ranges, etc.
+そのため、REST GETハンドラやデータベースクエリサービスを構築していて、冪等性を確保したい場合は、etag、「as-of」時間、日付範囲などの手法の使用を検討する必要があります。
 
-If you need tips on how to do this, searching for [idempotency patterns](http://blog.jonathanoliver.com/idempotency-patterns/) will turn up some good results.
+これを行う方法のヒントが必要な場合は、[冪等性パターン](https://blog.jonathanoliver.com/idempotency-patterns/)を検索すると、いくつかの良い結果が得られます。
 
-## "Two heads are better than one" 
+## "2つの頭脳は1つよりも優れている"
 
-And finally, last but not least, we come to the "test oracle". A test oracle is simply an alternative implementation that gives the right answer, and that you can check your results against. 
+そして最後に、重要なことですが、「テストオラクル」について説明します。テストオラクルとは、単に正しい答えを与える代替実装であり、結果をチェックするために使用できます。
 
-Often the test oracle implementation is not suitable for production -- it's too slow, or it doesn't parallelize, or it's [too poetic](https://xkcd.com/1026/), etc.,
-but that doesn't stop it being very useful for testing.
+多くの場合、テストオラクルの実装は本番環境には適していません。
+遅すぎたり、並列化できなかったり、[詩的すぎたり](https://xkcd.com/1026/)しますが、テストに非常に役立つことに変わりはありません。
 
-So for "list sort", there are many simple but slow implementations around. For example, here's a quick implementation of insertion sort:
+「リストのソート」の場合、シンプルだが遅い実装が数多く存在します。例えば、挿入ソートの簡単な実装を以下に示します。
 
 ```fsharp
 module InsertionSort = 
-	
-	// Insert a new element into a list by looping over the list.
-	// As soon as you find a larger element, insert in front of it
-	let rec insert newElem list = 
-		match list with 
-		| head::tail when newElem > head -> 
-			head :: insert newElem tail
-		| other -> // including empty list
-			newElem :: other 
+    
+    // リストをループして、新しい要素をリストに挿入する。
+    // より大きな要素が見つかったら、その前に挿入する
+    let rec insert newElem list = 
+        match list with 
+        | head::tail when newElem > head -> 
+            head :: insert newElem tail
+        | other -> // 空のリストを含む
+            newElem :: other 
 
-	// Sorts a list by inserting the head into the rest of the list 
-	// after the rest have been sorted
-	let rec sort list = 
-		match list with
-		| []   -> []
-		| head::tail -> 
-			insert head (sort tail)
+    // リストの残りの部分をソートしてから、
+    // 先頭をその中に挿入することでリストをソートする
+    let rec sort list = 
+        match list with
+        | []   -> []
+        | head::tail -> 
+            insert head (sort tail)
 
-	// test
-	// insertionSort  [5;3;2;1;1]
+    // テスト
+    // insertionSort  [5;3;2;1;1]
 ```
 
-With this in place, we can write a property that tests the result against insertion sort.
+これを用意したら、挿入ソートの結果と比較してテストするプロパティを書くことができます。
 
 ```fsharp
 let ``sort should give same result as insertion sort`` sortFn (aList:int list) = 
-	let sorted1 = aList |> sortFn 
-	let sorted2 = aList |> InsertionSort.sort
-	sorted1 = sorted2 
+    let sorted1 = aList |> sortFn 
+    let sorted2 = aList |> InsertionSort.sort
+    sorted1 = sorted2 
 ```
 
-When we test the good sort, it works. Good!
+良いソートをテストすると、動作します。いいですね。
 
 ```fsharp
 let goodSort = List.sort
 Check.Quick (``sort should give same result as insertion sort`` goodSort)
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-And when we test a bad sort, it doesn't. Even better!
+そして、悪いソートをテストすると、動作しません。さらにいいですね。
 
 ```fsharp
 let badSort aList = aList 
 Check.Quick (``sort should give same result as insertion sort`` badSort)
-// Falsifiable, after 4 tests (6 shrinks) 
+// 反証可能、4回のテスト（6回の縮小）後
 // [1; 0]
 ```
 
-## Generating Roman numerals in two different ways
+## 2つの異なる方法でローマ数字を生成する
 
-We can also use the test oracle approach to cross-check two different implementations when you're not sure that *either* implementation is right!
+また、*どちらの*実装が正しいかわからない場合に、2つの異なる実装をクロスチェックするために、テストオラクルアプローチを使用することもできます。
 
-For example, in my post ["Commentary on 'Roman Numerals Kata with Commentary'"](../posts/roman-numeral-kata.md) I came up with two completely different algorithms for generating Roman Numerals.
-Can we compare them to each other and test them both in one fell swoop?
+例えば、私の投稿「['ローマ数字Kataの解説付き解説'](../posts/roman-numeral-kata.md)」では、ローマ数字を生成するための2つの全く異なるアルゴリズムを考え出しました。
+これらを互いに比較して、一挙に両方をテストすることはできるでしょうか？
 
-The first algorithm was based on understanding that Roman numerals were based on tallying, leading to this simple code:
+最初のアルゴリズムは、ローマ数字がタリーに基づいていることを理解した上で、次のような単純なコードを作成しました。
 
 ```fsharp
 let arabicToRomanUsingTallying arabic = 
-   (String.replicate arabic "I")
-	.Replace("IIIII","V")
-	.Replace("VV","X")
-	.Replace("XXXXX","L")
-	.Replace("LL","C")
-	.Replace("CCCCC","D")
-	.Replace("DD","M")
-	// optional substitutions
-	.Replace("IIII","IV")
-	.Replace("VIV","IX")
-	.Replace("XXXX","XL")
-	.Replace("LXL","XC")
-	.Replace("CCCC","CD")
-	.Replace("DCD","CM")
+   (String.replicate arabic "I")
+    .Replace("IIIII","V")
+    .Replace("VV","X")
+    .Replace("XXXXX","L")
+    .Replace("LL","C")
+    .Replace("CCCCC","D")
+    .Replace("DD","M")
+    // オプションの置換
+    .Replace("IIII","IV")
+    .Replace("VIV","IX")
+    .Replace("XXXX","XL")
+    .Replace("LXL","XC")
+    .Replace("CCCC","CD")
+    .Replace("DCD","CM")
 ```
 
-Another way to think about Roman numerals is to imagine an abacus. Each wire has four "unit" beads and one "five" bead.
+ローマ数字を考える別の方法は、そろばんを想像することです。各ワイヤーには4つの「ユニット」ビーズと1つの「ファイブ」ビーズがあります。
 
-This leads to the so-called "bi-quinary" approach:
+これは、いわゆる「バイナリ」アプローチにつながります。
 
 ```fsharp
 let biQuinaryDigits place (unit,five,ten) arabic =
-  let digit =  arabic % (10*place) / place
-  match digit with
-  | 0 -> ""
-  | 1 -> unit
-  | 2 -> unit + unit
-  | 3 -> unit + unit + unit
-  | 4 -> unit + five // changed to be one less than five 
-  | 5 -> five
-  | 6 -> five + unit
-  | 7 -> five + unit + unit
-  | 8 -> five + unit + unit + unit
-  | 9 -> unit + ten  // changed to be one less than ten
-  | _ -> failwith "Expected 0-9 only"
+  let digit =  arabic % (10*place) / place
+  match digit with
+  | 0 -> ""
+  | 1 -> unit
+  | 2 -> unit + unit
+  | 3 -> unit + unit + unit
+  | 4 -> unit + five // 5より1つ少なくなるように変更
+  | 5 -> five
+  | 6 -> five + unit
+  | 7 -> five + unit + unit
+  | 8 -> five + unit + unit + unit
+  | 9 -> unit + ten  // 10より1つ少なくなるように変更
+  | _ -> failwith "Expected 0-9 only"
 
 let arabicToRomanUsingBiQuinary arabic = 
-  let units = biQuinaryDigits 1 ("I","V","X") arabic
-  let tens = biQuinaryDigits 10 ("X","L","C") arabic
-  let hundreds = biQuinaryDigits 100 ("C","D","M") arabic
-  let thousands = biQuinaryDigits 1000 ("M","?","?") arabic
-  thousands + hundreds + tens + units
+  let units = biQuinaryDigits 1 ("I","V","X") arabic
+  let tens = biQuinaryDigits 10 ("X","L","C") arabic
+  let hundreds = biQuinaryDigits 100 ("C","D","M") arabic
+  let thousands = biQuinaryDigits 1000 ("M","?","?") arabic
+  thousands + hundreds + tens + units
 ```
 
-We now have two completely different algorithms, and we can cross-check them with each other to see if they give the same result.
+これで、2つの全く異なるアルゴリズムができました。これらを互いにクロスチェックして、同じ結果が得られるかどうかを確認できます。
 
 ```fsharp
 let ``biquinary should give same result as tallying`` arabic = 
-	let tallyResult = arabicToRomanUsingTallying arabic 
-	let biquinaryResult = arabicToRomanUsingBiQuinary arabic 
-	tallyResult = biquinaryResult 
+    let tallyResult = arabicToRomanUsingTallying arabic 
+    let biquinaryResult = arabicToRomanUsingBiQuinary arabic 
+    tallyResult = biquinaryResult 
 ```
 
-But if we try running this code, we get a `ArgumentException: The input must be non-negative` due to the `String.replicate` call.
+しかし、このコードを実行しようとすると、`String.replicate` の呼び出しにより、`ArgumentException: The input must be non-negative` が発生します。
 
 ```fsharp
 Check.Quick ``biquinary should give same result as tallying``
 // ArgumentException: The input must be non-negative.
 ```
 
-So we need to only include inputs that are positive.  We also need to exclude numbers that are greater than 4000, say, since the algorithms break down there too.
+そのため、正の入力のみを含める必要があります。また、アルゴリズムがそこで破綻するため、4000より大きい数値も除外する必要があります。
 
-How can we implement this filter?
+このフィルタはどのように実装すればよいでしょうか？
 
-We saw in the previous post that we could use preconditions.  But for this example, we'll try something different and change the generator.
+前回の投稿で、事前条件を使用できることを説明しました。しかし、この例では、別の方法を試して、ジェネレータを変更してみましょう。
 
-First we'll define a *new* arbitrary integer called `arabicNumber` which is filtered as we want
-(an "arbitrary" is a combination of a generator algorithm and a shrinker algorithm, as described in the previous post).
+まず、必要なようにフィルタリングされた*新しい*任意の整数 `arabicNumber` を定義します
+（「任意」とは、前回の投稿で説明したように、ジェネレータアルゴリズムとシュリンカアルゴリズムの組み合わせです）。
 
 ```fsharp
 let arabicNumber = Arb.Default.Int32() |> Arb.filter (fun i -> i > 0 && i <= 4000) 
 ```
 
-Next, we create a new property *which is constrained to only use "arabicNumber"* by using the `Prop.forAll` helper. 
+次に、`Prop.forAll` ヘルパーを使用して、*「arabicNumber」のみを使用するように制約された*新しいプロパティを作成します。
 
-We'll give the property the rather clever name of "for all values of arabicNumber, biquinary should give same result as tallying".
+このプロパティには、「arabicNumberのすべての値について、バイナリはタリーと同じ結果を返す」という、かなり巧妙な名前を付けます。
 
 ```fsharp
 let ``for all values of arabicNumber biquinary should give same result as tallying`` = 
-	Prop.forAll arabicNumber ``biquinary should give same result as tallying`` 
+    Prop.forAll arabicNumber ``biquinary should give same result as tallying`` 
 ```
 
-Now finally, we can do the cross-check test:
+最後に、クロスチェックテストを実行できます。
 
 ```fsharp
 Check.Quick ``for all values of arabicNumber biquinary should give same result as tallying``
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-And we're good! Both algorithms work correctly, it seems.
+これでOKです。どちらのアルゴリズムも正しく動作しているようです。
 
-## "Model-based" testing
+## 「モデルベース」テスト
 
-"Model-based" testing, which we will discuss in more detail in a later post, is a variant on having a test oracle. 
+後の投稿で詳しく説明する「モデルベース」テストは、テストオラクルのバリエーションです。
 
-The way it works is that, in parallel with your (complex) system under test, you create a simplified model. 
+その仕組みは、テスト対象の（複雑な）システムと並行して、簡略化されたモデルを作成するというものです。
 
-Then, when you do something to the system under test, you do the same (but simplified) thing
-to your model.
+そして、テスト対象のシステムに何かを行うときは、
+モデルにも同じ（ただし簡略化された）ことを行います。
 
-At the end, you compare your model's state with the state of the system under test. If they are the same, you're done. If not, either your SUT is buggy or your model is wrong and you have to start over!
+最後に、モデルの状態とテスト対象のシステムの状態を比較します。同じであれば、完了です。そうでない場合は、SUTにバグがあるか、モデルが間違っているため、やり直す必要があります。
 
 <a id="zendo"></a>
 
-## Interlude: A game based on finding properties
+## 幕間: プロパティを見つけるゲーム
 
-With that, we have come to the end of the various property categories. We'll go over them one more time in a minute -- but first, an interlude.
+これで、さまざまなプロパティのカテゴリーの説明は終わりです。1分ほどで、もう一度すべてを説明します。しかし、その前に、幕間です。
 
-If you sometimes feel that trying to find properties is a mental challenge, you're not alone. Would it help to pretend that it is a game?
+プロパティを見つけようとするのが精神的な挑戦だと感じる場合は、あなただけではありません。ゲームだと思うと役に立つでしょうか？
 
-As it happens, there *is* a game based on property-based testing.
+実は、プロパティベースのテストに基づいたゲームがあります。
 
-It's called [Zendo](http://boardgamegeek.com/boardgame/6830/zendo) and it involves placing sets of objects (such as plastic pyramids) on a table,
-such that each layout conforms to a pattern -- a rule -- or as we would now say, *a property*!. 
+それは[Zendo](https://boardgamegeek.com/boardgame/6830/zendo)といいます。
+テーブルの上にオブジェクトのセット（プラスチック製のピラミッドなど）を配置し、各レイアウトがパターン、つまりルール、または私たちが今言うように*プロパティ*に準拠するようにするというものです。
 
-The other players then have to guess what the rule (property) is, based on what they can see. 
+他のプレイヤーは、見えているものに基づいて、ルール（プロパティ）が何であるかを推測する必要があります。
 
-Here's a picture of a Zendo game in progress:
+進行中のZendoゲームの写真を以下に示します。
 
 ![Zendo](../assets/img/zendo1.png)
 
-The white stones mean the property has been satisfied, while black stones mean failure. Can you guess the rule here?
-I'm going to guess that it's something like "a set must have a yellow pyramid that's not touching the ground".
+白い石はプロパティが満たされていることを意味し、黒い石は失敗を意味します。ここのルールがわかりますか？
+「セットには地面に触れていない黄色のピラミッドがなければならない」のようなものだと思います。
 
-Alright, I suppose Zendo wasn't really inspired by property-based testing, but it is a fun game, and it has even been known to make an
-appearance at [programming conferences](https://thestrangeloop.com/sessions/zendo-%E2%80%93-the-scientific-method-in-a-box).
+なるほど、Zendoは実際にはプロパティベースのテストからインスピレーションを得たものではありませんが、
+楽しいゲームであり、[プログラミングカンファレンス](https://thestrangeloop.com/sessions/zendo-%E2%80%93-the-scientific-method-in-a-box)に登場することさえあります。
 
-If you want to learn more about Zendo, [the rules are here](http://www.looneylabs.com/rules/zendo).
+Zendoについてもっと知りたい場合は、[ルールはこちら](https://www.looneylabs.com/rules/zendo)です。
 
 <a id="dollar"></a>
 
-## Applying the categories one more time
+## カテゴリーをもう一度適用する
 
-With all these categories in hand, let's look at one more example problem, and see if we can find properties for it.
+これらのカテゴリーをすべて念頭に置いて、別の問題の例を見て、プロパティを見つけられるかどうかを確認しましょう。
 
-This sample is based on the well-known `Dollar` example described in Kent Beck's "TDD By Example" book.
+このサンプルは、Kent Beckの著書「テスト駆動開発入門」で説明されている、よく知られた `Dollar` の例に基づいています。
 
-Nat Pryce, of [*Growing Object-Oriented Software Guided by Tests*](http://www.growing-object-oriented-software.com/) fame,
-wrote a blog post about property-based testing a while ago (["Exploring Test-Driven Development with QuickCheck"](http://www.natpryce.com/articles/000795.html)).
+[*Growing Object-Oriented Software Guided by Tests*](http://www.growing-object-oriented-software.com/) で有名なNat Pryceは、
+しばらく前にプロパティベースのテストに関するブログ記事（[「QuickCheckを使ったテスト駆動開発の探求」](http://www.natpryce.co/articles/000795.html)）を書きました。
 
-In it, he expressed some frustration about property-based testing being useful in practice. So let's revisit the example he referenced and see what we can do with it.
+その中で彼は、プロパティベースのテストが実際に役立つことについて、いくつかの不満を表明しました。そこで、彼が参照した例を再検討し、私たちに何ができるかを見てみましょう。
 
-We're not going to attempt to critique the design itself and make it more type-driven -- [others have done that](http://spin.atomicobject.com/2014/12/10/typed-language-tdd-part2/).
-Instead, we'll take the design as given and see what properties we can come up with.
+設計自体を批判して、より型駆動型にすることはしません。[他の人がそれをやっています](https://spin.atomicobject.com/typed-language-tdd-part2/)。
+代わりに、設計をそのまま受け入れて、どのようなプロパティを考え出すことができるかを見てみましょう。
 
-So what do we have? 
+では、何があるのでしょうか？
 
-* A `Dollar` class that stores an `Amount`.
-* Methods `Add` and `Times` that transform the amount in the obvious way.
+* `Amount` を格納する `Dollar` クラス。
+* 明らかな方法で金額を変換するメソッド `Add` と `Times`。
 
 ```fsharp
-// OO style class with members
+// メンバーを持つOOスタイルのクラス
 type Dollar(amount:int) =
-	member val Amount  = amount with get, set
-	member this.Add add = 
-		this.Amount <- this.Amount + add
-	member this.Times multiplier  = 
-		this.Amount <- this.Amount * multiplier  
-	static member Create amount  = 
-		Dollar amount  
+    member val Amount  = amount with get, set
+    member this.Add add = 
+        this.Amount <- this.Amount + add
+    member this.Times multiplier  = 
+        this.Amount <- this.Amount * multiplier  
+    static member Create amount  = 
+        Dollar amount  
 ```
 
-So, first let's try it out interactively to make sure it works as expected:
+では、まず対話型で試して、期待通りに動作することを確認しましょう。
 
 ```fsharp
 let d = Dollar.Create 2
-d.Amount  // 2
+d.Amount  // 2
 d.Times 3 
-d.Amount  // 6
+d.Amount  // 6
 d.Add 1
-d.Amount  // 7
+d.Amount  // 7
 ```
 
-But that's just playing around, not real testing. So what kind of properties can we think of?
+しかし、これは単なる遊びであり、本当のテストではありません。では、どのようなプロパティを考え出すことができるでしょうか？
 
-Let's run through them all again:
+もう一度すべてを検討してみましょう。
 
-* Different paths to same result
-* Inverses
-* Invariants
-* Idempotence
-* Structural induction
-* Easy to verify
-* Test oracle
+* 同じ結果に至る異なるパス
+* 逆演算
+* 不変条件
+* 冪等性
+* 構造帰納法
+* 検証が容易
+* テストオラクル
 
-Let's skip the "different paths" one for now. What about inverses? Are there any inverses we can use?
+今のところ、「異なるパス」は飛ばしましょう。逆演算はどうでしょうか？使用できる逆演算はありますか？
 
-Yes, the setter and getter form an inverse that we can create a property from:
+はい、セッターとゲッターは、プロパティを作成できる逆演算を形成します。
 
 ```fsharp
 let ``set then get should give same result`` value = 
-	let obj = Dollar.Create 0
-	obj.Amount <- value
-	let newValue = obj.Amount
-	value = newValue 
+    let obj = Dollar.Create 0
+    obj.Amount <- value
+    let newValue = obj.Amount
+    value = newValue 
 
 Check.Quick ``set then get should give same result`` 
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-Idempotence is relevant too. For example, doing two sets in a row should be the same as doing just one.
-Here's a property for that:
+冪等性も関係があります。例えば、2回連続でセットを行うことは、1回だけ行うことと同じです。
+そのためのプロパティを以下に示します。
 
 ```fsharp
 let ``set amount is idempotent`` value = 
-	let obj = Dollar.Create 0
-	obj.Amount <- value
-	let afterFirstSet = obj.Amount
-	obj.Amount <- value
-	let afterSecondSet = obj.Amount
-	afterFirstSet = afterSecondSet 
+    let obj = Dollar.Create 0
+    obj.Amount <- value
+    let afterFirstSet = obj.Amount
+    obj.Amount <- value
+    let afterSecondSet = obj.Amount
+    afterFirstSet = afterSecondSet 
 
 Check.Quick ``set amount is idempotent`` 
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-Any "structural induction" properties?  No, not relevant to this case.
+「構造帰納法」のプロパティはありますか？ いいえ、このケースには関係ありません。
 
-Any "easy to verify" properties? Not anything obvious.
- 
-Finally, is there a test oracle? No. Again not relevant, although if we really were designing a complex currency management system,
-it might be very useful to cross-check our results with a third party system.
+「検証が容易」なプロパティはありますか？ 明らかなものはありません。
+ 
+最後に、テストオラクルはありますか？ いいえ。これも関係ありませんが、実際に複雑な通貨管理システムを設計している場合は、
+サードパーティシステムと結果をクロスチェックすると非常に役立つ可能性があります。
 
-### Properties for an immutable Dollar
+### 不変のDollarのプロパティ
 
-A confession! I cheated a bit in the code above and created a mutable class, which is how most OO objects are designed. 
+告白します！上記のコードでは少しズルをして、可変クラスを作成しました。これは、ほとんどのOOオブジェクトが設計される方法です。
 
-But in "TDD by Example" , Kent quickly realizes the problems with that and changes it to an immutable class, so let me do the same.
+しかし、「テスト駆動開発入門」では、Kentはすぐにその問題に気づき、不変クラスに変更しているので、私も同じことをしましょう。
 
-Here's the immutable version:
+不変バージョンは以下の通りです。
 
 ```fsharp
 type Dollar(amount:int) =
-	member val Amount  = amount 
-	member this.Add add = 
-		Dollar (amount + add)
-	member this.Times multiplier  = 
-		Dollar (amount * multiplier)
-	static member Create amount  = 
-		Dollar amount  
-	
-// interactive test
+    member val Amount  = amount 
+    member this.Add add = 
+        Dollar (amount + add)
+    member this.Times multiplier  = 
+        Dollar (amount * multiplier)
+    static member Create amount  = 
+        Dollar amount  
+    
+// 対話型テスト
 let d1 = Dollar.Create 2
-d1.Amount  // 2
+d1.Amount  // 2
 let d2 = d1.Times 3 
-d2.Amount  // 6
+d2.Amount  // 6
 let d3 = d2.Add 1
-d3.Amount  // 7
+d3.Amount  // 7
 ```
 
-What's nice about immutable code is that we can eliminate the need for testing of setters, so the two properties we just created have now become irrelevant!
+不変コードの良い点は、セッターのテストの必要性をなくせることです。そのため、作成した2つのプロパティは無関係になりました。
 
-To tell the truth they were pretty trivial anyway, so it's no great loss.
+正直言って、どちらにしてもかなり些細なことだったので、大した損失ではありません。
 
-So then, what new properties can we devise now?
+では、今度はどのような新しいプロパティを考案できるでしょうか？
 
-Let's look at the `Times` method. How can we test that? Which one of the strategies can we use?
+`Times` メソッドを見てみましょう。どのようにテストすればよいでしょうか？どの戦略を使用できるでしょうか？
 
-I think the "different paths to same result" is very applicable. We can do the same thing we did with "sort" and do a times operation both "inside" and "outside" and see if they give the same result.
+「同じ結果に至る異なるパス」が非常に適用できると思います。「ソート」で行ったのと同じように、「内側」と「外側」の両方でtimes演算を行い、同じ結果が得られるかどうかを確認できます。
 
 ![Dollar times](../assets/img/property_dollar_times.png)
 
-Here's that property expressed in code:
+このプロパティをコードで表現すると、次のようになります。
 
 ```fsharp
 let ``create then times should be same as times then create`` start multiplier = 
-	let d0 = Dollar.Create start
-	let d1 = d0.Times(multiplier)
-	let d2 = Dollar.Create (start * multiplier)     
-	d1 = d2
+    let d0 = Dollar.Create start
+    let d1 = d0.Times(multiplier)
+    let d2 = Dollar.Create (start * multiplier)     
+    d1 = d2
 ```
 
-Great! Let's see if it works!
+素晴らしい！動作するかどうか見てみましょう。
 
 ```fsharp
 Check.Quick ``create then times should be same as times then create``
-// Falsifiable, after 1 test 
+// 反証可能、1回のテスト後
 ```
 
-Oops -- it doesn't work!
+おっと、動作しません。
 
-Why not? Because we forgot that `Dollar` is a reference type and doesn't compare equal by default!  
+なぜでしょうか？ `Dollar` が参照型であり、デフォルトでは等価比較されないことを忘れていたからです。
 
-As a result of this mistake, we have discovered a property that we might have overlooked!
-Let's encode that before we forget.
+この間違いの結果、見落としていたかもしれないプロパティを発見しました。
+忘れないうちに、それをコード化しましょう。
 
 ```fsharp
 let ``dollars with same amount must be equal`` amount = 
-	let d1 = Dollar.Create amount 
-	let d2 = Dollar.Create amount 
-	d1 = d2
+    let d1 = Dollar.Create amount 
+    let d2 = Dollar.Create amount 
+    d1 = d2
 
 Check.Quick ``dollars with same amount must be equal`` 
-// Falsifiable, after 1 test 
+// 反証可能、1回のテスト後
 ```
 
-So now we need to fix this by adding support for `IEquatable` and so on. 
+そこで、`IEquatable` などをサポートすることで、これを修正する必要があります。
 
-You can do that if you like -- I'm going to switch to F# record types and get equality for free!
+よろしければ、そうしてください。私はF#のレコード型に切り替えて、等価性を無料で手に入れます。
 
-### Dollar properties -- version 3
+### Dollarプロパティ - バージョン3
 
-Here's the `Dollar` rewritten again:
+`Dollar` を書き直したものがこちらです。
 
 ```fsharp
 type Dollar = {amount:int } 
-	with 
-	member this.Add add = 
-		{amount = this.amount + add }
-	member this.Times multiplier  = 
-		{amount = this.amount * multiplier }
-	static member Create amount  = 
-		{amount=amount}
+    with 
+    member this.Add add = 
+        {amount = this.amount + add }
+    member this.Times multiplier  = 
+        {amount = this.amount * multiplier }
+    static member Create amount  = 
+        {amount=amount}
 ```
 
-And now our two properties are satisfied:
+そして、2つのプロパティが満たされました。
 
 ```fsharp
 Check.Quick ``dollars with same amount must be equal`` 
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 
 Check.Quick ``create then times should be same as times then create``
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-We can extend this approach for different paths. For example, we can extract the amount and compare it directly, like this:
+このアプローチを異なるパスに拡張できます。例えば、次のように、金額を抽出して直接比較できます。
 
 ![Dollar times](../assets/img/property_dollar_times2.png)
 
-The code looks like this:
+コードは以下のようになります。
 
 ```fsharp
 let ``create then times then get should be same as times`` start multiplier = 
-	let d0 = Dollar.Create start
-	let d1 = d0.Times(multiplier)
-	let a1 = d1.amount
-	let a2 = start * multiplier     
-	a1 = a2
+    let d0 = Dollar.Create start
+    let d1 = d0.Times(multiplier)
+    let a1 = d1.amount
+    let a2 = start * multiplier     
+    a1 = a2
 
 Check.Quick ``create then times then get should be same as times``
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-And we can also include `Add` in the mix as well. 
+また、`Add` もミックスに含めることができます。
 
-For example, we can do a `Times` followed by an `Add` via two different paths, like this:
+例えば、次のように、2つの異なるパスで `Times` の後に `Add` を実行できます。
 
 ![Dollar times](../assets/img/property_dollar_times3.png)
 
-And here's the code:
+コードは以下の通りです。
 
 ```fsharp
 let ``create then times then add should be same as times then add then create`` start multiplier adder = 
-	let d0 = Dollar.Create start
-	let d1 = d0.Times(multiplier)
-	let d2 = d1.Add(adder)
-	let directAmount = (start * multiplier) + adder
-	let d3 = Dollar.Create directAmount 
-	d2 = d3
+    let d0 = Dollar.Create start
+    let d1 = d0.Times(multiplier)
+    let d2 = d1.Add(adder)
+    let directAmount = (start * multiplier) + adder
+    let d3 = Dollar.Create directAmount 
+    d2 = d3
 
 Check.Quick ``create then times then add should be same as times then add then create`` 
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-So this "different paths, same result" approach is very fruitful, and we can generate *lots* of paths this way.
+このように、「異なるパス、同じ結果」アプローチは非常に実り多く、この方法で*多くの*パスを生成できます。
 
-### Dollar properties -- version 4
+### Dollarプロパティ - バージョン4
 
-Shall we call it done then?  I would say not!
+では、これで終わりにしましょうか？私はそうは思いません。
 
-We are beginning to get a whiff of a code smell. All this `(start * multiplier) + adder` code seems like a bit of duplicated logic, and could end up being brittle.
+コードの臭いがし始めています。この `(start * multiplier) + adder` コードは、ロジックが重複しているように見え、脆くなる可能性があります。
 
-Can we abstract out some commonality that is present all these cases?
+これらのケースすべてに共通する部分を抽象化することはできるでしょうか？
 
-If we think about it, our logic is *really* just this:
+考えてみると、ロジックは*実際には*次のとおりです。
 
-* Transform the amount on the "inside" in some way.
-* Transform the amount on the "outside" in the same way.
-* Make sure that the results are the same.
+* 金額を「内側」で何らかの方法で変換する。
+* 金額を「外側」で同じ方法で変換する。
+* 結果が同じであることを確認する。
 
-But to test this, the `Dollar` class is going to have to support an arbitrary transform! Let's call it `Map`! 
+しかし、これをテストするには、`Dollar` クラスが任意の変換をサポートする必要があります。それを `Map` と呼ぶことにしましょう。
 
-Now all our tests can be reduced to this one property:
+これで、すべてのテストを次の1つのプロパティに減らすことができます。
 
 ![Dollar map](../assets/img/property_dollar_map.png)
 
-Let's add a `Map` method to `Dollar`. And we can also rewrite `Times` and `Add` in terms of `Map`:
+`Dollar` に `Map` メソッドを追加しましょう。また、`Times` と `Add` を `Map` で書き直すこともできます。
 
 ```fsharp
 type Dollar = {amount:int } 
-	with 
-	member this.Map f = 
-		{amount = f this.amount}
-	member this.Times multiplier = 
-		this.Map (fun a -> a * multiplier)
-	member this.Add adder = 
-		this.Map (fun a -> a + adder)
-	static member Create amount  = 
-		{amount=amount}
+    with 
+    member this.Map f = 
+        {amount = f this.amount}
+    member this.Times multiplier = 
+        this.Map (fun a -> a * multiplier)
+    member this.Add adder = 
+        this.Map (fun a -> a + adder)
+    static member Create amount  = 
+        {amount=amount}
 ```
 
-Now the code for our property looks like this:
+これで、プロパティのコードは以下のようになります。
 
 ```fsharp
 let ``create then map should be same as map then create`` start f = 
-	let d0 = Dollar.Create start
-	let d1 = d0.Map f  
-	let d2 = Dollar.Create (f start)     
-	d1 = d2
+    let d0 = Dollar.Create start
+    let d1 = d0.Map f  
+    let d2 = Dollar.Create (f start)     
+    d1 = d2
 ```
 
-But how can we test it now? What functions should we pass in?
+しかし、どうやってテストすればいいのでしょうか？どのような関数を渡せばいいのでしょうか？
 
-Don't worry! FsCheck has you covered! In cases like this, FsCheck will actually generate random functions for you too!
+心配しないでください。FsCheckが対応しています。このような場合、FsCheckは実際にランダムな関数を生成してくれます。
 
-Try it -- it just works!
+試してみてください。動作します。
 
 ```fsharp
 Check.Quick ``create then map should be same as map then create`` 
-// Ok, passed 100 tests.
+// OK、100個のテストに合格しました。
 ```
 
-Our new "map" property is much more general than the original property using "times", so we can eliminate the latter safely.
+新しい「map」プロパティは、「times」を使用した元のプロパティよりもはるかに一般的であるため、後者を安全に削除できます。
 
-### Logging the function parameter
+### 関数パラメータのログ出力
 
-There's a little problem with the property as it stands. If you want to see what the function is that FsCheck is generating, then Verbose mode is not helpful.
+現状のプロパティにはちょっとした問題があります。FsCheckが生成している関数が何であるかを確認したい場合、Verboseモードは役に立ちません。
 
 ```fsharp
 Check.Verbose ``create then map should be same as map then create`` 
 ```
 
-Gives the output:
+出力は以下のようになります。
 
 ```text
 0:
@@ -1483,28 +1490,28 @@ Gives the output:
 99:
 36
 <fun:Invoke@3000>
-Ok, passed 100 tests.
+OK、100個のテストに合格しました。
 ```
 
-We can't tell what the function values actually were.
+関数の値が実際には何であったのかわかりません。
 
-However, you can tell FsCheck to show more useful information by wrapping your function in a special `F` case, like this:
+しかし、次のように、関数を特別な `F` ケースでラップすることで、FsCheckにさらに役立つ情報を表示するように指示できます。
 
 ```fsharp
 let ``create then map should be same as map then create2`` start (F (_,f)) = 
-	let d0 = Dollar.Create start
-	let d1 = d0.Map f  
-	let d2 = Dollar.Create (f start)     
-	d1 = d2
+    let d0 = Dollar.Create start
+    let d1 = d0.Map f  
+    let d2 = Dollar.Create (f start)     
+    d1 = d2
 ```
 
-And now when you use Verbose mode...
+そして、Verboseモードを使用すると...
 
 ```fsharp
 Check.Verbose ``create then map should be same as map then create2`` 
 ```
 
-... you get a detailed log of each function that was used:
+...使用された各関数の詳細なログが表示されます。
 
 ```text
 0:
@@ -1523,51 +1530,51 @@ Check.Verbose ``create then map should be same as map then create2``
 99:
 10
 { 10->28 }
-Ok, passed 100 tests.
+OK、100個のテストに合格しました。
 ```
 
-Each `{ 2->-2 }`, `{ 10->28 }`, etc., represents the function that was used for that iteration.
+各 `{ 2->-2 }`、`{ 10->28 }` などは、その反復で使用された関数を表しています。
 
-<a id="tdd-vs-pbt"></a>
+＠  tdd-vs-pbt
 
-## TDD vs. property-based testing
+## TDDとプロパティベースのテスト
 
-How does property-based testing (PBT) fit in with TDD? This is a common question, so let me quickly give you my take on it.
+プロパティベースのテスト（PBT）はTDDとどのように適合するのでしょうか？これはよくある質問なので、私の考えを簡単に説明しましょう。
 
-First off, TDD works with *specific examples*, while PBT works with *universal properties*. 
+まず、TDDは*具体的な例*を扱いますが、PBTは*普遍的なプロパティ*を扱います。
 
-As I said in the previous post, I think examples are useful as a way into a design, and can be a form of documentation.
-But in my opinion, relying *only* on example-based tests would be a mistake.
+前回の投稿で述べたように、例は設計への入り口として有用であり、ドキュメントの一種になり得ると考えています。
+しかし、私の意見では、例に基づいたテスト*だけ*に頼るのは間違いです。
 
-Property-based approaches have a number of advantages over example-based tests:
+プロパティベースのアプローチは、例に基づいたテストに比べて、次のような多くの利点があります。
 
-* Property-based tests are more general, and thus are less brittle. 
-* Property-based tests provide a better and more concise description of requirements than a bunch of examples.
-* As a consequence, one property-based test can replace many, many, example-based tests. 
-* By generating random input, property-based tests often reveal issues that you have overlooked, such as dealing with nulls, missing data, divide by zero, negative numbers, etc.
-* Property-based tests force you to think.
-* Property-based tests force you to have a clean design.
+* プロパティベースのテストはより一般的であるため、脆さが軽減されます。
+* プロパティベースのテストは、一連の例よりも、要件をより適切かつ簡潔に記述します。
+* その結果、1つのプロパティベースのテストで、多くの例に基づいたテストを置き換えることができます。
+* ランダムな入力を生成することで、プロパティベースのテストは、nullの処理、データの欠落、ゼロ除算、負の数など、見落としていた問題を明らかにすることがよくあります。
+* プロパティベースのテストは、あなたに考えさせます。
+* プロパティベースのテストは、あなたにクリーンな設計を強制します。
 
-These last two points are the most important for me. Programming is not a matter of writing lines of code, it is about creating a design that meets the requirements.
+最後の2つのポイントが、私にとって最も重要です。プログラミングとは、コードを書くことではなく、要件を満たす設計を作成することです。
 
-So, anything that helps you think deeply about the requirements and what can go wrong should be a key tool in your personal toolbox!
+そのため、要件と何がうまくいかないかについて深く考えるのに役立つものはすべて、あなたの個人的なツールボックスの重要なツールになるはずです。
 
-For example, in the Roman Numeral section, we saw that accepting `int` was a bad idea (the code broke!). We had a quick fix, but really we should model
-the concept of a `PositiveInteger` in our domain, and then change our code to use that type rather than just an `int`.
-This demonstrates how using PBT can actually improve your domain model, not just find bugs.
+例えば、ローマ数字のセクションでは、`int` を受け入れるのは悪い考えであること（コードが壊れる！）がわかりました。
+とりあえず修正しましたが、実際にはドメインで `PositiveInteger` の概念をモデル化し、コードを単なる `int` ではなく、その型を使用するように変更する必要があります。
+これは、PBTを使用することで、バグを見つけるだけでなく、ドメインモデルを実際に改善できることを示しています。
 
-Similarly, introducing a `Map` method in the Dollar scenario not only made testing easier, but actually improved the usefulness of the Dollar "api".
+同様に、Dollarのシナリオで `Map` メソッドを導入したことで、テストが容易になっただけでなく、Dollarの「API」の有用性が実際に改善されました。
 
-Stepping back to look at the big picture, though, TDD and property-based testing are not at all in conflict. They share the same goal of building correct programs,
-and both are really more about design  than coding (think "Test-driven *design*" rather than "Test-driven *development*").
+しかし、全体像に目を向けると、TDDとプロパティベースのテストは全く対立していません。
+どちらも正しいプログラムを構築するという同じ目標を共有しており、どちらも実際にはコーディングよりも設計に関するものです（「テスト駆動*開発*」ではなく「テスト駆動*設計*」と考えてください）。
 
-## The end, at last
+## ついに終わり
 
-So that brings us to the end of another long post on property-based testing! 
+これで、プロパティベースのテストに関する長い投稿は終わりです。
 
-I hope that you now have some useful approaches that you can take away and apply to your own code base.
+これで、独自のコードベースに持ち帰って適用できる、いくつかの有用なアプローチが得られたことを願っています。
 
-Next time, we'll look at some real-world examples, and how you can create custom generators that match your domain.
+次回は、実際の例と、ドメインに合ったカスタムジェネレータを作成する方法について説明します。
 
 
-*The code samples used in this post are [available on GitHub](https://github.com/swlaschin/PropertyBasedTesting/blob/master/part2.fsx)*.
+*この投稿で使用されているコードサンプルは、[GitHubで入手できます](https://github.com/swlaschin/PropertyBasedTesting/blob/master/part2.fsx)*。
