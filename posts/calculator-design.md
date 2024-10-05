@@ -27,7 +27,7 @@ For this first post in the series, I'll be developing a simple pocket calculator
 
 My approach to software development is eclectic and pragmatic -- I like to mix different techniques and alternate between top-down and bottom-up approaches.
 
-Typically I start with the requirements -- I'm a fan of [requirements-driven design](http://fsharpforfunandprofit.com/posts/roman-numeral-kata/)!
+Typically I start with the requirements -- I'm a fan of [requirements-driven design](../posts/roman-numeral-kata.md)!
 Ideally, I would aim to become an expert in the domain as well.
 
 Next, I work on modelling the domain, using [domain-driven design](http://fsharpforfunandprofit.com/ddd/)
