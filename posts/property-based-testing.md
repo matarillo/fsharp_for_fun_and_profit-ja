@@ -44,7 +44,7 @@ categories: ["TDD"]
 
 ```fsharp
 [<Test>]
-let ``When I add 1 + 2, I expect 3``()=
+let ``1 + 2 は 3 になるはずだ``()=
     let result = add 1 2
     Assert.AreEqual(3,result)
 ```
@@ -67,7 +67,7 @@ EDFHに文句を言うと、彼らはTDDを正しく行っており、[テスト
 
 ```fsharp
 [<Test>]
-let ``When I add 2 + 2, I expect 4``()=
+let ``2 + 2 は 4 になるはずだ``()=
     let result = add 2 2
     Assert.AreEqual(4,result)
 ```
@@ -90,13 +90,13 @@ let add x y =
 
 ## 悪意のあるプログラマーに打ち勝つ
 
-そこで問題は、悪意のあるプログラマーがどんなに頑張っても、間違った実装を作成できないようなテストをどのように書けばよいのでしょうか？
+そこで問題です。悪意のあるプログラマーがどんなに頑張っても、間違った実装を作成できないようなテストをどのように書けばよいのでしょうか？
 
 そうですね、既知の結果をもっとたくさんリストアップして、少し混ぜ合わせてみましょう。
 
 ```fsharp
 [<Test>]
-let ``When I add two numbers, I expect to get their sum``()=
+let ``2つの数字を足すと、その合計になるはずだ``()=
     for (x,y,expected) in [ (1,2,3); (2,2,4); (3,5,8); (27,15,42); ]
         let actual = add x y
         Assert.AreEqual(expected,actual)
@@ -111,7 +111,7 @@ let rand = System.Random()
 let randInt() = rand.Next()
 
 [<Test>]
-let ``When I add two random numbers, I expect their sum``()=
+let ``2つの乱数を足すと、その合計になるはずだ``()=
     let x = randInt()
     let y = randInt()
     let expected = x + y
@@ -126,7 +126,7 @@ let ``When I add two random numbers, I expect their sum``()=
 
 ```fsharp
 [<Test>]
-let ``When I add two random numbers (100 times), I expect their sum``()=
+let ``100回とも、2つの乱数を足すと、その合計になるはずだ``()=
     for _ in [1..100] do
         let x = randInt()
         let y = randInt()
@@ -149,7 +149,7 @@ let ``When I add two random numbers (100 times), I expect their sum``()=
 
 では、`+`を使わずにテストできない場合、どのようにテストすればよいのでしょうか？
 
-答えは、関数の*プロパティ*、つまり「要件」に焦点を当てたテストを作成することです。
+答えは、関数の*プロパティ（特性）*、つまり「要件」に焦点を当てたテストを作成することです。
 これらのプロパティは、*どんな*正しい実装でも当てはまるものでなければなりません。
 
 では、`add`関数のプロパティについて考えてみましょう。
@@ -158,11 +158,11 @@ let ``When I add two random numbers (100 times), I expect their sum``()=
 
 例えば、`add`と`subtract`の違いは何でしょうか？ `subtract`ではパラメーターの順序が重要ですが、`add`では重要ではありません。
 
-ですから、良いプロパティがあります。それは加算自体に依存しませんが、間違った実装のクラス全体を除外してくれます。
+そのことはプロパティとして良さそうです。加算自体に依存しませんが、間違った実装はまとめて除外してくれます。
 
 ```fsharp
 [<Test>]
-let ``When I add two numbers, the result should not depend on parameter order``()=
+let ``2つの数字を足した結果は、パラメーターの順序に依存しないはずだ``()=
     for _ in [1..100] do
         let x = randInt()
         let y = randInt()
@@ -191,7 +191,7 @@ Assert.AreEqual(result1,result2)
 
 ```fsharp
 [<Test>]
-let ``Adding 1 twice is the same as adding 2``()=
+let ``1 を 2 回足すのは、2 を 1 回足すのと同じだ``()=
     for _ in [1..100] do
         let x = randInt()
         let y = randInt()
@@ -228,7 +228,7 @@ let add x y = 0  // 悪意のある実装
 
 ```fsharp
 [<Test>]
-let ``Adding zero is the same as doing nothing``()=
+let ``0 を足しても何も変わらない``()=
     for _ in [1..100] do
         let x = randInt()
         let result1 = x |> add 0
@@ -265,7 +265,7 @@ let commutativeProperty x y =
     result1 = result2
 
 [<Test>]
-let ``When I add two numbers, the result should not depend on parameter order``()=
+let ``2つの数字を足した結果は、パラメーターの順序に依存しないはずだ``()=
     propertyCheck commutativeProperty 
 ```
 
@@ -293,7 +293,7 @@ let commutativeProperty x y =
     result1 = result2
 
 [<Test>]
-let ``When I add two numbers, the result should not depend on parameter order``()=
+let ``2つの数字を足した結果は、パラメーターの順序に依存しないはずだ``()=
     propertyCheck commutativeProperty 
 
 let adding1TwiceIsAdding2OnceProperty x _ = 
@@ -302,7 +302,7 @@ let adding1TwiceIsAdding2OnceProperty x _ =
     result1 = result2
 
 [<Test>]
-let ``Adding 1 twice is the same as adding 2``()=
+let ``1 を 2 回足すのは、2 を 1 回足すのと同じだ``()=
     propertyCheck adding1TwiceIsAdding2OnceProperty 
 
 let identityProperty x _ = 
@@ -310,7 +310,7 @@ let identityProperty x _ =
     result1 = x
 
 [<Test>]
-let ``Adding zero is the same as doing nothing``()=
+let ``0 を足しても何も変わらない``()=
     propertyCheck identityProperty 
 ```
 
@@ -1258,15 +1258,15 @@ open FsCheck
 open FsCheck.NUnit
 
 [<Property(QuietOnSuccess = true)>]
-let ``Commutative`` x y = 
+let ``交換法則`` x y = 
     commutativeProperty x y
 
 [<Property(Verbose= true)>]
-let ``Associative`` x y z = 
+let ``結合法則`` x y z = 
     associativeProperty x y z 
     
 [<Property(EndSize=300)>]
-let ``Left Identity`` x = 
+let ``左単位元`` x = 
     leftIdentityProperty x 
 ```
 
