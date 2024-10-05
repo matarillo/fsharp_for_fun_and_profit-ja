@@ -1,182 +1,182 @@
 ---
 layout: post
-title: "Commentary on 'Roman Numerals Kata with Commentary'"
-description: "My approach to the Roman Numerals Kata"
-categories: ["Worked Examples"]
+title: "「解説付きローマ数字カタ」についての考察"
+description: "ローマ数字カタへの私のアプローチ"
+categories: ["作業例"]
 ---
 
-I recently watched a video called ["Roman Numerals Kata with Commentary"](http://blog.coreyhaines.com/2012/12/roman-numerals-kata-with-commentary.html). 
-In it, Corey Haines demonstrates how to implement the [Arabic to Roman Numerals Kata](http://codingdojo.org/cgi-bin/wiki.pl?KataRomanNumerals) in Ruby using a TDD approach.  
+最近、「[解説付きローマ数字カタ](http://blog.coreyhaines.com/2012/12/roman-numerals-kata-with-commentary.html)」という動画を見ました。
+この動画では、Corey HainesがTDDアプローチを用いて、Rubyで[アラビア数字からローマ数字への変換カタ](https://codingdojo.org/kata/RomanNumerals/)を実装する方法を紹介しています。
 
-*This video annoyed me intensely.*
+*この動画を見て、私は非常にイライラしてしまいました。*
 
-I mean no disrespect to Corey Haines' programming skills, and many people seem to have found the video useful, but I just found it exasperating.
+Corey Hainesのプログラミング能力を軽視するつもりはありません。実際、多くの人がこの動画を有益だと感じているようです。しかし、私にとっては単に苛立たしいものでした。
 
-I thought that in this post I'd try to explain why I got annoyed, and to present my alternative approach to problems like this. 
+この投稿では、なぜ私がイライラしたのか、そしてこのような問題に対する私なりのアプローチを説明したいと思います。
 
-## Where are the requirements?
+## 要件はどこにある？
 
-> *"Few programmers write even a rough sketch of what their programs will do before they start coding. Most programmers regard anything that doesn't generate code to be a waste of time."*
+> *「多くのプログラマーは、コーディングを始める前にプログラムの動作概要さえ書きません。コードを生成しないものは時間の無駄だと考えているのです。」*
 >
-> *Leslie Lamport, ["Why We Should Build Software Like We Build Houses"](http://www.wired.com/opinion/2013/01/code-bugs-programming-why-we-need-specs/)*
+> *Leslie Lamport, 「[ソフトウェアを家のように作るべき理由](https://www.wired.com/2013/01/code-bugs-programming-why-we-need-specs/)」*
 
-In standard TDD fashion, the video starts with implementing a initial failing case (handling zero), then making that work, then adding a test case for handling "1", then making that work, and so on.
+動画では、標準的なTDDの手法に従って進めています。まず初期の失敗ケース（ゼロの処理）を実装し、それを動作させます。次に「1」を処理するテストケースを追加し、それを動作させる、という具合です。
 
-This was the first thing that irritated me -- diving into code without really understanding the requirements. 
+これが私を最初にイライラさせた点です。要件を十分に理解せずにコードに飛びついているのです。
 
-A [programming kata](http://en.wikipedia.org/wiki/Kata_(programming\)) is so called because the goal is to practice your skills as a developer. 
-But for me, coding skills are just one aspect of a being a software developer, and not always the most important. 
+[プログラミングカタ](https://en.wikipedia.org/wiki/Kata_%28programming%29)の目的は、開発者としてのスキルを練習することです。
+しかし私にとって、コーディングスキルはソフトウェア開発者の一側面に過ぎず、必ずしも最重要ではありません。
 
-If there is anything that needs practicing by most developers, it is listening to and understanding the needs of the customer (a.k.a. requirements).
-We should never forget that our goal is to deliver value, not just to write code.
+多くの開発者が練習すべきなのは、顧客のニーズ（つまり要件）を聞き、理解することです。
+私たちの目標はコードを書くことではなく、価値を提供することだということを忘れてはいけません。
 
-In this case, even though there is a [wiki page](http://codingdojo.org/cgi-bin/wiki.pl?KataRomanNumerals) for the kata, the requirements are still somewhat fuzzy,
-and so I view this as an excellent opportunity to drill down into them, and maybe learn something new.
+このケースでは、カタに[Wikiページ](https://codingdojo.org/kata/RomanNumerals/)がありますが、要件はまだ曖昧です。
+そのため、これは要件を深く掘り下げ、新しいことを学ぶ絶好の機会だと考えています。
 
-## Becoming a domain expert
+## ドメインエキスパートになる
 
-In fact, I believe that going as deep as possible into the requirements has some important benefits. 
+実際、要件をできる限り深く理解することには重要な利点があります。
 
-**It's fun**. It's fun to really understand a new domain. I like to learn new things -- it is one of the perks of being a developer. 
-
-
-It's not just me. Dan North tells of how much fun he had working very closely with domain experts in his ["accelerating agile"](http://vimeo.com/68215534) presentation. 
-Part of that team's success was that the developers studied the domain (trading) right along with the traders themselves, so that communication was easy and confusion minimized.
-
-**Good design**. I do believe that in order to produce good software you have to become reasonably expert in the domain you are attempting to model. 
-This is the thesis behind Domain Driven Design, of course, but also is a key component of an Agile process: the "on site customer" who works very closely with the developers at all stages.
-
-And almost always, understanding the requirements properly will lead you into the right* way to implement a solution.
-No amount of shallow iterations will make up for a lack of deep insight.
-
-<sub>* Of course there is not really a "right" way, but there are plenty of wrong ways. So here I just mean not horribly complicated and unmaintainable.<sub>
-
-**Good tests**. You can't create good tests without understanding the requirements. A process like BDD makes this explicit;
-the requirements are written in such a way that they actually *become* the tests.
+**楽しい**。新しいドメインを本当に理解するのは楽しいものです。私は新しいことを学ぶのが好きです。それは開発者であることの特典の一つです。
 
 
-## Understanding Roman numerals 
+私だけではありません。Dan Northは「[アジャイルの加速](https://vimeo.com/68215534)」というプレゼンテーションで、ドメインエキスパートと密接に働くことの楽しさを語っています。
+そのチームの成功の一因は、開発者がトレーダーと一緒にドメイン（トレーディング）を学んだことでした。そのおかげで、コミュニケーションが容易になり、混乱が最小限に抑えられたのです。
 
-> *"During an inception, when we are most ignorant about most aspects of the project, the best use we can possibly make of the time available is to attempt to identify and reduce our ignorance across all the axes we can think of."*
-> -- *Dan North, ["Deliberate Discovery"](http://dannorth.net/2010/08/30/introducing-deliberate-discovery/)*
+**良いデザイン**。良いソフトウェアを作るには、モデル化しようとしているドメインについてある程度エキスパートになる必要があると私は信じています。
+これはもちろんドメイン駆動設計の考え方ですが、アジャイルプロセスの重要な要素でもあります。つまり、全段階で開発者と密接に協力する「オンサイト顧客」の存在です。
 
-So, how does this apply to the Roman Numerals Kata? Should we seriously become domain experts before we write a line of code?
+そしてほぼ常に、要件を適切に理解することで、解決策を実装する正しい*方法に導かれます。
+深い洞察の欠如を、表面的な反復で補うことはできません。
 
-I would say yes!
+<sub>* もちろん「正しい」方法は実際には存在しません。ただ、間違った方法はたくさんあります。ここでは、極端に複雑で保守不可能ではないという意味です。</sub>
 
-I know it is a trivial problem, and it seems like overkill, but then again, this is a kata, so you should be practising all the steps carefully and mindfully.
+**良いテスト**。要件を理解せずに良いテストを作ることはできません。BDDのようなプロセスでは、これが明確になります。
+要件は実際に*テストになる*ような形で書かれるのです。
 
-So, what can we find out about Roman numerals?
 
-First, a little [background reading from a reliable source](http://en.wikipedia.org/wiki/Roman_numerals) shows that they probably originated from something similar to [tally marks](http://en.wikipedia.org/wiki/Tally_marks).
+## ローマ数字を理解する
 
-![Tally marks](../assets/img/200px-Tally_marks.svg.png)
+> *「プロジェクトの開始時、私たちがプロジェクトのほとんどの側面について無知である時期に、利用可能な時間を最も有効に使う方法は、考えつく限りのあらゆる視点から我々の無知を特定し、減らすことを試みることです。」*
+> -- *Dan North, 「[意図的な発見](https://dannorth.net/introducing-deliberate-discovery/)」*
 
-This explains the simple strokes for "I" to "IIII" and then the different symbol for "V".
+では、これをローマ数字カタにどう適用すればいいでしょうか？コードを1行も書く前に、本当にドメインエキスパートになるべきでしょうか？
 
-As it evolved, symbols were added for ten and fifty, one hundred and five hundred, and so on.  
-This system of counting with ones and fives can be seen in the design of the [abacus](http://en.wikipedia.org/wiki/Roman_abacus), old and new.
+私は「はい」と答えます！
 
-![Roman Abacus](../assets/img/RomanAbacusRecon.jpg)
-![Modern abacus](../assets/img/320px-Sharp-abacus-japan.jpg)
+些細な問題だとわかっていますし、やりすぎに思えるかもしれません。しかし、これはカタです。すべてのステップを注意深く、意識的に練習すべきなのです。
 
-In fact, this system even has a name which I'd never heard of -- ["bi-quinary coded decimal"](http://en.wikipedia.org/wiki/Bi-quinary_coded_decimal). 
-Isn't that fun? I shall now attempt to drop that phrase into casual conversation wherever possible.
-(And by the way, the little stones used as counters are called "calculi", whence the name for the bane of high school students everywhere.)
+では、ローマ数字について何がわかるでしょうか？
 
-Much later, in the 13th century, certain abbreviations were added -- substituting "IV" for "IIII" and "IX" for "VIIII". This [subtractive notation](http://en.wikipedia.org/wiki/Subtractive_notation)
-means that the order of the symbols becomes important, something that is not required for a pure tally-based system.
+まず、[信頼できる情報源](https://en.wikipedia.org/wiki/Roman_numerals)によると、ローマ数字はおそらく[タリーマーク](https://en.wikipedia.org/wiki/Tally_marks)（訳注：日本で言う「正の字」）に似たものから始まったようです。
 
-These new requirements show us that nothing has changed in the development biz...
+![タリーマーク](../assets/img/200px-Tally_marks.svg.png)
 
-*Pope: "We need to add subtractive notation ASAP -- the Arabs are beating us on features."<br>
-You: "But it's not backwards compatible, sir. It's a breaking change!" <br>
-Pope: "Tough. I need it by next week."*
+これは「I」から「IIII」までの単純な線と、「V」の異なる記号を説明しています。
 
-So now that we know all about Roman numerals, do we have enough information to create the requirements?
+進化するにつれて、10と50、100と500などの記号が追加されました。
+1と5で数える方式は、古今の[算盤](https://en.wikipedia.org/wiki/Roman_abacus)のデザインに見ることができます。
 
-Alas, no. As we investigate further, it becomes clear that there is a lot of inconsistency. There is no ISO or ANSI standard for Roman numerals! 
+![ローマの算盤](../assets/img/RomanAbacusRecon.jpg)
+![現代の算盤](../assets/img/320px-Sharp-abacus-japan.jpg)
 
-This is not unusual of course. A fuzziness around requirements affects most software projects.
-Indeed, part of our job as a developer is to help clarify things and eliminate ambiguity. So, let's create some requirements based on what we know so far.
+実は、この方式には聞きなれない名前があります。「[二・五進法](https://ja.wikipedia.org/wiki/%E4%BA%8C%E4%BA%94%E9%80%B2%E6%B3%95)」です。
+面白いですね。今後、カジュアルな会話にこのフレーズを盛り込んでみようと思います。
+（ちなみに、カウンターとして使用される小石は「calculi」と呼ばれ、高校生の悩みの種（訳注：微積分学）の名前の由来になっています。）
 
-## The requirements for this kata
+13世紀になって、特定の省略形が追加されました。「IIII」を「IV」に、「VIIII」を「IX」に置き換えるものです。この[減算則](https://ja.wikipedia.org/wiki/%E3%83%AD%E3%83%BC%E3%83%9E%E6%95%B0%E5%AD%97#%E7%95%B0%E8%A1%A8%E8%A8%98)
+により、記号の順序が重要になりました。これは純粋なタリーマークベースのシステムでは必要なかったことです。
 
-> *"Programmers are not to be measured by their ingenuity and their logic but by the completeness of their case analysis."*
-> -- *Alan Perlis, [Epigrams](http://www.cs.yale.edu/quotes.html)*
+これらの新しい要件は、開発業界で何も変わっていないことを示しています...
 
-I think we would all agree that having unambiguous and testable requirements is a critical step towards having a successful project. 
+*法王：「減算則をできるだけ早く追加しろ。アラブ人に機能で負けているんだ。」<br>
+あなた：「でも陛下、後方互換性がありません。破壊的な変更になります！」<br>
+法王：「構わん。来週までに必要だ。」*
 
-Now when I talk about "requirements", I'm not talking about a 200 page document that takes six months to write.
-I'm just talking about a few bullet points that take 5 or 10 minutes to write down.
+さて、ローマ数字についてすべて知ったところで、要件を作成するのに十分な情報があるでしょうか？
 
-But... it is important to have them. Thinking carefully before coding is an essential skill that needs to be practiced,
-and so I would recommend doing this step as part of the discipline for any code kata. 
+残念ながら、そうではありません。さらに調査を進めると、一貫性がかなり欠如していることがわかります。ローマ数字にはISOやANSI規格がないのです！
 
-So here are the requirements as I see them:
+もちろん、これは珍しいことではありません。要件のあいまいさは、ほとんどのソフトウェアプロジェクトに影響します。
+実際、開発者としての私たちの仕事の一部は、物事を明確にし、曖昧さを排除することです。では、これまでに知ったことに基づいて要件を作成してみましょう。
 
-* The output will be generated by tallying 1, 5, 10, 50, 100, 500, and 1000, using the symbols "I", "V", "X", "L", "C", "D" and "M" respectively. 
-* The symbols must be written in descending order: "M" before "D" before "C" before "L", etc.
-* Using the tallying logic, it's clear that we can only have up to four repetitions of "I", "X", "C" and "M". And only one "V", "L" or "D".
-  Any more than that and the multiple tally marks are abbreviated to the next "higher" tally mark.
-* Finally, we have the six (optional) substitution rules: "IIII"=>"IV", "VIIII"=>"IX", "XXXX"=>"XL", "LXXXX"=>"XC", "CCCC"=>"CD", "DCCCC"=>"CM". These are exceptions to the descending order rule.
+## このカタの要件
 
-There's one other very important requirement that isn't on this list. 
+> *「プログラマーは、その独創性や論理性ではなく、ケース分析の完全性によって評価されるべきである。」*
+> -- *Alan Perlis, [警句集](https://www.cs.yale.edu/homes/perlis-alan/quotes.html)*
 
-* What is the range of valid inputs?
+誰もが同意すると思いますが、成功するプロジェクトにするためには、曖昧さがなく、テスト可能な要件を定義することが非常に重要です。
 
-If we don't explicitly document this, we could easily assume that all integers are valid, including zero and negative numbers. 
+ここで「要件」と言うとき、6ヶ月かけて書く200ページの文書のことを言っているのではありません。
+5分か10分で書き下ろせる数個の箇条書きのことを言っているのです。
 
-And what about large numbers, in the millions or billions? Are they allowed? Probably not.
+しかし...要件定義は重要です。コーディングの前に注意深く考えることは、練習する必要がある重要なスキルです。
+そのため、どのコードカタでも、この手順を規律の一部として行うことをお勧めします。
 
-So let's be explicit and say that the valid input ranges from 0 to 4000.  Then what should happen if the input is not valid? Return an empty string? Throw an exception?
+では、私が考える要件は次のとおりです。
 
-In a functional programming language like F#, the most common approach is to return an `Option` type, or to return a Success/Failure `Choice` type.
-Let's just use an `Option`, so to finish off the requirements, we have:
+* 出力は、1、5、10、50、100、500、1000を集計し、それぞれ「I」、「V」、「X」、「L」、「C」、「D」、「M」の記号を使用して生成します。
+* 記号は降順で書きます：「M」は「D」の前、「D」は「C」の前、「C」は「L」の前、といった具合です。
+* 集計ロジックを使用すると、「I」、「X」、「C」、「M」は最大4回まで、「V」、「L」、「D」は1回だけ繰り返せます。
+  それ以上になると、複数のタリーマークは次の「上位」のタリーマークに省略します。
+* 最後に、6つの（オプションの）置換規則があります：「IIII」=>「IV」、「VIIII」=>「IX」、「XXXX」=>「XL」、「LXXXX」=>「XC」、「CCCC」=>「CD」、「DCCCC」=>「CM」。これらは降順ルールの例外です。
 
-* The Arabic number 0 is mapped to the empty string.
-* If the input is < 0 or > 4000 return `None` otherwise return `Some(roman)`, where `roman` is the Arabic number converted to Roman numerals as described above.
+このリストにはない、もう一つ非常に重要な要件があります。
 
-So to sum up this step, we have read about Roman numerals, learned a few fun things, and come up with some clear requirements for the next stage.
-The whole thing took only 5-10 mins. In my opinion, that was time well spent.
+* 有効な入力の範囲は何ですか？
 
-## Writing the tests 
+これを明記しておかないと、ゼロや負の数も含めたすべての整数が有効だと勘違いしてしまうかもしれません。
 
-> *"Unit tests have been compared with shining a flashlight into a dark room in search of a monster. 
-> Shine the light into the room and then into all the scary corners. 
-> It doesn't mean the room is monster free --- just that the monster isn't standing where you've shined your flashlight."*
+では、数百万や数十億といった大きな数字はどうでしょうか？ これらは許可されるのでしょうか？ おそらく許可されないでしょう。
 
-Now that we have the requirements, we can start writing the tests.
+そこで、明示的に有効な入力の範囲を0から4000までとしましょう。では、入力が有効でない場合はどうすべきでしょうか？空の文字列を返すべきでしょうか？例外をスローすべきでしょうか？
 
-In the original video, the tests were developed incrementally, starting with 0, then 1, and so on.
+F#のような関数型プログラミング言語では、最も一般的なアプローチは`Option`型を返すか、成功/失敗の`Choice`型を返すことです。
+ここでは単に`Option`を使用することにしましょう。要件を完成させるために、以下を追加します。
 
-Personally, I think that there are a number of problems with that approach.
+* アラビア数字の0は空文字列にマッピングします。
+* 入力が0未満または4000より大きい場合は`None`を返し、それ以外の場合は`Some(roman)`を返します。ここで`roman`は上記の説明に従ってアラビア数字をローマ数字に変換したものです。
 
-First, as we should know, a major goal of TDD is not testing but *design*. 
+ここまでのステップをまとめると、ローマ数字について学び、いくつかの面白い発見をし、次の段階のための明確な要件を導き出しました。
+これらはすべて、わずか5～10分で完了しました。この時間は、有効に使えたと思います。
 
-But this micro, incremental approach to design does not seem to me to lead to a particularly good end result.
+## テストを書く
 
-For example, in the video, there is a big jump in the implementation complexity from testing the "I" case to testing the "II" case. But the rationale is a bit hard to understand,
-and to me it smacks a little of sleight-of-hand, of someone who already knows the answer, rather than naturally evolving from the previous case.
+> *「単体テストは、モンスターを探すために暗い部屋に懐中電灯を照らすことに例えられます。
+> 部屋に光を当て、そして全ての怖い隅々まで照らします。
+> これは部屋にモンスターがいないことを意味するわけではありません。ただ、懐中電灯を照らした場所にモンスターがいないということだけです。」*
 
-Unfortunately, I have seen this happen a lot with a strict TDD approach.
-You might be cruising along nicely and then bump into a huge road block which forces a huge rethink and refactoring. 
+さて、要件ができたので、テストの作成を始められます。
 
-A strict TDD'er using Uncle Bob's ["Transformation Priority Premise"](http://blog.8thlight.com/uncle-bob/2013/05/27/TheTransformationPriorityPremise.html) approach would say that that is fine and good, and part of the process.
+元の動画では、テストは0から始まり、次に1、というように段階的に開発されていました。
 
-Personally, I'd rather start with the trickiest requirements first, and front-load the risk rather than leaving it till the end.
+個人的には、このアプローチにはいくつかの問題があると考えています。
 
-Second, I don't like testing individual cases. I'd prefer that my tests cover *all* inputs. This is not always feasible, but when you can do it, as in this case, I think you should.
+まず、TDDの主な目的がテストではなく*設計*であることを認識すべきです。
 
-### Two tests compared
+しかし、この微視的で段階的な設計アプローチは、特に良い最終結果につながるとは思えません。
 
-To demonstrate what I mean, let's compare the test suite developed in the video with a more general requirements-based test.
+例えば、動画では「I」のケースのテストから「II」のケースのテストに移る際に、実装の複雑さが大きく跳ね上がります。しかし、その理由づけはやや理解しがたく、
+自然に前のケースから進化したというよりも、答えをすでに知っている人の手品のようにも感じられます。
 
-The test suite developed in the video checks only the obvious inputs, plus the case 3497 "for good measure". Here's the Ruby code ported to F#:
+残念ながら、厳格なTDDアプローチでは、これがよく起こるのを見てきました。
+順調に進んでいるように見えても、突然大きな障害に遭遇し、大規模な再考とリファクタリングが必要になることがあります。
+
+Uncle Bobの[変換の優先順位説](https://blog.cleancoder.com/uncle-bob/2013/05/27/TheTransformationPriorityPremise.html)に従う厳格なTDD実践者なら、それも良いことで、プロセスの一部だと言うでしょう。
+
+個人的には、最も難しい要件から始めて、リスクを前倒しにし、最後まで残さない方が良いと考えます。
+
+第二に、個別のケースをテストするのが好きではありません。テストはできれば*すべての*入力をカバーすべきです。これは常に実現可能というわけではありませんが、このケースのように可能な場合は、そうすべきだと考えます。
+
+### 2つのテストの比較
+
+これを説明するために、動画で開発されたテストスイートと、より一般的な要件ベースのテストを比較してみましょう。
+
+動画で開発されたテストスイートは、明白な入力と、「念のため」3497のケースのみをチェックします。以下はRubyコードをF#に移植したものです。
 
 ```fsharp
 [<Test>]
-let ``For certain inputs, expect certain outputs``() = 
+let ``特定の入力に対して、特定の出力を期待する``() = 
     let testpairs = [ 
       (1,"I")
       (2,"II")
@@ -184,7 +184,7 @@ let ``For certain inputs, expect certain outputs``() =
       (5,"V")
       (9,"IX")
       (10,"X")
-      // etc
+      // 省略
       (900,"CM")
       (1000,"M")
       (3497,"MMMCDXCVII")
@@ -194,85 +194,85 @@ let ``For certain inputs, expect certain outputs``() =
        Assert.AreEqual(expectedRoman, roman)
 ```
 
-With this set of inputs, how confident are we that the code meets the requirements?  
+この入力セットで、コードが要件を満たしていると、どの程度確信できるでしょうか？
 
-In a simple case like this, I might be reasonably confident,
-but this approach to testing worries me because of the use of "magic" test inputs that are undocumented.
+このような単純なケースでは、ある程度確信を持てるかもしれません。
+しかし、このテストアプローチは、文書化されていない「魔法の」テスト入力を使用しているため、私には不安があります。
 
-For example, why was 3497 plucked out of nowhere? Because (a) it is bigger than a thousand and (b) it has some 4's and 9's in it.
-But the reason it was picked is not documented in the test code.
+例えば、なぜ3497という数字が突然選ばれたのでしょうか？それは（a）1000より大きく、（b）4と9を含んでいるからです。
+しかし、その選択理由がテストコードに記載されていないのです。
 
-Furthermore, if we compare this test suite with the requirements, we can see that the second and third requirements are not explicitly tested for at all.
-True, the test with 3497 implicitly checks the ordering requirement ("M" before "C" before "X"), but that is never made explicit.
+さらに、このテストスイートを要件と比較すると、2番目と3番目の要件が明示的にテストされていないことがわかります。
+確かに、3497のテストは暗黙的に順序の要件（「M」が「C」の前、「C」が「X」の前）をチェックしていますが、それが明確に示されているわけではありません。
 
-Now compare that test with this one:
+次に、そのテストと以下のテストを比較してみましょう。
 
 ```fsharp
 [<Test>]
-let ``For all valid inputs, there must be a max of four "I"s in a row``() = 
+let ``すべての有効な入力に対して、"I"が最大4回連続することを確認する``() = 
     for i in [1..4000] do
        let roman = arabicToRoman i
        roman |> assertMaxRepetition "I" 4
 ```
 
-This test checks the requirement that you can only have four repetitions of "I".  
+このテストは、「I」が最大4回しか繰り返せないという要件をチェックしています。
 
-Unlike the one in the TDD video, this test case covers *all possible inputs*, not just one.
-If it passes, I will have complete confidence that the code meets this particular requirement.
+TDDの動画のものとは異なり、このテストケースは1つだけではなく、*すべての可能な入力*をカバーしています。
+このテストがパスすれば、コードがこの特定の要件を完全に満たしていると確信できます。
 
-### Property-based testing
+### プロパティベースのテスト
 
-If you are not familiar with this approach to testing, it is called *"property-based testing"*. You define a "property" that must be true in general, and then you generate as many inputs
-as possible in order to find cases where the property is not true. 
+このテストアプローチに馴染みがない方のために説明すると、これは*「プロパティベースのテスト」*と呼ばれます。
+一般的に成り立つべき「プロパティ」を定義し、そのプロパティが成り立たない場合を見つけるために、可能な限り多くの入力を生成します。
 
-In this case, we can test all 4000 inputs. In general though, our problems have a much larger range of possible inputs,
-so we generally just test on some representative sample of the inputs.
+このケースでは、4000個すべての入力をテストできます。
+しかし一般的には、問題にはもっと広範囲の入力がありうるため、通常は入力の代表的なサンプルだけをテストします。
 
-Most property-based testing tools are modelled after [Haskell's QuickCheck](http://en.wikipedia.org/wiki/QuickCheck),
-which is a tool that automatically generates "interesting" inputs for you, in order to find edge cases as quickly as possible.
-These inputs would include things like nulls, negative numbers, empty lists, strings with non-ascii characters in them, and so on.
+ほとんどのプロパティベースのテストツールは[Haskellの QuickCheck](https://en.wikipedia.org/wiki/QuickCheck)を参考にしています。
+QuickCheckは、エッジケースをできるだけ早く見つけるために、自動的に「興味深い」入力を生成するツールです。
+これらの入力には、null、負の数、空のリスト、非ASCII文字を含む文字列などが含まれます。
 
-An equivalent to QuickCheck is available for most languages now, including [FsCheck](https://github.com/fsharp/FsCheck) for F#.
+QuickCheckと同等のものが、F#用の[FsCheck](https://github.com/fsharp/FsCheck)を含め、ほとんどの言語で利用可能です。
 
-The advantage of property-based testing is that it forces you to think about the requirements in general terms, rather than as lots of special cases.
+プロパティベースのテストの利点は、多くの特殊なケースとしてではなく、一般的な観点から要件を考えることを促す点です。
 
-That is, rather than a test that says `the input "4" maps to "IV"`, we have a more general test that says `any input with 4 in the units place has "IV" as the last two characters`.
+つまり、`入力"4"は"IV"にマッピングされる`というテストの代わりに、`1の位が4の任意の入力は、最後の2文字が"IV"になる`というより一般的なテストになります。
 
-### Implementing a property-based test
+### プロパティベースのテストの実装
 
-To switch to property-based testing for the requirement above, I would refactor the code so that
-(a) I create a function that defines a property and then (b) I check that property against a range of inputs.
+上記の要件に対してプロパティベースのテストに切り替えるには、コードをリファクタリングして
+（a）プロパティを定義する関数を作成し、（b）そのプロパティを一連の入力に対してチェックします。
 
-Here's the refactored code:
+以下がリファクタリングしたコードです。
 
 ```fsharp
-// Define a property that should be true for all inputs
-let ``has max rep of four Is`` arabic = 
+// すべての入力に対して成り立つべきプロパティを定義
+let ``最大4つのIを持つ`` arabic = 
    let roman = arabicToRoman arabic
    roman |> assertMaxRepetition "I" 4
 
-// Explicitly enumerate all inputs...
+// すべての入力を明示的に列挙...
 [<Test>]
-let ``For all valid inputs, there must be a max of four "I"s``() = 
+let ``すべての有効な入力に対して、最大4つの"I"があることを確認``() = 
     for i in [1..4000] do
-       //check that the property holds
-       ``has max rep of four Is`` i
+       //プロパティが成り立つかチェック
+       ``最大4つのIを持つ`` i
 
-// ...Or use FsCheck to generate inputs for you
+// ...または FsCheck を使用して入力を生成
 let isInRange i = (i >= 1) && (i <= 4000)
-// input is in range implies has max of four Is
-let prop i = isInRange i ==> ``has max rep of four Is`` i
-// check all inputs for this property
+// 入力が範囲内であれば、最大4つのIを持つ
+let prop i = isInRange i ==> ``最大4つのIを持つ`` i
+// このプロパティに対してすべての入力をチェック
 Check.Quick prop
        
 ```
 
 
-Or for example, let's say that I want to test the substitution rule for 40 => "XL".
+または、例えば40 => "XL"の置換規則をテストしたい場合は、こうします。
 
 ```fsharp
-// Define a property that should be true for all inputs
-let ``if arabic has 4 tens then roman has one XL otherwise none`` arabic = 
+// すべての入力に対して成り立つべきプロパティを定義
+let ``アラビア数字の10の位が4なら、ローマ数字はXLを1つ持ち、それ以外は持たない`` arabic = 
    let roman = arabicToRoman arabic
    let has4Tens = (arabic % 100 / 10) = 4 
    if has4Tens then
@@ -280,51 +280,51 @@ let ``if arabic has 4 tens then roman has one XL otherwise none`` arabic =
    else 
        assertMaxOccurs "XL" 0 roman
 
-// Explicitly enumerate all inputs...
+// すべての入力を明示的に列挙...
 [<Test>]
-let ``For all valid inputs, check the XL substitution``() = 
+let ``すべての有効な入力に対して、XLの置換をチェック``() = 
     for i in [1..4000] do
-       ``if arabic has 4 tens then roman has one XL otherwise none`` i
+       ``アラビア数字の10の位が4なら、ローマ数字はXLを1つ持ち、それ以外は持たない`` i
 
-// ...Or again use FsCheck to generate inputs for you
+// ...または再度 FsCheck を使用して入力を生成
 let isInRange i = (i >= 1) && (i <= 4000)
-let prop i = isInRange i ==> ``if arabic has 4 tens then roman has one XL otherwise none`` i
+let prop i = isInRange i ==> ``アラビア数字の10の位が4なら、ローマ数字はXLを1つ持ち、それ以外は持たない`` i
 Check.Quick prop
 ```
 
-I'm not going to go into property-based testing any more here, but I think you can see the benefits over hand-crafted cases with magic inputs.
+プロパティベースのテストについてこれ以上詳しく説明しませんが、手作業で作成した特定の入力を持つケースよりも利点があることがおわかりいただけると思います。
 
-*The [code for this post](https://gist.github.com/swlaschin/8409306) has a full property-based test suite.*
+*[この投稿のコード](https://gist.github.com/swlaschin/8409306)には、完全なプロパティベースのテストスイートが含まれています。*
 
-## Requirements Driven Design?
+## 要件駆動設計？
 
-At this point, we can start on the implementation.
+これで、実装に取り掛かれます。
 
-Unlike the TDD video, I'd rather build the implementation by iterating on the *requirements*, not on the *test cases*.
-I need a catchy phrase for this, so I'll call it Requirements Driven Design?. Watch out for a Requirements Driven Design Manifesto coming soon.
+TDDの動画とは異なり、*テストケース*ではなく*要件*を反復することで実装を構築したいと思います。
+これにはキャッチーなフレーズが必要なので、要件駆動設計（Requirements Driven Design）と呼びましょうか。要件駆動設計マニフェストがもうすぐ登場するかもしれません。
 
-And rather than implementing code that handles individual inputs one by one, I prefer my implementations to cover as many input cases as possible -- preferably all of them.
-As each new requirement is added the implementation is modified or refined, using the tests to ensure that it still meets the requirements.
+そして、個々の入力を一つずつ処理するコードを実装するのではなく、できるだけ多くの入力ケース（できればすべて）をカバーする実装を好みます。
+新しい要件が追加されるたびに、テストを使用して要件をまだ満たしていることを確認しながら、実装を修正または改良します。
 
-But isn't this exactly TDD as demonstrated in the video? 
+しかし、これは動画で示されたTDDとまったく同じではないでしょうか？
 
-No, I don't think so. The TDD demonstration was *test-driven*, but not *requirements driven*. Mapping 1 to "I" and 2 to "II" are tests, but are not true requirements in my view.
-A good requirement is based on insight into the domain. Just testing that 2 maps to "II" does not provide that insight.
+いいえ、そうは思いません。TDDのデモンストレーションは*テスト駆動*でしたが、*要件駆動*ではありませんでした。1を「I」に、2を「II」にマッピングすることはテストですが、私の見解では真の要件とは言えません。
+良い要件はドメインへの洞察に基づいています。2が「II」にマッピングされることをテストするだけでは、その洞察は得られません。
 
-### A very simple implementation
+### 非常にシンプルな実装
 
-After criticizing someone else's implementation, time for me to put up or shut up.
+他人の実装を批判した後は、自分で実践するか黙るかのどちらかです。
 
-So, what is the simplest implementation I can think of that would work?
+では、私が考えられる最もシンプルな実装は何でしょうか？
 
-How about just converting our arabic number to tally marks?  1 becomes "I", 2 becomes "II", and so on.
+アラビア数字をタリーマークに変換するのはどうでしょうか？ 1は「I」に、2は「II」になり、以下同様です。
 
 ```fsharp
 let arabicToRoman arabic = 
    String.replicate arabic "I"
 ```
 
-Here it is in action:
+これを使ってみましょう。
 
 ```fsharp
 arabicToRoman 1    // "I"
@@ -332,27 +332,27 @@ arabicToRoman 5    // "IIIII"
 arabicToRoman 10   // "IIIIIIIIII" 
 ```
 
-This code actually meets the first and second requirements already, and for all inputs!
+このコードは、すでに最初と2番目の要件を満たしています。しかも、すべての入力に対してです！
 
-Of course, having 4000 tally marks is not very helpful, which is no doubt why the Romans started abbreviating them.  
+もちろん、4000個のタリーマークはあまり実用的ではありません。これがローマ人が省略を始めた理由でしょう。
 
-This is where insight into the domain comes in. If we understand that the tally marks are being abbreviated, we can emulate that in our code.
+ここでドメインへの洞察が重要になります。タリーマークが省略されていることを理解すれば、コードでそれを再現できます。
 
-So let's convert all runs of five tally marks into a "V".
+では、5つのタリーマークのすべての連続を「V」に変換しましょう。
  
 ```fsharp
 let arabicToRoman arabic = 
    (String.replicate arabic "I")
     .Replace("IIIII","V")
 
-// test
+// テスト
 arabicToRoman 1    // "I"
 arabicToRoman 5    // "V"
 arabicToRoman 6    // "VI"
 arabicToRoman 10   // "VV" 
 ```
 
-But now we can have runs of "V"s. Two "V"s need to be collapsed into an "X".
+しかし今度は「V」の連続が発生します。2つの「V」は「X」に置き換える必要があります。
 
 ```fsharp
 let arabicToRoman arabic = 
@@ -360,7 +360,7 @@ let arabicToRoman arabic =
     .Replace("IIIII","V")
     .Replace("VV","X")
 
-// test
+// テスト
 arabicToRoman 1    // "I"
 arabicToRoman 5    // "V"
 arabicToRoman 6    // "VI"
@@ -369,7 +369,7 @@ arabicToRoman 12   // "XII"
 arabicToRoman 16   // "XVI" 
 ```
 
-I think you get the idea. We can go on adding abbreviations... 
+アイデアはおわかりいただけたと思います。省略を追加し続けることができます...
 
 ```fsharp
 let arabicToRoman arabic = 
@@ -381,7 +381,7 @@ let arabicToRoman arabic =
     .Replace("CCCCC","D")
     .Replace("DD","M")
 
-// test
+// テスト
 arabicToRoman 1    // "I"
 arabicToRoman 5    // "V"
 arabicToRoman 6    // "VI"
@@ -391,9 +391,9 @@ arabicToRoman 16   // "XVI"
 arabicToRoman 3497 // "MMMCCCCLXXXXVII" 
 ```
 
-And now we're done. We've met the first three requirements.
+これで完成です。最初の3つの要件を満たしました。
 
-If we want to add the optional abbreviations for the fours and nines, we can do that at the end, after all the tally marks have been accumulated.
+4と9を表す省略形を追加したい場合は、最後に、すべての記号を集計した後に追加すればよいでしょう。
 
 ```fsharp
 let arabicToRoman arabic = 
@@ -404,7 +404,7 @@ let arabicToRoman arabic =
     .Replace("LL","C")
     .Replace("CCCCC","D")
     .Replace("DD","M")
-    // optional substitutions
+    // 省略形の置換
     .Replace("IIII","IV")
     .Replace("VIV","IX")
     .Replace("XXXX","XL")
@@ -413,7 +413,7 @@ let arabicToRoman arabic =
     .Replace("DCD","CM")
     
 
-// test
+// テスト
 arabicToRoman 1    // "I"
 arabicToRoman 4    // "IV"
 arabicToRoman 5    // "V"
@@ -426,46 +426,46 @@ arabicToRoman 946  // "CMXLVI"
 arabicToRoman 3497 // "MMMCDXCVII"
 ```
 
-Here is what I like about this approach:
+このアプローチの優れた点は以下の通りです。
 
-* It is derived from understanding the domain model (tally marks) rather than jumping right into a recursive design.
-* As a result, the implementation follows the requirements very closely. In fact it basically writes itself.
-* By following this step-by-step approach, someone else would have high confidence in the code being correct just by examining the code.
-  There is no recursion or special tricks that would confuse anyone.
-* The implementation generates output for all inputs at all times. In the intermediate stages, when it doesn't meet all the requirements,
-  it at least generates output (e.g. 10 mapped to "VV") that tells us what we need to do next.
+* 再帰的な設計に直接飛びつくのではなく、ドメインモデル（タリーマーク）の理解から導き出されています。
+* その結果、実装が要件に非常に忠実です。実際、ほぼ自然に書けてしまいます。
+* このステップバイステップのアプローチを見れば、他の人もコードを調べるだけで、その正しさに自信を持てるでしょう。
+  混乱を招くような再帰や特別なトリックはありません。
+* この実装は、常にすべての入力に対して出力を生成します。中間段階で、すべての要件を満たしていない場合でも、
+  少なくとも出力（例：10が"VV"にマッピングされる）を生成し、次にすべきことがわかります。
 
-Yes, this might not be the most efficient code, creating strings with 4000 "I"s in them! And of course, a more efficient approach would
-subtract the large tallies ("M", then "D", then "C") straight from the input, leading to the recursive solution demonstrated in the TDD video.
+確かに、これは最も効率的なコードとは言えないかもしれません。4000個の"I"を含む文字列を作成しているのですから！
+もちろん、より効率的なアプローチは大きなタリーマーク（"M"、次に"D"、次に"C"）を入力から直接引くことで、TDDの動画で示された再帰的な解決策につながります。
 
-But on the other hand, this implementation might well be efficient enough.
-The requirements don't say anything about performance constraints -- YAGNI anyone? -- so I'm tempted to leave it at this.
+しかし一方で、この実装でも十分に効率的かもしれません。
+要件にはパフォーマンスの制約について何も書かれていません - YAGNIの原則を思い出しませんか？ - なので、このままでも良いかもしれません。
 
-### A bi-quinary coded decimal implementation
+### 二・五進法の実装
 
-I can't resist another implementation, just so that I can use the word "bi-quinary" again.
+「二・五進法」という言葉をもう一度使える機会なので、別の実装も紹介したいと思います。
 
-The implementation will again be based on our understanding of the domain, in this case, the Roman abacus.
+この実装も、ドメインの理解に基づいています。今回は、ローマの算盤です。
 
-In the abacus, each row or wire represents a decimal place, just as our common Arabic notation does.
-But the number in that place can be encoded by two different symbols, depending on the number.
+算盤では、各行または線が十進法の桁を表します。これは私たちの一般的なアラビア数字表記と同じです。
+しかし、その桁の数は、数によって2つの異なる記号で表現できます。
 
-Some examples:
+いくつか例を挙げます。
 
-* 1 in the tens place is encoded by "X"
-* 2 in the tens place is encoded by "XX"
-* 5 in the tens place is encoded by "L"
-* 6 in the tens place is encoded by "LX"
+* 10の位の1は"X"で表します
+* 10の位の2は"XX"で表します
+* 10の位の5は"L"で表します
+* 10の位の6は"LX"で表します
 
-and so on.
+などです。
 
-This leads directly to an algorithm based on converting the beads on the abacus into a string representation.
+これは、算盤の玉を文字列表現に変換するアルゴリズムに直接つながります。
 
-* Split the input number into units, tens, hundreds and thousands. These represent each row or wire on the abacus.
-* Encode the digit for each place into a string using the "bi-quinary" representation and the appropriate symbols for that place.
-* Concat the representations for each place together to make single output string.
+* 入力数を1の位、10の位、100の位、1000の位に分割します。これらは算盤の各行または軸を表します。
+* 各桁の数字を「二・五進法」とその桁に適切な記号を使用して文字列に変換します。
+* 各桁の表現を連結して1つの出力文字列を作成します。
 
-Here's an implementation that is a direct translation of that algorithm:
+以下は、そのアルゴリズムを直接コードに落とし込んだ実装です。
 
 ```fsharp
 let biQuinaryDigits place (unit,five) arabic =
@@ -481,7 +481,7 @@ let biQuinaryDigits place (unit,five) arabic =
     | 7 -> five + unit + unit
     | 8 -> five + unit + unit + unit
     | 9 -> five + unit + unit + unit + unit
-    | _ -> failwith "Expected 0-9 only"
+    | _ -> failwith "0-9のみ想定しています"
 
 let arabicToRoman arabic = 
     let units = biQuinaryDigits 1 ("I","V") arabic
@@ -492,8 +492,8 @@ let arabicToRoman arabic =
 
 ```
 
-Note that the above code does not produce the abbreviations for the four and nine cases.
-We can easily modify it to do this though. We just need to pass in the symbol for ten, and tweak the mapping for the 4 and 9 case, as follows:
+上記のコードは4と9のケースの省略形を生成しないことに注意してください。
+しかし、これは簡単に修正できます。10を表す記号を渡し、4と9のケースの表現を調整するだけです。
 
 ```fsharp
 let biQuinaryDigits place (unit,five,ten) arabic =
@@ -503,13 +503,13 @@ let biQuinaryDigits place (unit,five,ten) arabic =
   | 1 -> unit
   | 2 -> unit + unit
   | 3 -> unit + unit + unit
-  | 4 -> unit + five // changed to be one less than five 
+  | 4 -> unit + five // 5未満に変更 
   | 5 -> five
   | 6 -> five + unit
   | 7 -> five + unit + unit
   | 8 -> five + unit + unit + unit
-  | 9 -> unit + ten  // changed to be one less than ten
-  | _ -> failwith "Expected 0-9 only"
+  | 9 -> unit + ten  // 10未満に変更
+  | _ -> failwith "0-9のみ想定しています"
 
 let arabicToRoman arabic = 
   let units = biQuinaryDigits 1 ("I","V","X") arabic
@@ -519,79 +519,79 @@ let arabicToRoman arabic =
   thousands + hundreds + tens + units
 ```
 
-Again, both these implementations are very straightforward and easy to verify. There are no subtle edge cases lurking in the code.
+ここでも、両方の実装は非常にシンプルで検証しやすいです。コードに潜む微妙な例外ケースはありません。
 
-## Review
+## 振り返り
 
-I started off this post being annoyed at a TDD demonstration. Let me review the reasons why I was annoyed, and how my approach differs.
+この投稿の冒頭で、TDDのデモに苛立ちを感じました。なぜ苛立ったのか、そして私のアプローチがどう異なるかを振り返ってみましょう。
 
-**Requirements**
+**要件**
 
-The TDD demonstration video did not make any attempt to document the requirements at all.
-I would say that this a dangerous thing to do, especially if you are learning.
+TDDのデモ動画では、要件を文書化する試みが全くありませんでした。
+これは危険なことだと私は考えます。特に学習中の場合はなおさらです。
 
-I would prefer that before you start coding you *always* make an effort to be explicit about what you are trying to do.
+コーディングを始める前に、*必ず*何をしようとしているのかを明確にする努力をすべきだと私は考えます。
 
-With only a tiny bit of effort I came up with some explicit requirements that I could use for verification later.
+ほんの少しの労力で、後で検証に使える明確な要件を作成しました。
 
-I also explicitly documented the range of valid inputs -- something that was unfortunately lacking in the TDD demonstration.
+また、有効な入力の範囲も明示的に文書化しました。これは残念ながらTDDのデモには欠けていました。
 
-**Understanding the domain**
+**ドメインの理解**
 
-Even if the requirements have been made explicit for you, I think that it is always worthwhile spending time to *really* understand the domain you are working in. 
+要件が明確に示されている場合でも、作業しているドメインを*十分に*理解するために時間を使うことは常に価値があると思います。
 
-In this case, understanding that Roman numerals were a tally-based system helped with the design later. (Plus I learned what "bi-quinary" means and got to use it in this post!)
+この場合、ローマ数字がタリーマークベースのシステムだったことを理解することが、後のデザインに役立ちました。（それに、「二・五進法」の意味を学び、この投稿で使用できました！）
 
-**Unit tests**
+**ユニットテスト**
 
-The unit tests in the TDD demonstration were built one single case at a time. First zero, then one, and so on. 
+TDDのデモでは、ユニットテストが一度に1つのケースずつ構築されていました。最初はゼロ、次に1、というように。
 
-As I note above, I feel very uncomfortable with this approach because (a) I don't think it leads to a good design and (b) the single cases don't cover all possible inputs.
+上述の通り、このアプローチには非常に不安を感じます。なぜなら（a）良いデザインにつながるとは思えず、（b）単一のケースではすべての可能な入力をカバーできないからです。
 
-I would strongly recommend that you write tests that map *directly* to the requirements. If the requirements are any good, this will mean that the tests cover many inputs at once,
-so you can then test as many inputs as you can.
+要件に*直接*対応するテストを書くことを強くお勧めします。要件が十分に良ければ、これは一度に多くの入力をカバーすることになり、
+できるだけ多くの入力をテストできます。
 
-Ideally, you would use a property-based testing tool like QuickCheck. Not only does it make this approach much easier to implement, but it forces you to identify what
-the properties of your design should be, which in turn helps you clarify any fuzzy requirements.
+理想的には、QuickCheckのようなプロパティベースのテストツールを使用します。このアプローチの実装がはるかに簡単になるだけでなく、
+設計のプロパティが何であるべきかを特定することを促し、それによってあいまいな要件を明確にするのに役立ちます。
 
-**Implementation**
+**実装**
 
-Finally, I described two implementations, both completely different from the recursive one demonstrated in the TDD video.
+最後に、TDDの動画で示された再帰的な実装とは全く異なる2つの実装を説明しました。
 
-Both designs were derived directly from an understanding of the domain. The first from using tally marks, and the second from using an abacus.
+両方の設計は、ドメインの理解から直接導き出されました。最初はタリーマークの使用から、2番目は算盤の使用からです。
 
-To my mind, both of these designs were also easier to understand -- no recursion! -- and thus easier to have confidence in.
+私にとって、これらの設計はより理解しやすく（再帰も使わないので）、より信頼しやすいと感じました。
 
-## Summary
+## まとめ
 
-*(Added based on comments I made below.)*
+*（以下のコメントに基づいて追加）*
 
-Let me be clear that I have absolutely no problem with TDD. And I don't have a problem with katas either.
+TDDには全く問題がないことを明確にしておきます。カタにも問題はありません。
 
-But here's my concern about these kinds of "dive-in" demos, namely that novices and learners might unintentionally learn the following (implicit) lessons:
+しかし、このような「飛び込み型」のデモについて私が懸念しているのは、初心者や学習者が無意識のうちに以下のような（暗黙の）教訓を学んでしまう可能性があることです。
 
-* It is OK to accept requirements as given without asking questions.
-* It is OK to work without a clear idea of the goal.
-* It is OK to start coding immediately.
-* It is OK to create tests that are extremely specific (e.g. with magic numbers).
-* It is OK to consider only the happy path.
-* It is OK to do micro refactoring without looking at the bigger picture.
+* 質問せずに与えられた要件をそのまま受け入れてもよい。
+* 明確な目標なしに作業してもよい。
+* すぐにコーディングを始めてもよい。
+* 非常に具体的なテスト（例：マジックナンバーを使用）を作成してもよい。
+* 正常系のみを考慮してもよい。
+* 全体像を見ずに細かなリファクタリングを行ってもよい。
 
-Personally, I think that if you are *practicing* to be a *professional* developer, you should:
+個人的には、*プロフェッショナル*な開発者になるための*練習*をしているのであれば、以下のことを練習すべきだと思います。
 
-* Practice asking for as much information as possible before you start coding.
-* Practice writing requirements (from unclear input) in such a way that they can be tested.
-* Practice thinking (analyzing and designing) rather than immediately coding.
-* Practice creating general tests rather than specific ones.
-* Practice thinking about and handling bad inputs, corner cases, and errors.
-* Practice major refactoring (rather than micro refactoring) so as to develop an intuition about where the [shearing layers](http://jonjagger.blogspot.co.uk/2009/10/how-buildings-learn-chapter-2-shearing.html) should be.
+* コーディングを始める前に、できるだけ多くの情報を求める練習をする。
+* テスト可能な方法で要件を書く練習をする（不明確な入力から）。
+* すぐにコーディングするのではなく、考える（分析と設計）練習をする。
+* 具体的なテストではなく、一般的なテストを作成する練習をする。
+* 不正な入力、エッジケース、エラーについて考え、処理する練習をする。
+* [シアリングレイヤー](https://jonjagger.blogspot.com/2009/10/how-buildings-learn-chapter-2-shearing.html)がどこにあるべきかという直感を養うために、細かなリファクタリングではなく大規模なリファクタリングを練習する。
 
-These principles are all completely compatible with TDD (or at least [the "London" school of TDD](http://codemanship.co.uk/parlezuml/blog/?postid=987)) and programming katas. There is no conflict, and I cannot see why they would be controversial.
+これらの原則はすべて、TDD（または少なくとも[TDDの「ロンドン」学派](https://web.archive.org/web/20220119195008/http://codemanship.co.uk/parlezuml/blog/?postid=987)）とプログラミングカタと完全に両立します。矛盾はなく、なぜ議論の的になるのかわかりません。
 
-## What do you think?
+## あなたはどう思いますか？
 
-I'm sure many of you will disagree with this post. I'm up for a (civilized) debate. Please leave comments below or on Reddit.
+多くの方がこの投稿に同意しないかもしれません。（礼儀正しい）議論の準備はできています。以下またはRedditでコメントをお願いします。
 
-If you'd like to see the complete code for this post, it is available as a [gist here](https://gist.github.com/swlaschin/8409306).
-The gist also includes full property-based tests for both implementations.
+この投稿の完全なコードを見たい場合は、[こちらのgist](https://gist.github.com/swlaschin/8409306)で利用可能です。
+このgistには、両方の実装の完全なプロパティベースのテストも含まれています。
 
