@@ -170,7 +170,7 @@ public IEnumerable<IGrouping<TKey, TSource>> GroupBy<TSource, TKey>(
 
 ## 理由8：nullチェックが好き
 
-私はすべてのメソッドで[nullチェック](https://stackoverflow.com/questions/7585493/null-parameter-checking-in-c-sharp)をするようにしています。その結果、自分のコードが完全に防弾であると知るのは、大きな満足感です。
+私はすべてのメソッドで[nullチェック](https://stackoverflow.com/questions/7585493/null-parameter-checking-in-c-sharp)をするようにしています。その結果、自分のコードが完全に鉄壁であると知るのは、大きな満足感です。
 
 ```csharp
 void someMethod(SomeClass x)
@@ -217,7 +217,7 @@ ss=: +/ @: *:
 
 私はもっと深く掘り下げられるもの、[歯ごたえの](../posts/designing-for-correctness.md) [ある](../series/designing-with-types.md) [もの](../posts/computation-expressions-intro.md)を求めているのです。
 
-そして、[チュートリアル](https://learnyouahaskell.com/)を読んだり、[例題](https://dotnet.microsoft.com/en-us/learn/fsharpで遊んだり、自分のコードを書いたりするべきだなどと言わないでください。私はただ、そういう苦労をせずに理解したいだけなのです。
+そして、[チュートリアル](https://learnyouahaskell.com/)を読んだり、[例題](https://dotnet.microsoft.com/en-us/learn/fsharp)で遊んだり、自分のコードを書いたりするべきだなどと言わないでください。私はただ、そういう苦労をせずに理解したいだけなのです。
 
 新しいパラダイムを学ぶためだけに、自分の[考え方を変え](https://web.archive.org/web/20140118170751/http://dave.fayr.am/posts/2011-08-19-lets-go-shopping.html)たくはありません。
 
