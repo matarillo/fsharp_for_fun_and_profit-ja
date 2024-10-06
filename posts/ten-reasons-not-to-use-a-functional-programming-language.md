@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "静的型付け関数型プログラミング言語を使用しない10の理由"
+title: "静的型付け関数型プログラミング言語を使わない10の理由"
 description: "理解できないものに対する不満"
 nav: fsharp-types
 #seriesId: ""
