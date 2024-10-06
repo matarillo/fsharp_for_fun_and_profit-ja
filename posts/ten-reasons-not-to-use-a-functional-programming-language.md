@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "Ten reasons not to use a statically typed functional programming language"
-description: "A rant against something I don't get"
+title: "静的型付け関数型プログラミング言語を使用しない10の理由"
+description: "理解できないものに対する不満"
 nav: fsharp-types
 #seriesId: ""
 seriesOrder: 1
@@ -9,34 +9,34 @@ categories: []
 ---
 
 
-Are you fed up with all the hype about functional programming?  Me too! I thought I'd rant about some reasons why sensible people like us should stay away from it.
+関数型プログラミングの誇大宣伝にうんざりしていませんか？私もです！今回は、私たちのような分別のある人間が関数型プログラミングに手を出さない方が良い理由として、いくつか不満を述べてみたいと思います。
 
-<sub>Just to be clear, when I say "statically typed functional programming language", I mean languages that also include things such as type inference, immutability by default, and so on. In practice, this means Haskell and the ML-family (including OCaml and F#).
+<sub>はっきりさせておきたいのですが、ここで言う「静的に型付けされた関数型プログラミング言語」とは、型推論、デフォルトでの不変性なども含んだ言語のことです。実際には、HaskellやMLファミリー（OCamlやF#を含む）がこれに当たります。
 </sub>
 
 
-## Reason 1: I don't want to follow the latest fad
+## 理由1：最新の流行には乗りたくない
 
-Like most programmers, I'm naturally conservative and I dislike learning new things. That's why I picked a career in IT.
+ほとんどのプログラマーと同じように、私は生まれつき保守的で、新しいことを学ぶのは好きではありません。だから私はIT業界で働く道を選びました。
 
-I don't jump on the latest bandwagon just because all the "cool kids" are doing it -- I wait until things have matured and I can get some perspective.
+私は、「クールな人たち」がやっているからといって、最新の流行に飛びつくことはありません。私は、物事が成熟し、ある程度の展望が得られるまで待ちます。
 
-To me, functional programming just hasn't been around long enough to convince me that it is here to stay.
+私にとって、関数型プログラミングは、まだ定着していると言えるほど長い間存在しているとは思えません。
 
-Yes, I suppose some pedants will claim that [ML](http://en.wikipedia.org/wiki/ML_\(programming_language\)) and [Haskell](http://en.wikipedia.org/wiki/Haskell_\(programming_language\)) have been around almost as long as old favorites like Java and PHP, but I only heard of Haskell recently, so that argument doesn't wash with me.
+確かに、一部の学者気取りは、[ML](https://en.wikipedia.org/wiki/ML_%28programming_language%29)や[Haskell](https://en.wikipedia.org/wiki/Haskell_%28programming_language%29)はJavaやPHPのような昔ながらの言語とほぼ同じくらい長い間存在していると主張するでしょう。しかし、私はHaskellのことを最近まで聞いたことがなかったので、その議論は私には通用しません。
 
-And look at the baby of the bunch, [F#](http://fsharp.org/). It's only seven years old, for Pete's sake!  Sure, that may be a long time to a geologist, but in internet time, seven years is just the blink of an eye. 
+そして、このグループの末っ子である[F#](https://fsharp.org/)を見てください。まだ7歳ですよ！確かに、地質学者にとっては長い時間かもしれませんが、インターネットの世界では、7年なんてほんの一瞬です。
 
-So, all told, I would definitely take the cautious approach and wait a few decades to see if this functional programming thing sticks around or whether it is just a flash in the pan.
-  
-## Reason 2: I get paid by the line
+結局のところ、私は慎重なアプローチを取り、この関数型プログラミングというものが定着するのか、それとも一過性のものなのかを見極めるために、数十年待つのが良いと思います。
 
-I don't know about you, but the more lines of code I write, the more productive I feel. If I can churn out 500 lines of code in a day, that's a job well done. 
-My commits are big, and my boss can see that I've been busy.
+## 理由2：行数で給料をもらっている
 
-But when I [compare code](../posts/fvsc-sum-of-squares.md) written in a functional language with a good old C-like language, there's so much less code that it scares me.
+皆さんはどうかわかりませんが、私はコードを書けば書くほど、生産性が高いと感じます。1日に500行のコードを書き出せれば、それは立派な仕事です。
+私のコミットは大きく、上司は私が忙しく働いていることがわかります。
 
-I mean, just look at this code written in a familiar language:
+しかし、関数型言語で書かれたコードと、昔ながらのC言語のようなコードを[比較](../posts/fvsc-sum-of-squares.md)してみると、コードの量がはるかに少ないので、怖くなってしまいます。
+
+例えば、使い慣れた言語で書かれたコードを見てみましょう。
 
 ```csharp
 public static class SumOfSquaresHelper
@@ -58,22 +58,22 @@ public static class SumOfSquaresHelper
 }
 ```
 
-and compare it with this:
+これを以下のコードと比較してみてください。
 
 ```fsharp
 let square x = x * x
 let sumOfSquares n = [1..n] |> List.map square |> List.sum
 ```
 
-That's 17 lines vs. only 2 lines.  [Imagine that difference multiplied over a whole project!](https://fpbridge.co.uk/why-fsharp.html#conciseness)  
+17行がたった2行になっています。[この違いがプロジェクト全体に及ぶことを想像してみてください！](https://fpbridge.co.uk/why-fsharp.html#conciseness)
 
-If I did use this approach, my productivity would drop drastically. I'm sorry -- I just can't afford it.
+もし私がこのアプローチを採用したら、私の生産性は劇的に低下するでしょう。申し訳ありませんが、私にはそんな余裕はありません。
 
-## Reason 3: I love me some curly braces
+## 理由3：波かっこが大好き
 
-And that's another thing. What's up with all these languages that get rid of curly braces. How can they call themselves real programming languages?
+もう一つあります。これらの言語はすべて波かっこをなくしていますが、どういうことなのでしょうか。本当にプログラミング言語と呼べるのでしょうか？
 
-I'll show you what I mean. Here's a code sample with familiar curly braces.
+例を挙げて説明します。これは、おなじみの波かっこを使ったコードサンプルです。
 
 ```csharp
 public class Squarer
@@ -92,7 +92,7 @@ public class Squarer
 }
 ```
     
-And here's some similar code, but without curly braces. 
+そして、これは似たようなコードですが、波かっこがありません。
 
 ```fsharp
 type Squarer() =  
@@ -106,24 +106,24 @@ type Squarer() =
         printf "Input=%i. Result=%i" input result
 ```
 
-Look at the difference! I don't know about you, but I find the second example a bit disturbing, as if something important is missing. 
+この違いを見てください！皆さんはどう思われるかわかりませんが、私は2番目の例を見ると、何か重要なものが欠けているような気がして、少し不安になります。
 
-To be honest, I feel a bit lost without the guidance that curly braces give me.  
+正直なところ、波かっこの指針がないと、少し迷ってしまうような気がします。
 
-## Reason 4: I like to see explicit types
+## 理由4：明示的な型を見るのが好き
 
-Proponents of functional languages claim that type inference makes the code cleaner because you don't have to clutter your code with type declarations all the time.
+関数型言語の支持者は、型推論によって型宣言をいちいち書く必要がなくなり、コードがすっきりすると主張しています。
 
-Well, as it happens, I *like* to see type declarations. I feel uncomfortable if I don't know the exact type of every parameter. That's why [Java](http://steve-yegge.blogspot.co.uk/2006/03/execution-in-kingdom-of-nouns.html) is my favorite language.
+しかし、実際のところ、私は型宣言を見るのが*好き*なのです。すべてのパラメータの正確な型がわからないと、不安になります。だから[Java](https://steve-yegge.blogspot.com/2006/03/execution-in-kingdom-of-nouns.html)は私のお気に入りの言語なのです。
 
-Here's a function signature for some ML-ish code. There are no type declarations needed and all types are inferred automatically.
+これは、あるML風のコードの関数シグネチャです。型宣言は必要なく、すべての型は自動的に推論されます。
 
 ```fsharp
 let GroupBy source keySelector = 
     ... 
 ```
 
-And here's the function signature for similar code in C#, with explicit type declarations.
+そして、これはC#で書かれた同様のコードの関数シグネチャで、明示的な型宣言があります。
 
 ```csharp
 public IEnumerable<IGrouping<TKey, TSource>> GroupBy<TSource, TKey>(
@@ -133,44 +133,44 @@ public IEnumerable<IGrouping<TKey, TSource>> GroupBy<TSource, TKey>(
     ...
 ```
 
-I may be in the minority here, but I like the second version much better. It's important to me to know that the return is of type `IEnumerable<IGrouping<TKey, TSource>>`.
+少数派かもしれませんが、私は2番目のバージョンの方がはるかに好きです。戻り値の型が`IEnumerable<IGrouping<TKey, TSource>>`であることを知ることが重要なのです。
 
-Sure, the compiler will type check this for you and warn you if there is a type mismatch. But why let the compiler do the work when your brain can do it instead?
+確かに、コンパイラが型チェックを行い、型が一致しない場合は警告を出してくれます。しかし、自分の頭でできることを、なぜコンパイラにやらせるのでしょうか？
 
-Ok, I admit that if you do use generics, and lambdas, and functions that return functions, and all the other newfangled stuff, then yes, your type declarations can get really hairy and complex. And it gets really hard to type them properly.
+確かに、ジェネリクスやラムダ、関数を返す関数など、新しいものをたくさん使えば、型宣言は非常に複雑になります。そして、それを正しく入力するのは本当に難しくなります。
 
-But I have an easy fix for that -- don't use generics and don't pass around functions. Your signatures will be much simpler.
+しかし、私には簡単な解決策があります。ジェネリクスを使わず、関数をあちこちに渡さないことです。そうすれば、シグネチャはずっとシンプルになります。
 
-## Reason 5: I like to fix bugs
+## 理由5：バグを修正するのが好き
 
-To me, there's nothing quite like the thrill of the hunt -- finding and killing a nasty bug. And if the bug is in a production system, even better, because I'll be a hero as well.
+私にとって、厄介なバグを見つけて退治するスリルに勝るものはありません。そして、そのバグが本番システムにあれば、なおさらです。なぜなら、私はヒーローになれるからです。
 
-But [I've read](https://web.archive.org/web/20130918053426/http://www.simontylercousins.net/journal/2013/3/7/why-bugs-dont-like-f.html) that in statically typed functional languages, it is much harder to introduce bugs.
+しかし、[読んだところによると](https://web.archive.org/web/20130918053426/http://www.simontylercousins.net/journal/2013/3/7/why-bugs-dont-like-f.html)、静的に型付けされた関数型言語では、バグを混入させるのがはるかに難しいそうです。
 
-That's a bummer. 
+それは残念です。
 
-## Reason 6: I live in the debugger
- 
-And talking of bug fixing, I spend most of my day in the debugger, stepping through code. Yes, I know I should be using unit tests, but easier said than done, OK?
+## 理由6：デバッガの中で生きている
 
-Anyway, apparently with these statically typed functional languages, [if your code compiles, it usually works](http://www.haskell.org/haskellwiki/Why_Haskell_just_works).
+バグ修正の話が出たついでに言うと、私はほとんどの時間をデバッガの中で、コードをステップ実行して過ごしています。そう、ユニットテストを使うべきだということはわかっています。しかし、言うは易く行うは難し、ですよね？
 
-I'm told that you do have to spend a lot of time up front getting the types to match up, but once that is done and it compiles successfully, there is nothing to debug. Where's the fun in that?
+とにかく、どうやらこれらの静的に型付けされた関数型言語では、[コードがコンパイルできれば、通常は動作する](https://wiki.haskell.org/Why_Haskell_just_works)ようです。
 
-Which brings me to...
+最初に型を一致させるのに多くの時間を費やす必要があると言われていますが、それが終わってコンパイルが成功すれば、デバッグする必要はありません。そんなの面白くないですよね？
 
-## Reason 7: I don't want to think about every little detail
+ということは...
 
-All this matching up types and making sure everything is perfect sounds tiring to me. 
+## 理由7：細部まで考えたくない
 
-In fact, I hear that you are forced to think about all the possible edge cases, and all the possible error conditions, and every other thing that could go wrong.
-And you have to do this at the beginning -- you can't be lazy and postpone it till later.
+型を一致させたり、すべてが完璧であることを確認したりするのは、私には面倒に思えます。
 
-I'd much rather get everything (mostly) working for the happy path, and then fix bugs as they come up. 
+実際、あらゆるエッジケースやエラー条件など、起こりうるすべての問題を考慮しなければならないそうです。
+そして、これを最初からやらなければならないのです。怠けて後回しにすることはできません。
 
-## Reason 8: I like to check for nulls
+私はむしろ、（ほとんど）すべてをハッピーパスとして動作させ、バグが発生したら修正する方が好きです。
 
-I'm very conscientious about [checking for nulls](http://stackoverflow.com/questions/7585493/null-parameter-checking-in-c-sharp) on every method. It gives me great satisfaction to know that my code is completely bulletproof as a result.
+## 理由8：nullチェックが好き
+
+私はすべてのメソッドで[nullチェック](https://stackoverflow.com/questions/7585493/null-parameter-checking-in-c-sharp)をするようにしています。その結果、自分のコードが完全に防弾であると知るのは、大きな満足感です。
 
 ```csharp
 void someMethod(SomeClass x)
@@ -181,45 +181,45 @@ void someMethod(SomeClass x)
 }
 ```
 
-Haha! Just kidding! Of course I can't be bothered to put null-checking code everywhere. I'd never get any real work done.  
+はは！冗談です！もちろん、nullチェックのコードをどこにでも入れるなんて、面倒なことはできません。そんなことをしていたら、本当の仕事は何もできません。
 
-But I've only ever had to deal with one bad crash caused by a NPE. And the business didn't lose too much money during the few weeks I spent looking for the problem. So I'm not sure why this is such a [big deal](http://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare). 
+しかし、null参照例外が原因でひどいクラッシュを経験したのは、たった1回だけです。そして、私が問題の調査に費やした数週間の間、会社はそれほど大きな損失を出しませんでした。だから、なぜこれがそんなに[大騒ぎ](https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/)されるのか、私にはよくわかりません。
 
-## Reason 9: I like to use design patterns everywhere
+## 理由9：デザインパターンをどこにでも使うのが好き
 
-I first read about design patterns in the [Design Patterns book](http://www.amazon.com/First-Design-Patterns-Elisabeth-Freeman/dp/0596007124) (for some reason it's referred to as the Gang of Four book, but I'm not sure why), and since then I have been diligent in using them at all times for all problems. It certainly makes my code look serious and "enterprise-y", and it impresses my boss.
+私はデザインパターンについて[デザインパターン本](https://www.amazon.co.jp/dp/4873112494)で初めて知りました（なぜか「Gang of Four」と呼ばれていますが、理由はよくわかりません）。それ以来、私はあらゆる問題に対して常にデザインパターンを使うようにしています。確かに、私のコードは本格的で「エンタープライズらしい」ものになり、上司を感心させます。
 
-But I don't see any mention of patterns in functional design. How can you get useful stuff done without Strategy, AbstractFactory, Decorator, Proxy, and so on? 
+しかし、関数型設計ではパターンについて言及されていません。Strategy、AbstractFactory、Decorator、Proxyなどを使わずに、どうやって役に立つことを成し遂げられるのでしょうか？
 
-Perhaps the functional programmers are not aware of them?
+もしかしたら、関数型プログラマーはこれらのことを知らないのでしょうか？
 
-## Reason 10: It's too mathematical
+## 理由10：数学的すぎる
 
-Here's some more code for calculating the sum of squares. This is *way* too hard to understand because of all the weird symbols in it.
+2乗和を計算するためのコードをもう一つ紹介します。これは、奇妙な記号がたくさん使われているため、理解するのが*非常に*難しいです。
 
 ```text
 ss=: +/ @: *:
 ```
 
-Oops, sorry! My mistake. That was [J code](http://en.wikipedia.org/wiki/J_\(programming_language\)).
+おっと、失礼！これは[Jのコード](http://en.wikipedia.org/wiki/J_%28programming_language%29)でした。
 
-But I do hear that functional programs use strange symbols like `<*>` and `>>=` and obscure concepts called "monads" and "functors". 
+しかし、関数型プログラムでは`<*>`や`>>=`のような奇妙な記号や、「モナド」や「ファンクター」と呼ばれる難解な概念が使われているそうです。
 
-I don't know why the functional people couldn't stick with things I already know -- obvious symbols like `++` and `!=` and easy concepts such as "inheritance" and "polymorphism".
+なぜ関数型の人たちは、私がすでに知っているもの、つまり `++` や `!=` のようなわかりやすい記号や、「継承」や「ポリモーフィズム」のような簡単な概念を使っていればいいのでしょうか？
 
-## Summary: I don't get it
+## まとめ：理解できない
 
-You know what. I don't get it. I don't get why functional programming is useful. 
+結局のところ、私は理解できません。なぜ関数型プログラミングが便利なのか、私にはわかりません。
 
-What I'd really like is for someone to just show me some [real benefits on a single page](../why-use-fsharp/index.md), instead of giving me too much information.
+私が本当に望んでいるのは、誰かが[1ページで本当のメリットを教えてくれる](../why-use-fsharp/index.md)ことであって、情報を詰め込みすぎることではありません。
 
-UPDATE: So now I've read the "everything you need to know on one page" page. But it's too short and simplistic for me.
+更新：それで、私は「1ページですべてがわかる」ページを読みました。しかし、それは私には短すぎて、単純すぎます。
 
-I'm really looking for something with a bit more depth -- [something](../posts/designing-for-correctness.md) I can [get](../series/designing-with-types.md) my teeth [into](../posts/computation-expressions-intro.md).  
+私はもっと深く掘り下げられるもの、[歯ごたえの](../posts/designing-for-correctness.md) [ある](../series/designing-with-types.md) [もの](../posts/computation-expressions-intro.md)を求めているのです。
 
-And no, don't say that I should read [tutorials](http://learnyouahaskell.com/), and [play with examples](http://www.tryfsharp.org/Learn), and write my own code. I just want to grok it without doing all of that work.  
+そして、[チュートリアル](https://learnyouahaskell.com/)を読んだり、[例題](https://dotnet.microsoft.com/en-us/learn/fsharpで遊んだり、自分のコードを書いたりするべきだなどと言わないでください。私はただ、そういう苦労をせずに理解したいだけなのです。
 
-I don't want to have to [change the way I think](https://web.archive.org/web/20140118170751/http://dave.fayr.am/posts/2011-08-19-lets-go-shopping.html) just to learn a new paradigm.
+新しいパラダイムを学ぶためだけに、自分の[考え方を変え](https://web.archive.org/web/20140118170751/http://dave.fayr.am/posts/2011-08-19-lets-go-shopping.html)たくはありません。
 
 
 
