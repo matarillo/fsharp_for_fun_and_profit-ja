@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Enterprise Tic-Tac-Toe, part 2"
+title: "エンタープライズ三目並べ パート2"
 description: "In which I throw away the previous design, and switch to a capability-centric approach"
 categories: ["実践例"]
-seriesId: "Annotated walkthroughs"
+seriesId: "注釈付きチュートリアル"
 seriesOrder: 6
 ---
 
