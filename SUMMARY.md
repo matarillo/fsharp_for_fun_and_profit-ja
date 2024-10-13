@@ -194,7 +194,7 @@
   * [電卓のチュートリアル: パート4](posts/calculator-complete-v2.md)
 * [エンタープライズ三目並べ](posts/enterprise-tic-tac-toe.md).
   * [エンタープライズ三目並べ パート2](posts/enterprise-tic-tac-toe-2.md)
-* [スクラッチから JSON パーザを書く](posts/understanding-parser-combinators-4.md)
+* [ゼロからJSONパーサーを書く](posts/understanding-parser-combinators-4.md)
 
 ### その他
 
