@@ -1,555 +1,555 @@
 ---
 layout: post
 title: "エンタープライズ三目並べ パート2"
-description: "In which I throw away the previous design, and switch to a capability-centric approach"
+description: "過去の設計を捨て、ケイパビリティ中心のアプローチへ"
 categories: ["実践例"]
 seriesId: "注釈付きチュートリアル"
 seriesOrder: 6
 ---
 
-*UPDATE: [Slides and video from my talk on this topic](http://fsharpforfunandprofit.com/ettt/)*
+*更新：[このトピックに関する講演のスライドとビデオ](https://fsharpforfunandprofit.com/ettt/)*
 
-*This post is one of series in I which I hope to close the gap between theory and practice in functional programming.
-I pick a small project and show you my thought processes as I go about designing and implementing it from beginning to end.*
- 
-In the [previous post](../posts/enterprise-tic-tac-toe.md), I did a design for a Tic-Tac-Toe (aka Noughts and Crosses) game.
+*この記事は、関数型プログラミングの理論と実践のギャップを埋めるためのシリーズの1つです。
+小さなプロジェクトを選び、設計から実装まで、筆者の思考プロセスを紹介します。*
 
-It wasn't bad for a direct-to-code brain dump, but there were a couple of things that I wasn't happy with.
+以前の記事 ([../posts/enterprise-tic-tac-toe.md](../posts/enterprise-tic-tac-toe.md)) では、三目並べゲームの設計を行いました。
 
-Unfortunately, the more I thought about it, the more those little niggles became full-fledged annoyances, and I got unhappier and unhappier.
+直接コードに落とし込んだものとしては悪くありませんでしたが、いくつか気になる点がありました。
 
-In this post, I'll explain why I was so unhappy, and how I arrived at a design that I am much more satisfied with.
+残念ながら、考えれば考えるほど、小さな懸念が大きないらだちへと変わり、筆者はますます不満に思いました。
 
-## The old design
+この記事では、なぜ筆者がそれほど不満だったのか、そして最終的にどのようにして満足のいく設計にたどり着いたのかを説明します。
 
-To recap the previous post briefly, here is the old design:
+## 以前の設計
 
-* There is a hidden `GameState` known only to the implementation.
-* There are some functions that allow the players to move (`PlayerXMoves` and `PlayerOMoves`).
-* The UI (or other client) passes the game state into each move, and gets a updated game state back.
-* Each move also returns a `MoveResult` which contains the game status (in process, won, tied), and if the game is still in process, whose turn it is, and what the available moves are.
+以前の記事を簡単に振り返り、以前の設計を示します。
 
-Here's the code:
+  * 実装のみにわかる非公開の `GameState` があります。
+  * プレイヤーが移動するための関数 (`PlayerXMoves` と `PlayerOMoves`) がいくつかあります。
+  * UI (またはその他のクライアント) はゲームの状態を各移動に渡し、更新されたゲームの状態を受け取ります。
+  * 各移動は、ゲームの状態 (進行中、勝利、引き分け) を含む `MoveResult` も返します。ゲームがまだ進行中の場合は、どちらのターンであるかと、可能な移動も返します。
+
+コードを以下に示します。
 
 ```fsharp
 module TicTacToeDomain =
 
-    type HorizPosition = Left | HCenter | Right
-    type VertPosition = Top | VCenter | Bottom
-    type CellPosition = HorizPosition * VertPosition 
+    type HorizPosition = Left | HCenter | Right
+    type VertPosition = Top | VCenter | Bottom
+    type CellPosition = HorizPosition * VertPosition 
 
-    type Player = PlayerO | PlayerX
+    type Player = PlayerO | PlayerX
 
-    type CellState = 
-        | Played of Player 
-        | Empty
+    type CellState = 
+        | Played of Player 
+        | Empty
 
-    type Cell = {
-        pos : CellPosition 
-        state : CellState 
-        }
+    type Cell = {
+        pos : CellPosition 
+        state : CellState 
+        }
 
-    type PlayerXPos = PlayerXPos of CellPosition 
-    type PlayerOPos = PlayerOPos of CellPosition 
+    type PlayerXPos = PlayerXPos of CellPosition 
+    type PlayerOPos = PlayerOPos of CellPosition 
 
-    type ValidMovesForPlayerX = PlayerXPos list
-    type ValidMovesForPlayerO = PlayerOPos list
-        
-    type MoveResult = 
-        | PlayerXToMove of ValidMovesForPlayerX 
-        | PlayerOToMove of ValidMovesForPlayerO 
-        | GameWon of Player 
-        | GameTied 
+    type ValidMovesForPlayerX = PlayerXPos list
+    type ValidMovesForPlayerO = PlayerOPos list
+        
+    type MoveResult = 
+        | PlayerXToMove of ValidMovesForPlayerX 
+        | PlayerOToMove of ValidMovesForPlayerO 
+        | GameWon of Player 
+        | GameTied 
 
-    // the "use-cases"        
-    type NewGame<'GameState> = 
-        'GameState * MoveResult      
-    type PlayerXMoves<'GameState> = 
-        'GameState -> PlayerXPos -> 'GameState * MoveResult
-    type PlayerOMoves<'GameState> = 
-        'GameState -> PlayerOPos -> 'GameState * MoveResult
+    // "ユースケース"        
+    type NewGame<'GameState> = 
+        'GameState * MoveResult      
+    type PlayerXMoves<'GameState> = 
+        'GameState -> PlayerXPos -> 'GameState * MoveResult
+    type PlayerOMoves<'GameState> = 
+        'GameState -> PlayerOPos -> 'GameState * MoveResult
 ```
 
-## What's wrong with the old design?
+## 以前の設計の問題点
 
-So what's wrong with this design? Why was I so unhappy?
+では、この設計の何が問題なのでしょうか？ なぜ筆者はそれほど不満だったのでしょうか？
 
-First, I was unhappy about the use of the `PlayerXPos` and `PlayerOPos` types. The idea was to wrap a `CellPosition` in a type
-so that it would be "owned" by a particular player.
-By doing this, and then having the valid moves be one of these types, I could prevent player X from playing twice, say.
-That is, after player X has moved, the valid moves for the next run would be wrapped in a `PlayerOPos` type so that only player O could use them.
+まず、`PlayerXPos` 型と `PlayerOPos` 型の使い方に疑問を感じました。
+`CellPosition` を型でラップして、特定のプレイヤーが「所有」しているように見せるという考えでした。
+これにより、有効な移動をこれらの型のいずれかに限定することで、プレイヤーXが2回連続でプレイすることを防ぐことができます。
+つまり、プレイヤーXが移動した後、次の実行の有効な移動は `PlayerOPos` 型でラップされるため、プレイヤーOだけがそれを使用できます。
 
-The problem was that the `PlayerXPos` and `PlayerOPos` types are public, so that a malicious user could have forged one and played twice anyway!
+問題は、`PlayerXPos` 型と `PlayerOPos` 型が公開されているため、悪意のあるユーザーが偽造して2回プレイできてしまうことです。
 
-Yes, these types could have been made private by parameterizing them like the game state, but the design would have become very ugly very quickly.
+これらの型はゲームの状態のようにパラメーター化することで非公開にできますが、設計が非常に複雑になってしまいます。
 
-Second, even if the moves *were* made unforgeable, there's that game state floating about. 
+次に、移動が偽造不可能だったとしても、ゲームの状態が宙に浮いたままです。
 
-It's true that the game state internals are private, but a malicious user could have still caused problems by reusing a game state.
-For example, they could attempt to play one of the valid moves with a game state from a previous turn, or vice versa.  
+ゲームの状態の内部が非公開であることは事実ですが、悪意のあるユーザーはゲームの状態を再利用することで問題を起こす可能性があります。
+例えば、前のターンのゲームの状態を使って有効な移動の1つをプレイしようとしたり、その逆をしたりする可能性があります。
 
-In this particular case, it would not be dangerous, but in general it might be a problem. 
+このケースでは危険ではありませんが、一般的には問題になる可能性があります。
 
-So, as you can see, this design was becoming a bit smelly to me, which was why I was becoming unhappy.
+このように、この設計にはいくつか問題があり、筆者は不満を感じていました。
 
-## What's up with this malicious user?
+## なぜ悪意のあるユーザーを想定するのか？
 
-Why I am assuming that the user of the API will be so malicious -- forging fake moves and all that?
+なぜAPIのユーザーがそれほど悪意を持っていると想定するのでしょうか？偽の移動を偽造したりするのでしょうか？
 
-The reason is that I use this as a design guideline. If a malicious user can do something I don't want, then the design is probably not good enough.
+それは、筆者がこれを設計のガイドラインとして使っているからです。 悪意のあるユーザーが筆者の意図しない操作をできる場合、設計はおそらく不十分です。
 
-In my series on [capability based security](../posts/capability-based-security.md) I point out that by designing for the
-[Principle Of Least Authority](https://en.wikipedia.org/wiki/Principle_of_least_privilege) ("POLA"), you end up with a good design as a side-effect.
+[ケイパビリティベースのセキュリティ](../posts/capability-based-security.md) に関するシリーズでは、
+[最小権限の原則](https://en.wikipedia.org/wiki/Principle_of_least_privilege)（「POLA」）に沿って設計することで、結果として優れた設計になることを指摘しています。
 
-That is, if you design the most minimal interface that the caller needs, then you will both avoid accidental complexity (good design) and increase security (POLA).
+つまり、呼び出し側が必要とする最小限のインターフェースを設計すると、偶発的な複雑さを回避し (優れた設計)、セキュリティを向上させることができます (POLA)。
 
-I had a little tip in that post: **design for malicious callers and you will probably end up with more modular code**.
+その投稿にはちょっとしたヒントがありました。 **悪意のある呼び出し側を想定して設計すると、よりモジュール化されたコードになるでしょう**。
 
-I think I will follow my own advice and see where I end up!
+筆者は自分のアドバイスに従って、どうなるか試してみるつもりです。
 
-## Designing for POLA
+## POLA向け設計
 
-So, let's design for POLA -- let's give the user the minimal "capability" to do something and no more.
+POLA向けに設計してみましょう。つまり、ユーザーに何かを行うための最小限の「ケイパビリティ（能力）」だけを与え、それ以上のものは与えないようにします。
 
-In this case, I want to give the user the capability to mark a specific position with an "X" or "O".
+ここでは、ユーザーに特定の位置を「X」または「O」でマークするケイパビリティを与えたいと考えています。
 
-Here's what I had before:
+以前のコードは次のとおりです。
 
 ```fsharp
 type PlayerXMoves = 
-    GameState * PlayerXPos -> // input
-        GameState * MoveResult // output
+    GameState * PlayerXPos -> // 入力
+        GameState * MoveResult // 出力
 ```
 
-The user is passing in the location (`PlayerXPos`) that they want to play.
+ユーザーは、プレイしたい場所（`PlayerXPos`）を渡しています。
 
-But let's now take away the user's ability to choose the position. Why don't I give the user a function, a `MoveCapability` say, that has the position baked in?
+しかし今度は、ユーザーから位置を選択するケイパビリティを取り上げてみましょう。位置情報が組み込まれた関数、例えば`MoveCapability`をユーザーに与えるのはどうでしょうか？
 
 ```fsharp
 type MoveCapability = 
-    GameState -> // input
-        GameState * MoveResult // output
+    GameState -> // 入力
+        GameState * MoveResult // 出力
 ```
 
-In fact, why not bake the game state into the function too? That way a malicious user can't pass the wrong game state to me.
+さらに、ゲームの状態も関数に組み込んでしまいましょう。こうすることで、悪意のあるユーザーが誤ったゲーム状態を渡すことができなくなります。
 
-This means that there is no "input" at all now -- everything is baked in!
+これは、入力がなくなり、すべてが組み込まれることを意味します。
 
 ```fsharp
 type MoveCapability = 
-    unit -> // no input
-        GameState * MoveResult // output
+    unit -> // 入力なし
+        GameState * MoveResult // 出力
 ```
 
-But now we have to give the user a whole set of capabilities, one for each possible move they can make.
-Where do these capabilities come from?  
+しかし、今度はユーザーが可能なすべての移動に対して、それぞれに対応するケイパビリティのセットを与える必要があります。
+これらのケイパビリティはどこから来るのでしょうか？
 
-Answer, the `MoveResult` of course! We'll change the `MoveResult` to return a list of capabilities rather than a list of positions.
+答えは、`MoveResult`です。`MoveResult`を変更し、位置のリストではなく、ケイパビリティのリストを返すようにします。
 
 ```fsharp
 type MoveResult = 
-    | PlayerXToMove of MoveCapability list 
-    | PlayerOToMove of MoveCapability list 
-    | GameWon of Player 
-    | GameTied 
+    | PlayerXToMove of MoveCapability list 
+    | PlayerOToMove of MoveCapability list 
+    | GameWon of Player 
+    | GameTied 
 ```
 
-Excellent! I'm much happier with this approach.
+素晴らしい！こちらのアプローチの方がはるかに良いと思います。
 
-And now that the `MoveCapability` contains the game state baked in, we don't need the game state to be in the output either!
+`MoveCapability`にゲームの状態が組み込まれているため、出力にゲームの状態を含める必要もなくなりました。
 
-So our move function has simplified dramatically and now looks like this:
+そのため、移動関数は大幅に簡略化され、次のようになります。
 
 ```fsharp
 type MoveCapability = 
-    unit -> MoveResult 
+    unit -> MoveResult 
 ```
 
-Look ma! No `'GameState` parameter! It's gone!
+ご覧ください！`'GameState`パラメータがなくなりました！
 
-## A quick walkthrough from the UI's point of view
+## UIの視点からの簡単なウォークスルー
 
-So now let's pretend we are the UI, and let's attempt to use the new design.
+UIの視点に立って、新しい設計をどのように使うか考えてみましょう。
 
-* First, assume that we have a list of available capabilities from the previous move.
-* Next, the user must pick one of the capabilities (e.g. squares) to play -- they can't just create any old cell position and play it, which is good.
-  But how will the user know which capability corresponds to which square?  The capabilities are completely opaque. We can't tell from the outside what they do!
-* Then, given that the user has picked a capability somehow, we run it (with no parameters).
-* Next we update the display to show the result of the move.
-  But again, how are we going to know what to display? There is no game state to extract the cells from any longer.
+* まず、前回の移動で得られた、利用可能なケイパビリティのリストがあるとします。
+* 次に、ユーザーはプレイするケイパビリティ（つまり、マス目）を1つ選びます。ユーザーは任意のセル位置を指定してプレイすることはできません。これは良いことです。
+  しかし、ユーザーはどのケイパビリティがどのマス目に対応するのか、どのようにして知るのでしょうか？ケイパビリティは完全に不透明で、外部からはその機能がわかりません。
+* ユーザーが何らかの方法でケイパビリティを選択したら、（パラメータなしで）実行します。
+* そして、移動の結果を表示するためにディスプレイを更新します。
+  しかし、何を表示すればよいのか、UIには判断材料がありません。セルを抽出するためのゲーム状態はもはや存在しないからです。
   
-Here's some pseudo-code for the UI game loop:  
+UIのゲームループの擬似コードを以下に示します。
   
 ```fsharp
-// loop while game not over
+// ゲームオーバーになるまでループ
 let rec playMove moveResult = 
 
-    let availableCapabilities = // from moveResult
-    
-    // get capability from user input somehow
-    let capability = ??
-    
-    // use the capability
-    let newMoveResult = capability()
-    
-    // display updated grid
-    let cells = ??  // from where
-    
-    // play again
-    match newMoveResult with
-    | PlayerXToMove capabilities -> 
-        // play another move
-        playMove newMoveResult
-    | etc            
+    let availableCapabilities = // moveResultから取得
+    
+    // ユーザー入力からケイパビリティを取得
+    let capability = ??
+    
+    // ケイパビリティを使用
+    let newMoveResult = capability()
+    
+    // 更新されたグリッドを表示
+    let cells = ??  // どこから取得？
+    
+    // 再度プレイ
+    match newMoveResult with
+    | PlayerXToMove capabilities -> 
+        // 別の移動をプレイ
+        playMove newMoveResult
+    | etc            
 ```
 
-Let's deal with the first issue: how does the user know which capability is associated with which square?
+最初の問題に対処しましょう。ユーザーは、どのケイパビリティがどのマス目に関連付けられているのか、どのようにして知るのでしょうか？
 
-The answer is just to create a new structure that "labels" the capability. In this case, with the cell position.
+その答えは、ケイパビリティに「ラベル」を付ける新しい構造を作ることです。ここでは、セルの位置でラベル付けします。
 ```fsharp
 type NextMoveInfo = {
-    posToPlay : CellPosition 
-    capability : MoveCapability }
+    posToPlay : CellPosition 
+    capability : MoveCapability }
 ```
 
-And now we must change the `MoveResult` to return a list of these labelled capabilities, rather than the unlabelled ones:
+そして、`MoveResult` を変更し、ラベル付けされていないケイパビリティのリストではなく、ラベル付けされたケイパビリティのリストを返すようにします。
 
 ```fsharp
 type MoveResult = 
-    | PlayerXToMove of NextMoveInfo list 
-    | PlayerOToMove of NextMoveInfo list 
-    | GameWon of Player 
-    | GameTied 
+    | PlayerXToMove of NextMoveInfo list 
+    | PlayerOToMove of NextMoveInfo list 
+    | GameWon of Player 
+    | GameTied 
 ```
 
-Note that the cell position is for the user's information only -- the actual position is still baked into the capability and cannot be forged.
+セル位置はユーザーの情報のためだけのものであることに注意してください。実際の位置は依然としてケイパビリティに組み込まれており、偽造はできません。
 
-Now for the second issue: how does the UI know what to display as a result of the move?  Let's just return that information to it directly in a new structure:
+2番目の問題です。UIは移動の結果として何を表示すればよいのでしょうか？その情報を新しい構造で直接返すようにしましょう。
 
 ```fsharp
-/// Everything the UI needs to know to display the board
+/// UIが盤面を表示するために必要なすべての情報
 type DisplayInfo = {
-    cells : Cell list
-    }
+    cells : Cell list
+    }
 ```
 
-And once again, the `MoveResult` must be changed, this time to return the `DisplayInfo` for each case:
+そして、`MoveResult` を再度変更します。今度は、それぞれの場合に `DisplayInfo` を返すようにします。
 
 ```fsharp
 type MoveResult = 
-    | PlayerXToMove of DisplayInfo * NextMoveInfo list 
-    | PlayerOToMove of DisplayInfo * NextMoveInfo list 
-    | GameWon of DisplayInfo * Player 
-    | GameTied of DisplayInfo 
+    | PlayerXToMove of DisplayInfo * NextMoveInfo list 
+    | PlayerOToMove of DisplayInfo * NextMoveInfo list 
+    | GameWon of DisplayInfo * Player 
+    | GameTied of DisplayInfo 
 ```
 
-## Dealing with circular dependencies
+## 循環依存の解消
 
-Here's our final design:
+最終的な設計は以下のとおりです。
 
 ```fsharp
-/// The capability to make a move at a particular location.
-/// The gamestate, player and position are already "baked" into the function.
+/// 特定の位置に移動するためのケイパビリティ。
+/// ゲームの状態、プレイヤー、位置はすでに、関数に「組み込まれて」います。
 type MoveCapability = 
-    unit -> MoveResult 
+    unit -> MoveResult 
 
-/// A capability along with the position the capability is associated with.
-/// This allows the UI to show information so that the user
-/// can pick a particular capability to exercise.
+/// ケイパビリティと、ケイパビリティが関連付けられている位置。
+/// これにより、UIはユーザーが特定のケイパビリティを選んで実行できるよう、
+/// 情報を表示できます。
 type NextMoveInfo = {
-    // the pos is for UI information only
-    // the actual pos is baked into the cap.
-    posToPlay : CellPosition 
-    capability : MoveCapability }
+    // 位置はUI情報のためだけにあります
+    // 実際の位置はケイパビリティに組み込まれています
+    posToPlay : CellPosition 
+    capability : MoveCapability }
 
-/// The result of a move. It includes: 
-/// * The information on the current board state.
-/// * The capabilities for the next move, if any.
+/// 移動の結果。以下を含みます。
+/// * 現在の盤面の状態に関する情報。
+/// * 次の移動のためのケイパビリティ（存在する場合）。
 type MoveResult = 
-    | PlayerXToMove of DisplayInfo * NextMoveInfo list 
-    | PlayerOToMove of DisplayInfo * NextMoveInfo list 
-    | GameWon of DisplayInfo * Player 
-    | GameTied of DisplayInfo 
+    | PlayerXToMove of DisplayInfo * NextMoveInfo list 
+    | PlayerOToMove of DisplayInfo * NextMoveInfo list 
+    | GameWon of DisplayInfo * Player 
+    | GameTied of DisplayInfo 
 ```
 
-But oops! This won't compile!
+しかし、これはコンパイルできません。
 
-`MoveCapability` depends on `MoveResult` which depends on `NextMoveInfo` which in turn depends on `MoveCapability` again. But the F# compiler does not allow forward references in general.
+`MoveCapability` は `MoveResult` に依存し、`MoveResult` は `NextMoveInfo` に依存し、`NextMoveInfo` は再び `MoveCapability` に依存しています。しかし、F# コンパイラは一般的に前方参照を許可しません。
 
-Circular dependencies like this are generally frowned upon (I even have a post called ["cyclic dependencies are evil"](../posts/cyclic-dependencies.md)!)
-and there are [normally work-arounds which you can use](../posts/removing-cyclic-dependencies.md) to remove them.
+このような循環依存は、一般的に良くないとされています（私自身も「 [循環依存は悪だ](../posts/cyclic-dependencies.md) 」という記事を書いています！）。
+循環依存を削除するために使える [回避策](../posts/removing-cyclic-dependencies.md) はいくつかあります。
 
-In this case though, I will link them together using the `and` keyword, which replaces the `type` keyword and is useful for just these kinds of cases.
+しかし今回は、`type` キーワードの代わりに `and` キーワードを使って、これらの型をリンクします。これは、まさにこのような場合に役立ちます。
 
 ```fsharp
 type MoveCapability = 
-    // etc
+    // etc
 and NextMoveInfo = {
-    // etc
+    // etc
 and MoveResult = 
-    // etc
+    // etc
 ```
 
-## Revisiting the API
+## APIの見直し
 
-What does the API look like now?
+APIは現在どのようになっているでしょうか？
 
-Originally, we had an API with slots for the three use-cases and also a helper function `getCells`:
+当初のAPIには、3つのユースケースのスロットとヘルパー関数 `getCells` がありました。
 
 ```fsharp
-type TicTacToeAPI<'GameState>  = 
-    {
-    newGame : NewGame<'GameState>
-    playerXMoves : PlayerXMoves<'GameState> 
-    playerOMoves : PlayerOMoves<'GameState> 
-    getCells : GetCells<'GameState>
-    }
+type TicTacToeAPI<'GameState>  = 
+    {
+    newGame : NewGame<'GameState>
+    playerXMoves : PlayerXMoves<'GameState> 
+    playerOMoves : PlayerOMoves<'GameState> 
+    getCells : GetCells<'GameState>
+    }
 ```
 
-But now, we don't need the `playerXMoves` or `playerOMoves`, because they are returned to us in the `MoveResult` of a previous move.
+しかし、`playerXMoves` と `playerOMoves` は、前の移動の `MoveResult` で返されるため、必要なくなりました。
 
-And `getCells` is no longer needed either, because we are returning the `DisplayInfo` directly now.
+また、`DisplayInfo` を直接返すようになったため、`getCells` も必要なくなりました。
 
-So after all these changes, the new API just has a single slot in it and looks like this:
+これらの変更を経て、新しいAPIは1つのスロットだけになり、次のようになります。
 
 ```fsharp
 type NewGame = unit -> MoveResult
 
 type TicTacToeAPI = 
-    {
-    newGame : NewGame 
-    }
+    {
+    newGame : NewGame 
+    }
 ```
 
-I've changed `NewGame` from a constant to a parameterless function, which is in fact, just a `MoveCapability` in disguise.
+`NewGame` を定数からパラメータのない関数に変更しました。これは実際には、`MoveCapability` の一種です。
 
-## The new design in full
+## 新しい設計の全体像
 
-Here's the new design in full:
+新しい設計の全体像は以下のとおりです。
 
 ```fsharp
 module TicTacToeDomain =
 
-    type HorizPosition = Left | HCenter | Right
-    type VertPosition = Top | VCenter | Bottom
-    type CellPosition = HorizPosition * VertPosition 
+    type HorizPosition = Left | HCenter | Right
+    type VertPosition = Top | VCenter | Bottom
+    type CellPosition = HorizPosition * VertPosition 
 
-    type Player = PlayerO | PlayerX
+    type Player = PlayerO | PlayerX
 
-    type CellState = 
-        | Played of Player 
-        | Empty
+    type CellState = 
+        | Played of Player 
+        | Empty
 
-    type Cell = {
-        pos : CellPosition 
-        state : CellState 
-        }
+    type Cell = {
+        pos : CellPosition 
+        state : CellState 
+        }
 
-    /// Everything the UI needs to know to display the board
-    type DisplayInfo = {
-        cells : Cell list
-        }
-    
-    /// The capability to make a move at a particular location.
-    /// The gamestate, player and position are already "baked" into the function.
-    type MoveCapability = 
-        unit -> MoveResult 
+    /// UIが盤面を表示するのに必要な情報すべて
+    type DisplayInfo = {
+        cells : Cell list
+        }
+    
+    /// 特定の位置に移動するためのケイパビリティ。
+    /// ゲームの状態、プレイヤー、位置はすでに、関数に組み込まれています。
+    type MoveCapability = 
+        unit -> MoveResult 
 
-    /// A capability along with the position the capability is associated with.
-    /// This allows the UI to show information so that the user
-    /// can pick a particular capability to exercise.
-    and NextMoveInfo = {
-        // the pos is for UI information only
-        // the actual pos is baked into the cap.
-        posToPlay : CellPosition 
-        capability : MoveCapability }
+    /// ケイパビリティと、ケイパビリティが関連付けられている位置。
+    /// これにより、UIが情報を表示し、
+    /// ユーザーが特定のケイパビリティを選んで実行できるようにします。
+    and NextMoveInfo = {
+        // 位置はUI情報のためだけにあります
+        // 実際の位置はケイパビリティに組み込まれています
+        posToPlay : CellPosition 
+        capability : MoveCapability }
 
-    /// The result of a move. It includes: 
-    /// * The information on the current board state.
-    /// * The capabilities for the next move, if any.
-    and MoveResult = 
-        | PlayerXToMove of DisplayInfo * NextMoveInfo list 
-        | PlayerOToMove of DisplayInfo * NextMoveInfo list 
-        | GameWon of DisplayInfo * Player 
-        | GameTied of DisplayInfo 
+    /// 移動の結果。以下を含みます。
+    /// * 現在の盤面の状態に関する情報。
+    /// * 次の移動のためのケイパビリティ（存在する場合）。
+    and MoveResult = 
+        | PlayerXToMove of DisplayInfo * NextMoveInfo list 
+        | PlayerOToMove of DisplayInfo * NextMoveInfo list 
+        | GameWon of DisplayInfo * Player 
+        | GameTied of DisplayInfo 
 
-    // Only the newGame function is exported from the implementation
-    // all other functions come from the results of the previous move
-    type TicTacToeAPI  = 
-        {
-        newGame : MoveCapability
-        }
+    // newGame関数のみが実装からエクスポートされます
+    // 他の関数はすべて、前の移動の結果から得られます
+    type TicTacToeAPI  = 
+        {
+        newGame : MoveCapability
+        }
 ```
 
-I'm much happier with this design than with the previous one:
+以前の設計よりも、こちらの設計の方がはるかに良いと感じています。
 
-* There is no game state for the UI to worry about.
-* There are no type parameters to make it look ugly.
-* The api is even more encapsulated -- a malicious UI can do very little now.
-* It's shorter -- always a good sign!
+* UIがゲームの状態を気にする必要がありません。
+* 見苦しい型パラメータがありません。
+* APIがさらにカプセル化され、悪意のあるUIはほとんど何もできません。
+* コードが短くなりました。これは良い兆候です。
 
-## The complete application
+## アプリケーション全体
 
-I have updated the implementation and console application to use this new design.
+この新しい設計を使うように、実装とコンソールアプリケーションを更新しました。
 
-The complete application is available on GitHub in [this gist](https://gist.github.com/swlaschin/7a5233a91912e66ac1e4) if you want to play with it.
+GitHubで公開されているアプリケーション全体は、[このgist](https://gist.github.com/swlaschin/7a5233a91912e66ac1e4) で確認できます。
 
-Surprisingly, the implementation also has become slightly simpler, because all the state is now hidden and there is no need to deal with types like `PlayerXPos` any more.
+実装も少しシンプルになりました。すべての状態が非表示になり、`PlayerXPos`のような型を扱う必要がなくなったからです。
 
-## Logging revisited
+## ロギングの再検討
 
-In the previous post, I demonstrated how logging could be injected into the API.
+前回の記事では、APIにロギング機能を組み込む方法を紹介しました。
 
-But in this design, the capabilities are opaque and have no parameters, so how are we supposed to log that a particular player chose a particular location?
+しかし、今回の設計では、ケイパビリティは不透明でパラメータがないため、特定のプレイヤーが特定の場所を選んだという情報を、どのようにログに記録すればよいのでしょうか？
 
-Well, we can't log the capabilities, but we *can* log their context, which we have via the `NextMoveInfo`. Let's see how this works in practice.
+ケイパビリティ自体をログに記録することはできませんが、`NextMoveInfo` から得られるコンテキストであれば、ログに記録できます。具体的にどのように動作するかを見てみましょう。
 
-First, given a `MoveCapability`, we want to transform it into another `MoveCapability` that also logs the player and cell position used.
+まず、`MoveCapability` が与えられたとき、プレイヤーと使われたセル位置もログに記録する、別の `MoveCapability` に変換します。
 
-Here's the code for that:
+そのためのコードは次のとおりです。
 
 ```fsharp
-/// Transform a MoveCapability into a logged version
+/// MoveCapabilityをログ記録バージョンに変換する
 let transformCapability transformMR player cellPos (cap:MoveCapability) :MoveCapability =
-    
-    // create a new capability that logs the player & cellPos when run
-    let newCap() =
-        printfn "LOGINFO: %A played %A" player cellPos
-        let moveResult = cap() 
-        transformMR moveResult 
-    newCap
+    
+    // 実行時にプレイヤーとcellPosをログに記録する、新しいケイパビリティを作る
+    let newCap() =
+        printfn "LOGINFO: %A played %A" player cellPos
+        let moveResult = cap() 
+        transformMR moveResult 
+    newCap
 ```
 
-This code works as follows:
+このコードの動作は以下のとおりです。
 
-* Create a new capability `newCap` function that is parameterless and returns a `MoveResult` just like the original one.
-* When it is called, log the player and cell position. These are not available from the `MoveCapability` that was passed in, so we have to pass them in explicitly.
-* Next, call the original capability and get the result.
-* The result itself contains the capabilities for the next move, so we need to recursively transform each capability in the `MoveResult` and return
-  a new `MoveResult`. This is done by the `transformMR` function that is passed in.
+* 元のケイパビリティと同様に、パラメータなしで `MoveResult` を返す、新しいケイパビリティ `newCap` 関数を作ります。
+* 呼び出されたら、プレイヤーとセルの位置をログに記録します。これらは、渡された `MoveCapability` からは取得できないため、明示的に渡す必要があります。
+* 次に、元のケイパビリティを呼び出して結果を取得します。
+* 結果自体には次の移動のためのケイパビリティが含まれているため、`MoveResult` 内の各ケイパビリティを再帰的に変換し、新しい `MoveResult` を返す必要があります。
+  これは、渡された `transformMR` 関数によって行われます。
 
-Now that we can transform a `MoveCapability`, we can go up a level and transform a `NextMoveInfo`.
+これで `MoveCapability` を変換できるようになったので、次は `NextMoveInfo` を変換します。
   
 ```fsharp
-/// Transform a NextMove into a logged version
+/// NextMoveをログ記録バージョンに変換する
 let transformNextMove transformMR player (move:NextMoveInfo) :NextMoveInfo = 
-    let cellPos = move.posToPlay 
-    let cap = move.capability
-    {move with capability = transformCapability transformMR player cellPos cap} 
+    let cellPos = move.posToPlay 
+    let cap = move.capability
+    {move with capability = transformCapability transformMR player cellPos cap} 
 ```
 
-This code works as follows:
+このコードの動作は以下のとおりです。
 
-* Given a `NextMoveInfo`, replace its capability with a transformed one. The output of `transformNextMove` is a new `NextMoveInfo`.
-* The cellPos comes from the original move.
-* The player and `transformMR` function are not available from the move, so must be passed in explicitly again.
+* `NextMoveInfo` が与えられたら、そのケイパビリティを変換されたものに置き換えます。 `transformNextMove` の出力は、新しい `NextMoveInfo` です。
+* `cellPos` は元の移動から取得します。
+* プレイヤーと `transformMR` 関数は移動からは取得できないため、再度明示的に渡す必要があります。
    
-Finally, we need to implement the function that will transform a `MoveResult`:
+最後に、`MoveResult` を変換する関数を実装します。
    
 ```fsharp
-/// Transform a MoveResult into a logged version
+/// MoveResultをログ記録バージョンに変換する
 let rec transformMoveResult (moveResult:MoveResult) :MoveResult =
-    
-    let tmr = transformMoveResult // abbreviate!
+    
+    let tmr = transformMoveResult // 省略形！
 
-    match moveResult with
-    | PlayerXToMove (display,nextMoves) ->
-        let nextMoves' = nextMoves |> List.map (transformNextMove tmr PlayerX) 
-        PlayerXToMove (display,nextMoves') 
-    | PlayerOToMove (display,nextMoves) ->
-        let nextMoves' = nextMoves |> List.map (transformNextMove tmr PlayerO)
-        PlayerOToMove (display,nextMoves') 
-    | GameWon (display,player) ->
-        printfn "LOGINFO: Game won by %A" player 
-        moveResult
-    | GameTied display ->
-        printfn "LOGINFO: Game tied" 
-        moveResult
+    match moveResult with
+    | PlayerXToMove (display,nextMoves) ->
+        let nextMoves' = nextMoves |> List.map (transformNextMove tmr PlayerX) 
+        PlayerXToMove (display,nextMoves') 
+    | PlayerOToMove (display,nextMoves) ->
+        let nextMoves' = nextMoves |> List.map (transformNextMove tmr PlayerO)
+        PlayerOToMove (display,nextMoves') 
+    | GameWon (display,player) ->
+        printfn "LOGINFO: Game won by %A" player 
+        moveResult
+    | GameTied display ->
+        printfn "LOGINFO: Game tied" 
+        moveResult
 ```
 
-This code works as follows:
+このコードの動作は以下のとおりです。
 
-* Given a `MoveResult`, handle each case. The output is a new `MoveResult`.
-* For the `GameWon` and `GameTied` cases, log the result and return the original moveResult.
-* For the `PlayerXToMove` case, take each of the `NextMoveInfo`s and transform them, passing in the required player (`PlayerX`) and `transformMR` function.
-  Note that the `transformMR` function is a reference to this very function! This means that `transformMoveResult` must be marked with `rec` to allow this self-reference.
-* For the `PlayerOToMove` case, do the same as the `PlayerXToMove` case, except change the player to `PlayerO`.
+* `MoveResult` が与えられると、それぞれの場合を処理します。出力は新しい `MoveResult` です。
+* `GameWon` と `GameTied` の場合は、結果をログに記録し、元の `moveResult` を返します。
+* `PlayerXToMove` の場合は、それぞれの `NextMoveInfo` を取得し、必要なプレイヤー（`PlayerX`）と `transformMR` 関数を渡して変換します。
+  `transformMR` 関数は、まさにこの関数自身への参照であることに注意してください。そのため、`transformMoveResult` に `rec` を付けて、この自己参照を許可する必要があります。
+* `PlayerOToMove` の場合は、`PlayerXToMove` の場合と同じ処理をしますが、プレイヤーを `PlayerO` に変更します。
 
-Finally, we can inject logging into the API as a whole by transforming the `MoveResult` returned by `newGame`:
+最後に、`newGame` から返される `MoveResult` を変換することで、API全体にロギング機能を組み込むことができます。
 
 ```fsharp
-/// inject logging into the API
+/// APIにロギングを注入する
 let injectLogging api =
-   
-    // create a new API with the functions 
-    // replaced with logged versions
-    { api with
-        newGame = fun () -> api.newGame() |> transformMoveResult
-        }
+   
+    // 関数をログ記録バージョンに置き換えた、
+    // 新しいAPIを作る
+    { api with
+        newGame = fun () -> api.newGame() |> transformMoveResult
+        }
 ```
 
-So there you go. Logging is a bit trickier than before, but still possible.
+これで完了です。ロギングの実装は以前より少し複雑になりましたが、それでも可能です。
 
-## A warning on recursion
+## 再帰に関する注意点
 
-In this code, I've been passing around functions that call each other recursively.
-When you do this, you have to be careful that you don't unwittingly cause a stack overflow.
+このコードでは、互いに再帰的に呼び出す関数をあちこちで渡しています。
+このような処理を行う場合、意図せずにスタックオーバーフローを起こさないように注意が必要です。
 
-In a game like this, when the number of nested calls is guaranteed to be small, then there is no issue.
-But if you are doing tens of thousands of nested calls, then you should worry about potential problems.
+今回のようなゲームでは、ネストされた呼び出しの回数が少ないため、問題にはなりません。
+しかし、何万回もネストされた呼び出しを行う場合は、潜在的な問題を考慮する必要があります。
 
-In some cases, the F# compiler will do tail-call optimization, but I suggest that you stress test your code to be sure!
+場合によっては、F#コンパイラが末尾呼び出しの最適化を行いますが、念のため、コードに負荷テストを実行することをお勧めします。
 
-## Data-centric vs capability-centric designs
+## データ中心設計とケイパビリティ中心設計
 
-There is an interesting difference between the original design and the new design.
+元の設計と新しい設計には、興味深い違いがあります。
 
-The original design was *data-centric*. Yes, we gave each player a function to use, but it was the *same* function used over and over, with different data passed in each time.
+元の設計は*データ中心*でした。各プレイヤーが使う関数を用意しましたが、それは毎回異なるデータを渡して使う、*同じ*関数でした。
 
-The new design is *function-centric* (or as I prefer, *capability-centric*). There is very little data now.
-Instead, the result of each function call is *another* set of functions than can be used for the next step, and so on, ad infinitum. 
+新しい設計は*関数中心*（あるいは私が好む言い方では*ケイパビリティ中心*）です。データはほとんどなくなり、
+各関数の呼び出しの結果は、次のステップで使う*別の*関数のセットになり、これが際限なく続きます。
 
-In fact, it reminds me somewhat of a [continuation-based](../posts/computation-expressions-continuations.md) approach, except that rather than passing in a continuation, 
-the function itself returns a list of continuations, and then you pick one to use.
+これは、[継続ベース](../posts/computation-expressions-continuations.md) のアプローチに似ています。
+ただし、継続を渡すのではなく、関数が継続のリストを返し、その中から1つを選んで使うという点が異なります。
 
-## Capabilities and RESTful designs -- a match made in heaven
+## ケイパビリティとRESTful設計 - 最高の組み合わせ
 
-If for some crazy reason you wanted to turn this design into a web service, how would you go about doing that?
+仮に、この設計をWebサービスに変えたいとしたら、どのようにすればよいでしょうか？
 
-In a *data-centric* design, we have a function to call (an endpoint URI in the web API) and then we pass data to it (as JSON or XML). The result of the call
-is more data that we use to update the display (e.g. the DOM).
+*データ中心*設計では、呼び出す関数（Web APIのエンドポイントURI）があり、それにデータ（JSONまたはXMLとして）を渡します。
+呼び出しの結果は、ディスプレイ（DOMなど）を更新するためのデータです。
 
-But in a *capability-centric* design, where's the data? And how do we pass functions around? It seems like this approach would not work for web services at all.
+しかし、*ケイパビリティ中心*設計では、データはどこにあり、関数をどのように渡せばよいのでしょうか？このアプローチは、Webサービスにはまったく向いていないように思えます。
 
-It might surprise you to know that there *is* a way to do this, and what's more it is exactly the same approach used by a RESTful design using [HATEOAS](https://en.wikipedia.org/wiki/HATEOAS).
+驚くべきことに、これを実現する方法があり、それは[HATEOAS](https://en.wikipedia.org/wiki/HATEOAS) を使うRESTful設計で採用されているアプローチと全く同じです。
 
-What happens is that each capability is mapped to a URI by the server, and then visiting that URI is the same as exercising that capability (e.g. calling the function).
+各ケイパビリティはサーバーによってURIにマッピングされ、そのURIにアクセスすることは、ケイパビリティを実行すること（関数を呼び出すこと）と同じになります。
 
-For example, in a web-based application based on this Tic-Tac-Toe design, the server would initially return nine URIs, one for each square.
-Then, when one of those squares was clicked, and the associated URI visited, the server would return eight new URIs, one for each remaining unplayed square.
-The URI for the just-played square would not be in this list, which means that it could not be clicked on again.
+例えば、この三目並べの設計に基づいたWebアプリケーションでは、サーバーは最初に、各マス目に対応する9つのURIを返します。
+そして、いずれかのマス目がクリックされ、関連付けられたURIにアクセスされると、サーバーは残りのプレイされていないマス目に対する8つのURIを返します。
+プレイ済みのマス目のURIはリストに含まれないため、再度クリックすることはできません。
 
-And of course when you click on one of the eight unplayed squares, the server would now return seven new URIs, and so on.
+もちろん、8つのプレイされていないマス目の1つをクリックすると、サーバーは7つの新しいURIを返し、というように続きます。
 
-This model is exactly what REST is supposed to be; you decide what to do next based on the contents of the returned page rather than hard-code the endpoints into your app.
+このモデルこそ、RESTのあるべき姿です。アプリにエンドポイントをハードコードするのではなく、返されたページの内容に基づいて、次に行うことを決めます。
 
-One possible downside of this approach is that it is does not appear to be stateless. 
+このアプローチの欠点は、ステートレスではないように見えることです。
 
-* In the data-centric version, all the data needed for a move was passed in each time, which means that scaling the backend services would be trivial.
-* In capability-centric approach though, the state has to be stored somewhere. If the complete game state can be encoded into the URI, then this approach will allow stateless servers as well,
-but otherwise, some sort of state-storage will be needed. 
+* データ中心設計では、移動に必要なデータはすべて毎回渡されるため、バックエンドサービスのスケーリングは容易です。
+* しかし、ケイパビリティ中心設計では、状態をどこかに保存する必要があります。
+  ゲームの状態全体をURIにエンコードできれば、ステートレスサーバーも実現できますが、そうでない場合は、何らかの状態ストレージが必要になります。
 
-Some web frameworks have made this function-centred approach a key part of their design, most notably [Seaside](https://en.wikipedia.org/wiki/Seaside_%28software%29).
+一部のWebフレームワークでは、この関数中心のアプローチを設計の核としています。特に有名なのは [Seaside](https://en.wikipedia.org/wiki/Seaside_%28software%29) です。
 
-The excellent [WebSharper framework for F#](http://websharper.com) also uses [something similar](http://websharper.com/blog-entry/3965), I think
-(I don't know WebSharper as well as I want to, alas, so correct me if I'm wrong).
+F#用の優れた [WebSharperフレームワーク](https://websharper.com) も [同様のアプローチ](https://websharper.com/blog-entry/3965) を採用していると思います
+（WebSharperはまだ十分に理解していないので、間違っていたらご指摘ください）。
 
-## Summary
+## まとめ
 
-In this post, I tore up my original design and replaced it with an even more function-centric one, which I like better.
+この記事では、元の設計を見直し、より関数中心的な設計に置き換えました。こちらの設計の方が気に入っています。
 
-But of course it still has all those qualities we love: separation of concerns, an API, a watertight security model, self-documenting code, and logging.
+もちろん、関心の分離、API、強固なセキュリティモデル、自己文書化コード、ロギングなど、私たちが重視する要素はすべて維持されています。
 
-I'm going to stop with Tic-Tac-Toe now -- I think I've wrung it dry! I hope you found these two walkthoughs interesting; I learned a lot myself.
+三目並べの分析はこれで終わりにします。十分に検討できたと思います。この2つのウォークスルーが興味深いものであったなら幸いです。私自身も多くの学びがありました。
 
-*NOTE: The code for this post is available on GitHub in [this gist](https://gist.github.com/swlaschin/7a5233a91912e66ac1e4).*
+*注：この記事のコードはGitHubの [このgist](https://gist.github.com/swlaschin/7a5233a91912e66ac1e4) で入手できます。*
