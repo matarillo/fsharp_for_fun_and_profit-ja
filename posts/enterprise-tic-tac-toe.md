@@ -7,7 +7,7 @@ seriesId: "注釈付きチュートリアル"
 seriesOrder: 5
 ---
 
-*更新: [このトピックに関する講演のスライドとビデオ](./ettt/)*
+*更新: [このトピックに関する講演のスライドとビデオ](https://fsharpforfunandprofit.com/ettt/)*
 
 *このシリーズでは、関数型プログラミングの理論と実践のギャップを埋めることを目指しています。
 そのために、小さなプロジェクトを題材に、設計から実装までの思考プロセスを具体的に示していきます。*
@@ -44,8 +44,8 @@ seriesOrder: 5
 * *テスターと運用担当者:* 「システムが中で何をしているのかを知るために、監査とログ記録が必要なんだ。」
 * *全員:* 「スケーラビリティなんて本当は必要ないんだけど、CTOが流行語に踊らされてるから仕方ないんだ。」
 
-[PHPのEasy Plus](./Herzult/SimplePHPEasyPlus)や
-[JavaのFizz Buzz Enterprise Edition](./EnterpriseQualityCoding/FizzBuzzEnterpriseEdition)など、
+[PHPのEasy Plus](https://github.com/Herzult/SimplePHPEasyPlus)や
+[JavaのエンタープライズFizzBuzz](https://github.com/EnterpriseQualityCoding/FizzBuzzEnterpriseEdition)など、
 すでに素晴らしい「エンタープライズ」プロジェクトはいくつかありますが、
 この作品も、その仲間入りができればと思っています。
 
@@ -54,7 +54,7 @@ seriesOrder: 5
 
 ## ドメイン設計
 
-> 「ゲームのルールを知らない人がソースコードを見ればルールを理解できるようにゲームを書きなさい」 -- [Raganwald](./)
+> 「ゲームのルールを知らない人がソースコードを見ればルールを理解できるようにゲームを書きなさい」 -- [Raganwald](http://raganwald.com/)
 
 いつものように、型ファーストで設計を進めていきましょう。このアプローチでは、
 
@@ -66,7 +66,7 @@ seriesOrder: 5
 この記事のタイトルを「**型に導かれて育つ関数型ソフトウェア**」にしても良かったかもしれませんね。
 
 前にも言ったように、私は、オブジェクトよりも、ゲームで起こりうるイベントを起点に設計を進めるのが好きです。
-私は古い人間なので「ユースケース」と呼んでいますが、[イベントストーミング](./2013/11/introducing-event-storming.html)のようなアプローチも好きです。
+私は古い人間なので「ユースケース」と呼んでいますが、[イベントストーミング](https://ziobrando.blogspot.com/2013/11/introducing-event-storming.html)のようなアプローチも好きです。
 
 さて、三目並べの「ドメイン」には、考慮すべき3つの「イベント駆動型ユースケース」（ここでは、マウスクリック）があります。
 
@@ -898,7 +898,7 @@ module WinFormApplication =
 
 コードに関して、いくつか補足説明します。
 
-まず、WPFではなくWinFormsを使っています。WinFormsはMonoをサポートしており、NuGetパッケージに依存せずに動作するためです。もっと高機能なUIを使いたい場合は、[ETO.Forms](./2012/09/11/introducing-eto-forms-a-cross-platform-ui-for-net/)を試してみてください。
+まず、WPFではなくWinFormsを使っています。WinFormsはMonoをサポートしており、NuGetパッケージに依存せずに動作するためです。もっと高機能なUIを使いたい場合は、[ETO.Forms](https://picoe.ca/2012/09/11/introducing-eto-forms-a-cross-platform-ui-for-net/)を試してみてください。
 
 `TicTacToeForm<'T>` には、次のように型パラメーターを明示的に指定しています。
 
@@ -1223,7 +1223,7 @@ let handleClick() =
 
 このコードを読みたくなければ、以下の[質問とまとめ](#questions)に進んでください。
 
-*ここに示されているすべてのコードは、GitHubの[このgist](./swlaschin/3418b549bd222396da82)で入手できます。*
+*ここに示されているすべてのコードは、GitHubの[このgist](https://gist.github.com/swlaschin/3418b549bd222396da82)で入手できます。*
 
 まずは、最終的なドメイン設計です。
 
@@ -1838,10 +1838,10 @@ let playerXMoves (gameState,move) =
 設計が安定したら、通常の書き方に戻すのが一般的です。
 
 
-**質問：これは非常に手間がかかるように思えます。結局、別の形での [BDUF](./wiki/Big_Design_Up_Front) ではないのですか？**
+**質問：これは非常に手間がかかるように思えます。結局、別の形での [BDUF](https://en.wikipedia.org/wiki/Big_Design_Up_Front) ではないのですか？**
 
 これは設計を行うための回りくどい方法のように思えるかもしれませんが、実際にはそれほど時間はかかりません。
-別の言語で探索的なプロトタイプを作成するよりも、 certainly 早く終わるでしょう。
+別の言語で探索的なプロトタイプを作成するよりも、 おそらく早く終わるでしょう。
 
 型を使って設計を文書化し、REPL を「実行可能な仕様チェッカー」として使用して、
 すべてが正しく連携するようにすることで、何度か迅速な反復を行ってきました。
@@ -1866,10 +1866,10 @@ let playerXMoves (gameState,move) =
 はい、このコードは `Cell`、`GameState` などの非常に具体的な型で記述されています。そして、そのどれも再利用できないのは事実です。
 
 このような、ドメイン固有で再利用不可能な設計と、
-リストやツリーのようなものの[抽象的で再利用可能なライブラリ](./en-us/library/ee353738.aspx)との間には、常に葛藤があります。
+リストやツリーのようなものの[抽象的で再利用可能なライブラリ](https://msdn.microsoft.com/en-us/library/ee353738.aspx)との間には、常に葛藤があります。
 
 理想的には、低レベルの再利用可能なコンポーネントから始めて、それらを組み合わせることで、より大きく、より具体的なコンポーネント (DSLなど) を構築し、
-最終的にアプリケーションを開発するべきです（Tomas は、[まさにこの点](./blog/2015/library-layers/index.html)に関する優れた記事を書いています）。
+最終的にアプリケーションを開発するべきです（Tomas は、[まさにこの点](https://tomasp.net/blog/2015/library-layers/index.html)に関する優れた記事を書いています）。
 
 今回、私がそのような方法を取らなかったのは、第一に、私は常に*具体的*な設計から始めることを好むからです。
 何度か何かを構築してみるまでは、優れた抽象化がどのようなものかさえわからないからです。
@@ -1910,5 +1910,5 @@ UIとコアロジックは分離しましたが、現時点では、それ以上
 
 **2015年2月16日更新：結局、この設計に不満を持つようになりました。[次の投稿](../posts/enterprise-tic-tac-toe-2.md) では、その理由と、より優れた設計を紹介します。**
 
-*注：この記事のコードは、GitHubの[このgist](./swlaschin/3418b549bd222396da82)で入手できます。*
+*注：この記事のコードは、GitHubの[このgist](https://gist.github.com/swlaschin/3418b549bd222396da82)で入手できます。*
 
