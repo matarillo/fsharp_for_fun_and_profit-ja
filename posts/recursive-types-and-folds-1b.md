@@ -4,7 +4,7 @@ title: "畳み込みの例"
 description: "他のドメインへのルールの適用"
 seriesId: "再帰型と畳み込み"
 seriesOrder: 2
-categories: [Folds, "パターン"]
+categories: ["畳み込み", "パターン"]
 ---
 
 このブログ記事はシリーズの第2弾です。

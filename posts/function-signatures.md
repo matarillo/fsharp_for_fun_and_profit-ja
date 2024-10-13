@@ -5,7 +5,7 @@ description: "関数シグネチャを見れば、その関数の働きがある
 nav: thinking-functionally
 seriesId: "関数型思考"
 seriesOrder: 9
-categories: [Functions]
+categories: ["関数"]
 ---
 
 気づきにくいかもしれませんが、F#には実は2つの構文があります。1つは普通の（値）式用で、もう1つは型定義用です。例を見てみましょう。

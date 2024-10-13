@@ -4,7 +4,7 @@ title: "畳み込みの紹介"
 description: "再帰的データ構造を通じた状態の伝播"
 seriesId: "再帰型と畳み込み"
 seriesOrder: 3
-categories: [Folds, "パターン"]
+categories: ["畳み込み", "パターン"]
 ---
 
 この記事はシリーズの 3 番目です。

@@ -2,7 +2,7 @@
 layout: post
 title: "循環依存を取り除くリファクタリング"
 description: "循環依存：パート2"
-categories: [Design]
+categories: [設計]
 seriesId: "循環依存"
 seriesOrder: 2
 

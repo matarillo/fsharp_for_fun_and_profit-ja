@@ -5,7 +5,7 @@ description: "既存の関数から新しい関数を作る"
 nav: thinking-functionally
 seriesId: "関数型思考"
 seriesOrder: 7
-categories: [Functions]
+categories: ["関数"]
 image: "/assets/img/Functions_Composition.png"
 ---
 

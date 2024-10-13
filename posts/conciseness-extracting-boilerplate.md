@@ -5,7 +5,7 @@ description: "DRY原則への関数型アプローチ"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 10
-categories: [Conciseness, Functions, Folds]
+categories: [Conciseness, "関数", "畳み込み"]
 ---
 
 このシリーズの最初の例では、F#とC#の両方で実装された、平方和を計算する簡単な関数を見ました。

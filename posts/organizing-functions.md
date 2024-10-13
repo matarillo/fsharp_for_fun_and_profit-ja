@@ -5,7 +5,7 @@ description: "入れ子関数とモジュール"
 nav: thinking-functionally
 seriesId: "関数型思考"
 seriesOrder: 10
-categories: [Functions, "モジュール"]
+categories: ["関数", "モジュール"]
 ---
 
 関数の定義方法を学んだ今、それらをどう整理すればいいでしょうか？
