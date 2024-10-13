@@ -5,7 +5,7 @@ description: ""
 nav: fsharp-types
 seriesId: "F#におけるオブジェクト指向プログラミング"
 seriesOrder: 5
-categories: [オブジェクト指向, インターフェース]
+categories: ["オブジェクト指向", "インターフェース"]
 ---
 
 [前回の投稿](../posts/interfaces.md)で見たように、F#でインターフェースを実装するのはC#よりも少し扱いにくいです。しかしF#には「オブジェクト式」という切り札があります。

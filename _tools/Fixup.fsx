@@ -205,7 +205,7 @@ module Series =
             """nav: why-use-fsharp"""
             """seriesId: "F# を使う理由" """
             """seriesOrder: 3"""
-            """categories: [F# vs C#]"""
+            """categories: ["F# vs C#"]"""
             ]
         parsePageText fi lines
 

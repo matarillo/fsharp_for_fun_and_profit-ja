@@ -2,7 +2,7 @@
 layout: post
 title: "Map, Bind, Apply のまとめ"
 description: ""
-categories: ["Patterns"]
+categories: ["パターン"]
 seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 7
 ---

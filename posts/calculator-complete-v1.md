@@ -2,7 +2,7 @@
 layout: post
 title: "Calculator Walkthrough: Part 3"
 description: "Adding the services and user interface, and dealing with disaster"
-categories: ["Worked Examples"]
+categories: ["実践例"]
 seriesId: "Annotated walkthroughs"
 seriesOrder: 3
 ---

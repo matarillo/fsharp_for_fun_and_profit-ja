@@ -5,7 +5,7 @@ description: ""
 nav: fsharp-types
 seriesId: "F#におけるオブジェクト指向プログラミング"
 seriesOrder: 4
-categories: [オブジェクト指向, インターフェース]
+categories: ["オブジェクト指向", "インターフェース"]
 ---
 
 F#ではインターフェースが利用可能で完全にサポートされていますが、C#での使い方とは異なる重要な点がいくつかあります。

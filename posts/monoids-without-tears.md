@@ -2,7 +2,7 @@
 layout: post
 title: "つらくないモノイド"
 description: "一般的な関数型パターンについて、数学をほとんど使わずに説明します"
-categories: ["パターン","数学","畳み込み"]
+categories: ["パターン", "数学", "畳み込み"]
 seriesId: "モノイドを理解する"
 seriesOrder: 1
 ---

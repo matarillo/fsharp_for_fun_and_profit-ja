@@ -2,7 +2,7 @@
 layout: post
 title: "Calculator Walkthrough: Part 2"
 description: "Testing the design with a trial implementation"
-categories: ["Worked Examples"]
+categories: ["実践例"]
 seriesId: "Annotated walkthroughs"
 seriesOrder: 2
 

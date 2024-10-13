@@ -2,7 +2,7 @@
 layout: post
 title: "モノイド以外を扱う"
 description: "つらくないモノイド - パート3"
-categories: ["パターン","畳み込み"]
+categories: ["パターン", "畳み込み"]
 seriesId: "モノイドを理解する"
 seriesOrder: 3
 ---

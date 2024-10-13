@@ -2,7 +2,7 @@
 layout: post
 title: "「解説付きローマ数字カタ」についての考察"
 description: "ローマ数字カタへの私のアプローチ"
-categories: ["作業例"]
+categories: ["実践例"]
 ---
 
 最近、「[解説付きローマ数字カタ](http://blog.coreyhaines.com/2012/12/roman-numerals-kata-with-commentary.html)」という動画を見ました。

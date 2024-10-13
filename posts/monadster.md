@@ -2,7 +2,7 @@
 layout: post
 title: "フランケンファンクター博士とモナド怪物"
 description: "または、19世紀の科学者がStateモナドをほぼ発明した話"
-categories: [部分適用, カリー化, コンビネーター]
+categories: ["部分適用", "カリー化", "コンビネーター"]
 image: "/assets/img/monadster_horror.jpg"
 seriesId: "状態の取り扱い"
 seriesOrder: 1

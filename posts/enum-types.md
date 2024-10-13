@@ -5,7 +5,7 @@ description: "共用体型とは異なります"
 nav: fsharp-types
 seriesId: "F#の型を理解する"
 seriesOrder: 8
-categories: [型]
+categories: ["型"]
 ---
 
 F#の列挙型はC#の列挙型と同じです。その定義は表面上、共用体型の空のケースとまったく同じように見えますが、気をつけるべき違いがたくさんあります。

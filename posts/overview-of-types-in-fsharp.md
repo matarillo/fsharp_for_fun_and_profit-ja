@@ -5,7 +5,7 @@ description: "全体像を把握する"
 nav: fsharp-types
 seriesId: "F#の型を理解する"
 seriesOrder: 2
-categories: [型]
+categories: ["型"]
 ---
 
 

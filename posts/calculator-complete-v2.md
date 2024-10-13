@@ -2,7 +2,7 @@
 layout: post
 title: "Calculator Walkthrough: Part 4"
 description: "Designing using a state machine"
-categories: ["Worked Examples"]
+categories: ["実践例"]
 seriesId: "Annotated walkthroughs"
 seriesOrder: 4
 ---

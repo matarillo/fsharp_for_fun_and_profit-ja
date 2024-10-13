@@ -5,7 +5,7 @@ description: "型表記の理解"
 nav: thinking-functionally
 seriesId: "関数型思考"
 seriesOrder: 4
-categories: [型, 関数]
+categories: ["型", "関数"]
 ---
 
 関数について理解を深めたところで、関数と型がどのように連携するかを見ていきましょう。これは定義域と値域の両方に関わります。ここでは概要のみ説明し、詳細は「[F#の型を理解する](../series/understanding-fsharp-types.md)」シリーズで扱います。

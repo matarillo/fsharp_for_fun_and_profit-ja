@@ -2,7 +2,7 @@
 layout: post
 title: "コア関数の実際的な使い方"
 description: "独立したデータと依存したデータの扱い方"
-categories: ["Patterns"]
+categories: ["パターン"]
 seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 3
 image: "/assets/img/vgfp_rop_before.png"

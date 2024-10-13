@@ -4,7 +4,7 @@ title: "完全なプログラムの設計とコード作成方法"
 description: "関数型アプリの作り方、パート1"
 seriesId: "関数型アプリの作り方"
 seriesOrder: 1
-categories: [DDD]
+categories: ["DDD"]
 ---
 
 

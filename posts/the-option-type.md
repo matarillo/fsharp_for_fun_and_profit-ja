@@ -5,7 +5,7 @@ description: "そしてなぜそれがnullやnull許容型ではないのか"
 nav: fsharp-types
 seriesId: "F#の型を理解する"
 seriesOrder: 7
-categories: [型]
+categories: ["型"]
 ---
 
 さて、特別な共用体型である `Option` 型を見てみましょう。この型は非常によく使われ、便利なので、言語に組み込まれています。

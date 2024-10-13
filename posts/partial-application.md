@@ -5,7 +5,7 @@ description: "関数のパラメータの一部を固定する"
 nav: thinking-functionally
 seriesId: "関数型思考"
 seriesOrder: 6
-categories: [カリー化, 部分適用]
+categories: ["カリー化", "部分適用"]
 ---
 
 

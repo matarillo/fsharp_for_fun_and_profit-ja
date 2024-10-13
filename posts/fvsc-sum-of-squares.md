@@ -5,7 +5,7 @@ description: "ループを使わずに1からNまでの二乗の合計を求め�
 nav: why-use-fsharp
 seriesId: "F#を使う理由"
 seriesOrder: 3
-categories: [F# vs C#]
+categories: ["F# vs C#"]
 ---
 
 実際のF#コードがどのように見えるか確認するために、簡単な問題から始めましょう：「1からNまでの二乗の合計を求める」。

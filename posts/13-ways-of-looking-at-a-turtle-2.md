@@ -2,7 +2,7 @@
 layout: post
 title: "タートルを見る13の方法（パート2）"
 description: "イベントソーシング、FRP、モナディック制御フロー、インタープリターの例を続けます。"
-categories: [パターン]
+categories: ["パターン"]
 ---
 
 > この投稿は[2015年英語版F#アドベントカレンダー](https://sergeytihon.wordpress.com/2015/10/25/f-advent-calendar-in-english-2015/)プロジェクトの一部です。

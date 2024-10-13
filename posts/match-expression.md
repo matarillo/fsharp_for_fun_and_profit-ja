@@ -5,7 +5,7 @@ description: "F#の主力機能"
 nav: thinking-functionally
 seriesId: "式と構文"
 seriesOrder: 9
-categories: [パターン,畳み込み]
+categories: ["パターン", "畳み込み"]
 ---
 
 F#ではパターンマッチングが広く使われています。 `let` で式に値を束縛したり、関数のパラメータを定義したり、 `match..with` 構文で分岐したりするときに活躍します。

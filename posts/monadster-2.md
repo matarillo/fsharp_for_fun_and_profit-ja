@@ -2,7 +2,7 @@
 layout: post
 title: "モナド怪物の体を完成させる"
 description: "フランケンファンクター博士とモナド怪物、パート2"
-categories: [部分適用、カリー化、コンビネーター]
+categories: ["部分適用", "カリー化", "コンビネーター"]
 image: "/assets/img/monadster_brain.jpg"
 seriesId: "状態の取り扱い"
 seriesOrder: 2

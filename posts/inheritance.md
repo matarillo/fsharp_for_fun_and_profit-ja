@@ -5,7 +5,7 @@ description: ""
 nav: fsharp-types
 seriesId: "F#におけるオブジェクト指向プログラミング"
 seriesOrder: 3
-categories: [オブジェクト指向, クラス]
+categories: ["オブジェクト指向", "クラス"]
 ---
 
 この記事は[前回のクラスに関する投稿](../posts/classes.md)の続きです。今回はF#における継承、抽象クラスやインターフェースの定義と使用方法に焦点を当てます。

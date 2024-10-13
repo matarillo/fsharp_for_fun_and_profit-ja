@@ -2,7 +2,7 @@
 layout: post
 title: "タートルを見る13の方法"
 description: "API、依存性注入、Stateモナドなどの例"
-categories: [パターン]
+categories: ["パターン"]
 ---
 
 > この投稿は[F# Advent Calendar in English 2015](https://sergeytihon.wordpress.com/2015/10/25/f-advent-calendar-in-english-2015/)プロジェクトの一部です。

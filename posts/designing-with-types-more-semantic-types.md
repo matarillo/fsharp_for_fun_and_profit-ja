@@ -5,7 +5,7 @@ description: "プリミティブ型にさらに多くの意味情報を加える
 nav: thinking-functionally
 seriesId: "型を使った設計"
 seriesOrder: 6
-categories: [型, DDD]
+categories: ["型", "DDD"]
 ---
 
 [前回の投稿](../posts/designing-with-types-single-case-dus.md)では、メールアドレスや郵便番号、州名などに単純な文字列型を使わないようにする話をしました。

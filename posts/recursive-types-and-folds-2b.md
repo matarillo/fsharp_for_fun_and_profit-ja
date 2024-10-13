@@ -4,7 +4,7 @@ title: "畳み込みを理解する"
 description: "再帰と反復の比較"
 seriesId: "再帰型と畳み込み"
 seriesOrder: 4
-categories: [畳み込み, パターン]
+categories: ["畳み込み", "パターン"]
 ---
 
 これはシリーズの第 4 回目です。

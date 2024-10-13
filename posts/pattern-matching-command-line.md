@@ -5,7 +5,7 @@ description: "実践的なパターンマッチング"
 nav: thinking-functionally
 seriesId: "式と構文"
 seriesOrder: 11
-categories: [パターン, 実践例]
+categories: ["パターン", "実践例"]
 ---
 
 match 式のしくみを理解したところで、実践的な例を見てみましょう。ただし、その前に設計アプローチについて説明します。

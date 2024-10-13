@@ -2,7 +2,7 @@
 layout: post
 title: "ゼロからJSONパーサーを書く"
 description: "250行のコードで"
-categories: [コンビネータ,パターン]
+categories: ["コンビネータ", "パターン"]
 seriesId: "パーサーコンビネータを理解する"
 seriesOrder: 4
 ---

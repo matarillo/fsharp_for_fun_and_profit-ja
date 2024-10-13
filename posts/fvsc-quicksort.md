@@ -5,7 +5,7 @@ description: "F#がC#よりも宣言的であることがわかり、パター�
 nav: why-use-fsharp
 seriesId: "F#を使う理由"
 seriesOrder: 4
-categories: [F# vs C#]
+categories: ["F# vs C#"]
 ---
 
 次の例では、リストをソートするためのクイックソート風のアルゴリズムを実装し、F#の実装とC#の実装を比較します。

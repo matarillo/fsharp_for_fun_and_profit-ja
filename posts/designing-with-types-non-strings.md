@@ -5,7 +5,7 @@ description: "整数と日付を安全に扱う"
 nav: thinking-functionally
 seriesId: "型を用いた設計"
 seriesOrder: 7
-categories: [型, DDD]
+categories: ["型", "DDD"]
 ---
 
 このシリーズでは、文字列をラップする単一ケース判別共用体のさまざまな用途を見てきました。

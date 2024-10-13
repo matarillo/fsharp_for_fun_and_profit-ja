@@ -5,7 +5,7 @@ description: "パターンマッチングの実践的な応用"
 nav: thinking-functionally
 seriesId: "式と構文"
 seriesOrder: 12
-categories: [パターン, 実例解説]
+categories: ["パターン", "実例解説"]
 ---
 
 [前回](../posts/pattern-matching-command-line.md)はコマンドラインの解析について見ました。今回は別のパターンマッチングの例として、ローマ数字を取り上げます。

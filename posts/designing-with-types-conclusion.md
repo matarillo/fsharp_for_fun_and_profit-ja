@@ -5,7 +5,7 @@ description: "変更前と変更後の比較"
 nav: thinking-functionally
 seriesId: "型を使った設計"
 seriesOrder: 8
-categories: [型, DDD]
+categories: ["型", "DDD"]
 ---
 
 このシリーズでは、設計プロセスの一部として型を使う方法をいくつか見てきました。具体的には次のようなものです。

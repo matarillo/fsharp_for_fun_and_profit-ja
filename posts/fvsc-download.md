@@ -5,7 +5,7 @@ description: "F#がコールバックに優れていることと、'use'キー�
 nav: why-use-fsharp
 seriesId: "F#を使う理由"
 seriesOrder: 5
-categories: [F# vs C#]
+categories: ["F# vs C#"]
 ---
 
 この例では、テキストストリームを処理するコールバック付きでWebページをダウンロードするF#とC#のコードを比較します。

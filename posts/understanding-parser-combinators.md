@@ -2,7 +2,7 @@
 layout: post
 title: "パーサーコンビネータを理解する"
 description: "パーサーコンビネータライブラリをゼロから書く"
-categories: [コンビネータ,パターン]
+categories: ["コンビネータ", "パターン"]
 seriesId: "パーサーコンビネータを理解する"
 seriesOrder: 1
 ---

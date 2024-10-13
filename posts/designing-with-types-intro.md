@@ -5,7 +5,7 @@ description: "設計をより透明にし、正確性を高める"
 nav: thinking-functionally
 seriesId: "型を使った設計"
 seriesOrder: 1
-categories: [型, DDD]
+categories: ["型", "DDD"]
 ---
 
 このシリーズでは、設計プロセスの一部として型を活用する方法について見ていきます。

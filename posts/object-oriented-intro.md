@@ -5,7 +5,7 @@ description: ""
 nav: fsharp-types
 seriesId: "F#におけるオブジェクト指向プログラミング"
 seriesOrder: 1
-categories: [オブジェクト指向]
+categories: ["オブジェクト指向"]
 ---
 
 このシリーズでは、F#がオブジェクト指向のクラスとメソッドをどのようにサポートしているかを見ていきます。

@@ -5,7 +5,7 @@ description: "型を足し合わせる"
 nav: fsharp-types
 seriesId: "F#の型を理解する"
 seriesOrder: 6
-categories: [型]
+categories: ["型"]
 ---
 
 

@@ -5,7 +5,7 @@ description: "ドメインへのより深い洞察を得る"
 nav: thinking-functionally
 seriesId: "型を使った設計"
 seriesOrder: 4
-categories: [型, DDD]
+categories: ["型", "DDD"]
 ---
 
 前回の記事では、型を使ってビジネスルールを表現する方法を見てきました。

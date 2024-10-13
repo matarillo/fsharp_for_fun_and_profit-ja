@@ -2,7 +2,7 @@
 layout: post
 title: "パーサーライブラリの改善"
 description: "より詳細なエラーの追加"
-categories: [パターン]
+categories: ["パターン"]
 seriesId: "パーサーコンビネータを理解する"
 seriesOrder: 3
 ---

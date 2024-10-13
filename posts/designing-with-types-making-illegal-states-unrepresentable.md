@@ -5,7 +5,7 @@ description: "型にビジネスロジックを組み込む"
 nav: thinking-functionally
 seriesId: "型を使った設計"
 seriesOrder: 3
-categories: [型, DDD]
+categories: ["型", "DDD"]
 ---
 
 この記事では、F#の重要な利点の1つを見ていきます。それは型システムを使って「不正な状態を表現不可能にする」ことです。この表現は[Yaron Minsky](https://ocaml.janestreet.com/?q=node/85)から借りました。

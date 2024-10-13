@@ -2,7 +2,7 @@
 layout: post
 title: "モナド怪物のリファクタリング"
 description: "フランケンファンクター博士とモナド怪物、パート3"
-categories: [部分適用、カリー化、コンビネータ]
+categories: ["部分適用", "カリー化", "コンビネーター"]
 seriesId: "状態の扱い"
 seriesOrder: 3
 ---

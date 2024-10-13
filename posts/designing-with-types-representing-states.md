@@ -5,7 +5,7 @@ description: "ステートマシンで正確性を確保する"
 nav: thinking-functionally
 seriesId: "型を使った設計"
 seriesOrder: 5
-categories: [型, DDD]
+categories: ["型", "DDD"]
 ---
 
 この記事では、ステートマシンを使って暗黙的な状態を明示的にする方法と、ステートマシンを判別共用体でモデル化する方法を見ていきます。

@@ -5,7 +5,7 @@ description: "プリミティブ型に意味を持たせる"
 nav: thinking-functionally
 seriesId: "型を使った設計"
 seriesOrder: 2
-categories: [型, DDD]
+categories: ["型", "DDD"]
 ---
 
 前回の記事では、メールアドレス、郵便番号などの値を単なる文字列として次のように定義しました。

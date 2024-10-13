@@ -2,7 +2,7 @@
 layout: post
 title: "Enterprise Tic-Tac-Toe"
 description: "A walkthrough of the design decisions in a purely functional implementation"
-categories: ["Worked Examples"]
+categories: ["実践例"]
 seriesId: "Annotated walkthroughs"
 seriesOrder: 5
 ---
