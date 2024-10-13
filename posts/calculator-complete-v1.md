@@ -1,484 +1,484 @@
 ---
 layout: post
-title: "Calculator Walkthrough: Part 3"
-description: "Adding the services and user interface, and dealing with disaster"
+title: "電卓のチュートリアル: パート 3"
+description: "サービスとユーザーインターフェースの追加、そして災難への対処"
 categories: ["実践例"]
-seriesId: "Annotated walkthroughs"
+seriesId: "注釈付きチュートリアル"
 seriesOrder: 3
 ---
 
-In this post, I'll continue developing a simple pocket calculator app.
+この記事では、シンプルな電卓アプリの開発を続けていきます。
 
-In the [first post](../posts/calculator-design.md), we completed a first draft of the design, using only types (no UML diagrams!).
-and in the [previous post](../posts/calculator-implementation.md), we created an initial implementation that exercised the design and revealed a missing requirement.
+[最初の記事](../posts/calculator-design.md)では、型のみを使用して（UML図は使用せず！）、設計の最初のドラフトを完成させました。
+そして、[前回の記事](../posts/calculator-implementation.md)では、設計に基づいた初期実装を作成し、その過程で不足している要件を明らかにしました。
 
-Now it's time to build the remaining components and assemble them into a complete application
+今回は、残りのコンポーネントを構築し、それらを組み合わせて完全なアプリケーションにする段階です。
 
-## Creating the services
+## サービスの作成
 
-We have a implementation. But the implementation depends on some services, and we haven't created the services yet.
+実装はできましたが、その実装はいくつかのサービスに依存しており、まだサービスを作成していません。
 
-In practice though, this bit is very easy and straightforward. The types defined in the domain enforce constraints
-such there is really only one way of writing the code.
+しかし実際には、この部分は非常に簡単で単純です。
+ドメインで定義された型によって制約が課せられるため、コードの書き方は実質的に1つしかありません。
 
-I'm going to show all the code at once (below), and I'll add some comments afterwards.
+すべてのコードを一度に（以下に）示し、後でいくつかのコメントを追加します。
 
 ```fsharp
 // ================================================
-// Implementation of CalculatorConfiguration
-// ================================================          
+// CalculatorConfigurationの実装
+// ================================================          
 module CalculatorConfiguration =
 
-    // A record to store configuration options
-    // (e.g. loaded from a file or environment)
-    type Configuration = {
-        decimalSeparator : string
-        divideByZeroMsg : string
-        maxDisplayLength: int
-        }
+    // 設定オプションを格納するレコード
+    // （例：ファイルまたは環境からロードされたもの）
+    type Configuration = {
+        decimalSeparator : string  // 小数点記号
+        divideByZeroMsg : string  // ゼロ除算時のメッセージ
+        maxDisplayLength: int     // 最大表示桁数
+        }
 
-    let loadConfig() = {
-        decimalSeparator = 
-            System.Globalization.CultureInfo.CurrentCulture.NumberFormat.CurrencyDecimalSeparator
-        divideByZeroMsg = "ERR-DIV0" 
-        maxDisplayLength = 10
-        }
-        
+    let loadConfig() = {
+        decimalSeparator = 
+            System.Globalization.CultureInfo.CurrentCulture.NumberFormat.CurrencyDecimalSeparator  // 現在のカルチャの小数点記号を取得
+        divideByZeroMsg = "ERR-DIV0"   // ゼロ除算時のメッセージ
+        maxDisplayLength = 10          // 最大表示桁数
+        }
+        
 // ================================================
-// Implementation of CalculatorServices 
-// ================================================          
+// CalculatorServicesの実装
+// ================================================          
 module CalculatorServices =
-    open CalculatorDomain
-    open CalculatorConfiguration
+    open CalculatorDomain
+    open CalculatorConfiguration
 
-    let updateDisplayFromDigit (config:Configuration) :UpdateDisplayFromDigit = 
-        fun (digit, display) ->
+    let updateDisplayFromDigit (config:Configuration) :UpdateDisplayFromDigit = 
+        fun (digit, display) ->
 
-        // determine what character should be appended to the display
-        let appendCh= 
-            match digit with
-            | Zero -> 
-                // only allow one 0 at start of display
-                if display="0" then "" else "0"
-            | One -> "1"
-            | Two -> "2"
-            | Three-> "3"
-            | Four -> "4"
-            | Five -> "5"
-            | Six-> "6"
-            | Seven-> "7"
-            | Eight-> "8"
-            | Nine-> "9"
-            | DecimalSeparator -> 
-                if display="" then 
-                    // handle empty display with special case
-                    "0" + config.decimalSeparator  
-                else if display.Contains(config.decimalSeparator) then 
-                    // don't allow two decimal separators
-                    "" 
-                else 
-                    config.decimalSeparator
-        
-        // ignore new input if there are too many digits
-        if (display.Length > config.maxDisplayLength) then
-            display // ignore new input
-        else
-            // append the new char
-            display + appendCh
+        // displayに追加する文字を決定する
+        let appendCh= 
+            match digit with
+            | Zero -> 
+                // 先頭に0は1つだけ許可する
+                if display="0" then "" else "0"  // displayが"0"の場合は""、それ以外の場合は"0"
+            | One -> "1"
+            | Two -> "2"
+            | Three-> "3"
+            | Four -> "4"
+            | Five -> "5"
+            | Six-> "6"
+            | Seven-> "7"
+            | Eight-> "8"
+            | Nine-> "9"
+            | DecimalSeparator -> 
+                if display="" then 
+                    // 空のdisplayの場合は特別に処理する
+                    "0" + config.decimalSeparator   // "0"と小数点記号を連結する
+                else if display.Contains(config.decimalSeparator) then 
+                    // 小数点は2つ許可しない
+                    ""   // 何も追加しない
+                else 
+                    config.decimalSeparator  // 小数点記号を追加する
+        
+        // 桁数が多すぎる場合は新しい入力を無視する
+        if (display.Length > config.maxDisplayLength) then
+            display // 新しい入力を無視する
+        else
+            // 新しい文字を追加する
+            display + appendCh
 
-    let getDisplayNumber :GetDisplayNumber = fun display ->
-        match System.Double.TryParse display with
-        | true, d -> Some d
-        | false, _ -> None
+    let getDisplayNumber :GetDisplayNumber = fun display ->
+        match System.Double.TryParse display with  // displayをdouble型に変換できるか試す
+        | true, d -> Some d  // 変換できた場合はSome dを返す
+        | false, _ -> None    // 変換できなかった場合はNoneを返す
 
-    let setDisplayNumber :SetDisplayNumber = fun f ->
-        sprintf "%g" f
+    let setDisplayNumber :SetDisplayNumber = fun f ->
+        sprintf "%g" f  // fを文字列に変換する
 
-    let setDisplayError divideByZeroMsg :SetDisplayError = fun f ->
-        match f with
-        | DivideByZero -> divideByZeroMsg
+    let setDisplayError divideByZeroMsg :SetDisplayError = fun f ->
+        match f with
+        | DivideByZero -> divideByZeroMsg  // ゼロ除算の場合はdivideByZeroMsgを返す
 
-    let doMathOperation  :DoMathOperation = fun (op,f1,f2) ->
-        match op with
-        | Add -> Success (f1 + f2)
-        | Subtract -> Success (f1 - f2)
-        | Multiply -> Success (f1 * f2)
-        | Divide -> 
-            try
-                Success (f1 / f2)
-            with
-            | :? System.DivideByZeroException -> 
-                Failure DivideByZero 
+    let doMathOperation  :DoMathOperation = fun (op,f1,f2) ->
+        match op with
+        | Add -> Success (f1 + f2)      // 加算
+        | Subtract -> Success (f1 - f2) // 減算
+        | Multiply -> Success (f1 * f2) // 乗算
+        | Divide -> 
+            try
+                Success (f1 / f2)      // 除算（成功）
+            with
+            | :? System.DivideByZeroException ->   // ゼロ除算例外が発生した場合
+                Failure DivideByZero              // ゼロ除算エラー
 
-    let initState :InitState = fun () -> 
-        {
-        display=""
-        pendingOp = None
-        }
+    let initState :InitState = fun () -> 
+        {
+        display=""          // displayを空にする
+        pendingOp = None    // 保留中の演算子をNoneにする
+        }
 
-    let createServices (config:Configuration) = {
-        updateDisplayFromDigit = updateDisplayFromDigit config
-        doMathOperation = doMathOperation
-        getDisplayNumber = getDisplayNumber
-        setDisplayNumber = setDisplayNumber
-        setDisplayError = setDisplayError (config.divideByZeroMsg)
-        initState = initState
-        }
+    let createServices (config:Configuration) = {
+        updateDisplayFromDigit = updateDisplayFromDigit config  // updateDisplayFromDigitを設定
+        doMathOperation = doMathOperation                      // doMathOperationを設定
+        getDisplayNumber = getDisplayNumber                    // getDisplayNumberを設定
+        setDisplayNumber = setDisplayNumber                      // setDisplayNumberを設定
+        setDisplayError = setDisplayError (config.divideByZeroMsg)  // setDisplayErrorを設定
+        initState = initState                                  // initStateを設定
+        }
 ```
 
-Some comments:
+## いくつかのコメント
 
-* I have created a configuration record that stores properties that are used to parameterize the services, such as the decimal separator.
-* The configuration record is passed into the `createServices` function, which in turn passes the configuration on those services that need it.
-* All the functions use the same approach of returning one of the types defined in the design, such as `UpdateDisplayFromDigit` or `DoMathOperation`.
-* There are only a few tricky edge cases, such as trapping exceptions in division, or preventing more than one decimal separator being appended.
+* 小数点記号など、サービスをパラメータ化するのに使用されるプロパティを格納する構成レコードを作成しました。
+* 構成レコードは `createServices` 関数に渡され、`createServices` 関数はそれを必要とするサービスに構成を渡します。
+* すべての関数は、`UpdateDisplayFromDigit` や `DoMathOperation` など、設計で定義された型のいずれかを返すという同じアプローチを使用しています。
+* 除算の例外をトラップしたり、複数の小数点が追加されるのを防いだりするなど、注意すべきエッジケースはわずかです。
 
 
-## Creating the user interface
+## ユーザーインターフェースの作成
 
-For the user interface, I'm going to use WinForms rather than WPF or a web-based approach. It's simple and should work on Mono/Xamarin as well as Windows.
-And it should be easy to port to other UI frameworks as well.
+ユーザーインターフェースには、WPFやWebベースのアプローチではなく、WinFormsを使用します。これはシンプルで、WindowsだけでなくMono/Xamarinでも動作するはずです。
+また、他のUIフレームワークにも簡単に移植できるはずです。
 
-As is typical with UI development I spent more time on this than on any other part of the process!
-I'm going to spare you all the painful iterations and just go directly to the final version.
+UI開発でよくあることですが、私はこのプロセスに他のどの部分よりも多くの時間を費やしました！
+ここでは、苦痛を伴う反復作業のすべてを省略し、最終バージョンに直接進みます。
 
-I won't show all the code, as it is about 200 lines (and you can see it in the [gist](https://gist.github.com/swlaschin/0e954cbdc383d1f5d9d3#file-calculator_v1-fsx)), but here are some highlights:
+約200行のコードなので、すべては表示しません（[gist](https://gist.github.com/swlaschin/0e954cbdc383d1f5d9d3#file-calculator_v1-fsx)で見ることができます）が、いくつか highlights を紹介します。
 
 ```fsharp
 module CalculatorUI =
 
-    open CalculatorDomain
+    open CalculatorDomain
 
-    type CalculatorForm(initState:InitState, calculate:Calculate) as this = 
-        inherit Form()
+    type CalculatorForm(initState:InitState, calculate:Calculate) as this = 
+        inherit Form()
 
-        // initialization before constructor
-        let mutable state = initState()
-        let mutable setDisplayedText = 
-            fun text -> () // do nothing
+        // コンストラクター前の初期化
+        let mutable state = initState()  // 状態を初期化
+        let mutable setDisplayedText = 
+            fun text -> () // 何もしない（デフォルト実装）
 ```
 
-The `CalculatorForm` is a subclass of `Form`, as usual. 
+`CalculatorForm` は、いつものように `Form` のサブクラスです。
 
-There are two parameters for its constructor.
-One is `initState`, the function that creates an empty state, and `calculate`, the function that transforms the state based on the input.
-In other words, I'm using standard constructor based dependency injection here.
+コンストラクターには2つのパラメータがあります。
+1つは空の状態を作成する関数 `initState` で、もう1つは入力に基づいて状態を変換する関数 `calculate` です。
+言い換えれば、ここでは標準的なコンストラクターベースの依存性注入を使用しています。
 
-There are two mutable fields (shock horror!). 
+ミュータブルフィールドが2つあります（衝撃的！）。
 
-One is the state itself. Obviously, it will be modified after each button is pressed.
+1つは状態自体です。明らかに、ボタンが押されるたびに状態は変更されます。
 
-The second is a function called `setDisplayedText`. What's that all about?
+2つ目は `setDisplayedText` という関数です。これは何のためのものでしょうか？
 
-Well, after the state has changed, we need to refresh the control (a Label) that displays the text.
+状態が変化した後、テキストを表示するコントロール（Label）を更新する必要があります。
 
-The standard way to do it is to make the label control a field in the form, like this:
+これを行う標準的な方法は、ラベルコントロールをフォームのフィールドにすることです。
 
 ```fsharp
 type CalculatorForm(initState:InitState, calculate:Calculate) as this = 
-    inherit Form()
+    inherit Form()
 
-    let displayControl :Label = null
+    let displayControl :Label = null  // ラベルコントロールのフィールド
 ```
 
-and then set it to an actual control value when the form has been initialized:
+そして、フォームが初期化されたときに、実際の値に設定します。
 
 ```fsharp
 member this.CreateDisplayLabel() = 
-    let display = new Label(Text="",Size=displaySize,Location=getPos(0,0))
-    display.TextAlign <- ContentAlignment.MiddleRight
-    display.BackColor <- Color.White
-    this.Controls.Add(display)
+    let display = new Label(Text="",Size=displaySize,Location=getPos(0,0))
+    display.TextAlign <- ContentAlignment.MiddleRight
+    display.BackColor <- Color.White
+    this.Controls.Add(display)
 
-    // traditional style - set the field when the form has been initialized
-    displayControl <- display
+    // 従来のスタイル - フォームが初期化されたときにフィールドを設定する
+    displayControl <- display
 ```
 
-But this has the problem that you might accidentally try to access the label control before it is initialized, causing a NRE.
-Also, I'd prefer to focus on the desired behavior, rather than having a "global" field that can be accessed by anyone anywhere.
+しかし、これには、初期化される前にラベルコントロールにアクセスしようとして、ヌル参照例外が発生する可能性があるという問題があります。
+また、誰でもどこからでもアクセスできる「グローバル」フィールドを持つよりも、目的の動作に焦点を当てたいと思います。
 
-By using a function, we (a) encapsulate the access to the real control and (b) avoid any possibility of a null reference.
+関数を使用することで、(a) 実際のコントロールへのアクセスをカプセル化し、(b) null参照の可能性を回避できます。
 
-The mutable function starts off with a safe default implementation (`fun text -> ()`),
-and is then changed to a *new* implementation when the label control is created:
+ミュータブル関数は、安全なデフォルト実装（`fun text -> ()`）で始まり、
+ラベルコントロールが作成されたときに *新しい* 実装に変更されます。
 
 ```fsharp
 member this.CreateDisplayLabel() = 
-    let display = new Label(Text="",Size=displaySize,Location=getPos(0,0))
-    this.Controls.Add(display)
+    let display = new Label(Text="",Size=displaySize,Location=getPos(0,0))
+    this.Controls.Add(display)
 
-    // update the function that sets the text
-    setDisplayedText <-
-        (fun text -> display.Text <- text)
+    // テキストを設定する関数を更新する
+    setDisplayedText <-
+        (fun text -> display.Text <- text)
 ```
 
 
-## Creating the buttons
+## ボタンの作成
 
-The buttons are laid out in a grid, and so I create a helper function `getPos(row,col)` that gets the physical position from a logical (row,col) on the grid.
+ボタンはグリッド状に配置されているため、グリッド上の論理的な（行、列）から物理的な位置を取得するヘルパー関数 `getPos(row,col)` を作成しました。
 
-Here's an example of creating the buttons:
+ボタンを作成する例を次に示します。
 
 ```fsharp
 member this.CreateButtons() = 
-    let sevenButton = new Button(Text="7",Size=buttonSize,Location=getPos(1,0),BackColor=DigitButtonColor)
-    sevenButton |> addDigitButton Seven
+    let sevenButton = new Button(Text="7",Size=buttonSize,Location=getPos(1,0),BackColor=DigitButtonColor)  // 7のボタンを作成
+    sevenButton |> addDigitButton Seven  // addDigitButton関数でSevenと関連付ける
 
-    let eightButton = new Button(Text="8",Size=buttonSize,Location=getPos(1,1),BackColor=DigitButtonColor)
-    eightButton |> addDigitButton Eight
+    let eightButton = new Button(Text="8",Size=buttonSize,Location=getPos(1,1),BackColor=DigitButtonColor)  // 8のボタンを作成
+    eightButton |> addDigitButton Eight  // addDigitButton関数でEightと関連付ける
 
-    let nineButton = new Button(Text="9",Size=buttonSize,Location=getPos(1,2),BackColor=DigitButtonColor)
-    nineButton |> addDigitButton Nine
+    let nineButton = new Button(Text="9",Size=buttonSize,Location=getPos(1,2),BackColor=DigitButtonColor)  // 9のボタンを作成
+    nineButton |> addDigitButton Nine  // addDigitButton関数でNineと関連付ける
 
-    let clearButton = new Button(Text="C",Size=buttonSize,Location=getPos(1,3),BackColor=DangerButtonColor)
-    clearButton |> addActionButton Clear
+    let clearButton = new Button(Text="C",Size=buttonSize,Location=getPos(1,3),BackColor=DangerButtonColor)  // クリアボタンを作成
+    clearButton |> addActionButton Clear  // addActionButton関数でClearと関連付ける
 
-    let addButton = new Button(Text="+",Size=doubleHeightSize,Location=getPos(1,4),BackColor=OpButtonColor)
-    addButton |> addOpButton Add
+    let addButton = new Button(Text="+",Size=doubleHeightSize,Location=getPos(1,4),BackColor=OpButtonColor)  // 加算ボタンを作成
+    addButton |> addOpButton Add  // addOpButton関数でAddと関連付ける
 ```
 
-And since all the digit buttons have the same behavior, as do all the math op buttons, I just created some helpers that set the event handler in a generic way:
+すべての数字ボタンとすべての算術演算ボタンは同じ動作をするため、汎用的にイベントハンドラを設定するヘルパー関数を作成しました。
 
 ```fsharp
 let addDigitButton digit (button:Button) =
-    button.Click.AddHandler(EventHandler(fun _ _ -> handleDigit digit))
-    this.Controls.Add(button)
+    button.Click.AddHandler(EventHandler(fun _ _ -> handleDigit digit))  // クリックイベントハンドラを追加
+    this.Controls.Add(button)  // コントロールに追加
 
 let addOpButton op (button:Button) =
-    button.Click.AddHandler(EventHandler(fun _ _ -> handleOp op))
-    this.Controls.Add(button)
+    button.Click.AddHandler(EventHandler(fun _ _ -> handleOp op))  // クリックイベントハンドラを追加
+    this.Controls.Add(button)  // コントロールに追加
 ```
 
-I also added some keyboard support:
+キーボードのサポートも追加しました。
 
 ```fsharp
 member this.KeyPressHandler(e:KeyPressEventArgs) =
-    match e.KeyChar with
-    | '0' -> handleDigit Zero
-    | '1' -> handleDigit One
-    | '2' -> handleDigit Two
-    | '.' | ',' -> handleDigit DecimalSeparator
-    | '+' -> handleOp Add
-    // etc
+    match e.KeyChar with
+    | '0' -> handleDigit Zero  // '0'キーを押すとhandleDigit Zeroを実行
+    | '1' -> handleDigit One  // '1'キーを押すとhandleDigit Oneを実行
+    | '2' -> handleDigit Two  // '2'キーを押すとhandleDigit Twoを実行
+    | '.' | ',' -> handleDigit DecimalSeparator  // '.'または','キーを押すとhandleDigit DecimalSeparatorを実行
+    | '+' -> handleOp Add  // '+'キーを押すとhandleOp Addを実行
+    // etc
 ```
 
-Button clicks and keyboard presses are eventually routed into the key function `handleInput`, which does the calculation.
+ボタンのクリックとキーボードの押下は、最終的に計算を実行するキー関数 `handleInput` にルーティングされます。
 
 ```fsharp
 let handleInput input =
-     let newState = calculate(input,state)
-     state <- newState 
-     setDisplayedText state.display 
-    
+     let newState = calculate(input,state)  // 計算を実行
+     state <- newState                     // 状態を更新
+     setDisplayedText state.display       // 表示を更新
+    
 let handleDigit digit =
-     Digit digit |> handleInput 
+     Digit digit |> handleInput   // 数字入力をhandleInputに渡す
 
 let handleOp op =
-     Op op |> handleInput 
+     Op op |> handleInput       // 演算子入力をhandleInputに渡す
 ```
 
-As you can see, the implementation of `handleInput` is trivial.
-It calls the calculation function that was injected, sets the mutable state to the result, and then updates the display.
+ご覧のとおり、`handleInput` の実装は些細なものです。
+注入された計算関数を呼び出し、ミュータブル状態に結果を設定し、表示を更新します。
 
-So there you have it -- a complete calculator!
+これで完成です ―― 完全な電卓です！
 
-Let's try it now -- get the code from this [gist](https://gist.github.com/swlaschin/0e954cbdc383d1f5d9d3#file-calculator_v1-fsx) and try running it as a F# script.
+では、試してみましょう。この[gist](https://gist.github.com/swlaschin/0e954cbdc383d1f5d9d3#file-calculator_v1-fsx)からコードを取得し、F#スクリプトとして実行してみてください。
 
-## Disaster strikes!
+## 災難発生！
 
-Let's start with a simple test. Try entering `1` `Add` `2` `Equals`. What would you expect?
+簡単なテストから始めましょう。「1」「+」「2」「=」と入力してみてください。どうなると思いますか？
 
-I don't know about you, but what I *wouldn't* expect is that the calculator display shows `12`!
+あなたの予想はわかりませんが、電卓の表示に「12」と表示されることは *想定外* ではないでしょうか？
 
-What's going on? Some quick experimenting shows that I have forgotten something really important --
-when an `Add` or `Equals` operation happens, any subsequent digits should *not* be added to the current buffer, but instead start a new one.
-Oh no! We've got a showstopper bug!
+何が起こっているのでしょうか？少し実験してみると、非常に重要なことを忘れていたことに気づきます。
+「+」または「=」の演算が行われると、後続の数字は現在のバッファに *追加* されるのではなく、新しいバッファを開始する必要があるのです。
+なんてこった！致命的なバグが発生しました！
 
-Remind me again, what idiot said "if it compiles, it probably works".* 
+もう一度思い出してください。「コンパイルできれば、おそらく動作する」と言った愚か者は誰でしたか？*
 
-<sub>* Actually, that idiot would be me (among many others).</sub>
+<sub>* 実は、その愚か者は私です（他にもたくさんいますが）。</sub>
 
-So what went wrong then? 
+では、何が問題だったのでしょうか？
 
-Well the code did compile, but it didn't work as expected, not because the code was buggy, but because *my design was flawed*.
+コードはコンパイルされましたが、期待どおりに動作しませんでした。コードにバグがあったからではなく、*設計に欠陥があった* からです。
 
-In other words, the use of the types from the type-first design process means that I *do* have high confidence that the code I wrote is a correct implementation of the design.
-But if the requirements and design are wrong, all the correct code in the world can't fix that.
+言い換えれば、型ファースト設計プロセスで作成された型を使用しているため、記述したコードが設計の正しい実装であるという高い確信は *あります*。
+しかし、要件と設計が間違っていれば、どんなに正しいコードを書いてもそれを修正することはできません。
 
-We'll revisit the requirements in the next post, but meanwhile, is there a patch we can make that will fix the problem?
+要件については次の記事で再検討しますが、とりあえず、問題を解決するためのパッチを適用することはできるでしょうか？
 
-## Fixing the bug
+## バグの修正
 
-Let's think of the circumstances when we start a new set of digits, vs. when we just append to the existing ones.
-As we noted above, a math operation or `Equals` will force the reset.  
+新しい数字のセットを開始する場合と、既存の数字に単に追加する場合について考えてみましょう。
+上で述べたように、算術演算または「=」によってリセットが強制されます。
 
-So why not set a flag when those operations happen? If the flag is set, then start a new display buffer,
-and after that, unset the flag so that characters are appended as before.
+では、これらの操作が発生したときにフラグを設定するのはどうでしょうか？
+フラグが設定されている場合は、新しい表示バッファを開始し、その後、フラグを解除して、以前のように文字が追加されるようにします。
 
-What changes do we need to make to the code?
+コードにどのような変更を加える必要があるでしょうか？
 
-First, we need to store the flag somewhere. We'll store it in the `CalculatorState` of course!
+まず、フラグをどこかに格納する必要があります。もちろん、`CalculatorState` に格納します！
 
 ```fsharp
 type CalculatorState = {
-    display: CalculatorDisplay
-    pendingOp: (CalculatorMathOp * Number) option
-    allowAppend: bool
-    }
+    display: CalculatorDisplay  // 表示
+    pendingOp: (CalculatorMathOp * Number) option  // 保留中の演算子
+    allowAppend: bool  // 追加を許可するかどうか
+    }
 ```
 
-(*This might seem like a good solution for now, but using flags like this is really a design smell.
-In the next post, I'll use a [different approach](../posts/designing-with-types-representing-states.md#replace-flags) which doesn't involve flags)*
+（*これは今のところ良い解決策のように思えるかもしれませんが、このようなフラグを使用することは実際には設計上の臭いです。
+次の記事では、フラグを使用しない[別のアプローチ](../posts/designing-with-types-representing-states.md#replace-flags)を使用します*）
 
-## Fixing the implementation
+## 実装の修正
 
-With this change made, compiling the `CalculatorImplementation` code now breaks everywhere a new state is created.
+この変更により、`CalculatorImplementation` コードをコンパイルすると、新しい状態が作成されるすべての場所でエラーが発生するようになりました。
 
-Actually, that's what I like about using F# -- something like adding a new field to a record is a breaking change, rather than
-something that can be overlooked by mistake.
+実は、これがF#を使う上で気に入っている点です。
+レコードに新しいフィールドを追加するような変更は、見落とされる可能性のあるものではなく、破壊的な変更になります。
 
-We'll make the following tweaks to the code:
+コードに次の調整を行います。
 
-* For `updateDisplayFromDigit`, we return a new state with `allowAppend` set to true.
-* For `updateDisplayFromPendingOp` and `addPendingMathOp`, we return a new state with `allowAppend` set to false.
+* `updateDisplayFromDigit` では、`allowAppend` をtrueに設定した新しい状態を返します。
+* `updateDisplayFromPendingOp` と `addPendingMathOp` では、`allowAppend` をfalseに設定した新しい状態を返します。
 
-## Fixing the services
+## サービスの修正
 
-Most of the services are fine. The only service that is broken now is `initState`, which just needs to be tweaked to have `allowAppend` be true when starting.
+ほとんどのサービスは問題ありません。修正が必要なサービスは `initState` のみで、開始時に `allowAppend` がtrueになるように調整する必要があります。
 
 ```fsharp
 let initState :InitState = fun () -> 
-    {
-    display=""
-    pendingOp = None
-    allowAppend = true
-    }
+    {
+    display=""  // displayを空にする
+    pendingOp = None  // 保留中の演算子をNoneにする
+    allowAppend = true  // 追加を許可する
+    }
 ```
 
-## Fixing the user interface
+## ユーザーインターフェースの修正
 
-The `CalculatorForm` class continues to work with no changes.
+`CalculatorForm` クラスは、変更なしで動作し続けます。
 
-But this change does raise the question of how much the `CalculatorForm` should know about the internals of the `CalculatorDisplay` type.
+しかし、この変更は、`CalculatorForm` が `CalculatorDisplay` 型の内部構造についてどれだけ知っているべきかという疑問を提起します。
 
-Should `CalculatorDisplay` be transparent, in which case the form might break every time we change the internals?
+`CalculatorDisplay` は透過的であるべきでしょうか？その場合、内部構造を変更するたびにフォームが壊れる可能性があります。
 
-Or should `CalculatorDisplay` be an opaque type, in which case we will need to add another "service" that extracts the buffer from the `CalculatorDisplay` type so that the form
-can display it?
+それとも、`CalculatorDisplay` は不透明な型であるべきでしょうか？
+その場合、フォームが表示できるように、`CalculatorDisplay` 型からバッファを抽出する別の「サービス」を追加する必要があります。
 
-For now, I'm happy to tweak the form if there are changes. But in a bigger or more long-term project,
-when we are trying to reduce dependencies, then yes, I would make the domain types opaque as much as possible to reduce the fragility of the design.
+今のところ、変更があればフォームを調整すればよいと考えています。
+しかし、より大規模なプロジェクトや長期的なプロジェクトでは、依存関係を減らそうとする場合、設計の脆弱性を軽減するために、ドメイン型をできるだけ不透明にするでしょう。
 
-## Testing the patched version
+## パッチを適用したバージョンのテスト
 
-Let's try out the patched version now (*you can get the code for the patched version from this [gist](https://gist.github.com/swlaschin/0e954cbdc383d1f5d9d3#file-calculator_v1_patched-fsx)*).
+パッチを適用したバージョンを今すぐ試してみましょう（*パッチを適用したバージョンのコードはこの[gist](https://gist.github.com/swlaschin/0e954cbdc383d1f5d9d3#file-calculator_v1_patched-fsx)から入手できます*）。
 
-Does it work now? 
+今度は動作するでしょうか？
 
-Yes. Entering `1` `Add` `2` `Equals` results in `3`, as expected.
+はい。「1」「+」「2」「=」と入力すると、期待どおりに「3」が表示されます。
 
-So that fixes the major bug. Phew.
+これで大きなバグが修正されました。ふぅ。
 
-But if you keep playing around with this implementation, you will encounter other <strike>bugs</strike> undocumented features too.
+しかし、この実装でいろいろと遊んでみると、他にも<strike>バグ</strike>文書化されていない機能に遭遇するでしょう。
 
-For example:
+例えば、
 
-* `1.0 / 0.0` displays `Infinity`. What happened to our divide by zero error?
-* You get strange behaviors if you enter operations in unusual orders. For example, entering `2 + + -` shows `8` on the display! 
+* `1.0 / 0.0` は `Infinity` と表示されます。ゼロ除算エラーはどうなったのでしょうか？
+* 演算を通常とは異なる順序で入力すると、奇妙な動作が発生します。例えば、「2 + + -」と入力すると、ディスプレイに「8」と表示されます！
 
-So obviously, this code is not yet fit for purpose.
+明らかに、このコードはまだ目的を果たしていません。
 
 
-## What about Test-Driven Development?
+## テスト駆動開発はどうでしょうか？
 
-At this point, you might be saying to yourself: "if only he had used TDD this wouldn't have happened". 
+この時点で、あなたは「もしTDDを使っていたら、こんなことは起こらなかっただろうに」と思っているかもしれません。
 
-It's true -- I wrote all this code, and yet I didn't even bother to write a test that checked whether you could add two numbers properly!
+確かにそうです。私はこのコードをすべて書きましたが、2つの数字を正しく加算できるかどうかを確認するテストを書くことさえしませんでした！
 
-If I had started out by writing tests, and letting that drive the design, then surely I wouldn't have run into this problem.
+もしテストを書くことから始めて、それを設計の指針にしていたら、きっとこの問題に直面することはなかったでしょう。
 
-Well in this particular example, yes, I would probably would have caught the problem immediately. 
-In a TDD approach, checking that `1 + 2 = 3` would have been one of the first tests I wrote!
-But on the other hand, for obvious flaws like this, any interactive testing will reveal the issue too. 
+この特定の例では、おそらくすぐに問題に気づいたでしょう。
+TDDアプローチでは、「1 + 2 = 3」を確認することは、最初に書くテストの1つだったでしょう！
+しかしその一方で、このような明白な欠陥については、インタラクティブなテストでも問題が明らかになります。
 
-To my mind, the advantages of test-driven development are that:
+私が考えるに、テスト駆動開発の利点は次のとおりです。
 
-* it drives the *design* of the code, not just the implementation.
-* it provides guarantees that code stays correct during refactoring.
+* 実装だけでなく、コードの *設計* を促進する。
+* リファクタリング中にコードが正しく保たれることを保証する。
 
-So the real question is, would test-driven development help us find missing requirements or subtle edge cases?
-Not necessarily. Test-driven development will only be effective if we can think of every possible case that could happen in the first place.
-In that sense, TDD would not make up for a lack of imagination!
+では、テスト駆動開発によって、見落としていた要件や微妙なエッジケースを発見できるのでしょうか？
+残念ながら、必ずしもそうとは言えません。テスト駆動開発が効果を発揮するのは、起こりうるすべてのケースを事前に想定できる場合に限られます。
+つまり、TDDは想像力の欠如を補う魔法の杖ではないのです。
 
-And if do have good requirements, then hopefully we can design the types to [make illegal states unrepresentable](../posts/designing-with-types-making-illegal-states-unrepresentable.md)
-and then we won't need the tests to provide correctness guarantees.
+そして、もし良い要件があれば、型を設計して[不正な状態を表現できないようにする](../posts/designing-with-types-making-illegal-states-unrepresentable.md)ことができ、
+テストで正当性を保証する必要はありません。
 
-Now I'm not saying that I am against automated testing. In fact, I do use it all the time to verify certain requirements, and especially for integration and testing in the large.
+私は自動テストに反対しているのではありません。実際、特定の要件を検証するために、特に統合テストや大規模なテストでは、常に自動テストを使用しています。
 
-So, for example, here is how I might test this code:
+例えば、このコードをテストする方法は次のとおりです。
 
 ```fsharp
 module CalculatorTests =
-    open CalculatorDomain
-    open System
+    open CalculatorDomain
+    open System
 
-    let config = CalculatorConfiguration.loadConfig()
-    let services = CalculatorServices.createServices config 
-    let calculate = CalculatorImplementation.createCalculate services
+    let config = CalculatorConfiguration.loadConfig()  // 設定をロード
+    let services = CalculatorServices.createServices config  // サービスを作成
+    let calculate = CalculatorImplementation.createCalculate services  // 計算関数を作成
 
-    let emptyState = services.initState()
+    let emptyState = services.initState()  // 空の状態を作成
 
-    /// Given a sequence of inputs, start with the empty state
-    /// and apply each input in turn. The final state is returned
-    let processInputs inputs = 
-        // helper for fold
-        let folder state input = 
-            calculate(input,state)
+    /// 入力シーケンスが与えられたら、空の状態から始めて、
+    /// 各入力を順番に適用します。最終的な状態が返されます。
+    let processInputs inputs = 
+        // foldのヘルパー
+        let folder state input = 
+            calculate(input,state)  // 入力を適用して状態を更新
 
-        inputs 
-        |> List.fold folder emptyState 
+        inputs 
+        |> List.fold folder emptyState  // 入力リストを畳み込み、最終的な状態を取得
 
-    /// Check that the state contains the expected display value
-    let assertResult testLabel expected state =
-        let actual = state.display
-        if (expected <> actual) then
-            printfn "Test %s failed: expected=%s actual=%s" testLabel expected actual 
-        else
-            printfn "Test %s passed" testLabel 
+    /// 状態に期待される表示値が含まれていることを確認する
+    let assertResult testLabel expected state =
+        let actual = state.display  // 実際の表示値を取得
+        if (expected <> actual) then
+            printfn "Test %s failed: expected=%s actual=%s" testLabel expected actual  // テスト失敗
+        else
+            printfn "Test %s passed" testLabel  // テスト成功
 
-    let ``when I input 1 + 2, I expect 3``() = 
-        [Digit One; Op Add; Digit Two; Action Equals]
-        |> processInputs 
-        |> assertResult "1+2=3" "3"
+    let ``when I input 1 + 2, I expect 3``() = 
+        [Digit One; Op Add; Digit Two; Action Equals]  // 入力シーケンス
+        |> processInputs  // 入力を処理
+        |> assertResult "1+2=3" "3"  // 結果を確認
 
-    let ``when I input 1 + 2 + 3, I expect 6``() = 
-        [Digit One; Op Add; Digit Two; Op Add; Digit Three; Action Equals]
-        |> processInputs 
-        |> assertResult "1+2+3=6" "6"
+    let ``when I input 1 + 2 + 3, I expect 6``() = 
+        [Digit One; Op Add; Digit Two; Op Add; Digit Three; Action Equals]  // 入力シーケンス
+        |> processInputs  // 入力を処理
+        |> assertResult "1+2+3=6" "6"  // 結果を確認
 
-    // run tests
-    do 
-        ``when I input 1 + 2, I expect 3``()
-        ``when I input 1 + 2 + 3, I expect 6``() 
+    // テストを実行
+    do 
+        ``when I input 1 + 2, I expect 3``()
+        ``when I input 1 + 2 + 3, I expect 6``() 
 ```
 
-And of course, this would be easily adapted to using [NUnit or similar](../posts/low-risk-ways-to-use-fsharp-at-work-3.md). 
+そしてもちろん、これは[NUnitなど](../posts/low-risk-ways-to-use-fsharp-at-work-3.md)を使用して簡単に適応させることができます。
 
-## How can I develop a better design?
+## どうすればより良い設計を開発できますか？
 
-I messed up! As I said earlier, the *implementation itself* was not the problem. I think the type-first design process worked.
-The real problem was that I was too hasty and just dived into the design without really understanding the requirements.
+私は失敗しました！前にも言ったように、*実装自体* は問題ではありませんでした。
+型ファースト設計プロセスはうまくいったと思います。本当の問題は、私が性急すぎて、要件をきちんと理解せずに設計に飛び込んでしまったことです。
 
-How can I prevent this from happening again next time?
+次回、このようなことが起こらないようにするにはどうすればよいでしょうか？
 
-One obvious solution would be to switch to a proper TDD approach.
-But I'm going to be a bit stubborn, and see if I can stay with a type-first design! 
+1つの明白な解決策は、適切なTDDアプローチに切り替えることです。
+しかし、私は少し頑固なので、型ファースト設計を続けられるかどうか試してみます。
 
-[In the next post](../posts/calculator-complete-v2.md), I will stop being so ad-hoc and over-confident,
-and instead use a process that is more thorough and much more likely to prevent these kinds of errors at the design stage.
+[次の記事](../posts/calculator-complete-v2.md)では、場当たり的で自信過剰なやり方をやめ、
+設計段階でこのような種類のエラーを防ぐ可能性がはるかに高い、より徹底的なプロセスを使用します。
 
-*The code for this post is available on GitHub in [this gist (unpatched)](https://gist.github.com/swlaschin/0e954cbdc383d1f5d9d3#file-calculator_v1-fsx)
-and [this gist (patched)](https://gist.github.com/swlaschin/0e954cbdc383d1f5d9d3#file-calculator_v1_patched-fsx).*
+*この記事のコードはGitHubの[このgist（パッチ未適用）](https://gist.github.com/swlaschin/0e954cbdc383d1f5d9d3#file-calculator_v1-fsx)と
+[このgist（パッチ適用済み）](https://gist.github.com/swlaschin/0e954cbdc383d1f5d9d3#file-calculator_v1_patched-fsx)で入手できます。*
 
 
 

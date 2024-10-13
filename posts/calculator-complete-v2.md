@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Calculator Walkthrough: Part 4"
+title: "電卓のチュートリアル: パート 4"
 description: "Designing using a state machine"
 categories: ["実践例"]
-seriesId: "Annotated walkthroughs"
+seriesId: "注釈付きチュートリアル"
 seriesOrder: 4
 ---
 
