@@ -5,7 +5,7 @@ description: "Asyncクラスによるバックグラウンドタスクのカプ�
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 24
-categories: ["並行処理"]
+categories: ["並行性"]
 ---
 
 この記事では、F#で非同期コードを書くいくつかの方法と、並列処理の簡単な例も見ていきます。

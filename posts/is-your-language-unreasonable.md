@@ -2,7 +2,7 @@
 layout: post
 title: "Is your programming language unreasonable?"
 description: "or, why predictability is important"
-categories: ["F# vs C#", "Correctness"]
+categories: ["F# vs C#", "正確性"]
 image: "/assets/img/safety_first.jpg"
 ---
 

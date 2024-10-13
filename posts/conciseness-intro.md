@@ -5,7 +5,7 @@ description: "なぜ簡潔性が重要なのか？"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 7
-categories: ["Conciseness"]
+categories: ["簡潔性"]
 ---
 
 簡単なコードを見てきた後、今度は主要なテーマ（簡潔性、利便性、正確性、並行性、完全性）について、型、関数、パターンマッチングの概念を通して説明していきます。

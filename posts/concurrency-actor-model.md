@@ -5,7 +5,7 @@ description: "並行処理を考えやすくする"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 25
-categories: ["並行処理"]
+categories: ["並行性"]
 ---
 
 この記事では、並行処理のためのメッセージベース（またはアクターベース）アプローチについて見ていきます。

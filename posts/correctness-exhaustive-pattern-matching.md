@@ -5,7 +5,7 @@ description: "正確性を確保するための強力な技法"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 20
-categories: ["Correctness", "パターン"]
+categories: ["正確性", "パターン"]
 ---
 
 先ほど簡単に触れましたが、パターンマッチングを行う際には、すべての可能なケースにマッチさせる必要があります。これは正確性を確保するための非常に強力な技法であることがわかります。

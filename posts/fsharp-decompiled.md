@@ -2,7 +2,7 @@
 layout: post
 title: "F# decompiled into C#"
 description: "Or, what C# code do you have to write to get the same functionality as F#?"
-categories: ["F# vs C#", "Convenience"]
+categories: ["F# vs C#", "利便性"]
 ---
 
 *The complete code for this post [is available on GitHub](https://github.com/swlaschin/fsharp-decompiled)*

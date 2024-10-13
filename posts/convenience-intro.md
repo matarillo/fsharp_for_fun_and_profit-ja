@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "便利な機能"
+title: "利便性"
 description: "プログラミングの面倒な作業や定型コードを減らす機能"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 13
-categories: ["Convenience"]
+categories: ["利便性"]
 ---
 
 これからの連載では、「便利な機能」というテーマでまとめたF#のいくつかの機能について詳しく見ていきます。これらの機能は必ずしもコードを簡潔にするわけではありませんが、C#では必要となる多くの面倒な作業や定型コードを省くことができます。
