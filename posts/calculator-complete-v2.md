@@ -275,7 +275,7 @@ let cStateHandler inputEvent =
 
 それでは、電卓のステートマシンを設計していきましょう。まずは、最初のバージョンを以下に示します。
 
-[電卓ステートマシンv1](../assets/img/calculator_states_1.png)
+![電卓ステートマシンv1](../assets/img/calculator_states_1.png)
 
 図の中で、各状態はボックスで表され、状態遷移をトリガーするイベント（数字の入力、数学演算、`Equals`など）は赤色で示しています。
 
@@ -287,7 +287,7 @@ let cStateHandler inputEvent =
 
 バージョン2を以下に示します。
 
-[電卓ステートマシンv1](../assets/img/calculator_states_2.png)
+![電卓ステートマシンv2](../assets/img/calculator_states_2.png)
 
 ## ステートマシンの完成
 
@@ -309,7 +309,7 @@ let cStateHandler inputEvent =
 
 これらの点を踏まえ、状態遷移図のバージョン3を以下に示します。
 
-[電卓ステートマシンv1](../assets/img/calculator_states_3.png)
+![電卓ステートマシンv3](../assets/img/calculator_states_3.png)
 
 図では、主要な遷移のみを示しています。すべての遷移を表示すると複雑になりすぎるためです。
 ただし、詳細な要件を定義するには、これで十分な情報が得られます。
