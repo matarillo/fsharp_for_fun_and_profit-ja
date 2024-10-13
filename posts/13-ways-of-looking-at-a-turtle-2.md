@@ -733,7 +733,7 @@ let handleMoveResponse moveResponse = turtle {
 val handleMoveResponse : MoveResponse -> TurtleStateComputation<unit>
 ```
 
-これはモナディック（または「対角」）関数です -- 通常の世界で始まり、`TurtleStateComputation`世界で終わります。
+これはモナディック（または「対角」）関数です ―― 通常の世界で始まり、`TurtleStateComputation`世界で終わります。
 
 これらは、「bind」を使用したり、コンピュテーション式内で`let!`や`do!`を使用したりできる関数です。
 

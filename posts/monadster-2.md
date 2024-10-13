@@ -174,7 +174,7 @@ type DeadHeart = DeadHeart of Label
 type LiveHeart = LiveHeart of Label * VitalForce
 ```
 
-しかし、怪物に必要なのは生きた心臓以上のもの ― 鼓動する心臓です。
+しかし、怪物に必要なのは生きた心臓以上のもの ―― 鼓動する心臓です。
 鼓動する心臓は、生きた心臓ともう少しの生命力から構築されます。以下のようになります。
 
 ```fsharp
@@ -667,7 +667,7 @@ let bodyM =
 
 ![研究室の電気](../assets/img/monadster-lab-electricity.gif)<br><sub><a href="https://misfitdaydream.blogspot.co.uk/2012/10/frankenstein-1931.html">出典：Misfit Robot Daydream</a></sub>
 
-来ました ― 生命力が利用可能になりました！急いで通常の方法で`bodyM`を実行します...
+来ました ―― 生命力が利用可能になりました！急いで通常の方法で`bodyM`を実行します...
 
 ```fsharp
 let vf = {units = 10}

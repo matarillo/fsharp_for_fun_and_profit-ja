@@ -304,7 +304,7 @@ let good = stringAddWorkflow "12" "3" "2"
 let bad = stringAddWorkflow "12" "xyz" "2"
 ```
 
-**パート2 -- bind関数の作成** 
+**パート2 ―― bind関数の作成** 
 
 パート1が完成したら、アイデアを拡張して2つの関数を追加します。
 

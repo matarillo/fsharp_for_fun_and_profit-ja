@@ -474,7 +474,7 @@ panel.Controls.Add(greenButton)
 
 ![](../assets/img/fsharp-interactive-ui3.png)
 
-しかし、ボタンが小さすぎます -- `AutoSize`をtrueに設定する必要があります。
+しかし、ボタンが小さすぎます ―― `AutoSize`をtrueに設定する必要があります。
 
 ```fsharp
 greenButton.AutoSize <- true

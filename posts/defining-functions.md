@@ -5,7 +5,7 @@ description: "ラムダ式とその他の手法"
 nav: thinking-functionally
 seriesId: "関数型思考"
 seriesOrder: 8
-categories: ["関数", "コンビネータ―"]
+categories: ["関数", "コンビネーター"]
 ---
 
 
