@@ -5,7 +5,7 @@ description: "パターンマッチングは一度の手順でマッチングと
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 12
-categories: [Conciseness, Patterns]
+categories: [Conciseness, "パターン"]
 ---
 
 これまで、 `match..with` 式でのパターンマッチングのロジックを見てきました。一見すると単なるswitch/case文のように見えますが、実はパターンマッチングはもっと汎用的です。値、条件、型に基づいてさまざまな方法で式を比較し、同時に値の割り当てや抽出を行うことができるのです。

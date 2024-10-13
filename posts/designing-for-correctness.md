@@ -5,7 +5,7 @@ description: "不正な状態を表現不可能にする方法"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 22
-categories: [Correctness, Types, Worked Examples]
+categories: [Correctness, "型", "実践例"]
 ---
 
 この投稿では、正しさのための設計方法（少なくとも、現在理解している要件に対する正しさ）を見ていきます。ここで言う正しさとは、適切に設計されたモデルのクライアントが、システムを不正な状態（要件を満たさない状態）にできないということです。コンパイラが許可しないため、文字通り不正なコードを作ることができないのです。

@@ -5,7 +5,7 @@ description: "強力なマッチングのための動的パターン"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 17
-categories: [Convenience, Patterns]
+categories: [Convenience, "パターン"]
 ---
 
 F#には「アクティブパターン」と呼ばれる特殊なパターンマッチングがあります。これは、パターンを動的に解析したり検出したりできるものです。通常のパターンと同様に、呼び出し側から見ると、マッチングと出力が1つのステップに統合されています。

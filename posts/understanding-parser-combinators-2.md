@@ -2,7 +2,7 @@
 layout: post
 title: "便利なパーサーコンビネータの作成"
 description: "15個ほどのコンビネータでほとんどのものを解析できます"
-categories: [Combinators,Patterns]
+categories: ["コンビネータ", "パターン"]
 seriesId: "パーサーコンビネータの理解"
 seriesOrder: 2
 ---

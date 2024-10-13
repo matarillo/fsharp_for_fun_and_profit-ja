@@ -4,7 +4,7 @@ title: "木構造の実践的な利用"
 description: "データベース、JSON、エラー処理の例"
 seriesId: "再帰型と畳み込み"
 seriesOrder: 6
-categories: [Folds, Patterns]
+categories: [Folds, "パターン"]
 ---
 
 この記事はシリーズの第6弾です。

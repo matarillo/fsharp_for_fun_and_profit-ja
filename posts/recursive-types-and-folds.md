@@ -4,7 +4,7 @@ title: "再帰型入門"
 description: "カタモーフィズムを恐れるな"
 seriesId: "再帰型と畳み込み"
 seriesOrder: 1
-categories: [Folds, Patterns]
+categories: [Folds, "パターン"]
 ---
 
 このシリーズでは、再帰型とその使い方について説明します。

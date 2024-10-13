@@ -4,7 +4,7 @@ title: "ジェネリック再帰型"
 description: "ドメインを3つの方法で実装する"
 seriesId: "再帰型と畳み込み"
 seriesOrder: 5
-categories: [Folds, Patterns]
+categories: [Folds, "パターン"]
 ---
 
 
