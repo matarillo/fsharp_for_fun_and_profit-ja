@@ -5,7 +5,7 @@ description: ".NETライブラリを扱うための便利な機能"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 28
-categories: [Completeness]
+categories: ["完全性"]
 ---
 
 

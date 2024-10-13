@@ -5,7 +5,7 @@ description: "F#は.NETエコシステム全体の一部です"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 27
-categories: [Completeness]
+categories: ["完全性"]
 ---
 
 連載の最後では、「完全性」というテーマで、F#のその他の側面を見ていきます。

@@ -5,7 +5,7 @@ description: "複雑な型構文に惑わされないようにする方法"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 8
-categories: [Conciseness,Types]
+categories: ["Conciseness", "型"]
 ---
 
 これまでに見てきたように、F#は「型推論」という技術を使用して、通常のコードで明示的に指定する必要のある型注釈の数を大幅に減らしています。さらに、型を指定する必要がある場合でも、C#と比べて構文がより簡潔です。

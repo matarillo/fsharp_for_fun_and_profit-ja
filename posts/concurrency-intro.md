@@ -5,7 +5,7 @@ description: "ソフトウェア開発方法における次の大革命？"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 23
-categories: [Concurrency]
+categories: ["並行処理"]
 ---
 
 

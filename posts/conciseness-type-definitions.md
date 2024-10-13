@@ -5,7 +5,7 @@ description: "新しい型を作成するペナルティなし"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 9
-categories: [Conciseness,Types]
+categories: ["Conciseness", "型"]
 ---
 
 C#では、新しい型を作成することに抵抗があります。型推論がないため、ほとんどの場所で型を明示的に指定する必要があり、結果として柔軟性が失われ、視覚的な煩雑さが増します。そのため、クラスをモジュール化するよりも、巨大なクラスを作成する誘惑に駆られがちです。

@@ -5,7 +5,7 @@ description: "コードを予測可能にする"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 19
-categories: [Correctness, Immutability]
+categories: ["Correctness", "イミュータビリティ"]
 ---
 
 イミュータビリティ（不変性）が重要である理由を理解するために、小さな例から始めましょう。

@@ -5,7 +5,7 @@ description: "不変性とコーディング不要の組み込み等価性"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 14
-categories: [Convenience, "型"]
+categories: ["Convenience", "型"]
 ---
 
 F#の素晴らしい点の1つは、ほとんどの型が「すぐに使える」便利な動作を最初から持っていることです。たとえば、不変性や組み込みの等価性機能などがあり、これらはC#では明示的にコーディングする必要があることが多いです。

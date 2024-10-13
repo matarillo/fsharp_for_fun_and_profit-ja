@@ -5,7 +5,7 @@ description: "「コンパイル時ユニットテスト」の書き方"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 18
-categories: [Correctness]
+categories: ["Correctness"]
 ---
 
 プログラマーとして、あなたは常に自分や他人が書いたコードを判断しています。理想的な世界では、コードを見ればその動作を簡単に理解できるはずです。もちろん、簡潔で明確で読みやすいことが、そのための大きな要因です。

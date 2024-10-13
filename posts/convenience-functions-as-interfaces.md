@@ -5,7 +5,7 @@ description: "関数を使用すると、OOデザインパターンが簡単に�
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 15
-categories: [Convenience, "関数"]
+categories: ["Convenience", "関数"]
 ---
 
 

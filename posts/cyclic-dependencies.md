@@ -2,7 +2,7 @@
 layout: post
 title: "循環依存は悪"
 description: "循環依存：パート1"
-categories: [設計]
+categories: ["設計"]
 seriesId: "循環依存"
 seriesOrder: 1
 image: "/assets/img/Layering3b.png"

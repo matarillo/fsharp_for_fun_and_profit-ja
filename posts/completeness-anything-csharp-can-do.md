@@ -5,7 +5,7 @@ description: "F#でのオブジェクト指向コードの駆け足ツアー"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 29
-categories: [Completeness]
+categories: ["完全性"]
 ---
 
 F#では、関数型コードをオブジェクト指向コードよりも一般的に優先すべきなのは明白ですが、状況によっては、クラス、継承、仮想メソッドなどの完全なオブジェクト指向言語の機能がすべて必要になる場合もあります。

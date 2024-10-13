@@ -5,7 +5,7 @@ description: "F#では型システムはあなたの味方であり、敵では�
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 21
-categories: [Correctness, "型"]
+categories: ["Correctness", "型"]
 ---
 
 C#やJavaなどの言語を通じて、静的型チェックには馴染みがあるでしょう。これらの言語では、型チェックは単純ですが粗く、PythonやRubyなどの動的言語の自由さに比べると煩わしく感じることがあります。
