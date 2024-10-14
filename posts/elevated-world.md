@@ -448,7 +448,7 @@ let batman =
 
 `map`と同じように、`apply`と`return`のペアの正しい実装も、どの高次の世界で使う場合でも成り立つべき特徴があります。
 
-いわゆる4つの["アプリカティブ則"](https://en.wikibooks.org/wiki/Haskell/Applicative_functors#Applicative_functor_laws)があり、
+いわゆる4つの「[アプリカティブ則](https://en.wikibooks.org/wiki/Haskell/Applicative_functors#Applicative_functor_laws)」があり、
 **アプリカティブファンクター**（プログラミングの文脈で）は、ジェネリックなデータ型コンストラクター（我々の場合は`E<T>`）と、
 アプリカティブ則に従う関数のペア（`apply`と`return`）として定義されます。
 
