@@ -1,58 +1,58 @@
 ---
 layout: post
-title: "Swapping type-safety for high performance using compiler directives"
-description: "An experiment in how to have your cake and eat it too"
+title: "型安全と高パフォーマンスをコンパイラディレクティブで切り替える"
+description: "ケーキを手に入れて、しかもそれを食べる方法の実験"
 categories: []
 ---
 
-*TL;DR; An experiment: you can use lots of domain modelling types at development time and swap them out for a more performant implementation later using compiler directives.*
+*TL;DR; **実験:** 開発時にはドメインモデリングに多くの型を導入し、その後、コンパイラディレクティブを用いて、効率的な実装に置き換えることで、パフォーマンスを向上できます。*
 
-## Domain Modelling vs. Performance
+## ドメインモデリング vs パフォーマンス
 
-I am a big fan of using [types for domain modelling](http://fsharpforfunandprofit.com/ddd/) -- lots and lots and *lots* of types!
+私は[ドメインモデリングに型を多用](https://fsharpforfunandprofit.com/ddd/)することの、熱烈な支持者です。本当に*たくさんの*型を使います！
 
-These types act both as documentation and as a compile time constraint to ensure that only valid data is used.
+型はドキュメントとしての役割と、コンパイル時に制約を設ける役割の両方を担い、有効なデータのみが使われることを保証します。
 
-For example, if I have two types `CustomerId` and `OrderId`, I can represent them as separate types:
+たとえば、`CustomerId` と `OrderId` という2つの型を使う必要があるとします。それぞれを別の型として表現することで、
 
 ```fsharp
 type CustomerId = CustomerId of int
 type OrderId = OrderId of int
 ```
 
-and by doing this, I guarantee that I can't use an `OrderId` where I need an `CustomerId`.
+`CustomerId` が必要な場所で、誤って `OrderId` を使うのを防げます。
 
-The problem is that adding a layer of indirection like this can affect performance:
+しかし、このように間接的な層を追加すると、パフォーマンスに影響が出る可能性があります。
 
-* the extra indirection can cause data access to be much slower.
-* the wrapper class needs extra memory, creating memory pressure.
-* this in turn triggers the garbage collector more often, which can often be the cause of performance problems in managed code.
+* 間接参照によってデータアクセスが大幅に遅くなる可能性があります。
+* ラッパークラスは追加のメモリを必要とし、メモリ不足を引き起こします。
+* その結果、ガベージコレクターがより頻繁に起動し、マネージドコードにおけるパフォーマンス低下の原因となる可能性があります。
 
-In general, I don't generally worry about micro-performance like this at design-time.
-Many many things will have a *much* bigger impact on performance, including any kind of I/O, and the algorithms you choose.
+一般的に、設計段階ではこのような細かなパフォーマンスの違いについて、あまり気にしません。
+入出力やアルゴリズムの選択など、パフォーマンスに *はるかに* 大きな影響を与える要素は他にたくさんあります。
+そのため、実際の状況から切り離されたマイクロベンチマークを行うことは *全く* 推奨しません。
 
-As a result, I am very much *against* doing micro-benchmarks out of context. You should always profile a real app in a real context,
-rather than worrying too much over things that might not be important.
+些細な問題を過度に心配するのではなく、常に現実のアプリケーションを、実際の使用状況でプロファイリングするべきです。
 
-Having said that, I am now going to do some micro-benchmarks!
+とは言うものの、これからマイクロベンチマークをいくつか実行してみます！
 
-### Micro-benchmarking a wrapper type
+### ラッパー型のマイクロベンチマーク
 
-Let's see how a wrapper type fares when used in large numbers. Let's say we want to:
+大量のラッパー型を使った場合、パフォーマンスにどのような影響があるのか見てみましょう。今回は、以下の処理を行うことにします。
 
-* create ten million customer ids 
-* then, map over them twice
-* then, filter them
+* 顧客IDを1,000万個作成する
+* それらに対して2回マップ操作を行う
+* それらをフィルタリングする
 
-Admittedly, it's a bit silly adding 1 to a customer id -- we'll look at a better example later.
+顧客IDに1を加算するという処理は、確かに少し馬鹿げています。後ほど、より現実的な例を見てみましょう。
 
-Anyway, here's the code:
+ともかく、コードは次のとおりです。
 
 ```fsharp
-// type is an wrapper for a primitive type
+// 型はプリミティブ型のラッパーです
 type CustomerId = CustomerId of int
 
-// create two silly functions for mapping and filtering 
+// マッピングとフィルタリングのための、2つの単純な関数を作成します
 let add1ToCustomerId (CustomerId i) = 
     CustomerId (i+1)
 
@@ -60,79 +60,79 @@ let isCustomerIdSmall (CustomerId i) =
     i < 100000
 
 // ---------------------------------
-// timed with a 1 million element array
+// 100万要素の配列で時間を計測
 // ---------------------------------
 #time
 Array.init 1000000 CustomerId
-// map it 
+// マップ操作
 |> Array.map add1ToCustomerId 
-// map it again
+// 再度マップ操作
 |> Array.map add1ToCustomerId 
-// filter it 
+// フィルタリング
 |> Array.filter isCustomerIdSmall 
 |> ignore
 #time
 ```
 
-*The code sample above is [available on GitHub](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86#file-typesafe-performance-with-compiler-directives-1-fsx)*.
+*上記のコードサンプルは [GitHubで入手可能](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86#file-typesafe-performance-with-compiler-directives-1-fsx) です。*
 
-*(Again, let me stress that this is a terrible way to profile code!)*
+*(重ねてになりますが、これはコードのプロファイリングとしては非常に不適切な方法です！)*
 
-A typical timed result looks like this:
+典型的な実行結果は以下のようになります。
 
 ```text
 Real: 00:00:00.296, CPU: 00:00:00.296, GC gen0: 6, gen1: 4, gen2: 0
 ```
 
-That is, it takes about 0.3 seconds to do those steps, and it creates quite a bit of garbage, triggering four gen1 collections.
-If you are not sure what "gen0", "gen1", and "gen2" mean, then [this is a good place to start](https://msdn.microsoft.com/en-us/library/ms973837.aspx).
+つまり、これらの処理を実行するには約0.3秒かかり、かなりの量のガベージが生成され、4回のgen1コレクションがトリガーされます。
+「gen0」、「gen1」、「gen2」が何なのか分からない場合は、[こちらをご覧ください](https://msdn.microsoft.com/en-us/library/ms973837.aspx)。
 
-*DISCLAIMER: I'm going to be doing all my benchmarking in F# interactive. Compiled code with optimizations might have a completely different performance profile.
-Past performance is no guarantee of future results. Draw conclusions at your own risk. Etc., etc.*
+* **免責事項:** すべてのベンチマークはF#インタラクティブで実行しています。最適化されたコンパイル済みコードは、全く異なるパフォーマンスプロファイルを持つ可能性があります。
+過去のパフォーマンスは将来の結果を保証するものではありません。結論を導き出す際は、ご自身の責任において行ってください。などなど。*
 
-If we increase the array size to 10 million, we get a more than 10x slower result:
+配列のサイズを1,000万に増やすと、実行時間は10倍以上遅くなります。
 
 ```text
 Real: 00:00:03.489, CPU: 00:00:03.541, GC gen0: 68, gen1: 46, gen2: 2
 ```
 
-That is, it takes about 3.5 seconds to do those steps, and it creates *a lot* of garbage, including a few gen2 GC's, which are really bad. 
-In fact, you might even get an "out of memory" exception, in which case, you'll have to restart F# Interactive! 
+つまり、これらの処理を実行するには約3.5秒かかり、非常に大量のガベージが生成され、深刻な問題を引き起こすgen2 GCも何回か発生しています。
+場合によっては、「メモリ不足」例外が発生し、F#インタラクティブを再起動しなければならないこともあります！
 
-So what are the alternatives to using a wrapper?  There are two common approaches:
+では、ラッパー型を使う以外にどのような方法があるのでしょうか？ 一般的なアプローチとしては、以下の2つがあります。
 
-* Using type aliases
-* Using units of measure
+* 型エイリアスを使う
+* 測定単位を使う
 
-Let's start with type aliases.
+まずは、型エイリアスから見ていきましょう。
 
-## Using type aliases
+## 型エイリアスを使う
 
-In the type alias approach, I would simply dispense with the wrapper, but keep the type around as documentation.
+型エイリアスのアプローチでは、ラッパー型を使わずに、型をドキュメントとしてのみ使います。
 
 ```fsharp
 type CustomerId = int
 type OrderId = int
 ```
 
-If I want to use the type as documentation, I must then annotate the functions appropriately.
+型をドキュメントとして使う場合、関数に適切な注釈を付ける必要があります。
 
-For example, in the `add1ToCustomerId` below
-both the parameter and the return value have been annotated so that it has the type `CustomerId -> CustomerId` rather than `int -> int`.
+たとえば、以下の `add1ToCustomerId` では、パラメータと戻り値の両方に注釈を付けて、
+型が `int -> int` ではなく `CustomerId -> CustomerId` になるようにしています。
 
 ```fsharp
 let add1ToCustomerId (id:CustomerId) :CustomerId = 
     id+1
 ```
 
-### Micro-benchmarking a type alias
+### 型エイリアスのマイクロベンチマーク
 
-Let's create another micro-benchmark:
+別のマイクロベンチマークを作成してみましょう。
 
 ```fsharp
 type CustomerId = int
 
-// create two silly functions for mapping and filtering 
+// マッピングとフィルタリングのための、2つの単純な関数を作成します
 let add1ToCustomerId (id:CustomerId) :CustomerId = 
     id+1
 // val add1ToCustomerId : id:CustomerId -> CustomerId
@@ -142,67 +142,67 @@ let isCustomerIdSmall (id:CustomerId) =
 // val isCustomerIdSmall : id:CustomerId -> bool
 
 // ---------------------------------
-// timed with a 1 million element array
+// 100万要素の配列で時間を計測
 // ---------------------------------
 #time
 Array.init 1000000 (fun i -> i)
-// map it 
+// マップ操作
 |> Array.map add1ToCustomerId 
-// map it again
+// 再度マップ操作
 |> Array.map add1ToCustomerId 
-// filter it 
+// フィルタリング
 |> Array.filter isCustomerIdSmall 
 |> Array.length
 #time
 ```
 
-*The code sample above is [available on GitHub](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86#file-typesafe-performance-with-compiler-directives-2-fsx)*.
+*上記のコードサンプルは [GitHubで入手可能](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86#file-typesafe-performance-with-compiler-directives-2-fsx) です。*
 
-The results are spectacularly better!
+結果は驚くほど向上しました！
 
 ```text
 Real: 00:00:00.017, CPU: 00:00:00.015, GC gen0: 0, gen1: 0, gen2: 0
 ```
 
-It takes about 17 milliseconds to do those steps, and more importantly, very little garbage was generated. 
+これらの処理を実行するのにかかる時間は約17ミリ秒で、さらに重要なのは、生成されるガベージがほとんどないことです。
 
-If we increase the array size to 10 million, we get a 10x slower result, but still no garbage:
+配列サイズを1,000万に増やしても、実行時間は10倍遅くなるだけで、ガベージは生成されません。
 
 ```text
 Real: 00:00:00.166, CPU: 00:00:00.156, GC gen0: 0, gen1: 0, gen2: 0
 ```
 
-Compared with the earlier version at over three seconds, that's excellent.
+3秒以上かかっていた以前のバージョンと比べると、これは素晴らしいことです。
 
-### Problems with type aliases
+### 型エイリアスの問題点
 
-Alas, the problem with type aliases is that we have completely lost type safety now! 
+残念なことに、型エイリアスを使うと、型安全性が完全に失われてしまいます。
 
-To demonstrate, here's some code that creates a `CustomerId` and an `OrderId`:
+これを示すために、`CustomerId` と `OrderId` を作成するコードを以下に示します。
 
 ```fsharp
 type CustomerId = int
 type OrderId = int
 
-// create two
+// 2つ作成します
 let cid : CustomerId = 12
 let oid : OrderId = 12
 ```
 
-And sadly, the two ids compare equal, and we can pass an `OrderId` to function expecting a `CustomerId` without any complaint from the compiler.
+悲しいことに、2つのIDは等しいと判定され、コンパイラからエラーが出ることなく、`CustomerId` を期待する関数に `OrderId` を渡すことができます。
 
 ```fsharp
 cid = oid              // true
 
-// pass OrderId to function expecting a CustomerId 
+// CustomerId を期待する関数に OrderId を渡します
 add1ToCustomerId oid   // CustomerId = 13
 ```
 
-Ok, so that doesn't look promising! What next?
+これは、あまり良い状況ではありませんね。次はどうすればいいのでしょうか？
 
-## Using units of measure
+## 測定単位を使う
 
-The other common option is to use units of measure to distinguish the two types, like this:
+もう1つの一般的な方法は、測定単位を使って2つの型を区別することです。
 
 ```fsharp
 type [<Measure>] CustomerIdUOM 
@@ -212,12 +212,12 @@ type CustomerId = int<CustomerIdUOM>
 type OrderId = int<OrderIdUOM>
 ```
 
-`CustomerId` and `OrderId` are still two different types, but the unit of measure is erased, so by the time the JIT sees it the type looks like an primitive int.
+`CustomerId` と `OrderId` は、それぞれ異なる型として定義されています。しかし、測定単位の情報は実行時には消去されるため、JITコンパイラからはプリミティブな `int` 型として認識されます。
 
-We can see that this is true when we time the same steps as before:
+実際に時間を計測してみると、このことが分かります。
 
 ```fsharp
-// create two silly functions for mapping and filtering 
+// マッピングとフィルタリングを行う単純な関数を2つ定義する
 let add1ToCustomerId id  = 
     id+1<CustomerIdUOM>
 
@@ -225,148 +225,148 @@ let isCustomerIdSmall i =
     i < 100000<CustomerIdUOM>
 
 // ---------------------------------
-// timed with a 1 million element array
+// 100万要素の配列で時間を計測する
 // ---------------------------------
 #time
 Array.init 1000000 (fun i -> LanguagePrimitives.Int32WithMeasure<CustomerIdUOM> i)
-// map it 
+// マッピングする
 |> Array.map add1ToCustomerId 
-// map it again
+// 再度マッピングする
 |> Array.map add1ToCustomerId 
-// filter it 
+// フィルタリングする
 |> Array.filter isCustomerIdSmall 
 |> ignore
 #time
 ```
 
-*The code sample above is [available on GitHub](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86#file-typesafe-performance-with-compiler-directives-3-fsx)*.
+*上記のコードサンプルは [GitHubで入手可能](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86#file-typesafe-performance-with-compiler-directives-3-fsx) です。*
 
-A typical timed result looks like this:
+典型的な計測結果は以下のようになります。
 
 ```text
 Real: 00:00:00.022, CPU: 00:00:00.031, GC gen0: 0, gen1: 0, gen2: 0
 ```
 
-Again, the code is very fast (22 milliseconds), and just as importantly, very little garbage was generated again. 
+この結果から、コードの実行速度が非常に高速 (22ミリ秒) であること、そして重要な点として、ガベージがほとんど生成されていないことが分かります。
 
-If we increase the array size to 10 million, we maintain the high performance (just as with the type alias approach) and still no garbage:
+配列サイズを1,000万に増やした場合でも、(型エイリアスのアプローチと同様に) 高いパフォーマンスを維持し、ガベージは発生しません。
 
 ```text
 Real: 00:00:00.157, CPU: 00:00:00.156, GC gen0: 0, gen1: 0, gen2: 0
 ```
 
-### Problems with units of measure
+### 測定単位を使う上での問題点
 
-The advantage of units of measure is that the `CustomerId` and `OrderId` types are incompatible, so we get the type safety that we want.
+測定単位を使うことの利点は、`CustomerId` 型と `OrderId` 型に互換性がないため、型安全性を確保できることです。
 
-But I find them unsatisfactory from an esthetic point of view. I like my wrapper types! 
+しかし、美的観点からは、私は満足できません。ラッパー型の方が好みです。
 
-And also, units of measure are really meant to be used with numeric values. For example, I can create a customer id and order id:
+また、測定単位は本来、数値と組み合わせて使うことを意図しています。たとえば、顧客IDと注文IDを作成してみましょう。
 
 ```fsharp
 let cid = 12<CustomerIdUOM>
 let oid = 4<OrderIdUOM>
 ```
 
-and then I can divide CustomerId(12) by OrderId(4) to get three...
+ここで、CustomerId(12) を OrderId(4) で割ると 3 になります。
 
 ```fsharp
 let ratio = cid / oid
 // val ratio : int<CustomerIdUOM/OrderIdUOM> = 3
 ```
 
-Three what though? Three customer ids per order id?  What does that even mean?
+しかし、この 3 という値は何を表しているのでしょうか？ 顧客ID 3 つにつき注文ID 1 つ？ 意味が分かりません。
 
-Yes, surely this will never happen in practice, but still it bothers me!
+もちろん、実際にはこのような状況は起こり得ないでしょう。しかし、それでも私は気になってしまうのです。
 
-## Using compiler directives to get the best of both worlds
+## コンパイラディレクティブを使って両方の長所を活かす
 
-Did I mention that I really like wrapper types? I really like them up until I get a call saying that production systems are having performance hiccups because of too many big GCs.
+ラッパー型への強い思い入れは、先ほどもお伝えしたとおりです。しかし、運用システムで大量のGCが発生し、パフォーマンスが低下していると報告を受けたことで、その思いは揺らいでしまいました。
 
-So, can we get the best of both worlds? Type-safe wrapper types AND fast performance?
+では、型安全なラッパー型と高速なパフォーマンス、両方の長所を活かすことはできないのでしょうか？
 
-I think so, if you are willing to put up with some extra work during development and build.
+開発中やビルド中に追加の作業を許容できるのであれば、可能です。
 
-The trick is to have *both* the "wrapper type" implemention and the "type alias" implementation available to you, and then switch between them based on a compiler directive.
+「ラッパー型」の実装と「型エイリアス」の実装の両方を用意し、コンパイラディレクティブに基づいて切り替えるという方法があります。
 
-For this to work:
+これを実現するには、以下の2点が必要です。
 
-* you will need to tweak your code to not access the type directly, but only via functions and pattern matching.
-* you will need to create a "type alias" implementation that implements a "constructor", various "getters" and for pattern matching, active patterns.
+* 型に直接アクセスするのではなく、関数とパターンマッチングのみを介してアクセスするようにコードを修正する。
+* 「コンストラクタ」、複数の「ゲッター」、そしてパターンマッチングのためにアクティブパターンを実装した「型エイリアス」実装を作成する。
 
-Here's an example, using the `COMPILED` and `INTERACTIVE` directives so that you can play with it interactively.
-Obviously, in real code, you would use your own directive such as `FASTTYPES` or similar.
+`COMPILED` ディレクティブと `INTERACTIVE` ディレクティブを使って、対話的に操作できる例を以下に示します。
+実際のコードでは、`FASTTYPES` などの独自のディレクティブを使うことになるでしょう。
 
 ```fsharp
-#if COMPILED  // uncomment to use aliased version   
-//#if INTERACTIVE // uncomment to use wrapped version
+#if COMPILED  // エイリアス版を使う場合はコメントを外す   
+//#if INTERACTIVE // ラッパー版を使う場合はコメントを外す
 
-// type is an wrapper for a primitive type
+// プリミティブ型のラッパーとして型を定義する
 type CustomerId = CustomerId of int
 
-// constructor
+// コンストラクタ
 let createCustomerId i = CustomerId i
 
-// get data
+// データを取得するための関数
 let customerIdValue (CustomerId i) = i
 
-// pattern matching
-// not needed
+// パターンマッチング
+// 不要
 
 #else
-// type is an alias for a primitive type
+// プリミティブ型のエイリアスとして型を定義する
 type CustomerId = int
 
-// constructor
+// コンストラクタ
 let inline createCustomerId i :CustomerId = i
 
-// get data
+// データを取得するための関数
 let inline customerIdValue (id:CustomerId) = id
 
-// pattern matching
+// パターンマッチング
 let inline (|CustomerId|) (id:CustomerId) :int = id
 
 #endif
 ```
 
-You can see that for both versions I've created a constructor `createCustomerId` and a getter `customerIdValue` and, for the type alias version, an active pattern that looks just like `CustomerId`.
+どちらのバージョンでも、コンストラクタ `createCustomerId` とゲッター `customerIdValue` を作成しています。また、型エイリアスバージョンには、`CustomerId` と同様に動作するアクティブパターンを作成しています。
 
-With this code in place, we can use `CustomerId` without caring about the implementation:
+このコードにより、実装を意識することなく `CustomerId` を使えます。
 
 ```fsharp
-// test the getter
+// ゲッターのテスト
 let testGetter c1 c2 =
     let i1 = customerIdValue c1
     let i2 = customerIdValue c2
     printfn "Get inner value from customers %i %i" i1 i2
-// Note that the signature is as expected:
+// シグネチャは期待どおりです。
 // c1:CustomerId -> c2:CustomerId -> unit
 
-// test pattern matching
+// パターンマッチングのテスト
 let testPatternMatching c1 =
     let (CustomerId i) = c1
     printfn "Get inner value from Customers via pattern match: %i" i
 
     match c1 with
     | CustomerId i2 -> printfn "match/with %i" i
-// Note that the signature is as expected:
+// シグネチャは期待どおりです
 // c1:CustomerId -> unit
 
 let test() = 
-    // create two ids
+    // 2つのIDを作成する
     let c1 = createCustomerId 1
     let c2 = createCustomerId 2
     let custArray : CustomerId [] = [| c1; c2 |]
     
-    // test them
+    // テストする
     testGetter c1 c2 
     testPatternMatching c1 
 ```
 
-And now we can run the *same* micro-benchmark with both implementations:
+これで、*同じ*マイクロベンチマークを両方の実装で実行できます。
 
 ```fsharp
-// create two silly functions for mapping and filtering 
+// マッピングとフィルタリングを行う単純な関数を2つ定義する
 let add1ToCustomerId (CustomerId i) = 
     createCustomerId (i+1)
 
@@ -374,55 +374,55 @@ let isCustomerIdSmall (CustomerId i) =
     i < 100000
 
 // ---------------------------------
-// timed with a 1 million element array
+// 100万要素の配列で時間を計測する
 // ---------------------------------
 #time
 Array.init 1000000 createCustomerId
-// map it 
+// マッピングする
 |> Array.map add1ToCustomerId 
-// map it again
+// 再度マッピングする
 |> Array.map add1ToCustomerId 
-// filter it 
+// フィルタリングする
 |> Array.filter isCustomerIdSmall 
 |> Array.length
 #time
 ```
 
-*The code sample above is [available on GitHub](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86#file-typesafe-performance-with-compiler-directives-4-fsx)*.
+*上記のコードサンプルは [GitHubで入手可能](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86#file-typesafe-performance-with-compiler-directives-4-fsx) です。*
 
-The results are similar to the previous examples. The aliased version is much faster and does not create GC pressure:
+結果は、前の例と同様です。エイリアス版の方がはるかに高速で、GCへの負荷もありません。
 
 ```text
-// results using wrapped version
+// ラッパー版を使った結果
 Real: 00:00:00.408, CPU: 00:00:00.405, GC gen0: 7, gen1: 4, gen2: 1
 
-// results using aliased version
+// エイリアス版を使った結果
 Real: 00:00:00.022, CPU: 00:00:00.031, GC gen0: 0, gen1: 0, gen2: 0
 ```
 
-and for the 10 million element version:
+1,000万要素版の結果は以下のとおりです。
 
 ```text
-// results using wrapped version
+// ラッパー版を使った結果
 Real: 00:00:03.199, CPU: 00:00:03.354, GC gen0: 67, gen1: 45, gen2: 2
 
-// results using aliased version
+// エイリアス版を使った結果
 Real: 00:00:00.239, CPU: 00:00:00.202, GC gen0: 0, gen1: 0, gen2: 0
 ```
 
-## A more complex example
+### より複雑な例
 
-In practice, we might want something more complex than a simple wrapper.
+単純なラッパー型よりも複雑な型が必要になる場面は少なくありません。
 
-For example, here is an `EmailAddress` (a simple wrapper type, but constrained to be non-empty and containing a "@") and
-some sort of `Activity` record that stores an email and the number of visits, say.
+たとえば、空文字を許容せず "@" を含むように制限された `EmailAddress` 型や、
+メールアドレスと訪問回数を保持する `Activity` レコードのような型を定義したい場合があります。
 
 ```fsharp
 module EmailAddress =
-    // type with private constructor 
+    // private コンストラクタを持つ型
     type EmailAddress = private EmailAddress of string
 
-    // safe constructor
+    // 安全なコンストラクタ
     let create s = 
         if System.String.IsNullOrWhiteSpace(s) then 
             None
@@ -431,42 +431,42 @@ module EmailAddress =
         else
             None
 
-    // get data
+    // データを取得する
     let value (EmailAddress s) = s
 
 module ActivityHistory =
     open EmailAddress
     
-    // type with private constructor 
+    // private コンストラクタを持つ型
     type ActivityHistory = private {
         emailAddress : EmailAddress
         visits : int
         }
 
-    // safe constructor
+    // 安全なコンストラクタ
     let create email visits = 
         {emailAddress = email; visits = visits }
 
-    // get data
+    // データを取得する
     let email {emailAddress=e} = e
     let visits {visits=a} = a
 ```
 
-As before, for each type there is a constructor and a getter for each field.
+上記のように、各型にコンストラクタとフィールド値を取得するためのゲッターを定義します。
 
-*NOTE: Normally I would define a type outside a module, but because the real constructor needs to be private,
-I've put the type inside the module and given the module and the type the same name. If this is too awkward, you can rename the module to be different
-from the type, or use the OCaml convention of calling the main type in a module just "T", so you get `EmailAddress.T` as the type name.*
+*注記: 通常、型はモジュールの外で定義しますが、ここではコンストラクタを private にする必要があるため、
+型をモジュール内に配置し、モジュールと型に同じ名前を付けています。
+もし違和感があるなら、モジュール名と型名を別にするか、OCaml の慣例に従ってモジュール内の主要な型を "T" とすることで、`EmailAddress.T` のように型名にアクセスしてもいいでしょう。*
 
-To make a more performant version, we replace `EmailAddress` with a type alias, and `Activity` with a struct, like this:
+パフォーマンスを向上させるために、`EmailAddress` を型エイリアスに、`Activity` を構造体に置き換えてみましょう。
 
 ```fsharp
 module EmailAddress =
 
-    // aliased type 
+    // エイリアス型
     type EmailAddress = string
 
-    // safe constructor
+    // 安全なコンストラクタ
     let inline create s :EmailAddress option = 
         if System.String.IsNullOrWhiteSpace(s) then 
             None
@@ -475,7 +475,7 @@ module EmailAddress =
         else
             None
 
-    // get data
+    // データを取得する
     let inline value (e:EmailAddress) :string = e
 
 module ActivityHistory =
@@ -486,21 +486,21 @@ module ActivityHistory =
         member this.EmailAddress = emailAddress 
         member this.Visits = visits 
 
-    // safe constructor
+    // 安全なコンストラクタ
     let create email visits = 
         ActivityHistory(email,visits)
 
-    // get data
+    // データを取得する
     let email (act:ActivityHistory) = act.EmailAddress
     let visits (act:ActivityHistory) = act.Visits
 
 ```
 
-This version reimplements the constructor and a getter for each field.
-I could have made the field names for `ActivityHistory` be the same in both cases too, but. in the struct case, type inference would not work.
-By making them different, the user is forced to use the getter functions rather than dotting in.
+このバージョンでは、コンストラクタと各フィールドのゲッターを再実装しています。
+`ActivityHistory` のフィールド名を構造体版でもレコード版と同じにすることもできましたが、構造体の場合は型推論が機能しなくなります。
+フィールド名を異なるものにすることで、ユーザーはドット演算子ではなくゲッター関数を使うように強制されます。
 
-Both implementations have the same "API", so we can create code that works with both:
+どちらの実装も "API" は同じなので、両方で動作するコードを作成できます。
 
 ```fsharp
 let rand = new System.Random()
@@ -524,43 +524,43 @@ let isCustomerInactive activity =
     visits < 3
 
     
-// execute creation and iteration for a large number of records
+// 大量のレコードに対して作成と反復を実行する
 let mapAndFilter noOfRecords = 
     Array.init noOfRecords (fun _ -> createCustomerWithRandomActivity() )
-    // map it 
+    // マップする
     |> Array.map add1ToVisits 
-    // map it again
+    // 再度マップする
     |> Array.map add1ToVisits 
-    // filter it 
+    // フィルターする
     |> Array.filter isCustomerInactive 
-    |> ignore  // we don't actually care!
+    |> ignore  // 実際には気にしません!
 ```
 
-### Pros and cons of this approach
+### このアプローチの長所と短所
 
-One nice thing about this approach is that it is self-correcting -- it forces you to use the "API" properly.  
+このアプローチの利点は、自己修正型であるということです。API の正しい使い方を強制できます。
 
-For example, if I started accessing fields directly by dotting into
-the `ActivityHistory` record, then that code would break when the compiler directive was turned on and the struct implementation was used.
+たとえば、`ActivityHistory` レコードにドット演算子で直接アクセスしていたる場合、
+コンパイラディレクティブが有効になって構造体の実装が使われると、そのコードは動作しなくなります。
 
-Of course, you could also create a signature file to enforce the API.
+もちろん、API を強制するためにシグネチャファイルを作成することもできます。
 
-On the negative side, we do lose some of the nice syntax such as `{rec with ...}`.
-But you should really only be using this technique with small records (2-3 fields), so not having `with` is not a big burden.
+欠点としては、`{rec with ...}` などの便利な構文の一部が使えなくなることが挙げられます。
+しかし、この手法は小さなレコード（2～3フィールド）にのみ使うべきなので、`with` が使えないことは大きな問題ではありません。
 
-### Timing the two implementations
+### 2つの実装のタイミング
 
-Rather than using `#time`, this time I wrote a custom timer that runs a function 10 times and prints out the GC and memory used on each run.
+今回は `#time` を使う代わりに、関数を10回実行し、各実行で使われた GC とメモリを出力するカスタムタイマーを作成しました。
 
 ```fsharp
-/// Do countN repetitions of the function f and print the 
-/// time elapsed, number of GCs and change in total memory
+/// 関数 f を countN 回繰り返し実行し、
+/// 経過時間、GC の回数、合計メモリの変化を出力します
 let time countN label f  = 
 
     let stopwatch = System.Diagnostics.Stopwatch()
     
-    // do a full GC at the start but NOT thereafter
-    // allow garbage to collect for each iteration
+    // 開始時に完全な GC を実行しますが、その後は実行しません
+    // 各反復でガベージを収集できるようにします
     System.GC.Collect()  
     printfn "Started"         
 
@@ -581,14 +581,14 @@ let time countN label f  =
         f()
         stopwatch.Stop() 
         let gen0',gen1',gen2',mem' = getGcStats()
-        // convert memory used to K
+        // 使われたメモリを K に変換します
         let changeInMem = (mem'-mem) / 1000L
         printfn "#%2i elapsed:%6ims gen0:%3i gen1:%3i gen2:%3i mem:%6iK" iteration stopwatch.ElapsedMilliseconds (gen0'-gen0) (gen1'-gen1) (gen2'-gen2) changeInMem 
 ```
 
-*The code sample above is [available on GitHub](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86#file-typesafe-performance-with-compiler-directives-5-fsx)*.
+*上記のコードサンプルは [GitHubで入手可能](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86#file-typesafe-performance-with-compiler-directives-5-fsx) です。*
 
-Let's now run `mapAndFilter` with a million records in the array:
+配列に100万レコードを持つ `mapAndFilter` を実行してみましょう。
 
 ```fsharp
 let size = 1000000
@@ -596,7 +596,7 @@ let label = sprintf "mapAndFilter: %i records" size
 time 10 label (fun () -> mapAndFilter size)
 ```
  
-The results are shown below:
+実行結果は次のとおりです。
  
 ```text
 =======================
@@ -628,24 +628,24 @@ mapAndFilter: 1000000 records (Aliased)
 #10 elapsed:   180ms gen0:  8 gen1:  0 gen2:  0 mem: 23762K
 ```
 
-Now this code no longer consists of only value types, so the profiling is getting muddier now!
-The `mapAndFilter` function uses `createCustomerWithRandomActivity` which in turn uses `Option`, a reference type,
-so there will be a large number of reference types being allocated. Just as in real life, it's hard to keep things pure!
+このコードはもはや値型のみで構成されてはいないため、プロファイリングの結果は複雑になります。
+`mapAndFilter` 関数は `createCustomerWithRandomActivity` 関数を使い、この関数は参照型である `Option` 型を使うため、多数の参照型が割り当てられることになります。
+現実世界と同じように、プログラムにおいても物事を完全に純粋に保つことは困難です。
 
-Even so, you can see that the wrapped version is slower than the aliased version (approx 800ms vs. 150ms) and creates more garbage on each iteration (approx 72Mb vs 24Mb)
-and most importantly has two big GC pauses (in the 5th and 9th iterations), while the aliased version never even does a gen1 GC, let alone a gen2.
+そうは言っても、ラッパー型のバージョンはエイリアス型バージョンよりも実行速度が遅く（約 800ms 対 150ms）、各反復でより多くのガベージを生成し（約 72MB 対 24MB）、さらに重要な点として、2 回の大きな GC 一時停止（5 回目と 9 回目の反復）が発生します。
+一方、エイリアス型のバージョンでは Gen1 GC さえ発生せず、Gen2 GC は言うまでもありません。
 
-*NOTE: The fact that aliased version is using up memory and yet there are no gen1s makes me a bit suspicious of these figures. I think they might be different if run outside of 
-F# interactive.*
+*注記: エイリアス型バージョンがメモリを消費しているにもかかわらず、Gen1 GC が発生しないという事実は、これらの数値の信頼性を疑わせるものです。
+F# インタラクティブ環境以外で実行した場合、異なる結果になる可能性があります。*
 
-## What about non-record types?
+### レコード型以外の場合
 
-What if the type we want to optimise is a discriminated union rather than a record?  
+最適化したい型が、レコードではなく判別共用体 (DU) である場合はどうすれば良いでしょうか？
 
-My suggestion is to turn the DU into a struct with a tag for each case, and fields for all possible data.
+ここでは、判別共用体を、各ケースに対応するタグと、すべてのデータに対応するフィールドを持つ構造体に変換することを提案します。
 
-For example, let's say that we have DU that classifies an `Activity` into `Active` and `Inactive`, and for the `Active` case we store the email and visits and for
-the inactive case we only store the email:
+例として、ある `Activity` を `Active` と `Inactive` に分類する判別共用体があるとします。
+`Active` の場合はメールアドレスと訪問回数を保存し、`Inactive` の場合はメールアドレスのみを保存します。
  
 ```fsharp
 module Classification =
@@ -656,17 +656,17 @@ module Classification =
         | Active of EmailAddress * int
         | Inactive of EmailAddress 
 
-    // constructor
+    // コンストラクタ
     let createActive email visits = 
         Active (email,visits)
     let createInactive email = 
         Inactive email
 
-    // pattern matching
-    // not needed
+    // パターンマッチング
+    // 不要
 ```
 
-To turn this into a struct, I would do something like this:
+これを構造体に変換すると、次のようになります。
 
 ```fsharp
 module Classification =
@@ -680,13 +680,13 @@ module Classification =
         member this.Email = email
         member this.Visits = visits
 
-    // constructor
+    // コンストラクタ
     let inline createActive email visits = 
         Classification(true,email,visits)
     let inline createInactive email = 
         Classification(false,email,0)
 
-    // pattern matching
+    // パターンマッチング
     let inline (|Active|Inactive|) (c:Classification) = 
         if c.IsActive then 
             Active (c.Email,c.Visits)
@@ -694,9 +694,9 @@ module Classification =
             Inactive (c.Email)
 ```
 
-Note that `Visits` is not used in the `Inactive` case, so is set to a default value.
+`Inactive` の場合は `Visits` が使われないため、デフォルト値に設定されていることに注意してください。
 
-Now let's create a function that classifies the activity history, creates a `Classification` and then filters and extracts the email only for active customers.
+次に、アクティビティ履歴を分類し、`Classification` を作成して、アクティブな顧客のメールアドレスのみをフィルタリングして抽出する関数を示します。
 
 ```fsharp
 open Classification
@@ -710,21 +710,21 @@ let createClassifiedCustomer activity =
     else
         Classification.createActive email visits 
 
-// execute creation and iteration for a large number of records
+// 大量のレコードに対して作成と反復処理を実行する
 let extractActiveEmails noOfRecords =
     Array.init noOfRecords (fun _ -> createCustomerWithRandomActivityHistory() )
-    // map to a classification
+    // 分類にマッピングする
     |> Array.map createClassifiedCustomer
-    // extract emails for active customers
+    // アクティブな顧客のメールアドレスを抽出する
     |> Array.choose (function
         | Active (email,visits) -> email |> Some
         | Inactive _ -> None )
     |> ignore
 ```
 
-*The code sample above is [available on GitHub](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86#file-typesafe-performance-with-compiler-directives-5-fsx)*.
+*上記のコードサンプルは [GitHubで入手可能](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86#file-typesafe-performance-with-compiler-directives-5-fsx) です。*
 
-The results of profiling this function with the two different implementations are shown below:
+2つの実装でこの関数をプロファイリングした結果は次のとおりです。
  
 ```text
 =======================
@@ -756,92 +756,92 @@ extractActiveEmails: 1000000 records (Aliased)
 #10 elapsed:  3732ms gen0: 33 gen1:  1 gen2:  1 mem:-256432K
 ```
 
-As before, the aliased/struct version is more performant, being faster and generating less garbage (although there was a GC pause at the end, oh dear).
+エイリアス/構造体バージョンの方が高速で、生成されるガベージも少ないことがわかります。そのため、パフォーマンスの点で優れています。（ただし、最後にガベージコレクションによる一時停止が発生しました。）
 
-## Questions
+## 質問
 
-### Isn't this a lot of work, creating two implementations?
+### 2つの実装を作成するのは大変な作業ではありませんか？
 
-Yes! *I don't think you should do this in general.* This is just an experiment on my part.
+はい、その通りです。*一般的に、この方法を採用すべきではない* と考えています。これは、私自身が行った実験にすぎません。
 
-I suggest that turning records and DUs into structs is a last resort, only done after you have eliminated all other bottlenecks first.
+レコードと判別共用体を構造体に変換することは、他のすべてのボトルネックを排除した後の最後の手段としてのみ行うことをお勧めします。
 
-However, there may be a few special cases where speed and memory are critical, and then, perhaps, it might be worth doing something like this.
+ただし、速度とメモリ消費量が非常に重要な特殊なケースも存在するかもしれません。そのような場合は、このような方法を試す価値があるかもしれません。
 
-### What are the downsides?
+### デメリットは何ですか？
 
-In addition to all the extra work and maintenance, you mean?
+追加の作業やメンテナンスに加えて、何かデメリットはあるのでしょうか？
 
-Well, because the types are essentially private, we do lose some of the nice syntax available when you have access to the internals of the type,
-such as `{rec with ...}`, but as I said, you should really only be using this technique with small records anyway.
+型は本質的にプライベートになるため、 `{rec with ...}` など、型の内部にアクセスできる場合に利用できる便利な構文の一部が失われてしまいます。
+しかし、前述のように、この手法は小さなレコードにのみ使うべきです。
 
-More importantly, value types like structs are not a silver bullet. They have their own problems.
+さらに重要なのは、構造体のような値型は万能薬ではないということです。値型には、それ自体に問題があります。
 
-For example, they can be slower when passed as arguments (because of copy-by-value) and you must be careful not to [box them implicitly](http://theburningmonk.com/2015/07/beware-of-implicit-boxing-of-value-types/),
-otherwise you end up doing allocations and creating garbage.  Microsoft has [guidelines on using classes vs structs](https://msdn.microsoft.com/en-us/library/ms229017.aspx),
-but see also [this commentary on breaking these guidelines](http://stackoverflow.com/a/6973171/1136133) and [these rules](http://stackoverflow.com/a/598268/1136133).
+たとえば、値渡しのため、引数として渡されるときに速度が低下する可能性があります。また、[暗黙的にボックス化](https://theburningmonk.com/2015/07/beware-of-implicit-boxing-of-value-types/) しないように注意する必要があります。
+ボックス化してしまうと、メモリ割り当てが発生し、ガベージが作成されてしまいます。Microsoft は [クラスと構造体の使用に関するガイドライン](https://msdn.microsoft.com/en-us/library/ms229017.aspx) を提供していますが、
+[これらのガイドラインに反する解説](https://stackoverflow.com/a/6973171/1136133) や [これらのルール](https://stackoverflow.com/a/598268/1136133) も参考になるでしょう。
 
 
-### What about using shadowing?
+### シャドウイングを使うのはどうでしょうか？
 
-Shadowing is used when the client wants to use a different implementation. For example, you can
-switch from unchecked to checked arithmetic by opening the [Checked module](https://msdn.microsoft.com/en-us/library/ee340296.aspx).
-[More details here](http://theburningmonk.com/2012/01/checked-context-in-c-and-f/).
+シャドウイングは、クライアントが別の実装を使いたい場合に利用されます。
+たとえば、[Checked モジュール](https://msdn.microsoft.com/en-us/library/ee340296.aspx) をオープンすれば、チェックされていない算術演算からチェックされた算術演算に切り替えることができます。
+[詳細はこちら](https://theburningmonk.com/2012/01/checked-context-in-c-and-f/)。
 
-But that would not work here -- I don't want each client to decide which version of the type they will use. That would lead to all sorts of incompatibility problems.
-Also, it's not a per-module decision, it's a decision based on deployment context.
+しかし、今回のケースではシャドウイングは有効ではありません。各クライアントが、どのバージョンの型を使うかを決定するのは望ましくありません。
+さまざまな非互換性の問題が発生する可能性があります。また、これはモジュールごとの決定ではなく、デプロイメントコンテキストに基づいた決定です。
 
-### What about more performant collection types?
+### より高性能なコレクション型はどうでしょうか？
 
-I am using `array` everywhere as the collection type.  If you want other high performing collections,
-check out [FSharpx.Collections](https://fsprojects.github.io/FSharpx.Collections/) or [Funq collections](https://github.com/GregRos/Funq).
+コレクション型として、すべての箇所で `array` を使っています。
+他の高性能なコレクションを使いたい場合は、[FSharpx.Collections](https://fsprojects.github.io/FSharpx.Collections/) または [Funq collections](https://github.com/GregRos/Funq) を調べてみてください。
 
-### You've mixed up allocations, mapping, filtering. What about a more fine-grained analysis?
+### メモリ割り当て、マッピング、フィルタリングが混在しています。より詳細な分析をしてみては？
 
-I'm trying to keep some semblage of dignity after I said that micro-benchmarking was bad!
+マイクロベンチマークは良くないと述べた手前、体裁を保とうとしています。
 
-So, yes, I deliberately created a case with mixed usage and measured it as a whole rather than benchmarking each part separately.
-Your usage scenarios will obviously be different, so I don't think there's any need to go deeper.
+そのため、意図的にさまざまな処理を組み合わせたケースを作成し、各部分を個別にベンチマークするのではなく、全体として測定しました。
+実際の使用シナリオは明らかに異なるため、さらに深く掘り下げる必要はないと考えます。
 
-Also, I'm doing all my benchmarking in F# interactive. Compiled code with optimizations might have a completely different performance profile.
+また、すべてのベンチマークを F# インタラクティブで行っています。最適化されたコンパイル済みコードは、まったく異なるパフォーマンスプロファイルを持つ可能性があります。
 
-### What other ways are there to increase performance?
+### 他にパフォーマンスを向上させる方法はありますか？
 
-Since F# is a .NET language, the performance tips for C# work for F# as well, standard stuff like:
+F# は .NET 言語なので、C# のパフォーマンスに関するヒントは F# にも有効です。標準的なものとしては、次のようなものがあります。
 
-* Make all I/O async. Use streaming IO over random access IO if possible. Batch up your requests.
-* Check your algorithms. Anything worse than O(n log(n)) should be looked at.
-* Don't do things twice. Cache as needed.
-* Keep things in the CPU cache by keeping objects in contiguous memory and avoiding too many deep reference (pointer) chains. Things that help with this are using arrays instead of lists, value types instead of reference types, etc.
-* Avoid pressure on the garbage collector by minimizing allocations. Avoid creating long-lived objects that survive gen0 collections.
+* **すべての I/O 処理を非同期にする。** 可能な場合は、ランダムアクセス I/O よりもストリーミング I/O を使うようにしましょう。リクエストはバッチ処理するのが効果的です。
+* **アルゴリズムを見直す。** 計算量が *O(n log(n))* よりも悪い場合は、改善の余地があると考えられます。
+* **同じ処理を繰り返さない。** 必要に応じてキャッシュを活用しましょう。
+* **CPU キャッシュを効率的に利用する。** オブジェクトは連続したメモリ領域に配置し、参照（ポインタ）チェーンが深くなりすぎないようにすることで、CPU キャッシュに効率よくデータを保持できます。具体的には、リストの代わりに配列を使ったり、参照型の代わりに値型を使ったりすることが有効です。
+* **メモリ割り当てを最小限に抑える。** メモリ割り当てを減らすことで、GCの負荷を軽減できます。具体的には、gen0で回収されず、長期間存続するようなオブジェクトの生成を避けることが重要です。
 
-To be clear, I don't claim to be an expert on .NET performance and garbage collection.  In fact, if you see something wrong with this analysis, please let me know!
+念のため、私は .NET のパフォーマンスとガベージコレクションの専門家ではないことを明記しておきます。もし、この分析に何か問題があれば、ぜひご指摘ください！
 
-Here are some sources that helped me:
+参考になった資料を以下に示します。
 
-* The book [Writing High-Performance .NET Code](http://www.writinghighperf.net/) by Ben Watson.
-* Martin Thompson has a great [blog](http://mechanical-sympathy.blogspot.jp/2012/08/memory-access-patterns-are-important.html)
-  on performance and some excellent videos, such as [Top 10 Performance Folklore](http://www.infoq.com/presentations/top-10-performance-myths).
-  ([Good summary here](http://weronikalabaj.com/performance-myths-and-facts/).)
-* [Understanding Latency](https://www.youtube.com/watch?v=9MKY4KypBzg), a video by Gil Tene.
-* [Essential Truths Everyone Should Know about Performance in a Large Managed Codebase](https://channel9.msdn.com/Events/TechEd/NorthAmerica/2013/DEV-B333), a video by Dustin Cambell at Microsoft.
-* For F# in particular:
-  * Yan Cui has some blog posts on [records vs structs](http://theburningmonk.com/2011/10/fsharp-performance-test-structs-vs-records/) and [memory layout](http://theburningmonk.com/2015/07/smallest-net-ref-type-is-12-bytes-or-why-you-should-consider-using-value-types).
-  * Jon Harrop has a number of good articles such as [this one](http://flyingfrogblog.blogspot.co.uk/2012/06/are-functional-languages-inherently.html) but some of it is behind a paywall.
-  * Video: [High Performance F# in .NET and on the GPU](https://vimeo.com/33699102) with Jack Pappas. The sound is bad, but the slides and discussion are good!
-  * [Resources for Math and Statistics](http://fsharp.org/guides/math-and-statistics/) on fsharp.org
+* Ben Watson著 [Writing High-Performance .NET Code](https://www.writinghighperf.net/)
+* Martin Thompsonによるパフォーマンスに関する素晴らしい[ブログ](https://mechanical-sympathy.blogspot.jp/2012/08/memory-access-patterns-are-important.html)
+  [Top 10 Performance Folklore](https://www.infoq.com/presentations/top-10-performance-myths) などの優れたビデオもあります。
+  ([ここでの要約](https://weronikalabaj.com/performance-myths-and-facts/)が良いです。)
+* Gil Teneによるビデオ、[Understanding Latency](https://www.youtube.com/watch?v=9MKY4KypBzg)。
+* MicrosoftのDustin Cambellによるビデオ、[Essential Truths Everyone Should Know about Performance in a Large Managed Codebase](https://channel9.msdn.com/Events/TechEd/NorthAmerica/2013/DEV-B333)。
+* 特にF#については、以下を参照してください。
+  * Yan Cuiによる [レコードと構造体](https://theburningmonk.com/2011/10/fsharp-performance-test-structs-vs-records/) および [メモリレイアウト](https://theburningmonk.com/2015/07/smallest-net-ref-type-is-12-bytes-or-why-you-should-consider-using-value-types) に関するブログ記事。
+  * Jon Harropによる [この記事](https://flyingfrogblog.blogspot.co.uk/2012/06/are-functional-languages-inherently.html) などの優れた記事が多数ありますが、一部は有料です。
+  * ビデオ: Jack Pappasによる [High Performance F# in .NET and on the GPU](https://vimeo.com/33699102)。音質は悪いですが、スライドと議論は良いです！
+  * fsharp.orgの [数学と統計のリソース](https://fsharp.org/guides/math-and-statistics/)
 
-## Summary
+## まとめ
 
-> "Keep it clean; keep it simple; aim to be elegant."
+> 「クリーンに保ち、シンプルに保ち、エレガントであることを目指す。」
 > -- *Martin Thompson*
 
-This was a little experiment to see if I could have my cake and eat it too. Domain modelling using lots of types, but with the ability to get performance when needed in an elegant way.
+これは、ケーキを手に入れて、それを食べることができるかどうかを確認するためのちょっとした実験でした。多くの型を使ったドメインモデリングですが、必要に応じてエレガントな方法でパフォーマンスを得ることができます。
 
-I think that this is quite a nice solution, but as I said earlier, this optimization (and uglification)
-should only ever be needed for a small number of heavily used core types that are allocated many millions of times.
+これは非常に優れたソリューションだと思いますが、前述のように、この最適化（および醜くすること）は、
+何百万回も割り当てられる、使用頻度の高い少数の型にのみ必要です。
 
-Finally, I have not used this approach myself in a large production system (I've never needed to),
-so I would be interested in getting feedback from people in the trenches on what they do.
+最後に、このアプローチを大規模な本番システムで自分で使ったことはありません（必要がなかったため）。
+現場の人々が何をしているのか、フィードバックをいただければ幸いです。
 
-*The code samples used in this post are [available on GitHub](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86)*.
+*この記事で使われているコードサンプルは [GitHubで入手可能](https://gist.github.com/swlaschin/348b6b9e64d4b150cf86) です。*

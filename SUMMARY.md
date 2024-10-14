@@ -203,4 +203,4 @@
 * [そのプログラミング言語は不合理ですか？](posts/is-your-language-unreasonable.md)
 * [UML図？必要ねぇ！](posts/no-uml-diagrams.md)
 * [内向的・外向的なプログラミング言語](posts/introvert-vs-extrovert.md)
-* [コンパイラ指令で型安全性を犠牲にして高速化](posts/typesafe-performance-with-compiler-directives.md)
+* [型安全と高パフォーマンスをコンパイラディレクティブで切り替える](posts/typesafe-performance-with-compiler-directives.md)
