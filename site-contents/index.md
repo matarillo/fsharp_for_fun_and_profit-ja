@@ -88,4 +88,4 @@ hasNoCode: 1
 * [そのプログラミング言語は不合理ですか？](../posts/is-your-language-unreasonable.md) あるいは、予測可能性の重要性について
 * [「解説付きローマ数字カタ」の解説](../posts/roman-numeral-kata.md) ローマ数字カタへの私のアプローチ
 * [静的型付け関数型プログラミング言語を使わない10の理由](../posts/ten-reasons-not-to-use-a-functional-programming-language.md) 理解できないものに対する不満
-* [くだらない UML 図なんか要らない](../posts/no-uml-diagrams.md) つまり、多くの場合、クラス図に UML を使用する必要はありません。
+* [UML図？必要ねぇ！](../posts/no-uml-diagrams.md) つまり、多くの場合、クラス図に UML を使用する必要はありません。

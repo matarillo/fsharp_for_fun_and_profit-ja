@@ -201,6 +201,6 @@
 * [静的型付け関数型プログラミング言語を使わない10の理由](posts/ten-reasons-not-to-use-a-functional-programming-language.md)
 * [なぜモナドチュートリアルを書かないのか](posts/why-i-wont-be-writing-a-monad-tutorial.md)
 * [そのプログラミング言語は不合理ですか？](posts/is-your-language-unreasonable.md)
-* [くだらない UML 図なんか要らない](posts/no-uml-diagrams.md)
+* [UML図？必要ねぇ！](posts/no-uml-diagrams.md)
 * [内向型と外向型プログラミング言語](posts/introvert-vs-extrovert.md)
 * [コンパイラ指令で型安全性を犠牲にして高速化](posts/typesafe-performance-with-compiler-directives.md)

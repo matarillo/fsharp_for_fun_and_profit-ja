@@ -1,37 +1,37 @@
 ---
 layout: post
-title: "We don't need no stinking UML diagrams"
-description: "A comparison of code vs UML"
+title: "UML図？必要ねぇ！"
+description: "コードとUMLの比較"
 categories: ["DDD"]
 ---
 
-In my talk on [functional DDD](http://fsharpforfunandprofit.com/ddd/), I often use this slide (*[in context](http://www.slideshare.net/ScottWlaschin/ddd-with-fsharptypesystemlondonndc2013/45)*):
+私が[関数型DDD](https://fsharpforfunandprofit.com/ddd/)について講演するとき、よくこのスライドを使います（*[スライドの前後関係も参照してください](https://www.slideshare.net/ScottWlaschin/ddd-with-fsharptypesystemlondonndc2013/45)*）。
 
-![We don't need no stinking UML diagrams](../assets/img/no-uml-diagrams.jpg)
+![UML図？必要ねぇ！](../assets/img/no-uml-diagrams.jpg)
 
-Which is of course is a misquote of [this famous scene](https://www.youtube.com/watch?v=gx6TBrfCW54). Oops, I mean [this one](https://www.youtube.com/watch?v=VqomZQMZQCQ).
+これはもちろん、[あの有名なシーン](https://www.youtube.com/watch?v=gx6TBrfCW54)をもじったものです。あ、[こっちのシーン](https://www.youtube.com/watch?v=VqomZQMZQCQ)の間違いでした。
 
-Ok, I might be exaggerating a bit. Some UML diagrams are useful (I like sequence diagrams for example) and in general, I do think a good picture or diagram can be worth 1000 words.
+少し大げさだったかもしれません。UML図の中にも役立つものはあります（私はシーケンス図が好きです）。それに、良い図は千の言葉に匹敵する力があると思います。
 
-But I believe that, in many cases, using UML for class diagrams is not necessary.
+しかし、多くの場合、クラス図にUMLを使う必要はないと考えています。
 
-Instead, a concise language like F# (or OCaml or Haskell) can convey the same meaning
-in a way that is easier to read, easier to write, and most important, easier to turn into *working code*! 
+F#（OCamlやHaskellでも良いのですが）のような簡潔な言語なら、UMLと同じ意味を、より分かりやすく表現できます。
+読み書きしやすく、そして何より、*実際に動くコード*に落とし込みやすいのです。
 
-With UML diagrams, you need to translate them to code, with the possibility of losing something in translation.
-But if the design is documented in your programming language itself, there is no translation phase, and so the design must always be in sync with the implementation.
+UML図では、コードに変換する必要があり、その過程で情報が失われてしまう可能性があります。
+しかし、設計自体がプログラミング言語で記述されていれば、変換という手順は必要なくなり、設計は常に実装と同期することになります。
 
-To demonstrate this in practice, I decided to scour the internet for some good (and not-so-good) UML class diagrams, and convert them into F# code.  You can compare them for yourselves.
+これを実際に示すために、インターネットで良いUMLクラス図と、あまり良くないUMLクラス図を探し、F#のコードに変換してみました。両者を比較してみてください。
 
-## Regular expressions
+## 正規表現
 
-Let's start with a classic one: regular expressions (*[source](http://zenit.senecac.on.ca/wiki/index.php/Interpreter)*)
+まずは、典型的な例として正規表現を取り上げます（*[引用元](https://zenit.senecac.on.ca/wiki/index.php/Interpreter)*）。
 
-Here's the UML diagram:
+UML図はこちらです。
 
 ![](../assets/img/uml-regex.png)
 
-And here's the F# equivalent:
+F#のコードはこちらです。
 
 ```fsharp
 type RegularExpression =
@@ -40,22 +40,22 @@ type RegularExpression =
     | Alternation of RegularExpression * RegularExpression
     | Repetition of RegularExpression 
 
-// An interpreter takes a string input and a RegularExpression
-// and returns a value of some kind    
+// インタプリタは文字列と正規表現を受け取り、
+// 何らかの値を返します。
 type Interpret<'a> =  string -> RegularExpression -> 'a
 ```
 
-That's quite straightforward.
+とても簡単ですね。
 
-## Student enrollment
+## 学生の登録
 
-Here's another classic one: enrollment (*[source](http://www.agilemodeling.com/artifacts/classDiagram.htm)*).
+もう1つの典型的な例として、登録を取り上げます（*[引用元](https://www.agilemodeling.com/artifacts/classDiagram.htm)*）。
 
-Here's the UML diagram:
+UML図はこちらです。
 
 ![](../assets/img/uml-enrollment.png)
 
-And here's the F# equivalent:
+F#のコードはこちらです。
 
 ```fsharp
 type Student = {
@@ -91,7 +91,7 @@ type Enrollment = {
 type EnrollmentRepository = Enrollment list
 
 // ==================================
-// activities / use-cases / scenarios
+// 処理 / ユースケース / シナリオ
 // ==================================
 
 type IsElegibleToEnroll = Student -> Seminar -> bool
@@ -99,30 +99,30 @@ type GetSeminarsTaken = Student -> EnrollmentRepository -> Seminar list
 type AddStudentToWaitingList = Student -> Seminar -> Seminar 
 ```
 
-The F# mirrors the UML diagram, but I find that by writing functions for all the activities rather than drawing pictures, holes in the original requirements are revealed.
+F#はUML図と同じ内容を表現していますが、図を描くよりも、すべての処理を関数として書き出すことで、元の要件の穴が明らかになると感じています。
 
-For example, in the `GetSeminarsTaken` method in the UML diagram, where is the list of seminars stored?
-If it is in the `Student` class (as implied by the diagram) then we have a mutual recursion between `Student` and `Seminar` 
-and the whole tree of every student and seminar is interconnected and must be loaded at the same time unless [hacks are used](https://stackoverflow.com/questions/19371214/entity-framework-code-first-circular-dependices).
+例えば、UML図の`GetSeminarsTaken`メソッドでは、セミナーのリストはどこに保存されているのでしょうか？
+もしそれが`Student`クラスにあるとしたら（図から暗示されるように）、`Student`と`Seminar`の間で相互参照が発生し、[特別な処理をしない限り](https://stackoverflow.com/questions/19371214/entity-framework-code-first-circular-dependices)、
+すべての学生とセミナーの情報がつながってしまい、全体を一度に読み込まないといけなくなります。
 
-Instead, for the functional version, I created an `EnrollmentRepository` to decouple the two classes.
+そこで、関数型バージョンでは、2つのクラスを分離するために`EnrollmentRepository`を作成しました。
 
-Similarly, it's not clear how enrollment actually works, so I created an `EnrollStudent` function to make it clear what inputs are needed.
+同様に、登録がどのように動作するのか明確ではないので、必要な入力を明確にするために`EnrollStudent`関数を作成しました。
 
 ```fsharp
 type EnrollStudent = Student -> Seminar -> Enrollment option
 ```
 
-Because the function returns an `option`, it is immediately clear that enrollment might fail (e.g student is not eligible to enroll, or is enrolling twice by mistake).
+関数が`option`を返すので、登録が失敗する可能性がある（例えば、学生が登録資格を持っていない、または誤って2回登録しようとしている）ことがすぐに分かります。
 
 
-## Order and customer
+## 注文と顧客
 
-Here's another one (*[source](http://www.tutorialspoint.com/uml/uml_class_diagram.htm)*).
+また別の例を見てみましょう（*[引用元](https://www.tutorialspoint.com/uml/uml_class_diagram.htm)*）。
 
 ![](../assets/img/uml-order.png)
 
-And here's the F# equivalent:
+これをF#で書くと、以下のようになります。
 
 ```fsharp
 type Customer = {name:string; location:string}
@@ -133,39 +133,39 @@ type Order =
     | Normal of NormalOrder
     | Special of SpecialOrder 
 
-// these three operations work on all orders
+// これらの3つの操作は、どの注文にも共通です。
 type Confirm =  Order -> Order 
 type Close =  Order -> Order 
 type Dispatch =  Order -> Order 
 
-// this operation only works on Special orders
+// この操作は、SpecialOrderにのみ適用できます
 type Receive =  SpecialOrder -> SpecialOrder
 ```
 
-I'm just copying the UML diagram, but I have to say that I hate this design. It's crying out to have more fine grained states. 
+UML図をそのままコードにしていますが、正直、この設計はあまり好きではありません。状態をもっと細かく分けた方が良いでしょう。
 
-In particular, the `Confirm` and `Dispatch` functions are horrible -- they give no idea of what else is needed as input or what the effects will be.
-This is where writing real code can force you to think a bit more deeply about the requirements.
+特に、`Confirm`関数と`Dispatch`関数は、何を入力として受け取り、何を出力するのか、全く分かりません。
+実際のコードを書くことで、要件についてより深く考えることができるようになるのです。
 
-## Order and customer, version 2
+## 注文と顧客 バージョン2
 
-Here's a much better version of orders and customers (*[source](http://edn.embarcadero.com/article/31863)*).
+注文と顧客の、より良いバージョンを見てみましょう（*[引用元](https://edn.embarcadero.com/article/31863)*）。
 
 ![](../assets/img/uml-order2.png)
 
-And here's the F# equivalent:
+これをF#で書くと、以下のようになります。
 
 ```fsharp
 type Date = System.DateTime
 
-// == Customer related ==
+// == 顧客関連 ==
 
 type Customer = {
     name:string
     address:string
     }
 
-// == Item related ==
+// == 商品関連 ==
 
 type [<Measure>] grams
 
@@ -178,7 +178,7 @@ type Qty = int
 type Price = decimal
 
 
-// == Payment related ==
+// == 支払い関連 ==
 
 type PaymentMethod = 
     | Cash
@@ -190,7 +190,7 @@ type Payment = {
     paymentMethod : PaymentMethod 
     }
 
-// == Order related ==
+// == 注文関連 ==
 
 type TaxStatus = Taxable | NonTaxable
 type Tax = decimal
@@ -212,7 +212,7 @@ type Order = {
     }
 
 // ==================================
-// activities / use-cases / scenarios
+// 処理 / ユースケース / シナリオ
 // ==================================
 type GetPriceForQuantity = Item -> Qty -> Price
 
@@ -221,30 +221,30 @@ type CalcTotal = Order -> Price
 type CalcTotalWeight = Order -> int<grams>
 ```
 
-I've done some minor tweaking, adding units of measure for the weight, creating types to represent `Qty` and `Price`.
+ここでは、重さの単位を追加したり、`Qty`と`Price`を表す型を作成したりするなど、少しだけ変更を加えています。
 
-Again, this design might be improved with more fine grained states, 
-such as creating a separate `AuthorizedPayment` type (to ensure that an order can only be paid with authorized payments)
-and a separate `PaidOrder` type (e.g. to stop you paying for the same order twice).
+この設計も、`AuthorizedPayment`型（注文の支払いは、承認された支払いのみ受け付けるようにするため）や
+`PaidOrder`型（同じ注文に2回支払うことを防ぐため）など、
+状態をより細かく分けることで、さらに改善できる可能性があります。
 
-Here's the kind of thing I mean:
+例えば、以下のような感じです。
 
 ```fsharp
-// Try to authorize a payment. Note that it might fail
+// 支払いの承認を試みます。失敗する可能性があることに注意してください。
 type Authorize =  UnauthorizedPayment -> AuthorizedPayment option
 
-// Pay an unpaid order with an authorized payment.
+// 未払いの注文に対し、承認された支払いを適用します。
 type PayOrder = UnpaidOrder -> AuthorizedPayment -> PaidOrder
 ```
 
 
-## Hotel Booking
+## ホテルの予約
 
-Here's one from the JetBrains IntelliJ documentation (*[source](https://www.jetbrains.com/idea/help/viewing-diagram.html)*).
+JetBrains IntelliJのドキュメントにあった例を紹介します（*[引用元](https://www.jetbrains.com/idea/help/viewing-diagram.html)*）。
 
 ![](../assets/img/uml-hotel.png)
 
-Here's the F# equivalent:
+F#で書くと、こうなります。
 
 ```fsharp
 type Date = System.DateTime
@@ -284,7 +284,7 @@ type Booking = {
     beds: int
     }
 
-// What are these?!? And why are they in the domain?
+// これらは一体何でしょう？ なぜドメインオブジェクトに含まれているのでしょう？
 type EntityManager = unit
 type FacesMessages = unit
 type Events = unit
@@ -319,21 +319,21 @@ type RegisterAction = {
     }
 ```
 
-I have to stop there, sorry. The design is driving me crazy. I can't even.
+もう我慢できません。ここで終わりにします。
 
-What are these `EntityManager` and `FacesMessages` fields? And logging is important of course, but why is `Log` a field in the domain object?
+`EntityManager`や`FacesMessages`フィールドは何のためにあるのでしょう？ ログは確かに重要ですが、なぜドメインオブジェクトに`Log`フィールドがあるのでしょう？
 
-By the way, in case you think that I am deliberately picking bad examples of UML design, all these diagrams come from the top results in an image search for ["uml class diagram"](https://www.google.com/search?q=uml+class+diagram&tbm=isch).
+誤解しないでください。私がわざとUML設計の悪い例を選んでいるのではありません。これらの図はすべて、["uml class diagram"](https://www.google.com/search?q=uml+class+diagram&tbm=isch)で画像検索した上位の結果から引用したものです。
 
-## Library
+## 図書館
 
-This one is better, a library domain (*[source](http://www.uml-diagrams.org/library-domain-uml-class-diagram-example.html)*).
+今度は、図書館のドメインです。少し良くなってきましたね（*[引用元](https://www.uml-diagrams.org/library-domain-uml-class-diagram-example.html)*）。
 
 ![](../assets/img/uml-library.png)
 
-Here's the F# equivalent. Note that because it is code, I can add comments to specific types and fields, which is doable but awkward with UML.
+F# で書くと、こうなります。コードなので、UMLでは難しい、特定の型やフィールドにコメントを追加できます。
 
-Note also that I can say `ISBN: string option` to indicate an optional ISBN rather that the awkward `[0..1]` syntax.
+また、`ISBN: string option`のように書くことで、ISBNが省略可能であることを表現できます。UMLの `[0..1]`のような書き方は、少し分かりにくいですね。
 
 ```fsharp
 type Author = {
@@ -357,21 +357,21 @@ type Library = {
     address: string
     }
 
-// Each physical library item - book, tape cassette, CD, DVD, etc. could have its own item number. 
-// To support it, the items may be barcoded. The purpose of barcoding is 
-// to provide a unique and scannable identifier that links the barcoded physical item 
-// to the electronic record in the catalog. 
-// Barcode must be physically attached to the item, and barcode number is entered into 
-// the corresponding field in the electronic item record.
-// Barcodes on library items could be replaced by RFID tags. 
-// The RFID tag can contain item's identifier, title, material type, etc. 
-// It is read by an RFID reader, without the need to open a book cover or CD/DVD case 
-// to scan it with barcode reader.
+// 図書館にある個々の資料 - 書籍、カセットテープ、CD、DVDなどは、それぞれ独自のアイテム番号を持つことができます。
+// これをサポートするために、資料にバーコードを付けることがあります。バーコードの目的は、
+// バーコード化された物理的な資料と、目録内の電子記録を結びつける、
+// 一意でスキャン可能な識別子を提供することです。
+// バーコードは資料に物理的に添付する必要があり、
+// バーコード番号は電子資料レコードの対応するフィールドに入力されます。
+// 図書館資料のバーコードは、RFIDタグに置き換えることができます。
+// RFIDタグには、資料の識別子、タイトル、資料の種類などを含めることができます。
+// RFIDタグはRFIDリーダーで読み取ることができ、
+// バーコードリーダーでスキャンするために書籍の表紙やCD/DVDケースを開ける必要はありません。
 type BookItem = {
     barcode: string option
     RFID: string option
     book: Book
-    /// Library has some rules on what could be borrowed and what is for reference only. 
+    /// 図書館には、貸出可能な資料と閲覧のみの資料に関するルールがあります。
     isReferenceOnly: bool
     belongsTo: Library
     }
@@ -394,8 +394,8 @@ type Account = {
     number: int
     opened: Date
     
-    /// Rules are also defined on how many books could be borrowed 
-    /// by patrons and how many could be reserved.
+    /// 利用者が何冊の本を借りることができ、
+    /// 何冊の本を予約できるかについてのルールも定義されています。
     history: History list
     
     state: AccountState
@@ -409,7 +409,7 @@ and History = {
     }
 ```
 
-Since the Search and Manage interfaces are undefined, we can just use placeholders (`unit`) for the inputs and outputs.
+検索インターフェースと管理インターフェースは定義されていないので、入力と出力にはプレースホルダー（`unit`）を使います。
 
 ```fsharp
 type Librarian = {
@@ -418,7 +418,7 @@ type Librarian = {
     position: string
     }
 
-/// Either a patron or a librarian can do a search
+/// 利用者と司書の両方が検索できます。
 type SearchInterfaceOperator =
     | Patron of Patron
     | Librarian of Librarian
@@ -430,31 +430,31 @@ type SearchInterface = SearchInterfaceOperator -> Catalogue -> SearchRequest -> 
 type ManageRequest = unit // to do
 type ManageResult = unit // to do
 
-/// Only librarians can do management
+/// 司書のみが管理できます。
 type ManageInterface = Librarian -> Catalogue -> ManageRequest -> ManageResult   
 ```
 
-Again, this might not be the perfect design. For example, it's not clear that only `Active` accounts could borrow a book, which I might represent in F# as: 
+これも完璧な設計とは言えませんね。例えば、`Active`アカウントだけが本を借りられるということが、はっきりとは分かりません。F#では、以下のように表現できます。
 
 ```fsharp
 type Account = 
     | Active of ActiveAccount
     | Closed of ClosedAccount
     
-/// Only ActiveAccounts can borrow
+/// ActiveAccountだけが本を借りられます。
 type Borrow = ActiveAccount -> BookItem -> History
 ```
 
-If you want to see a more modern approach to modelling this domain using CQRS and event sourcing, see [this post](http://thinkbeforecoding.com/post/2009/11/02/Event-Sourcing-and-CQRS-Lets-use-it).
+CQRSとイベントソーシングを使った、このドメインのより現代的なモデリング方法を見たい場合は、[この記事](https://thinkbeforecoding.com/post/2009/11/02/Event-Sourcing-and-CQRS-Lets-use-it)を参照してください。
 
 
-## Software licensing
+## ソフトウェアライセンス
 
-The final example is from a software licensing domain (*[source](http://www.uml-diagrams.org/software-licensing-domain-diagram-example.html?context=cls-examples)*).
+最後の例は、ソフトウェアのライセンスに関するものです（*[引用元](https://www.uml-diagrams.org/software-licensing-domain-diagram-example.html?context=cls-examples)*）。
 
 ![](../assets/img/uml-hasp.png)
 
-Here's the F# equivalent. 
+F#で書くと、以下のようになります。
 
 ```fsharp
 open System
@@ -463,7 +463,7 @@ type String50 = string
 type String5 = string
 
 // ==========================
-// Customer-related
+// 顧客関連
 // ==========================
 
 type AddressDetails = {
@@ -486,7 +486,7 @@ type IndividualCustomer = {
     middleName : string option
     email : string
     phone : string option
-    locale : string option // default :  "English"
+    locale : string option // デフォルトは英語
     billing : AddressDetails
     shipping : AddressDetails
     }
@@ -496,7 +496,7 @@ type Contact = {
     lastName : string
     middleName : string option
     email : string
-    locale : string option // default :  "English"
+    locale : string option // デフォルトは英語
     }
 
 type Company = {
@@ -514,10 +514,10 @@ type Customer =
     | Company of Company 
 
 // ==========================
-// Product-related
+// 製品関連
 // ==========================
 
-/// Flags can be ORed together
+/// フラグはORで組み合わせることができます
 [<Flags>] 
 type LockingType =
     | HL 
@@ -555,7 +555,7 @@ type Product =
     | ProvisionalProduct of ProductInfo * baseProduct:Product 
 
 // ==========================
-// Entitlement-related
+// 資格関連
 // ==========================
 
 type EntitlementType = 
@@ -575,25 +575,25 @@ type Entitlement = {
     }
 ```
 
-This diagram is just pure data and no methods, so there are no function types.  I have a feeling that there are some important business rules that have not been captured.
+この図はデータだけで、メソッドがないので、関数の型はありません。何か重要なビジネスルールが表現できていないような気がします。
 
-For example, if you read the comments in the source, you'll see that there are some interesting constraints around `EntitlementType` and `LockingType`.
-Only certain locking types can be used with certain entitlement types.
+例えば、元の資料のコメントを読むと、`EntitlementType`と`LockingType`に、ある興味深い制約があることが分かります。
+特定のロックタイプは、特定の資格タイプでのみ使用できるのです。
 
-That might be something that we could consider modelling in the type system, but I haven't bothered. I've just tried to reproduct the UML as is.
+これは型システムでモデル化できるかもしれませんが、今回はUMLをそのまま再現することにしました。
 
-## Summary
+## まとめ
 
-I think that's enough to get the idea. 
+もうお分かりいただけたでしょうか？
 
-My general feeling about UML class diagrams is that they are OK for a sketch, if a bit heavyweight compared to a few lines of code.
+UMLクラス図は、スケッチとしては良いと思います。ただし、数行のコードと比べると、少し複雑すぎる気もします。
 
-For detailed designs, though, they are not nearly detailed enough. Critical things like context and dependencies are not at all obvious.
-In my opinion, none of the UML diagrams I've shown have been good enough to write code from, even as a basic design.
+しかし、詳細な設計を描くには、UMLクラス図は情報が足りません。コンテキストや依存関係のような重要なものが、全く表現されていないのです。
+私の意見では、ここに示したUML図はどれも、コードを書くための設計としては不十分です。
 
-Even more seriously, a UML diagram can be very misleading to non-developers. It looks "official" and can give the impression that the design has been thought about deeply,
-when in fact the design is actually shallow and unusable in practice.
+さらに、UML図は、開発者以外の人を誤解させてしまう可能性があります。
+UML図は「公式」に見え、実際には設計が浅く、実用できないにもかかわらず、深く考えられた設計だという印象を与えてしまうことがあるのです。
 
-Disagree? Let me know in the comments!  
+ご意見はありますか？ コメントで教えてください！
 
 
