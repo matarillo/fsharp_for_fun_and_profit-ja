@@ -3,7 +3,7 @@ layout: post
 title: "エンタープライズ三目並べ"
 description: "純粋関数型で実装するときの設計判断をウォークスルーする"
 categories: ["実践例"]
-seriesId: "注釈付きチュートリアル"
+seriesId: "注釈付きウォークスルー"
 seriesOrder: 5
 ---
 

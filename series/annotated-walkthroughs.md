@@ -1,20 +1,20 @@
 ---
 layout: series_index
-title: "The 'Annotated walkthroughs' series"
-seriesIndexId: "Annotated walkthroughs"
+title: "「注釈付きウォークスルー」シリーズ"
+seriesIndexId: "注釈付きウォークスルー"
 ---
 
-One comment I hear often is a complaint about the gap between theory and practice in F# and functional programming in general.
-In other words, you know the theory, but how do you actually design and implement an application using FP principles?
+F# や関数型プログラミング全般についてよく聞く意見の一つに、理論と実践のギャップに関する不満があります。
+つまり、理論は分かっても、FPの原則を使って実際にアプリケーションを設計・実装するにはどうすればいいのか、ということです。
 
-So I thought it might be useful to show you how I personally would go about designing and implementing some little applications from beginning to end.
+そこで、ちょっとしたアプリケーションを最初から最後まで設計・実装していく過程をお見せするのが役立つかもしれないと考えました。
 
-These will be sort of annotated live coding sessions. I'll take you through my thought process at each stage, including backtracking and refactoring.
+これはいわば、注釈付きのライブコーディングセッションのようなものです。各段階における私の思考プロセス、手戻りやリファクタリングも含めて、すべてお見せします。
 
 
-* [Calculator Walkthrough: Part 1](../posts/calculator-design.md). The type-first approach to designing a Calculator.
-* [Calculator Walkthrough: Part 2](../posts/calculator-implementation.md). Testing the design with a trial implementation.
-* [Calculator Walkthrough: Part 3](../posts/calculator-complete-v1.md). Adding the services and user interface, and dealing with disaster.
-* [Calculator Walkthrough: Part 4](../posts/calculator-complete-v2.md). Designing using a state machine.
-* [Enterprise Tic-Tac-Toe](../posts/enterprise-tic-tac-toe.md). A walkthrough of the design decisions in a purely functional implementation.
-* [Enterprise Tic-Tac-Toe, part 2](../posts/enterprise-tic-tac-toe-2.md). In which I throw away the previous design, and switch to a capability-centric approach.
+* [電卓のウォークスルー: パート 1](../posts/calculator-design.md)。 型ファーストのアプローチで電卓を設計する。
+* [電卓のウォークスルー: パート 2](../posts/calculator-implementation.md)。 仮実装で設計を検証する。
+* [電卓のウォークスルー: パート 3](../posts/calculator-complete-v1.md)。 サービスとユーザーインターフェースの追加、そして災難への対処。
+* [電卓のウォークスルー: パート 4](../posts/calculator-complete-v2.md)。 ステートマシンを使用した設計。
+* [エンタープライズ三目並べ](../posts/enterprise-tic-tac-toe.md)。 純粋関数型で実装するときの設計判断をウォークスルーする。
+* [エンタープライズ三目並べ パート 2](../posts/enterprise-tic-tac-toe-2.md)。 過去の設計を捨て、ケイパビリティ中心のアプローチへ。

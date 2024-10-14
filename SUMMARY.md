@@ -188,11 +188,12 @@
 * [実践例: コマンドライン引数の解析](posts/pattern-matching-command-line.md)
 * [実践例: ローマ数字](posts/roman-numerals.md)
 * [「解説付きローマ数字カタ」の解説](posts/roman-numeral-kata.md)
-* [電卓のウォークスルー: パート1](posts/calculator-design.md)
+* [「注釈付きウォークスルー」 シリーズ](series/annotated-walkthroughs.md)       
+  * [電卓のウォークスルー: パート1](posts/calculator-design.md)
   * [電卓のウォークスルー: パート2](posts/calculator-implementation.md)
   * [電卓のウォークスルー: パート3](posts/calculator-complete-v1.md)
   * [電卓のウォークスルー: パート4](posts/calculator-complete-v2.md)
-* [エンタープライズ三目並べ](posts/enterprise-tic-tac-toe.md).
+  * [エンタープライズ三目並べ](posts/enterprise-tic-tac-toe.md).
   * [エンタープライズ三目並べ パート2](posts/enterprise-tic-tac-toe-2.md)
 * [ゼロからJSONパーサーを書く](posts/understanding-parser-combinators-4.md)
 

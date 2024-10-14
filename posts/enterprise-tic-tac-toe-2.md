@@ -3,7 +3,7 @@ layout: post
 title: "エンタープライズ三目並べ パート2"
 description: "過去の設計を捨て、ケイパビリティ中心のアプローチへ"
 categories: ["実践例"]
-seriesId: "注釈付きチュートリアル"
+seriesId: "注釈付きウォークスルー"
 seriesOrder: 6
 ---
 

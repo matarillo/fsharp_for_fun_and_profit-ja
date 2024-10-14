@@ -3,7 +3,7 @@ layout: post
 title: "電卓のウォークスルー: パート 2"
 description: "仮実装で設計を検証する"
 categories: ["実践例"]
-seriesId: "注釈付きチュートリアル"
+seriesId: "注釈付きウォークスルー"
 seriesOrder: 2
 
 ---

@@ -3,7 +3,7 @@ layout: post
 title: "電卓のウォークスルー: パート 3"
 description: "サービスとユーザーインターフェースの追加、そして災難への対処"
 categories: ["実践例"]
-seriesId: "注釈付きチュートリアル"
+seriesId: "注釈付きウォークスルー"
 seriesOrder: 3
 ---
 
