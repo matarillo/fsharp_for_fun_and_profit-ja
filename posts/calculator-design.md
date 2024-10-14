@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "電卓のチュートリアル: パート 1"
+title: "電卓のウォークスルー: パート 1"
 description: "型ファーストのアプローチで電卓を設計する"
 categories: ["実践例", "ドメイン駆動設計"]
 seriesId: "注釈付きチュートリアル"

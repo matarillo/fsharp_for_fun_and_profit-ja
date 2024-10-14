@@ -188,10 +188,10 @@
 * [実践例: コマンドライン引数の解析](posts/pattern-matching-command-line.md)
 * [実践例: ローマ数字](posts/roman-numerals.md)
 * [「解説付きローマ数字カタ」の解説](posts/roman-numeral-kata.md)
-* [電卓のチュートリアル: パート1](posts/calculator-design.md)
-  * [電卓のチュートリアル: パート2](posts/calculator-implementation.md)
-  * [電卓のチュートリアル: パート3](posts/calculator-complete-v1.md)
-  * [電卓のチュートリアル: パート4](posts/calculator-complete-v2.md)
+* [電卓のウォークスルー: パート1](posts/calculator-design.md)
+  * [電卓のウォークスルー: パート2](posts/calculator-implementation.md)
+  * [電卓のウォークスルー: パート3](posts/calculator-complete-v1.md)
+  * [電卓のウォークスルー: パート4](posts/calculator-complete-v2.md)
 * [エンタープライズ三目並べ](posts/enterprise-tic-tac-toe.md).
   * [エンタープライズ三目並べ パート2](posts/enterprise-tic-tac-toe-2.md)
 * [ゼロからJSONパーサーを書く](posts/understanding-parser-combinators-4.md)
@@ -200,7 +200,7 @@
 
 * [静的型付け関数型プログラミング言語を使わない10の理由](posts/ten-reasons-not-to-use-a-functional-programming-language.md)
 * [なぜモナドチュートリアルを書かないのか](posts/why-i-wont-be-writing-a-monad-tutorial.md)
-* [あなたのプログラミング言語は非常識ですか？](posts/is-your-language-unreasonable.md)
+* [そのプログラミング言語は不合理ですか？](posts/is-your-language-unreasonable.md)
 * [くだらない UML 図なんか要らない](posts/no-uml-diagrams.md)
 * [内向型と外向型プログラミング言語](posts/introvert-vs-extrovert.md)
 * [コンパイラ指令で型安全性を犠牲にして高速化](posts/typesafe-performance-with-compiler-directives.md)

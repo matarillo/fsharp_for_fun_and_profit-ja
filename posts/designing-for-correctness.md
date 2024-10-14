@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "実例：正しさのための設計"
+title: "実践例：正しさのための設計"
 description: "不正な状態を表現不可能にする方法"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"

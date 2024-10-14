@@ -40,7 +40,7 @@ hasNoCode: 1
 * [Reader モナド](../posts/elevated-world-6.md): Reader モナドの再発明
 * [Map, bind, apply, lift, sequence, traverse](../series/map-and-bind-and-apply-oh-my.md): ジェネリックデータ型を扱うためのコア関数の一部を説明するシリーズ
 * [つらくないモノイド](../posts/monoids-without-tears.md): 一般的な関数型パターンを、ほとんど数学を使わずに解説します。
-* [フォールドと再帰型](../series/recursive-types-and-folds.md): 再帰型、カタモーフィズム、末尾再帰、左フォールドと右フォールドの違いなどについて説明します。
+* [畳み込みと再帰型](../series/recursive-types-and-folds.md): 再帰型、カタモーフィズム、末尾再帰、左畳み込みと右畳み込みの違いなどについて説明します。
 * [パーサーコンビネータの理解](../posts/understanding-parser-combinators.md): パーサーコンビネータライブラリをゼロから作成します。
 * [タートルを見る13の方法](../posts/13-ways-of-looking-at-a-turtle.md): Stateモナド、エージェント、インタープリターなど、さまざまな手法を使ってタートルグラフィック API を実装します。
 
@@ -48,13 +48,13 @@ hasNoCode: 1
 
 これらの記事では、コードを大量に含んだ詳細な実践例を提供します。
 
-* [正しい設計](../posts/designing-for-correctness.md): 不正な状態を表現不可能にする方法（ショッピングカートの例）。
+* [正しさのための設計](../posts/designing-for-correctness.md): 不正な状態を表現不可能にする方法（ショッピングカートの例）。
 * [スタックベースの電卓](../posts/stack-based-calculator.md): コンビネータのパワーをデモするためにシンプルなスタックを使用します。
-* [コマンドラインの解析](../posts/pattern-matching-command-line.md): カスタム型と組み合わせたパターンマッチングの使用。
+* [コマンドライン引数の解析](../posts/pattern-matching-command-line.md): カスタム型と組み合わせたパターンマッチングの使用。
 * [ローマ数字](../posts/roman-numerals.md): もう一つのパターンマッチングの例
-* [電卓ウォークスルー](../posts/calculator-design.md): 電卓を設計するための型優先アプローチ
-* [エンタープライズ三目並べ](../posts/enterprise-tic-tac-toe.md): 純粋な関数型実装における設計上の意思決定のウォークスルー
-* [JSON パーサーを書く](../posts/understanding-parser-combinators-4.md)
+* [電卓のウォークスルー](../posts/calculator-design.md): 電卓を設計するための型優先アプローチ
+* [エンタープライズ三目並べ](../posts/enterprise-tic-tac-toe.md): 純粋関数型で実装するときの設計判断をウォークスルーする
+* [JSONパーサーを書く](../posts/understanding-parser-combinators-4.md)
 
 ## F# の特定のトピック
 
@@ -71,7 +71,7 @@ hasNoCode: 1
 
 制御フロー:
 
-* [Match..with 式](../posts/match-expression.md) と [マッチングを隠すためにFoldを作成する](../posts/match-expression.md#folds)
+* [match..with 式](../posts/match-expression.md) と [マッチングロジックを隠す「畳み込み」関数の作成](../posts/match-expression.md#folds)
 * [if-then-else とループ](../posts/control-flow-expressions.md)
 * [例外](../posts/exceptions.md)
 
@@ -85,7 +85,7 @@ hasNoCode: 1
 
 ## 物議を醸す記事
 
-* [あなたのプログラミング言語は理不尽ですか？](../posts/is-your-language-unreasonable.md) つまり、予測可能性がなぜ重要なのか
-* [「ローマ数字のカタと解説」に関するコメント](../posts/roman-numeral-kata.md) ローマ数字のカタに対する私のアプローチ
-* [静的に型付けされた関数型プログラミング言語を使用しない 10 の理由](../posts/ten-reasons-not-to-use-a-functional-programming-language.md) 理解できないものへの不満
+* [そのプログラミング言語は不合理ですか？](../posts/is-your-language-unreasonable.md) あるいは、予測可能性の重要性について
+* [「解説付きローマ数字カタ」の解説](../posts/roman-numeral-kata.md) ローマ数字カタへの私のアプローチ
+* [静的型付け関数型プログラミング言語を使わない10の理由](../posts/ten-reasons-not-to-use-a-functional-programming-language.md) 理解できないものに対する不満
 * [くだらない UML 図なんか要らない](../posts/no-uml-diagrams.md) つまり、多くの場合、クラス図に UML を使用する必要はありません。

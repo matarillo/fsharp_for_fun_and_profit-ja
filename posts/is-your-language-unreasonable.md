@@ -1,116 +1,116 @@
 ---
 layout: post
-title: "Is your programming language unreasonable?"
-description: "or, why predictability is important"
+title: "そのプログラミング言語は不合理ですか？"
+description: "あるいは、予測可能性の重要性について"
 categories: ["F# vs C#", "正確性"]
 image: "/assets/img/safety_first.jpg"
 ---
 
-As should be obvious, one of the goals of this site is to persuade people to take F# seriously as a general purpose development language.
+このサイトの目的は、F#を汎用的な開発言語として、多くの人に使ってもらうことです。
 
-But as functional idioms have become more mainstream, and C# has added functional capabilities such as lambdas and LINQ, it seems like C# is "catching up" with F# more and more. 
+関数型プログラミングが普及し、C#にもラムダ式やLINQのような関数型プログラミングの機能が追加されてくると、C#がF#に追いついてきているように思えます。
 
-So, ironically, I've now started to hear people say things like this:
+皮肉なことに、最近よく聞くようになった意見があります。
 
-* "C# already has most of the features of F#, so why should I bother to switch?"*
-* "There is no need to change. All we have do is wait a couple of years and C# will get many of the F# features that provide the most benefits."
-* "F# is slightly better than C#, but not so much that it's really worth the effort to move towards it." 
-* "F# seems really nice, even if it's a bit intimidating. But I can't see a practical purpose to use it over C#." 
+* 「C#にはF#の機能がほとんど備わっているので、わざわざF#に乗り換える必要はないでしょう？」
+* 「変更する必要はありません。数年待てば、C#にF#の便利な機能が取り込まれるでしょう。」
+* 「F#はC#より少し良いですが、乗り換えるほどではありません。」
+* 「F#は少し難しそうですが、良さそうです。でも、C#じゃなくてF#を使う理由がわかりません。」
 
-No doubt, the same comments are being made in the JVM ecosystem about Scala and Clojure vs. Java, now that Java has lambdas too.
+Javaにラムダ式が追加された今、Javaの世界でも、ScalaやClojureとJavaを比べて、同じようなことを言っている人がいるのでしょう。
 
-So for this post, I'm going to stray away from F#, and focus on C# (and by proxy, other mainstream languages),
-and try to demonstrate that, even with all the functional features in the world, programming in C# will never be the same as programming in F#.
+今回は、F#のことは一旦忘れて、C#（そして他の一般的な言語）に注目します。
+そして、C#でのプログラミングは、どんなに関数型プログラミングの機能を充実させても、F#でのプログラミングとは違うということを示したいと思います。
 
-Before I start, I want to make it clear that I am *not* hating on C#. As it happens I like C# very much; it is one of my favorite mainstream languages,
-and it has evolved to be very powerful while being consistent and backwards compatible, which is a hard thing to pull off.
+その前に、私がC#を嫌っている*わけではない*ことを、はっきりさせておきます。私はC#がとても好きです。C#は、私が好きな主流言語の一つです。
+C#は、一貫性と過去のバージョンとの互換性を保ちながら、とても強力に進化してきました。これは簡単なことではありません。
 
-But C# is not perfect. Like most mainstream OO languages, it contains some design decisions which no amount of LINQ or lambda goodness can compensate for.
+しかしC#は完璧ではありません。他の多くのオブジェクト指向言語と同じように、C#には、LINQやラムダ式の良さでは補えない設計上の問題点がいくつかあります。
 
-In this post, I'll show you some of the issues that these design decisions cause, and suggest some ways to improve the language to avoid them.
+この記事では、C#の設計上の問題点によって起こる問題をいくつか紹介し、それを解決するために言語を改善する方法を提案します。
 
-*(I'm now going to don my flameproof suit. I think I might need it!)*
+*(炎上対策の準備をしておきます。必要になるかもしれません！)*
 
 ----
 
-UPDATE: Many people have [seriously misread](http://www.washingtonpost.com/local/serious-reading-takes-a-hit-from-online-scanning-and-skimming-researchers-say/2014/04/06/088028d2-b5d2-11e3-b899-20667de76985_story.html) this post, it seems. So let me be clear:
+更新：多くの人がこの記事を[誤解している](https://www.washingtonpost.com/local/serious-reading-takes-a-hit-from-online-scanning-and-skimming-researchers-say/2014/04/06/088028d2-b5d2-11e3-b899-20667de76985_story.html)ようです。そこで、はっきりさせておきましょう。
 
-* I am *not* saying that statically typed languages are "better" than dynamic languages.
-* I am *not* saying that FP languages are "better" than OO languages.
-* I am *not* saying that being able to reason about code is the most important aspect of a language.
+* 静的型付け言語が動的型付け言語より「優れている」と主張している*わけではありません*。
+* 関数型プログラミング言語がオブジェクト指向言語より「優れている」と主張している*わけではありません*。
+* コードの推論が言語の最も重要な側面だと主張している*わけではありません*。
  
-What I *am* saying is:
+私が言いたいのは、
 
-* Not being able to reason about code has costs that many developers might not be aware of.
-* Therefore, being "reasonable" should be one of the (many) factors under consideration when choosing a programming language, not just ignored due to lack of awareness.
-* *IF* you want to be able to reason about your code, *THEN* it will be much easier if your language supports the features that I mention.
-* The fundamental paradigm of OO (object-identity, behavior-based) is not compatible with "reasonability", and so it will be hard to retrofit existing OO languages to add this quality.
+* コードの推論ができないことには、多くの開発者が気づいていないコストがかかるということです。
+* ですから、「合理的であること」は、プログラミング言語を選ぶ上で考慮すべき点の一つであり、認識不足のために無視すべきではありません。
+* コードの推論を*したいなら*、この記事で紹介する機能が言語でサポートされていると、とても簡単になります。
+* オブジェクト指向の基本的な考え方（オブジェクトの同一性、振る舞いベース）は「合理性」と相容れないので、既存のオブジェクト指向言語にこの性質を追加するのは難しいでしょう。
 
-That's it. Thank you!
+以上です。ありがとうございました。
 
 
 
 
 ----
 
-## What is a "reasonable" programming language, anyway?
+## 「合理的な」プログラミング言語とは？
 
-If you hang around functional programmers, you will often hear the phrase "reason about", as in "we want to reason about our programs".
+関数型プログラマーと話していると、「推論する」という言葉をよく耳にします。「プログラムについて推論したい」のように。
 
-What does that mean? Why use the word "reason" rather than just "understand"?
+どういう意味でしょうか？なぜ「理解する」ではなく「推論する」という言葉を使うのでしょうか？
 
-The use of "reasoning" goes back to mathematics and logic, but I'm going to use a simple and pragmatic definition:
+「推論」という言葉は、数学や論理学で使われていましたが、ここではシンプルで実用的な定義を使います。
 
-* "reasoning about the code" means that you can draw conclusions using only the information that you have *right in front of you*, rather than having to delve into other parts of the codebase.
+* 「コードについて推論する」とは、コードの他の部分を見なくても、目の前にある情報だけで結論を導き出せるということです。
 
-In other words, you can predict the behavior of some code just by looking at it.  You may need to understand the interfaces to other components, but you shouldn't need to look inside them
-to see what they do.
+言い換えれば、コードを見るだけで、そのコードがどのように動くか予測できるということです。
+他の部分とのやり取りを理解する必要があるかもしれませんが、どのように動くかを知るために、中のコードを見る必要はありません。
 
-Since, as developers, we spend most of our time looking at code, this is a pretty important aspect of programming!
+開発者は、ほとんどの時間をコードを見て過ごしているので、これはプログラミングにおいてとても重要なことです。
 
-Of course, there is a huge amount of advice out there on how to do just this: naming guidelines, formatting rules, design patterns, etc., etc.
+もちろん、良いコードを書くためのアドバイスはたくさんあります。命名規約、整形ルール、デザインパターンなどです。
 
-But can your programming language *by itself* help your code to be more reasonable, more predictable?  I think the answer is yes, but I'll let you judge for yourself.
+しかし、プログラミング言語*自体*が、コードをより合理的で予測しやすいものにするのに役立つのでしょうか？私は、答えは「イエス」だと思いますが、それはあなた自身で判断してください。
 
-Below, I'll present a series of code fragments. After each snippet, I'm going to ask you what you think the code does. I've deliberately not shown my own comments so that you can
-think about it and do your own reasoning. After you have thought about it, scroll down to read my opinion.
+以下に、コードの断片をいくつか示します。それぞれのコードの後に、そのコードが何をするかを質問します。
+私はわざとコメントを書いていません。コードについて考えて、あなた自身で推論できるようにです。それについて考えた後、下にスクロールして私の意見を読んでください。
 
 -----
 
-## Example 1 
+## 例1
 
-Let's start off by looking at the following code.
+次のコードを見てみましょう。
 
-* We start with a variable `x` that is assigned the integer `2`.
-* Then `DoSomething` is called with `x` as a parameter.
-* Then `y` is assigned to `x - 1`.
+* 変数`x`に整数`2`を代入します。
+* `x`を引数として、`DoSomething`を呼び出します。
+* `y`に`x - 1`を代入します。
 
-The question I would ask you is simple: What is the value of `y`?
+質問は単純です。`y`の値は何ですか？
 
 ```csharp
 var x = 2;
 DoSomething(x);
 
-// What value is y? 
+// yの値は何ですか？
 var y = x - 1;
 ```
 
-(scroll down for answer)
+（答えを見るには下にスクロールしてください）
 
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
 
-The answer is `-1`.  Did you get that answer?  No? If you can't figure it out, scroll down again.
+答えは`-1`です。わかりましたか？いいえ？もしわからない場合は、もう一度下にスクロールしてください。
 
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
-Trick question!  This code is actually JavaScript! 
+ひっかけ問題でした！ このコードは、実はJavaScriptです。
 
-Here's the whole thing:
+全体は次のとおりです。
 
 ```csharp
 function DoSomething (foo) { x = false}
@@ -120,51 +120,51 @@ DoSomething(x);
 var y = x - 1;
 ```
 
-Yes, it's horrible! `DoSomething` accesses `x` directly rather than through the parameter, and then turns it into a boolean of all things!
-Then, subtracting 1 from `x` casts it from `false` to `0`, so that `y` is `-1`.
+最低ですね。`DoSomething`は、パラメータを使わずに、`x`に直接アクセスし、それをブール値に変えてしまいます。
+そして、`x`から1を引くと、`x`は`false`から`0`に型変換されるので、`y`は`-1`になります。
 
-Don't you totally hate this?  Sorry to mislead you about the language, but I just wanted to demonstrate how annoying it is when the language behaves in unpredictable ways.
+本当にひどいですよね。言語について誤解させてしまい申し訳ありませんが、言語が予測できない動きをすると、どれほど面倒なことかを示したかっただけです。
 
-JavaScript is a very useful and important language. But no one would claim that [reasonableness](http://stackoverflow.com/a/1995298/1136133) was one of its [strengths](../assets/img/javascript-the-good-parts.jpg).
-In fact, most dynamically-typed languages have [quirks that make them hard to reason about](https://www.destroyallsoftware.com/talks/wat) in this way.  
+JavaScriptはとても便利で重要な言語です。しかし、[合理性](https://stackoverflow.com/a/1995298/1136133)がJavaScriptの[強み](../assets/img/javascript-the-good-parts.jpg)の一つだと主張する人はいないでしょう。
+実際、動的な型付け言語のほとんどは、このように[推論しにくい癖](https://www.destroyallsoftware.com/talks/wat)があります。
 
-Thanks to static typing and sensible scoping rules, this kind of thing could never happen in C# (unless you tried really hard!)
-In C#, if you don't match up the types properly, you get a *compile-time* error rather than a *run-time* error. 
+静的な型付けと適切なスコープ規則のおかげで、C#ではこのようなことは起こりません（無理やりやろうとしない限り）。
+C#では、型が正しく一致しないと、実行時にエラーが起こるのではなく、コンパイル時にエラーが起こります。
 
-In other words, C# is much more predictable than JavaScript. Score one for static typing!
+言い換えれば、C#はJavaScriptよりもはるかに予測しやすいということです。静的型付けの利点です。
 
-So now we have our first requirement for making a language predictable:
+これで、言語を予測しやすくするための最初の要件がわかりました。
 
 
-*__How to make your language predictable__*: 
+*__言語を予測可能にするには__*：
 
-1. Variables should not be allowed to change their type.
+1. 変数の型は変更できないようにする。
 
-C# is looking good compared to JavaScript. But we're not done yet...
+JavaScriptと比べると、C#は良さそうです。しかし、まだ終わりではありません。
 
 <br><br><br>
 
-*UPDATE: This is an admittedly silly example. In retrospect, I could have picked a better one.
-Yes, I know that no one sensible would ever do this. The point still stands: the JavaScript language does not prevent you from doing stupid things with implicit typecasts.*
+*更新：これは、確かに馬鹿げた例です。今思えば、もっと良い例を選ぶべきでした。
+分別のある人なら、こんなことはしないことはわかっています。それでも、ポイントは変わりません。JavaScriptは、暗黙の型変換で愚かなことをするのを防いでくれないのです。*
 
 -----
 
-## Example 2 
+## 例2
 
-In this next example, we're going to create two instances of the same `Customer` class, with exactly the same data in them.
+次は、全く同じデータを持つ、同じ`Customer`クラスのインスタンスを2つ作ってみます。
 
-The question is: Are they equal?
+さて、この2つは等しいでしょうか？
 
 ```csharp
-// create two customers
+// 2つの顧客を作る
 var cust1 = new Customer(99, "J Smith");
 var cust2 = new Customer(99, "J Smith");
 
-// true or false?
+// true それとも false?
 cust1.Equals(cust2);
 ```
 
-(scroll down for answer)
+(答えを見るには下にスクロールしてください)
 
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -172,51 +172,51 @@ cust1.Equals(cust2);
 
 
 ```csharp
-// true or false?
+// true それとも false?
 cust1.Equals(cust2);
 ```
 
-Who knows? It depends on how the `Customer` class has been implemented. This code is *not* predictable.
+さあ、どうでしょう？ これは`Customer`クラスがどのように作られているかによって違います。 このコードは*予測できません*。
 
-You'll have to look at whether the class implements `IEquatable` at least,
-and you'll probably have to look at the internals of the class as well to see exactly what is going on.
+少なくとも、クラスが`IEquatable`を実装しているかどうかを確認する必要があります。
+そして、実際に何が起こっているのかを正確に知るには、クラスの中身を見る必要があるでしょう。
 
-*But why is this even an issue?*
+*でも、なぜこれが問題になるのでしょう？*
 
-Let me ask you this:
+こう考えてみてください。
 
-* How often would you NOT want the instances to be equal?  
-* How often have you had to override the `Equals` method?
-* How often have you had a bug caused by *forgetting* to override the `Equals` method?
-* How often have you had a bug caused by mis-implementing `GetHashCode` (such as forgetting to change it when the fields that you compare on change)?
+* これまで、インスタンスを等しくしたくないと思ったことはどのくらいありましたか？
+* これまで、`Equals`メソッドをオーバーライドする必要があったことはどのくらいありましたか？
+* これまで、`Equals`メソッドをオーバーライドするのを*忘れた*ためにバグが発生したことはどのくらいありましたか？
+* これまで、`GetHashCode`の実装を誤ったためにバグが発生したことはどのくらいありましたか？（比較対象のフィールドが変更されたときに変更するのを忘れたなど）
 
-Why not make the objects equal by default, and make reference equality testing the special case?
+オブジェクトが等しいかどうかを判断する際、デフォルトでは値を比較するようにして、参照の比較が必要な場合のみ特別な処理を行うようにするのはどうでしょうか？
 
-So let's add another item to our list. 
+リストに別の項目を追加しましょう。
 
-*__How to make your language predictable__*: 
+*__言語を予測可能にするには__*：
 
-1. Variables should not be allowed to change their type.
-1. **Objects containing the same values should be equal by default.**
+1. 変数の型は変更できないようにする。
+2. **同じ値を持つオブジェクトは、デフォルトで等しくする。**
 
 -----
 
-## Example 3
+## 例3
 
-In this next example, I've got two objects containing exactly the same data, but which are instances of different classes.
+次は、全く同じデータを持つ2つのオブジェクトを作りますが、異なるクラスのインスタンスにします。
 
-The question again is: Are they equal?
+さて、ここでまた同じ質問です。この2つは等しいでしょうか？
 
 ```csharp
-// create a customer and an order
+// 顧客と注文を作る
 var cust = new Customer(99, "J Smith");
 var order = new Order(99, "J Smith");
 
-// true or false?
+// true それとも false?
 cust.Equals(order);
 ```
 
-(scroll down for answer)
+(答えを見るには下にスクロールしてください)
 
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -224,48 +224,48 @@ cust.Equals(order);
 
 
 ```csharp
-// true or false?
+// true それとも false?
 cust.Equals(order);
 ```
 
-Who cares! This is almost certainly a bug! Why are you even comparing two different classes like this in the first place?
+そんな比較に意味はありません！ これはほぼ確実にバグです！そもそも、なぜ2つの異なるクラスを比較するのでしょうか？
 
-Compare their names or ids, certainly, but not the objects themselves.  This should be a compiler error.
+オブジェクト自体を比較するのではなく、名前やIDを比較してください。異なる型のオブジェクトを比較することは、コンパイルエラーになるべきです。
 
-If it isn't, why not? You probably just used the wrong variable name by mistake but now you have a subtle bug in your code. Why does your language let you do this?
+もしコンパイルエラーにならないのであれば、それはなぜでしょうか？ たぶん、あなたは間違った変数名を使ってしまっただけなのに、コードに微妙なバグが潜んでしまうことになります。 なぜ言語はそんなことを許してしまうのでしょうか？
 
-So let's add another item to our list. 
+リストに別の項目を追加しましょう。
 
-*__How to make your language predictable__*: 
+*__言語を予測可能にするには__*：
 
-1. Variables should not be allowed to change their type.
-1. Objects containing the same values should be equal by default.
-1. **Comparing objects of different types is a compile-time error.**
- 
+1. 変数の型は変更できないようにする。
+2. 同じ値を持つオブジェクトは、デフォルトで等しくする。
+3. **異なる型のオブジェクトを比較すると、コンパイル時エラーになる。**
+
 <br><br><br>
  
-*UPDATE: Many people have pointed out that you need this when comparing classes related by inheritance. This is true, of course.
-But what is the cost of this feature? You get the ability to compare subclasses, but you lose the ability to detect accidental errors.*
+*更新：多くの人が、継承関係にあるクラスを比較するときにこれが必要だと指摘しています。もちろん、その通りです。
+しかし、この機能のコストは何でしょうか？サブクラスを比較する機能は得られますが、うっかりミスによるエラーを検出する機能は失われます。*
 
-*Which is more important in practice? That's for you to decide, I just wanted to make it clear that there are costs associated with the status quo, not just benefits.*
+*実際にはどちらが重要でしょうか？それはあなたが決めることです。私は現状維持には利点だけでなくコストも伴うことを明確にしたかっただけです。*
 
 -----
- 
-## Example 4
 
-In this snippet, we're just going to create a `Customer` instance. That's all. Can't get much more basic than that.
+## 例4
+
+このコードでは、`Customer`インスタンスを作るだけです。本当にそれだけ。これ以上シンプルなコードはありません。
 
 ```csharp
-// create a customer
+// 顧客を作成する
 var cust = new Customer();
 
-// what is the expected output?
+// 期待される出力は？
 Console.WriteLine(cust.Address.Country);
 ```
 
-Now the question is: what is the expected output of `WriteLine`?
+さて、質問です。`WriteLine`の出力はどうなるでしょうか？
 
-(scroll down for answer)
+(答えを見るには下にスクロールしてください)
 
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -274,60 +274,60 @@ Now the question is: what is the expected output of `WriteLine`?
 
 
 ```csharp
-// what is the expected output?
+// 期待される出力は？
 Console.WriteLine(cust.Address.Country);
 ```
 
-Who knows?  
+さあ、どうなるでしょう？
 
-It depends on whether the `Address` property is null or not. And that is something you can't tell without looking at the internals of the `Customer` class again.
+これは、`Address`プロパティがnullかどうかによって変わります。そして、それを知るには、また`Customer`クラスの中身を見なければなりません。
 
-Yes, we know that it is a best practice that constructors should initialize all fields at construction time,
-but why doesn't the language enforce it?
+コンストラクターは、オブジェクトを作るときにすべてのフィールドを初期化するべきだというベストプラクティスはありますが、
+なぜ言語はそれを強制しないのでしょうか？
 
-If the address is required, then make it be required in the constructor.
-And if the address is *not* always required, then make it clear that the `Address` property is optional and might be missing.
+もしアドレスが必要なら、コンストラクターで必須にすれば良いのです。
+そして、アドレスが必ずしも必要ないなら、`Address`プロパティはオプションで、値がない場合もあることを明確に示すべきです。
 
-So let's add another item to our list of improvements. 
+リストに項目をもう一つ追加しましょう。
 
-*__How to make your language predictable__*: 
+*__言語を予測可能にするには__*：
 
-1. Variables should not be allowed to change their type.
-1. Objects containing the same values should be equal by default.
-1. Comparing objects of different types is a compile-time error.
-1. **Objects must *always* be initialized to a valid state. Not doing so is a compile-time error.**
+1. 変数の型は変更できないようにする。
+2. 同じ値を持つオブジェクトは、デフォルトで等しくする。
+3. 異なる型のオブジェクトを比較すると、コンパイル時エラーになる。
+4. **オブジェクトは*常に*有効な状態に初期化されなければならない。そうでない場合はコンパイル時エラーになる。**
 
 -----
 
-## Example 5
+## 例5
 
-In this next example, we're going to:
+次の例では、こんなことをやってみます。
 
-* Create a customer.
-* Add it to a set that uses hashing.
-* Do something with the customer object.
-* See if the customer is still in the set.
+* まず、顧客を作ります。
+* それを、ハッシュを使った集合に追加します。
+* そして、その顧客オブジェクトで何らかの処理を行います。
+* 最後に、その顧客がまだ集合に含まれているかどうかを確認します。
 
-What could possibly go wrong?
+何が問題になる可能性があるでしょうか？
 
 ```csharp
-// create a customer
+// 顧客を作成する
 var cust = new Customer(99, "J Smith");
 
-// add it to a set
+// 集合に追加する
 var processedCustomers = new HashSet<Customer>();
 processedCustomers.Add(cust);
 
-// process it
+// 処理を行う
 ProcessCustomer(cust);
 
-// Does the set contain the customer? true or false?
+// 集合に顧客が含まれているか？ true それとも false?
 processedCustomers.Contains(cust);
 ```
 
-So, does the set still contain the customer at the end of this code?
+では、このコードの最後で、集合に顧客はまだ含まれているでしょうか？
 
-(scroll down for answer)
+(答えを見るには下にスクロールしてください)
 
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -335,98 +335,98 @@ So, does the set still contain the customer at the end of this code?
 
 
 ```csharp
-// Does the set contain the customer?
+// 集合に顧客が含まれているか？
 processedCustomers.Contains(cust);
 ```
 
-Maybe. Maybe not.  
+もしかしたら含まれているかもしれませんし、含まれていないかもしれません。
 
-It depends on two things: 
+これは2つの要素に依存します。
 
-* First, does the hash code of the customer depend on a *mutable* field, such as an id. 
-* Second, does `ProcessCustomer` change this field? 
+* 1つ目は、顧客のハッシュコードが、IDなどの*可変*フィールドに依存しているかどうかです。
+* 2つ目は、`ProcessCustomer`がこのフィールドを変更するかどうかです。
 
-If both are true, then the hash will have been changed, and the customer will not longer *appear* to exist in the set (even though it is still in there somewhere!).
+もしこれらの条件が両方とも当てはまる場合、ハッシュ値は変更されてしまい、顧客は集合から見かけ上消えてしまいます（実際にはまだどこかに残っているのですが！）。
 
-This might well cause subtle performance and memory problems (e.g. if the set is a cache).
+これは、パフォーマンスやメモリ使用量に微妙な問題を引き起こす可能性があります（例えば、集合がキャッシュとして使われている場合など）。
 
-How could the language prevent this?
+プログラミング言語はどうすればこの問題を防ぐことができるでしょうか？
 
-One way would be to say that any field or property used in `GetHashCode` must be immutable, while allowing other properties to be mutable. But that is really impractical.
+1つの方法は、`GetHashCode`で使用されるフィールドまたはプロパティは不変でなければならないが、他のプロパティは可変でもよいとすることです。しかし、それは実際には非現実的です。
 
-Better to just make the entire `Customer` class immutable instead!
+代わりに、`Customer`クラス全体を不変にする方が良いでしょう！
 
-Now if the `Customer` class was immutable, and `ProcessCustomer` wanted to make changes, it would have to return a *new version* of the customer, and the code would look like this:
+`Customer`クラスが不変であり、`ProcessCustomer`が変更を加えたい場合は、顧客の*新しいバージョン*を返す必要があり、コードは次のようになります。
 
 ```csharp
-// create a customer
+// 顧客を作成する
 var cust = new ImmutableCustomer(99, "J Smith");
 
-// add it to a set
+// 集合に追加する
 var processedCustomers = new HashSet<ImmutableCustomer>();
 processedCustomers.Add(cust);
 
-// process it and return the changes
+// 処理を行い、変更を返す
 var changedCustomer = ProcessCustomer(cust);
 
-// true or false?
+// true それとも false?
 processedCustomers.Contains(cust);
 ```
 
-Notice that the `ProcessCustomer` line has changed to:
+`ProcessCustomer`の行が以下のように変更されていることに注目してください。
 
 ```csharp
 var changedCustomer = ProcessCustomer(cust);
 ```
 
-It's clear that `ProcessCustomer` has changed something just by looking at this code.
-If `ProcessCustomer` *hadn't* changed anything, it wouldn't have needed to return an object at all.
+`ProcessCustomer`が何かを変更したことは、このコードを見るだけで明らかです。
+`ProcessCustomer`が何も変更*しなかった*場合、オブジェクトを返す必要はまったくありません。
 
-Going back to the question, it's clear that in this implementation the original version of the customer is guaranteed to still be in the set, no matter what `ProcessCustomer` does.
+質問に戻ると、この実装では、`ProcessCustomer`が何をするかに関係なく、元の顧客が集合に含まれていることが保証されていることは明らかです。
 
-Of course, that doesn't solve the issue of whether the new one or the old one (or both) should be in the set.
-But unlike the implementation using the mutable customer, this issue is now staring you in the face and won't go unnoticed accidentally.
+もちろん、新しいものと古いもののどちらを（または両方）集合に入れるべきかという問題は解決しません。
+しかし、可変の顧客を使う実装とは異なり、この問題は明確になり、見落とされることはありません。
 
-So [immutability FTW](http://stackoverflow.com/a/4763485/1136133)!
+というわけで、[不変性は最高](https://stackoverflow.com/a/4763485/1136133)！
 
-So that's another item for our list. 
+リストに項目をもう一つ追加しましょう。
 
-*__How to make your language predictable__*: 
+*__言語を予測可能にするには__*：
 
-1. Variables should not be allowed to change their type.
-1. Objects containing the same values should be equal by default.
-1. Comparing objects of different types is a compile-time error.
-1. Objects must *always* be initialized to a valid state. Not doing so is a compile-time error.
-1. **Once created,  objects and collections *must* be immutable.**
+1. 変数の型は変更できないようにする。
+2. 同じ値を持つオブジェクトは、デフォルトで等しくする。
+3. 異なる型のオブジェクトを比較すると、コンパイル時エラーになる。
+4. オブジェクトは*常に*有効な状態に初期化されなければならない。そうでない場合はコンパイル時エラーになる。
+5. **作成後は、オブジェクトとコレクションは*不変*でなければならない。**
 
-Time for a quick joke about immutability:
+不変性についてのちょっとしたジョーク：
 
-> "How many Haskell programmers does it take to change a lightbulb?"
+> 「電球を変えるには何人のHaskellプログラマーが必要ですか？」
 
-> "Haskell programmers don't "change" lightbulbs, they "replace" them. And you must also replace the whole house at the same time."
+> 「Haskellプログラマーは電球を“変え”ません。“取り替え”ます。それも、家ごとそっくり“取り替え”なければなりません。」
 
-Almost done now -- just one more!
+ほぼ完了ですが、あと一つだけ残っています！
 
 -----
 
-## Example 6
+## 例6
 
-In this final example, we'll try to fetch a customer from a `CustomerRepository`.
+最後の例では、`CustomerRepository`から顧客を取得してみましょう。
 
 ```csharp
-// create a repository
+// リポジトリを作成する
 var repo = new CustomerRepository();
 
-// find a customer by id
+// IDで顧客を検索する
 var customer = repo.GetById(42);
 
-// what is the expected output?
+// 期待される出力は？
 Console.WriteLine(customer.Id);
 ```
 
-The question is: after we do `customer = repo.GetById(42)`, what is the value of `customer.Id`?
+では、質問です。`customer = repo.GetById(42)`を実行した後、`customer.Id`の値は何でしょうか？
 
-(scroll down for answer)
+(答えを見るには下にスクロールしてください)
 
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
@@ -436,181 +436,181 @@ The question is: after we do `customer = repo.GetById(42)`, what is the value of
 ```csharp
 var customer = repo.GetById(42);
 
-// what is the expected output?
+// 期待される出力は？
 Console.WriteLine(customer.Id);
 ```
 
-It all depends, of course. 
+もちろん、場合によりますよね。
 
-If I look at the method signature of `GetById`, it tells me it always returns a `Customer`. But does it *really*?
+`GetById`のメソッドシグネチャを見ると、常に`Customer`を返すように見えます。でも、*本当に*そうでしょうか？
 
-What happens if the customer is missing? Does `repo.GetById` return `null`? Does it throw an exception? You can't tell just by looking at the code that we've got. 
+顧客が見つからない場合はどうなるのでしょう？ `repo.GetById`は`null`を返すのでしょうか？ 例外をスローするのでしょうか？ 今のコードを見るだけでは、わかりません。
 
-In particular, `null` is a terrible thing to return. It's a turncoat that pretends to be a `Customer` and can be assigned to `Customer` variables with nary a complaint from the compiler,
-but when you actually ask it to do something, it blows up in your face with an evil cackle.  Unfortunately, I can't tell by looking at this code whether a null is returned or not.
+特に、`null`を返すのは最悪です。 `null`は`Customer`のふりをしておいて、コンパイラに怒られることなく`Customer`変数に代入できます。
+ところが、いざ何かしようとすると、邪悪な笑い声とともに、あなたの顔の前で爆発します。残念ながら、このコードからnullが返されるかどうかは、見分けることができません。
 
-Exceptions are a little better, because at least they are typed and contain information about the context. But it's not apparent from the method signature which exceptions might be thrown.
-The only way that you can know for sure is by looking at the internal source code (and maybe the documentation, if you're lucky and it is up to date).
+例外処理の方がまだマシです。少なくとも型指定されていて、コンテキスト情報が含まれているからです。 しかし、メソッドシグネチャを見ても、どんな例外がスローされるのかはわかりません。 
+確実に知るには、ソースコードの中身を見るしかありません（運が良ければ最新のドキュメントもあるでしょう）。
 
-But now imagine that your language did not allow `null` and did not allow exceptions. What could you do instead?
+では、もし言語が`null`も例外も許さないとしたらどうでしょう？ どうすれば良いのでしょうか？
 
-The answer is, you would be forced to return a special class that might contain *either* a customer *or* an error, like this:
+答えは、顧客*または*エラーのいずれかを含む特別なクラスを返すように強制することです。
 
 ```csharp
-// create a repository
+// リポジトリを作成する
 var repo = new CustomerRepository();
 
-// find a customer by id and
-// return a CustomerOrError result
+// IDで顧客を検索し、
+// CustomerOrError結果を返す
 var customerOrError = repo.GetById(42);
 ```
 
-The code that processed this "customerOrError" result would then have to test what kind of result it was, and handle each case separately, like this:
+この「customerOrError」という結果を処理するコードは、それがどんな種類の結果なのかをテストし、それぞれの場合を個別に処理する必要があります。
 
 ```csharp
-// handle both cases
+// 両方のケースを処理する
 if (customerOrError.IsCustomer)
     Console.WriteLine(customerOrError.Customer.Id);
 
 if (customerOrError.IsError)
     Console.WriteLine(customerOrError.ErrorMessage);
 ```
-    
-This is exactly the approach taken by most functional languages. It does help if the language provides conveniences to make this technique easier, such as sum types,
-but even without that, this approach is still the only way to go if you want to make it obvious what your code is doing. (You can read more about this technique [here](http://fsharpforfunandprofit.com/rop/).)
-    
-So that's the last two items to add to our list, at least for now. 
 
-*__How to make your language predictable__*: 
+これは、ほとんどの関数型言語で採用されているアプローチです。 直和型など、この手法をサポートする便利な機能があれば、言語として役立ちますが、
+たとえなくても、コードの動作を明確にしたい場合は、このアプローチが唯一の方法です。（この手法の詳細については、[こちら](https://fsharpforfunandprofit.com/rop/)をご覧ください。）
 
-1. Variables should not be allowed to change their type.
-1. Objects containing the same values should be equal by default.
-1. Comparing objects of different types is a compile-time error.
-1. Objects must *always* be initialized to a valid state. Not doing so is a compile-time error.
-1. Once created,  objects and collections *must* be immutable.
-1. **No nulls allowed.**
-1. **Missing data or errors must be made explicit in the function signature.**
+これで、リストに最後の2つの項目を追加できました。
 
-I could go on, with snippets demonstrating the misuse of globals, side-effects, casting, and so on. But I think I'll stop here -- you've probably got the idea by now!
+*__言語を予測可能にするには__*：
 
-## Can your programming language do *this*?
+1. 変数の型は変更できないようにする。
+2. 同じ値を持つオブジェクトは、デフォルトで等しくする。
+3. 異なる型のオブジェクトを比較すると、コンパイル時エラーになる。
+4. オブジェクトは*常に*有効な状態に初期化されなければならない。そうでない場合はコンパイル時エラーになる。
+5. 作成後は、オブジェクトとコレクションは*不変*でなければならない。
+6. **nullは許可されない。**
+7. **欠落データまたはエラーは、関数シグネチャで明示的にする必要がある。**
 
-I hope that it is obvious that making these additions to a programming language will help to make it more reasonable.
+グローバル変数、副作用、キャストなどの誤用を示すコードスニペットをもっと紹介することもできますが、この辺りでやめておきましょう。もうお分かりいただけたかと思います！
 
-Unfortunately, mainstream OO languages like C# are very unlikely to add these features. 
+## あなたのプログラミング言語は*これ*ができますか？
 
-First of all, it would be a major breaking change to all existing code.
+プログラミング言語にこれらの追加を行うことで、より合理的になることは明らかだと思います。
 
-Second, many of these changes go deeply against the grain of the object-oriented programming model itself. 
+残念ながら、C#のような主流のオブジェクト指向言語は、これらの機能を追加する可能性は非常に低いです。
 
-For example, in the OO model, object identity is paramount, so *of course* equality by reference is the default.
+まず、既存のコードすべてに大きな変更を加えることになります。
 
-Also, from an OO point of view, how two objects are compared is entirely up to the objects themselves -- OO is all about polymorphic behavior and the compiler needs to stay out of it!
-Similarly, how objects are constructed and initialized is again entirely up to the object itself. There are no rules to say what should or should not be allowed.
+さらに、これらの変更の多くは、オブジェクト指向プログラミングモデル自体と根本的に矛盾しています。
 
-Finally, it is very hard to add non-nullable reference types to a statically typed OO language without also implementing the initialization constraints in point 4.
-As Eric Lippert himself has said ["Non-nullability is the sort of thing you want baked into a type system from day one, not something you want to retrofit 12 years later"](http://blog.coverity.com/2013/11/20/c-non-nullable-reference-types/).
+たとえば、オブジェクト指向モデルでは、オブジェクトの同一性が最も重要なので、*当然*参照による等価性がデフォルトになります。
 
-In contrast, most functional programming languages have these "high-predictability" features as a core part of the language. 
+また、オブジェクト指向の観点からは、2つのオブジェクトをどのように比較するかは、完全にオブジェクト自体に委ねられます。 オブジェクト指向は多態的な振る舞いに関するものであり、コンパイラが口出しすべきではありません！
+同様に、オブジェクトをどのように構築して初期化するかも、完全にオブジェクト自体に委ねられます。 何が許可されるべきか、許可されるべきでないかについての規則はありません。
 
-For example, in F#, all but one of the items on that list are built into the language:
+最後に、静的に型付けされたオブジェクト指向言語に、項目4の初期化制約を実装せずに、null非許容参照型を追加することは非常に困難です。
+Eric Lippert氏が述べているように、[「null非許容性は、12年後に後付けしたいものではなく、最初から型システムに組み込みたいものです」](https://blog.coverity.com/2013/11/20/c-non-nullable-reference-types/)。
 
-1. Values are not allowed to change their type. (And this even includes implicit casts from int to float, say).
-1. Records with the same internal data *ARE* equal by default.
-1. Comparing values of different types *IS* a compile-time error.
-1. Values *MUST* be initialized to a valid state. Not doing so is a compile-time error.
-1. Once created, values *ARE* immutable by default.
-1. Nulls are *NOT* allowed, in general.
+対照的に、ほとんどの関数型プログラミング言語は、これらの「予測可能性が高い」機能を言語の中核部分として備えています。
 
-Item #7 is not enforced by the compiler, but discriminated unions (sum types) are generally used to return errors rather than using exceptions, so
-that the function signature indicates exactly what the possible errors are.
+たとえば、F#では、リストされている項目の1つを除くすべてが言語に組み込まれています。
 
-It's true that when working with F# there are still many caveats. You *can* have mutable values, you *can* create and throw exceptions, and you may indeed have to deal with nulls that come from non-F# code.
+1. 値は型を変更できません。（これは、たとえばintからfloatへの暗黙的なキャストも含まれます）。
+2. 同じ内部データを持つレコードは、デフォルトで等しくなります。
+3. 異なる型の値を比較することは、コンパイル時エラーです。
+4. 値は*必ず*有効な状態に初期化する必要があります。そうでない場合はコンパイル時エラーになります。
+5. 作成後、値はデフォルトで不変です。
+6. 一般的に、nullは許可されません。
 
-But these things are considered code smells and are unusual, rather than being the general default.
+項目7はコンパイラによって強制されるものではありません。しかし、一般的には、エラーを返すために例外ではなく判別共用体（直和型）が使われます。
+その結果、関数シグネチャは、どのようなエラーが発生する可能性があるのかを正確に示すことができるのです。
 
-Other languages such as Haskell are even purer (and hence even more reasonable) than F#, but even Haskell programs will not be perfect. 
+確かに、F# を使う場合でも、まだ注意すべき点はたくさんあります。例えば、可変の値を使うことも*できます*し、例外を生成してスローすることも*できます*。また、F# 以外のコードから null が渡される場合もあるでしょう。
 
-In fact, no language can be reasoned about *perfectly* and still be practical. But still, some languages are certainly more reasonable than others.
+しかし、F# では、このようなコードは一般的ではなく、むしろ「コードの臭い」と見なされます。
 
-I think that one of the reasons why many people have become so enthusiastic about functional-style code (and call it "simple" even though it's full of [strange symbols](https://gist.github.com/folone/6089236)!) is exactly this:
-immutability, and lack of side effects, and all the other functional principles, act together to enforce this reasonability and predictability,
-which in turn helps to reduce your cognitive burden so that you need only focus on the code in front of you. 
+Haskellなどの他の言語は、F#よりもさらに純粋です（したがって、より合理的です）。 しかし、Haskellプログラムでさえ完璧ではありません。
+
+実際、*完全に*推論可能でありながら実用的な言語はありません。 しかしそれでも、一部の言語は確かに他の言語よりも合理的です。
+
+多くの人が関数型スタイルのコードに熱中する（たとえそれが[奇妙な記号](https://gist.github.com/folone/6089236)でいっぱいだったとしても、「シンプル」と呼ぶ）、その理由の一つはまさにこれだと思います。
+不変性、副作用の欠如、そして他のすべての関数型プログラミングの原則は、連携して作用し、コードの合理性と予測可能性を高めます。
+その結果、認知的な負担が軽減され、目の前のコードのみに集中できるようになるのです。
 
 
-## Lambdas aren't the solution
+## ラムダ式は解決策ではありません
 
-So now it should be clear that this list of proposed improvements has nothing to do with language enhancements such as lambdas or clever functional libraries.
+ここまで読んで、私が提案した改善点が、ラムダ式や高階関数といった言語の拡張とは関係ないことは、もうお分かりでしょう。
 
-In other words, when I focus on reasonability, **I don't care what my language *will* let me do, I care more about what my language *won't* let me do.**
-I want a language that stops me doing stupid things by mistake.
+つまり、私が合理性に注目するということは、**言語で*何ができるか*よりも、言語で*何ができないか*の方に関心がある**ということです。
+私は、間違って愚かなことをしてしまうのを防いでくれる言語を求めているのです。
 
-That is, if I had to choose between language A that didn't allow nulls, or language B that had higher-kinded types but still allowed objects to be null easily,
-I would pick language A without hesitation.
+言い換えれば、もしnullを許容しない言語Aと、高階型をサポートしているけれどnullを簡単に許容してしまう言語Bのどちらかを選ばなければならないとしたら、
+私は迷わず言語Aを選びます。
 
-## Questions 
+## よくある質問
 
-Let me see if I can prempt some questions...
+いくつか予想される質問に答えておきましょう。
 
-**Question: These examples are very contrived! If you code carefully and follow good practices, you can write safe code without these features!**
+**質問：例として挙げているコードは、ちょっと不自然じゃないですか？注意深くコーディングして、良いプラクティスに従えば、これらの機能がなくても安全なコードは書けますよね？**
 
-Yes, you can. I'm not claiming you can't. But this post is not about writing safe code, it's about *reasoning* about the code. There is a difference.
+はい、その通りです。安全なコードを書けないとは言ってません。しかし、この記事は安全なコードを書くことではなく、コードについて*推論する*ことについてです。コードについて推論するのと、安全なコードを書くのとは、違います。
 
-And it's not about what you can do if you are careful. It's about what can happen if you are not careful!  
-That is, does your *programming language* (not your coding guidelines, or tests, or IDE, or development practices) give you support for reasoning about your code?
+注意深くコーディングすれば安全なコードを書ける、ということではありません。注意を怠ったときに何が起こるか、ということです！
+つまり、*プログラミング言語*は（コーディングガイドライン、テスト、IDE、開発プラクティスではなく）、コードについて推論するためのサポートを提供してくれるのでしょうか？
 
-**Question: You're telling me that a language *should* have these features. Isn't that very arrogant of you?**
+**質問：あなたは、言語はこれらの機能を持つ*べき*だと言っているのですか？ ちょっと傲慢じゃないですか？**
 
-Please read carefully. I am not saying that at all. What I *am* saying is that: 
+この記事をよく読んでください。私はそんなことは一言も言っていません。私が言っているのは、
 
-* *IF* you want to be able to reason about your code, *THEN* it will be much easier if your language supports the features that I mention.
+> *もし*あなたが自分のコードについて推論できるようにしたいのであれば、*そうすれば*私が言及する機能をあなたの言語がサポートしていれば、はるかに簡単になります。
 
-If reasoning about your code is not that important to you, then please do feel free to ignore everything I've said!
+ということです。もし、コードについて推論することがそれほど重要ではないのであれば、私の言っていることは無視してください！
 
-**Question: Focusing on just one aspect of a programming language is too limiting. Surely other qualities are just as important?**
+**質問：プログラミング言語の一つの側面だけに注目するのは、あまりにも限定的すぎませんか？ 他の特性も同じくらい重要なのではありませんか？**
 
-Yes, or course they are. I am not a absolutist on this topic.
-I think that factors such as comprehensive libraries, good tooling, a welcoming community, and the strength of the ecosystem are very important too.
+はい、もちろんです。私はこのトピックに関して絶対主義者ではありません。
+包括的なライブラリ、優れたツール、歓迎的なコミュニティ、エコシステムの強さなども非常に重要だと思います。
 
-But the purpose of this post was to address the specific comments I mentioned at the beginning, such as: "C# already has most of the features of F#, so why should I bother to switch?".
+しかし、この記事の目的は、冒頭で述べたような「C\#にはすでにF\#のほとんどの機能があるので、なぜわざわざ乗り換える必要があるのですか？」といった意見に答えることでした。
 
-**Question: Why are you dismissing dynamic languages so quickly?**
+**質問：あなたはなぜ、動的型付け言語をそんなに早く切り捨てるのですか？**
 
-First, my apologies to JavaScript developers for the dig earlier! 
+まず、先ほどのJavaScriptの例について、JavaScript開発者にお詫び申し上げます！
 
-I like dynamic languages a lot, and one of my favorite languages, Smalltalk, is completely unreasonable by the standards I've talked about. Luckily,
-this post is not trying to persuade you which languages are "best" in general, but rather just discussing one aspect of that choice. 
+私は動的型付け言語も好きです。そして、私のお気に入りの言語の一つであるSmalltalkは、この記事で話してきた基準からすると全く合理的ではありません。
+この記事は、どの言語が一般的に「最高」なのかを主張しようとしているのではなく、言語選択の一つの側面について議論しているだけです。
 
-**Question: Immutable data structures are slow, and there will be lots of extra allocation going on. Won't this affect performance? **
+**質問：不変データ構造は遅く、多くの追加のメモリ割り当てが発生します。これはパフォーマンスに影響しませんか？**
 
-This post is not attempting to address the performance impact (or any other aspect) of these features. 
+この記事では、これらの機能がパフォーマンスに与える影響（またはその他の側面）については扱いません。
 
-But it is indeed a valid question to ask which should have a higher priority: code quality or performance? That's for you to decide, and it depends on the context.
+しかし、コードの品質とパフォーマンスのどちらを優先すべきかという質問は、確かに重要です。それはあなたが決めることであり、状況によって異なります。
 
-Personally, I would go for safety and quality first, unless there was a compelling reason not to. Here's a sign I like:
+個人的には、そうしないだけの説得力のある理由がない限り、安全性と品質を優先します。私が好きな標語があります。
 
-![Safety, Quality, Quantity, in that order](../assets/img/safety_first.jpg)
+![安全性、品質、数量、の順番](../assets/img/safety_first.jpg)
 
-## Summary
+## まとめ
 
-I said just above that this post is not trying to persuade you to pick a language based on "reasonability" alone. But that's not quite true.
+この記事は「合理性」だけで言語を選ぶように説得しようとしているのではない、と先ほど述べました。しかし、それは完全には真実ではありません。
 
-If you have already picked a statically typed, high-level language such as C# or Java,
-then it's clear that reasonability or something like it was an important criterion in your language decision.
+もしあなたがすでにC\#やJavaのような静的型付けの高水準言語を選んでいるのであれば、
+合理性のようなものは、あなたの言語選択において重要な基準であったはずです。
 
-In that case, I hope that the examples in this post might have made you more willing to consider using an even more "reasonable" language on your platform of choice (.NET or JVM).
+その場合、この記事の例が、あなたが選んだプラットフォーム（.NETまたはJVM）上で、さらに「合理的な」言語を使ってみようという気になるきっかけになれば幸いです。
 
-The argument for staying put -- that your current language will eventually "catch up" -- may be true purely in terms of features, 
-but no amount of future enhancements can really change the core design decisions in an OO language.
-You'll never get rid of nulls, or mutability, or having to override equality all the time.
+現状維持の論拠、つまり「今の言語が最終的には『追いつく』だろう」という論拠は、純粋に機能の面では正しいかもしれません。
+しかし、将来的な機能強化がどれだけ行われても、オブジェクト指向言語のコアとなる設計思想を変えることはできません。
+nullや可変性、等価性のオーバーライドの必要性から逃れることはできないでしょう。
 
-What's nice about F#, or Scala/Clojure, is that these functional alternatives don't require you to change your ecosystem, but they do immediately improve your code quality. 
+F\#やScala/Clojureの良い点は、これらの関数型プログラミング言語の選択肢は、エコシステムを変える必要がなく、コードの品質をすぐに改善できることです。
 
-In my opinion, it's quite a low risk compared with the cost of business as usual. 
+従来通りのビジネスのコストと比較して、リスクはかなり低いと思います。
 
-*(I'll leave the issue of finding skilled people, training, support, etc, for another post.
-But see [this](http://www.paulgraham.com/pypar.html),
-[this](https://twitter.com/panesofglass/status/559431579328475136),
-[this](https://twitter.com/foxyjackfox/status/559415445594206208), 
-and [this](http://wesmorgan.svbtle.com/recruiting-software-developers-language-matters) if you're worried about hiring)*
+*（スキルのある人材の確保、トレーニング、サポートなどの問題は、別の記事で取り上げます。
+しかし、採用について心配な場合は、[これ](https://www.paulgraham.com/pypar.html)、
+[これ](https://twitter.com/panesofglass/status/559431579328475136)、
+[これ](https://twitter.com/foxyjackfox/status/559415445594206208)、
+[これ](https://wesmorgan.svbtle.com/recruiting-software-developers-language-matters)をご覧ください。）*
 

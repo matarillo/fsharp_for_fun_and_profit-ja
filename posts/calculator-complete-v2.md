@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "電卓のチュートリアル: パート 4"
+title: "電卓のウォークスルー: パート 4"
 description: "ステートマシンを使用した設計"
 categories: ["実践例"]
 seriesId: "注釈付きチュートリアル"
