@@ -1,84 +1,84 @@
 ---
 layout: post
-title: "Why I won't be writing a monad tutorial"
+title: "モナドのチュートリアルを書かない理由"
 description: ""
 categories: []
 ---
 
-*"A ?newbie', in Haskell, is someone who hasn't yet implemented a compiler. They've only written a monad tutorial" - [Pseudonymn](http://sequence.complete.org/node?page=10)*
+*「Haskellの世界では、コンパイラをまだ実装していない人のことを初心者と呼びます。彼らはモナドのチュートリアルを書いただけなのです」 - [Pseudonymn](https://sequence.complete.org/node?page=10)*
 
-Let's start with a story...
+まずは、お話から始めましょう。
 
-### Alice learns to count
+### アリス、数を学ぶ
 
-*Young Alice and her father (who happens to be a mathematician) are visiting a petting zoo...*
+*幼いアリスと数学者の父親が、ふれあい動物園にいます……*
 
-Alice: Look at those kitties.
+アリス：見て！子猫たち。
 
-![two kitties](../assets/img/two_kitties.jpg)
+![2匹の子猫](../assets/img/two_kitties.jpg)
 
-Daddy: Aren't they cute. There are *two* of them.
+お父さん：かわいいね。2匹いるよ。
 
-Alice: Look at those doggies.
+アリス：見て！子犬たち。
 
-![two kitties](../assets/img/two_puppies.jpg)
+![2匹の子犬](../assets/img/two_puppies.jpg)
 
-Daddy: That's right. Can you count? There are *two* doggies.
+お父さん：そうだね。数えられるかな？子犬も2匹いるよ。
 
-Alice: Look at those horsies.
+アリス：見て！お馬さんたち。
 
-![two kitties](../assets/img/two_horses.jpg)
+![2匹の馬](../assets/img/two_horses.jpg)
 
-Daddy: Yes darling. Do you know what the kitties and doggies and horsies all have in common?
+お父さん：そうだね。子猫と子犬と馬に共通点があるのがわかる？
 
-Alice: No. Nothing in common! 
+アリス：ううん。全然違うよ！
 
-Daddy: Well, actually they *do* have something in common. Can you see what it is?
+お父さん：いや、実は共通点があるんだ。わかるかな？
 
-Alice: No! A doggy is not a kitty.  A horsie is not a kitty.  
+アリス：ううん！子犬は子猫じゃないし、馬も子猫じゃない。
 
-Daddy: How about I explain for you?  First, let us consider [a set S which is strictly well-ordered with respect to set membership and where every element of S is also a subset of S](http://en.wikipedia.org/wiki/Ordinal_number#Von_Neumann_definition_of_ordinals). Does that give you a clue?
+お父さん：説明しようか？まず、[集合の帰属関係に関して厳密に整列されていて、かつSのすべての要素がSの部分集合でもあるような集合S](https://en.wikipedia.org/wiki/Ordinal_number#Von_Neumann_definition_of_ordinals)について考えてみよう。何かヒントになるかな？
 
-Alice: [Bursts into tears] 
+アリス：[泣き出す]
 
-### How not to win friends and influence people
+### 人を惹きつけ、影響を与える方法
 
-No (sensible) parent would ever try to explain how to count by starting with a formal definition of ordinal numbers.
+分別のある親なら、順序数の形式的な定義から始めて数を数える方法を説明しようとはしませんよね。
 
-So why is it that many people feel compelled to explain a concept like monads by emphasizing their formal definition?
+では、なぜモナドのような概念を説明する時に、多くの人がその形式的な定義を強調するのでしょうか？
 
-That might be fine for a college-level math class, but it plainly does not work for regular programmers, who just want to create something useful. 
+大学の数学の授業ならそれでいいかもしれませんが、何か役立つものを作ろうとしている普通のプログラマーには明らかに不向きです。
 
-As an unfortunate result of this approach, though, there is now a whole mystique around the concept of monads. It has become [a bridge you must cross](http://www.thefreedictionary.com/pons+asinorum) on the way to true enlightenment. And there are, of course, a [plethora of monad tutorials](http://www.haskell.org/haskellwiki/Monad_tutorials_timeline) to help you cross it.
+しかし、このアプローチの残念な結果として、モナドの概念には神秘的な雰囲気が漂ってしまいました。モナドは、真の悟りに至るために[渡らなければならない橋](https://www.thefreedictionary.com/pons+asinorum)になってしまったのです。そしてもちろん、それを渡るための[モナドのチュートリアルはたくさん](https://www.haskell.org/haskellwiki/Monad_tutorials_timeline)あります。
 
-Here's the truth: You *don't* need to understand monads to write useful functional code. This is especially true for F# compared to say, Haskell.
+真実はこうです。役立つ関数型コードを書くのに、モナドを理解する*必要はありません*。これは特に、HaskellよりF#に当てはまります。
 
-Monads are not a [golden hammer](http://en.wikipedia.org/wiki/Law_of_the_instrument). They won't make you any more productive. They won't make your code less buggy.
+モナドは[万能な解決策](https://en.wikipedia.org/wiki/Law_of_the_instrument)ではありません。モナドを使っても、生産性が上がるわけでも、コードのバグが減るわけでもありません。
 
-So really, don't worry about them. 
+だから、本当に、モナドのことは心配しないでください。
 
-### Why I won't be writing a monad tutorial
+### モナドのチュートリアルを書かない理由
 
-So this is why I won't be writing a monad tutorial. I don't think it will help people learn about functional programming. If anything, it just creates confusion and anxiety.
+モナドのチュートリアルを書かないのはそのためです。関数型プログラミングを学ぶ人の役に立つとは思えません。むしろ、混乱と不安を生み出すだけです。
 
-Yes, I will use examples of monads in [many](../posts/recipe-part2.md) different [posts](../posts/computation-expressions-wrapper-types.md),
-but, other than right here, I will try to avoid using the word "monad" anywhere on this site. In fact, it has pride of place on my [list of banned words](../about/index.md#banned)!
+もちろん、[多くの](../posts/recipe-part2.md)異なる[記事](../posts/computation-expressions-wrapper-types.md)でモナドの例を使いますが、ここ以外では、このサイトのどこでも「モナド」という言葉を使わないようにします。
+実際、「モナド」は[禁止ワードリスト](https://fsharpforfunandprofit.com/about/#forbidden-words)の筆頭に挙げられています。
 
 
-### Why you should write a monad tutorial
+### モナドのチュートリアルを書くべき理由
 
-On the other hand, I do think that *you* should write a monad tutorial.  When you try to explain something to somebody else, you end up understanding it better yourself. 
+一方で、*あなた*はモナドのチュートリアルを書くべきだと思います。誰かに何かを説明しようとすると、自分自身の理解も深まります。
 
-Here's the process I think you should follow:
+チュートリアルを書く手順は以下の通りです。
 
-1. First, write lots of practical code involving lists, sequences, options, async workflows, computation expressions, etc. 
-1. As you become more experienced, you will start to use more abstractions, focusing on the shapes of things rather than the details.
-1. At some point, you will have an aha! moment -- a sudden insight that all the abstractions have something in common. 
-1. Bingo! Time to write your monad tutorial!
+1. まず、リスト、シーケンス、オプション、非同期ワークフロー、コンピュテーション式などを使った実践的なコードをたくさん書きます。
+2. 経験を積むにつれて、詳細ではなく、物事の形に注目して、より多くの抽象化を使うようになります。
+3. ある時点で、すべての抽象化に共通点があるという、はっとする瞬間が訪れます。
+4. これでビンゴ！モナドのチュートリアルを書く時が来ました！
 
-The key point is that [*you have to do it in this order*](http://byorgey.wordpress.com/2009/01/12/abstraction-intuition-and-the-monad-tutorial-fallacy/) -- you cannot jump straight to the last step and then work backwards. It is the very act of working your way through the details that enables you to understand the abstraction when you see it. 
+重要なのは、[*この順番でやる*](https://byorgey.wordpress.com/2009/01/12/abstraction-intuition-and-the-monad-tutorial-fallacy/)ということです。最後のステップにいきなり飛んで、そこから逆算することはできません。抽象化を理解するためには、細部を一つ一つ積み重ねていくことが不可欠なのです。
 
-Good luck with your tutorial -- I'm off to eat a burrito.
+チュートリアル頑張ってください。私はブリトーを食べに行きます。
 
 
 
