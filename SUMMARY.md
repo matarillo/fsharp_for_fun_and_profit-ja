@@ -181,7 +181,7 @@
 * [プロパティベースのテスト入門](posts/property-based-testing.md)
 * [プロパティベースのテストのプロパティ選択](posts/property-based-testing-2.md)
 
-### 例とチュートリアル
+### 例とウォークスルー
 
 * [実践例: 正しさのための設計](posts/designing-for-correctness.md) 
 * [実践例: スタックベースの電卓](posts/stack-based-calculator.md)
