@@ -654,7 +654,7 @@ C\#またはF\#では、グローバルなパブリック関数へのアクセ�
 * David Wagnerによる優れた講演、[「セキュリティのためのオブジェクトケイパビリティ」](https://en.wikipedia.org/wiki/caja)。
 
 セキュリティと安全のために言語を強化することに関しては、多くの研究が行われてきました。
-例えば、[E言語](http://www.erights.org/elang/index.html)と[E言語に関するMark Millerの論文](http://www.erights.org/talks/thesis/markm-thesis.pdf)(PDF)、
+たとえば、[E言語](http://www.erights.org/elang/index.html)と[E言語に関するMark Millerの論文](http://www.erights.org/talks/thesis/markm-thesis.pdf)(PDF)、
 Java上に構築された[Joe-E言語](https://en.wikipedia.org/wiki/Joe-E)、
 JavaScript上に構築されたGoogleの[Caja](https://en.wikipedia.org/wiki/caja)、
 OCamlから派生したケイパビリティベースの言語である[Emily](https://shiftleft.com/mirrors/www.hpl.hp.com/techreports/2006/HPL-2006-116.html)、

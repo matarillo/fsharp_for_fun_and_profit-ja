@@ -29,7 +29,7 @@ sしかし、これらの関数やさらに多くの機能を含む優れたF#�
   アプリカティブファンクターによるバリデーション、flipのような一般的な関数、非同期プログラミングユーティリティ、
   そしてC# - F#の相互運用を容易にする関数を実装しています。
   
-例えば、[この投稿](../posts/elevated-world-4.md#traverse)で実装したモナディックな走査`List.traverseResultM`は、すでにExtCoreで
+たとえば、[この投稿](../posts/elevated-world-4.md#traverse)で実装したモナディックな走査`List.traverseResultM`は、すでにExtCoreで
 [ここ](https://github.com/jack-pappas/ExtCore/blob/4fc2302e74a9b5217d980e5ce2680f0b3db26c3d/ExtCore/ControlCollections.Choice.fs#L398)で利用可能です。
   
 このシリーズが気に入った方は、["Dr Frankenfunctor and the Monadster"](../posts/monadster.md)シリーズでStateモナドについての投稿や、

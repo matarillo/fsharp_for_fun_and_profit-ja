@@ -36,7 +36,7 @@ categories: []
 
 しかし、関数型言語で書かれたコードと、昔ながらのC言語のようなコードを[比較](../posts/fvsc-sum-of-squares.md)してみると、コードの量がはるかに少ないので、怖くなってしまいます。
 
-例えば、使い慣れた言語で書かれたコードを見てみましょう。
+たとえば、使い慣れた言語で書かれたコードを見てみましょう。
 
 ```csharp
 public static class SumOfSquaresHelper

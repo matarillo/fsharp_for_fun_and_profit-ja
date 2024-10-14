@@ -212,7 +212,7 @@ let applOption = {retn = Option.Some; apply=Option.apply}
 let applResult = {retn = Result.Success; apply=Result.apply}
 ```
 
-`Applicative`レコードのインスタンス（例えば`appl`）を、汎用的な`mapE`関数への追加パラメータとして使用します。
+`Applicative`レコードのインスタンス（たとえば`appl`）を、汎用的な`mapE`関数への追加パラメータとして使用します。
 
 ```fsharp
 let rec mapE appl f list =
@@ -502,7 +502,7 @@ let traverseResultM f list =
 
 これらの例ではすべてコレクション型として`list`型を使用しています。他の型に対しても`traverse`を実装できるでしょうか？
 
-はい、できます。例えば、`Option`は1要素のリストと考えることができ、同じ手法を使用できます。
+はい、できます。たとえば、`Option`は1要素のリストと考えることができ、同じ手法を使用できます。
 
 例として、`Option`に対する`traverseResultA`の実装を見てみましょう。
 
@@ -558,7 +558,7 @@ let goodNone = None |> Option.traverseResultA parseInt
 
 ### Traversable（走査可能）
 
-`mapXXX`や`traverseXXX`のような関数を実装できる型は*Traversable*と呼ばれます。例えば、コレクション型はTraversableですし、他にもいくつかあります。
+`mapXXX`や`traverseXXX`のような関数を実装できる型は*Traversable*と呼ばれます。たとえば、コレクション型はTraversableですし、他にもいくつかあります。
 
 前述のように、型クラスを持つ言語では、Traversable型は`traverse`の実装を1つだけ持てば十分です。
 しかし、型クラスのない言語では、Traversable型は高次の型ごとに1つの実装が必要になります。
@@ -574,7 +574,7 @@ let goodNone = None |> Option.traverseResultA parseInt
 **Traversable**はジェネリックなデータ型コンストラクタである`E<T>` と、
 これらの法則に従う関数のセット（`traverse`または`traverseXXX`）として定義されます。
 
-これらの法則は以前のものと似ています。例えば、恒等関数が正しくマップされること、合成が保持されること、などです。
+これらの法則は以前のものと似ています。たとえば、恒等関数が正しくマップされること、合成が保持されること、などです。
 
 <a id="sequence"></a>
 <hr>

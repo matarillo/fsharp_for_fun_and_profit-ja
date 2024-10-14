@@ -101,7 +101,7 @@ type AddStudentToWaitingList = Student -> Seminar -> Seminar
 
 F#はUML図と同じ内容を表現していますが、図を描くよりも、すべての処理を関数として書き出すことで、元の要件の穴が明らかになると感じています。
 
-例えば、UML図の`GetSeminarsTaken`メソッドでは、セミナーのリストはどこに保存されているのでしょうか？
+たとえば、UML図の`GetSeminarsTaken`メソッドでは、セミナーのリストはどこに保存されているのでしょうか？
 もしそれが`Student`クラスにあるとしたら（図から暗示されるように）、`Student`と`Seminar`の間で相互参照が発生し、[特別な処理をしない限り](https://stackoverflow.com/questions/19371214/entity-framework-code-first-circular-dependices)、
 すべての学生とセミナーの情報がつながってしまい、全体を一度に読み込まないといけなくなります。
 
@@ -113,7 +113,7 @@ F#はUML図と同じ内容を表現していますが、図を描くよりも、
 type EnrollStudent = Student -> Seminar -> Enrollment option
 ```
 
-関数が`option`を返すので、登録が失敗する可能性がある（例えば、学生が登録資格を持っていない、または誤って2回登録しようとしている）ことがすぐに分かります。
+関数が`option`を返すので、登録が失敗する可能性がある（たとえば、学生が登録資格を持っていない、または誤って2回登録しようとしている）ことがすぐに分かります。
 
 
 ## 注文と顧客
@@ -227,7 +227,7 @@ type CalcTotalWeight = Order -> int<grams>
 `PaidOrder`型（同じ注文に2回支払うことを防ぐため）など、
 状態をより細かく分けることで、さらに改善できる可能性があります。
 
-例えば、以下のような感じです。
+たとえば、以下のような感じです。
 
 ```fsharp
 // 支払いの承認を試みます。失敗する可能性があることに注意してください。
@@ -434,7 +434,7 @@ type ManageResult = unit // to do
 type ManageInterface = Librarian -> Catalogue -> ManageRequest -> ManageResult   
 ```
 
-これも完璧な設計とは言えませんね。例えば、`Active`アカウントだけが本を借りられるということが、はっきりとは分かりません。F#では、以下のように表現できます。
+これも完璧な設計とは言えませんね。たとえば、`Active`アカウントだけが本を借りられるということが、はっきりとは分かりません。F#では、以下のように表現できます。
 
 ```fsharp
 type Account = 
@@ -577,7 +577,7 @@ type Entitlement = {
 
 この図はデータだけで、メソッドがないので、関数の型はありません。何か重要なビジネスルールが表現できていないような気がします。
 
-例えば、元の資料のコメントを読むと、`EntitlementType`と`LockingType`に、ある興味深い制約があることが分かります。
+たとえば、元の資料のコメントを読むと、`EntitlementType`と`LockingType`に、ある興味深い制約があることが分かります。
 特定のロックタイプは、特定の資格タイプでのみ使用できるのです。
 
 これは型システムでモデル化できるかもしれませんが、今回はUMLをそのまま再現することにしました。

@@ -94,7 +94,7 @@ let services = CalculatorServices.createServices()
 let calculate = CalculatorImplementation.createCalculate services
 
 // 返された "calculate" 関数は Calculate 型であり、
-// 例えば UI に渡すことができる
+// たとえば UI に渡すことができる
 
 // UI を作成して実行する
 let form = new CalculatorUI.CalculatorForm(calculate)

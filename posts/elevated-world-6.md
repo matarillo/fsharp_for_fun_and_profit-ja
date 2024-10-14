@@ -333,7 +333,7 @@ let getPurchaseInfo (custId:CustId) : Result<ProductInfo list> =
 `let productInfosResult = Result.result { .. }`というコードで、`result`コンピュテーション式を作成しています。これにより、`let!`による展開と`return`によるラッピングがすべて簡素化されます。
 
 そのため、この実装には明示的な`xxxResult`値がどこにもありません。しかし、蓄積のために可変コレクションクラスを使用する必要があります。
-`for productId in productIds do`は実際には本当の`for`ループではなく、例えば`List.map`で置き換えることはできないからです。
+`for productId in productIds do`は実際には本当の`for`ループではなく、たとえば`List.map`で置き換えることはできないからです。
 
 ### `result`コンピュテーション式 
 
@@ -667,7 +667,7 @@ module ApiAction =
 すべての関数が`run`というヘルパー関数を使用していることに注意してください。これは`ApiAction`をアンラップして内部の関数を取得し、
 これを渡された`api`に適用します。結果は`ApiAction`にラップされた値です。
 
-例えば、`ApiAction<int>`があれば、`run api myAction`の結果は`int`になります。
+たとえば、`ApiAction<int>`があれば、`run api myAction`の結果は`int`になります。
 
 そして最後に、`ApiClient`を作成し、接続を開き、アクションを実行し、接続を閉じる`execute`関数があります。
 
@@ -724,7 +724,7 @@ module ApiActionResult =
 
 ### Map
 
-念のため、`map`は両側に新しいスタックを追加します。例えば、このような一般的な世界をまたぐ関数から始めます。
+念のため、`map`は両側に新しいスタックを追加します。たとえば、このような一般的な世界をまたぐ関数から始めます。
 
 ![](../assets/img/vgfp_api_generic.png)
 
@@ -936,7 +936,7 @@ CustId "C1"
 成功： [{ProductName = "P1-名前";}; {ProductName = "P2-名前";}]
 ```
 
-存在しない顧客、例えばCXを使用するとどうなるでしょうか？
+存在しない顧客、たとえばCXを使用するとどうなるでしょうか？
 
 ```fsharp
 CustId "CX"
@@ -955,7 +955,7 @@ CustId "CX"
 失敗： ["キーCustId "CX"が見つかりません"]
 ```
 
-購入した製品の1つに情報がない場合はどうでしょうか？例えば、顧客C2はPXとP2を購入しましたが、PXには情報がありません。
+購入した製品の1つに情報がない場合はどうでしょうか？たとえば、顧客C2はPXとP2を購入しましたが、PXには情報がありません。
 
 ```fsharp
 CustId "C2"
