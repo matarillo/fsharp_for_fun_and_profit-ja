@@ -1,101 +1,101 @@
 ---
 layout: post
-title: "Introvert and extrovert programming languages"
-description: "Late night thoughts on language personality types"
+title: "内向的・外向的なプログラミング言語"
+description: "深夜に思いついた、言語の性格タイプ"
 categories: []
 ---
 
-> What's the difference between an introvert and extrovert mathematician?
-> <br>
-> An introvert mathematician looks at his shoes while talking to you; an extrovert mathematician looks at *your* shoes.  
+> 内向的な数学者と外向的な数学者の違いは何でしょう？
+> 
+> 内向的な数学者は、あなたと話している間、自分の靴を見つめます。外向的な数学者は、*あなたの*靴を見つめます。
 
-For a long time, I've been aware of [differences](https://plus.google.com/110981030061712822816/posts/KaSKeg4vQtz) in how programming languages present themselves to the outside world.
+私は以前から、プログラミング言語の外界に対するふるまい方が[違う](https://plus.google.com/110981030061712822816/posts/KaSKeg4vQtz)ことに気づいていました。
 
-If programming languages had personalities, I would be tempted to call some of them "introvert", and some of them "extrovert".
+もしプログラミング言語に性格があるとしたら、そのうちのいくつかを「内向的」、いくつかを「外向的」と呼びたいです。
 
-An extrovert programming language is all about the outside world, never happier than when partying with IO and external data sources.
+外向的なプログラミング言語は、外界がすべてであり、IOや外部データソースとパーティーをしている時が一番幸せです。
 
-On the other hand, an introvert programming language is quite happy to be alone and would prefer not to deal with the outside world, if possible.
-Sure, it can be social and work with IO when it needs to, but it finds the activity quite tiring, and is relieved when IO has gone home and it can go back to reading a good book.
+一方、内向的なプログラミング言語は、一人でいることに満足しており、可能であれば外界と関わりたくないと思っています。
+もちろん、必要であれば社交的で、IOと連携することもできますが、その活動をかなり疲れると感じ、IOが家に帰って、良い本を読んでリラックスできるようになると安心します。
 
-What's interesting is that you can tell a lot about the personality type of a language by looking at what is considered important in a user guide or tutorial.
+興味深いのは、ユーザーガイドやチュートリアルで何が重要とされているかを見ることで、言語の性格タイプについて多くのことがわかるということです。
 
-For example, the classic "C Programming Language" book [famously has](https://books.google.co.uk/books?id=va1QAAAAMAAJ&focus=searchwithinvolume&q=hello%2C+world)
-`printf("hello, world\n")` at the very beginning, and most other C books [follow the same pattern](https://en.wikibooks.org/wiki/C_Programming/A_taste_of_C).
+たとえば、古典的な「プログラミング言語C」の本では、冒頭に`printf("hello, world\n")` があることが[有名です](https://books.google.co.uk/books?id=va1QAAAAMAAJ&focus=searchwithinvolume&q=hello%2C+world)し、
+他のほとんどのCの本も[同様です](https://en.wikibooks.org/wiki/C_Programming/A_taste_of_C)。
 
-And indeed, C *is* a very extrovert language. Coding examples are littered with files and console IO.
-Similarly, you can tell that PHP, Python and Perl are equally extrovert with just one glance at their manuals.
+そして実際、Cは*非常に*外向的な言語です。コーディング例には、ファイルやコンソールIOが散りばめられています。
+同様に、PHP、Python、Perlが同様に外向的であることは、マニュアルを一目見ただけでわかります。
 
-In fact, I would say that *all* of the most popular languages are extrovert, and the reasons are obvious.
-They ooze confidence, they make friends easily, and they get things done.
+実際、最も人気のある言語は*すべて*外向的であると言えるでしょう。理由は明らかです。
+彼らは自信に満ち溢れ、簡単に友達を作り、物事を成し遂げます。
 
-On the other hand, I would say that Haskell is a great example of an introvert language.
+一方、Haskellは内向的な言語の素晴らしい例と言えるでしょう。
 
-For example, in the book "Learn You A Haskell" the "hello world" example doesn't appear until [chapter 9](http://learnyouahaskell.com/input-and-output#hello-world)!
-And in "Real World Haskell", IO is not invited to dinner until [chapter 7](http://book.realworldhaskell.org/read/io.html).
+たとえば、「すごいHaskellたのしく学ぼう!」という本では、「hello world」の例は[9章](https://learnyouahaskell.com/input-and-output#hello-world)まで出てきません！
+また、「Real World Haskell」では、IOは[7章](https://book.realworldhaskell.org/read/io.html)まで夕食に招待されません。
 
-If you don't have the full manual handy, another telling clue that a language is introverted
-is if it early on introduces you to its close friend, the Fibonacci function. Introvert languages love recursion!
+完全なマニュアルが手元にない場合、言語が内向的であることを示すもう1つの手がかりは、早い段階で親友であるフィボナッチ関数を紹介することです。
+内向的な言語は再帰が大好きです！
 
-Now, just as in the real world, introvert languages are misunderstood by extroverts. They are accused of being too arrogant, too serious, too risk-averse.
+さて、現実世界と同じように、内向的な言語は外向的な人には誤解されています。彼らは、傲慢すぎるとか、真面目すぎるとか、リスク回避しすぎるとか非難されます。
 
-But that's not fair -- introvert languages are really just more reflective and thoughtful, and thus more likely to have deep insights than the shallow, yapping extroverts.
+しかし、それは公平ではありません。内向的な言語は、実際にはより思慮深く、考え深いので、浅はかでやかましい外向的な言語よりも深い洞察を得る可能性が高いのです。
 
 
-### But...
+### しかし...
 
-> "All generalisations are false including this one"
+> 「すべての一般化は誤りである、この言葉も含めて。」
 
-You might think that imperative and OO languages would be extrovert, while languages with more declarative paradigms (functional, logic) would be introvert,
-but that is not always the case.
+命令型やOO言語は外向的で、より宣言的なパラダイム（関数型、論理型）を持つ言語は内向的だと考えるかもしれませんが、
+必ずしもそうではありません。
 
-For example, SQL is a declarative language, but its whole purpose in life is data-processing, which makes it extrovert in my book.
+たとえば、SQLは宣言型言語ですが、その人生の目的はデータ処理であり、それは私の考えでは外向的です。
 
-And nearer to home, F# is a functional-first language, but is very happy to do IO, and in fact
-has excellent support for real-world data processing via [type providers](http://blogs.msdn.com/b/dsyme/archive/2013/01/30/twelve-type-providers-in-pictures.aspx) and
-[Deedle](https://bluemountaincapital.github.io/Deedle/).
+そして、より身近なところでは、F#は関数型ファーストの言語ですが、IOにも適しています。
+実際、[型プロバイダー](https://blogs.msdn.com/b/dsyme/archive/2013/01/30/twelve-type-providers-in-pictures.aspx)や[Deedle](https://bluemountaincapital.github.io/Deedle/)を介して、
+現実世界のデータ処理を非常にうまくサポートしています。
 
-Just as people are not all one or the other, so with programming languages.
-There is a range. Some languages are extremely extrovert, some extremely introvert, and some in-between.
+人がすべてどちらか一方であるわけではないように、プログラミング言語も同様です。
+幅があるのです。非常に外向的な言語もあれば、非常に内向的な言語もあり、その中間の言語もあります。
 
-### A lot of people say I am egocentric -- but enough about them
+### 多くの人が私を自己中心的だと言うが、彼らのことはもういい
 
-> "Reality is merely an illusion, albeit a very persistent one."
+> 「現実は単なる幻想に過ぎない。とはいえ、非常にしつこい幻想だが。」
 
-Some languages do not fall so neatly into this personality type spectrum.
+この性格タイプ分類にきちんと収まらない言語もあります。
 
-Take Smalltalk for example. 
+Smalltalkを例に挙げましょう。
 
-In many ways, Smalltalk is *extremely* extrovert. It has lots of support for user interface interaction, and itself was one of the first
-[graphical development environments](http://arstechnica.com/features/2005/05/gui/3/). 
+多くの点で、Smalltalkは*非常に*外向的です。ユーザーインターフェースの相互作用をサポートする機能が豊富にあり、
+最初期の[グラフィカル開発環境](https://arstechnica.com/features/2005/05/gui/3/)のひとつでした。
 
-But there's a problem. Sure, it's friendly and chatty and great at intense one-to-one conversations, but it has a dark side -- it doesn't play well with others.
-It only reluctantly acknowledges the operating system, and rather than dealing with messiness of external libraries, prefers to implement things in its own perfect way.
+しかし、問題があります。確かに、フレンドリーでおしゃべりで、1対1の濃厚な会話は得意ですが、暗い一面があります。それは、他人と仲良くできないことです。
+オペレーティングシステムだけは渋々認めますが、粗雑な外部ライブラリを使うより、独自の完璧な方法で物事を実装することを好みます。
 
-Most Lisps have the same failing as well. Idealistic and elegant, but rather isolated.
-I'm going to call this personality type [solipsistic](http://www.merriam-webster.com/dictionary/solipsism).
+ほとんどのLispにも同じ欠点があります。理想主義的でエレガントですが、やや孤立しています。
+私はこの性格タイプを[唯我論的](https://www.merriam-webster.com/dictionary/solipsism)と呼ぶことにします。
 
-In their defence, many important programming concepts were first developed in solipsistic languages. But alas, despite their ardent followers,
-they never gain the widespread recognition they deserve. 
+彼らの弁護をしておくと、多くの重要なプログラミングの概念は、唯我論的な言語で最初に開発されました。
+しかし、悲しいかな、熱心な支持者にもかかわらず、広く普及し、正当な評価を得ることはありません。
 
-### Where Do We Come From? What Are We? Where Are We Going?
+### 我々はどこから来たのか、我々は何者か、我々はどこへ行くのか
 
-And that brings me, inevitably, to the all-devouring black hole that is JavaScript. Where does that fit in this silly scheme?
+そして、この話題は必然的に、すべてを飲み込むブラックホールであるJavaScriptへ向かいます。馬鹿げたスキームではありますが、JavaScriptはどこに当てはまるのでしょうか？
 
-Obviously, its original purpose was to to aid communication with the user (and also, for animating monkeys), so at first glance it would seem to be extrovert.
+JavaScriptの本来の目的は、ユーザーとのコミュニケーションを支援すること（そして、猿をアニメーション化すること）だったのは明らかですから、一見すると外向的に見えます。
 
-But the fact that it runs in a sandbox (and until somewhat recently didn't do many kinds of IO) makes me think otherwise.
-The clincher for me is node.js. Need a server language? Let's create one in our own image! Let's write all the libraries from scratch! 
+しかし、JavaScriptがサンドボックス内で実行されるという事実（そして、つい最近までさまざまな種類のIOを扱えなかったこと）を考えると、JavaScriptは実は内向的な言語なのではないか、という気がしてきます。
+決め手になったのは、node.jsです。サーバーサイド言語が必要ですか？私たちの流儀で作成しましょう！必要なライブラリはすべてゼロから書きましょう！
 
-But it seems to have worked, for now at least. So, solipsism for the win!
+しかし、少なくとも今のところは、その態度でうまくいったようです。ということで、唯我論的で決まりです！
 
-### Concluding Unscientific Postscript
+### 非科学的な結論
 
-> "Nature has made us frivolous to console us for our miseries"
+> 「自然は我々を軽薄に作り、我々の苦しみを慰めようとした。」
 
-At this point, I should wrap up with some profound observations about different programming communities and what their language preference reveals about them.
+最後に、さまざまなプログラミングコミュニティの特徴や、コミュニティ参加者が好むプログラミング言語からどのようなことが明らかになるのか、といった深い考察をまとめるべきかもしれません。
 
-But really, this is a just a bit of whimsy, so I won't.
+しかし、実際には、この記事はちょっとした気まぐれで書いただけなので、そのような考察はしません。
 
 
 
