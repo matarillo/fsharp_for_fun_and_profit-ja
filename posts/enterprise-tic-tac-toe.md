@@ -898,7 +898,7 @@ module WinFormApplication =
 
 コードに関して、いくつか補足説明します。
 
-まず、WPFではなくWinFormsを使っています。WinFormsはMonoをサポートしており、NuGetパッケージに依存せずに動作するためです。もっと高機能なUIを使いたい場合は、[ETO.Forms](https://picoe.ca/2012/09/11/introducing-eto-forms-a-cross-platform-ui-for-net/)を試してみてください。
+まず、WPFではなくWinFormsを使っています。WinFormsはMonoをサポートしており、NuGetパッケージに依存せずに動作するためです。もっと高機能なUIを使いたい場合は、[ETO.Forms](https://github.com/picoe/Eto)を試してみてください。
 
 `TicTacToeForm<'T>` には、次のように型パラメーターを明示的に指定しています。
 

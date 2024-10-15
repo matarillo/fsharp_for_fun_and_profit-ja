@@ -5,7 +5,7 @@ description: ""
 categories: []
 ---
 
-*「Haskellの世界では、コンパイラをまだ実装していない人のことを初心者と呼びます。彼らはモナドのチュートリアルを書いただけなのです」 - [Pseudonymn](https://sequence.complete.org/node?page=10)*
+*「Haskellの世界では、コンパイラをまだ実装していない人のことを初心者と呼びます。彼らはモナドのチュートリアルを書いただけなのです」 - [Pseudonymn](https://web.archive.org/web/20150905084601/http://sequence.complete.org/node?page=10)*
 
 まずは、お話から始めましょう。
 
@@ -49,7 +49,7 @@ categories: []
 
 大学の数学の授業ならそれでいいかもしれませんが、何か役立つものを作ろうとしている普通のプログラマーには明らかに不向きです。
 
-しかし、このアプローチの残念な結果として、モナドの概念には神秘的な雰囲気が漂ってしまいました。モナドは、真の悟りに至るために[渡らなければならない橋](https://www.thefreedictionary.com/pons+asinorum)になってしまったのです。そしてもちろん、それを渡るための[モナドのチュートリアルはたくさん](https://www.haskell.org/haskellwiki/Monad_tutorials_timeline)あります。
+しかし、このアプローチの残念な結果として、モナドの概念には神秘的な雰囲気が漂ってしまいました。モナドは、真の悟りに至るために[渡らなければならない橋](https://www.thefreedictionary.com/pons+asinorum)になってしまったのです。そしてもちろん、それを渡るための[モナドのチュートリアルはたくさん](https://wiki.haskell.org/Monad_tutorials_timeline)あります。
 
 真実はこうです。役立つ関数型コードを書くのに、モナドを理解する*必要はありません*。これは特に、HaskellよりF#に当てはまります。
 
