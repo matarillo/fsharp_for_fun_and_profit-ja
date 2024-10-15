@@ -21,7 +21,7 @@ seriesIndexId: "F# を使う理由"
 * [簡潔さのためのパターンマッチング](../posts/conciseness-pattern-matching.md)。パターンマッチングは一度のステップでマッチングと束縛ができます。
 * [利便性](../posts/convenience-intro.md)。プログラミングの苦労とボイラープレートコードを減らす機能。
 * [型に関する既定のふるまい](../posts/convenience-types.md)。コーディングなしで不変性と組み込みの等価性を実現。
-* [インターフェースとしての関数](../posts/convenience-functions-as-interfaces.md)。関数を使うとOOデザインパターンが些細なものになります。
+* [インターフェースとしての関数](../posts/convenience-functions-as-interfaces.md)。関数を使用すると、オブジェクト指向のデザインパターンが簡単に実現できる。
 * [部分適用](../posts/convenience-partial-application.md)。関数のパラメータの一部を固定する方法。
 * [アクティブパターン](../posts/convenience-active-patterns.md)。強力なマッチングのための動的パターン。
 * [正確性](../posts/correctness-intro.md)。「コンパイル時単体テスト」の書き方。

@@ -179,7 +179,7 @@ form.Show()
 * [簡潔さのためのパターンマッチング](../posts/conciseness-pattern-matching.md)。パターンマッチングで一度にマッチングと束縛ができる
 * [利便性](../posts/convenience-intro.md)。プログラミングの退屈な作業とボイラープレートコードを減らす機能
 * [型に関する既定のふるまい](../posts/convenience-types.md)。コーディング不要の不変性と組み込み等価性
-* [インターフェースとしての関数](../posts/convenience-functions-as-interfaces.md)。関数を使えばOOデザインパターンが簡単になる
+* [インターフェースとしての関数](../posts/convenience-functions-as-interfaces.md)。関数を使用すると、オブジェクト指向のデザインパターンが簡単に実現できる
 * [部分適用](../posts/convenience-partial-application.md)。関数のパラメータの一部を固定する方法
 * [アクティブパターン](../posts/convenience-active-patterns.md)。強力なマッチングのための動的パターン
 * [正確性](../posts/correctness-intro.md)。「コンパイル時ユニットテスト」の書き方

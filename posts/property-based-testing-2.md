@@ -1192,7 +1192,7 @@ Zendoについてもっと知りたい場合は、[ルールはこちら](https:
 * 明らかな方法で金額を変換するメソッド `Add` と `Times`。
 
 ```fsharp
-// メンバーを持つOOスタイルのクラス
+// メンバーを持つオブジェクト指向スタイルのクラス
 type Dollar(amount:int) =
     member val Amount  = amount with get, set
     member this.Add add = 
