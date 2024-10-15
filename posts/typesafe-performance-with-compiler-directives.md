@@ -85,7 +85,7 @@ Real: 00:00:00.296, CPU: 00:00:00.296, GC gen0: 6, gen1: 4, gen2: 0
 ```
 
 つまり、これらの処理を実行するには約0.3秒かかり、かなりの量のガベージが生成され、4回のgen1 GCがトリガーされます。
-「gen0」、「gen1」、「gen2」が何なのか分からない場合は、[こちらをご覧ください](https://msdn.microsoft.com/en-us/library/ms973837.aspx)。
+「gen0」、「gen1」、「gen2」が何なのか分からない場合は、[こちらをご覧ください](https://learn.microsoft.com/ja-jp/previous-versions/dotnet/articles/ms973837%28v=msdn.10%29)。
 
 * **免責事項:** すべてのベンチマークはF#インタラクティブで実行しています。最適化されたコンパイル済みコードは、全く異なるパフォーマンスプロファイルを持つ可能性があります。
 過去のパフォーマンスは将来の結果を保証するものではありません。結論を導き出す際は、ご自身の責任において行ってください。などなど。*
@@ -778,14 +778,14 @@ extractActiveEmails: 1000000 records (Aliased)
 さらに重要なのは、構造体のような値型は万能薬ではないということです。値型には、それ自体に問題があります。
 
 たとえば、値渡しのため、引数として渡されるときに速度が低下する可能性があります。また、[暗黙的にボックス化](https://theburningmonk.com/2015/07/beware-of-implicit-boxing-of-value-types/) しないように注意する必要があります。
-ボックス化してしまうと、メモリ割り当てが発生し、ガベージが作成されてしまいます。Microsoft は [クラスと構造体の使用に関するガイドライン](https://msdn.microsoft.com/en-us/library/ms229017.aspx) を提供していますが、
+ボックス化してしまうと、メモリ割り当てが発生し、ガベージが作成されてしまいます。Microsoft は [クラスと構造体の使用に関するガイドライン](https://learn.microsoft.com/ja-jp/dotnet/standard/design-guidelines/choosing-between-class-and-struct) を提供していますが、
 [これらのガイドラインに反する解説](https://stackoverflow.com/a/6973171/1136133) や [これらのルール](https://stackoverflow.com/a/598268/1136133) も参考になるでしょう。
 
 
 ### シャドウイングを使うのはどうでしょうか？
 
 シャドウイングは、クライアントが別の実装を使いたい場合に利用されます。
-たとえば、[Checked モジュール](https://msdn.microsoft.com/en-us/library/ee340296.aspx) をオープンすれば、チェックされていない算術演算からチェックされた算術演算に切り替えることができます。
+たとえば、[Checked モジュール](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-core-operators-checked.html) をオープンすれば、チェックされていない算術演算からチェックされた算術演算に切り替えることができます。
 [詳細はこちら](https://theburningmonk.com/2012/01/checked-context-in-c-and-f/)。
 
 しかし、今回のケースではシャドウイングは有効ではありません。各クライアントが、どのバージョンの型を使うかを決定するのは望ましくありません。

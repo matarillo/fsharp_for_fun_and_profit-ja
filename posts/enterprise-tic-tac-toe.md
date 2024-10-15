@@ -1866,7 +1866,7 @@ let playerXMoves (gameState,move) =
 はい、このコードは `Cell`、`GameState` などの非常に具体的な型で記述されています。そして、そのどれも再利用できないのは事実です。
 
 このような、ドメイン固有で再利用不可能な設計と、
-リストやツリーのようなものの[抽象的で再利用可能なライブラリ](https://msdn.microsoft.com/en-us/library/ee353738.aspx)との間には、常に葛藤があります。
+リストやツリーのようなものの[抽象的で再利用可能なライブラリ](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-listmodule.html)との間には、常に葛藤があります。
 
 理想的には、低レベルの再利用可能なコンポーネントから始めて、それらを組み合わせることで、より大きく、より具体的なコンポーネント (DSLなど) を構築し、
 最終的にアプリケーションを開発するべきです（Tomas は、[まさにこの点](https://tomasp.net/blog/2015/library-layers/index.html)に関する優れた記事を書いています）。

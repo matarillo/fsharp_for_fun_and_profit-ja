@@ -26,7 +26,7 @@ image: "/assets/img/auth_3.png"
 
 これは、ある時点で、ユーザーのアイデンティティとロールに基づいて認可を行う必要があることを意味します。（ユーザーが正常に認証されていることを前提とします）。
 
-多くのWebフレームワークでは、UIレイヤー、多くの場合[コントローラー](https://msdn.microsoft.com/en-us/library/system.web.mvc.authorizeattribute.aspx)に認可を配置する傾向があります。
+多くのWebフレームワークでは、UIレイヤー、多くの場合[コントローラー](https://learn.microsoft.com/ja-jp/dotnet/api/system.web.mvc.authorizeattribute)に認可を配置する傾向があります。
 このアプローチに関する懸念点は、「内部」（ゲートウェイを通過した後）に入ると、アプリのどの部分もデータベースにアクセスする完全な権限を持っていることです。
 うっかりしてコードが間違ったことを行い、セキュリティ侵害が発生するという事故が起こりやすくなります。
 
@@ -1099,7 +1099,8 @@ ITの神様は常にこのような場合は容赦なく、ファイルの存在
 **質問：このコードでは、独自の認可を作成しています。適切な認可プロバイダーを使うべきではないですか？**
 
 はい。このコードは単なる例です。
-認可ロジックはドメインロジックとは完全に分離されているため、[`ClaimsAuthorizationManager`]([https://msdn.microsoft.com/en-us/library/system.security.claims.claimsauthorizationmanager.aspx)クラスや
+認可ロジックはドメインロジックとは完全に分離されているため、[`ClaimsAuthorizationManager`](https://learn.microsoft.com/ja-jp/dotnet/api/system.security.claims.claimsauthorizationmanager
+)クラスや
 [XACML](https://en.wikipedia.org/wiki/XACML)などの認可プロバイダーで簡単に置き換えることができます。
 
 **質問がもっとあります...**
