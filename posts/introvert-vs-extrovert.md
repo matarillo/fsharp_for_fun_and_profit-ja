@@ -9,7 +9,7 @@ categories: []
 > 
 > 内向的な数学者は、あなたと話している間、自分の靴を見つめます。外向的な数学者は、*あなたの*靴を見つめます。
 
-私は以前から、プログラミング言語の外界に対するふるまい方が[違う](https://plus.google.com/110981030061712822816/posts/KaSKeg4vQtz)ことに気づいていました。
+私は以前から、プログラミング言語の外界に対するふるまい方が[違う](https://gist.github.com/mschwager/c0d3c6aad87ea3ae852c85422bf723ff)ことに気づいていました。
 
 もしプログラミング言語に性格があるとしたら、そのうちのいくつかを「内向的」、いくつかを「外向的」と呼びたいです。
 
@@ -21,7 +21,7 @@ categories: []
 興味深いのは、ユーザーガイドやチュートリアルで何が重要とされているかを見ることで、言語の性格タイプについて多くのことがわかるということです。
 
 たとえば、古典的な「プログラミング言語C」の本では、冒頭に`printf("hello, world\n")` があることが[有名です](https://books.google.co.uk/books?id=va1QAAAAMAAJ&focus=searchwithinvolume&q=hello%2C+world)し、
-他のほとんどのCの本も[同様です](https://en.wikibooks.org/wiki/C_Programming/A_taste_of_C)。
+他のほとんどのCの本も[同様です](https://web.archive.org/web/20150302130132/http://en.wikibooks.org/wiki/C_Programming/A_taste_of_C)。
 
 そして実際、Cは*非常に*外向的な言語です。コーディング例には、ファイルやコンソールIOが散りばめられています。
 同様に、PHP、Python、Perlが同じくらい外向的であることは、マニュアルを一目見ただけでわかります。
@@ -52,7 +52,7 @@ categories: []
 たとえば、SQLは宣言型言語ですが、その人生の目的はデータ処理であり、それは私の考えでは外向的です。
 
 そして、より身近なところでは、F#は関数型ファーストの言語ですが、IOにも適しています。
-実際、[型プロバイダー](https://blogs.msdn.com/b/dsyme/archive/2013/01/30/twelve-type-providers-in-pictures.aspx)や[Deedle](https://bluemountaincapital.github.io/Deedle/)を介して、
+実際、[型プロバイダー](https://web.archive.org/web/20190126013507/https://blogs.msdn.microsoft.com/dsyme/2013/01/30/twelve-f-type-providers-in-action/)や[Deedle](https://bluemountaincapital.github.io/Deedle/)を介して、
 現実世界のデータ処理を非常にうまくサポートしています。
 
 人がすべてどちらか一方であるわけではないように、プログラミング言語も同様です。
@@ -67,7 +67,7 @@ categories: []
 Smalltalkを例に挙げましょう。
 
 多くの点で、Smalltalkは*非常に*外向的です。ユーザーインターフェースの相互作用をサポートする機能が豊富にあり、
-最初期の[グラフィカル開発環境](https://arstechnica.com/features/2005/05/gui/3/)のひとつでした。
+最初期の[グラフィカル開発環境](https://arstechnica.com/features/2005/05/gui/#page-3のひとつでした。
 
 しかし、問題があります。確かに、フレンドリーでおしゃべりで、1対1の濃厚な会話は得意ですが、暗い一面があります。それは、他人と仲良くできないことです。
 オペレーティングシステムだけは渋々認めますが、粗雑な外部ライブラリを使うより、独自の完璧な方法で物事を実装することを好みます。
