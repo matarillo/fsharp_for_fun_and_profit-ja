@@ -779,7 +779,7 @@ extractActiveEmails: 1000000 records (Aliased)
 
 たとえば、値渡しのため、引数として渡されるときに速度が低下する可能性があります。また、[暗黙的にボックス化](https://theburningmonk.com/2015/07/beware-of-implicit-boxing-of-value-types/) しないように注意する必要があります。
 ボックス化してしまうと、メモリ割り当てが発生し、ガベージが作成されてしまいます。Microsoft は [クラスと構造体の使用に関するガイドライン](https://learn.microsoft.com/ja-jp/dotnet/standard/design-guidelines/choosing-between-class-and-struct) を提供していますが、
-[これらのガイドラインに反する解説](https://stackoverflow.com/a/6973171/1136133) や [これらのルール](https://stackoverflow.com/a/598268/1136133) も参考になるでしょう。
+[これらのガイドラインに反する解説](https://stackoverflow.com/questions/521298/when-should-i-use-a-struct-rather-than-a-class-in-c/6973171#6973171) や [これらのルール](https://stackoverflow.com/questions/521298/when-should-i-use-a-struct-rather-than-a-class-in-c/598268#598268) も参考になるでしょう。
 
 
 ### シャドウイングを使うのはどうでしょうか？
@@ -794,7 +794,7 @@ extractActiveEmails: 1000000 records (Aliased)
 ### より高性能なコレクション型はどうでしょうか？
 
 コレクション型として、すべての箇所で `array` を使っています。
-他の高性能なコレクションを使いたい場合は、[FSharpx.Collections](https://fsprojects.github.io/FSharpx.Collections/) または [Funq collections](https://github.com/GregRos/Funq) を調べてみてください。
+他の高性能なコレクションを使いたい場合は、[FSharpx.Collections](https://fsprojects.github.io/FSharpx.Collections/) または [Funq collections](https://github.com/GregRos/Imms) を調べてみてください。
 
 ### メモリ割り当て、マッピング、フィルタリングが混在しています。より詳細な分析をしてみては？
 
@@ -820,16 +820,16 @@ F# は .NET 言語なので、C# のパフォーマンスに関するヒント�
 参考になった資料を以下に示します。
 
 * Ben Watson著 [Writing High-Performance .NET Code](https://www.writinghighperf.net/)
-* Martin Thompsonによるパフォーマンスに関する素晴らしい[ブログ](https://mechanical-sympathy.blogspot.jp/2012/08/memory-access-patterns-are-important.html)
-  [Top 10 Performance Folklore](https://www.infoq.com/presentations/top-10-performance-myths) などの優れたビデオもあります。
+* Martin Thompsonによるパフォーマンスに関する素晴らしい[ブログ](https://mechanical-sympathy.blogspot.com/2012/08/memory-access-patterns-are-important.html)
+  [Top 10 Performance Folklore](https://www.infoq.com/presentations/top-10-performance-myths/) などの優れたビデオもあります。
   ([ここでの要約](https://weronikalabaj.com/performance-myths-and-facts/)が良いです。)
 * Gil Teneによるビデオ、[Understanding Latency](https://www.youtube.com/watch?v=9MKY4KypBzg)。
-* MicrosoftのDustin Cambellによるビデオ、[Essential Truths Everyone Should Know about Performance in a Large Managed Codebase](https://channel9.msdn.com/Events/TechEd/NorthAmerica/2013/DEV-B333)。
+* MicrosoftのDustin Cambellによるビデオ、[Essential Truths Everyone Should Know about Performance in a Large Managed Codebase](https://web.archive.org/web/20150224182607/http://channel9.msdn.com/Events/TechEd/NorthAmerica/2013/DEV-B333#fbid=yFqdpQ9vpFn)。
 * 特にF#については、以下を参照してください。
-  * Yan Cuiによる [レコードと構造体](https://theburningmonk.com/2011/10/fsharp-performance-test-structs-vs-records/) および [メモリレイアウト](https://theburningmonk.com/2015/07/smallest-net-ref-type-is-12-bytes-or-why-you-should-consider-using-value-types) に関するブログ記事。
-  * Jon Harropによる [この記事](https://flyingfrogblog.blogspot.co.uk/2012/06/are-functional-languages-inherently.html) などの優れた記事が多数ありますが、一部は有料です。
+  * Yan Cuiによる [レコードと構造体](https://theburningmonk.com/2011/10/fsharp-performance-test-structs-vs-records/) および [メモリレイアウト](https://theburningmonk.com/2015/07/smallest-net-ref-type-is-12-bytes-or-why-you-should-consider-using-value-types/) に関するブログ記事。
+  * Jon Harropによる [この記事](https://web.archive.org/web/20160118044443/http://flyingfrogblog.blogspot.com/2012/06/are-functional-languages-inherently.html) などの優れた記事が多数ありますが、一部は有料です。
   * ビデオ: Jack Pappasによる [High Performance F# in .NET and on the GPU](https://vimeo.com/33699102)。音質は悪いですが、スライドと議論は良いです！
-  * fsharp.orgの [数学と統計のリソース](https://fsharp.org/guides/math-and-statistics/)
+  * fsharp.orgの [数学と統計のリソース](https://fsharp.org/guides/data-science/)
 
 ## まとめ
 
