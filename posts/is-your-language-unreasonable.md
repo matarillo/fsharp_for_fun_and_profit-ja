@@ -125,7 +125,7 @@ var y = x - 1;
 
 本当にひどいですよね。言語について誤解させてしまい申し訳ありませんが、言語が予測できない動きをすると、どれほど面倒なことかを示したかっただけです。
 
-JavaScriptはとても便利で重要な言語です。しかし、[合理性](https://stackoverflow.com/a/1995298/1136133)がJavaScriptの[強み](../assets/img/javascript-the-good-parts.jpg)の一つだと主張する人はいないでしょう。
+JavaScriptはとても便利で重要な言語です。しかし、[合理性](https://stackoverflow.com/questions/1995113/strangest-language-feature/1995298#1995298)がJavaScriptの[強み](../assets/img/javascript-the-good-parts.jpg)の一つだと主張する人はいないでしょう。
 実際、動的な型付け言語のほとんどは、このように[推論しにくい癖](https://www.destroyallsoftware.com/talks/wat)があります。
 
 静的な型付けと適切なスコープ規則のおかげで、C#ではこのようなことは起こりません（無理やりやろうとしない限り）。
@@ -387,7 +387,7 @@ var changedCustomer = ProcessCustomer(cust);
 もちろん、新しいものと古いもののどちらを（または両方）集合に入れるべきかという問題は解決しません。
 しかし、可変の顧客を使う実装とは異なり、この問題は明確になり、見落とされることはありません。
 
-というわけで、[不変性は最高](https://stackoverflow.com/a/4763485/1136133)！
+というわけで、[不変性は最高](https://stackoverflow.com/questions/4763457/are-immutable-objects-good-practice/4763485#4763485)！
 
 リストに項目をもう一つ追加しましょう。
 
@@ -509,7 +509,7 @@ if (customerOrError.IsError)
 同様に、オブジェクトをどのように構築して初期化するかも、完全にオブジェクト自体に委ねられます。 何が許可されるべきか、許可されるべきでないかについての規則はありません。
 
 最後に、静的に型付けされたオブジェクト指向言語に、項目4の初期化制約を実装せずに、null非許容参照型を追加することは非常に困難です。
-Eric Lippert氏が述べているように、[「null非許容性は、12年後に後付けしたいものではなく、最初から型システムに組み込みたいものです」](https://blog.coverity.com/2013/11/20/c-non-nullable-reference-types/)。
+Eric Lippert氏が述べているように、[「null非許容性は、12年後に後付けしたいものではなく、最初から型システムに組み込みたいものです」](https://web.archive.org/web/20150327065919/http://blog.coverity.com/2013/11/20/c-non-nullable-reference-types/#.VRT_zMd_r2c)。
 
 対照的に、ほとんどの関数型プログラミング言語は、これらの「予測可能性が高い」機能を言語の中核部分として備えています。
 
