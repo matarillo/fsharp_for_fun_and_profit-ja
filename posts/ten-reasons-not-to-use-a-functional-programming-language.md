@@ -201,7 +201,7 @@ void someMethod(SomeClass x)
 ss=: +/ @: *:
 ```
 
-おっと、失礼！これは[Jのコード](http://en.wikipedia.org/wiki/J_%28programming_language%29)でした。
+おっと、失礼！これは[Jのコード](https://en.wikipedia.org/wiki/J_%28programming_language%29)でした。
 
 しかし、関数型プログラムでは`<*>`や`>>=`のような奇妙な記号や、「モナド」や「ファンクター」と呼ばれる難解な概念が使われているそうです。
 

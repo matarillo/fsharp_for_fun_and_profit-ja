@@ -8,7 +8,7 @@ categories: ["TDD"]
 > この記事は[F# Advent Calendar in English 2014](https://sergeytihon.wordpress.com/2014/11/24/f-advent-calendar-in-english-2014/) の一部です。
 > 他の素晴らしい記事もぜひご覧ください！ また、企画してくれたSergey Tihonに感謝します。
 
-*更新：これらの記事に基づいて、プロパティベースのテストに関する講演を行いました。[スライドとビデオはこちら](http://fsharpforfunandprofit.com/pbt/)*
+*更新：これらの記事に基づいて、プロパティベースのテストに関する講演を行いました。[スライドとビデオはこちら](https://fsharpforfunandprofit.com/pbt/)*
 
 こんなやり取りは、できればしたくありません。
 

@@ -17,7 +17,7 @@ seriesOrder: 4
 しかし、結果は散々なものでした！
 問題はコードのバグではなく、コーディングを始める前に要件を十分に検討していなかったことにありました。
 
-まあ、フレッド・ブルックスの有名な言葉にもあるように「捨てるつもりで計画せよ。いずれにせよ捨てることになるのだから」（とはいえ、これは[少し単純化しすぎ](http://www.davewsmith.com//blog/2010/brook-revisits-plan-to-throw-one-away)ですが）。
+まあ、フレッド・ブルックスの有名な言葉にもあるように「捨てるつもりで計画せよ。いずれにせよ捨てることになるのだから」（とはいえ、これは[少し単純化しすぎ](https://web.archive.org/web/20160320073020/http://www.davewsmith.com//blog/2010/brook-revisits-plan-to-throw-one-away)ですが）。
 
 幸いなことに、以前の失敗から学び、設計を改善する計画があります。
 
@@ -297,7 +297,7 @@ let cStateHandler inputEvent =
 さて、電卓をモデル化するためにステートマシンを使うことを考えたのは、きっと私だけではないでしょう。
 誰か他の人の設計を参考にして、<s>盗む</s>拝借することはできないでしょうか？
 
-そこで、「電卓 ステートマシン」でGoogle検索してみると、[こんなもの](http://cnx.org/contents/9bac155d-509e-46a6-b48b-30731ed08ce6@2/Finite_State_Machines_and_the_)など、たくさんの検索結果が出てきます。
+そこで、「電卓 ステートマシン」でGoogle検索してみると、[こんなもの](https://www.clear.rice.edu/comp310/JavaResources/cnx/finite_state_machine.html)など、たくさんの検索結果が出てきます。
 このページには、詳細な仕様と状態遷移図が載っています。
 
 この図を参考に、さらに検討を重ねた結果、以下の点が明らかになりました。

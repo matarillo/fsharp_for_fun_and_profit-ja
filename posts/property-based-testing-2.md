@@ -1179,7 +1179,7 @@ Zendoについてもっと知りたい場合は、[ルールはこちら](https:
 このサンプルは、Kent Beckの著書「テスト駆動開発入門」で説明されている、よく知られた `Dollar` の例に基づいています。
 
 [*Growing Object-Oriented Software Guided by Tests*](http://www.growing-object-oriented-software.com/) で有名なNat Pryceは、
-しばらく前にプロパティベースのテストに関するブログ記事（[「QuickCheckを使ったテスト駆動開発の探求」](http://www.natpryce.co/articles/000795.html)）を書きました。
+しばらく前にプロパティベースのテストに関するブログ記事（[「QuickCheckを使ったテスト駆動開発の探求」](http://www.natpryce.com/articles/000795.html)）を書きました。
 
 その中で彼は、プロパティベースのテストが実際に役立つことについて、いくつかの不満を表明しました。そこで、彼が参照した例を再検討し、私たちに何ができるかを見てみましょう。
 

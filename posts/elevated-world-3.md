@@ -245,7 +245,7 @@ Haskellのような型クラスを持つ言語では、`return`がもっと使�
 これにより、エラーを捨てることなく全ての失敗を収集できます。`Failure`ケースに単一の文字列ではなく文字列のリストを持たせた理由はこれです。
 
 *注：デモを簡単にするため、失敗ケースに`string`を使っています。より洗練された設計では、可能な失敗を明示的にリストアップします。
-詳細は[関数型エラーハンドリング](http://fsharpforfunandprofit.com/rop/)の講演を参照してください。*
+詳細は[関数型エラーハンドリング](https://fsharpforfunandprofit.com/rop/)の講演を参照してください。*
 
 ### アプリカティブスタイルを使ったバリデーション
 
@@ -510,7 +510,7 @@ let createCustomerResultA id name email =
 この組み合わされた関数は、`a->Result<b>`の形の別の世界をまたぐ関数であり、さらに大きな関数のコンポーネント部分として使用できます。
 
 この「全てを同じ世界に高次化する」アプローチの詳細な例については、
-[関数型エラー処理](http://fsharpforfunandprofit.com/rop/)と[状態のスレッド処理](../series/handling-state.md)に関する私の投稿を参照してください。
+[関数型エラー処理](https://fsharpforfunandprofit.com/rop/)と[状態のスレッド処理](../series/handling-state.md)に関する私の投稿を参照してください。
 
 <a id="kleisli"></a>
 <hr>
