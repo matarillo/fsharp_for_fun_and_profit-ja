@@ -40,30 +40,22 @@ jobs:
       - name: Install docsify-cli
         run: npm install -g docsify-cli
 
-      # 静的ファイルの準備
-      - name: Prepare static files
+      # .nojekyllファイルの作成
+      - name: Create .nojekyll file
         run: |
           # .nojekyllファイルが存在することを確認（GitHub Pagesでアンダースコアで始まるファイルを処理するため）
           touch .nojekyll
-          
-          # 静的ファイル生成用のディレクトリを作成
-          mkdir -p dist
-          cp .nojekyll dist/
 
-      # docsifyでの静的ファイル生成
-      - name: Generate static files with docsify
-        run: npx docsify generate . -o dist
+      # リポジトリファイルの確認
+      - name: List repository files
+        run: ls -la
 
-      # 静的ファイルの確認
-      - name: List generated files
-        run: ls -la dist
-
-      # アーティファクトのアップロード
+      # アーティファクトのアップロード（リポジトリ全体）
       - name: Upload Artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
-          # 生成された静的ファイルのみをアップロード
-          path: './dist'
+          # リポジトリ全体をアップロード
+          path: '.'
 
   deploy:
     needs: build
@@ -79,4 +71,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v3
