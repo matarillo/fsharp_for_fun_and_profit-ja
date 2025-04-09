@@ -1,6 +1,6 @@
-# これはActionsを使い始めるための基本的なワークフローです
+# docsifyを使用してGitHub Pagesにデプロイするためのワークフロー
 
-name: CI
+name: Deploy Docsify to GitHub Pages
 
 # ワークフローの実行タイミングを制御します
 on:
@@ -21,25 +21,49 @@ jobs:
 
     # ステップは、ジョブの一部として実行されるタスクのシーケンスを表します
     steps:
-      # $GITHUB_WORKSPACEの下にあなたのリポジトリをチェックアウトします。これによりジョブがアクセスできるようになります
-      - uses: actions/checkout@v4
+      # リポジトリをチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
+      # Node.jsのセットアップ
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
 
-      - run: npm ci
+      # 依存関係のインストール
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Build with HonKit
-        run: npx honkit build
+      # docsify-cliのインストール
+      - name: Install docsify-cli
+        run: npm install -g docsify-cli
 
+      # 静的ファイルの準備
+      - name: Prepare static files
+        run: |
+          # .nojekyllファイルが存在することを確認（GitHub Pagesでアンダースコアで始まるファイルを処理するため）
+          touch .nojekyll
+          
+          # 静的ファイル生成用のディレクトリを作成
+          mkdir -p dist
+          cp .nojekyll dist/
+
+      # docsifyでの静的ファイル生成
+      - name: Generate static files with docsify
+        run: npx docsify generate . -o dist
+
+      # 静的ファイルの確認
+      - name: List generated files
+        run: ls -la dist
+
+      # アーティファクトのアップロード
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          # upload entire directory
-          path: './_book'
+          # 生成された静的ファイルのみをアップロード
+          path: './dist'
 
   deploy:
     needs: build
