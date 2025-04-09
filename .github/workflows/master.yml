@@ -36,7 +36,7 @@ jobs:
         run: npx honkit build
 
       - name: Upload Artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           # upload entire directory
           path: './_book'
@@ -55,4 +55,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
