@@ -32,14 +32,14 @@ jobs:
 
       - run: npm ci
 
-      - name: Build with HonKit
-        run: npx honkit build
+      - name: Build with Astro
+        run: npm build
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # upload entire directory
-          path: './_book'
+          path: './dist'
 
   deploy:
     needs: build
