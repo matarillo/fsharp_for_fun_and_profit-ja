@@ -12,11 +12,11 @@ F#は科学や数値解析といった専門分野で優れていますが、企
 
 ## ![](@assets/img/glyphicons/glyphicons_030_pencil.png) 簡潔さ
 
-F#には波かっこやセミコロンなどの、[コーディング上の「ノイズ」](../posts/fvsc-sum-of-squares.html)がありません。
+F#には波かっこやセミコロンなどの、[コーディング上の「ノイズ」](posts/fvsc-sum-of-squares.html)がありません。
 
-強力な[型推論システム](../posts/conciseness-type-inference.html)のおかげで、オブジェクトの型をほとんど指定する必要がありません。
+強力な[型推論システム](posts/conciseness-type-inference.html)のおかげで、オブジェクトの型をほとんど指定する必要がありません。
 
-また、C#と比べて、同じ問題を解決するのに[より少ないコード行数](../posts/fvsc-download.html)で済みます。
+また、C#と比べて、同じ問題を解決するのに[より少ないコード行数](posts/fvsc-download.html)で済みます。
 
 ```
 // ワンライナー
@@ -43,10 +43,10 @@ let worker = Worker jdoe
 
 
 F#では多くの一般的なプログラミング作業がより簡単です。
-これには、[複雑な型定義](../posts/conciseness-type-definitions.html)の作成と使用、[リスト処理](../posts/conciseness-extracting-boilerplate.html)、[比較と等価性](../posts/convenience-types.html)、[状態機械](../posts/designing-with-types-representing-states.html)などが含まれます。
+これには、[複雑な型定義](posts/conciseness-type-definitions.html)の作成と使用、[リスト処理](posts/conciseness-extracting-boilerplate.html)、[比較と等価性](posts/convenience-types.html)、[状態機械](posts/designing-with-types-representing-states.html)などが含まれます。
 
 
-また、関数が第一級オブジェクトであるため、[他の関数をパラメータとして受け取る](../posts/conciseness-extracting-boilerplate.html)関数や、[既存の関数を組み合わせて](../posts/conciseness-functions-as-building-blocks.html)新しい関数を作る関数を作成することで、強力で再利用可能なコードを簡単に作れます。
+また、関数が第一級オブジェクトであるため、[他の関数をパラメータとして受け取る](posts/conciseness-extracting-boilerplate.html)関数や、[既存の関数を組み合わせて](posts/conciseness-functions-as-building-blocks.html)新しい関数を作る関数を作成することで、強力で再利用可能なコードを簡単に作れます。
 
 ```
 // 自動的な等値判定と比較
@@ -66,13 +66,13 @@ let result = add2times3 5
 ## ![](@assets/img/glyphicons/glyphicons_150_check.png) 正確性
 
 
-F#には[強力な型システム](../posts/correctness-type-checking.html)があり、[null参照例外](../posts/the-option-type.html#option-is-not-null)などの一般的なエラーを防ぎます。
+F#には[強力な型システム](posts/correctness-type-checking.html)があり、[null参照例外](posts/the-option-type.html#option-is-not-null)などの一般的なエラーを防ぎます。
 
-値は[デフォルトで不変](../posts/correctness-immutability.html)なので、多くの種類のエラーを防げます。
+値は[デフォルトで不変](posts/correctness-immutability.html)なので、多くの種類のエラーを防げます。
 
-さらに、[型システム](../posts/correctness-exhaustive-pattern-matching.html)を使ってビジネスロジックを表現することで、
-[間違ったコードを書くことが不可能](../posts/designing-for-correctness.html)になったり、
-[単位の混乱](../posts/units-of-measure.html)を避けられたりするため、ユニットテストの必要性が大幅に減ります。
+さらに、[型システム](posts/correctness-exhaustive-pattern-matching.html)を使ってビジネスロジックを表現することで、
+[間違ったコードを書くことが不可能](posts/designing-for-correctness.html)になったり、
+[単位の混乱](posts/units-of-measure.html)を避けられたりするため、ユニットテストの必要性が大幅に減ります。
 
 
 ```
@@ -99,9 +99,9 @@ let distance = 10<m> + 10<ft> // エラー!
 
 
 F#には、複数の処理を同時に行う際に役立つ組み込みライブラリがいくつかあります。
-非同期プログラミングや並列処理が[とても簡単](../posts/concurrency-async-and-parallel.html)にできます。
+非同期プログラミングや並列処理が[とても簡単](posts/concurrency-async-and-parallel.html)にできます。
 
-F#には組み込みの[アクターモデル](../posts/concurrency-actor-model.html)もあり、イベント処理や[関数型リアクティブプログラミング](../posts/concurrency-reactive.html)のサポートも優れています。
+F#には組み込みの[アクターモデル](posts/concurrency-actor-model.html)もあり、イベント処理や[関数型リアクティブプログラミング](posts/concurrency-reactive.html)のサポートも優れています。
 
 そして、データ構造がデフォルトで不変なので、状態の共有やロックの回避がずっと簡単です。
 
@@ -125,10 +125,10 @@ MailboxProcessor.Start(fun inbox-> async{
 F#は基本的に関数型言語ですが、100% 純粋ではない他のスタイルもサポートしています。
 これにより、Webサイト、データベース、他のアプリケーションなど、純粋でない世界とのやり取りがずっと簡単になります。
 
-特に、F#は関数型とオブジェクト指向のハイブリッド言語として設計されているため、[C#でできることはほぼすべてできます](../posts/completeness-anything-csharp-can-do.html)。
+特に、F#は関数型とオブジェクト指向のハイブリッド言語として設計されているため、[C#でできることはほぼすべてできます](posts/completeness-anything-csharp-can-do.html)。
 
 
-F#は[.NETエコシステムの一部](../posts/completeness-seamless-dotnet-interop.html)ですから、すべてのサードパーティの.NETライブラリやツールにスムーズにアクセスできます。
+F#は[.NETエコシステムの一部](posts/completeness-seamless-dotnet-interop.html)ですから、すべてのサードパーティの.NETライブラリやツールにスムーズにアクセスできます。
 （Monoや新しい .NET Coreを通じて）Linuxやスマートフォンなどのほとんどのプラットフォームで動作します。
 
 
@@ -165,33 +165,33 @@ form.Show()
 
 以下のシリーズでは、F#単独のコードスニペット（しばしばC#コードとの比較も）を使って、F#のそれぞれの利点を紹介します。
 
-* [「F# を使う理由」シリーズの紹介](../posts/why-use-fsharp-intro.html)。F#の利点の概要
-* [60秒でわかるF#の文法](../posts/fsharp-in-60-seconds.html)。F#コードの読み方の超簡単な概要
-* [F#とC#の比較：簡単な合計](../posts/fvsc-sum-of-squares.html)。ループを使わずに1からNまでの二乗の合計を求めてみる
-* [F#とC#の比較：ソート](../posts/fvsc-quicksort.html)。F#がC#よりも宣言的であること、そしてパターンマッチングの紹介
-* [F#とC#の比較：Webページのダウンロード](../posts/fvsc-download.html)。F#がコールバックに優れていること、そして'use'キーワードの紹介
-* [4つの重要な概念](../posts/key-concepts.html)。F#を標準的な命令型言語と区別する概念
-* [簡潔さ](../posts/conciseness-intro.html)。なぜ簡潔さが重要なのか？
-* [型推論](../posts/conciseness-type-inference.html)。複雑な型構文に気を取られないようにする方法
-* [低オーバーヘッドの型定義](../posts/conciseness-type-definitions.html)。新しい型を作るのにペナルティがない
-* [関数を使ってボイラープレートコードを抽出する](../posts/conciseness-extracting-boilerplate.html)。DRY原則への関数型アプローチ
-* [関数をビルディングブロックとして使用する](../posts/conciseness-functions-as-building-blocks.html)。関数合成とミニ言語でコードをより読みやすくする
-* [簡潔さのためのパターンマッチング](../posts/conciseness-pattern-matching.html)。パターンマッチングで一度にマッチングと束縛ができる
-* [利便性](../posts/convenience-intro.html)。プログラミングの退屈な作業とボイラープレートコードを減らす機能
-* [型に関する既定のふるまい](../posts/convenience-types.html)。コーディング不要の不変性と組み込み等価性
-* [インターフェースとしての関数](../posts/convenience-functions-as-interfaces.html)。関数を使用すると、オブジェクト指向のデザインパターンが簡単に実現できる
-* [部分適用](../posts/convenience-partial-application.html)。関数のパラメータの一部を固定する方法
-* [アクティブパターン](../posts/convenience-active-patterns.html)。強力なマッチングのための動的パターン
-* [正確性](../posts/correctness-intro.html)。「コンパイル時ユニットテスト」の書き方
-* [不変性](../posts/correctness-immutability.html)。コードを予測可能にする
-* [網羅的パターンマッチング](../posts/correctness-exhaustive-pattern-matching.html)。正確性を確保するための強力な技術
-* [型システムを使って正しいコードを確保する](../posts/correctness-type-checking.html)。F#では型システムは敵ではなく味方
-* [実践例：正確性のための設計](../posts/designing-for-correctness.html)。不正な状態を表現不可能にする方法
-* [並行性](../posts/concurrency-intro.html)。ソフトウェア開発の次の大革命？
-* [非同期プログラミング](../posts/concurrency-async-and-parallel.html)。Asyncクラスでバックグラウンドタスクをカプセル化する
-* [メッセージとエージェント](../posts/concurrency-actor-model.html)。並行性について考えやすくする
-* [関数型リアクティブプログラミング](../posts/concurrency-reactive.html)。イベントをストリームに変換する
-* [完全性](../posts/completeness-intro.html)。F#は.NETエコシステム全体の一部
-* [.NETライブラリとのシームレスな相互運用](../posts/completeness-seamless-dotnet-interop.html)。.NETライブラリを扱うための便利な機能
-* [C#でできることは何でも...](../posts/completeness-anything-csharp-can-do.html)。F#でのオブジェクト指向コードの駆け足ツアー
-* [F# を使う理由：結論](../posts/why-use-fsharp-conclusion.html)。
+* [「F# を使う理由」シリーズの紹介](posts/why-use-fsharp-intro.html)。F#の利点の概要
+* [60秒でわかるF#の文法](posts/fsharp-in-60-seconds.html)。F#コードの読み方の超簡単な概要
+* [F#とC#の比較：簡単な合計](posts/fvsc-sum-of-squares.html)。ループを使わずに1からNまでの二乗の合計を求めてみる
+* [F#とC#の比較：ソート](posts/fvsc-quicksort.html)。F#がC#よりも宣言的であること、そしてパターンマッチングの紹介
+* [F#とC#の比較：Webページのダウンロード](posts/fvsc-download.html)。F#がコールバックに優れていること、そして'use'キーワードの紹介
+* [4つの重要な概念](posts/key-concepts.html)。F#を標準的な命令型言語と区別する概念
+* [簡潔さ](posts/conciseness-intro.html)。なぜ簡潔さが重要なのか？
+* [型推論](posts/conciseness-type-inference.html)。複雑な型構文に気を取られないようにする方法
+* [低オーバーヘッドの型定義](posts/conciseness-type-definitions.html)。新しい型を作るのにペナルティがない
+* [関数を使ってボイラープレートコードを抽出する](posts/conciseness-extracting-boilerplate.html)。DRY原則への関数型アプローチ
+* [関数をビルディングブロックとして使用する](posts/conciseness-functions-as-building-blocks.html)。関数合成とミニ言語でコードをより読みやすくする
+* [簡潔さのためのパターンマッチング](posts/conciseness-pattern-matching.html)。パターンマッチングで一度にマッチングと束縛ができる
+* [利便性](posts/convenience-intro.html)。プログラミングの退屈な作業とボイラープレートコードを減らす機能
+* [型に関する既定のふるまい](posts/convenience-types.html)。コーディング不要の不変性と組み込み等価性
+* [インターフェースとしての関数](posts/convenience-functions-as-interfaces.html)。関数を使用すると、オブジェクト指向のデザインパターンが簡単に実現できる
+* [部分適用](posts/convenience-partial-application.html)。関数のパラメータの一部を固定する方法
+* [アクティブパターン](posts/convenience-active-patterns.html)。強力なマッチングのための動的パターン
+* [正確性](posts/correctness-intro.html)。「コンパイル時ユニットテスト」の書き方
+* [不変性](posts/correctness-immutability.html)。コードを予測可能にする
+* [網羅的パターンマッチング](posts/correctness-exhaustive-pattern-matching.html)。正確性を確保するための強力な技術
+* [型システムを使って正しいコードを確保する](posts/correctness-type-checking.html)。F#では型システムは敵ではなく味方
+* [実践例：正確性のための設計](posts/designing-for-correctness.html)。不正な状態を表現不可能にする方法
+* [並行性](posts/concurrency-intro.html)。ソフトウェア開発の次の大革命？
+* [非同期プログラミング](posts/concurrency-async-and-parallel.html)。Asyncクラスでバックグラウンドタスクをカプセル化する
+* [メッセージとエージェント](posts/concurrency-actor-model.html)。並行性について考えやすくする
+* [関数型リアクティブプログラミング](posts/concurrency-reactive.html)。イベントをストリームに変換する
+* [完全性](posts/completeness-intro.html)。F#は.NETエコシステム全体の一部
+* [.NETライブラリとのシームレスな相互運用](posts/completeness-seamless-dotnet-interop.html)。.NETライブラリを扱うための便利な機能
+* [C#でできることは何でも...](posts/completeness-anything-csharp-can-do.html)。F#でのオブジェクト指向コードの駆け足ツアー
+* [F# を使う理由：結論](posts/why-use-fsharp-conclusion.html)。

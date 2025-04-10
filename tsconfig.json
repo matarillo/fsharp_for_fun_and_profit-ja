@@ -5,6 +5,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@docs/*": ["src/content/docs/*"],
       "@assets/*": ["src/assets/*"]
     }
   }

@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
+  base: '/fsharp_for_fun_and_profit-ja/',
   integrations: [
     starlight({
       title: 'F# for fun and profit 日本語訳',
