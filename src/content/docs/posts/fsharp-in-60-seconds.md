@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "F# syntax in 60 seconds"
+title: "60 秒でわかる F# シンタックス"
 description: "A very quick overview on how to read F# code"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"

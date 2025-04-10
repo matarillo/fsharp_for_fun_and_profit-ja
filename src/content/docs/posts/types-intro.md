@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "F#の型を理解する：イントロダクション"
+title: "F#の型を理解する：はじめに"
 description: "型の新しい世界"
 nav: fsharp-types
 seriesId: "F#の型を理解する"

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Installing and using F#"
+title: "F# のインストールと使い方"
 description: "Instructions for downloading, installing and using F# with Visual Studio, SharpDevelop and MonoDevelop"
 nav: 
 hasComments: 1

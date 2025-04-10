@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Learning F#"
+title: "F# を学ぶ"
 description: "Functional programming languages need a different approach"
 nav: learning-fsharp
 hasComments: 1

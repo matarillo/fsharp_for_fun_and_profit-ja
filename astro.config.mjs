@@ -46,9 +46,9 @@ export default defineConfig({
             { label: 'C# と F# の比較: Webページのダウンロード', link: '/posts/fvsc-download/' },
             { label: 'F# の 4 つの重要概念', link: '/posts/key-concepts/' },
             {
-              label: '簡潔さ',
+              label: '簡潔性',
               items: [
-                { label: '簡潔さ', link: '/posts/conciseness-intro/' },
+                { label: '簡潔性: はじめに', link: '/posts/conciseness-intro/' },
                 { label: '型推論', link: '/posts/conciseness-type-inference/' },
                 { label: '低オーバーヘッドの型定義', link: '/posts/conciseness-type-definitions/' },
                 {
@@ -59,13 +59,13 @@ export default defineConfig({
                   label: 'ビルディングブロックとしての関数を使う',
                   link: '/posts/conciseness-functions-as-building-blocks/'
                 },
-                { label: '簡潔さのためのパターンマッチング', link: '/posts/conciseness-pattern-matching/' },
+                { label: '簡潔性のためのパターンマッチング', link: '/posts/conciseness-pattern-matching/' },
               ],
             },
             {
-              label: '便利さ',
+              label: '利便性',
               items: [
-                { label: '便利さ', link: '/posts/convenience-intro/' },
+                { label: '利便性: はじめに', link: '/posts/convenience-intro/' },
                 { label: '型に関する既定のふるまい', link: '/posts/convenience-types/' },
                 { label: 'インターフェースとしての関数', link: '/posts/convenience-functions-as-interfaces/' },
                 { label: '部分適用', link: '/posts/convenience-partial-application/' },
@@ -75,7 +75,7 @@ export default defineConfig({
             {
               label: '正確性',
               items: [
-                { label: '正確性', link: '/posts/correctness-intro/' },
+                { label: '正確性: はじめに', link: '/posts/correctness-intro/' },
                 { label: '不変性', link: '/posts/correctness-immutability/' },
                 { label: '網羅的なパターンマッチング', link: '/posts/correctness-exhaustive-pattern-matching/' },
                 { label: '型システムを使用した正しいコードの確保', link: '/posts/correctness-type-checking/' },
@@ -83,9 +83,9 @@ export default defineConfig({
               ],
             },
             {
-              label: '並行処理',
+              label: '並行性',
               items: [
-                { label: '並行処理', link: '/posts/concurrency-intro/' },
+                { label: '並行性: はじめに', link: '/posts/concurrency-intro/' },
                 { label: '非同期プログラミング', link: '/posts/concurrency-async-and-parallel/' },
                 { label: 'メッセージとエージェント', link: '/posts/concurrency-actor-model/' },
                 { label: '関数型リアクティブプログラミング', link: '/posts/concurrency-reactive/' },
@@ -94,7 +94,7 @@ export default defineConfig({
             {
               label: '完全性',
               items: [
-                { label: '完全性', link: '/posts/completeness-intro/' },
+                { label: '完全性: はじめに', link: '/posts/completeness-intro/' },
                 {
                   label: 'シームレスな .NET ライブラリとの相互運用',
                   link: '/posts/completeness-seamless-dotnet-interop/'

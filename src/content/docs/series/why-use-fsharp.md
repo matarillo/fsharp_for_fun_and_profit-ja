@@ -13,12 +13,12 @@ seriesIndexId: "F# を使う理由"
 * [F#とC#の比較：ソート](../posts/fvsc-quicksort.html)。F#がC#よりも宣言的であることがわかり、パターンマッチングが紹介されます。
 * [F#とC#の比較：Webページのダウンロード](../posts/fvsc-download.html)。F#がコールバックに優れていることがわかり、'use'キーワードが紹介されます。
 * [4つの重要な概念](../posts/key-concepts.html)。F#を標準的な命令型言語と区別する概念。
-* [簡潔さ](../posts/conciseness-intro.html)。なぜ簡潔さが重要なのか？
+* [簡潔性](../posts/conciseness-intro.html)。なぜ簡潔性が重要なのか？
 * [型推論](../posts/conciseness-type-inference.html)。複雑な型構文に気を取られないようにする方法。
 * [オーバーヘッドの低い型定義](../posts/conciseness-type-definitions.html)。新しい型を作るペナルティがありません。
 * [関数を使ってボイラープレートコードを抽出する](../posts/conciseness-extracting-boilerplate.html)。DRY原則への関数型アプローチ。
 * [関数をビルディングブロックとして使う](../posts/conciseness-functions-as-building-blocks.html)。関数合成とミニ言語がコードをより読みやすくします。
-* [簡潔さのためのパターンマッチング](../posts/conciseness-pattern-matching.html)。パターンマッチングは一度のステップでマッチングと束縛ができます。
+* [簡潔性のためのパターンマッチング](../posts/conciseness-pattern-matching.html)。パターンマッチングは一度のステップでマッチングと束縛ができます。
 * [利便性](../posts/convenience-intro.html)。プログラミングの苦労とボイラープレートコードを減らす機能。
 * [型に関する既定のふるまい](../posts/convenience-types.html)。コーディングなしで不変性と組み込みの等価性を実現。
 * [インターフェースとしての関数](../posts/convenience-functions-as-interfaces.html)。関数を使用すると、オブジェクト指向のデザインパターンが簡単に実現できる。

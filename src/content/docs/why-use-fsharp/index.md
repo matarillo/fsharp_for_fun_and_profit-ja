@@ -10,7 +10,7 @@ image: "@assets/img/four-concepts2.png"
 F#は科学や数値解析といった専門分野で優れていますが、企業向けの開発にも最適な選択肢です。
 次回のプロジェクトではF#を使うべきだと思える理由を5つ紹介します。
 
-## ![](@assets/img/glyphicons/glyphicons_030_pencil.png) 簡潔さ
+## ![](@assets/img/glyphicons/glyphicons_030_pencil.png) 簡潔性
 
 F#には波かっこやセミコロンなどの、[コーディング上の「ノイズ」](posts/fvsc-sum-of-squares.html)がありません。
 
@@ -39,7 +39,7 @@ let jdoe = {First="John";Last="Doe"}
 let worker = Worker jdoe
 ```
 
-## ![](@assets/img/glyphicons/glyphicons_343_thumbs_up.png) 便利さ
+## ![](@assets/img/glyphicons/glyphicons_343_thumbs_up.png) 利便性
 
 
 F#では多くの一般的なプログラミング作業がより簡単です。
@@ -95,7 +95,7 @@ emptyShoppingCart.remove   // コンパイルエラー!
 let distance = 10<m> + 10<ft> // エラー!
 ```
 
-## ![](@assets/img/glyphicons/glyphicons_054_clock.png) 並行処理 
+## ![](@assets/img/glyphicons/glyphicons_054_clock.png) 並行性
 
 
 F#には、複数の処理を同時に行う際に役立つ組み込みライブラリがいくつかあります。
@@ -171,12 +171,12 @@ form.Show()
 * [F#とC#の比較：ソート](posts/fvsc-quicksort.html)。F#がC#よりも宣言的であること、そしてパターンマッチングの紹介
 * [F#とC#の比較：Webページのダウンロード](posts/fvsc-download.html)。F#がコールバックに優れていること、そして'use'キーワードの紹介
 * [4つの重要な概念](posts/key-concepts.html)。F#を標準的な命令型言語と区別する概念
-* [簡潔さ](posts/conciseness-intro.html)。なぜ簡潔さが重要なのか？
+* [簡潔性](posts/conciseness-intro.html)。なぜ簡潔性が重要なのか？
 * [型推論](posts/conciseness-type-inference.html)。複雑な型構文に気を取られないようにする方法
 * [低オーバーヘッドの型定義](posts/conciseness-type-definitions.html)。新しい型を作るのにペナルティがない
 * [関数を使ってボイラープレートコードを抽出する](posts/conciseness-extracting-boilerplate.html)。DRY原則への関数型アプローチ
 * [関数をビルディングブロックとして使用する](posts/conciseness-functions-as-building-blocks.html)。関数合成とミニ言語でコードをより読みやすくする
-* [簡潔さのためのパターンマッチング](posts/conciseness-pattern-matching.html)。パターンマッチングで一度にマッチングと束縛ができる
+* [簡潔性のためのパターンマッチング](posts/conciseness-pattern-matching.html)。パターンマッチングで一度にマッチングと束縛ができる
 * [利便性](posts/convenience-intro.html)。プログラミングの退屈な作業とボイラープレートコードを減らす機能
 * [型に関する既定のふるまい](posts/convenience-types.html)。コーディング不要の不変性と組み込み等価性
 * [インターフェースとしての関数](posts/convenience-functions-as-interfaces.html)。関数を使用すると、オブジェクト指向のデザインパターンが簡単に実現できる

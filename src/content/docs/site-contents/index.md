@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Site Contents"
+title: "サイトの内容"
 nav: site-contents
 description: "A directory of useful pages"
 hasIcons: 1
