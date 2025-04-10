@@ -1,4 +1,7 @@
-# F# for Fun and Profit eBook 日本語訳
+---
+title: "F# for Fun and Profit eBook 日本語訳"
+description: ""
+---
 
 This is a Japanese translation of ["F# for Fun and Profit eBook"](https://swlaschin.gitbooks.io/fsharpforfunandprofit/content/). The github repository for the Japanese version is [here](https://github.com/matarillo/fsharp_for_fun_and_profit-ja).
 
@@ -22,10 +25,10 @@ F# は無料かつオープンソースで、Linux、Mac、Windows などで動�
 
 ## スタートガイド
 
-まず、記事をランダムに読む前に、「[F# を使う理由とは？](./why-use-fsharp/index.md)」 ページと、[「F# を使う理由」 シリーズ](series/why-use-fsharp.md) 全体を読むことをお勧めします。
-その後は、「[サイトの内容](./site-contents/index.md)」 ページで、関数や型などについてのさらなる学習のためのリソースが紹介されています。
+まず、記事をランダムに読む前に、「[F# を使う理由とは？](./why-use-fsharp.html)」 ページと、[「F# を使う理由」 シリーズ](series/why-use-fsharp.html) 全体を読むことをお勧めします。
+その後は、「[サイトの内容](./site-contents.html)」 ページで、関数や型などについてのさらなる学習のためのリソースが紹介されています。
 
-[F# を学ぶ](./learning-fsharp/index.md) ためのアドバイスのページもありますし、コードのコンパイルに問題がある場合は、[F# のトラブルシューティング](./troubleshooting-fsharp/index.md) ページが役に立つかもしれません。
+[F# を学ぶ](./learning-fsharp.html) ためのアドバイスのページもありますし、コードのコンパイルに問題がある場合は、[F# のトラブルシューティング](./troubleshooting-fsharp.html) ページが役に立つかもしれません。
 
 読者はプログラミングの基本的な知識を持っており、C#、Java、または類似の C 系言語に慣れていることを前提としています。
 Mono/.NET ライブラリの経験があるとさらに理解が深まるでしょう。

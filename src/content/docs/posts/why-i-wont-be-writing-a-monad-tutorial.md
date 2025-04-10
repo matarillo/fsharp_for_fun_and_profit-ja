@@ -15,19 +15,19 @@ categories: []
 
 アリス：見て！子猫たち。
 
-![2匹の子猫](../assets/img/two_kitties.jpg)
+![2匹の子猫](@assets/img/two_kitties.jpg)
 
 お父さん：かわいいね。2匹いるよ。
 
 アリス：見て！子犬たち。
 
-![2匹の子犬](../assets/img/two_puppies.jpg)
+![2匹の子犬](@assets/img/two_puppies.jpg)
 
 お父さん：そうだね。数えられるかな？子犬も2匹いるよ。
 
 アリス：見て！お馬さんたち。
 
-![2匹の馬](../assets/img/two_horses.jpg)
+![2匹の馬](@assets/img/two_horses.jpg)
 
 お父さん：そうだね。子猫と子犬と馬に共通点があるのがわかる？
 

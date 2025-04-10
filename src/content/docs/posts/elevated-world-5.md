@@ -260,7 +260,7 @@ let makeContentSize (UriContent (uri, html)) =
 次に、`Async.map`を使って、`a -> b`関数を`Async<a> -> Async<b>`関数に変換します。
 この場合、`Result<UriContent> -> Result<UriContentSize>`は`Async<Result<UriContent>> -> Async<Result<UriContentSize>>`になります。
 
-![](../assets/img/vgfp_urlcontentsize.png)
+![](@assets/img/vgfp_urlcontentsize.png)
 
 そして、正しい種類の入力を受け取れるようになったので、`getUriContent`と合成することができます。
 
@@ -338,17 +338,17 @@ let maxContentSize list =
 * `Uri`のリストをアクションのリストに変換する（`Async<Result<UriContentSize>> list`）
 * 次に、スタックの上位2つの部分を入れ替える必要があります。つまり、`List<Async>`を`Async<List>`に変換します。
 
-![](../assets/img/vgfp_download_stack_1.png)
+![](@assets/img/vgfp_download_stack_1.png)
 
 * 次に、スタックの*下位*2つの部分を入れ替える必要があります。つまり、`List<Result>`を`Result<List>`に変換します。
    しかし、スタックの下位2つの部分は`Async`でラップされているので、これを行うには`Async.map`を使用する必要があります。
     
-![](../assets/img/vgfp_download_stack_2.png)
+![](@assets/img/vgfp_download_stack_2.png)
 
 * 最後に、一番下の`List`に`List.maxBy`を使用して、それを単一の値に変換する必要があります。つまり、`List<UriContentSize>`を`UriContentSize`に変換します。
    しかし、スタックの一番下は`Result`でラップされ、さらに`Async`でラップされているので、これを行うには`Async.map`と`Result.map`を使用する必要があります。
 
-![](../assets/img/vgfp_download_stack_3.png)
+![](@assets/img/vgfp_download_stack_3.png)
 
 完全なコードは以下の通りです。
 
@@ -709,13 +709,13 @@ largestPageSizeM_Bad: 1回あたりの平均時間:  2371ms
 
 それらが1つの型であれば、`bind`は次のようになります。
 
-![](../assets/img/vgfp_asyncresult-1.png)
+![](@assets/img/vgfp_asyncresult-1.png)
 
 つまり、前の値が次の値を決定するということです。
 
 また、「入れ替え」がはるかに簡単になります。
 
-![](../assets/img/vgfp_asyncresult-2.png)
+![](@assets/img/vgfp_asyncresult-2.png)
 
 ### AsyncResult型の定義
 

@@ -107,7 +107,7 @@ if (!this.IsPaidFor) { 何かを実行 }
 
 以下が状態遷移図です：
 
-![Shopping Cart](../assets/img/ShoppingCart.png)
+![Shopping Cart](@assets/img/ShoppingCart.png)
  
 このような状態指向のモデルが、ビジネスシステムでは非常に一般的であることは注目に値します。製品開発、顧客関係管理、注文処理、その他のワークフローは、しばしばこのようにモデル化できます。
 

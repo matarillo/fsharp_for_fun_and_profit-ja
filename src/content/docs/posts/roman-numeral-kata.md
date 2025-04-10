@@ -70,15 +70,15 @@ Corey Hainesのプログラミング能力を軽視するつもりはありま�
 
 まず、[信頼できる情報源](https://en.wikipedia.org/wiki/Roman_numerals)によると、ローマ数字はおそらく[タリーマーク](https://en.wikipedia.org/wiki/Tally_marks)（訳注：日本で言う「正の字」）に似たものから始まったようです。
 
-![タリーマーク](../assets/img/200px-Tally_marks.svg.png)
+![タリーマーク](@assets/img/200px-Tally_marks.svg.png)
 
 これは「I」から「IIII」までの単純な線と、「V」の異なる記号を説明しています。
 
 進化するにつれて、10と50、100と500などの記号が追加されました。
 1と5で数える方式は、古今の[算盤](https://en.wikipedia.org/wiki/Roman_abacus)のデザインに見ることができます。
 
-![ローマの算盤](../assets/img/RomanAbacusRecon.jpg)
-![現代の算盤](../assets/img/320px-Sharp-abacus-japan.jpg)
+![ローマの算盤](@assets/img/RomanAbacusRecon.jpg)
+![現代の算盤](@assets/img/320px-Sharp-abacus-japan.jpg)
 
 実は、この方式には聞きなれない名前があります。「[二・五進法](https://ja.wikipedia.org/wiki/%E4%BA%8C%E4%BA%94%E9%80%B2%E6%B3%95)」です。
 面白いですね。今後、カジュアルな会話にこのフレーズを盛り込んでみようと思います。

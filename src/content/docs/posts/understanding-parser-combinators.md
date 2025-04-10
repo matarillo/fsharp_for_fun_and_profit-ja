@@ -66,7 +66,7 @@ val A_Parser :
 
 これは、入力が文字列で、出力がブール値と別の文字列（残りの入力）のペアであることを示しています。図で表すと次のようになります。
 
-![](../assets/img/parser-1.png)
+![](@assets/img/parser-1.png)
 
 では、テストしてみましょう。まず、適切な入力を使ってテストします。
 
@@ -248,7 +248,7 @@ Failure "Expecting 'A'. Got 'Z'"
 
 関数の入力と出力を図で表すと、次のようになります。
 
-![](../assets/img/parser-2.png)
+![](@assets/img/parser-2.png)
 
 
 
@@ -307,7 +307,7 @@ val pchar :
 
 カリー化されたバージョンの`pchar`を図で表すと、こうなります。
 
-![](../assets/img/parser-3.png)
+![](@assets/img/parser-3.png)
 
 ### カリー化とは何か？
 
@@ -411,7 +411,7 @@ parseA inputZBC  // Failure "Expecting 'A'. Got 'Z'"
 
 `pchar`の図をもう一度見てみましょう。今回は部分適用に焦点を当てています。
 
-![](../assets/img/parser-4a.png)
+![](@assets/img/parser-4a.png)
 
 先に進む前に、この論理を理解することが非常に重要です。残りの投稿はこの基本設計にしたがって作られるからです。
 
@@ -435,11 +435,11 @@ type Parser<'T> = Parser of (string -> Result<'T * string>)
 
 カプセル化することで、このデザインから、
 
-![](../assets/img/parser-4a.png)
+![](@assets/img/parser-4a.png)
 
 このデザインに移行します。
 
-![](../assets/img/parser-4b.png)
+![](@assets/img/parser-4b.png)
 
 実装の変更は非常にシンプルです。内部関数の返し方を変更するだけです。
 

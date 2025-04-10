@@ -5,14 +5,14 @@ description: "関数型アプリの作り方、パート2"
 seriesId: "関数型アプリの作り方"
 seriesOrder: 2
 categories: []
-image: "/assets/img/Recipe_Railway_Transparent.png"
+image: "@assets/img/Recipe_Railway_Transparent.png"
 ---
 
 *更新: [より包括的なプレゼンテーションのスライドと動画はこちら](https://fsharpforfunandprofit.com/rop/)（そして、Eitherモナドを理解している場合は、[まずこれを読んでください](https://fsharpforfunandprofit.com/rop/#monads)）*
 
 前回の記事では、ユースケースをステップに分け、全てのエラーを別の失敗トラックに振り分ける方法を見ました。以下のような感じです。
 
-![2つの出力を持つ関数](../assets/img/Recipe_Function_ErrorTrack.png)
+![2つの出力を持つ関数](@assets/img/Recipe_Function_ErrorTrack.png)
 
 この記事では、これらのステップ関数を1つの単位にまとめる様々な方法を見ていきます。関数の詳細な内部設計については、後の記事で説明します。
 
@@ -22,7 +22,7 @@ image: "/assets/img/Recipe_Railway_Transparent.png"
 
 2つの可能性があります。データが有効な場合（ハッピーパス）、または何か問題がある場合です。問題がある場合は失敗パスに進み、残りのステップをバイパスします。以下のようになります。
 
-![2つの出力を持つ検証関数](../assets/img/Recipe_Validation_Paths.png)
+![2つの出力を持つ検証関数](@assets/img/Recipe_Validation_Paths.png)
 
 しかし、前回と同様、これは有効な関数ではありません。関数は1つの出力しか持てないので、前回定義した`Result`型を使う必要があります。
 
@@ -34,7 +34,7 @@ type Result<'TSuccess,'TFailure> =
 
 そして、図は次のようになります。
 
-![成功/失敗出力を持つ検証関数](../assets/img/Recipe_Validation_Union2.png)
+![成功/失敗出力を持つ検証関数](@assets/img/Recipe_Validation_Union2.png)
 
 実際にどのように機能するかを示すために、実際の検証関数の例を挙げます。
 
@@ -63,35 +63,35 @@ validateInput : Request -> Result<Request,string>
 
 1つの関数の`Success`出力を次の関数の入力につなぎ、`Failure`出力の場合は2番目の関数をバイパスする方法が必要です。この図が全体的なアイデアを示しています。
 
-![検証関数と更新関数の接続](../assets/img/Recipe_Validation_Update.png)
+![検証関数と更新関数の接続](@assets/img/Recipe_Validation_Update.png)
 
 これを行うための素晴らしい類推があります。おそらくすでに馴染みのあるものです。鉄道です！
 
 鉄道には列車を別の線路に導くための分岐器（イギリスでは「ポイント」）があります。これらの「成功/失敗」関数を鉄道の分岐器と考えることができます。このようになります。
 
-![鉄道の分岐器](../assets/img/Recipe_RailwaySwitch.png)
+![鉄道の分岐器](@assets/img/Recipe_RailwaySwitch.png)
 
 そして、ここに2つの分岐器が並んでいます。
 
-![2つの分岐器（未接続）](../assets/img/Recipe_RailwaySwitch1.png)
+![2つの分岐器（未接続）](@assets/img/Recipe_RailwaySwitch1.png)
 
 両方の失敗トラックをつなげるにはどうすればよいでしょうか？明らかです。このようにします！
 
-![2つの分岐器（接続済み）](../assets/img/Recipe_RailwaySwitch2.png)
+![2つの分岐器（接続済み）](@assets/img/Recipe_RailwaySwitch2.png)
 
 そして、一連の分岐器があれば、次のような2線式のシステムになります。
 
-![3つの分岐器（接続済み）](../assets/img/Recipe_RailwaySwitch3.png)
+![3つの分岐器（接続済み）](@assets/img/Recipe_RailwaySwitch3.png)
 
 上の線路がハッピーパスで、下の線路が失敗パスです。
 
 全体像を見ると、2線式の鉄道をまたぐ一連のブラックボックス関数があり、各関数がデータを処理して次の関数に渡していくことがわかります。
 
-![不透明な関数](../assets/img/Recipe_Railway_Opaque.png)
+![不透明な関数](@assets/img/Recipe_Railway_Opaque.png)
 
 しかし、関数の中を見ると、実際には各関数の中に分岐器があり、不正なデータを失敗トラックに振り分けていることがわかります。
 
-![透明な関数](../assets/img/Recipe_Railway_Transparent.png)
+![透明な関数](@assets/img/Recipe_Railway_Transparent.png)
 
 失敗パスに入ると、（通常は）二度とハッピーパスに戻ることはなく、最後まで残りの関数をバイパスすることに注意してください。
 
@@ -104,17 +104,17 @@ validateInput : Request -> Result<Request,string>
 
 一連の1線式関数をつなげたい場合、左から右への合成演算子`>>`を使えます。
 
-![1線式関数の合成](../assets/img/Recipe_Railway_Compose1.png)
+![1線式関数の合成](@assets/img/Recipe_Railway_Compose1.png)
 
 同じ合成操作は2線式関数にも適用できます。
 
-![2線式関数の合成](../assets/img/Recipe_Railway_Compose2.png)
+![2線式関数の合成](@assets/img/Recipe_Railway_Compose2.png)
 
 合成の唯一の制約は、左側の関数の出力型が右側の関数の入力型と一致する必要があることです。
 
 鉄道の類推では、1線式の出力を1線式の入力に接続したり、2線式の出力を2線式の入力に接続したりできますが、2線式の出力を1線式の入力に直接接続することは*できません*。
 
-![2線式関数の合成](../assets/img/Recipe_Railway_Compose3.png)
+![2線式関数の合成](@assets/img/Recipe_Railway_Compose3.png)
 
 ## 分岐器を2線式入力に変換する
 
@@ -126,7 +126,7 @@ validateInput : Request -> Result<Request,string>
 
 答えは簡単です。分岐器関数用の「穴」や「スロット」を持つ「アダプター」関数を作成し、それを適切な2線式関数に変換します。以下は図解です。
 
-![バインドアダプター](../assets/img/Recipe_Railway_BindAdapter.png)
+![バインドアダプター](@assets/img/Recipe_Railway_BindAdapter.png)
 
 そして、実際のコードは次のようになります。このアダプター関数を`bind`と呼びますが、これは標準的な名前です。
 
@@ -239,7 +239,7 @@ let combinedValidation =
 
 以下は、（バインドされていない）`Validate1`分岐器と、`Validate2`および`Validate3`分岐器、さらに`Validate2'`および`Validate3'`アダプターを示す図です。
 
-![Validate2とValidate3の接続](../assets/img/Recipe_Railway_Validator2and3.png)
+![Validate2とValidate3の接続](@assets/img/Recipe_Railway_Validator2and3.png)
 
 `bind`を「インライン化」して、このように書くこともできます。
 
@@ -329,19 +329,19 @@ let combinedValidation =
 
 つまり、これが：
 
-![2つの分岐器（未接続）](../assets/img/Recipe_RailwaySwitch1.png)
+![2つの分岐器（未接続）](@assets/img/Recipe_RailwaySwitch1.png)
 
 このようになります：
 
-![2つの分岐器（接続済み）](../assets/img/Recipe_RailwaySwitch2.png)
+![2つの分岐器（接続済み）](@assets/img/Recipe_RailwaySwitch2.png)
 
 しかし、よく考えてみると、この組み合わせたトラックも実際には別の分岐器にすぎません！中央部分を隠すとわかります。1つの入力と2つの出力があります：
 
-![2つの分岐器（接続済み）](../assets/img/Recipe_RailwaySwitch2a.png)
+![2つの分岐器（接続済み）](@assets/img/Recipe_RailwaySwitch2a.png)
 
 つまり、実際に行ったのは分岐器の一種の合成で、このようになります：
 
-![分岐器の合成](../assets/img/Recipe_Railway_MComp.png)
+![分岐器の合成](@assets/img/Recipe_Railway_MComp.png)
 
 各合成の結果は単なる別の分岐器なので、常に別の分岐器を追加でき、さらに大きなものになりますが、それでもまだ分岐器であり、このように続きます。
 
@@ -380,11 +380,11 @@ let combinedValidation =
 では、分岐器合成ではなくbindを使う理由は何でしょうか？コンテキストによります。既存の2線式システムがあり、そこに分岐器を挿入する必要がある場合、
 bindをアダプターとして使用して、分岐器を2線式入力を受け付けるものに変換する必要があります。
 
-![分岐器の合成](../assets/img/Recipe_Railway_WhyBind.png)
+![分岐器の合成](@assets/img/Recipe_Railway_WhyBind.png)
 
 一方、データフロー全体が一連の分岐器で構成されている場合、分岐器合成の方がシンプルかもしれません。
 
-![分岐器の合成](../assets/img/Recipe_Railway_WhyCompose.png)
+![分岐器の合成](@assets/img/Recipe_Railway_WhyCompose.png)
 
 ### bindを使った分岐器合成
 
@@ -392,15 +392,15 @@ bindをアダプターとして使用して、分岐器を2線式入力を受け
 
 これが2つの別々の分岐器です：
 
-![2つの分岐器（未接続）](../assets/img/Recipe_RailwaySwitch1.png)
+![2つの分岐器（未接続）](@assets/img/Recipe_RailwaySwitch1.png)
 
 そして、これが分岐器を組み合わせて新しい大きな分岐器を作ったものです：
 
-![2つの分岐器（未接続）](../assets/img/Recipe_RailwaySwitch2.png)
+![2つの分岐器（未接続）](@assets/img/Recipe_RailwaySwitch2.png)
 
 そして、これが2番目の分岐器に`bind`を使って同じことを行ったものです：
 
-![bindを分岐器合成として使用](../assets/img/Recipe_Railway_BindIsCompose.png)
+![bindを分岐器合成として使用](@assets/img/Recipe_Railway_BindIsCompose.png)
 
 以下は、このような考え方で書き直した分岐器合成演算子です：
 
@@ -432,7 +432,7 @@ let canonicalizeEmail input =
 
 言い換えれば、アダプターブロックが必要です。`bind`で使用したのと同じ概念ですが、今回のアダプターブロックは1線式関数用のスロットを持ち、アダプターブロック全体の「形」は分岐器になります。
 
-![単純な関数の持ち上げ](../assets/img/Recipe_Railway_SwitchAdapter.png)
+![単純な関数の持ち上げ](@assets/img/Recipe_Railway_SwitchAdapter.png)
 
 これを行うコードは些細なものです。1線式関数の出力を取り、2線式の結果に変換するだけです。この場合、結果は*常に*Successになります。
 
@@ -445,7 +445,7 @@ let switch f x =
 鉄道の観点から言えば、失敗トラックを少し追加したことになります。全体として見ると、分岐器関数（1線式入力、2線式出力）のように*見えます*が、
 もちろん、失敗トラックはダミーで、分岐器が実際に使われることはありません。
 
-![単純な関数の持ち上げ](../assets/img/Recipe_Railway_SwitchAdapter2.png)
+![単純な関数の持ち上げ](@assets/img/Recipe_Railway_SwitchAdapter2.png)
 
 `switch`が利用可能になれば、`canonicalizeEmail`関数をチェーンの末尾に簡単に追加できます。拡張し始めているので、関数名を`usecase`に変更しましょう。
 
@@ -479,11 +479,11 @@ usecase badInput
 
 しかし、時には2線式モデルを直接使いたい場合があります。その場合、1線式関数を直接2線式関数に変換したいでしょう。
 
-![単純な関数のマッピング](../assets/img/Recipe_Railway_MapAdapter2.png)
+![単純な関数のマッピング](@assets/img/Recipe_Railway_MapAdapter2.png)
 
 ここでも、単純な関数用のスロットを持つアダプターブロックが必要です。このアダプターを通常`map`と呼びます。
 
-![単純な関数のマッピング](../assets/img/Recipe_Railway_MapAdapter.png)
+![単純な関数のマッピング](@assets/img/Recipe_Railway_MapAdapter.png)
 
 そして、ここでも実際の実装は非常に単純です。2線式入力が`Success`の場合、関数を呼び出し、その出力をSuccessに変換します。一方、2線式入力が`Failure`の場合、関数を完全にバイパスします。
 
@@ -527,11 +527,11 @@ let usecase =
 
 鉄道の観点から見ると、これはデッドエンドの側線を作ることに相当します。このようになります。
 
-![デッドエンド関数のためのTee](../assets/img/Recipe_Railway_Tee.png)
+![デッドエンド関数のためのTee](@assets/img/Recipe_Railway_Tee.png)
 
 これを機能させるには、`switch`のような別のアダプター関数が必要です。ただし、今回は1線式デッドエンド関数用のスロットがあり、それを1線式出力を持つ単一の1線式パススルー関数に変換します。
 
-![デッドエンド関数のためのTeeアダプター](../assets/img/Recipe_Railway_TeeAdapter.png)
+![デッドエンド関数のためのTeeアダプター](@assets/img/Recipe_Railway_TeeAdapter.png)
 
 以下がコードで、UNIXのteeコマンドにちなんで`tee`と呼びます：
 
@@ -605,7 +605,7 @@ let usecase =
 
 これまでと同様に、アダプターブロックを作成しますが、今回は*2つ*の別々の1線式関数用のスロットを持ちます。
 
-![ダブルマップアダプター](../assets/img/Recipe_Railway_DoubleMapAdapter.png)
+![ダブルマップアダプター](@assets/img/Recipe_Railway_DoubleMapAdapter.png)
 
 以下がコードです：
 
@@ -677,11 +677,11 @@ let fail x =
 
 これまで、関数を直列に組み合わせてきました。しかし、検証のような場合、複数の分岐器を並列に実行し、結果を組み合わせたいことがあります。このようなイメージです：
 
-![並列の分岐器](../assets/img/Recipe_Railway_Parallel.png)
+![並列の分岐器](@assets/img/Recipe_Railway_Parallel.png)
 
 これを簡単にするために、分岐器合成で使ったのと同じトリックを再利用できます。一度に多くを行うのではなく、単一のペアに焦点を当て、それらを「加算」して新しい分岐器を作れば、その後「加算」を簡単にチェーンして、必要な数だけ加算できます。つまり、これを実装するだけで良いのです：
 
-![2つの分岐器を並列に加算](../assets/img/Recipe_Railway_MPlus.png)
+![2つの分岐器を並列に加算](@assets/img/Recipe_Railway_MPlus.png)
 
 では、並列に2つの分岐器を加算するロジックはどうなるでしょうか？
 
@@ -1021,16 +1021,16 @@ let plus addSuccess addFailure switch1 switch2 x =
 
 たとえば、パイナップルの貨物は`function1`というトンネルを通過すると、魔法のようにリンゴに変わります。
 
-![パイナップルからリンゴへ](../assets/img/Recipe_Railway_Cargo1.png)
+![パイナップルからリンゴへ](@assets/img/Recipe_Railway_Cargo1.png)
 
 そして、リンゴの貨物は`function2`というトンネルを通過すると、バナナに変わります。
 
-![リンゴからバナナへ](../assets/img/Recipe_Railway_Cargo2.png)
+![リンゴからバナナへ](@assets/img/Recipe_Railway_Cargo2.png)
 
 この魔法の鉄道には重要なルールがあります。同じ種類の貨物を運ぶトラックしか接続できないのです。
 この場合、`function1`と`function2`を接続できます。なぜなら、`function1`から出てくる貨物（リンゴ）が`function2`に入る貨物（同じくリンゴ）と同じだからです。
 
-![関数の接続](../assets/img/Recipe_Railway_Cargo3.png)
+![関数の接続](@assets/img/Recipe_Railway_Cargo3.png)
 
 もちろん、トラックが常に同じ貨物を運ぶわけではありません。貨物の種類の不一致はエラーの原因となります。
 
@@ -1154,7 +1154,7 @@ let usecase =
 
 NDC Oslo 2014でこのトピックについて発表しました（画像をクリックすると動画が見られます）
 
-[![Video from NDC Oslo 2014](../assets/img/rop-ndcoslo.jpg)](https://vimeo.com/97344498)
+[![Video from NDC Oslo 2014](@assets/img/rop-ndcoslo.jpg)](https://vimeo.com/97344498)
 
 そして、使用したスライドはこちらです：
 

@@ -60,7 +60,7 @@ categories: ["パターン"]
   （場合によっては空の）イベントのリストを生成します。
 * 生成されたイベントは、次のコマンドで使うために`EventStore`に保存されます。
 
-![](../assets/img/turtle-event-source.png)
+![](@assets/img/turtle-event-source.png)
 
 このようにして、クライアントもコマンドハンドラも状態を追跡する必要がありません。`EventStore`だけが可変です。
 
@@ -300,7 +300,7 @@ let drawTriangle() =
 しかし、`commandHandler`は最小限の作業（状態の更新など）しか行わず、複雑なドメインロジックは実行しません。
 複雑なロジックは、イベントストリームをサブスクライブする1つ以上のダウンストリーム"プロセッサ"（"アグリゲータ"とも呼ばれます）によって実行されます。
 
-![](../assets/img/turtle-frp.png)
+![](@assets/img/turtle-frp.png)
 
 これらのイベントをプロセッサへの"コマンド"と考えることもでき、もちろん、プロセッサは別のプロセッサが消費する新しいイベントを生成できるので、
 このアプローチは、アプリケーションがイベントストアによってリンクされたコマンドハンドラのセットで構成されるアーキテクチャスタイルに拡張できます。
@@ -308,7 +308,7 @@ let drawTriangle() =
 この手法は「[ストリーム処理](https://www.confluent.io/blog/making-sense-of-stream-processing/)」とよく呼ばれます。
 しかし、Jessica Kerrはこのアプローチを「[関数型レトロアクティブプログラミング](https://x.com/jessitron/status/408554836578537472)」と呼んでいました - 気に入ったので、この名前を借用します！
 
-![](../assets/img/turtle-stream-processor.png)
+![](@assets/img/turtle-stream-processor.png)
 
 ### デザインの実装
 
@@ -805,7 +805,7 @@ Move 60.0
 
 言い換えれば、以下のような一連の交互のコマンドとタートル関数があります：
 
-![](../assets/img/turtle-interpreter-chain.png)
+![](@assets/img/turtle-interpreter-chain.png)
 
 では、このデザインをコードでどのようにモデル化できるでしょうか？
 
@@ -856,7 +856,7 @@ Turnコマンド => (Turnコマンドのパラメータ), (関数 unit -> 何か
 
 したがって、ペアの全チェーンを再帰的な構造としてモデル化できます：
 
-![](../assets/img/turtle-interpreter-nested.png)
+![](@assets/img/turtle-interpreter-nested.png)
 
 コードでは：
 

@@ -223,7 +223,7 @@ trace {
 
 以下の図は、このプロセスを視覚的に表現しています。
 
-![Delay](../assets/img/ce_delay.png)
+![Delay](@assets/img/ce_delay.png)
 
 
 上の例のデバッグトレースを見ると、詳細に何が起こったかがわかります。少し混乱するかもしれないので、注釈を付けました。
@@ -387,7 +387,7 @@ returnしてからreturnした結果: Some 3
 
 しかし、`Return`の出力は必ずしも「公開」されたラップ型である必要はありません。代わりに内部で定義された型でもよいのです。
 
-![Delay](../assets/img/ce_return.png)
+![Delay](@assets/img/ce_return.png)
 
 同様に、遅延型は単純な関数である必要はなく、制約を満たす任意の型でよいのです。
 
@@ -403,7 +403,7 @@ returnしてからreturnした結果: Some 3
 
 この場合、さまざまな型とその流れを表す図は次のようになります。
 
-![Delay](../assets/img/ce_types.png)
+![Delay](@assets/img/ce_types.png)
 
 これが有効であることを証明するために、`Internal`と`Delayed`に別個の型を使用した実装を示します。
 

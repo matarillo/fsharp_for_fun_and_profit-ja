@@ -147,7 +147,7 @@ let dummyDrawLine log oldPos newPos color =
 * 状態はローカルフィールド（`currentPosition`、`currentAngle`など）に格納され、これらは可変です。
 * 何が起こっているかを監視できるように、ログ関数`log`を注入します。
 
-![](../assets/img/turtle-oo.png)
+![](@assets/img/turtle-oo.png)
 
 以下は完全なコードで、自明なはずです。
 
@@ -272,7 +272,7 @@ let drawPolygon n =
 
 このアプローチでは、クライアントが現在の状態を追跡し、次の関数呼び出しに渡す責任を負います。
 
-![](../assets/img/turtle-fp.png)
+![](@assets/img/turtle-fp.png)
 
 以下は`TurtleState`の定義と初期状態の値です。
 
@@ -414,7 +414,7 @@ APIを使ってクライアントを実装から隠蔽しましょう！
 この場合、APIはテキストベースで、`"move 100"`や`"turn 90"`のようなテキストコマンドを使用します。APIはこれらのコマンドを検証し、
 タートル（再び状態を持つ`Turtle`クラスのオブジェクト指向アプローチを使用します）のメソッド呼び出しに変換する必要があります。
 
-![](../assets/img/turtle-oo-api.png)
+![](@assets/img/turtle-oo-api.png)
 
 コマンドが有効でない場合、APIはそれをクライアントに示す必要があります。オブジェクト指向アプローチを使用しているため、
 次のように文字列を含む`TurtleApiException`をスローします。
@@ -557,7 +557,7 @@ APIレイヤーが可変のタートル状態を格納することで状態を�
 代わりに`Success`と`Failure`のケースを持つ`Result`値を返します。`Failure`ケースはエラーに使用されます。
 （エラー処理の関数型アプローチについての[私の講演](https://fsharpforfunandprofit.com/rop/)で、この技術についてより詳しく説明しています。）
 
-![](../assets/img/turtle-fp-api.png)
+![](@assets/img/turtle-fp-api.png)
 
 APIクラスの実装から始めましょう。今回は`mutable`なタートル状態を含んでいます。
 
@@ -599,15 +599,15 @@ type ErrorMessage =
 
 * `returnR`は「通常の」値を`Result`の世界の値に変換します。
 
-![](../assets/img/turtle-returnR.png)
+![](@assets/img/turtle-returnR.png)
 
 * `mapR`は「通常の」1パラメータ関数を`Result`の世界の1パラメータ関数に変換します。
 
-![](../assets/img/turtle-mapR.png)
+![](@assets/img/turtle-mapR.png)
 
 * `lift2R`は「通常の」2パラメータ関数を`Result`の世界の2パラメータ関数に変換します。
 
-![](../assets/img/turtle-lift2R.png)
+![](@assets/img/turtle-lift2R.png)
 
 例として、これらのヘルパー関数を使用して、通常の`move`関数を`Result`の世界の関数に変換できます。
 
@@ -740,7 +740,7 @@ let drawPolygon n =
 このデザインでは、APIレイヤーがメッセージキューを介して`TurtleAgent`と通信し、
 クライアントは以前と同様にAPIレイヤーと対話します。
 
-![](../assets/img/turtle-agent.png)
+![](@assets/img/turtle-agent.png)
 
 API（またはどこにも）に可変要素はありません。`TurtleAgent`は再帰的なメッセージ処理ループのパラメータとして
 現在の状態を格納することで状態を管理します。
@@ -1446,13 +1446,13 @@ drawTriangle(api)
 
 *（Stateモナドについての詳細は、私の[「モナド怪物」トークと投稿](https://fsharpforfunandprofit.com/monadster/)と[パーサーコンビネータに関する投稿](../posts/understanding-parser-combinators.md)を参照してください）*
 
-![](../assets/img/turtle-monad.png)
+![](@assets/img/turtle-monad.png)
 
 ### `turtle`ワークフローの定義
 
 最初に定義した基本的なタートル関数は、他の多くの状態変換関数と同じ「形」を持っています。入力とタートル状態、そして出力とタートル状態です。
 
-![](../assets/img/turtle-monad-1.png)
+![](@assets/img/turtle-monad-1.png)
 
 *（これまでのところ、タートル関数から使用可能な出力はありませんでしたが、後の例では、この出力を使用して決定を行う様子を見ることができます。）*
 
@@ -1462,11 +1462,11 @@ drawTriangle(api)
 
 まず、カリー化のおかげで、この形の関数を2つの別々の1パラメータ関数に再構成できることに注目してください：入力の処理は、次に状態をパラメータとして持つ別の関数を生成します。
 
-![](../assets/img/turtle-monad-2.png)
+![](@assets/img/turtle-monad-2.png)
 
 そこで、タートル関数を入力を受け取り新しい*関数*を返すものとして考えることができます：
 
-![](../assets/img/turtle-monad-3.png)
+![](@assets/img/turtle-monad-3.png)
 
 今回の場合、`TurtleState`を状態として使用すると、返される関数は次のようになります：
 
@@ -1476,7 +1476,7 @@ TurtleState -> 'a * TurtleState
 
 最後に、扱いやすくするために、返される関数を独自の存在として扱い、`TurtleStateComputation`のような名前を付けることができます：
 
-![](../assets/img/turtle-monad-4.png)
+![](@assets/img/turtle-monad-4.png)
 
 実装では、通常、関数を[単一ケース判別共用体](../posts/designing-with-types-single-case-dus.md)でラップします：
 
@@ -1649,7 +1649,7 @@ let drawPolygon n =
 コマンドのリストを「実行」する際、標準的なTurtleライブラリ関数を使用して各コマンドを順番に実行し、
 `fold`を使用して状態をシーケンス全体に渡すことができます。
 
-![](../assets/img/turtle-batch.png)
+![](@assets/img/turtle-batch.png)
 
 そして、すべてのコマンドが一度に実行されるため、このアプローチではクライアントが呼び出し間で保持する必要のある状態はありません。
 

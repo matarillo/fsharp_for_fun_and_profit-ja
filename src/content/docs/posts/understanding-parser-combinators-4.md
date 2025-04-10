@@ -164,7 +164,7 @@ run jBool "truX" |> printResult
 
 文字列パースの仕様は以下のような"鉄道図"で表されています。
 
-![](../assets/img/json_string.gif)
+![](@assets/img/json_string.gif)
 
 *全ての図は[json.org](https://www.json.org/)から引用。*
 
@@ -322,7 +322,7 @@ run jString "\"ab\\u263Ade\""  // 成功 "ab?de"
 
 数値のパース処理は、以下の"鉄道図"で表されます。
 
-![](../assets/img/json_number.gif)
+![](@assets/img/json_number.gif)
 
 ここも、ボトムアップで作業を進めましょう。最も基本的な要素である単一の文字や数字から始めます。
 
@@ -572,7 +572,7 @@ run jNumber_ "123.4e-5"  // JNumber 0.001234
 
 次は`Array`のケースです。ここでも鉄道図を使用して実装をガイドします。
 
-![](../assets/img/json_array.gif)
+![](@assets/img/json_array.gif)
 
 ここでもプリミティブから始めます。各トークンの後にオプションの空白を追加していることに注意してください。
 
@@ -713,7 +713,7 @@ run jArray "[ 1, 2, ]" |> printResult
 
 まず、鉄道図を見てみましょう。
 
-![](../assets/img/json_object.gif)
+![](@assets/img/json_object.gif)
 
 これを使って、パーサーを直接作成できるので、コメントなしで提示します。
 

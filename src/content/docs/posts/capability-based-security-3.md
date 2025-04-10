@@ -5,7 +5,7 @@ description: "関数型アプローチによる認可 パート3"
 seriesId: "関数型アプローチによる認可"
 seriesOrder: 3
 categories: []
-image: "/assets/img/auth_token.png"
+image: "@assets/img/auth_token.png"
 ---
 
 *更新：[このトピックに関する講演のスライドとビデオ](https://fsharpforfunandprofit.com/cap/)*
@@ -26,7 +26,7 @@ image: "/assets/img/auth_token.png"
 
 基本的な認可システム（[OAuth 2.0](https://developers.google.com/accounts/docs/OAuth2#basicsteps)など）を簡略化した図を次に示します。
 
-![Simplified authentication](../assets/img/auth_token.png)
+![Simplified authentication](@assets/img/auth_token.png)
 
 最も単純な形式での手順は次のとおりです。
 

@@ -5,7 +5,7 @@ description: "循環依存：パート1"
 categories: ["設計"]
 seriesId: "循環依存"
 seriesOrder: 1
-image: "/assets/img/Layering3b.png"
+image: "@assets/img/Layering3b.png"
 ---
 
 *[モジュール構成](../posts/recipe-part3.md)と[循環依存](../posts/removing-cyclic-dependencies.md)に関する3つの関連記事の1つ。*
@@ -60,11 +60,11 @@ F#についてよく聞かれる不満の一つに、コードを *依存順* �
 
 これには馴染みがあるはずです。以下は単純なレイヤーの図です：
 
-![](../assets/img/Layering1.png)
+![](@assets/img/Layering1.png)
 
 しかし、最下層から最上層への依存を導入するとどうなるでしょうか？
 
-![](../assets/img/Layering2.png)
+![](@assets/img/Layering2.png)
 
 最下層から最上層への依存を導入することで、悪の「循環依存」を生み出してしまいました。
 
@@ -72,23 +72,23 @@ F#についてよく聞かれる不満の一つに、コードを *依存順* �
 
 たとえば、最下層を最上層に置くこともできます：
 
-![](../assets/img/Layering3.png)
+![](@assets/img/Layering3.png)
 
 論理的な観点から見れば、この代替レイヤリングは元のレイヤリングと同じです。
 
 では、中間層を最上層に置くのはどうでしょうか？
 
-![](../assets/img/Layering3b.png)
+![](@assets/img/Layering3b.png)
 
 何かがひどく間違っています！明らかに、物事を台無しにしてしまいました。
 
 実際、コンポーネント間に何らかの循環依存がある場合、*できること*は*すべて*のコンポーネントを*同じ*レイヤーに置くことだけです。
 
-![](../assets/img/Layering4.png)
+![](@assets/img/Layering4.png)
 
 言い換えれば、循環依存は「分割統治」アプローチを完全に破壊し、そもそもコンポーネントを持つ理由を台無しにしてしまいます。3つのコンポーネントを持つ代わりに、今や1つの「スーパーコンポーネント」を持つことになり、それは必要以上に3倍大きく複雑になっています。
 
-![](../assets/img/Layering5.png)
+![](@assets/img/Layering5.png)
 
 これが循環依存が悪である理由です。
 

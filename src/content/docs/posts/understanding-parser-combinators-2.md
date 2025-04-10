@@ -72,7 +72,7 @@ Success ((('1', '2'), '3'), "A")
 
 * 通常の世界のすべての型（たとえば`char`）には、パーサーの世界に対応する型（`Parser<char>`）があります。
 
-![](../assets/img/parser-world-return.png)
+![](@assets/img/parser-world-return.png)
 
 そして、
 
@@ -82,11 +82,11 @@ Success ((('1', '2'), '3'), "A")
 
 * 通常の世界のすべての関数（たとえば`char -> string`）には、パーサーの世界に対応する関数（`Parser<char> -> Parser<string>`）があります。
 
-![](../assets/img/parser-world-map.png)
+![](@assets/img/parser-world-map.png)
 
 この比喩を使うと、`map`は通常の世界の関数をパーサーの世界の関数に変換（または「持ち上げ」）します。
 
-![](../assets/img/parser-map.png)
+![](@assets/img/parser-map.png)
 
 *ちなみに、この比喩が気に入ったなら、[さらに詳しく説明した連載](../posts/elevated-world.md)があります。*
 
@@ -211,7 +211,7 @@ val parseThreeDigitsAsInt : Parser<int>
 
 以下は`returnP`の図です。
 
-![](../assets/img/parser-return.png)
+![](@assets/img/parser-return.png)
 
 そして、これが`returnP`の実装です。
 
@@ -233,7 +233,7 @@ val returnP :
 
 次に`applyP`の図を示します。
 
-![](../assets/img/parser-apply.png)
+![](@assets/img/parser-apply.png)
 
 そして、これが`.>>.`と`map`を使った`applyP`の実装です。
 
@@ -279,7 +279,7 @@ val lift2 :
 
 これが`lift2`の図です。
 
-![](../assets/img/parser-lift2.png)
+![](@assets/img/parser-lift2.png)
 
 *この仕組みについてもっと知りたい場合は、[`lift2`に関する私の「マニュアルページ」投稿](../posts/elevated-world.md)や[「Monadster」を使った説明](../posts/monadster.md)をご覧ください。*
 

@@ -26,7 +26,7 @@ seriesOrder: 1
 * ドメインモデル作成のための代数的型
 * 制御フローのためのパターンマッチング
 
-![4つの主要概念](../assets/img/four-concepts2.png)
+![4つの主要概念](@assets/img/four-concepts2.png)
 
 そして、その投稿とその後の投稿で説明したように、これらの側面は単に学術的なものではなく、開発者であるあなたに具体的な利点を提供します。
 
@@ -65,7 +65,7 @@ seriesOrder: 1
 
 上で説明したさまざまな移植経路を視覚化するのに役立つ図を以下に示します。
 
-![4つの主要概念](../assets/img/porting-paths.png)
+![4つの主要概念](@assets/img/porting-paths.png)
  
 ## このシリーズのアプローチ
 

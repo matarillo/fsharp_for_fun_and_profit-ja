@@ -99,11 +99,11 @@ x + y;;
 
 個人的には、スクリプトファイルを作成する方法（`ファイル > 新規作成 > ファイル`を選択し、"F#スクリプト"を選択）を好みます。自動補完とインテリセンスが利用できるからです。
 
-![](../assets/img/fsharp-script-intellisense.jpg)
+![](@assets/img/fsharp-script-intellisense.jpg)
 
 コードの一部を実行するには、選択してマウス右クリックするか、単に`Alt+Enter`を押します。
 
-![](../assets/img/fsharp-script-evaluate.png)
+![](@assets/img/fsharp-script-evaluate.png)
 
 <a name="working-with-nuget"></a>
 ## 外部ライブラリとNuGetの使用
@@ -450,11 +450,11 @@ form.Show()
 
 ウィンドウは以下のようになります：
 
-![](../assets/img/fsharp-interactive-ui1.png)
+![](@assets/img/fsharp-interactive-ui1.png)
 
 クリック後、タイトルバーが変更されたウィンドウは以下のようになります：
 
-![](../assets/img/fsharp-interactive-ui2.png)
+![](@assets/img/fsharp-interactive-ui2.png)
 
 次に、FlowLayoutPanelとボタンを追加しましょう。
 
@@ -472,7 +472,7 @@ panel.Controls.Add(greenButton)
 
 現在のウィンドウは以下のようになります：
 
-![](../assets/img/fsharp-interactive-ui3.png)
+![](@assets/img/fsharp-interactive-ui3.png)
 
 しかし、ボタンが小さすぎます ―― `AutoSize`をtrueに設定する必要があります。
 
@@ -482,7 +482,7 @@ greenButton.AutoSize <- true
 
 これでよくなりました！
 
-![](../assets/img/fsharp-interactive-ui4.png)
+![](@assets/img/fsharp-interactive-ui4.png)
 
 黄色のボタンも追加してみましょう：
 
@@ -494,7 +494,7 @@ yellowButton.Click.Add (fun _-> form.BackColor <- Color.Yellow)
 panel.Controls.Add(yellowButton) 
 ```
 
-![](../assets/img/fsharp-interactive-ui5.png)
+![](@assets/img/fsharp-interactive-ui5.png)
 
 しかし、ボタンが切れてしまっているので、フローの方向を変更しましょう：
 
@@ -502,7 +502,7 @@ panel.Controls.Add(yellowButton)
 panel.FlowDirection <- FlowDirection.TopDown
 ```
 
-![](../assets/img/fsharp-interactive-ui6.png)
+![](@assets/img/fsharp-interactive-ui6.png)
 
 しかし今度は、黄色のボタンが緑のボタンと同じ幅になっていません。これは`Dock`で修正できます：
 
@@ -510,7 +510,7 @@ panel.FlowDirection <- FlowDirection.TopDown
 yellowButton.Dock <- DockStyle.Fill
 ```
 
-![](../assets/img/fsharp-interactive-ui7.png)
+![](@assets/img/fsharp-interactive-ui7.png)
 
 ご覧の通り、このように対話的にレイアウトを操作するのは非常に簡単です。
 レイアウトのロジックに満足したら、実際のアプリケーション用にコードをC#に変換し直すことができます。

@@ -5,7 +5,7 @@ description: "C#とF#で実プロジェクトの指標を比較"
 categories: []
 seriesId: "循環依存"
 seriesOrder: 3
-image: "/assets/img/specflow_svg.png"
+image: "@assets/img/specflow_svg.png"
 ---
 
 (*2013-06-15更新。記事末尾のコメントを参照*)
@@ -246,7 +246,7 @@ F#コードの「コード/トップ」比率は、C#コードよりも一貫し
 
 「コードサイズ」と「トップレベル型」を視覚的にプロットすると、以下のようなグラフになります。
 
-![](../assets/img/Metrics_CodeSize_TopLevel.png)
+![](@assets/img/Metrics_CodeSize_TopLevel.png)
 
 驚いたことに、このグラフではF#とC#のプロジェクトがはっきりと区別されています。C#プロジェクトは、プロジェクトサイズが異なっても、1000命令あたり1〜2のトップレベル型という一貫した比率を示しているようです。
 F#プロジェクトも一貫しており、1000命令あたり約0.6のトップレベル型という比率を示しています。
@@ -266,7 +266,7 @@ FParsecCSについては、パーサーには必然的に大きなC#クラスが
 
 以下は「コードサイズ」と「すべての型」の対応するグラフです。
 
-![](../assets/img/Metrics_CodeSize_AllTypes.png)
+![](@assets/img/Metrics_CodeSize_AllTypes.png)
 
 F#については驚くほど線形になっています。型の総数（コンパイラが生成したものを含む）は、プロジェクトのサイズと密接に関係しているようです。
 一方、C#の型の数はかなりばらつきがあるようです。
@@ -279,7 +279,7 @@ F#については驚くほど線形になっています。型の総数（コン
 
 コードサイズと型数を比較した後、今度は型数同士を比較してみましょう。
 
-![](../assets/img/Metrics_TopLevel_AuthTypes.png)
+![](@assets/img/Metrics_TopLevel_AuthTypes.png)
 
 ここでも大きな違いが見られます。C#では、モジュール性の単位ごとに平均1.1の作成された型があります。しかしF#では平均1.9で、いくつかのプロジェクトではそれよりもはるかに多くなっています。
 
@@ -302,20 +302,20 @@ C#プロジェクトの結果は以下の通りです。
 <tr><th>プロジェクト</th><th>トップレベル型</th><th>依存関係の総数</th><th>依存/トップ</th><th>1つ以上の依存</th><th>3つ以上の依存</th><th>5つ以上の依存</th><th>10以上の依存</th><th>図</th></tr>
 </thead>
 <tbody>
-<tr><td>ef	</td><td>514	</td><td>2354	</td><td>4.6	</td><td>76%	</td><td>51%	</td><td>32%	</td><td>13%	</td><td><a href='/assets/svg/ef.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/ef.all.dot'>dotfile</a>	</td></tr>
-<tr><td>jsonDotNet	</td><td>215	</td><td>913	</td><td>4.2	</td><td>69%	</td><td>42%	</td><td>30%	</td><td>14%	</td><td><a href='/assets/svg/jsonDotNet.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/jsonDotNet.all.dot'>dotfile</a>	</td></tr>
-<tr><td>nancy	</td><td>339	</td><td>1132	</td><td>3.3	</td><td>78%	</td><td>41%	</td><td>22%	</td><td>6%	</td><td><a href='/assets/svg/nancy.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/nancy.all.dot'>dotfile</a>	</td></tr>
-<tr><td>cecil	</td><td>240	</td><td>1145	</td><td>4.8	</td><td>73%	</td><td>43%	</td><td>23%	</td><td>13%	</td><td><a href='/assets/svg/cecil.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/cecil.all.dot'>dotfile</a>	</td></tr>
-<tr><td>nuget	</td><td>216	</td><td>833	</td><td>3.9	</td><td>71%	</td><td>43%	</td><td>26%	</td><td>12%	</td><td><a href='/assets/svg/nuget.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/nuget.all.dot'>dotfile</a>	</td></tr>
-<tr><td>signalR	</td><td>192	</td><td>641	</td><td>3.3	</td><td>66%	</td><td>34%	</td><td>19%	</td><td>10%	</td><td><a href='/assets/svg/signalR.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/signalR.all.dot'>dotfile</a>	</td></tr>
-<tr><td>nunit	</td><td>173	</td><td>499	</td><td>2.9	</td><td>75%	</td><td>39%	</td><td>13%	</td><td>4%	</td><td><a href='/assets/svg/nunit.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/nunit.all.dot'>dotfile</a>	</td></tr>
-<tr><td>specFlow	</td><td>242	</td><td>578	</td><td>2.4	</td><td>64%	</td><td>25%	</td><td>17%	</td><td>5%	</td><td><a href='/assets/svg/specFlow.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/specFlow.all.dot'>dotfile</a>	</td></tr>
-<tr><td>elmah	</td><td>116	</td><td>300	</td><td>2.6	</td><td>72%	</td><td>28%	</td><td>22%	</td><td>6%	</td><td><a href='/assets/svg/elmah.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/elmah.all.dot'>dotfile</a>	</td></tr>
-<tr><td>yamlDotNet	</td><td>70	</td><td>228	</td><td>3.3	</td><td>83%	</td><td>30%	</td><td>11%	</td><td>4%	</td><td><a href='/assets/svg/yamlDotNet.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/yamlDotNet.all.dot'>dotfile</a>	</td></tr>
-<tr><td>fparsecCS	</td><td>41	</td><td>64	</td><td>1.6	</td><td>59%	</td><td>29%	</td><td>5%	</td><td>0%	</td><td><a href='/assets/svg/fparsecCS.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/fparsecCS.all.dot'>dotfile</a>	</td></tr>
-<tr><td>moq	</td><td>397	</td><td>1100	</td><td>2.8	</td><td>63%	</td><td>29%	</td><td>17%	</td><td>7%	</td><td><a href='/assets/svg/moq.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/moq.all.dot'>dotfile</a>	</td></tr>
-<tr><td>ndepend	</td><td>734	</td><td>2426	</td><td>3.3	</td><td>67%	</td><td>37%	</td><td>25%	</td><td>10%	</td><td><a href='/assets/svg/ndepend.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/ndepend.all.dot'>dotfile</a>	</td></tr>
-<tr><td>ndependPlat	</td><td>185	</td><td>404	</td><td>2.2	</td><td>67%	</td><td>24%	</td><td>11%	</td><td>4%	</td><td><a href='/assets/svg/ndependPlat.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/ndependPlat.all.dot'>dotfile</a>	</td></tr>
+<tr><td>ef	</td><td>514	</td><td>2354	</td><td>4.6	</td><td>76%	</td><td>51%	</td><td>32%	</td><td>13%	</td><td><a href='@assets/svg/ef.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/ef.all.dot'>dotfile</a>	</td></tr>
+<tr><td>jsonDotNet	</td><td>215	</td><td>913	</td><td>4.2	</td><td>69%	</td><td>42%	</td><td>30%	</td><td>14%	</td><td><a href='@assets/svg/jsonDotNet.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/jsonDotNet.all.dot'>dotfile</a>	</td></tr>
+<tr><td>nancy	</td><td>339	</td><td>1132	</td><td>3.3	</td><td>78%	</td><td>41%	</td><td>22%	</td><td>6%	</td><td><a href='@assets/svg/nancy.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/nancy.all.dot'>dotfile</a>	</td></tr>
+<tr><td>cecil	</td><td>240	</td><td>1145	</td><td>4.8	</td><td>73%	</td><td>43%	</td><td>23%	</td><td>13%	</td><td><a href='@assets/svg/cecil.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/cecil.all.dot'>dotfile</a>	</td></tr>
+<tr><td>nuget	</td><td>216	</td><td>833	</td><td>3.9	</td><td>71%	</td><td>43%	</td><td>26%	</td><td>12%	</td><td><a href='@assets/svg/nuget.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/nuget.all.dot'>dotfile</a>	</td></tr>
+<tr><td>signalR	</td><td>192	</td><td>641	</td><td>3.3	</td><td>66%	</td><td>34%	</td><td>19%	</td><td>10%	</td><td><a href='@assets/svg/signalR.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/signalR.all.dot'>dotfile</a>	</td></tr>
+<tr><td>nunit	</td><td>173	</td><td>499	</td><td>2.9	</td><td>75%	</td><td>39%	</td><td>13%	</td><td>4%	</td><td><a href='@assets/svg/nunit.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/nunit.all.dot'>dotfile</a>	</td></tr>
+<tr><td>specFlow	</td><td>242	</td><td>578	</td><td>2.4	</td><td>64%	</td><td>25%	</td><td>17%	</td><td>5%	</td><td><a href='@assets/svg/specFlow.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/specFlow.all.dot'>dotfile</a>	</td></tr>
+<tr><td>elmah	</td><td>116	</td><td>300	</td><td>2.6	</td><td>72%	</td><td>28%	</td><td>22%	</td><td>6%	</td><td><a href='@assets/svg/elmah.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/elmah.all.dot'>dotfile</a>	</td></tr>
+<tr><td>yamlDotNet	</td><td>70	</td><td>228	</td><td>3.3	</td><td>83%	</td><td>30%	</td><td>11%	</td><td>4%	</td><td><a href='@assets/svg/yamlDotNet.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/yamlDotNet.all.dot'>dotfile</a>	</td></tr>
+<tr><td>fparsecCS	</td><td>41	</td><td>64	</td><td>1.6	</td><td>59%	</td><td>29%	</td><td>5%	</td><td>0%	</td><td><a href='@assets/svg/fparsecCS.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/fparsecCS.all.dot'>dotfile</a>	</td></tr>
+<tr><td>moq	</td><td>397	</td><td>1100	</td><td>2.8	</td><td>63%	</td><td>29%	</td><td>17%	</td><td>7%	</td><td><a href='@assets/svg/moq.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/moq.all.dot'>dotfile</a>	</td></tr>
+<tr><td>ndepend	</td><td>734	</td><td>2426	</td><td>3.3	</td><td>67%	</td><td>37%	</td><td>25%	</td><td>10%	</td><td><a href='@assets/svg/ndepend.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/ndepend.all.dot'>dotfile</a>	</td></tr>
+<tr><td>ndependPlat	</td><td>185	</td><td>404	</td><td>2.2	</td><td>67%	</td><td>24%	</td><td>11%	</td><td>4%	</td><td><a href='@assets/svg/ndependPlat.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/ndependPlat.all.dot'>dotfile</a>	</td></tr>
 <tr><td>personalCS	</td><td>195	</td><td>532	</td><td>2.7	</td><td>69%	</td><td>29%	</td><td>19%	</td><td>7%	</td><td>	</td></tr>
 <tr><td>合計	</td><td>3869	</td><td>13149	</td><td>3.4	</td><td>70%	</td><td>37%	</td><td>22%	</td><td>9%	</td><td>	</td></tr>
 
@@ -329,19 +329,19 @@ F#プロジェクトの結果は以下の通りです。
 <tr><th>プロジェクト</th><th>トップレベル型</th><th>依存関係の総数</th><th>依存/トップ</th><th>1つ以上の依存</th><th>3つ以上の依存</th><th>5つ以上の依存</th><th>10以上の依存</th><th>図</th></tr>
 </thead>
 <tbody>
-<tr><td>fsxCore	</td><td>173	</td><td>76	</td><td>0.4	</td><td>30%	</td><td>4%	</td><td>1%	</td><td>0%	</td><td><a href='/assets/svg/fsxCore.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/fsxCore.all.dot'>dotfile</a>	</td></tr>
-<tr><td>fsCore	</td><td>154	</td><td>287	</td><td>1.9	</td><td>55%	</td><td>26%	</td><td>14%	</td><td>3%	</td><td><a href='/assets/svg/fsCore.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/fsCore.all.dot'>dotfile</a>	</td></tr>
-<tr><td>fsPowerPack	</td><td>93	</td><td>68	</td><td>0.7	</td><td>38%	</td><td>13%	</td><td>2%	</td><td>0%	</td><td><a href='/assets/svg/fsPowerPack.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/fsPowerPack.all.dot'>dotfile</a>	</td></tr>
-<tr><td>storm	</td><td>67	</td><td>195	</td><td>2.9	</td><td>72%	</td><td>40%	</td><td>18%	</td><td>4%	</td><td><a href='/assets/svg/storm.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/storm.all.dot'>dotfile</a>	</td></tr>
-<tr><td>fParsec	</td><td>8	</td><td>9	</td><td>1.1	</td><td>63%	</td><td>25%	</td><td>0%	</td><td>0%	</td><td><a href='/assets/svg/fParsec.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/fParsec.all.dot'>dotfile</a>	</td></tr>
-<tr><td>websharper	</td><td>52	</td><td>18	</td><td>0.3	</td><td>31%	</td><td>0%	</td><td>0%	</td><td>0%	</td><td><a href='/assets/svg/websharper.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/websharper.all.dot'>dotfile</a>	</td></tr>
-<tr><td>tickSpec	</td><td>34	</td><td>48	</td><td>1.4	</td><td>50%	</td><td>15%	</td><td>9%	</td><td>3%	</td><td><a href='/assets/svg/tickSpec.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/tickSpec.all.dot'>dotfile</a>	</td></tr>
-<tr><td>websharperHtml	</td><td>18	</td><td>37	</td><td>2.1	</td><td>78%	</td><td>39%	</td><td>6%	</td><td>0%	</td><td><a href='/assets/svg/websharperHtml.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/websharperHtml.all.dot'>dotfile</a>	</td></tr>
-<tr><td>canopy	</td><td>6	</td><td>8	</td><td>1.3	</td><td>50%	</td><td>33%	</td><td>0%	</td><td>0%	</td><td><a href='/assets/svg/canopy.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/canopy.all.dot'>dotfile</a>	</td></tr>
-<tr><td>fsYaml	</td><td>7	</td><td>10	</td><td>1.4	</td><td>71%	</td><td>14%	</td><td>0%	</td><td>0%	</td><td><a href='/assets/svg/fsYaml.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/fsYaml.all.dot'>dotfile</a>	</td></tr>
-<tr><td>fsSql	</td><td>13	</td><td>14	</td><td>1.1	</td><td>54%	</td><td>8%	</td><td>8%	</td><td>0%	</td><td><a href='/assets/svg/fsSql.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/fsSql.all.dot'>dotfile</a>	</td></tr>
-<tr><td>fsUnit	</td><td>2	</td><td>0	</td><td>0.0	</td><td>0%	</td><td>0%	</td><td>0%	</td><td>0%	</td><td><a href='/assets/svg/fsUnit.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/fsUnit.all.dot'>dotfile</a>	</td></tr>
-<tr><td>foq	</td><td>35	</td><td>66	</td><td>1.9	</td><td>66%	</td><td>29%	</td><td>11%	</td><td>0%	</td><td><a href='/assets/svg/foq.all.dot.svg'>svg</a>&nbsp<a href='/assets/svg/foq.all.dot'>dotfile</a>	</td></tr>
+<tr><td>fsxCore	</td><td>173	</td><td>76	</td><td>0.4	</td><td>30%	</td><td>4%	</td><td>1%	</td><td>0%	</td><td><a href='@assets/svg/fsxCore.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/fsxCore.all.dot'>dotfile</a>	</td></tr>
+<tr><td>fsCore	</td><td>154	</td><td>287	</td><td>1.9	</td><td>55%	</td><td>26%	</td><td>14%	</td><td>3%	</td><td><a href='@assets/svg/fsCore.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/fsCore.all.dot'>dotfile</a>	</td></tr>
+<tr><td>fsPowerPack	</td><td>93	</td><td>68	</td><td>0.7	</td><td>38%	</td><td>13%	</td><td>2%	</td><td>0%	</td><td><a href='@assets/svg/fsPowerPack.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/fsPowerPack.all.dot'>dotfile</a>	</td></tr>
+<tr><td>storm	</td><td>67	</td><td>195	</td><td>2.9	</td><td>72%	</td><td>40%	</td><td>18%	</td><td>4%	</td><td><a href='@assets/svg/storm.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/storm.all.dot'>dotfile</a>	</td></tr>
+<tr><td>fParsec	</td><td>8	</td><td>9	</td><td>1.1	</td><td>63%	</td><td>25%	</td><td>0%	</td><td>0%	</td><td><a href='@assets/svg/fParsec.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/fParsec.all.dot'>dotfile</a>	</td></tr>
+<tr><td>websharper	</td><td>52	</td><td>18	</td><td>0.3	</td><td>31%	</td><td>0%	</td><td>0%	</td><td>0%	</td><td><a href='@assets/svg/websharper.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/websharper.all.dot'>dotfile</a>	</td></tr>
+<tr><td>tickSpec	</td><td>34	</td><td>48	</td><td>1.4	</td><td>50%	</td><td>15%	</td><td>9%	</td><td>3%	</td><td><a href='@assets/svg/tickSpec.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/tickSpec.all.dot'>dotfile</a>	</td></tr>
+<tr><td>websharperHtml	</td><td>18	</td><td>37	</td><td>2.1	</td><td>78%	</td><td>39%	</td><td>6%	</td><td>0%	</td><td><a href='@assets/svg/websharperHtml.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/websharperHtml.all.dot'>dotfile</a>	</td></tr>
+<tr><td>canopy	</td><td>6	</td><td>8	</td><td>1.3	</td><td>50%	</td><td>33%	</td><td>0%	</td><td>0%	</td><td><a href='@assets/svg/canopy.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/canopy.all.dot'>dotfile</a>	</td></tr>
+<tr><td>fsYaml	</td><td>7	</td><td>10	</td><td>1.4	</td><td>71%	</td><td>14%	</td><td>0%	</td><td>0%	</td><td><a href='@assets/svg/fsYaml.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/fsYaml.all.dot'>dotfile</a>	</td></tr>
+<tr><td>fsSql	</td><td>13	</td><td>14	</td><td>1.1	</td><td>54%	</td><td>8%	</td><td>8%	</td><td>0%	</td><td><a href='@assets/svg/fsSql.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/fsSql.all.dot'>dotfile</a>	</td></tr>
+<tr><td>fsUnit	</td><td>2	</td><td>0	</td><td>0.0	</td><td>0%	</td><td>0%	</td><td>0%	</td><td>0%	</td><td><a href='@assets/svg/fsUnit.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/fsUnit.all.dot'>dotfile</a>	</td></tr>
+<tr><td>foq	</td><td>35	</td><td>66	</td><td>1.9	</td><td>66%	</td><td>29%	</td><td>11%	</td><td>0%	</td><td><a href='@assets/svg/foq.all.dot.svg'>svg</a>&nbsp<a href='@assets/svg/foq.all.dot'>dotfile</a>	</td></tr>
 <tr><td>personalFS	</td><td>30	</td><td>111	</td><td>3.7	</td><td>93%	</td><td>60%	</td><td>27%	</td><td>7%	</td><td></td></tr>
 <tr><td>合計	</td><td>692	</td><td>947	</td><td>1.4	</td><td>49%	</td><td>19%	</td><td>8%	</td><td>1%	</td><td>	</td></tr>
 
@@ -372,7 +372,7 @@ F#プロジェクトの結果は以下の通りです。
 
 以下は、コードサイズと依存関係の数の関係を示すグラフです。
 
-![](../assets/img/Metrics_CodeSize_Dependencies.png)
+![](@assets/img/Metrics_CodeSize_Dependencies.png)
 
 C#プロジェクトとF#プロジェクトの違いが非常に明確です。C#の依存関係はプロジェクトサイズに比例して線形に増加しているようです。一方、F#の依存関係は平坦なようです。
 
@@ -386,9 +386,9 @@ C#プロジェクトとF#プロジェクトの違いが非常に明確です。C
 
 以下は、同じ結果を視覚的に表示したものです。
 
-![](../assets/img/Metrics_CS_DependencyPercent.png)
+![](@assets/img/Metrics_CS_DependencyPercent.png)
 
-![](../assets/img/Metrics_FS_DependencyPercent.png)
+![](@assets/img/Metrics_FS_DependencyPercent.png)
 
 
 これらの数字から何が推測できるでしょうか？
@@ -408,15 +408,15 @@ F#グループで最も悪い例は、私自身のF#アプリケーションで�
 
 ほとんどの図が非常に大きいことに注意してください。開いた後、全体を見るためには大きくズームアウトする必要があります！
 
-まずは[SpecFlow](../assets/svg/specFlow.all.dot.svg)と[TickSpec](../assets/svg/tickSpec.all.dot.svg)の図を比較してみましょう。
+まずは[SpecFlow](..@assets/svg/specFlow.all.dot.svg)と[TickSpec](..@assets/svg/tickSpec.all.dot.svg)の図を比較してみましょう。
 
 SpecFlowの図はこちらです。
 
-[![](../assets/img/specflow_svg.png)](../assets/svg/specFlow.all.dot.svg)
+[![](@assets/img/specflow_svg.png)](..@assets/svg/specFlow.all.dot.svg)
 
 TickSpecの図はこちらです。
 
-[![](../assets/img/tickspec_svg.png)](../assets/svg/tickSpec.all.dot.svg)
+[![](@assets/img/tickspec_svg.png)](..@assets/svg/tickSpec.all.dot.svg)
 
 各図は、プロジェクト内で見つかったすべてのトップレベル型をリストアップしています。ある型から別の型への依存関係がある場合、矢印で示されています。
 可能な限り依存関係は左から右に向かって示されているので、右から左に向かう矢印は循環依存があることを意味します。
@@ -432,25 +432,25 @@ TickSpecの図はSpecFlowのものよりもはるかに単純です。これはT
 
 答えは違います。機能の数とは全く関係がないと思います。むしろコードの組織化方法が異なるからです。
 
-SpecFlowのクラス（[dotfile](../assets/svg/specFlow.all.dot)）を見ると、インターフェースを作成することで優れたオブジェクト指向設計とTDDの実践に従っていることがわかります。
+SpecFlowのクラス（[dotfile](..@assets/svg/specFlow.all.dot)）を見ると、インターフェースを作成することで優れたオブジェクト指向設計とTDDの実践に従っていることがわかります。
 たとえば、`TestRunnerManager`と`ITestRunnerManager`があります。
 また、オブジェクト指向設計でよく見られる他のパターンもたくさんあります。「リスナー」クラスとインターフェース、「プロバイダー」クラスとインターフェース、「コンパレーター」クラスとインターフェースなどです。
 
-一方、TickSpecのモジュール（[dotfile](../assets/svg/tickSpec.all.dot)）を見ると、インターフェースは全くありません。また、「リスナー」や「プロバイダー」、「コンパレーター」もありません。
+一方、TickSpecのモジュール（[dotfile](..@assets/svg/tickSpec.all.dot)）を見ると、インターフェースは全くありません。また、「リスナー」や「プロバイダー」、「コンパレーター」もありません。
 コード内でそのようなものが必要な場合もあるかもしれませんが、モジュールの外部には公開されていないか、より可能性が高いのは、その役割が型ではなく関数によって果たされているのでしょう。
 
 ちなみに、SpecFlowのコードを批判しているわけではありません。よく設計されているように見えますし、非常に有用なライブラリです。ただ、オブジェクト指向設計と関数型設計の違いをいくつか浮き彫りにしていると思います。
 
 ### MoqとFoqの比較
 
-[Moq](../assets/svg/moq.all.dot.svg)と[Foq](../assets/svg/foq.all.dot.svg)の図も比較してみましょう。これら2つのプロジェクトはほぼ同じことを行っているので、コードは比較可能なはずです。
+[Moq](..@assets/svg/moq.all.dot.svg)と[Foq](..@assets/svg/foq.all.dot.svg)の図も比較してみましょう。これら2つのプロジェクトはほぼ同じことを行っているので、コードは比較可能なはずです。
 
 前と同様に、F#で書かれたプロジェクトの方が依存関係の図がはるかに小さくなっています。
 
-Moqのクラス（[dotfile](../assets/svg/moq.all.dot)）を見ると、分析から除外しなかった「Castle」ライブラリが含まれていることがわかります。
+Moqのクラス（[dotfile](..@assets/svg/moq.all.dot)）を見ると、分析から除外しなかった「Castle」ライブラリが含まれていることがわかります。
 依存関係を持つ249のクラスのうち、Moq固有のものは66だけです。Moq名前空間内のクラスのみを考慮していれば、もっときれいな図が得られたかもしれません。
 
-一方、Foqのモジュール（[dotfile](../assets/svg/foq.all.dot)）を見ると、依存関係を持つモジュールは23しかなく、Moqのクラスだけでもそれより少ないです。
+一方、Foqのモジュール（[dotfile](..@assets/svg/foq.all.dot)）を見ると、依存関係を持つモジュールは23しかなく、Moqのクラスだけでもそれより少ないです。
 
 つまり、F#のコード組織化には何か大きな違いがあるのです。
 
@@ -460,7 +460,7 @@ FParsecプロジェクトは興味深い自然実験です。このプロジェ�
 
 C#コードは高速な解析のために設計されており、F#コードはよりハイレベルなので、直接比較するのは少し不公平かもしれません。しかし...不公平を承知で比較してみましょう！
 
-F#アセンブリの["FParsec"](../assets/svg/fParsec.all.dot.svg)とC#アセンブリの["FParsecCS"](../assets/svg/fparsecCS.all.dot.svg)の図がこちらです。
+F#アセンブリの["FParsec"](..@assets/svg/fParsec.all.dot.svg)とC#アセンブリの["FParsecCS"](..@assets/svg/fparsecCS.all.dot.svg)の図がこちらです。
 
 どちらもきれいで明確です。素晴らしいコードですね！
 
@@ -497,22 +497,22 @@ C#プロジェクトの循環依存の結果は以下の通りです。
 <tr><th>プロジェクト</th><th>トップレベル型</th><th>サイクル数</th><th>参加</th><th>参加%</th><th>最大成分サイズ</th><th>サイクル数（公開）</th><th>参加（公開）</th><th>参加%（公開）</th><th>最大成分サイズ（公開）</th><th>図</th></tr>
 </thead>
 <tbody>
-<tr><td>ef	</td><td>514	</td><td>14	</td><td>123	</td><td>24%	</td><td>79	</td><td>1	</td><td>7	</td><td>1%	</td><td>7	</td><td><a href='/assets/svg/ef.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/ef.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>jsonDotNet	</td><td>215	</td><td>3	</td><td>88	</td><td>41%	</td><td>83	</td><td>1	</td><td>11	</td><td>5%	</td><td>11	</td><td><a href='/assets/svg/jsonDotNet.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/jsonDotNet.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>nancy	</td><td>339	</td><td>6	</td><td>35	</td><td>10%	</td><td>21	</td><td>2	</td><td>4	</td><td>1%	</td><td>2	</td><td><a href='/assets/svg/nancy.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/nancy.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>cecil	</td><td>240	</td><td>2	</td><td>125	</td><td>52%	</td><td>123	</td><td>1	</td><td>50	</td><td>21%	</td><td>50	</td><td><a href='/assets/svg/cecil.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/cecil.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>nuget	</td><td>216	</td><td>4	</td><td>24	</td><td>11%	</td><td>10	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td><a href='/assets/svg/nuget.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/nuget.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>signalR	</td><td>192	</td><td>3	</td><td>14	</td><td>7%	</td><td>7	</td><td>1	</td><td>5	</td><td>3%	</td><td>5	</td><td><a href='/assets/svg/signalR.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/signalR.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>nunit	</td><td>173	</td><td>2	</td><td>80	</td><td>46%	</td><td>78	</td><td>1	</td><td>48	</td><td>28%	</td><td>48	</td><td><a href='/assets/svg/nunit.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/nunit.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>specFlow	</td><td>242	</td><td>5	</td><td>11	</td><td>5%	</td><td>3	</td><td>1	</td><td>2	</td><td>1%	</td><td>2	</td><td><a href='/assets/svg/specFlow.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/specFlow.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>elmah	</td><td>116	</td><td>2	</td><td>9	</td><td>8%	</td><td>5	</td><td>1	</td><td>2	</td><td>2%	</td><td>2	</td><td><a href='/assets/svg/elmah.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/elmah.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>yamlDotNet	</td><td>70	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td><a href='/assets/svg/yamlDotNet.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/yamlDotNet.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>fparsecCS	</td><td>41	</td><td>3	</td><td>6	</td><td>15%	</td><td>2	</td><td>1	</td><td>2	</td><td>5%	</td><td>2	</td><td><a href='/assets/svg/fparsecCS.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/fparsecCS.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>moq	</td><td>397	</td><td>9	</td><td>50	</td><td>13%	</td><td>15	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td><a href='/assets/svg/moq.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/moq.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>ndepend	</td><td>734	</td><td>12	</td><td>79	</td><td>11%	</td><td>22	</td><td>8	</td><td>36	</td><td>5%	</td><td>7	</td><td><a href='/assets/svg/ndepend.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/ndepend.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>ndependPlat	</td><td>185	</td><td>2	</td><td>5	</td><td>3%	</td><td>3	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td><a href='/assets/svg/ndependPlat.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/ndependPlat.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>personalCS	</td><td>195	</td><td>11	</td><td>34	</td><td>17%	</td><td>8	</td><td>5	</td><td>19	</td><td>10%	</td><td>7	</td><td><a href='/assets/svg/personalCS.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/personalCS.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>合計	</td><td>3869	</td><td>	</td><td>683	</td><td>18%	</td><td>	</td><td>	</td><td>186	</td><td>5%	</td><td>	</td><td><a href='/assets/svg/TOTAL.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/TOTAL.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>ef	</td><td>514	</td><td>14	</td><td>123	</td><td>24%	</td><td>79	</td><td>1	</td><td>7	</td><td>1%	</td><td>7	</td><td><a href='@assets/svg/ef.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/ef.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>jsonDotNet	</td><td>215	</td><td>3	</td><td>88	</td><td>41%	</td><td>83	</td><td>1	</td><td>11	</td><td>5%	</td><td>11	</td><td><a href='@assets/svg/jsonDotNet.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/jsonDotNet.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>nancy	</td><td>339	</td><td>6	</td><td>35	</td><td>10%	</td><td>21	</td><td>2	</td><td>4	</td><td>1%	</td><td>2	</td><td><a href='@assets/svg/nancy.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/nancy.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>cecil	</td><td>240	</td><td>2	</td><td>125	</td><td>52%	</td><td>123	</td><td>1	</td><td>50	</td><td>21%	</td><td>50	</td><td><a href='@assets/svg/cecil.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/cecil.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>nuget	</td><td>216	</td><td>4	</td><td>24	</td><td>11%	</td><td>10	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td><a href='@assets/svg/nuget.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/nuget.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>signalR	</td><td>192	</td><td>3	</td><td>14	</td><td>7%	</td><td>7	</td><td>1	</td><td>5	</td><td>3%	</td><td>5	</td><td><a href='@assets/svg/signalR.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/signalR.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>nunit	</td><td>173	</td><td>2	</td><td>80	</td><td>46%	</td><td>78	</td><td>1	</td><td>48	</td><td>28%	</td><td>48	</td><td><a href='@assets/svg/nunit.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/nunit.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>specFlow	</td><td>242	</td><td>5	</td><td>11	</td><td>5%	</td><td>3	</td><td>1	</td><td>2	</td><td>1%	</td><td>2	</td><td><a href='@assets/svg/specFlow.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/specFlow.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>elmah	</td><td>116	</td><td>2	</td><td>9	</td><td>8%	</td><td>5	</td><td>1	</td><td>2	</td><td>2%	</td><td>2	</td><td><a href='@assets/svg/elmah.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/elmah.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>yamlDotNet	</td><td>70	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td><a href='@assets/svg/yamlDotNet.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/yamlDotNet.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>fparsecCS	</td><td>41	</td><td>3	</td><td>6	</td><td>15%	</td><td>2	</td><td>1	</td><td>2	</td><td>5%	</td><td>2	</td><td><a href='@assets/svg/fparsecCS.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/fparsecCS.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>moq	</td><td>397	</td><td>9	</td><td>50	</td><td>13%	</td><td>15	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td><a href='@assets/svg/moq.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/moq.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>ndepend	</td><td>734	</td><td>12	</td><td>79	</td><td>11%	</td><td>22	</td><td>8	</td><td>36	</td><td>5%	</td><td>7	</td><td><a href='@assets/svg/ndepend.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/ndepend.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>ndependPlat	</td><td>185	</td><td>2	</td><td>5	</td><td>3%	</td><td>3	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td><a href='@assets/svg/ndependPlat.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/ndependPlat.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>personalCS	</td><td>195	</td><td>11	</td><td>34	</td><td>17%	</td><td>8	</td><td>5	</td><td>19	</td><td>10%	</td><td>7	</td><td><a href='@assets/svg/personalCS.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/personalCS.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>合計	</td><td>3869	</td><td>	</td><td>683	</td><td>18%	</td><td>	</td><td>	</td><td>186	</td><td>5%	</td><td>	</td><td><a href='@assets/svg/TOTAL.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/TOTAL.all.cycles.dot'>dotfile</a>	</td></tr>
 
 </tbody>                                                     
 </table>
@@ -525,8 +525,8 @@ F#プロジェクトの結果は以下の通りです。
 </thead>
 <tbody>
 <tr><td>fsxCore	</td><td>173	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td>.	</td></tr>
-<tr><td>fsCore	</td><td>154	</td><td>2	</td><td>5	</td><td>3%	</td><td>3	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td><a href='/assets/svg/fsCore.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/fsCore.all.cycles.dot'>dotfile</a>	</td></tr>
-<tr><td>fsPowerPack	</td><td>93	</td><td>1	</td><td>2	</td><td>2%	</td><td>2	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td><a href='/assets/svg/fsPowerPack.all.cycles.dot.svg'>svg</a>&nbsp<a href='/assets/svg/fsPowerPack.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>fsCore	</td><td>154	</td><td>2	</td><td>5	</td><td>3%	</td><td>3	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td><a href='@assets/svg/fsCore.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/fsCore.all.cycles.dot'>dotfile</a>	</td></tr>
+<tr><td>fsPowerPack	</td><td>93	</td><td>1	</td><td>2	</td><td>2%	</td><td>2	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td><a href='@assets/svg/fsPowerPack.all.cycles.dot.svg'>svg</a>&nbsp<a href='@assets/svg/fsPowerPack.all.cycles.dot'>dotfile</a>	</td></tr>
 <tr><td>storm	</td><td>67	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td>.	</td></tr>
 <tr><td>fParsec	</td><td>8	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td>.	</td></tr>
 <tr><td>websharper	</td><td>52	</td><td>0	</td><td>0	</td><td>0%	</td><td>1	</td><td>0	</td><td>0	</td><td>0%	</td><td>0	</td><td>.	</td></tr>
@@ -562,7 +562,7 @@ F#コードでサイクルを探そうとしても、がっかりするでしょ
 NDependでさえサイクルがありますが、公平を期すために言えば、これには正当な理由があるかもしれません。まず、NDependはクラス間ではなく名前空間間のサイクル除去に重点を置いています。また、
 サイクルが同じソースファイルで宣言された型の間にある可能性があります。その結果、私の方法では良く組織化されたC#コードに対してやや不利に働く可能性があります（上記のFParsec vs FParsecCSの議論で述べたように）。
 
-![](../assets/img/Metrics_TopLevel_Participation.png)
+![](@assets/img/Metrics_TopLevel_Participation.png)
 
 なぜC#とF#でこのような違いがあるのでしょうか？
 

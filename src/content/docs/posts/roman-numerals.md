@@ -12,7 +12,7 @@ categories: ["パターン", "実践例"]
 
 前回と同様に、内部モデルを「純粋」にして、入力から内部モデルへの変換と、内部モデルから出力への変換を別々の段階で行うよう心がけます。
 
-![](../assets/img/function_transform2.png)
+![](@assets/img/function_transform2.png)
 
 ## 要件
 

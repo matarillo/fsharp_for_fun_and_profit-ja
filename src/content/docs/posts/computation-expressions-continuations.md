@@ -437,7 +437,7 @@ z
 
 コンピュテーション式版と並べて比較すると、自作版が`let!`によく似ていることがわかります。ただし、パラメータの順序が逆で、継続に明示的な矢印があります。
 
-![computation expression: logging](../assets/img/compexpr_logging.png)
+![computation expression: logging](@assets/img/compexpr_logging.png)
 
 ### 「安全な除算」の例を再考する
 
@@ -554,7 +554,7 @@ let bad = divideByWorkflow 12 3 0 1
 
 再度、コンピュテーション式版と並べて比較すると、自作版が意味的に同じであることがわかります。構文だけが異なります。
 
-![computation expression: logging](../assets/img/compexpr_safedivide.png)
+![computation expression: logging](@assets/img/compexpr_safedivide.png)
 
 ### まとめ
 

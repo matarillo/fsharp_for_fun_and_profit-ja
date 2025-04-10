@@ -14,7 +14,7 @@ categories: ["型"]
 
 欠損値や無効な値を表したいという状況はよくあります。図で表すと、定義域は次のようになります。
 
-![int option](../assets/img/int_option.png)
+![int option](@assets/img/int_option.png)
  
 これは明らかに何らかの共用体型を使うべき状況です！
 

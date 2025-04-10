@@ -5,7 +5,7 @@ description: "関数型アプローチによる認可 パート2"
 seriesId: "関数型アプローチによる認可"
 seriesOrder: 2
 categories: []
-image: "/assets/img/auth_3.png"
+image: "@assets/img/auth_3.png"
 ---
 
 *更新：[このトピックに関する講演のスライドとビデオ](https://fsharpforfunandprofit.com/cap/)*
@@ -232,7 +232,7 @@ module CustomerDatabaseCapabilityProvider =
 
 この設計を表す図を次に示します。
 
-![例2](../assets/img/auth_2.png)
+![例2](@assets/img/auth_2.png)
 
 **このモデルの問題点**
 
@@ -323,7 +323,7 @@ match getCustomerOnlyForSameIdOrAgents with
 
 この設計を表す図を次に示します。
 
-![例3](../assets/img/auth_3.png)
+![例3](@assets/img/auth_3.png)
 
 ### ケイパビリティに対する追加の変換
 

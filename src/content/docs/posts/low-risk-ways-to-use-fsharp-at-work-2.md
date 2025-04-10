@@ -284,7 +284,7 @@ do
     
 型プロバイダーが、フィードの実際の内容に基づいて利用可能なプロパティを示すインテリセンス（以下に示す）を生成することに注目してください。これはとてもクールです。
 
-![](../assets/img/fsharp-xml-dropdown.png)    
+![](@assets/img/fsharp-xml-dropdown.png)    
 
 結果は以下のようになります：
 
@@ -359,7 +359,7 @@ PageFileBytesPeak=312565760
 
 ここでも、型プロバイダーを使うことでインテリセンス（以下に示す）が得られます。何百ものWMIオプションに対して非常に便利です。
 
-![](../assets/img/fsharp-wmi-dropdown.png)
+![](@assets/img/fsharp-wmi-dropdown.png)
 
 [WMI型プロバイダーの詳細はこちら](https://fsprojects.github.io/FSharp.Management/WMIProvider.html)。
 

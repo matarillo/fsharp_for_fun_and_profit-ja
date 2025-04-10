@@ -5,7 +5,7 @@ description: "高次の世界を扱うためのツールセット"
 categories: ["パターン"]
 seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 1
-image: "/assets/img/vgfp_map.png"
+image: "@assets/img/vgfp_map.png"
 ---
 
 この連載では、`Option`や`List`などのジェネリックなデータ型を扱うためのコア関数を解説します。
@@ -42,11 +42,11 @@ Haskellユーザーや圏論家の方々は、ここで目をそらしたくな�
 たとえば、通常の世界には`Int`という値の集合がありますが、高次の世界にはそれに対応する`E<Int>`という値の集合があります。
 同様に、通常の世界の`String`に対して、高次の世界には`E<String>`があります。
 
-![](../assets/img/vgfp_e_values.png)
+![](@assets/img/vgfp_e_values.png)
 
 また、通常の世界に`Int`と`String`の間の関数があるように、高次の世界にも`E<Int>`と`E<String>`の間の関数があります。
 
-![](../assets/img/vgfp_e_functions.png)
+![](@assets/img/vgfp_e_functions.png)
 
 「世界」という言葉を「型」の代わりに意図的に使っていることに注意してください。世界内の値の間の*関係*が、基礎となるデータ型と同じくらい重要だということを強調するためです。
 
@@ -150,7 +150,7 @@ Haskellユーザーや圏論家の方々は、ここで目をそらしたくな�
 
 「map」は、通常の世界の関数を取り、高次の世界の対応する関数に変換するための一般的な名前です。
 
-![](../assets/img/vgfp_map.png)
+![](@assets/img/vgfp_map.png)
 
 各高次の世界では、mapが独自の方法で実装されています。
 
@@ -159,7 +159,7 @@ Haskellユーザーや圏論家の方々は、ここで目をそらしたくな�
 `map`には別の見方もあります。高次の値（`E<a>`）と通常の関数（`a->b`）を受け取り、`E<a>`の内部要素に関数`a->b`を適用して生成された新しい高次の値（`E<b>`）を返す、
 *2つの*パラメータを持つ関数と考えることもできます。
 
-![](../assets/img/vgfp_map2.png)
+![](@assets/img/vgfp_map2.png)
 
 F#のように関数がデフォルトでカリー化される言語では、これらの見方は同じことを意味します。
 他の言語では、2つの使い方を切り替えるために、カリー化や非カリー化が必要になることがあります。
@@ -243,12 +243,12 @@ Some 2 |> Option.map add1    // Some 3
 まず、通常の世界の`id`関数を`map`で高次の世界に持ち上げると、
 結果の関数は高次の世界の`id`関数と*同じ*になるはずです。
 
-![](../assets/img/vgfp_functor_law_id.png)
+![](@assets/img/vgfp_functor_law_id.png)
 
 次に、通常の世界で2つの関数`f`と`g`を取り、それらを合成して（たとえば`h`とする）、その結果を`map`で持ち上げると、
 得られる関数は、`f`と`g`を*別々に*高次の世界に持ち上げてから合成した場合と*同じ*になるはずです。
 
-![](../assets/img/vgfp_functor_law_compose.png)
+![](@assets/img/vgfp_functor_law_compose.png)
 
 これら2つの特性は「[ファンクター則](https://en.wikibooks.org/wiki/Haskell/The_Functor_class#The_functor_laws)」と呼ばれ、
 **ファンクター**（プログラミングの文脈で）は、ジェネリックなデータ型（ここでは`E<T>`）とファンクター則に従う`map`関数のペアとして定義されます。
@@ -288,7 +288,7 @@ mapにはよく使われる変種がいくつかあります。
 「return」（「unit」や「pure」とも呼ばれる）は、通常の値を高次の値に変換する単純な関数です。
 
 
-![](../assets/img/vgfp_return.png)
+![](@assets/img/vgfp_return.png)
 
 この関数には様々な名前がありますが、ここではF#で一般的に使われ、コンピュテーション式でも使用される「return」を一貫して使います。
 
@@ -327,7 +327,7 @@ let returnList x  = [x]
 
 「apply」は、高次の値の中に包まれた関数（`E<(a->b)>`）を、`E<a> -> E<b>`という形の持ち上げられた関数に変換します。
 
-![](../assets/img/vgfp_apply.png)
+![](@assets/img/vgfp_apply.png)
 
 一見すると重要性が分かりにくいかもしれませんが、実は非常に有用です。通常の世界の複数引数関数を高次の世界の複数引数関数に持ち上げることができるからです。
 この点については後ほど詳しく見ていきます。
@@ -339,11 +339,11 @@ let returnList x  = [x]
 
 たとえば、1引数の関数（`E<(a->b)>`）があれば、それを1つの高次の引数に適用して、結果を別の高次の値として得ることができます。
 
-![](../assets/img/vgfp_apply2.png)
+![](@assets/img/vgfp_apply2.png)
 
 2引数の関数（`E<(a->b->c)>`）があれば、`apply`を2回続けて使い、2つの高次の引数を適用して高次の出力を得ることができます。
 
-![](../assets/img/vgfp_apply3.png)
+![](@assets/img/vgfp_apply3.png)
 
 このテクニックを使えば、任意の数の引数に対応できます。
 
@@ -406,7 +406,7 @@ let resultList =
 仕組みはこうです。通常の関数に`return`を適用し、その後`apply`を使うと、
 単に`map`を使った場合と同じ結果になります。
 
-![](../assets/img/vgfp_apply_vs_map.png)
+![](@assets/img/vgfp_apply_vs_map.png)
 
 このテクニックを使うと、中置記法をさらに簡単にできます。
 最初の`return`と`apply`を`map`で置き換えられるので、一般的に`map`用の中置演算子も作ります。F#では通常`<!>`を使います。
@@ -457,12 +457,12 @@ let batman =
 最初の法則は次のように言います。通常の世界の`id`関数を取り、`return`で高次の世界に持ち上げ、それから`apply`を行うと、
 得られる新しい関数（`E<a> -> E<a>`型）は高次の世界の`id`関数と同じになるべきだ、と。
 
-![](../assets/img/vgfp_apply_law_id.png)
+![](@assets/img/vgfp_apply_law_id.png)
 
 2番目の法則はこうです。通常の世界で関数`f`と値`x`を取り、`f`を`x`に適用して結果（たとえば`y`）を得て、その結果を`return`で持ち上げると、
 `f`と`x`を*先に*高次の世界に持ち上げてから、そこで後から適用した場合と同じ結果になるべきだ、と。
 
-![](../assets/img/vgfp_apply_law_homomorphism.png)
+![](@assets/img/vgfp_apply_law_homomorphism.png)
 
 残りの2つの法則は図で表現しにくいので、ここでは説明しません。ただ、これらの法則を全て合わせることで、どんな実装も適切であることが保証されます。
 
@@ -509,7 +509,7 @@ module Option =
 
 `lift2`の視覚的な表現はこのようになります。
 
-![](../assets/img/vgfp_lift2.png)
+![](@assets/img/vgfp_lift2.png)
 
 `lift`関数のシリーズを使うと、コードがより読みやすくなります。
 あらかじめ用意された`lift`関数の1つを使うことで、`<*>`構文を避けられるからです。
@@ -562,7 +562,7 @@ Option.lift2 (*) (Some 2) (Some 3)   // Some 6
 
 図で表すとこんな感じです。
 
-![](../assets/img/vgfp_apply_combine.png)
+![](@assets/img/vgfp_apply_combine.png)
 
 オプションとリスト用の実装例を見てみましょう。
 

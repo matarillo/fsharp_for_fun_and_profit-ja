@@ -3,7 +3,7 @@ layout: post
 title: "プロパティベースのテストのプロパティ選択"
 description: "FsCheckやQuickCheckを使いたいけど、どんなプロパティを使えばいいのかわからない"
 categories: ["TDD"]
-image: "/assets/img/property_commutative.png"
+image: "@assets/img/property_commutative.png"
 ---
 
 *更新情報: これらの投稿に基づいて、プロパティベースのテストに関する講演を行いました。[スライドとビデオはこちら](https://fsharpforfunandprofit.com/pbt/) です。*
@@ -38,7 +38,7 @@ image: "/assets/img/property_commutative.png"
 この種のプロパティは、操作を異なる順序で組み合わせても、同じ結果になることを前提としています。
 たとえば、下の図では、`X` を実行してから `Y` を実行しても、`Y` を実行してから `X` を実行しても、同じ結果になります。
 
-![可換プロパティ](../assets/img/property_commutative.png)
+![可換プロパティ](@assets/img/property_commutative.png)
 
 加算の可換性は、このパターンの分かりやすい例です。たとえば、「1を足す」を実行してから「2を足す」を実行した結果は、「2を足す」を実行してから「1を足す」を実行した結果と同じです。
 
@@ -52,7 +52,7 @@ image: "/assets/img/property_commutative.png"
 
 下の図では、`X` を実行すると `ABC` が何らかのバイナリ形式にシリアル化され、`X` の逆の操作である何らかのデシリアライズを実行すると、同じ `ABC` の値が返されます。
   
-![逆演算](../assets/img/property_inverse.png)
+![逆演算](@assets/img/property_inverse.png)
 
 シリアル化/デシリアライズに加えて、`addition`/`subtraction`、`write`/`read`、`setProperty`/`getProperty` など、他の操作のペアもこの方法でチェックできます。
 
@@ -66,7 +66,7 @@ image: "/assets/img/property_commutative.png"
 
 下の図では、変換によって項目の順序が変わりますが、変換後も同じ4つの項目が存在しています。
 
-![不変条件](../assets/img/property_invariant.png)
+![不変条件](@assets/img/property_invariant.png)
 
 一般的な不変条件には、コレクションのサイズ（たとえば `map` の場合）、コレクションの内容（たとえば `sort` の場合）、サイズに比例した高さや深さ（たとえば平衡木）などがあります。
 
@@ -78,7 +78,7 @@ image: "/assets/img/property_commutative.png"
 
 下の図では、`distinct` を使って集合をフィルタリングすると2つの項目が返されますが、`distinct` を2回行っても、同じ集合が返されます。
 
-![冪等性](../assets/img/property_idempotence.png)
+![冪等性](@assets/img/property_idempotence.png)
 
 この冪等性という概念は、データベースの更新やメッセージ処理など、様々な場面で役立ちます。
 
@@ -92,7 +92,7 @@ image: "/assets/img/property_commutative.png"
 下の図では、4つの項目からなるリストを、1つの項目と3つの項目からなるリストに分割し、さらにそれを1つの項目と2つの項目からなるリストに分割できることがわかります。
 2つの項目からなるリストについてプロパティが成立することが証明できれば、3つの項目からなるリスト、そして4つの項目からなるリストについても成立すると推測できます。
 
-![帰納法](../assets/img/property_induction.png)
+![帰納法](@assets/img/property_induction.png)
 
 帰納法のプロパティは、リストや木などの再帰的な構造に自然に適用できることがよくあります。
 
@@ -104,7 +104,7 @@ image: "/assets/img/property_commutative.png"
 
 下の図では、迷路のルートを見つけるのは難しいですが、それが正しいかどうかを確認するのは簡単です。
 
-![見つけるのは難しくても、検証は簡単](../assets/img/property_easy_verification.png)
+![見つけるのは難しくても、検証は簡単](@assets/img/property_easy_verification.png)
 
 素因数分解など、有名な問題の多くはこの種の問題です。しかし、このアプローチは、単純な問題にも使うことができます。
 
@@ -116,7 +116,7 @@ image: "/assets/img/property_commutative.png"
 
 多くの場合、結果を確認するために使用できる、アルゴリズムまたはプロセスの代替バージョン（「テストオラクル」）があります。
 
-![テストオラクル](../assets/img/property_test_oracle.png)
+![テストオラクル](@assets/img/property_test_oracle.png)
 
 たとえば、最適化の調整を行った高性能なアルゴリズムをテストしたい場合があります。
 この場合、はるかに遅いが、正しく書くのがはるかに簡単な、ブルートフォースアルゴリズムと比較することができます。
@@ -135,7 +135,7 @@ image: "/assets/img/property_commutative.png"
 `List.sort`の*前*に1つの操作を組み合わせ、*後*に別の操作を組み合わせることで、最終的に同じ結果になるような方法を考えられるでしょうか？
 つまり、「上に行ってから上を横切る」のと「下を横切ってから上に行く」のが同じになるようにです。
 
-![リストのソート？](../assets/img/property_list_sort.png)
+![リストのソート？](@assets/img/property_list_sort.png)
 
 これはどうでしょうか？
 
@@ -143,7 +143,7 @@ image: "/assets/img/property_commutative.png"
 * **パス2:** ソートしてから、リストの各要素に1を足します。
 * 両方のリストは等しくなるはずです。
 
-![1を足してからソートする場合と、ソートしてから1を足す場合](../assets/img/property_list_sort1.png)
+![1を足してからソートする場合と、ソートしてから1を足す場合](@assets/img/property_list_sort1.png)
 
 このプロパティを実装したコードを以下に示します。
 
@@ -178,7 +178,7 @@ Check.Quick (``+1してからソートした結果は、ソートしてから+1�
 * **パス2:** ソートしてから、リストの*先頭*に `Int32.MinValue` を追加します。
 * 両方のリストは等しくなるはずです。
 
-![最小値を使ったリストのソート](../assets/img/property_list_sort2.png)
+![最小値を使ったリストのソート](@assets/img/property_list_sort2.png)
 
 コードは以下の通りです。
 
@@ -240,7 +240,7 @@ Check.Quick (``最小値を追加してからソートした結果は、ソー�
 「ソート済みであること」を利用した別の方法として、最初にすべての値の符号を反転し、
 ソートの*後*に符号を反転するパスでは、さらに反転を追加するという方法があります。
 
-![符号の反転を使ったリストのソート](../assets/img/property_list_sort3.png)
+![符号の反転を使ったリストのソート](@assets/img/property_list_sort3.png)
 
 ```fsharp
 let ``符号を反転してからソートした結果は、ソートしてから符号を反転し、反転した結果と同じである`` sortFn aList = 
@@ -279,7 +279,7 @@ Check.Quick ( ``符号を反転してからソートした結果は、ソート�
 
 同じ追加/先頭に追加のトリックを実行できます。
 
-![リストの反転](../assets/img/property_list_rev.png)
+![リストの反転](@assets/img/property_list_rev.png)
 
 プロパティのコードは以下の通りです。
 
@@ -330,7 +330,7 @@ Check.Quick (``任意の値を追加してから反転した結果は、反転�
 
 リストの反転はどうでしょうか？ 実は、反転はそれ自体が逆演算なのです。
 
-![逆演算を使ったリストの反転](../assets/img/property_list_rev_inverse.png)
+![逆演算を使ったリストの反転](@assets/img/property_list_rev_inverse.png)
 
 これをプロパティにしてみましょう。
 
@@ -377,7 +377,7 @@ Check.Quick (``反転してから反転した結果は、元と同じである``
 たとえば、文字列の分割関数が機能しているかどうかを確認したいとします。トークナイザを書く必要はありません。
 トークンを連結すると元の文字列に戻ることだけを確認すればよいのです。
 
-![文字列分割プロパティ](../assets/img/property_string_split.png)
+![文字列分割プロパティ](@assets/img/property_string_split.png)
 
 このプロパティのコアコードは以下の通りです。
 
@@ -430,7 +430,7 @@ Check.Quick ``カンマで分割された文字列の要素を連結すると、
 
 最初に思いつくのは、リスト内の隣接要素について、最初の要素が2番目の要素よりも小さくなるということです。
 
-![隣接プロパティ](../assets/img/property_list_sort_pairwise.png)
+![隣接プロパティ](@assets/img/property_list_sort_pairwise.png)
 
 
 これをプロパティにしてみましょう。
@@ -573,7 +573,7 @@ Check.Quick (``リストの隣接する要素は、順序付けられている``
 
 答え: 偽の結果はデータを捨てています。真の結果は常に元のリストと同じ内容を含んでいますが、順序が異なります。
 
-![順列プロパティ](../assets/img/property_list_sort_permutation.png)
+![順列プロパティ](@assets/img/property_list_sort_permutation.png)
 
 これは新しいプロパティにつながります。ソートされたリストは常に元のリストの順列です。なるほど！では、プロパティを順列で書いてみましょう。
 
@@ -1160,7 +1160,7 @@ Check.Quick ``arabicNumberのすべての値について、バイナリ法とタ
 
 進行中のZendoゲームの写真を以下に示します。
 
-![Zendo](../assets/img/zendo1.png)
+![Zendo](@assets/img/zendo1.png)
 
 白い石はプロパティが成立していることを意味し、黒い石は失敗を意味します。ここのルールがわかりますか？
 「セットには地面に触れていない黄色のピラミッドがなければならない」のようなものだと思います。
@@ -1301,7 +1301,7 @@ d3.Amount  // 7
 
 「異なるパス、同じ結果」の戦略が有効だと考えられます。ソートの場合と同様に、times演算を「内側」と「外側」の両方で行い、結果が同じになるかどうかを確認できます。
 
-![Dollar times](../assets/img/property_dollar_times.png)
+![Dollar times](@assets/img/property_dollar_times.png)
 
 このプロパティをコードで表現すると、次のようになります。
 
@@ -1369,7 +1369,7 @@ Check.Quick ``作成してから乗算した結果は、乗算してから作成
 
 このアプローチを異なるパスに拡張できます。たとえば、次のように、金額を抽出して直接比較できます。
 
-![Dollar times](../assets/img/property_dollar_times2.png)
+![Dollar times](@assets/img/property_dollar_times2.png)
 
 コードは以下のようになります。
 
@@ -1389,7 +1389,7 @@ Check.Quick ``作成してから乗算し、値を取得した結果は、乗算
 
 たとえば、次のように、2つの異なるパスで `Times` の後に `Add` を実行できます。
 
-![Dollar times](../assets/img/property_dollar_times3.png)
+![Dollar times](@assets/img/property_dollar_times3.png)
 
 コードは以下の通りです。
 
@@ -1426,7 +1426,7 @@ Check.Quick ``作成してから乗算し、加算した結果は、乗算し、
 
 これで、すべてのテストを次の1つのプロパティに減らすことができます。
 
-![Dollar map](../assets/img/property_dollar_map.png)
+![Dollar map](@assets/img/property_dollar_map.png)
 
 `Dollar` に `Map` メソッドを追加しましょう。また、`Times` と `Add` を `Map` で書き直すこともできます。
 

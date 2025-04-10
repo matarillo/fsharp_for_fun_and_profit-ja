@@ -6,7 +6,7 @@ nav: thinking-functionally
 seriesId: "関数型思考"
 seriesOrder: 7
 categories: ["関数"]
-image: "/assets/img/Functions_Composition.png"
+image: "@assets/img/Functions_Composition.png"
 ---
 
 ## 関数の結合性
@@ -49,7 +49,7 @@ let F x y z = x <| y z    // 後方パイプを使用
 
 たとえば、型「T1」から型「T2」への関数「f」があり、また型「T2」から型「T3」への関数「g」があるとします。この場合、「f」の出力を「g」の入力につなげることで、型「T1」から型「T3」への新しい関数を作ることができます。
 
-![](../assets/img/Functions_Composition.png)
+![](@assets/img/Functions_Composition.png)
 
 具体例を見てみましょう。
 

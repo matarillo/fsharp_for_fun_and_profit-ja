@@ -21,7 +21,7 @@ F# や関数型プログラミング全般についてよく聞く意見の一�
 
 このシリーズの最初の投稿では、次のようなシンプルな電卓アプリを開発していきます。
 
-![Calculator image](../assets/img/calculator_1.png)
+![Calculator image](@assets/img/calculator_1.png)
 
 ## 私の開発アプローチ
 
@@ -86,7 +86,7 @@ type Calculate = CalculatorInput -> CalculatorOutput
 代わりに、通常は、入力時に信頼できない乱雑な世界から素敵な原始的なドメインに変換する検証/変換関数と、
 出力時にその逆を行う同様の関数が存在します。
 
-![ドメインの入力と出力](../assets/img/domain_input_output.png)
+![ドメインの入力と出力](@assets/img/domain_input_output.png)
 
 
 では、まず `CalculatorInput` から見ていきましょう。入力の構造はどうなるでしょうか？

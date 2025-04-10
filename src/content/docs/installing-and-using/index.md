@@ -4,7 +4,7 @@ title: "Installing and using F#"
 description: "Instructions for downloading, installing and using F# with Visual Studio, SharpDevelop and MonoDevelop"
 nav: 
 hasComments: 1
-image: "/assets/img/fsharp_eval2.png"
+image: "@assets/img/fsharp_eval2.png"
 
 ---
 

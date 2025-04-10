@@ -7,7 +7,7 @@ categories: ["DDD"]
 
 私が[関数型DDD](https://fsharpforfunandprofit.com/ddd/)について講演するとき、よくこのスライドを使います（*[スライドの前後関係も参照してください](https://www.slideshare.net/ScottWlaschin/ddd-with-fsharptypesystemlondonndc2013/45)*）。
 
-![UML図？必要ねぇ！](../assets/img/no-uml-diagrams.jpg)
+![UML図？必要ねぇ！](@assets/img/no-uml-diagrams.jpg)
 
 これはもちろん、[あの有名なシーン](https://www.youtube.com/watch?v=gx6TBrfCW54)をもじったものです。あ、[こっちのシーン](https://www.youtube.com/watch?v=VqomZQMZQCQ)の間違いでした。
 
@@ -29,7 +29,7 @@ UML図では、コードに変換する必要があり、その過程で情報�
 
 UML図はこちらです。
 
-![](../assets/img/uml-regex.png)
+![](@assets/img/uml-regex.png)
 
 F#のコードはこちらです。
 
@@ -53,7 +53,7 @@ type Interpret<'a> =  string -> RegularExpression -> 'a
 
 UML図はこちらです。
 
-![](../assets/img/uml-enrollment.png)
+![](@assets/img/uml-enrollment.png)
 
 F#のコードはこちらです。
 
@@ -120,7 +120,7 @@ type EnrollStudent = Student -> Seminar -> Enrollment option
 
 また別の例を見てみましょう（*[引用元](https://www.tutorialspoint.com/uml/uml_class_diagram.htm)*）。
 
-![](../assets/img/uml-order.png)
+![](@assets/img/uml-order.png)
 
 これをF#で書くと、以下のようになります。
 
@@ -151,7 +151,7 @@ UML図をそのままコードにしていますが、正直、この設計は�
 
 注文と顧客の、より良いバージョンを見てみましょう（*[引用元](https://web.archive.org/web/20190801150337/http://edn.embarcadero.com/article/31863)*）。
 
-![](../assets/img/uml-order2.png)
+![](@assets/img/uml-order2.png)
 
 これをF#で書くと、以下のようになります。
 
@@ -242,7 +242,7 @@ type PayOrder = UnpaidOrder -> AuthorizedPayment -> PaidOrder
 
 JetBrains IntelliJのドキュメントにあった例を紹介します（*[引用元](https://web.archive.org/web/20150915005415/http://www.jetbrains.com/idea/help/viewing-diagram.html)*）。
 
-![](../assets/img/uml-hotel.png)
+![](@assets/img/uml-hotel.png)
 
 F#で書くと、こうなります。
 
@@ -329,7 +329,7 @@ type RegisterAction = {
 
 今度は、図書館のドメインです。少し良くなってきましたね（*[引用元](https://www.uml-diagrams.org/library-domain-uml-class-diagram-example.html)*）。
 
-![](../assets/img/uml-library.png)
+![](@assets/img/uml-library.png)
 
 F# で書くと、こうなります。コードなので、UMLでは難しい、特定の型やフィールドにコメントを追加できます。
 
@@ -452,7 +452,7 @@ CQRSとイベントソーシングを使った、このドメインのより現�
 
 最後の例は、ソフトウェアのライセンスに関するものです（*[引用元](https://www.uml-diagrams.org/software-licensing-domain-diagram-example.html?context=cls-examples)*）。
 
-![](../assets/img/uml-hasp.png)
+![](@assets/img/uml-hasp.png)
 
 F#で書くと、以下のようになります。
 

@@ -3,7 +3,7 @@ layout: post
 title: "モナド怪物の体を完成させる"
 description: "フランケンファンクター博士とモナド怪物、パート2"
 categories: ["部分適用", "カリー化", "コンビネーター"]
-image: "/assets/img/monadster_brain.jpg"
+image: "@assets/img/monadster_brain.jpg"
 seriesId: "状態の取り扱い"
 seriesOrder: 2
 ---
@@ -58,7 +58,7 @@ let headSurgery brain skull =
 
 `map2M`を再利用できれば理想的ですが、問題があります。`map2M`が機能するためには、頭蓋骨が`M`でラップされている必要があります。
 
-![head](../assets/img/monadster_head1.png)
+![head](@assets/img/monadster_head1.png)
 
 しかし、頭蓋骨は生きる必要がなく、生命力も使用しないので、`Skull`を`M<Skull>`に変換する特別な関数を作る必要があります。
 
@@ -122,7 +122,7 @@ let skull = Skull "Yorick"
 
 *ちなみに、この変わった名前の脳の由来には、[面白い話](https://ja.wikipedia.org/wiki/%E3%83%A4%E3%83%B3%E3%82%B0%E3%83%BB%E3%83%95%E3%83%A9%E3%83%B3%E3%82%B1%E3%83%B3%E3%82%B7%E3%83%A5%E3%82%BF%E3%82%A4%E3%83%B3)があるのですが、今はその詳細に立ち入る時間がありません。*
 
-![異常な脳](../assets/img/monadster_brain.jpg)
+![異常な脳](@assets/img/monadster_brain.jpg)
 
 次に、死んだ部品から「M」バージョンを構築します。
 
@@ -216,7 +216,7 @@ val makeBeatingHeart : LiveHeart -> M<BeatingHeart>
 
 死んだ心臓を出発点とし、鼓動する心臓を得る必要があります。
 
-![heart1](../assets/img/monadster_heart1.png)
+![heart1](@assets/img/monadster_heart1.png)
 
 しかし、これを直接行うためのツールがありません。
 
@@ -224,13 +224,13 @@ val makeBeatingHeart : LiveHeart -> M<BeatingHeart>
 
 ところが、最初の出力が2番目の入力と互換性がないため、それらを直接つなげることができません。
 
-![heart2](../assets/img/monadster_heart2.png)
+![heart2](@assets/img/monadster_heart2.png)
 
 そこで、`M<LiveHeart>`を入力として受け取り、それを`M<BeatingHeart>`に変換する関数が必要になります。
 
 さらに、この関数を既に持っている`makeBeatingHeart`関数から構築したいと考えています。
 
-![heart2](../assets/img/monadster_heart3.png)
+![heart2](@assets/img/monadster_heart3.png)
 
 以下は、これまで何度も使ってきたパターンを応用した第一案です。
 
@@ -327,7 +327,7 @@ let bindM f bodyPartM =
 
 これで、`DeadHeart`を受け取り、`M<BeatingHeart>`を生成する関数を作成する方法がわかりました。
 
-![heart3](../assets/img/monadster_heart4.png)
+![heart3](@assets/img/monadster_heart4.png)
 
 以下がそのコードです。
 
@@ -357,7 +357,7 @@ let beatingHeartM =
 `bindM`の捉え方の一つは、`mapM`と同様に「関数変換器」だということです。
 つまり、任意の「Mを返す」関数を、入力と出力の両方が`M`である関数に変換するのです。
 
-![bindM](../assets/img/monadster_bindm.png)
+![bindM](@assets/img/monadster_bindm.png)
 
 `map`と同様に、`bind`も他の多くの文脈で登場します。
 
@@ -371,7 +371,7 @@ bindが重要な理由は、「Mを返す」関数がよく登場するからで
 
 `bindM`を使うことで、各ステップを入力と出力の両方が`M`である関数に変換できます。これにより、これらの関数を連結できるようになります。
 
-![bindM](../assets/img/monadster_bindm2.png)
+![bindM](@assets/img/monadster_bindm2.png)
 
 ### 鼓動する心臓のテスト
 
@@ -665,7 +665,7 @@ let bodyM =
 
 あとは稲妻が落ちて、生命力を生成する機械に電力が送られるのを待つだけです！
 
-![研究室の電気](../assets/img/monadster-lab-electricity.gif)<br><sub><a href="https://misfitdaydream.blogspot.co.uk/2012/10/frankenstein-1931.html">出典：Misfit Robot Daydream</a></sub>
+![研究室の電気](@assets/img/monadster-lab-electricity.gif)<br><sub><a href="https://misfitdaydream.blogspot.co.uk/2012/10/frankenstein-1931.html">出典：Misfit Robot Daydream</a></sub>
 
 来ました ―― 生命力が利用可能になりました！急いで通常の方法で`bodyM`を実行します...
 

@@ -1350,7 +1350,7 @@ printHeader()
 
 詳細な出力はすべて列挙しません - 自分でコードを実行できますが - 結果のグラフを以下に示します。
 
-![モノイドパフォーマンス](../assets/img/monoid_performance.jpg)
+![モノイドパフォーマンス](@assets/img/monoid_performance.jpg)
 
 いくつか注目すべき点があります：
 

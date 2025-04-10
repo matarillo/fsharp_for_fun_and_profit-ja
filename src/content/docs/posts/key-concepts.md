@@ -6,7 +6,7 @@ nav: why-use-fsharp
 seriesId: "F#を使う理由"
 seriesOrder: 6
 categories: 
-image: "/assets/img/four-concepts2.png"
+image: "@assets/img/four-concepts2.png"
 ---
 
 これからの記事では、このシリーズのテーマである簡潔さ、利便性、正確性、並行性、完全性を実際に示していきます。
@@ -20,7 +20,7 @@ image: "/assets/img/four-concepts2.png"
 
 これらの概念は後の記事でより詳しく扱います。ここではこのシリーズの残りを理解するためのお試し版程度です。
 
-![4つの主要概念](../assets/img/four-concepts2.png)
+![4つの主要概念](@assets/img/four-concepts2.png)
 
 ### オブジェクト指向ではなく関数指向
 

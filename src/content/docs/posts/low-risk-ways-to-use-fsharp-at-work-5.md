@@ -103,7 +103,7 @@ Martin Fowlerは[DSLに関する彼の本](https://ptgmedia.pearsoncmg.com/image
 たとえば、[以前の投稿](../posts/cycles-and-modularity-in-the-wild.md)で、[GraphViz](https://www.graphviz.org/)と組み合わせてF#を使い、
 依存関係のダイアグラムを作成しました。以下にサンプルを示します：
 
-![](../assets/img/tickspec_svg.png)
+![](@assets/img/tickspec_svg.png)
 
 ダイアグラム自体を生成するコードは短く、約60行だけでした。
 [こちら](https://gist.github.com/swlaschin/5742974#file-type-dependency-graph-fsx-L428)で見ることができます。

@@ -679,14 +679,14 @@ Text "Hello world"
 
 一つの方法は、別々のページを加算して完全なテキストブロックを作り、そのテキストブロックに`wordCount`関数を適用することです。以下は図解です。
 
-![ページの加算による単語数カウント](../assets/img/monoid_h1.jpg)
+![ページの加算による単語数カウント](@assets/img/monoid_h1.jpg)
 
 しかし、新しいページを書き終えるたびに、すべてのテキストを加算し、単語数を数え直す必要があります。
 
 疑いなく、もっと良い方法があることがわかるでしょう。
 すべてのテキストを加算してから数えるのではなく、各ページの単語数を別々に数え、それらの数を加算するのです。以下のようになります。
 
-![カウントの加算による単語数カウント](../assets/img/monoid_h2.jpg)
+![カウントの加算による単語数カウント](@assets/img/monoid_h2.jpg)
 
 2つ目のアプローチは、整数（カウント）自体がモノイドであり、それらを加算して望む結果を得られるという事実に基づいています。
 
@@ -933,11 +933,11 @@ module FrequentWordTest =
 
 では、前回と同様に2つのアプローチを比較しましょう。最初のアプローチはすべてのページを結合し、その後`mostFrequentWord`を適用します。以下のようになります。
 
-![ページの加算によるmostFrequentWord](../assets/img/monoid_non_h1.png)
+![ページの加算によるmostFrequentWord](@assets/img/monoid_non_h1.png)
 
 2つ目のアプローチは、各ページで別々に`mostFrequentWord`を行い、その後結果を結合します。以下のようになります。
 
-![カウントの加算によるmostFrequentWord](../assets/img/monoid_non_h2.png)
+![カウントの加算によるmostFrequentWord](@assets/img/monoid_non_h2.png)
 
 以下がコードです。
         
@@ -980,11 +980,11 @@ Using map reduce, the most frequent word is hellogoodbyefoobar
 単語数の例では、ブロックを加算してから単語数を数えても、単語数を数えてから加算しても、*同じ*最終結果が得られました。
 以下は図解です。
 
-![両方の方法による単語数](../assets/img/monoid_h1_both.png)
+![両方の方法による単語数](@assets/img/monoid_h1_both.png)
 
 しかし、最頻出単語の例では、2つの異なるアプローチから*同じ*答えは得られませんでした。
 
-![両方の方法による最頻出単語](../assets/img/monoid_non_h1_both.png)
+![両方の方法による最頻出単語](@assets/img/monoid_non_h1_both.png)
 
 言い換えれば、`wordCount`については以下が成り立ちました。
 

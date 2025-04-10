@@ -5,7 +5,7 @@ description: "リストと高次の値を混ぜる"
 categories: ["パターン"]
 seriesId: "Map, Bind, Applyなにもわからない"
 seriesOrder: 4
-image: "/assets/img/vgfp_sequence_stack.png"
+image: "@assets/img/vgfp_sequence_stack.png"
 ---
 
 この投稿は連載記事の一部です。
@@ -104,7 +104,7 @@ let rec mapOption f list =
 
 実装を図で表すと次のようになります。
 
-![](../assets/img/vgfp_mapOption.png)
+![](@assets/img/vgfp_mapOption.png)
 
 この動作の仕組みがわからない場合は、このシリーズの最初の投稿の `apply` に関するセクションを読んでください。
 
@@ -272,7 +272,7 @@ let good = ["1";"2";"3"] |> mapOption parseInt
 前述のように、XXXがアプリカティブな世界（`apply`と`return`を持つ世界）を表す`mapXXX`関数のセットを定義できます。
 これらの`mapXXX`関数は、世界をまたぐ関数をコレクションで動作するように変換します。
 
-![](../assets/img/vgfp_traverse.png)
+![](@assets/img/vgfp_traverse.png)
 
 また、先ほど述べたように、言語が型クラスをサポートしている場合、単一の実装（`mapM`または`traverse`と呼ばれる）で済みます。
 ここからは、この一般的な概念を`traverse`と呼ぶことにします。これが`map`とは異なることを明確にするためです。
@@ -291,7 +291,7 @@ let good = ["1";"2";"3"] |> mapOption parseInt
 走査可能な世界が上にある場合、`List<a>`のような型が生成され、
 アプリカティブな世界が上にある場合、`Result<a>`のような型が生成されます。
 
-![](../assets/img/vgfp_mstack_1.png)
+![](@assets/img/vgfp_mstack_1.png)
 
 *重要：ここでは一貫性のために`List<_>`という構文を「リストの世界」を表すために使用しています。これは.NETのListクラスとは異なります！
 F#では、これは不変の`list`型で実装されます。*
@@ -301,25 +301,25 @@ F#では、これは不変の`list`型で実装されます。*
 走査可能な世界をアプリカティブな世界の上に積み重ねると、`List<Result<a>>`のような型が生成されます。
 あるいは、アプリカティブな世界を走査可能な世界の上に積み重ねると、`Result<List<a>>`のような型が生成されます。
 
-![](../assets/img/vgfp_mstack_2.png)
+![](@assets/img/vgfp_mstack_2.png)
 
 この表記法を用いて、様々な種類の関数がどのように表現されるか確認していきましょう。
 
 まず、`a -> Result<b>`のような単純な世界をまたぐ関数から始めましょう。ここで、目標の世界はアプリカティブな世界です。
 図では、入力は通常の世界（左側）で、出力（右側）は通常の世界の上に積み重ねられたアプリカティブな世界です。
 
-![](../assets/img/vgfp_traverse_cross.png)
+![](@assets/img/vgfp_traverse_cross.png)
 
 次に、通常の`a`値のリストがあり、`a -> Result<b>`のような関数を使用して各`a`値を変換するために`map`を使用すると、
 結果もリストになりますが、内容は`a`値の代わりに`Result<b>`値になります。
 
-![](../assets/img/vgfp_traverse_map.png)
+![](@assets/img/vgfp_traverse_map.png)
 
 `traverse`の場合、効果は全く異なります。
 `a`値のリストをその関数で変換するために`traverse`を使用すると、
 出力はリストではなく`Result`になります。そして、`Result`の内容は`List<b>`になります。
 
-![](../assets/img/vgfp_traverse_traverse.png)
+![](@assets/img/vgfp_traverse_traverse.png)
 
 つまり、`traverse`では、`List`は通常の世界に付属したままで、アプリカティブな世界（`Result`など）が上部に追加されます。
 
@@ -595,7 +595,7 @@ let goodNone = None |> Option.traverseResultA parseInt
 
 しかし、`List<Result>`を与えられて、それを`Result<List>`に変更する必要がある場合はどうでしょうか。つまり、スタック内の世界の順序を入れ替える必要がある場合です。
 
-![](../assets/img/vgfp_sequence_stack.png)
+![](@assets/img/vgfp_sequence_stack.png)
 
 ここで`sequence`が役立ちます。まさにこれが`sequence`の機能だからです！ `sequence`関数は「レイヤーを入れ替え」ます。
 
@@ -705,7 +705,7 @@ let desiredOutput = [Some 1; Some 3; None; Some 7],[Some 2; Some 4; None; Some 8
 
 一方で、この作業が単に世界のスタックを別のスタックに変換することだと認識すれば、ほとんど考えずに*機械的に*関数を作成できます。
 
-![](../assets/img/vgfp_tuple_sequence-1.png)
+![](@assets/img/vgfp_tuple_sequence-1.png)
 
 ### 解決策の設計
 
@@ -718,11 +718,11 @@ let desiredOutput = [Some 1; Some 3; None; Some 7],[Some 2; Some 4; None; Some 8
 
 * `optionSequenceTuple`はオプションを下に移動し、タプルを上に移動します。
 
-![](../assets/img/vgfp_tuple_sequence-2.png)
+![](@assets/img/vgfp_tuple_sequence-2.png)
 
 * `listSequenceTuple`はリストを下に移動し、タプルを上に移動します。
 
-![](../assets/img/vgfp_tuple_sequence-3.png)
+![](@assets/img/vgfp_tuple_sequence-3.png)
 
 これらのヘルパー関数をライブラリに入れる必要はありますか？ いいえ。
 また必要になる可能性は低く、たまに必要になっても、依存関係を避けるためにゼロから書く方が良いでしょう。

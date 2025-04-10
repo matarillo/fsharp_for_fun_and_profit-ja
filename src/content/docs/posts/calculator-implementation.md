@@ -10,7 +10,7 @@ seriesOrder: 2
 
 この記事では、前回に引き続き、シンプルな電卓アプリの開発を進めていきます。
 
-![電卓の画像](../assets/img/calculator_1.png)
+![電卓の画像](@assets/img/calculator_1.png)
 
 [前回の記事](../posts/calculator-design.md)では、UML図を使わずに型だけを使って設計の最初のドラフトを作成しました。
 

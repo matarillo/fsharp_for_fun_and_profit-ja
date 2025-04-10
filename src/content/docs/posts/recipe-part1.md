@@ -53,13 +53,13 @@ categories: ["DDD"]
 
 以下は、さまざまなコンポーネントを示す図です。
 
-![Recipe Happy Path](../assets/img/Recipe_HappyPath.png)
+![Recipe Happy Path](@assets/img/Recipe_HappyPath.png)
 
 しかし、これは「ハッピーパス」のみを示しています。現実はそれほど単純ではありません！データベースにユーザーIDが見つからない場合や、メールアドレスが無効な場合、データベースでエラーが発生した場合はどうなるでしょうか？
 
 問題が起こり得る箇所をすべて示すように図を更新してみましょう。
 
-![Recipe Error Path](../assets/img/Recipe_ErrorPath.png)
+![Recipe Error Path](@assets/img/Recipe_ErrorPath.png)
 
 ユースケースの各ステップで、図に示すようなさまざまなエラーが発生する可能性があります。このシリーズの目標の1つは、これらのエラーをエレガントに処理する方法を説明することです。
 
@@ -74,11 +74,11 @@ categories: ["DDD"]
 
 以下は、ユースケースを簡略化したバージョンに基づいて、私が意味することを示す図です。
 
-![A imperative data flow](../assets/img/Recipe_ResponseBack.png)
+![A imperative data flow](@assets/img/Recipe_ResponseBack.png)
 
 しかし、関数型モデルでは、関数は入力と出力を持つブラックボックスです。このようになります。
 
-![A function with one output](../assets/img/Recipe_Function1.png)
+![A function with one output](@assets/img/Recipe_Function1.png)
 
 このモデルにユースケースを適合させるにはどうすればよいでしょうか？
 
@@ -88,15 +88,15 @@ categories: ["DDD"]
 
 この場合、すべてのエラーをハッピーパスの代替パスとして最後まで*前方に送る*必要があります。
 
-![A functional data flow](../assets/img/Recipe_ResponseForward.png)
+![A functional data flow](@assets/img/Recipe_ResponseForward.png)
 
 これを行えば、フロー全体を次のような単一の「ブラックボックス」関数に変換できます。
 
-![A function with many outputs](../assets/img/Recipe_FunctionMany.png)
+![A function with many outputs](@assets/img/Recipe_FunctionMany.png)
 
 もちろん、大きな関数の内部を見れば、各ステップに対応する小さな関数が（関数型の言葉で言えば）「合成されて」パイプラインで結合されています。
 
-![A function with many outputs](../assets/img/Recipe_FunctionMany2.png)
+![A function with many outputs](@assets/img/Recipe_FunctionMany2.png)
 
 
 ### エラー処理
@@ -119,7 +119,7 @@ type UseCaseResult =
 
 そして、4つの異なるケースが1つの出力に埋め込まれているのを示すように書き直した図がこちらです。
 
-![A function with a 4 case union output](../assets/img/Recipe_Function_Union4.png)
+![A function with a 4 case union output](@assets/img/Recipe_Function_Union4.png)
 
 ### エラー処理の簡素化
 
@@ -133,7 +133,7 @@ type UseCaseResult =
     | Failure
 ```
 
-![A function with a 2 case union output](../assets/img/Recipe_Function_Union2.png)
+![A function with a 2 case union output](@assets/img/Recipe_Function_Union2.png)
 
 この型は非常に汎用的で、*どんな*ワークフローにも使えます！実際、この型を使った便利な関数のライブラリを作成できることと、それをあらゆるシナリオで再利用できることをこの後に示します。
 
@@ -153,7 +153,7 @@ F#ライブラリには実際に、これとほぼ同じ型が定義されてい
 
 さて、個々のステップを再確認してみると、各ステップのエラーを単一の「失敗」パスに結合する必要があることがわかります。
 
-![A function with two outputs](../assets/img/Recipe_Function_ErrorTrack.png)
+![A function with two outputs](@assets/img/Recipe_Function_ErrorTrack.png)
 
 これをどのように行うかは、次の記事のトピックになります。
 

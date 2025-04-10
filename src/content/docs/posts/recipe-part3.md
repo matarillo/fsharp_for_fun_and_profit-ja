@@ -25,7 +25,7 @@ F#初心者は、C#と同じようにクラスでコードを整理したくな�
 
 コードを考える標準的な方法は、ドメイン層、プレゼンテーション層などの層（レイヤー）に分けることです。次の図のようになります。
 
-![設計のレイヤー](../assets/img/Recipe_DesignLayers1.png)
+![設計のレイヤー](@assets/img/Recipe_DesignLayers1.png)
 
 各層には、その層に関連するコード*のみ*が含まれます。
 
@@ -35,7 +35,7 @@ F#初心者は、C#と同じようにクラスでコードを整理したくな�
 
 そのため、レイヤーの図を次のように調整する必要があります（矢印は依存を表します）。
 
-![設計のレイヤー](../assets/img/Recipe_DesignLayers1a.png)
+![設計のレイヤー](@assets/img/Recipe_DesignLayers1a.png)
 
 理想的には、この再編成をさらに細分化し、アプリケーションサービス、ドメインサービスなどを含む別の「サービス層」を設けます。最終的に、コアとなるドメインクラスは「純粋」で、ドメイン外の何にも依存しません。これは「[ヘキサゴナルアーキテクチャ](https://alistair.cockburn.us/hexagonal-architecture/)」や「[オニオンアーキテクチャ](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/)」と呼ばれることがあります。ただし、この記事ではオブジェクト指向設計の微妙な点については触れません。今は、よりシンプルなモデルで考えていきましょう。
 
@@ -64,13 +64,13 @@ F#初心者は、C#と同じようにクラスでコードを整理したくな�
 
 これら2つの要素を分離すると、図は次のようになります。
 
-![設計のレイヤー](../assets/img/Recipe_DesignLayers2.png)
+![設計のレイヤー](@assets/img/Recipe_DesignLayers2.png)
 
 ただし、後方参照（赤い矢印で示す）が生じる可能性があります。たとえば、ドメイン層の関数が`IRepository`のような永続化関連の型に依存する場合があります。
 
 オブジェクト指向設計では、これに対処するために[さらに層を追加](https://wiki.c2.com/?OneMoreLevelOfIndirection)（例：アプリケーションサービス）します。しかし関数型設計では、そうする必要はありません。永続化関連の型をレイヤーの別の場所、つまりドメイン関数の下に移動するだけです。次のようになります。
 
-![設計のレイヤー](../assets/img/Recipe_DesignLayers2a.png)
+![設計のレイヤー](@assets/img/Recipe_DesignLayers2a.png)
 
 この設計では、レイヤー間の循環参照をすべて排除しました。*すべての矢印が下向きになります*。
 
@@ -84,11 +84,11 @@ F#初心者は、C#と同じようにクラスでコードを整理したくな�
 
 [パート1](../posts/recipe-part1.md)で議論したユースケースの例を参照すると：
 
-![レシピのハッピーパス](../assets/img/Recipe_HappyPath.png)
+![レシピのハッピーパス](@assets/img/Recipe_HappyPath.png)
 
 F#プロジェクトの対応するコードは次のようになるでしょう：
 
-![設計のレイヤー](../assets/img/Recipe_DesignLayers_CodeLayout.png)
+![設計のレイヤー](@assets/img/Recipe_DesignLayers_CodeLayout.png)
 
 リストの一番下にあるのは、プログラムのエントリポイントを含む「main」または「program」と呼ばれるメインファイルです。
 

@@ -5,7 +5,7 @@ description: "または、世界をまたぐ関数を合成する方法"
 categories: ["パターン"]
 seriesId: "Map, Bind, Apply なにもわからない"
 seriesOrder: 2
-image: "/assets/img/vgfp_bind.png"
+image: "@assets/img/vgfp_bind.png"
 ---
 
 この投稿は、シリーズの2番目です。
@@ -78,18 +78,18 @@ Webページを取得する関数が`Async<string>`を返したりします。
 このような「世界をまたぐ」関数は、`a -> E<b>`というシグネチャで認識できます。入力は通常の世界にありますが、出力は高次の世界にあります。
 残念ながら、このタイプの関数は標準的な合成では連結できません。
 
-![](../assets/img/vgfp_bind_noncomposition.png)
+![](@assets/img/vgfp_bind_noncomposition.png)
 
 「bind」の機能は、世界をまたぐ関数（一般に「モナディック関数」と呼ばれる）を持ち上げられた関数`E<a> -> E<b>`に変換することです。
 
-![](../assets/img/vgfp_bind.png)
+![](@assets/img/vgfp_bind.png)
 
 これを行う利点は、結果として得られる持ち上げられた関数が純粋に高次の世界に存在し、簡単に合成できることです。
 
 たとえば、`a -> E<b>`型の関数は`b -> E<c>`型の関数と直接合成できませんが、
 `bind`を使用すると、2番目の関数は`E<b> -> E<c>`型になり、合成*可能*になります。
 
-![](../assets/img/vgfp_bind_composition.png)
+![](@assets/img/vgfp_bind_composition.png)
 
 このように、`bind`を使えば任意の数のモナディック関数を連鎖できます。
 
@@ -99,7 +99,7 @@ Webページを取得する関数が`Async<string>`を返したりします。
 入力の中身を「アンラップ」して`a -> E<b>`関数を実行することで新しい高次の値（`E<b>`）を生成する関数と考えられます。
 この「アンラップ」という比喩はすべての高次の世界に当てはまるわけではありませんが、こう考えると役立つことが多いです。
 
-![](../assets/img/vgfp_bind2.png)
+![](@assets/img/vgfp_bind2.png)
 
 ### 実装例
 
@@ -279,7 +279,7 @@ bind/returnを使う際に特別な構文を使う*必要はない*ことを強�
 * まず、通常の関数から世界をまたぐ関数を構築します。出力に`return`を適用することでこれを行います。
 * 次に、この世界をまたぐ関数を`bind`を使って持ち上げられた関数に変換します。これにより、単に`map`を行った場合と同じ結果が得られます。
 
-![](../assets/img/vgfp_bind_vs_map.png)
+![](@assets/img/vgfp_bind_vs_map.png)
 
 同様に、`bind`は`apply`をエミュレートできます。以下は、F#でOptionに対する`map`と`apply`を`bind`と`return`（Some）を使って定義する方法です。
 
@@ -317,30 +317,30 @@ let apply fOpt xOpt =
 
 まず、`return`関数自体が世界をまたぐ関数であることに注目してください。
 
-![](../assets/img/vgfp_monad_law1_a.png)
+![](@assets/img/vgfp_monad_law1_a.png)
 
 これは、`bind`を使ってそれを高次の世界の関数に持ち上げられることを意味します。そして、この持ち上げられた関数は何をするのでしょうか。うまくいけば、何もしません！
 単に入力を返すだけです。
 
 そして、これがまさに最初のモナド則です。この持ち上げられた関数は、高次の世界での`id`関数と同じでなければならないと言っています。
 
-![](../assets/img/vgfp_monad_law1_b.png)
+![](@assets/img/vgfp_monad_law1_b.png)
 
 2番目の法則は似ていますが、`bind`と`return`が逆になっています。通常の値`a`と、`a`を`E<b>`に変換する世界をまたぐ関数`f`があるとします。
 
-![](../assets/img/vgfp_monad_law2_a.png)
+![](@assets/img/vgfp_monad_law2_a.png)
 
 `f`には`bind`を、`a`には`return`を使って、両方を高次の世界に持ち上げましょう。
 
-![](../assets/img/vgfp_monad_law2_b.png)
+![](@assets/img/vgfp_monad_law2_b.png)
 
 ここで、`f`の高次バージョンを`a`の高次バージョンに適用すると、ある値`E<b>`が得られます。
 
-![](../assets/img/vgfp_monad_law2_c.png)
+![](@assets/img/vgfp_monad_law2_c.png)
 
 一方、`f`の通常バージョンを`a`の通常バージョンに適用*しても*、ある値`E<b>`が得られます。
 
-![](../assets/img/vgfp_monad_law2_d.png)
+![](@assets/img/vgfp_monad_law2_d.png)
 
 2番目のモナド則は、これら2つの高次の値（`E<b>`）が同じであるべきだと言っています。言い換えれば、これらの `bind` と `return` の適用はデータを歪めるべきではありません。
 

@@ -3,7 +3,7 @@ layout: post
 title: "そのプログラミング言語は不合理ですか？"
 description: "あるいは、予測可能性の重要性について"
 categories: ["F# vs C#", "正確性"]
-image: "/assets/img/safety_first.jpg"
+image: "@assets/img/safety_first.jpg"
 ---
 
 このサイトの目的は、F#を汎用的な開発言語として、多くの人に使ってもらうことです。
@@ -125,7 +125,7 @@ var y = x - 1;
 
 本当にひどいですよね。言語について誤解させてしまい申し訳ありませんが、言語が予測できない動きをすると、どれほど面倒なことかを示したかっただけです。
 
-JavaScriptはとても便利で重要な言語です。しかし、[合理性](https://stackoverflow.com/questions/1995113/strangest-language-feature/1995298#1995298)がJavaScriptの[強み](../assets/img/javascript-the-good-parts.jpg)の一つだと主張する人はいないでしょう。
+JavaScriptはとても便利で重要な言語です。しかし、[合理性](https://stackoverflow.com/questions/1995113/strangest-language-feature/1995298#1995298)がJavaScriptの[強み](@assets/img/javascript-the-good-parts.jpg)の一つだと主張する人はいないでしょう。
 実際、動的な型付け言語のほとんどは、このように[推論しにくい癖](https://www.destroyallsoftware.com/talks/wat)があります。
 
 静的な型付けと適切なスコープ規則のおかげで、C#ではこのようなことは起こりません（無理やりやろうとしない限り）。
@@ -589,7 +589,7 @@ Haskellなどの他の言語は、F#よりもさらに純粋です（したが�
 
 個人的には、そうしないだけの説得力のある理由がない限り、安全性と品質を優先します。私が好きな標語があります。
 
-![安全性、品質、数量、の順番](../assets/img/safety_first.jpg)
+![安全性、品質、数量、の順番](@assets/img/safety_first.jpg)
 
 ## まとめ
 

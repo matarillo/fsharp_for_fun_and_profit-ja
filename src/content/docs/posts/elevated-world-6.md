@@ -489,7 +489,7 @@ let getPurchaseInfo (custId:CustId) =
 
 図で表すと以下のようになります。
 
-![](../assets/img/vgfp_api_pipe.png)
+![](@assets/img/vgfp_api_pipe.png)
 
 ところが、これには2つの障害があります。
 
@@ -507,23 +507,23 @@ let getPurchaseInfo (custId:CustId) =
 
 典型的なAPI呼び出し関数は以下のようになっています。
 
-![](../assets/img/vgfp_api_action1.png)
+![](@assets/img/vgfp_api_action1.png)
 
 型シグネチャを見ると、2つのパラメータを含む関数だとわかります。
 
-![](../assets/img/vgfp_api_action2.png)
+![](@assets/img/vgfp_api_action2.png)
 
 しかし、この関数を解釈する*もう1つの*方法があります。1つのパラメータを含む関数で、別の関数を返すものとして見ることです。返される関数は`ApiClient`パラメータを含み、
 最終的な出力を返します。
 
-![](../assets/img/vgfp_api_action3.png)
+![](@assets/img/vgfp_api_action3.png)
 
 次のように考えることもできます。今は入力がありますが、実際の`ApiClient`は後で得られるので、
 今すぐに`ApiClient`を必要とせずに、入力を使ってAPIを消費する関数を作成し、それを様々な方法で組み合わせられます。
 
 このAPIを消費する関数に名前を付けましょう。`ApiAction`とします。
 
-![](../assets/img/vgfp_api_action4.png)
+![](@assets/img/vgfp_api_action4.png)
 
 実際、それ以上のことをしてみましょう。型にしてしまうのです！
 
@@ -587,19 +587,19 @@ let getProductInfo (productId:ProductId) =
 
 `getPurchaseIds`をスタック図で表すと、入力は`CustId`で、出力は`ApiAction<Result<List<ProductId>>>`です。
 
-![](../assets/img/vgfp_api_getpurchaseids.png)
+![](@assets/img/vgfp_api_getpurchaseids.png)
 
 そして`getProductInfo`では、入力は`ProductId`で、出力は`ApiAction<Result<ProductInfo>>`です。
 
-![](../assets/img/vgfp_api_getproductinfo.png)
+![](@assets/img/vgfp_api_getproductinfo.png)
 
 私たちが求めている結合関数`getPurchaseInfo`は、以下のようになるはずです。
 
-![](../assets/img/vgfp_api_getpurchaseinfo.png)
+![](@assets/img/vgfp_api_getpurchaseinfo.png)
 
 そして今、2つの関数を合成する際の問題が非常に明確になりました。`getPurchaseIds`の出力は`getProductInfo`の入力として使用できません。
 
-![](../assets/img/vgfp_api_noncompose.png)
+![](@assets/img/vgfp_api_noncompose.png)
 
 しかし、方法はあります。これらの層を操作して一致させれば、簡単に合成できるはずです。
 
@@ -611,7 +611,7 @@ let getProductInfo (productId:ProductId) =
 
 この変更を加えると、2つの関数はより単純になります。
 
-![](../assets/img/vgfp_api_apiactionresult_functions.png)
+![](@assets/img/vgfp_api_apiactionresult_functions.png)
 
 図は十分でしょう。ここからはコードを書いていきます。
 
@@ -720,25 +720,25 @@ module ApiActionResult =
 * `getProductInfo`の*左側*（入力）を操作して、`getPurchaseIds`の出力と一致するようにする必要があります。
 * `getProductInfo`の*右側*（出力）を操作して、理想的な`getPurchaseInfo`の出力と一致するようにする必要があります。
 
-![](../assets/img/vgfp_api_wanted.png)
+![](@assets/img/vgfp_api_wanted.png)
 
 ### Map
 
 念のため、`map`は両側に新しいスタックを追加します。たとえば、このような一般的な世界をまたぐ関数から始めます。
 
-![](../assets/img/vgfp_api_generic.png)
+![](@assets/img/vgfp_api_generic.png)
 
 `List.map`を使用すると、各側に新しい`List`スタックが追加されます。
 
-![](../assets/img/vgfp_api_map_generic.png)
+![](@assets/img/vgfp_api_map_generic.png)
 
 変換前の`getProductInfo`はこのようになっています。
 
-![](../assets/img/vgfp_api_getproductinfo2.png)
+![](@assets/img/vgfp_api_getproductinfo2.png)
 
 そして`List.map`を使用した後はこのようになります。
 
-![](../assets/img/vgfp_api_map_getproductinfo.png)
+![](@assets/img/vgfp_api_map_getproductinfo.png)
 
 これは有望に見えるかもしれません - 入力として`ProductId`の`List`ができました。そして上に`ApiActionResult`を重ねれば、`getPurchaseId`の出力と一致するでしょう。
 
@@ -751,13 +751,13 @@ module ApiActionResult =
 覚えていますか。`bind`は「対角線」状の関数を水平方向の関数に変換します。この変換は、*左側*に新しいスタックを追加することで実現します。
 具体的には、右側の最上位にある高次の世界が、そのまま左側に追加されます。
 
-![](../assets/img/vgfp_api_generic.png)
+![](@assets/img/vgfp_api_generic.png)
 
-![](../assets/img/vgfp_api_bind_generic.png)
+![](@assets/img/vgfp_api_bind_generic.png)
 
 そして、`ApiActionResult.bind`を使用した後の`getProductInfo`はこのようになります。
 
-![](../assets/img/vgfp_api_bind_getproductinfo.png)
+![](@assets/img/vgfp_api_bind_getproductinfo.png)
 
 これは我々には役に立ちません。入力として`ProductId`の`List`が必要です。
 
@@ -768,13 +768,13 @@ module ApiActionResult =
 `traverse`は値の対角線関数をリストで包まれた値の対角線関数に変換します。具体的には、`List`が左側の一番上のスタックとして追加されます。
 同時に、右側では上から2番目のスタックとして追加されます。
 
-![](../assets/img/vgfp_api_generic.png)
+![](@assets/img/vgfp_api_generic.png)
 
-![](../assets/img/vgfp_api_traverse_generic.png)
+![](@assets/img/vgfp_api_traverse_generic.png)
 
 `getProductInfo`にこれを適用すると、非常に有望な結果が得られます。 
 
-![](../assets/img/vgfp_api_traverse_getproductinfo.png)
+![](@assets/img/vgfp_api_traverse_getproductinfo.png)
 
 入力は必要なリストになっています。そして出力は完璧です。`ApiAction<Result<List<ProductInfo>>>`が欲しかったのですが、今それができました。
 
@@ -782,7 +782,7 @@ module ApiActionResult =
 
 これも先ほど見ました。それは`bind`です。これも適用すれば完成です。
 
-![](../assets/img/vgfp_api_complete_getproductinfo.png)
+![](@assets/img/vgfp_api_complete_getproductinfo.png)
 
 コードで表現すると、次のようになります。
 

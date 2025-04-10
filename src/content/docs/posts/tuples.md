@@ -15,7 +15,7 @@ categories: ["型"]
 
 次に、この「int」の集合を2組用意したと想像してください。これらの直積（デカルト積）を取ることで「掛け算」できます。つまり、2つの「int」リストのあらゆる組み合わせを選んで、新しいオブジェクトのリストを作るのです。以下の図のようになります。
 
-![int*int タプル](../assets/img/tuple_int_int.png)
+![int*int タプル](@assets/img/tuple_int_int.png)
 
 ご覧の通り、F# ではこのようなペアをタプルと呼びます。そして、タプルの型シグネチャがこのような形をしているのも、納得できるかと思います。この例では、「intとintの積」の型は「`int * int`」となります。アスタリスク記号は当然「掛け算」を表しています。この新しい型の有効なインスタンスは、(-2,2)、(-1,0)、(2,2) などのすべてのペアです。
 
@@ -35,7 +35,7 @@ val t2 : int * int = (-2, 7)
 
 この「積」のアプローチは、任意の型の組み合わせでタプルを作るのに使えます。「intとboolの積」の例を見てみましょう。
 
-![int*bool タプル](../assets/img/tuple_int_bool.png)
+![int*bool タプル](@assets/img/tuple_int_bool.png)
 
 F# での使い方はこうです。上のタプル型は `int*bool` というシグネチャを持ちます。
 
@@ -50,7 +50,7 @@ val t4 : int * bool = (7, false)
 
 もちろん、文字列も使えます。ありとあらゆる文字列の集合は非常に大きいですが、概念的には同じことです。以下のタプル型は「`string*int`」というシグネチャを持ちます。
 
-![string*int タプル](../assets/img/tuple_str_int.png)
+![string*int タプル](@assets/img/tuple_str_int.png)
 
 使い勝手とシグネチャを確認してみましょう。
 
@@ -65,7 +65,7 @@ val t6 : string * int = ("goodbye", 99)
 
 そして、2つの型を掛け合わせるだけに留める理由はありません。3つでも4つでも構いません。たとえば、`int * bool * string` という型もできます。
 
-![int*bool*string タプル](../assets/img/tuple_int_bool_str.png)
+![int*bool*string タプル](@assets/img/tuple_int_bool_str.png)
 
 使い勝手とシグネチャを確認してみましょう。
 
@@ -80,7 +80,7 @@ val t7 : int * bool * string = (42, true, "hello")
 
 タプルでもジェネリック型を使えます。
 
-!['a*'b タプル](../assets/img/tuple_a_b.png)
+!['a*'b タプル](@assets/img/tuple_a_b.png)
 
 ジェネリックタプルの使い方は通常、関数と関連しています。
 

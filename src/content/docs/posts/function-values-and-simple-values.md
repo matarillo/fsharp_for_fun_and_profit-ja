@@ -61,7 +61,7 @@ val 関数名 : 定義域 -> 値域
 
 次に、常に整数5を返し、入力を持たない操作を想像してみてください。
 
-![](../assets/img/Functions_Const.png)
+![](@assets/img/Functions_Const.png)
  
 これは「定数」操作と呼べるでしょう。
 

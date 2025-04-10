@@ -350,7 +350,7 @@ listbuilder {
 
 微妙だが重要な点は、最後の値から始まり「後ろ向き」に組み合わされることです。まず"3"と"4"が組み合わされ、その結果が"2"と組み合わされ、というように進みます。
 
-![Combine](../assets/img/combine.png)
+![Combine](@assets/img/combine.png)
 
 ## シーケンス以外のCombine
 

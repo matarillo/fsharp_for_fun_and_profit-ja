@@ -3,7 +3,7 @@ layout: post
 title: "フランケンファンクター博士とモナド怪物"
 description: "または、19世紀の科学者がStateモナドをほぼ発明した話"
 categories: ["部分適用", "カリー化", "コンビネーター"]
-image: "/assets/img/monadster_horror.jpg"
+image: "@assets/img/monadster_horror.jpg"
 seriesId: "状態の取り扱い"
 seriesOrder: 1
 ---
@@ -20,7 +20,7 @@ seriesOrder: 1
 しかし、その後、私たち全員が知っているように、怪物は逃亡し、
 自由になったモナド怪物はコンピュータサイエンスの会議を荒らし回り、ベテランのプログラマーたちでさえ恐怖に陥れました。
 
-![恐怖、恐怖](../assets/img/monadster_horror.jpg)
+![恐怖、恐怖](@assets/img/monadster_horror.jpg)
 
 *キャプション：1990年のACM LISPと関数型プログラミングに関する会議での恐ろしい出来事。*
 
@@ -52,7 +52,7 @@ seriesOrder: 1
 
 ここに原理を示す図があります。
 
-![原理](../assets/img/monadster1.png)
+![原理](@assets/img/monadster1.png)
 
 しかし、これでは体のパーツを*一つ*作るだけです。どうすれば複数のパーツを作れるでしょうか？これがフランケンファンクター博士が直面した課題でした。
 
@@ -61,12 +61,12 @@ seriesOrder: 1
 
 どうすれば2つのステップをつなげて、最初のステップの生命力を2つ目のステップの入力に供給できるでしょうか？
 
-![ステップの接続](../assets/img/monadster_connect.png)
+![ステップの接続](@assets/img/monadster_connect.png)
 
 ステップを正しくつなげたとしても、生き返った様々なパーツを何らかの方法で組み合わせる必要があります。しかし、生き返ったパーツにアクセスできるのは創造の瞬間だけです。
 どうすればその一瞬のうちにそれらを組み合わせられるでしょうか？
 
-![各ステップの出力の組み合わせ](../assets/img/monadster_combine.png)
+![各ステップの出力の組み合わせ](@assets/img/monadster_combine.png)
 
 フランケンファンクター博士の天才的な発想により、これらの問題を解決する優雅なアプローチが生まれました。これから私がご紹介するそのアプローチです。
 
@@ -134,13 +134,13 @@ let makeLiveLeftLeg (deadLeftLeg,vitalForce) =
 
 ご覧のとおり、この実装は先ほどの図と完全に一致します。
 
-![バージョン1](../assets/img/monadster1.png)
+![バージョン1](@assets/img/monadster1.png)
 
 この時点で、フランケンファンクター博士は2つの重要な洞察を得ました。
 
 最初の洞察は、[カリー化](../posts/currying.md)のおかげで、関数をタプルを受け取る関数から、各パラメータを順番に渡す2つのパラメータを持つ関数に変換できることでした。
 
-![バージョン2](../assets/img/monadster2.png)
+![バージョン2](@assets/img/monadster2.png)
 
 コードは次のようになりました。
 
@@ -162,7 +162,7 @@ let makeLiveLeftLeg deadLeftLeg vitalForce =
 
 言い換えると、死んだパーツを渡すと、生命力が与えられたときに生きたパーツを作る関数が返ってくるのです。
 
-![バージョン3](../assets/img/monadster3.png)
+![バージョン3](@assets/img/monadster3.png)
 
 これらの「生き返す」関数は、組み合わせる方法さえ見つかれば、「レシピの手順」として扱うことができます。
 
@@ -279,7 +279,7 @@ val makeLiveLeftLegM : DeadLeftLeg -> M<LiveLeftLeg>
 ここで`makeLiveLeftLegM`のような関数が非常に重要になります。これらはパラメータを受け取り、結果に「焼き込む」（つまり、パラメータの値を結果の一部として組み込む）のです。
 結果として、似たようなシグネチャを持つ多くの「M作成」関数が見られるでしょう。すべて次のような感じです。
 
-![](../assets/img/monadster5.png)
+![](@assets/img/monadster5.png)
 
 コードで表すと次のようになります。
 
@@ -387,17 +387,17 @@ type HealBrokenArm = LiveLeftBrokenArm -> LiveLeftArm
 
 まず、`DeadLeftUnbrokenArm`から`LiveLeftArm`を作ることは除外しなければなりません。そのようなものは存在しないからです。また、`DeadLeftBrokenArm`を直接健康な`LiveLeftArm`に変換することもできません。
 
-![死から死への変換](../assets/img/monadster_map1.png)
+![死から死への変換](@assets/img/monadster_map1.png)
 
 しかし、`DeadLeftBrokenArm`を*生きている*折れた腕に変え、そして生きている折れた腕を治すことはできるのではないでしょうか。
 
-![生きている折れた腕を直接作ることはできない](../assets/img/monadster_map2.png)
+![生きている折れた腕を直接作ることはできない](@assets/img/monadster_map2.png)
 
 いいえ、残念ながらそれはうまくいきません。生きたパーツを直接作ることはできず、`M`レシピのコンテキスト内でのみ生きたパーツを作ることができます。
 
 必要なのは、`healBrokenArm`の特別なバージョン（`healBrokenArmM`と呼びましょう）を作ることです。これは`M<LiveBrokenArm>`を`M<LiveArm>`に変換します。
 
-![生きている折れた腕を直接作ることはできない](../assets/img/monadster_map3.png)
+![生きている折れた腕を直接作ることはできない](@assets/img/monadster_map3.png)
 
 しかし、そのような関数をどのように作ればよいでしょうか？そして、その中で`healBrokenArm`をどのように再利用できるでしょうか？
 
@@ -494,13 +494,13 @@ let mapM f bodyPartM =
 let healBrokenArmM = mapM healBrokenArm
 ```
 
-![healを使ったmapM](../assets/img/monadster_map4.png)
+![healを使ったmapM](@assets/img/monadster_map4.png)
 
 ### mapMの重要性
 
 `mapM`を考える一つの方法は、「関数変換器」だと捉えることです。任意の「通常の」関数を受け取り、入力と出力が`M`である関数に変換します。
 
-![mapM](../assets/img/monadster_mapm.png)
+![mapM](@assets/img/monadster_mapm.png)
 
 `mapM`に似た関数は多くの状況で登場します。たとえば、`Option.map`は「通常の」関数を入力と出力がオプションである関数に変換します。
 同様に、`List.map`は、「通常の」関数を、入力と出力がリストである関数に変換します。他にも多くの例があります。
@@ -624,7 +624,7 @@ let armSurgery lowerArm upperArm =
 
 言い換えると、通常の生きているパーツで動作する`armSurgery`関数を、`M`で動作する`armSurgeryM`関数に変換する必要があります。
 
-![armsurgeryM](../assets/img/monadster_armsurgeryM.png)
+![armsurgeryM](@assets/img/monadster_armsurgeryM.png)
 
 以前と同じアプローチを使えます。
 
@@ -698,7 +698,7 @@ f:('a -> 'b -> 'c) -> M<'a> -> M<'b> -> M<'c>
 
 `mapM`と同様に、この関数を「関数変換器」として解釈できます。これは「通常の」2パラメータ関数を`M`の世界の関数に変換します。
 
-![map2M](../assets/img/monadster_map2m.png)
+![map2M](@assets/img/monadster_map2m.png)
 
 
 ### 右腕のテスト
