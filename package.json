@@ -1,15 +1,17 @@
 {
-  "name": "fsharpforfunandprofit.gitbook",
-  "version": "1.0.0",
-  "description": "This is eBook version of my site [fsharpforfunandprofit.com](http://fsharpforfunandprofit.com), created by popular request for people who want to read it offline on their kindle or phone. Special thanks to Roman Provaznik for the final nag.",
-  "main": "index.js",
+  "name": "fsharp-for-fun-and-profit-jp",
+  "type": "module",
+  "version": "0.0.1",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "honkit": "^5.1.4"
+  "dependencies": {
+    "@astrojs/starlight": "^0.33.0",
+    "astro": "^5.5.3",
+    "sharp": "^0.32.5"
   }
 }
