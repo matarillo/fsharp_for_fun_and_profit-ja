@@ -10,7 +10,9 @@ image: "@assets/img/four-concepts2.png"
 F#は科学や数値解析といった専門分野で優れていますが、企業向けの開発にも最適な選択肢です。
 次回のプロジェクトではF#を使うべきだと思える理由を5つ紹介します。
 
-## ![](@assets/img/glyphicons/glyphicons_030_pencil.png) 簡潔性
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+## <i class="fa-solid fa-pencil"></i> 簡潔性
 
 F#には波かっこやセミコロンなどの、[コーディング上の「ノイズ」](posts/fvsc-sum-of-squares.html)がありません。
 
@@ -39,7 +41,7 @@ let jdoe = {First="John";Last="Doe"}
 let worker = Worker jdoe
 ```
 
-## ![](@assets/img/glyphicons/glyphicons_343_thumbs_up.png) 利便性
+## <i class="fa-solid fa-thumbs-up"></i> 利便性
 
 
 F#では多くの一般的なプログラミング作業がより簡単です。
@@ -63,7 +65,7 @@ let add2times3 = (+) 2 >> (*) 3
 let result = add2times3 5
 ```
 
-## ![](@assets/img/glyphicons/glyphicons_150_check.png) 正確性
+## <i class="fa-solid fa-square-check"></i> 正確性
 
 
 F#には[強力な型システム](posts/correctness-type-checking.html)があり、[null参照例外](posts/the-option-type.html#option-is-not-null)などの一般的なエラーを防ぎます。
@@ -95,7 +97,7 @@ emptyShoppingCart.remove   // コンパイルエラー!
 let distance = 10<m> + 10<ft> // エラー!
 ```
 
-## ![](@assets/img/glyphicons/glyphicons_054_clock.png) 並行性
+## <i class="fa-solid fa-clock"></i> 並行性
 
 
 F#には、複数の処理を同時に行う際に役立つ組み込みライブラリがいくつかあります。
@@ -120,7 +122,7 @@ MailboxProcessor.Start(fun inbox-> async{
 	})
 ```
 
-## ![](@assets/img/glyphicons/glyphicons_280_settings.png) 完全性
+## <i class="fa-solid fa-screwdriver-wrench"></i> 完全性
 
 F#は基本的に関数型言語ですが、100% 純粋ではない他のスタイルもサポートしています。
 これにより、Webサイト、データベース、他のアプリケーションなど、純粋でない世界とのやり取りがずっと簡単になります。
