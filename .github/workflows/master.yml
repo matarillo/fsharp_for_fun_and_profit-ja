@@ -33,7 +33,7 @@ jobs:
       - run: npm ci
 
       - name: Build with Astro
-        run: npm build
+        run: npm run build
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
