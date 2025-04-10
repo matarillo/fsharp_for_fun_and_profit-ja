@@ -7,7 +7,7 @@ seriesId: "C# からの移植"
 seriesOrder: 1
 ---
 
-*注意：このシリーズを読む前に、前提知識として以下のシリーズを読むことをお勧めします：「[関数型思考](../series/thinking-functionally.md)」 、 「[式と構文](../series/expressions-and-syntax.md)」 、 「[F#の型を理解する](../series/understanding-fsharp-types.md)」。*
+*注意：このシリーズを読む前に、前提知識として以下のシリーズを読むことをお勧めします：「[関数型思考](../series/thinking-functionally.html)」 、 「[式と構文](../series/expressions-and-syntax.html)」 、 「[F#の型を理解する](../series/understanding-fsharp-types.html)」。*
 
 多くの開発者にとって、新しい言語を学んだ後の次のステップは、既存のコードをその言語に移植することかもしれません。これにより、両言語の違いを実感できます。
 
@@ -19,7 +19,7 @@ seriesOrder: 1
 
 ## 移植の洗練度レベル
 
-[以前の投稿](../posts/key-concepts.md)の図を思い出してください。F#をC#と区別する4つの主要な概念があります。
+[以前の投稿](../posts/key-concepts.html)の図を思い出してください。F#をC#と区別する4つの主要な概念があります。
 
 * オブジェクト指向ではなく関数指向
 * 文ではなく式
@@ -56,8 +56,8 @@ seriesOrder: 1
 
 この最終レベルでは、コードが関数型であるだけでなく、設計自体が代数的型（特に判別共用体）の力を活用するように変更されています。
 
-ドメインは[型にエンコードされ](../posts/designing-with-types-single-case-dus.md)、[不正な状態が表現できないようになっており](../posts/designing-with-types-making-illegal-states-unrepresentable.md)、[正しさがコンパイル時に強制されます](../posts/correctness-type-checking.md)。
-このアプローチの威力を具体的に示すには、[「F#を使う理由」シリーズ](../series/why-use-fsharp.md)の[ショッピングカートの例](../posts/designing-for-correctness.md)と[「型を使って設計する」シリーズ](../series/designing-with-types.md)全体を参照してください。
+ドメインは[型にエンコードされ](../posts/designing-with-types-single-case-dus.html)、[不正な状態が表現できないようになっており](../posts/designing-with-types-making-illegal-states-unrepresentable.html)、[正しさがコンパイル時に強制されます](../posts/correctness-type-checking.html)。
+このアプローチの威力を具体的に示すには、[「F#を使う理由」シリーズ](../series/why-use-fsharp.html)の[ショッピングカートの例](../posts/designing-for-correctness.html)と[「型を使って設計する」シリーズ](../series/designing-with-types.html)全体を参照してください。
 
 このレベルはF#でのみ実現可能で、C#では実用的ではありません。
 
@@ -72,7 +72,7 @@ seriesOrder: 1
 これら3つのレベルが実際にどのように機能するかを見るため、いくつかの実例に適用します：
 
 * 最初の例は、"Uncle" Bob Martinが説明した有名な「ボウリングゲームカタ」のコードに基づいた、10ピンボウリングゲームの作成と得点計算のシンプルなシステムです。元のC#コードはクラスが1つだけで約70行のコードですが、それでも多くの重要な原則を示しています。
-* 次に、[この例](../posts/designing-for-correctness.md)に基づいたショッピングカートのコードを見ていきます。
+* 次に、[この例](../posts/designing-for-correctness.html)に基づいたショッピングカートのコードを見ていきます。
 * 最後の例は、Bob Martinの例に基づいた地下鉄の改札システムの状態を表すコードです。この例は、F#の判別共用体がオブジェクト指向アプローチよりも簡単に状態遷移モデルを表現できることを示しています。
 
 しかし、詳細な例に取り掛かる前に、基本に立ち返ってコードスニペットの簡単な移植を行います。それが次の投稿のテーマになります。

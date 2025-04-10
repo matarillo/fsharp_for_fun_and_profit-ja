@@ -7,7 +7,7 @@ seriesId: "F#の型を理解する"
 seriesOrder: 11
 ---
 
-以前の「[F#を使う理由](../posts/correctness-type-checking.md#units-of-measure)」シリーズで触れたように、F#には数値型にメタデータとして測定単位情報を加えられる、とても便利な機能があります。
+以前の「[F#を使う理由](../posts/correctness-type-checking.html#units-of-measure)」シリーズで触れたように、F#には数値型にメタデータとして測定単位情報を加えられる、とても便利な機能があります。
 
 F#コンパイラは、同じ測定単位を持つ数値だけを組み合わせられるようにします。これにより、誤った組み合わせを防ぎ、コードの安全性を高めます。
 
@@ -70,7 +70,7 @@ force1 = force2 // true
 物理学やその他の科学系アプリケーションで測定単位を使うなら、SI単位と関連する定数を利用したいでしょう。これらをすべて自分で定義する必要はありません。以下のように、あらかじめ定義されています。
 
 * F# 4.1以降（Visual Studio 2017に同梱）では、これらはコアF#ライブラリの `FSharp.Data.UnitSystems.SI` 名前空間に組み込まれています（F# Core Library Documentationの[UnitNames](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-data-unitsystems-si-unitnames.html)と[UnitSymbols](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-data-unitsystems-si-unitsymbols.html)を参照）。
-* F# 3.0（Visual Studio 2012に同梱）では、これらはコアF#ライブラリの `Microsoft.FSharp.Data.UnitSystems.SI` 名前空間に組み込まれています（GitHubの[MicrosoftDocs/visualfsharpdocs アーカイブ](https://github.com/MicrosoftDocs/visualfsharpdocs/blob/main/docs/conceptual/microsoft.fsharp.data.unitsystems.si-namespace-%5Bfsharp%5D.md)を参照）。
+* F# 3.0（Visual Studio 2012に同梱）では、これらはコアF#ライブラリの `Microsoft.FSharp.Data.UnitSystems.SI` 名前空間に組み込まれています（GitHubの[MicrosoftDocs/visualfsharpdocs アーカイブ](https://github.com/MicrosoftDocs/visualfsharpdocs/blob/main/docs/conceptual/microsoft.fsharp.data.unitsystems.si-namespace-%5Bfsharp%5D.html)を参照）。
 * F# 2.0（Visual Studio 2010に同梱）では、F# powerpackをインストールして入手する必要があります（F# powerpackは https://github.com/fsprojects-archive/zzarchive-powerpack にアーカイブされています）。
 
 

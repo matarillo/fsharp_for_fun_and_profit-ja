@@ -1299,7 +1299,7 @@ let ``左単位元`` x =
 
 *この記事で使用されているコードサンプルは、[GitHubで入手できます](https://github.com/swlaschin/PropertyBasedTesting/blob/master/part1.fsx)。*
 
-**もっと知りたいですか？ [プロパティベースのテストのプロパティを選択する方法に関するフォローアップ記事](../posts/property-based-testing-2.md)を書きました**
+**もっと知りたいですか？ [プロパティベースのテストのプロパティを選択する方法に関するフォローアップ記事](../posts/property-based-testing-2.html)を書きました**
 
 *更新：これらの記事に基づいて、プロパティベースのテストに関する講演を行いました。[スライドとビデオはこちら](https://fsharpforfunandprofit.com/pbt/)。*
 

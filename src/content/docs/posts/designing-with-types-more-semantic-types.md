@@ -8,7 +8,7 @@ seriesOrder: 6
 categories: ["型", "DDD"]
 ---
 
-[前回の投稿](../posts/designing-with-types-single-case-dus.md)では、メールアドレスや郵便番号、州名などに単純な文字列型を使わないようにする話をしました。
+[前回の投稿](../posts/designing-with-types-single-case-dus.html)では、メールアドレスや郵便番号、州名などに単純な文字列型を使わないようにする話をしました。
 単一ケースの共用体でラップすることで、(a)型をはっきり区別し、(b)検証ルールを加えられるようになりました。
 
 今回は、この考え方をもっと細かいレベルまで広げられないか考えてみます。
@@ -79,7 +79,7 @@ void SaveToDatabase(PersonalName personalName)
 
 答えは、もちろん、制約を組み込んだラッパー型を作ることです。
 
-[前回](../posts/designing-with-types-single-case-dus.md)使った単一ケース共用体の手法を使って、簡単なプロトタイプを作ってみましょう。
+[前回](../posts/designing-with-types-single-case-dus.html)使った単一ケース共用体の手法を使って、簡単なプロトタイプを作ってみましょう。
 
 ```fsharp
 module String100 = 

@@ -27,14 +27,14 @@ F# や関数型プログラミング全般についてよく聞く意見の一�
 
 私のソフトウェア開発へのアプローチは折衷的で実用的です。さまざまなテクニックを組み合わせ、トップダウンとボトムアップのアプローチを交互に行うのが好きです。
 
-普段は、要件定義から始めます。[要件駆動設計](../posts/roman-numeral-kata.md)のファンなのです！
+普段は、要件定義から始めます。[要件駆動設計](../posts/roman-numeral-kata.html)のファンなのです！
 理想的には、そのドメインの専門家になることも目指します。
 
 次に、ドメインモデリングに取り組みます。
 静的なデータ（ DDD用語でいう「集約」 ）だけでなく、ドメインイベントに焦点を当てながら（ [イベントストーミング](https://ziobrando.blogspot.com/2013/11/introducing-event-storming.html) ）、[ドメイン駆動設計](https://fsharpforfunandprofit.com/ddd/)を行います。
 
 モデリングプロセスの一環として、[型ファースト開発](https://tomasp.net/blog/type-first-development.aspx/)を用いて設計のスケッチを作成し、
-ドメインのデータ型（「名詞」）とドメインのアクティビティ（「動詞」）の両方を表す[型を作成](../series/designing-with-types.md)します。
+ドメインのデータ型（「名詞」）とドメインのアクティビティ（「動詞」）の両方を表す[型を作成](../series/designing-with-types.html)します。
 
 ドメインモデルの最初のドラフトを作成したら、通常は「ボトムアップ」アプローチに切り替え、これまでに定義したモデルを実行する小さなプロトタイプをコーディングします。
 
@@ -113,7 +113,7 @@ type Calculate = CalculatorInput * CalculatorState -> CalculatorState
 `CalculatorInput` はキーストロークなどを意味し、 `CalculatorState` は状態です。
 
 この関数を、2つの別々のパラメーター（ `CalculatorInput -> CalculatorState -> CalculatorState` のような形式）ではなく、
-[タプル](../posts/tuples.md) （ `CalculatorInput * CalculatorState` ）を入力として使用して定義していることに注意してください。
+[タプル](../posts/tuples.html) （ `CalculatorInput * CalculatorState` ）を入力として使用して定義していることに注意してください。
 両方のパラメーターが常に必要であり、タプルによってそれが明確になるため、このようにしました。たとえば、入力の一部だけを適用することは望ましくありません。
 
 実際、型ファースト設計を行う際には、すべての関数に対してこれを行います。すべての関数は1つの入力と1つの出力を持っています。
@@ -165,7 +165,7 @@ type CalculatorDisplay = string
 そのため、新しい宣言を下に追加し、`and` を使って繋いでいきます。
 
 しかし、最終的な製品コードでは、設計が安定したら、`and` を使用しないように、これらの型の順序を変更します。
-その理由は、`and` が[型の循環依存を隠して](../posts/cyclic-dependencies.md)リファクタリングを妨げる可能性があるからです。
+その理由は、`and` が[型の循環依存を隠して](../posts/cyclic-dependencies.html)リファクタリングを妨げる可能性があるからです。
 
 ## 電卓への入力型を定義する
 

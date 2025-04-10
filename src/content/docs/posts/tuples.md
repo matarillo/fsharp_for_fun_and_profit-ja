@@ -126,7 +126,7 @@ type PairOfIntFunctions = (int->int) * (int->int)
 
 これらのポイントは非常に重要です。理解していないと、すぐに混乱してしまうでしょう。
 
-そして、[以前の投稿](../posts/defining-functions.md)でも触れたことですが、*関数の複数のパラメータをタプルと間違えないでください*。
+そして、[以前の投稿](../posts/defining-functions.html)でも触れたことですが、*関数の複数のパラメータをタプルと間違えないでください*。
 
 ```fsharp
 // 単一のタプルパラメータを取る関数ですが、
@@ -273,7 +273,7 @@ addOneToTuple (1,2,3)
 
 ### タプルの表現
 
-[以前の投稿](../posts/convenience-types.md)で述べたように、タプルには便利なデフォルトの文字列表現があり、簡単にシリアライズできます。
+[以前の投稿](../posts/convenience-types.html)で述べたように、タプルには便利なデフォルトの文字列表現があり、簡単にシリアライズできます。
 
 ```fsharp
 (1,2,3).ToString()

@@ -845,7 +845,7 @@ let reduceOptions =
 
 `choose`と同じ方法で最初の要素を返したい場合は、`pick`の使用を検討してください（[セクション11](#11)参照）。
 
-`choose`と同様の操作を他のラッパー型（成功/失敗の結果など）で行いたい場合は、[ここで議論されています](../posts/elevated-world-5.md)。
+`choose`と同様の操作を他のラッパー型（成功/失敗の結果など）で行いたい場合は、[ここで議論されています](../posts/elevated-world-5.html)。
   
 <a id="13"></a>
 <hr>
@@ -1196,7 +1196,7 @@ let tupleComparer tuple1 tuple2  =
 ## 17. 各要素を別のものに変換する
 
 私は時々、関数型プログラミングを「変換指向プログラミング」と考えるのが好きです。`map`（LINQでは`Select`）は、このアプローチの最も基本的な要素の1つです。
-実際、私はこのテーマについて[ここ](./elevated-world.md)で連載を書いています。
+実際、私はこのテーマについて[ここ](./elevated-world.html)で連載を書いています。
 
 * [`map: mapping:('T -> 'U) -> list:'T list -> 'U list`](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-listmodule.html#map)
   与えられた関数をコレクションの各要素に適用した結果を要素とする新しいコレクションを作成します。
@@ -2029,7 +2029,7 @@ addFourParams <!> [1;2;3] <*> [1;2;3] <*> [1;2;3] <*> [1;2;3]
 // 結果 = [4; 8; 12]
 ```
 
-これが魔法のように見える場合は、[このシリーズ](../posts/elevated-world.md#lift)でこのコードが何をしているかの説明を参照してください。
+これが魔法のように見える場合は、[このシリーズ](../posts/elevated-world.html#lift)でこのコードが何をしているかの説明を参照してください。
 
 
 <a id="26"></a>

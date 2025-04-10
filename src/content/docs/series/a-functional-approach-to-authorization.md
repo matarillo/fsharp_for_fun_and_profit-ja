@@ -13,6 +13,6 @@ seriesIndexId: "関数型アプローチによる認可"
 
 
 
-* [関数型アプローチによる認可](../posts/capability-based-security.md)。ケイパビリティベースのセキュリティとその他。
-* [IDとロールによるケイパビリティの制約](../posts/capability-based-security-2.md)。関数型アプローチによる認可 パート2。
-* [型をアクセストークンとして使う](../posts/capability-based-security-3.md)。関数型アプローチによる認可 パート3。
+* [関数型アプローチによる認可](../posts/capability-based-security.html)。ケイパビリティベースのセキュリティとその他。
+* [IDとロールによるケイパビリティの制約](../posts/capability-based-security-2.html)。関数型アプローチによる認可 パート2。
+* [型をアクセストークンとして使う](../posts/capability-based-security-3.html)。関数型アプローチによる認可 パート3。

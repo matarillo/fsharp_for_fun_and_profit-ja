@@ -14,11 +14,11 @@ seriesIndexId: "型を使って設計する"
 
 
 
-* [型を使って設計する：はじめに](../posts/designing-with-types-intro.md)。設計を分かりやすくし、正確性を高める。
-* [型を使って設計する：単一ケース共用体型](../posts/designing-with-types-single-case-dus.md)。プリミティブ型に意味を持たせる。
-* [型を使って設計する：不正な状態を表現できないようにする](../posts/designing-with-types-making-illegal-states-unrepresentable.md)。ビジネスロジックを型で表現する。
-* [型を使って設計する：新しい概念を見つける](../posts/designing-with-types-discovering-the-domain.md)。ドメインをより深く理解する。
-* [型を使って設計する：状態を明確にする](../posts/designing-with-types-representing-states.md)。ステートマシンを使って正確性を確保する。
-* [型を使って設計する：制約付き文字列](../posts/designing-with-types-more-semantic-types.md)。プリミティブ型にさらに意味情報を持たせる。
-* [型を使って設計する：文字列以外の型](../posts/designing-with-types-non-strings.md)。整数や日付を安全に扱う。
-* [型を使って設計する：まとめ](../posts/designing-with-types-conclusion.md)。変更前と変更後を比較する。
+* [型を使って設計する：はじめに](../posts/designing-with-types-intro.html)。設計を分かりやすくし、正確性を高める。
+* [型を使って設計する：単一ケース共用体型](../posts/designing-with-types-single-case-dus.html)。プリミティブ型に意味を持たせる。
+* [型を使って設計する：不正な状態を表現できないようにする](../posts/designing-with-types-making-illegal-states-unrepresentable.html)。ビジネスロジックを型で表現する。
+* [型を使って設計する：新しい概念を見つける](../posts/designing-with-types-discovering-the-domain.html)。ドメインをより深く理解する。
+* [型を使って設計する：状態を明確にする](../posts/designing-with-types-representing-states.html)。ステートマシンを使って正確性を確保する。
+* [型を使って設計する：制約付き文字列](../posts/designing-with-types-more-semantic-types.html)。プリミティブ型にさらに意味情報を持たせる。
+* [型を使って設計する：文字列以外の型](../posts/designing-with-types-non-strings.html)。整数や日付を安全に扱う。
+* [型を使って設計する：まとめ](../posts/designing-with-types-conclusion.html)。変更前と変更後を比較する。

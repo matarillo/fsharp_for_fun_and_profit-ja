@@ -12,7 +12,7 @@ seriesOrder: 2
 
 ![電卓の画像](@assets/img/calculator_1.png)
 
-[前回の記事](../posts/calculator-design.md)では、UML図を使わずに型だけを使って設計の最初のドラフトを作成しました。
+[前回の記事](../posts/calculator-design.html)では、UML図を使わずに型だけを使って設計の最初のドラフトを作成しました。
 
 今回は、その設計を使って仮実装を行い、検証していきます。
 
@@ -216,7 +216,7 @@ let updateDisplayFromPendingOp services state =
 ## `bind` の活用
 
 ポイントは、「もし何かが存在すれば、その値に対して処理を行う」というパターンが、
-まさに[こちら](../posts/computation-expressions-continuations.md)と[こちら](https://fsharpforfunandprofit.com/rop/)で説明されている `bind` パターンと同じであると認識することです。
+まさに[こちら](../posts/computation-expressions-continuations.html)と[こちら](https://fsharpforfunandprofit.com/rop/)で説明されている `bind` パターンと同じであると認識することです。
 
 `bind` パターンを効果的に使用するには、コードを小さなチャンクに分割するのが良いでしょう。
 
@@ -436,7 +436,7 @@ let updateDisplayFromPendingOp services state =
 
 これまで、`bind` を直接使ってきました。これで `if/else` の入れ子をなくすことができました。
 
-F# では、[コンピュテーション式](../posts/computation-expressions-intro.md)を使うことで、複雑な処理を別の方法で隠すことができます。
+F# では、[コンピュテーション式](../posts/computation-expressions-intro.html)を使うことで、複雑な処理を別の方法で隠すことができます。
 
 今回はオプション型を使うので、オプション型をきれいに処理できる "maybe" コンピュテーション式を作れます。
 (他の型を使う場合は、型ごとに別のコンピュテーション式が必要です)
@@ -646,6 +646,6 @@ let createCalculate (services:CalculatorServices) :Calculate =
 
 実装を作成することで、設計が合理的であることを証明しました。さらに、見落としていた要件も見つかりました。
 
-[次の投稿](../posts/calculator-complete-v1.md)では、サービスとユーザーインターフェースを実装して、完全なアプリケーションを作成します。
+[次の投稿](../posts/calculator-complete-v1.html)では、サービスとユーザーインターフェースを実装して、完全なアプリケーションを作成します。
 
 *この投稿のコードは、GitHub のこの[gist](https://gist.github.com/swlaschin/0e954cbdc383d1f5d9d3#file-calculator_implementation-fsx) で入手できます。*

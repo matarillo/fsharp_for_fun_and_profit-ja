@@ -5,7 +5,7 @@ description: "FizzBuzzを実装する3つの方法"
 categories: []
 ---
 
-[鉄道指向プログラミング](../posts/recipe-part2.md)の記事に続いて、同じ手法を[FizzBuzz](http://web.archive.org/web/20110818113955/http://imranontech.com/2007/01/24/using-fizzbuzz-to-find-developers-who-grok-coding/)問題に適用し、
+[鉄道指向プログラミング](../posts/recipe-part2.html)の記事に続いて、同じ手法を[FizzBuzz](http://web.archive.org/web/20110818113955/http://imranontech.com/2007/01/24/using-fizzbuzz-to-find-developers-who-grok-coding/)問題に適用し、
 他の実装と比較してみようと思います。
 
 この記事の大部分は、[Dave FayramのFizzBuzzに関する投稿](http://web.archive.org/web/20160307132000/http://dave.fayr.am/posts/2012-10-4-finding-fizzbuzz.html)から直接<s>盗んだ</s>インスピレーションを得たもので、
@@ -425,7 +425,7 @@ module FizzBuzz_Pipeline_WithRules =
 ## FizzBuzz：鉄道指向バージョン
 
 パイプラインバージョンはFizzBuzzの十分に適切な関数型実装ですが、
-念のため、[鉄道指向プログラミング](../posts/recipe-part2.md)の記事で説明した「二軌道」設計を使用できるかどうか見てみましょう。
+念のため、[鉄道指向プログラミング](../posts/recipe-part2.html)の記事で説明した「二軌道」設計を使用できるかどうか見てみましょう。
 
 簡単に思い出すと、「鉄道指向プログラミング」（別名「Either」モナド）では、2つのケースを持つ共用体型を定義します。「成功」と「失敗」で、それぞれ異なる「軌道」を表します。
 そして、これらの「二軌道」関数を一連のつなぎ合わせて鉄道を作ります。
@@ -690,7 +690,7 @@ module FizzBuzz_RailwayOriented_UsingCustomChoice =
 実は、一石二鳥でこれらの問題を同時に解決できます。
 
 すべての「スイッチ」関数を*直列*に結合する代わりに、*並列*に「加算」することができます。
-[鉄道指向プログラミング](../posts/recipe-part2.md)の記事では、この技法を検証関数の結合に使用しました。
+[鉄道指向プログラミング](../posts/recipe-part2.html)の記事では、この技法を検証関数の結合に使用しました。
 FizzBuzzでは、すべての因数を一度に処理するためにこれを使用します。
 
 コツは、2つの関数を結合するための「追加」または「連結」関数を定義することです。2つの関数をこの方法で追加できれば、続けて好きなだけ追加できます。
@@ -823,7 +823,7 @@ module FizzBuzz_RailwayOriented_UsingAddition =
 
 もちろん、他の状況では鉄道指向アプローチがうまく機能せず、パイプラインアプローチの方が適している場合もあるでしょう。この記事が両方について有用な洞察を提供できたことを願っています。
 
-*FizzBuzzファンの方は、[関数型リアクティブプログラミング](../posts/concurrency-reactive.md)のページもチェックしてみてください。そこには問題のさらに別のバリエーションがあります。*
+*FizzBuzzファンの方は、[関数型リアクティブプログラミング](../posts/concurrency-reactive.html)のページもチェックしてみてください。そこには問題のさらに別のバリエーションがあります。*
 
 ## 追伸：List.reduceの使用には注意が必要
 

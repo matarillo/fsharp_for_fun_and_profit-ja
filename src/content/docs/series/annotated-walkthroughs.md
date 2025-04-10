@@ -12,9 +12,9 @@ F# や関数型プログラミング全般についてよく聞く意見の一�
 これはいわば、注釈付きのライブコーディングセッションのようなものです。各段階における私の思考プロセス、手戻りやリファクタリングも含めて、すべてお見せします。
 
 
-* [電卓のウォークスルー: パート 1](../posts/calculator-design.md)。 型ファーストのアプローチで電卓を設計する。
-* [電卓のウォークスルー: パート 2](../posts/calculator-implementation.md)。 仮実装で設計を検証する。
-* [電卓のウォークスルー: パート 3](../posts/calculator-complete-v1.md)。 サービスとユーザーインターフェースの追加、そして災難への対処。
-* [電卓のウォークスルー: パート 4](../posts/calculator-complete-v2.md)。 ステートマシンを使用した設計。
-* [エンタープライズ三目並べ](../posts/enterprise-tic-tac-toe.md)。 純粋関数型で実装するときの設計判断をウォークスルーする。
-* [エンタープライズ三目並べ パート 2](../posts/enterprise-tic-tac-toe-2.md)。 過去の設計を捨て、ケイパビリティ中心のアプローチへ。
+* [電卓のウォークスルー: パート 1](../posts/calculator-design.html)。 型ファーストのアプローチで電卓を設計する。
+* [電卓のウォークスルー: パート 2](../posts/calculator-implementation.html)。 仮実装で設計を検証する。
+* [電卓のウォークスルー: パート 3](../posts/calculator-complete-v1.html)。 サービスとユーザーインターフェースの追加、そして災難への対処。
+* [電卓のウォークスルー: パート 4](../posts/calculator-complete-v2.html)。 ステートマシンを使用した設計。
+* [エンタープライズ三目並べ](../posts/enterprise-tic-tac-toe.html)。 純粋関数型で実装するときの設計判断をウォークスルーする。
+* [エンタープライズ三目並べ パート 2](../posts/enterprise-tic-tac-toe-2.html)。 過去の設計を捨て、ケイパビリティ中心のアプローチへ。

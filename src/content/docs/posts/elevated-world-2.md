@@ -9,7 +9,7 @@ image: "@assets/img/vgfp_bind.png"
 ---
 
 この投稿は、シリーズの2番目です。
-[前回の投稿](../posts/elevated-world.md)では、通常の世界から高次の世界へ値を持ち上げるためのコア関数について説明しました。
+[前回の投稿](../posts/elevated-world.html)では、通常の世界から高次の世界へ値を持ち上げるためのコア関数について説明しました。
 
 今回は、「世界をまたぐ」関数と、`bind`関数を使ってそれらを制御する方法を見ていきます。
 
@@ -18,36 +18,36 @@ image: "@assets/img/vgfp_bind.png"
 このシリーズで言及する様々な関数へのショートカットリストです。
 
 * **パート1：高次の世界への持ち上げ**
-  * [`map`関数](../posts/elevated-world.md#map)
-  * [`return`関数](../posts/elevated-world.md#return)
-  * [`apply`関数](../posts/elevated-world.md#apply)
-  * [`liftN`関数ファミリー](../posts/elevated-world.md#lift)
-  * [`zip`関数とZipList世界](../posts/elevated-world.md#zip)
+  * [`map`関数](../posts/elevated-world.html#map)
+  * [`return`関数](../posts/elevated-world.html#return)
+  * [`apply`関数](../posts/elevated-world.html#apply)
+  * [`liftN`関数ファミリー](../posts/elevated-world.html#lift)
+  * [`zip`関数とZipList世界](../posts/elevated-world.html#zip)
 * **パート2：世界をまたぐ関数の合成方法**    
-  * [`bind`関数](../posts/elevated-world-2.md#bind)
-  * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.md#not-a-monad)
+  * [`bind`関数](../posts/elevated-world-2.html#bind)
+  * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.html#not-a-monad)
 * **パート3：コア関数の実際的な使い方**  
-  * [独立データと依存データ](../posts/elevated-world-3.md#dependent)
-  * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.md#validation)
-  * [一貫した世界への持ち上げ](../posts/elevated-world-3.md#consistent)
-  * [Kleisli世界](../posts/elevated-world-3.md#kleisli)
+  * [独立データと依存データ](../posts/elevated-world-3.html#dependent)
+  * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.html#validation)
+  * [一貫した世界への持ち上げ](../posts/elevated-world-3.html#consistent)
+  * [Kleisli世界](../posts/elevated-world-3.html#kleisli)
 * **パート4：リストと高次の値の混合**    
-  * [リストと高次の値の混合](../posts/elevated-world-4.md#mixing)
-  * [`traverse`/`MapM`関数](../posts/elevated-world-4.md#traverse)
-  * [`sequence`関数](../posts/elevated-world-4.md#sequence)
-  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.md#adhoc)
-  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.md#readability)
-  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.md#filter)
+  * [リストと高次の値の混合](../posts/elevated-world-4.html#mixing)
+  * [`traverse`/`MapM`関数](../posts/elevated-world-4.html#traverse)
+  * [`sequence`関数](../posts/elevated-world-4.html#sequence)
+  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.html#adhoc)
+  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.html#readability)
+  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.html#filter)
 * **パート5：すべてのテクニックを使用する実世界の例**    
-  * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.md#asynclist)
-  * [2つの世界を1つとして扱う](../posts/elevated-world-5.md#asyncresult)
+  * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.html#asynclist)
+  * [2つの世界を1つとして扱う](../posts/elevated-world-5.html#asyncresult)
 * **パート6：独自の高次の世界を設計する** 
-  * [独自の高次の世界を設計する](../posts/elevated-world-6.md#part6)
-  * [失敗のフィルタリング](../posts/elevated-world-6.md#filtering)
-  * [Readerモナド](../posts/elevated-world-6.md#readermonad)
+  * [独自の高次の世界を設計する](../posts/elevated-world-6.html#part6)
+  * [失敗のフィルタリング](../posts/elevated-world-6.html#filtering)
+  * [Readerモナド](../posts/elevated-world-6.html#readermonad)
 * **パート7：まとめ** 
-  * [言及した演算子のリスト](../posts/elevated-world-7.md#operators)
-  * [補足文献](../posts/elevated-world-7.md#further-reading)
+  * [言及した演算子のリスト](../posts/elevated-world-7.html#operators)
+  * [補足文献](../posts/elevated-world-7.html#further-reading)
 
 <a id="part2"></a>
 <hr>
@@ -301,7 +301,7 @@ let apply fOpt xOpt =
 たとえば、`bind`の実装ではエミュレートできない方法で`apply`を実装することも可能です。
 
 実際、`apply`（「アプリカティブスタイル」）や`bind`（「モナディックスタイル」）を使うことで、プログラムの動作に大きな影響を与える可能性があります。
-これら2つのアプローチの詳細については、[このポストのパート3](../posts/elevated-world-3.md#dependent)で説明します。
+これら2つのアプローチの詳細については、[このポストのパート3](../posts/elevated-world-3.html#dependent)で説明します。
 
 ### 正しいbind/return実装の特性
 
@@ -406,6 +406,6 @@ let groupFromTheRight = a >>= (fun x -> f x >>= g)
 しかし、まだ答えていない質問もあります。たとえば次のような疑問です。
 「なぜ`apply`の代わりに`bind`を選ぶべきなのか？」「複数の高次の世界を同時に扱うにはどうすればよいのか？」
 
-[次の投稿](../posts/elevated-world-3.md)では、これらの疑問に答え、一連の実践的な例を通じてこのツールセットの使い方を示します。
+[次の投稿](../posts/elevated-world-3.html)では、これらの疑問に答え、一連の実践的な例を通じてこのツールセットの使い方を示します。
 
 *更新：@joseanpgに指摘されたモナド則の誤りを修正しました。ありがとうございます！*

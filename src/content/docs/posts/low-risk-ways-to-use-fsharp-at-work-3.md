@@ -8,7 +8,7 @@ seriesOrder: 3
 
 ---
 
-この投稿は、[仕事でF#を低リスクかつ段階的に使う方法](../posts/low-risk-ways-to-use-fsharp-at-work.md)に関する前回のシリーズの続きです。
+この投稿は、[仕事でF#を低リスクかつ段階的に使う方法](../posts/low-risk-ways-to-use-fsharp-at-work.html)に関する前回のシリーズの続きです。
 ミッションクリティカルなコードに影響を与えることなく、低リスクで段階的にF#を実践するにはどうすればよいでしょうか？
 
 今回は、テストにF#を使うことについて説明します。
@@ -455,7 +455,7 @@ Falsifiable, after 33 tests
   同様に、何かをシリアライズしてからデシリアライズすると、元のものが戻ってくるはずです。
 * **不変条件**。販売注文に商品を追加する場合、個々の明細の合計は注文合計と同じになるはずです。
   または、各ページの単語数の合計は、本全体の単語数の合計と同じになるはずです。
-  より一般的には、2つの異なる経路で計算する場合、同じ答えが得られるはずです（[モノイド準同型！](../posts/monoids-part2.md#monoid-homomorphism)）
+  より一般的には、2つの異なる経路で計算する場合、同じ答えが得られるはずです（[モノイド準同型！](../posts/monoids-part2.html#monoid-homomorphism)）
 * **丸め**。レシピに材料を追加する場合、材料のパーセンテージの合計（小数点以下2桁の精度）は常に正確に100%になるはずです。
   同様のルールは、株式、税金計算などのほとんどの分割ロジックに必要です。
   （例：[DDDブックの「シェアパイ」の例](https://books.google.co.uk/books?id=xColAAPGubgC&pg=PA198&lpg=PA198&dq=%22domain+driven+design%22+%22share+pie%22&source=bl&ots=q9-HdfTK4p&sig=IUnHGFUdwQv2p0tuWVbrqqwdAk4&hl=en&sa=X&ei=IdFbU5bLK8SMOPLFgfgC#v=onepage&q=%22domain%20driven%20design%22%20%22share%20pie%22&f=false)）。
@@ -467,10 +467,10 @@ FsCheckはリファクタリングにも非常に役立ちます。テストが�
 
 FsCheckに関するその他のリンク：
 
-* [プロパティベースのテスト入門](../posts/property-based-testing.md)と[プロパティベースのテストのプロパティ選択](../posts/property-based-testing-2.md)に関するフォローアップを書きました。
-* [FsCheckのドキュメント](https://github.com/fsharp/FsCheck/blob/master/Docs/Documentation.md)。
+* [プロパティベースのテスト入門](../posts/property-based-testing.html)と[プロパティベースのテストのプロパティ選択](../posts/property-based-testing-2.html)に関するフォローアップを書きました。
+* [FsCheckのドキュメント](https://github.com/fsharp/FsCheck/blob/master/Docs/Documentation.html)。
 * [実践でのFsCheckの使用に関する記事](https://brandewinder.com/2014/03/22/fscheck-and-xunit-is-the-bomb/)。
-* [FsCheckに言及しているローマ数字kata](../posts/roman-numeral-kata.md)に関する私の投稿。
+* [FsCheckに言及しているローマ数字kata](../posts/roman-numeral-kata.html)に関する私の投稿。
 
 プロパティベースのテスト一般については、QuickCheckに関する記事やビデオを探してください。
 

@@ -10,8 +10,8 @@ seriesIndexId: "F#におけるオブジェクト指向プログラミング"
 
 
 
-* [F#におけるオブジェクト指向プログラミング：はじめに](../posts/object-oriented-intro.md)
-* [クラス](../posts/classes.md)
-* [継承と抽象クラス](../posts/inheritance.md)
-* [インターフェース](../posts/interfaces.md)
-* [オブジェクト式](../posts/object-expressions.md)
+* [F#におけるオブジェクト指向プログラミング：はじめに](../posts/object-oriented-intro.html)
+* [クラス](../posts/classes.html)
+* [継承と抽象クラス](../posts/inheritance.html)
+* [インターフェース](../posts/interfaces.html)
+* [オブジェクト式](../posts/object-expressions.html)

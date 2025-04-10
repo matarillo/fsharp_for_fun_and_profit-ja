@@ -16,27 +16,27 @@ categories: ["パターン"]
 
 では、早速ですが、タートルを実装する13の異なる方法をご紹介しましょう。
 
-* [方法1. 基本的なオブジェクト指向アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way1)：可変状態を持つクラスを作ります。
-* [方法2. 基本的な関数型アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way2)：不変の状態を持つ関数のモジュールを作ります。
-* [方法3. オブジェクト指向のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way3)：状態を持つコアクラスを呼び出すオブジェクト指向APIを作ります。
-* [方法4. 関数型のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way4)：状態を持たないコア関数を使う、状態を持つAPIを作ります。
-* [方法5. エージェントの前面にあるAPI](../posts/13-ways-of-looking-at-a-turtle.md#way5)：メッセージキューを使っててエージェントと通信するAPIを作ります。
-* [方法6. インターフェースを使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way6)：インターフェースまたは関数のレコードを使って、実装をAPIから分離します。
-* [方法7. 関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)：関数パラメータを渡すことで、実装をAPIから分離します。
-* [方法8. Stateモナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)：状態を追跡する特別な「タートルワークフロー」コンピュテーション式を作ります。
-* [方法9. コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)：タートルのコマンドを表す型を作り、コマンドのリストを一括処理します。
-* [幕間：データ型を使った意識的な分離](../posts/13-ways-of-looking-at-a-turtle.md#decoupling)。データまたはインターフェースを使った分離に関するメモ。
-* [方法10. イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)：過去のイベントのリストから状態を構築します。
-* [方法11. 関数型リアクティブプログラミング（ストリーム処理）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)：ビジネスロジックが以前のイベントに反応することに基づいています。
-* [エピソードV：タートルの逆襲](../posts/13-ways-of-looking-at-a-turtle-2.md#strikes-back)：一部のコマンドが失敗する可能性を考慮するように、タートルAPIを変更します。
-* [方法12. モナディック制御フロー](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)：タートルワークフロー内で、以前のコマンドの結果に基づいて決定を行います。
-* [方法13. タートルインタープリター](../posts/13-ways-of-looking-at-a-turtle-2.md#way13)：タートルプログラミングとタートルの実装を完全に分離し、ほぼフリーモナドを実現します。
-* [使用したテクニックの再確認](../posts/13-ways-of-looking-at-a-turtle-2.md#review)。
+* [方法1. 基本的なオブジェクト指向アプローチ](../posts/13-ways-of-looking-at-a-turtle.html#way1)：可変状態を持つクラスを作ります。
+* [方法2. 基本的な関数型アプローチ](../posts/13-ways-of-looking-at-a-turtle.html#way2)：不変の状態を持つ関数のモジュールを作ります。
+* [方法3. オブジェクト指向のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.html#way3)：状態を持つコアクラスを呼び出すオブジェクト指向APIを作ります。
+* [方法4. 関数型のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.html#way4)：状態を持たないコア関数を使う、状態を持つAPIを作ります。
+* [方法5. エージェントの前面にあるAPI](../posts/13-ways-of-looking-at-a-turtle.html#way5)：メッセージキューを使っててエージェントと通信するAPIを作ります。
+* [方法6. インターフェースを使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.html#way6)：インターフェースまたは関数のレコードを使って、実装をAPIから分離します。
+* [方法7. 関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.html#way7)：関数パラメータを渡すことで、実装をAPIから分離します。
+* [方法8. Stateモナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.html#way8)：状態を追跡する特別な「タートルワークフロー」コンピュテーション式を作ります。
+* [方法9. コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.html#way9)：タートルのコマンドを表す型を作り、コマンドのリストを一括処理します。
+* [幕間：データ型を使った意識的な分離](../posts/13-ways-of-looking-at-a-turtle.html#decoupling)。データまたはインターフェースを使った分離に関するメモ。
+* [方法10. イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.html#way10)：過去のイベントのリストから状態を構築します。
+* [方法11. 関数型リアクティブプログラミング（ストリーム処理）](../posts/13-ways-of-looking-at-a-turtle-2.html#way11)：ビジネスロジックが以前のイベントに反応することに基づいています。
+* [エピソードV：タートルの逆襲](../posts/13-ways-of-looking-at-a-turtle-2.html#strikes-back)：一部のコマンドが失敗する可能性を考慮するように、タートルAPIを変更します。
+* [方法12. モナディック制御フロー](../posts/13-ways-of-looking-at-a-turtle-2.html#way12)：タートルワークフロー内で、以前のコマンドの結果に基づいて決定を行います。
+* [方法13. タートルインタープリター](../posts/13-ways-of-looking-at-a-turtle-2.html#way13)：タートルプログラミングとタートルの実装を完全に分離し、ほぼフリーモナドを実現します。
+* [使用したテクニックの再確認](../posts/13-ways-of-looking-at-a-turtle-2.html#review)。
 
 拡大版には、おまけの方法が2つあります。
 
-* [方法14. 抽象データタートル](../posts/13-ways-of-looking-at-a-turtle-3.md#way14)：抽象データ型を使って、タートルの実装詳細をカプセル化します。
-* [方法15. ケイパビリティベースのタートル](../posts/13-ways-of-looking-at-a-turtle-3.md#way15)：タートルの現在の状態に基づいて、
+* [方法14. 抽象データタートル](../posts/13-ways-of-looking-at-a-turtle-3.html#way14)：抽象データ型を使って、タートルの実装詳細をカプセル化します。
+* [方法15. ケイパビリティベースのタートル](../posts/13-ways-of-looking-at-a-turtle-3.html#way15)：タートルの現在の状態に基づいて、
 クライアントが使えるタートル関数を制御します。
 
 
@@ -626,7 +626,7 @@ let distanceR = validateDistance distanceStr
 lift2R move distanceR stateR
 ```
 
-*（`Result`の世界への関数の「持ち上げ」についての詳細は、[「持ち上げ」に関する一般的な投稿](../posts/elevated-world.md#lift)を参照してください）*
+*（`Result`の世界への関数の「持ち上げ」についての詳細は、[「持ち上げ」に関する一般的な投稿](../posts/elevated-world.html#lift)を参照してください）*
 
 以下が`Exec`の完全なコードです。
 
@@ -955,7 +955,7 @@ type TurtleApi(turtle: ITurtle) =
 `normalSize`については、元の`Turtle`クラスに戻って`ITurtle`インターフェースをサポートするように改修できます。しかし、動作するコードを変更するのは嫌です！
 代わりに、元の`Turtle`クラスの周りに「プロキシ」ラッパーを作成し、プロキシが新しいインターフェースを実装します。
 
-一部の言語では、プロキシラッパーの作成に時間がかかる可能性がありますが、F#では[オブジェクト式](../posts/object-expressions.md)を使ってインターフェースを素早く実装できます。
+一部の言語では、プロキシラッパーの作成に時間がかかる可能性がありますが、F#では[オブジェクト式](../posts/object-expressions.html)を使ってインターフェースを素早く実装できます。
 
 ```fsharp
 let normalSize() = 
@@ -1444,7 +1444,7 @@ drawTriangle(api)
 
 これは汎用のStateモナドではなく、このデモンストレーション用に簡略化したものです。`turtle`ワークフローと呼びます。
 
-*（Stateモナドについての詳細は、私の[「モナド怪物」トークと投稿](https://fsharpforfunandprofit.com/monadster/)と[パーサーコンビネータに関する投稿](../posts/understanding-parser-combinators.md)を参照してください）*
+*（Stateモナドについての詳細は、私の[「モナド怪物」トークと投稿](https://fsharpforfunandprofit.com/monadster/)と[パーサーコンビネータに関する投稿](../posts/understanding-parser-combinators.html)を参照してください）*
 
 ![](@assets/img/turtle-monad.png)
 
@@ -1478,7 +1478,7 @@ TurtleState -> 'a * TurtleState
 
 ![](@assets/img/turtle-monad-4.png)
 
-実装では、通常、関数を[単一ケース判別共用体](../posts/designing-with-types-single-case-dus.md)でラップします：
+実装では、通常、関数を[単一ケース判別共用体](../posts/designing-with-types-single-case-dus.html)でラップします：
 
 ```fsharp
 type TurtleStateComputation<'a> = 
@@ -1756,8 +1756,8 @@ let drawPolygon n =
 
 ## 幕間：データ型を使った意識的な分離
 
-これまでの例のうち3つ（[エージェント](../posts/13-ways-of-looking-at-a-turtle.md#way5)、[関数型依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)、
-[バッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)）で、`Command`型 - 各APIコールのケースを含む判別共用体 - を使用しました。
+これまでの例のうち3つ（[エージェント](../posts/13-ways-of-looking-at-a-turtle.html#way5)、[関数型依存性注入](../posts/13-ways-of-looking-at-a-turtle.html#way7)、
+[バッチ処理](../posts/13-ways-of-looking-at-a-turtle.html#way9)）で、`Command`型 - 各APIコールのケースを含む判別共用体 - を使用しました。
 次の投稿でも、イベントソーシングとインタープリターのアプローチで同様のものが使用されるのを見ることができます。
 
 これは偶然ではありません。オブジェクト指向設計と関数型設計の違いの1つは、オブジェクト指向設計が振る舞いに焦点を当てるのに対し、
@@ -1792,7 +1792,7 @@ let drawPolygon n =
 
 もしもし？まだ誰かいますか？ここまで読んでいただきありがとうございます！
 
-さて、休憩の時間です！[次の投稿](../posts/13-ways-of-looking-at-a-turtle-2.md)では、タートルを見る方法について残りの4つをカバーします。
+さて、休憩の時間です！[次の投稿](../posts/13-ways-of-looking-at-a-turtle-2.html)では、タートルを見る方法について残りの4つをカバーします。
 
 *この投稿のソースコードは[GitHub](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle)で入手できます。*
 

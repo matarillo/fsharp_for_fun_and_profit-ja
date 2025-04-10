@@ -7,7 +7,7 @@ seriesId: "F#の型を理解する"
 seriesOrder: 1
 ---
 
-*注意：このシリーズを読む前に、「[関数型思考](../series/thinking-functionally.md)」と「[式と構文](../series/expressions-and-syntax.md)」シリーズを前提知識として読むことをおすすめします。*
+*注意：このシリーズを読む前に、「[関数型思考](../series/thinking-functionally.html)」と「[式と構文](../series/expressions-and-syntax.html)」シリーズを前提知識として読むことをおすすめします。*
 
 
 F#は関数だけでなく、強力な型システムも重要な特徴です。関数と同じく、型システムを理解することが、この言語に習熟し快適に扱うためのカギとなります。

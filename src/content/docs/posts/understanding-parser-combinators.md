@@ -23,9 +23,9 @@ seriesOrder: 1
 このシリーズは4つの記事で構成されています。
 
 * 第1回の今回は、パーサーコンビネータの基本概念を見て、ライブラリのコアを組み立てます。
-* [第2回](../posts/understanding-parser-combinators-2.md)では、便利なコンビネータのライブラリを組み立てます。
-* [第3回](../posts/understanding-parser-combinators-3.md)では、役立つエラーメッセージの提供に取り組みます。
-* [最終回](../posts/understanding-parser-combinators-4.md)では、このパーサーライブラリを使ってJSONパーサーを組み立てます。
+* [第2回](../posts/understanding-parser-combinators-2.html)では、便利なコンビネータのライブラリを組み立てます。
+* [第3回](../posts/understanding-parser-combinators-3.html)では、役立つエラーメッセージの提供に取り組みます。
+* [最終回](../posts/understanding-parser-combinators-4.html)では、このパーサーライブラリを使ってJSONパーサーを組み立てます。
 
 ここではパフォーマンスや効率性に焦点を当てませんが、[FParsec](https://www.quanttec.com/fparsec/)のようなライブラリを効果的に使えるようになる理解が得られると思います。
 そして、FParsecを作ったStephan Tolksdorfに感謝します。
@@ -311,7 +311,7 @@ val pchar :
 
 ### カリー化とは何か？
 
-カリー化の仕組みがよくわからない場合は、[こちらの投稿](../posts/currying.md)を参照してください。
+カリー化の仕組みがよくわからない場合は、[こちらの投稿](../posts/currying.html)を参照してください。
 基本的には、複数のパラメータを持つ関数を、一連の単一パラメータ関数として書けることを意味します。
 
 つまり、この2パラメータ関数は、
@@ -745,7 +745,7 @@ run aAndThenBorC "AQZ"  // Failure "Expecting 'C'. Got 'Q'"
 たとえば、2つのパーサーだけでなく、パーサーの*リスト*から選択したい場合はどうでしょうか。
 
 これは簡単です。物事を対で組み合わせる方法があれば、`reduce`を使ってリスト全体を組み合わせることができます
-（`reduce`の操作についての詳細は、[モノイドに関するこの投稿](../posts/monoids-without-tears.md)を参照してください）。
+（`reduce`の操作についての詳細は、[モノイドに関するこの投稿](../posts/monoids-without-tears.html)を参照してください）。
 
 ```fsharp
 /// パーサーのリストから任意のものを選択
@@ -930,7 +930,7 @@ let anyOf listOfChars =
 
 この投稿では、パーシングライブラリの基礎と、いくつかのシンプルなコンビネータを作成しました。
 
-[次の投稿](../posts/understanding-parser-combinators-2.md)では、これをもとに、もっと多くのコンビネータを含むライブラリを作ります。
+[次の投稿](../posts/understanding-parser-combinators-2.html)では、これをもとに、もっと多くのコンビネータを含むライブラリを作ります。
 
 *この投稿のソースコードは[このgist](https://gist.github.com/swlaschin/cb42417079ae2c5f99db#file-understanding_parser_combinators-fsx)で利用できます。*
 

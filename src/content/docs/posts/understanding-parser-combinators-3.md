@@ -11,8 +11,8 @@ seriesOrder: 3
 
 このシリーズでは、アプリカティブパーサーとパーサーコンビネータの仕組みを解説しています。
 
-* [第1回](../posts/understanding-parser-combinators.md)では、パーシングライブラリの基礎を作りました。
-* [第2回](../posts/understanding-parser-combinators-2.md)では、他の多くの便利なコンビネータでライブラリを拡張しました。
+* [第1回](../posts/understanding-parser-combinators.html)では、パーシングライブラリの基礎を作りました。
+* [第2回](../posts/understanding-parser-combinators-2.html)では、他の多くの便利なコンビネータでライブラリを拡張しました。
 * 今回は、より役立つエラーメッセージを提供するようにライブラリを改良します。
 
 <hr>
@@ -814,7 +814,7 @@ run pfloat "-123Z45"
 この投稿では、より良いエラー処理といくつかの新しいパーサーを追加しました。
 
 これで、JSONパーサーを組み立てるために必要なものが全て揃いました。
-それが[次の投稿](../posts/understanding-parser-combinators-4.md)のテーマです。
+それが[次の投稿](../posts/understanding-parser-combinators-4.html)のテーマです。
 
 *この投稿のソースコードは[このgist](https://gist.github.com/swlaschin/485f418fede6b6a36d89#file-understanding_parser_combinators-3-fsx)で入手できます。*
 

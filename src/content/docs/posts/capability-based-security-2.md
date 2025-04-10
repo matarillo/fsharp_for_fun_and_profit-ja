@@ -10,7 +10,7 @@ image: "@assets/img/auth_3.png"
 
 *更新：[このトピックに関する講演のスライドとビデオ](https://fsharpforfunandprofit.com/cap/)*
 
-[前の投稿](../posts/capability-based-security.md)では、コードが想定以上のことをしないようにするための基礎として、「ケイパビリティ」について検討し始めました。
+[前の投稿](../posts/capability-based-security.html)では、コードが想定以上のことをしないようにするための基礎として、「ケイパビリティ」について検討し始めました。
 そして、設定フラグを変更する単純なアプリケーションでこれをデモンストレーションしました。
 
 この投稿では、現在のユーザーのアイデンティティとロールに基づいてケイパビリティを制限する方法を見ていきます。
@@ -1105,13 +1105,13 @@ ITの神様は常にこのような場合は容赦なく、ファイルの存在
 
 **質問がもっとあります...**
 
-見逃した場合は、[パート1の最後](../posts/capability-based-security.md#summary)で追加の質問に回答しています。
+見逃した場合は、[パート1の最後](../posts/capability-based-security.html#summary)で追加の質問に回答しています。
 それ以外の場合は、以下に質問を追加してください。対応させていただきます。
 
 
 ## 次回予告
 
-[次の投稿](../posts/capability-based-security-3.md)では、型を使ってアクセストークンをエミュレートし、グローバル関数への不正アクセスを防ぐ方法を見ていきます。
+[次の投稿](../posts/capability-based-security-3.html)では、型を使ってアクセストークンをエミュレートし、グローバル関数への不正アクセスを防ぐ方法を見ていきます。
 
 *注：この投稿のすべてのコードは、[ここ](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_dbexample-fsx)と
 [ここ](https://gist.github.com/swlaschin/909c5b24bf921e5baa8c#file-capabilitybasedsecurity_consoleexample-fsx)のgistとして入手できます。*

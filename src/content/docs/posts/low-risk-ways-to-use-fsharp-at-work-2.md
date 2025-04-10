@@ -8,13 +8,13 @@ seriesOrder: 2
 
 ---
 
-この投稿は、[仕事で F#を低リスクで使う方法](../posts/low-risk-ways-to-use-fsharp-at-work.md)のシリーズの続きです。
+この投稿は、[仕事で F#を低リスクで使う方法](../posts/low-risk-ways-to-use-fsharp-at-work.html)のシリーズの続きです。
 ミッションクリティカルなコードに影響を与えることなく、低リスクで段階的にF#を実践できる方法をいくつか提案してきました。
 
 今回は、ビルドやその他の開発・DevOpsスクリプトにF#を使う方法について説明します。
 
-F#が初めての方は、前回の投稿の[はじめに](../posts/low-risk-ways-to-use-fsharp-at-work.md#getting-started)と
-[NuGetの使用](../posts/low-risk-ways-to-use-fsharp-at-work.md#working-with-nuget)のセクションを読むとよいでしょう。
+F#が初めての方は、前回の投稿の[はじめに](../posts/low-risk-ways-to-use-fsharp-at-work.html#getting-started)と
+[NuGetの使用](../posts/low-risk-ways-to-use-fsharp-at-work.html#working-with-nuget)のセクションを読むとよいでしょう。
 
 ## シリーズの内容
 

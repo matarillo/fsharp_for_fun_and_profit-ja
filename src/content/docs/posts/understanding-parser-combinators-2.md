@@ -11,7 +11,7 @@ seriesOrder: 2
 
 このシリーズでは、アプリカティブパーサーとパーサーコンビネータの仕組みを見ていきます。
 
-* [最初の投稿](../posts/understanding-parser-combinators.md)でパーシングライブラリの基礎を作りました。
+* [最初の投稿](../posts/understanding-parser-combinators.html)でパーシングライブラリの基礎を作りました。
 * この投稿では、他の多くの便利なコンビネータを使ってライブラリを拡張します。
   コンビネータ名は[FParsec](https://www.quanttec.com/fparsec/)で使われているものをコピーしているので、簡単に移行できます。
 
@@ -88,7 +88,7 @@ Success ((('1', '2'), '3'), "A")
 
 ![](@assets/img/parser-map.png)
 
-*ちなみに、この比喩が気に入ったなら、[さらに詳しく説明した連載](../posts/elevated-world.md)があります。*
+*ちなみに、この比喩が気に入ったなら、[さらに詳しく説明した連載](../posts/elevated-world.html)があります。*
 
 これが`map`の機能です。では、どのように実装すればいいでしょうか。
 
@@ -281,7 +281,7 @@ val lift2 :
 
 ![](@assets/img/parser-lift2.png)
 
-*この仕組みについてもっと知りたい場合は、[`lift2`に関する私の「マニュアルページ」投稿](../posts/elevated-world.md)や[「Monadster」を使った説明](../posts/monadster.md)をご覧ください。*
+*この仕組みについてもっと知りたい場合は、[`lift2`に関する私の「マニュアルページ」投稿](../posts/elevated-world.html)や[「Monadster」を使った説明](../posts/monadster.html)をご覧ください。*
 
 `lift2`を実際に使う例を見てみましょう。まず、整数の加算をパーサーの加算に持ち上げます。
 
@@ -839,7 +839,7 @@ val bindP :
 ```
 
 これは標準的な`bind`シグネチャに一致しています。入力`f`は「対角線」関数（`'a -> Parser<'b>`）で、出力は「水平」関数（`Parser<'a> -> Parser<'b>`）です。
-`bind`の動作に関する詳細は[この投稿](../posts/elevated-world-2.md#bind)を参照してください。
+`bind`の動作に関する詳細は[この投稿](../posts/elevated-world-2.html#bind)を参照してください。
 
 `bind`の中置バージョンは`>>=`です。パラメータが反転していることに注意してください。`f`が2番目のパラメータになり、F#のパイプラインイディオムに便利になります。
 
@@ -1127,6 +1127,6 @@ let sepBy p sep =
 この投稿では、前回の基本的なパースコードをもとに、15個ほどのコンビネータのライブラリを組み立てました。これらを組み合わせてほぼすべてのものをパースできます。
 
 これから、これらを使ってJSONパーサーを組み立てますが、その前に一旦立ち止まってエラーメッセージをクリーンアップしましょう。
-それが[次の投稿](../posts/understanding-parser-combinators-3.md)のトピックになります。
+それが[次の投稿](../posts/understanding-parser-combinators-3.html)のトピックになります。
 
 *この投稿のソースコードは[このgist](https://gist.github.com/swlaschin/a3dbb114a9ee95b2e30d#file-understanding_parser_combinators-2-fsx)で利用可能です。*

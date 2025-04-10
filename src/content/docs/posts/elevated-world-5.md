@@ -8,9 +8,9 @@ seriesOrder: 5
 ---
 
 この投稿は、一連の投稿の5番目です。
-[最初の2つの投稿](../posts/elevated-world.md)では、ジェネリックデータ型を扱うためのいくつかのコア関数、`map`、`bind`などについて説明しました。
-[3番目の投稿](../posts/elevated-world-3.md)では、「アプリカティブ」と「モナディック」のスタイルの違い、そして値と関数を一貫性のあるものにするための持ち上げ方について議論しました。
-[前回の投稿](../posts/elevated-world-4.md)では、高次の値のリストを扱う方法として、`traverse`と`sequence`を紹介しました。
+[最初の2つの投稿](../posts/elevated-world.html)では、ジェネリックデータ型を扱うためのいくつかのコア関数、`map`、`bind`などについて説明しました。
+[3番目の投稿](../posts/elevated-world-3.html)では、「アプリカティブ」と「モナディック」のスタイルの違い、そして値と関数を一貫性のあるものにするための持ち上げ方について議論しました。
+[前回の投稿](../posts/elevated-world-4.html)では、高次の値のリストを扱う方法として、`traverse`と`sequence`を紹介しました。
 
 この投稿では、これまでに議論してきたすべてのテクニックを使用する実用的な例を検討することで、締めくくりとします。
 
@@ -19,36 +19,36 @@ seriesOrder: 5
 このシリーズで触れる様々な関数へのショートカットリストです。
 
 * **パート1：高次の世界への持ち上げ**
-  * [`map`関数](../posts/elevated-world.md#map)
-  * [`return`関数](../posts/elevated-world.md#return)
-  * [`apply`関数](../posts/elevated-world.md#apply)
-  * [`liftN`関数ファミリー](../posts/elevated-world.md#lift)
-  * [`zip`関数とZipList世界](../posts/elevated-world.md#zip)
+  * [`map`関数](../posts/elevated-world.html#map)
+  * [`return`関数](../posts/elevated-world.html#return)
+  * [`apply`関数](../posts/elevated-world.html#apply)
+  * [`liftN`関数ファミリー](../posts/elevated-world.html#lift)
+  * [`zip`関数とZipList世界](../posts/elevated-world.html#zip)
 * **パート2：世界をまたぐ関数の合成方法**    
-  * [`bind`関数](../posts/elevated-world-2.md#bind)
-  * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.md#not-a-monad)
+  * [`bind`関数](../posts/elevated-world-2.html#bind)
+  * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.html#not-a-monad)
 * **パート3：コア関数の実際的な使い方**  
-  * [独立データと依存データ](../posts/elevated-world-3.md#dependent)
-  * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.md#validation)
-  * [一貫した世界への持ち上げ](../posts/elevated-world-3.md#consistent)
-  * [Kleisli世界](../posts/elevated-world-3.md#kleisli)
+  * [独立データと依存データ](../posts/elevated-world-3.html#dependent)
+  * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.html#validation)
+  * [一貫した世界への持ち上げ](../posts/elevated-world-3.html#consistent)
+  * [Kleisli世界](../posts/elevated-world-3.html#kleisli)
 * **パート4：リストと高次の値の混合**    
-  * [リストと高次の値の混合](../posts/elevated-world-4.md#mixing)
-  * [`traverse`/`MapM`関数](../posts/elevated-world-4.md#traverse)
-  * [`sequence`関数](../posts/elevated-world-4.md#sequence)
-  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.md#adhoc)
-  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.md#readability)
-  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.md#filter)
+  * [リストと高次の値の混合](../posts/elevated-world-4.html#mixing)
+  * [`traverse`/`MapM`関数](../posts/elevated-world-4.html#traverse)
+  * [`sequence`関数](../posts/elevated-world-4.html#sequence)
+  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.html#adhoc)
+  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.html#readability)
+  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.html#filter)
 * **パート5：すべてのテクニックを使用する実世界の例**    
-  * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.md#asynclist)
-  * [2つの世界を1つとして扱う](../posts/elevated-world-5.md#asyncresult)
+  * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.html#asynclist)
+  * [2つの世界を1つとして扱う](../posts/elevated-world-5.html#asyncresult)
 * **パート6：独自の高次の世界を設計する** 
-  * [独自の高次の世界を設計する](../posts/elevated-world-6.md#part6)
-  * [失敗のフィルタリング](../posts/elevated-world-6.md#filtering)
-  * [Readerモナド](../posts/elevated-world-6.md#readermonad)
+  * [独自の高次の世界を設計する](../posts/elevated-world-6.html#part6)
+  * [失敗のフィルタリング](../posts/elevated-world-6.html#filtering)
+  * [Readerモナド](../posts/elevated-world-6.html#readermonad)
 * **パート7：まとめ** 
-  * [言及した演算子のリスト](../posts/elevated-world-7.md#operators)
-  * [補足文献](../posts/elevated-world-7.md#further-reading)
+  * [言及した演算子のリスト](../posts/elevated-world-7.html#operators)
+  * [補足文献](../posts/elevated-world-7.html#further-reading)
 
 <a id="part5"></a>
 <hr>
@@ -60,7 +60,7 @@ seriesOrder: 5
 
 ## 例：Webサイトのリストをダウンロードして処理する
 
-この例は、[3番目の投稿](../posts/elevated-world-3.md)の冒頭で述べたものの変形版になります。
+この例は、[3番目の投稿](../posts/elevated-world-3.html)の冒頭で述べたものの変形版になります。
 
 * Webサイトのリストが与えられたら、最大のホームページを持つサイトを見つけるアクションを作成します。
 
@@ -98,7 +98,7 @@ type WebClientWithTimeout(timeout:int<ms>) =
 かつて、2000ミリ秒ではなく2000秒にタイムアウトを設定してしまったことがあり、二度とそのような間違いはしたくありません！
 
 次のコードは、ドメインの型を定義しています。URLとサイズを一緒に保持できるようにしたいと思います。タプルを使用することもできますが、
-[ドメインのモデル化に型を使用する](../posts/designing-with-types-single-case-dus.md)ことを提唱しています。ドキュメンテーションのためだけでも、そうすべきだと思います。
+[ドメインのモデル化に型を使用する](../posts/designing-with-types-single-case-dus.html)ことを提唱しています。ドキュメンテーションのためだけでも、そうすべきだと思います。
 
 ```fsharp
 // ダウンロードしたページのコンテンツ
@@ -551,7 +551,7 @@ largestPageSizeA_Bad: 1回あたりの平均時間:  2252ms
 
 `largestPageSizeA`には、マップとシーケンスが連続して並んでいます。つまり、リストが3回反復され、非同期が2回マップされることになります。
 
-[以前にも述べた](../posts/elevated-world-4.md#readability)ように、私は明快さをマイクロ最適化よりも優先します。証拠がない限り、これは気にしません。
+[以前にも述べた](../posts/elevated-world-4.html#readability)ように、私は明快さをマイクロ最適化よりも優先します。証拠がない限り、これは気にしません。
 
 しかし、もしやりたいのであれば、何ができるか見てみましょう。
 
@@ -855,6 +855,6 @@ largestPageSizeM_AR_Bad: 1回あたりの平均時間:   117ms
 この投稿では、小さな実用的な例を見てきました。
 この例から、`map`、`apply`、`bind`、`traverse`、`sequence`が単なる学問的な抽象概念ではなく、ツールベルトに欠かせない重要なツールであることがわかったと思います。
 
-[次の投稿](../posts/elevated-world-6.md)では、別の実用的な例を見ていきますが、今度は*独自の*高次の世界を作ることになります。
+[次の投稿](../posts/elevated-world-6.html)では、別の実用的な例を見ていきますが、今度は*独自の*高次の世界を作ることになります。
 では、そのときまで！
 

@@ -21,7 +21,7 @@ categories: ["型", "DDD"]
 
 ## 「変更前」のコード ##
 
-シリーズの[最初の投稿](../posts/designing-with-types-intro.md)で使用した、最初の例を見てみましょう。
+シリーズの[最初の投稿](../posts/designing-with-types-intro.html)で使用した、最初の例を見てみましょう。
 
 ```fsharp
 type Contact = 

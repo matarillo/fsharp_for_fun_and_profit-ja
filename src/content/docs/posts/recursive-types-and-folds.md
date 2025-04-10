@@ -15,41 +15,41 @@ categories: ["畳み込み", "パターン"]
 シリーズの内容は次の通りです。
 
 * **パート1: 再帰型とカタモーフィズム入門**
-  * [シンプルな再帰型](../posts/recursive-types-and-folds.md#basic-recursive-type)
-  * [すべてをパラメーター化](../posts/recursive-types-and-folds.md#parameterize)
-  * [カタモーフィズムの紹介](../posts/recursive-types-and-folds.md#catamorphisms)
-  * [カタモーフィズムの利点](../posts/recursive-types-and-folds.md#benefits)
-  * [カタモーフィズム作成のルール](../posts/recursive-types-and-folds.md#rules)
+  * [シンプルな再帰型](../posts/recursive-types-and-folds.html#basic-recursive-type)
+  * [すべてをパラメーター化](../posts/recursive-types-and-folds.html#parameterize)
+  * [カタモーフィズムの紹介](../posts/recursive-types-and-folds.html#catamorphisms)
+  * [カタモーフィズムの利点](../posts/recursive-types-and-folds.html#benefits)
+  * [カタモーフィズム作成のルール](../posts/recursive-types-and-folds.html#rules)
 * **パート2: カタモーフィズムの例**
-  * [カタモーフィズムの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-1b.md#file-system)
-  * [カタモーフィズムの例: 製品ドメイン](../posts/recursive-types-and-folds-1b.md#product)
+  * [カタモーフィズムの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-1b.html#file-system)
+  * [カタモーフィズムの例: 製品ドメイン](../posts/recursive-types-and-folds-1b.html#product)
 * **パート3: 畳み込みの紹介**
-  * [カタモーフィズム実装の欠陥](../posts/recursive-types-and-folds-2.md#flaw)
-  * [`fold` の導入](../posts/recursive-types-and-folds-2.md#fold)
-  * [foldの問題点](../posts/recursive-types-and-folds-2.md#problems)
-  * [関数をアキュムレーターとして使う](../posts/recursive-types-and-folds-2.md#functions)
-  * [`foldback` の導入](../posts/recursive-types-and-folds-2.md#foldback)
-  * [畳み込みの作成ルール](../posts/recursive-types-and-folds-2.md#rules)
+  * [カタモーフィズム実装の欠陥](../posts/recursive-types-and-folds-2.html#flaw)
+  * [`fold` の導入](../posts/recursive-types-and-folds-2.html#fold)
+  * [foldの問題点](../posts/recursive-types-and-folds-2.html#problems)
+  * [関数をアキュムレーターとして使う](../posts/recursive-types-and-folds-2.html#functions)
+  * [`foldback` の導入](../posts/recursive-types-and-folds-2.html#foldback)
+  * [畳み込みの作成ルール](../posts/recursive-types-and-folds-2.html#rules)
 * **パート4: 畳み込みを理解する**
-  * [反復 vs. 再帰](../posts/recursive-types-and-folds-2b.md#iteration)
-  * [畳み込みの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-2b.md#file-system)
-  * [「畳み込み」に関するよくある質問](../posts/recursive-types-and-folds-2b.md#questions)
+  * [反復 vs. 再帰](../posts/recursive-types-and-folds-2b.html#iteration)
+  * [畳み込みの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-2b.html#file-system)
+  * [「畳み込み」に関するよくある質問](../posts/recursive-types-and-folds-2b.html#questions)
 * **パート5: ジェネリック再帰型**
-  * [ジェネリック再帰型 LinkedList](../posts/recursive-types-and-folds-3.md#linkedlist)
-  * [ギフトドメインをジェネリックにする](../posts/recursive-types-and-folds-3.md#revisiting-gift)
-  * [ジェネリックなコンテナ型の定義](../posts/recursive-types-and-folds-3.md#container)
-  * [ギフトドメインを実装する3つ目の方法](../posts/recursive-types-and-folds-3.md#another-gift)
-  * [抽象か具象か？3通りの設計の比較](../posts/recursive-types-and-folds-3.md#compare)
+  * [ジェネリック再帰型 LinkedList](../posts/recursive-types-and-folds-3.html#linkedlist)
+  * [ギフトドメインをジェネリックにする](../posts/recursive-types-and-folds-3.html#revisiting-gift)
+  * [ジェネリックなコンテナ型の定義](../posts/recursive-types-and-folds-3.html#container)
+  * [ギフトドメインを実装する3つ目の方法](../posts/recursive-types-and-folds-3.html#another-gift)
+  * [抽象か具象か？3通りの設計の比較](../posts/recursive-types-and-folds-3.html#compare)
 * **パート6: 木構造の実践的な利用**
-  * [ジェネリックな Tree 型の定義](../posts/recursive-types-and-folds-3b.md#tree)
-  * [Tree 型の実践的な利用](../posts/recursive-types-and-folds-3b.md#reuse)
-  * [Tree 型の写像](../posts/recursive-types-and-folds-3b.md#map)
-  * [例：ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.md#listing)
-  * [例：並列 grep](../posts/recursive-types-and-folds-3b.md#grep)
-  * [例：ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.md#database)
-  * [例：Tree から JSON へシリアライズ](../posts/recursive-types-and-folds-3b.md#tojson)
-  * [例：JSON から Tree へデシリアライズ](../posts/recursive-types-and-folds-3b.md#fromjson)
-  * [例：JSON から Tree へデシリアライズ - エラー処理版](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
+  * [ジェネリックな Tree 型の定義](../posts/recursive-types-and-folds-3b.html#tree)
+  * [Tree 型の実践的な利用](../posts/recursive-types-and-folds-3b.html#reuse)
+  * [Tree 型の写像](../posts/recursive-types-and-folds-3b.html#map)
+  * [例：ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.html#listing)
+  * [例：並列 grep](../posts/recursive-types-and-folds-3b.html#grep)
+  * [例：ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.html#database)
+  * [例：Tree から JSON へシリアライズ](../posts/recursive-types-and-folds-3b.html#tojson)
+  * [例：JSON から Tree へデシリアライズ](../posts/recursive-types-and-folds-3b.html#fromjson)
+  * [例：JSON から Tree へデシリアライズ - エラー処理版](../posts/recursive-types-and-folds-3b.html#json-with-error-handling)
 
   
 <a id="basic-recursive-type"></a>
@@ -364,7 +364,7 @@ christmasPresent |> descriptionUsingCata
 カタモーフィズムは「畳み込み」とも呼ばれますが、畳み込みには種類があるので、
 「カタモーフィズム」は**概念**を表し、「畳み込み」は特定の実装方法を表すようにしています。
 
-さまざまな種類の畳み込みについては[次の記事](../posts/recursive-types-and-folds-2.md)で詳しく説明するので、
+さまざまな種類の畳み込みについては[次の記事](../posts/recursive-types-and-folds-2.html)で詳しく説明するので、
 この記事では「カタモーフィズム」だけを使います。
 
 ### 実装の整理
@@ -807,7 +807,7 @@ cheapChoc |> upgradeChocolate
 ```
 
 この処理は `map` 関数に似ているように思えるかもしれませんが、その通りです。
-ジェネリックな `map` 関数については、[シリーズの第6回](../posts/recursive-types-and-folds-3b.md#map) でジェネリックな再帰型について議論する際に取り上げます。
+ジェネリックな `map` 関数については、[シリーズの第6回](../posts/recursive-types-and-folds-3b.html#map) でジェネリックな再帰型について議論する際に取り上げます。
   
   
 <a id="rules"></a>
@@ -830,7 +830,7 @@ cheapChoc |> upgradeChocolate
 
 この投稿では、再帰型の定義方法と、カタモーフィズムの概念を紹介しました。
 
-[次の投稿](../posts/recursive-types-and-folds-1b.md) では、
+[次の投稿](../posts/recursive-types-and-folds-1b.html) では、
 これらのルールを使って、他のドメインに対してカタモーフィズムを作成します。
 
 それでは、また次回お会いしましょう！

@@ -171,7 +171,7 @@ let bind switchFunction twoTrackInput =
     | Failure f -> Failure f
 ```
 
-これは最初の定義とまったく同じです。2つのパラメータを持つ関数が1つのパラメータを持つ関数とどうして全く同じになるのか疑問に思うなら、[カリー化](../posts/currying.md)に関する記事を読む必要があります！
+これは最初の定義とまったく同じです。2つのパラメータを持つ関数が1つのパラメータを持つ関数とどうして全く同じになるのか疑問に思うなら、[カリー化](../posts/currying.html)に関する記事を読む必要があります！
 
 もう1つの方法は、`match..with`構文をより簡潔な`function`キーワードに置き換えることです。このようになります。
 
@@ -1149,7 +1149,7 @@ let usecase =
 
 ## 補足文献
 
-* この「鉄道指向」アプローチが気に入った場合、[FizzBuzzに適用した例](../posts/railway-oriented-programming-carbonated.md)もご覧ください。
+* この「鉄道指向」アプローチが気に入った場合、[FizzBuzzに適用した例](../posts/railway-oriented-programming-carbonated.html)もご覧ください。
 * このアプローチをさらに発展させる方法を示した[スライドと動画](https://fsharpforfunandprofit.com/rop/)もあります（いずれ、ブログ投稿として適切な形にする予定です）。
 
 NDC Oslo 2014でこのトピックについて発表しました（画像をクリックすると動画が見られます）

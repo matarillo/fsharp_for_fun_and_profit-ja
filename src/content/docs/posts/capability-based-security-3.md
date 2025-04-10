@@ -10,7 +10,7 @@ image: "@assets/img/auth_token.png"
 
 *更新：[このトピックに関する講演のスライドとビデオ](https://fsharpforfunandprofit.com/cap/)*
 
-以前の記事（[リンク](../posts/capability-based-security.md)、[リンク](../posts/capability-based-security-2.md)）では、
+以前の記事（[リンク](../posts/capability-based-security.html)、[リンク](../posts/capability-based-security-2.html)）では、
 コードを制限するための基礎として「ケイパビリティ」について検討しました。
 
 しかし、これまでの例のほとんどでは、グローバルなケイパビリティを使わないように自制することに頼るか、
@@ -433,7 +433,7 @@ let tokenToCap f token =
 **質問：他のクライアントが使用できないように、アクセストークンに呼び出し元も保存しないのはなぜですか？**
 
 権限ベースのアプローチを使用しているため、必要ありません。
-[最初の投稿](../posts/capability-based-security.md#authority)で説明したように、クライアントがケイパビリティを取得すると、
+[最初の投稿](../posts/capability-based-security.html#authority)で説明したように、クライアントがケイパビリティを取得すると、
 他のユーザーが使用できるようにそれを渡すことができるため、特定の呼び出し元に制限しても意味がありません。
 
 **質問：認可モジュールは、ケイパビリティとアクセストークンの型を認識する必要があります。それは余分な結合を追加していませんか？**
@@ -457,7 +457,7 @@ Haskellの関連するもの（[例](https://hackage.haskell.org/package/Capabil
 
 **さらに質問があります...**
 
-[パート1](../posts/capability-based-security.md#summary)と[パート2](../posts/capability-based-security-2.md#summary)の最後で、いくつかの追加の質問に回答しているので、最初にそれらの回答を読んでください。
+[パート1](../posts/capability-based-security.html#summary)と[パート2](../posts/capability-based-security-2.html#summary)の最後で、いくつかの追加の質問に回答しているので、最初にそれらの回答を読んでください。
 それ以外の場合は、以下のコメントに質問を追加してください。対応させていただきます。
 
 ## まとめ

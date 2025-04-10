@@ -12,7 +12,7 @@ categories: ["型", "DDD"]
 
 ## 背景 ##
 
-このシリーズの[前の記事](../posts/designing-with-types-single-case-dus.md)で、メールアドレスなどの型をラップする単一ケース判別共用体について説明しました。
+このシリーズの[前の記事](../posts/designing-with-types-single-case-dus.html)で、メールアドレスなどの型をラップする単一ケース判別共用体について説明しました。
 
 ```fsharp
 module EmailAddress = 
@@ -250,7 +250,7 @@ let paymentReport paidCarts =
 
 それでは、このアプローチを実際の例に当てはめてみましょう。
 
-[前の記事](../posts/designing-with-types-intro.md)で使った `Contact` の例では、顧客がメールアドレスを確認したかどうかを示すフラグがありました。
+[前の記事](../posts/designing-with-types-intro.html)で使った `Contact` の例では、顧客がメールアドレスを確認したかどうかを示すフラグがありました。
 型の定義は以下のようになっていました。
 
 ```fsharp
@@ -324,7 +324,7 @@ module EmailContactInfo =
             emailContactInfo
 ```
 
-[ここで説明した](../posts/match-expression.md)ように、match 式のすべての分岐が同じ型を返す必要があることに注意してください。そのため、「確認済み」状態を無視する場合でも、渡されたオブジェクトなど、何かを返す必要があります。
+[ここで説明した](../posts/match-expression.html)ように、match 式のすべての分岐が同じ型を返す必要があることに注意してください。そのため、「確認済み」状態を無視する場合でも、渡されたオブジェクトなど、何かを返す必要があります。
 
 最後に、`sendVerificationEmail` と `sendPasswordReset` という2つのユーティリティ関数を書くことができます。
 
@@ -469,7 +469,7 @@ let signedFor package signature =
 ```
 
 *注：ここではエラー処理に `failwith` を使っています。実際のシステムでは、クライアント側でエラー処理を行うようにコードを修正するべきです。
-コンストラクターエラーの処理については、[単一ケース判別共用体に関する記事](../posts/designing-with-types-single-case-dus.md)の議論を参照してください。*
+コンストラクターエラーの処理については、[単一ケース判別共用体に関する記事](../posts/designing-with-types-single-case-dus.html)の議論を参照してください。*
 
 ## 明示的なケースを使って暗黙的な条件分岐コードを置き換える ##
 

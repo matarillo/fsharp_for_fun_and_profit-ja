@@ -7,7 +7,7 @@ seriesId: "モノイドを理解する"
 seriesOrder: 2
 ---
 
-[前回の投稿](../posts/monoids-without-tears.md)では、モノイドの定義について見てきました。今回は、モノイドの実装方法を見ていきます。
+[前回の投稿](../posts/monoids-without-tears.html)では、モノイドの定義について見てきました。今回は、モノイドの実装方法を見ていきます。
 
 まず、定義を振り返ってみましょう。
 
@@ -172,7 +172,7 @@ orderLine3 |> printLine // そして表示
 TOTAL          3  21.97
 ```
 
-*注：使用されているprintf書式オプションについては、[printfに関する投稿](../posts/printf.md)を参照してください。*
+*注：使用されているprintf書式オプションについては、[printfに関する投稿](../posts/printf.html)を参照してください。*
 
 では、これをリストに適用してみましょう。`reduce`を使います。
 

@@ -10,7 +10,7 @@ categories: ["畳み込み", "パターン"]
 
 これはシリーズ記事の第5回目です。
 
-[前回](../posts/recursive-types-and-folds-2b.md)では、特定のドメイン型に対する畳み込みを理解するために時間を費やしました。
+[前回](../posts/recursive-types-and-folds-2b.html)では、特定のドメイン型に対する畳み込みを理解するために時間を費やしました。
 
 今回は視野を広げ、ジェネリック再帰型の使い方を見ていきます。
 
@@ -19,49 +19,49 @@ categories: ["畳み込み", "パターン"]
 シリーズの内容は次の通りです。
 
 * **パート1: 再帰型とカタモーフィズム入門**
-  * [シンプルな再帰型](../posts/recursive-types-and-folds.md#basic-recursive-type)
-  * [すべてをパラメーター化](../posts/recursive-types-and-folds.md#parameterize)
-  * [カタモーフィズムの紹介](../posts/recursive-types-and-folds.md#catamorphisms)
-  * [カタモーフィズムの利点](../posts/recursive-types-and-folds.md#benefits)
-  * [カタモーフィズム作成のルール](../posts/recursive-types-and-folds.md#rules)
+  * [シンプルな再帰型](../posts/recursive-types-and-folds.html#basic-recursive-type)
+  * [すべてをパラメーター化](../posts/recursive-types-and-folds.html#parameterize)
+  * [カタモーフィズムの紹介](../posts/recursive-types-and-folds.html#catamorphisms)
+  * [カタモーフィズムの利点](../posts/recursive-types-and-folds.html#benefits)
+  * [カタモーフィズム作成のルール](../posts/recursive-types-and-folds.html#rules)
 * **パート2: カタモーフィズムの例**
-  * [カタモーフィズムの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-1b.md#file-system)
-  * [カタモーフィズムの例: 製品ドメイン](../posts/recursive-types-and-folds-1b.md#product)
+  * [カタモーフィズムの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-1b.html#file-system)
+  * [カタモーフィズムの例: 製品ドメイン](../posts/recursive-types-and-folds-1b.html#product)
 * **パート3: 畳み込みの紹介**
-  * [カタモーフィズム実装の欠陥](../posts/recursive-types-and-folds-2.md#flaw)
-  * [`fold` の導入](../posts/recursive-types-and-folds-2.md#fold)
-  * [foldの問題点](../posts/recursive-types-and-folds-2.md#problems)
-  * [関数をアキュムレーターとして使う](../posts/recursive-types-and-folds-2.md#functions)
-  * [`foldback` の導入](../posts/recursive-types-and-folds-2.md#foldback)
-  * [畳み込みの作成ルール](../posts/recursive-types-and-folds-2.md#rules)
+  * [カタモーフィズム実装の欠陥](../posts/recursive-types-and-folds-2.html#flaw)
+  * [`fold` の導入](../posts/recursive-types-and-folds-2.html#fold)
+  * [foldの問題点](../posts/recursive-types-and-folds-2.html#problems)
+  * [関数をアキュムレーターとして使う](../posts/recursive-types-and-folds-2.html#functions)
+  * [`foldback` の導入](../posts/recursive-types-and-folds-2.html#foldback)
+  * [畳み込みの作成ルール](../posts/recursive-types-and-folds-2.html#rules)
 * **パート4: 畳み込みを理解する**
-  * [反復 vs. 再帰](../posts/recursive-types-and-folds-2b.md#iteration)
-  * [畳み込みの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-2b.md#file-system)
-  * [「畳み込み」に関するよくある質問](../posts/recursive-types-and-folds-2b.md#questions)
+  * [反復 vs. 再帰](../posts/recursive-types-and-folds-2b.html#iteration)
+  * [畳み込みの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-2b.html#file-system)
+  * [「畳み込み」に関するよくある質問](../posts/recursive-types-and-folds-2b.html#questions)
 * **パート5: ジェネリック再帰型**
-  * [ジェネリック再帰型 LinkedList](../posts/recursive-types-and-folds-3.md#linkedlist)
-  * [ギフトドメインをジェネリックにする](../posts/recursive-types-and-folds-3.md#revisiting-gift)
-  * [ジェネリックなコンテナ型の定義](../posts/recursive-types-and-folds-3.md#container)
-  * [ギフトドメインを実装する3つ目の方法](../posts/recursive-types-and-folds-3.md#another-gift)
-  * [抽象か具象か？3通りの設計の比較](../posts/recursive-types-and-folds-3.md#compare)
+  * [ジェネリック再帰型 LinkedList](../posts/recursive-types-and-folds-3.html#linkedlist)
+  * [ギフトドメインをジェネリックにする](../posts/recursive-types-and-folds-3.html#revisiting-gift)
+  * [ジェネリックなコンテナ型の定義](../posts/recursive-types-and-folds-3.html#container)
+  * [ギフトドメインを実装する3つ目の方法](../posts/recursive-types-and-folds-3.html#another-gift)
+  * [抽象か具象か？3通りの設計の比較](../posts/recursive-types-and-folds-3.html#compare)
 * **パート6: 木構造の実践的な利用**
-  * [ジェネリックな Tree 型の定義](../posts/recursive-types-and-folds-3b.md#tree)
-  * [Tree 型の実践的な利用](../posts/recursive-types-and-folds-3b.md#reuse)
-  * [Tree 型の写像](../posts/recursive-types-and-folds-3b.md#map)
-  * [例：ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.md#listing)
-  * [例：並列 grep](../posts/recursive-types-and-folds-3b.md#grep)
-  * [例：ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.md#database)
-  * [例：Tree から JSON へシリアライズ](../posts/recursive-types-and-folds-3b.md#tojson)
-  * [例：JSON から Tree へデシリアライズ](../posts/recursive-types-and-folds-3b.md#fromjson)
-  * [例：JSON から Tree へデシリアライズ - エラー処理版](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
+  * [ジェネリックな Tree 型の定義](../posts/recursive-types-and-folds-3b.html#tree)
+  * [Tree 型の実践的な利用](../posts/recursive-types-and-folds-3b.html#reuse)
+  * [Tree 型の写像](../posts/recursive-types-and-folds-3b.html#map)
+  * [例：ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.html#listing)
+  * [例：並列 grep](../posts/recursive-types-and-folds-3b.html#grep)
+  * [例：ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.html#database)
+  * [例：Tree から JSON へシリアライズ](../posts/recursive-types-and-folds-3b.html#tojson)
+  * [例：JSON から Tree へデシリアライズ](../posts/recursive-types-and-folds-3b.html#fromjson)
+  * [例：JSON から Tree へデシリアライズ - エラー処理版](../posts/recursive-types-and-folds-3b.html#json-with-error-handling)
 
 <a id="linkedlist"></a>
 <hr>
 
 ## ジェネリック再帰型 LinkedList
 
-ここで質問です。代数的型しかなく、それらを直積（[タプル](../posts/tuples.md)、[レコード](../posts/records.md)）
-または直和（[判別共用体](../posts/discriminated-unions.md)）としてしか組み合わせられない場合、これらの操作だけでリスト型を作成するにはどうすればよいでしょうか？
+ここで質問です。代数的型しかなく、それらを直積（[タプル](../posts/tuples.html)、[レコード](../posts/records.html)）
+または直和（[判別共用体](../posts/discriminated-unions.html)）としてしか組み合わせられない場合、これらの操作だけでリスト型を作成するにはどうすればよいでしょうか？
 
 答えは、もちろん再帰です！
 
@@ -99,7 +99,7 @@ let linkedList = 1 :: 2 :: 3 :: []
 
 ### LinkedList用の `cata`
 
-[このシリーズの最初の記事](../posts/recursive-types-and-folds.md#rules) のルールに従って、`Empty` と `Cons` をそれぞれ `fEmpty` と `fCons` に置き換えることで、`cata` 関数を機械的に作成できます。
+[このシリーズの最初の記事](../posts/recursive-types-and-folds.html#rules) のルールに従って、`Empty` と `Cons` をそれぞれ `fEmpty` と `fCons` に置き換えることで、`cata` 関数を機械的に作成できます。
 
 ```fsharp
 module LinkedList = 
@@ -127,7 +127,7 @@ val cata :
 
 ### LinkedList用の `fold`
 
-[以前の記事](../posts/recursive-types-and-folds-2.md#rules)のルールを使って、トップダウンの反復的な `fold` 関数も作成できます。
+[以前の記事](../posts/recursive-types-and-folds-2.html#rules)のルールを使って、トップダウンの反復的な `fold` 関数も作成できます。
 
 ```fsharp
 module LinkedList = 
@@ -209,7 +209,7 @@ List.foldBack       : ('T -> 'State -> 'State) -> 'T list        -> 'State -> 'S
 
 ### `foldBack` を使ったリスト型の変換
 
-[最初の記事](../posts/recursive-types-and-folds.md#benefits)で、カタモーフィズムは構造が似た型同士の変換に使えることを説明しました。
+[最初の記事](../posts/recursive-types-and-folds.html#benefits)で、カタモーフィズムは構造が似た型同士の変換に使えることを説明しました。
 
 それでは、 `LinkedList` からネイティブな `list` 型への変換と、その逆の変換を行う関数を作成して、それを示してみましょう。
 
@@ -786,7 +786,7 @@ type GiftDecoration =
 type Gift = {contents: GiftContents; decorations: GiftDecoration list}
 ```
 
-直感的に理解できない場合は、[データ型のサイズ](../posts/type-size-and-design.md) に関する記事を読むとよいでしょう。
+直感的に理解できない場合は、[データ型のサイズ](../posts/type-size-and-design.html) に関する記事を読むとよいでしょう。
 一見まったく異なるように見える型でも、「等価」になりえることを説明しています。
 
 ### 設計の選択
@@ -817,6 +817,6 @@ F# のリスト実装自体もこれを採用しています。
 
 この記事では、`Gift`をジェネリック型としてモデル化するいくつかの方法と、各アプローチの長所と短所を見てきました。
 
-[次の記事](../posts/recursive-types-and-folds-3b.md)では、ジェネリックな再帰型の実用的な例を見ていきます。
+[次の記事](../posts/recursive-types-and-folds-3b.html)では、ジェネリックな再帰型の実用的な例を見ていきます。
 
 *この記事のソースコードは[このgist](https://gist.github.com/swlaschin/c423a0f78b22496a0aff)です。*

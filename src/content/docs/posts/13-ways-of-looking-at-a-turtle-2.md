@@ -11,31 +11,31 @@ categories: ["パターン"]
 この2部構成の大型投稿では、シンプルなタートルグラフィックスモデルを極限まで拡張しながら、部分適用、バリデーション、「リフティング」の概念、
 メッセージキューを持つエージェント、依存性注入、Stateモナド、イベントソーシング、ストリーム処理、そしてインタープリターを実演します！
 
-[前回の投稿](../posts/13-ways-of-looking-at-a-turtle.md)では、タートルを見る最初の9つの方法を紹介しました。今回は残りの4つを見ていきます。
+[前回の投稿](../posts/13-ways-of-looking-at-a-turtle.html)では、タートルを見る最初の9つの方法を紹介しました。今回は残りの4つを見ていきます。
 
 おさらいとして、13の方法を挙げておきます：
 
-* [方法1. 基本的なオブジェクト指向アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way1)：可変状態を持つクラスを作ります。
-* [方法2. 基本的な関数型アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way2)：不変の状態を持つ関数のモジュールを作ります。
-* [方法3. オブジェクト指向のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way3)：状態を持つコアクラスを呼び出すオブジェクト指向APIを作ります。
-* [方法4. 関数型のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way4)：状態を持たないコア関数を使う、状態を持つAPIを作ります。
-* [方法5. エージェントの前面にあるAPI](../posts/13-ways-of-looking-at-a-turtle.md#way5)：メッセージキューを使っててエージェントと通信するAPIを作ります。
-* [方法6. インターフェースを使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way6)：インターフェースまたは関数のレコードを使って、実装をAPIから分離します。
-* [方法7. 関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)：関数パラメータを渡すことで、実装をAPIから分離します。
-* [方法8. Stateモナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)：状態を追跡する特別な「タートルワークフロー」コンピュテーション式を作ります。
-* [方法9. コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)：タートルのコマンドを表す型を作り、コマンドのリストを一括処理します。
-* [幕間：データ型を使った意識的な分離](../posts/13-ways-of-looking-at-a-turtle.md#decoupling)。データまたはインターフェースを使った分離に関するメモ。
-* [方法10. イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)：過去のイベントのリストから状態を構築します。
-* [方法11. 関数型リアクティブプログラミング（ストリーム処理）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)：ビジネスロジックが以前のイベントに反応することに基づいています。
-* [エピソードV：タートルの逆襲](../posts/13-ways-of-looking-at-a-turtle-2.md#strikes-back)：一部のコマンドが失敗する可能性を考慮するように、タートルAPIを変更します。
-* [方法12. モナディック制御フロー](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)：タートルワークフロー内で、以前のコマンドの結果に基づいて決定を行います。
-* [方法13. タートルインタープリター](../posts/13-ways-of-looking-at-a-turtle-2.md#way13)：タートルプログラミングとタートルの実装を完全に分離し、ほぼフリーモナドを実現します。
-* [使用したテクニックの再確認](../posts/13-ways-of-looking-at-a-turtle-2.md#review)。
+* [方法1. 基本的なオブジェクト指向アプローチ](../posts/13-ways-of-looking-at-a-turtle.html#way1)：可変状態を持つクラスを作ります。
+* [方法2. 基本的な関数型アプローチ](../posts/13-ways-of-looking-at-a-turtle.html#way2)：不変の状態を持つ関数のモジュールを作ります。
+* [方法3. オブジェクト指向のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.html#way3)：状態を持つコアクラスを呼び出すオブジェクト指向APIを作ります。
+* [方法4. 関数型のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.html#way4)：状態を持たないコア関数を使う、状態を持つAPIを作ります。
+* [方法5. エージェントの前面にあるAPI](../posts/13-ways-of-looking-at-a-turtle.html#way5)：メッセージキューを使っててエージェントと通信するAPIを作ります。
+* [方法6. インターフェースを使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.html#way6)：インターフェースまたは関数のレコードを使って、実装をAPIから分離します。
+* [方法7. 関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.html#way7)：関数パラメータを渡すことで、実装をAPIから分離します。
+* [方法8. Stateモナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.html#way8)：状態を追跡する特別な「タートルワークフロー」コンピュテーション式を作ります。
+* [方法9. コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.html#way9)：タートルのコマンドを表す型を作り、コマンドのリストを一括処理します。
+* [幕間：データ型を使った意識的な分離](../posts/13-ways-of-looking-at-a-turtle.html#decoupling)。データまたはインターフェースを使った分離に関するメモ。
+* [方法10. イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.html#way10)：過去のイベントのリストから状態を構築します。
+* [方法11. 関数型リアクティブプログラミング（ストリーム処理）](../posts/13-ways-of-looking-at-a-turtle-2.html#way11)：ビジネスロジックが以前のイベントに反応することに基づいています。
+* [エピソードV：タートルの逆襲](../posts/13-ways-of-looking-at-a-turtle-2.html#strikes-back)：一部のコマンドが失敗する可能性を考慮するように、タートルAPIを変更します。
+* [方法12. モナディック制御フロー](../posts/13-ways-of-looking-at-a-turtle-2.html#way12)：タートルワークフロー内で、以前のコマンドの結果に基づいて決定を行います。
+* [方法13. タートルインタープリター](../posts/13-ways-of-looking-at-a-turtle-2.html#way13)：タートルプログラミングとタートルの実装を完全に分離し、ほぼフリーモナドを実現します。
+* [使用したテクニックの再確認](../posts/13-ways-of-looking-at-a-turtle-2.html#review)。
 
 拡大版には、おまけの方法が2つあります。
 
-* [方法14. 抽象データタートル](../posts/13-ways-of-looking-at-a-turtle-3.md#way14)：抽象データ型を使って、タートルの実装詳細をカプセル化します。
-* [方法15. ケイパビリティベースのタートル](../posts/13-ways-of-looking-at-a-turtle-3.md#way15)：タートルの現在の状態に基づいて、
+* [方法14. 抽象データタートル](../posts/13-ways-of-looking-at-a-turtle-3.html#way14)：抽象データ型を使って、タートルの実装詳細をカプセル化します。
+* [方法15. ケイパビリティベースのタートル](../posts/13-ways-of-looking-at-a-turtle-3.html#way15)：タートルの現在の状態に基づいて、
 クライアントが使えるタートル関数を制御します。
 
 タートルの上にタートル、その上にまたタートル！
@@ -48,7 +48,7 @@ categories: ["パターン"]
 
 ## 10: イベントソーシング - 過去のイベントのリストから状態を構築する
 
-このデザインでは、[エージェント（方法5）](../posts/13-ways-of-looking-at-a-turtle.md#way5)と[バッチ（方法9）](../posts/13-ways-of-looking-at-a-turtle.md#way9)アプローチで使用した「コマンド」の概念を基に、
+このデザインでは、[エージェント（方法5）](../posts/13-ways-of-looking-at-a-turtle.html#way5)と[バッチ（方法9）](../posts/13-ways-of-looking-at-a-turtle.html#way9)アプローチで使用した「コマンド」の概念を基に、
 状態を更新する方法として「コマンド」を「イベント」に置き換えます。
 
 動作の仕組みは次のとおりです：
@@ -128,7 +128,7 @@ type TurtleEvent =
 * コマンドと状態に基づいて、生成するイベントを決める（プライベートな）`eventsFromCommand`関数。
 * コマンドを処理し、イベントストアからイベントを読み取り、他の2つの関数を呼び出す公開`commandHandler`関数。
 
-これが`applyEvent`です。[以前のバッチ処理の例](../posts/13-ways-of-looking-at-a-turtle.md#way9)で見た`applyCommand`関数とよく似ています。
+これが`applyEvent`です。[以前のバッチ処理の例](../posts/13-ways-of-looking-at-a-turtle.html#way9)で見た`applyCommand`関数とよく似ています。
 
 ```fsharp
 /// 現在の状態にイベントを適用し、タートルの新しい状態を返す
@@ -655,7 +655,7 @@ let setColor log color state =
 
 ## 12: モナディック制御フロー
 
-このアプローチでは、[方法8](../posts/13-ways-of-looking-at-a-turtle.md#way8)の`turtle`ワークフローを再利用します。
+このアプローチでは、[方法8](../posts/13-ways-of-looking-at-a-turtle.html#way8)の`turtle`ワークフローを再利用します。
 ただし今回は、前のコマンドの結果に基づいて次のコマンドの決定を行います。
 
 その前に、`move`の変更がコードにどのような影響を与えるか見てみましょう。たとえば、`move 40.0`を使って何回か前進したいとします。
@@ -795,7 +795,7 @@ Move 60.0
 
 最後のアプローチでは、タートルのプログラミングとその解釈を*完全に*分離する方法を見ていきます。
 
-これは[コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)アプローチに似ていますが、
+これは[コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.html#way9)アプローチに似ていますが、
 コマンドの出力に応答できるように拡張されています。
 
 ### インタープリターの設計
@@ -833,7 +833,7 @@ type TurtleResponse =
 問題は、応答がコマンドと正しく一致することを保証できないことです。たとえば、`Move`コマンドを送信した場合、`MoveResponse`を期待し、
 決して`SetColorResponse`を期待しません。しかし、この実装ではそれを強制していません！
 
-[不正な状態を表現不可能にする](../posts/designing-with-types-making-illegal-states-unrepresentable.md)方法を見つける必要があります - どうすればいいでしょうか？
+[不正な状態を表現不可能にする](../posts/designing-with-types-making-illegal-states-unrepresentable.html)方法を見つける必要があります - どうすればいいでしょうか？
 
 トリックは、リクエストとレスポンスを*ペア*で組み合わせることです。つまり、`Move`コマンドには、入力として`MoveResponse`を受け取る関連する関数があり、他の各組み合わせについても同様です。
 応答のないコマンドは、今のところ`unit`を返すと考えることができます。
@@ -1275,11 +1275,11 @@ let drawTwoLines log = turtleProgram {
 この投稿では、タートルAPIを実装する13の異なる方法を見てきました。様々なテクニックを使用しました。使用されたすべてのテクニックを簡単に振り返ってみましょう：
 
 * **純粋でステートレスな関数**。関数型プログラミングのすべての例で見られます。これらはすべてテストやモックが非常に容易です。
-* **部分適用**。[最もシンプルな関数型プログラミングの例（方法2）](../posts/13-ways-of-looking-at-a-turtle.md#way2)で初めて見られ、メインフローがパイピングを使用できるようにタートル関数にロギング関数が適用されました。
-  その後、特に[「関数を使った依存性注入アプローチ」（方法7）](../posts/13-ways-of-looking-at-a-turtle.md#way7)で広く使用されました。
-* **オブジェクト式**。クラスを作成せずにインターフェースを実装するために使用されました（[方法6](../posts/13-ways-of-looking-at-a-turtle.md#way6)参照）。
-* **Result型**（別名Eitherモナド）。すべての関数型APIの例（[たとえば方法4](../posts/13-ways-of-looking-at-a-turtle.md#way4)）で、例外を投げる代わりにエラーを返すために使用されました。
-* **アプリカティブ「リフティング」**（例：`lift2`）。通常の関数を`Result`の世界に持ち上げるために使用されました（[方法4](../posts/13-ways-of-looking-at-a-turtle.md#way4)など）。
+* **部分適用**。[最もシンプルな関数型プログラミングの例（方法2）](../posts/13-ways-of-looking-at-a-turtle.html#way2)で初めて見られ、メインフローがパイピングを使用できるようにタートル関数にロギング関数が適用されました。
+  その後、特に[「関数を使った依存性注入アプローチ」（方法7）](../posts/13-ways-of-looking-at-a-turtle.html#way7)で広く使用されました。
+* **オブジェクト式**。クラスを作成せずにインターフェースを実装するために使用されました（[方法6](../posts/13-ways-of-looking-at-a-turtle.html#way6)参照）。
+* **Result型**（別名Eitherモナド）。すべての関数型APIの例（[たとえば方法4](../posts/13-ways-of-looking-at-a-turtle.html#way4)）で、例外を投げる代わりにエラーを返すために使用されました。
+* **アプリカティブ「リフティング」**（例：`lift2`）。通常の関数を`Result`の世界に持ち上げるために使用されました（[方法4](../posts/13-ways-of-looking-at-a-turtle.html#way4)など）。
 * **状態管理の様々な方法**：
   * 可変フィールド（方法1）
   * 状態を明示的に管理し、一連の関数を通してパイプする（方法2）
@@ -1287,20 +1287,20 @@ let drawTwoLines log = turtleProgram {
   * エージェント内に状態を隠す（方法5）
   * ステートモナドで舞台裏で状態をスレッド化する（方法8と12の`turtle`ワークフロー）
   * コマンドのバッチ（方法9）やイベントのバッチ（方法10）、インタープリター（方法13）を使用して状態を完全に避ける
-* **関数を型でラップする**。[方法8](../posts/13-ways-of-looking-at-a-turtle.md#way8)で状態を管理するため（Stateモナド）と、[方法13](../posts/13-ways-of-looking-at-a-turtle.md#way13)で応答を格納するために使用されました。
+* **関数を型でラップする**。[方法8](../posts/13-ways-of-looking-at-a-turtle.html#way8)で状態を管理するため（Stateモナド）と、[方法13](../posts/13-ways-of-looking-at-a-turtle.html#way13)で応答を格納するために使用されました。
 * **コンピュテーション式**、たくさんありました！3つ作成して使用しました：
   * エラー処理のための`result`
   * タートルの状態管理のための`turtle`
-  * インタープリターアプローチ（[方法13](../posts/13-ways-of-looking-at-a-turtle-2.md#way13)）でASTを構築するための`turtleProgram`
+  * インタープリターアプローチ（[方法13](../posts/13-ways-of-looking-at-a-turtle-2.html#way13)）でASTを構築するための`turtleProgram`
 * **モナディック関数のチェーン化**。`result`と`turtle`ワークフローで行われました。基礎となる関数はモナディック（「対角」）で、通常は適切に合成できませんが、
   ワークフロー内では簡単かつ透過的に順序付けできます。
-* **振る舞いをデータ構造として表現する**。[「関数型依存性注入」の例（方法7）](../posts/13-ways-of-looking-at-a-turtle.md#way7)で、インターフェース全体ではなく単一の関数を渡せるようにするために使用されました。
+* **振る舞いをデータ構造として表現する**。[「関数型依存性注入」の例（方法7）](../posts/13-ways-of-looking-at-a-turtle.html#way7)で、インターフェース全体ではなく単一の関数を渡せるようにするために使用されました。
 * **データ中心のプロトコルを使用した分離**。エージェント、バッチコマンド、イベントソーシング、インタープリターの例で見られました。
 * **ロックフリーと非同期処理**。エージェントを使用（方法5）。
 * **コンピュテーションの「構築」と「実行」の分離**。`turtle`ワークフロー（方法8と12）と`turtleProgram`ワークフロー（方法13：インタープリター）で見られました。
-* **イベントソーシングを使用して状態を再構築する**。メモリ内で可変状態を維持する代わりに、[イベントソーシング（方法10）](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)
-   と[FRP（方法11）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)の例で見られました。
-* **イベントストリーム**と[FRP（方法11）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)の使用。ビジネスロジックを小さく、独立した、分離されたプロセッサに分割し、モノリシックなオブジェクトを避けるために使用されました。
+* **イベントソーシングを使用して状態を再構築する**。メモリ内で可変状態を維持する代わりに、[イベントソーシング（方法10）](../posts/13-ways-of-looking-at-a-turtle-2.html#way10)
+   と[FRP（方法11）](../posts/13-ways-of-looking-at-a-turtle-2.html#way11)の例で見られました。
+* **イベントストリーム**と[FRP（方法11）](../posts/13-ways-of-looking-at-a-turtle-2.html#way11)の使用。ビジネスロジックを小さく、独立した、分離されたプロセッサに分割し、モノリシックなオブジェクトを避けるために使用されました。
 
 これら13の方法を検討することは単なる楽しい演習であり、すべてのコードをすぐにストリームプロセッサやインタープリターを使用するように変換することを提案しているわけではありません！特に
 関数型プログラミングに慎重な人々と一緒に作業している場合、追加の複雑さに見合う明確な利点がない限り、初期の（そしてよりシンプルな）アプローチに固執する傾向があります。

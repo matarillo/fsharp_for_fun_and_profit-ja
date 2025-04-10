@@ -9,8 +9,8 @@ image: "@assets/img/vgfp_sequence_stack.png"
 ---
 
 この投稿は連載記事の一部です。
-[最初の2つの投稿](../posts/elevated-world.md)では、ジェネリックデータ型を扱うためのコア関数について説明しました。`map`、`bind`などです。
-[前回の投稿](../posts/elevated-world-3.md)では、「アプリカティブ」と「モナディック」スタイルについて議論し、値と関数を互いに一貫性のある形で高次の世界に持ち上げる方法を説明しました。
+[最初の2つの投稿](../posts/elevated-world.html)では、ジェネリックデータ型を扱うためのコア関数について説明しました。`map`、`bind`などです。
+[前回の投稿](../posts/elevated-world-3.html)では、「アプリカティブ」と「モナディック」スタイルについて議論し、値と関数を互いに一貫性のある形で高次の世界に持ち上げる方法を説明しました。
 
 今回の投稿では、よくある問題を見ていきます。高次の値のリストを扱う方法です。
 
@@ -19,36 +19,36 @@ image: "@assets/img/vgfp_sequence_stack.png"
 このシリーズで言及される様々な関数へのショートカットリストです。
 
 * **パート1：高次の世界への持ち上げ**
-  * [`map`関数](../posts/elevated-world.md#map)
-  * [`return`関数](../posts/elevated-world.md#return)
-  * [`apply`関数](../posts/elevated-world.md#apply)
-  * [`liftN`関数ファミリー](../posts/elevated-world.md#lift)
-  * [`zip`関数とZipList世界](../posts/elevated-world.md#zip)
+  * [`map`関数](../posts/elevated-world.html#map)
+  * [`return`関数](../posts/elevated-world.html#return)
+  * [`apply`関数](../posts/elevated-world.html#apply)
+  * [`liftN`関数ファミリー](../posts/elevated-world.html#lift)
+  * [`zip`関数とZipList世界](../posts/elevated-world.html#zip)
 * **パート2：世界をまたぐ関数の合成方法**    
-  * [`bind`関数](../posts/elevated-world-2.md#bind)
-  * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.md#not-a-monad)
+  * [`bind`関数](../posts/elevated-world-2.html#bind)
+  * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.html#not-a-monad)
 * **パート3：コア関数の実際的な使い方**  
-  * [独立データと依存データ](../posts/elevated-world-3.md#dependent)
-  * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.md#validation)
-  * [一貫した世界への持ち上げ](../posts/elevated-world-3.md#consistent)
-  * [Kleisli世界](../posts/elevated-world-3.md#kleisli)
+  * [独立データと依存データ](../posts/elevated-world-3.html#dependent)
+  * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.html#validation)
+  * [一貫した世界への持ち上げ](../posts/elevated-world-3.html#consistent)
+  * [Kleisli世界](../posts/elevated-world-3.html#kleisli)
 * **パート4：リストと高次の値の混合**    
-  * [リストと高次の値の混合](../posts/elevated-world-4.md#mixing)
-  * [`traverse`/`MapM`関数](../posts/elevated-world-4.md#traverse)
-  * [`sequence`関数](../posts/elevated-world-4.md#sequence)
-  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.md#adhoc)
-  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.md#readability)
-  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.md#filter)
+  * [リストと高次の値の混合](../posts/elevated-world-4.html#mixing)
+  * [`traverse`/`MapM`関数](../posts/elevated-world-4.html#traverse)
+  * [`sequence`関数](../posts/elevated-world-4.html#sequence)
+  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.html#adhoc)
+  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.html#readability)
+  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.html#filter)
 * **パート5：すべてのテクニックを使用する実世界の例**    
-  * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.md#asynclist)
-  * [2つの世界を1つとして扱う](../posts/elevated-world-5.md#asyncresult)
+  * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.html#asynclist)
+  * [2つの世界を1つとして扱う](../posts/elevated-world-5.html#asyncresult)
 * **パート6：独自の高次の世界を設計する** 
-  * [独自の高次の世界を設計する](../posts/elevated-world-6.md#part6)
-  * [失敗のフィルタリング](../posts/elevated-world-6.md#filtering)
-  * [Readerモナド](../posts/elevated-world-6.md#readermonad)
+  * [独自の高次の世界を設計する](../posts/elevated-world-6.html#part6)
+  * [失敗のフィルタリング](../posts/elevated-world-6.html#filtering)
+  * [Readerモナド](../posts/elevated-world-6.html#readermonad)
 * **パート7：まとめ** 
-  * [言及した演算子のリスト](../posts/elevated-world-7.md#operators)
-  * [補足文献](../posts/elevated-world-7.md#further-reading)
+  * [言及した演算子のリスト](../posts/elevated-world-7.html#operators)
+  * [補足文献](../posts/elevated-world-7.html#further-reading)
 
 <a id="mixing"></a>
 <hr>
@@ -821,7 +821,7 @@ output = desiredOutput |> printfn "出力は正しいですか？ %b"
 確かに、この解決策は、再利用可能な関数を1つ用意するよりも手間がかかりますが、機械的なので、コーディングにはほんの数分しかかかりません。
 そして、自分で解決策を考え出すよりもはるかに簡単です。
 
-*もっと知りたいですか？実際の問題で`sequence`を使う例については、[この投稿](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)を参照してください。*
+*もっと知りたいですか？実際の問題で`sequence`を使う例については、[この投稿](../posts/recursive-types-and-folds-3b.html#json-with-error-handling)を参照してください。*
 
 <a id="readability"></a>
 <hr>
@@ -878,5 +878,5 @@ foldの様々な使用法は独自のシリーズに値するので、フィル�
 
 この投稿では、高次の値のリストを扱う方法として`traverse`と`sequence`について学びました。
 
-[次の投稿](../posts/elevated-world-5.md)では、これまで議論してきたすべてのテクニックを使用する実践的な例を詳しく見ていきます。
+[次の投稿](../posts/elevated-world-5.html)では、これまで議論してきたすべてのテクニックを使用する実践的な例を詳しく見ていきます。
 

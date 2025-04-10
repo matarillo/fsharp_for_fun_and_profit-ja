@@ -9,10 +9,10 @@ seriesOrder: 4
 
 この一連の記事では、シンプルなポケット電卓アプリを開発しています。
 
-[最初の記事](../posts/calculator-design.md)では、型ファースト開発を用いて最初の設計を行いました。
-そして[2番目の記事](../posts/calculator-implementation.md)では、初期実装を作成しました。
+[最初の記事](../posts/calculator-design.html)では、型ファースト開発を用いて最初の設計を行いました。
+そして[2番目の記事](../posts/calculator-implementation.html)では、初期実装を作成しました。
 
-[前回の記事](../posts/calculator-complete-v1.md)では、ユーザーインターフェースを含めた残りのコードを作成し、実際に動かしてみました。
+[前回の記事](../posts/calculator-complete-v1.html)では、ユーザーインターフェースを含めた残りのコードを作成し、実際に動かしてみました。
 
 しかし、結果は散々なものでした！
 問題はコードのバグではなく、コーディングを始める前に要件を十分に検討していなかったことにありました。
@@ -60,7 +60,7 @@ let appendCh=
 （「FSM」――[空飛ぶスパゲッティモンスター](https://en.wikipedia.org/wiki/Flying_Spaghetti_Monster)と混同しないようにしましょう）を使うことを強く推奨しています。
 プログラムをステートマシンとしてモデル化できるケースがいかに多いか、きっと驚くことでしょう。
 
-ステートマシンを使うメリットは何でしょうか？ 以前の[投稿](../posts/designing-with-types-representing-states.md)でも触れましたが、改めてその利点を説明します。
+ステートマシンを使うメリットは何でしょうか？ 以前の[投稿](../posts/designing-with-types-representing-states.html)でも触れましたが、改めてその利点を説明します。
 
 **各状態は、それぞれ異なる動作を許容します。**
 言い換えれば、ステートマシンは、コンテキストと、そのコンテキストにおいてどのような操作が可能なのかを明確に意識することを強制します。

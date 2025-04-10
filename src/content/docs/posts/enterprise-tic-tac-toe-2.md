@@ -12,7 +12,7 @@ seriesOrder: 6
 *このシリーズでは、関数型プログラミングの理論と実践のギャップを埋めることを目指しています。
 小さなプロジェクトを選び、設計から実装まで、筆者の思考プロセスを具体的に示していきます。*
 
-[以前の記事](../posts/enterprise-tic-tac-toe.md) では、三目並べゲームの設計を行いました。
+[以前の記事](../posts/enterprise-tic-tac-toe.html) では、三目並べゲームの設計を行いました。
 
 直接コードに落とし込んだものとしては悪くありませんでしたが、いくつか気になる点がありました。
 
@@ -98,7 +98,7 @@ module TicTacToeDomain =
 
 それは、筆者がこれを設計のガイドラインとして使っているからです。 悪意のあるユーザーが筆者の意図しない操作をできる場合、設計はおそらく不十分です。
 
-[ケイパビリティベースのセキュリティ](../posts/capability-based-security.md) に関するシリーズでは、
+[ケイパビリティベースのセキュリティ](../posts/capability-based-security.html) に関するシリーズでは、
 [最小権限の原則](https://en.wikipedia.org/wiki/Principle_of_least_privilege)（「POLA」）に沿って設計することで、結果として優れた設計になることを指摘しています。
 
 つまり、呼び出し側が必要とする最小限のインターフェースを設計すると、偶発的な複雑さを回避し (優れた設計)、セキュリティを向上させることができます (POLA)。
@@ -276,8 +276,8 @@ type MoveResult =
 
 `MoveCapability` は `MoveResult` に依存し、`MoveResult` は `NextMoveInfo` に依存し、`NextMoveInfo` は再び `MoveCapability` に依存しています。しかし、F# コンパイラは一般的に前方参照を許可しません。
 
-このような循環依存は、一般的に良くないとされています（私自身も「 [循環依存は悪だ](../posts/cyclic-dependencies.md) 」という記事を書いています！）。
-循環依存を削除するために使える [回避策](../posts/removing-cyclic-dependencies.md) はいくつかあります。
+このような循環依存は、一般的に良くないとされています（私自身も「 [循環依存は悪だ](../posts/cyclic-dependencies.html) 」という記事を書いています！）。
+循環依存を削除するために使える [回避策](../posts/removing-cyclic-dependencies.html) はいくつかあります。
 
 しかし今回は、`type` キーワードの代わりに `and` キーワードを使って、これらの型をリンクします。これは、まさにこのような場合に役立ちます。
 
@@ -509,7 +509,7 @@ let injectLogging api =
 新しい設計は*関数中心*（あるいは私が好む言い方では*ケイパビリティ中心*）です。データはほとんどなくなり、
 各関数の呼び出しの結果は、次のステップで使う*別の*関数のセットになり、これが際限なく続きます。
 
-これは、[継続ベース](../posts/computation-expressions-continuations.md) のアプローチに似ています。
+これは、[継続ベース](../posts/computation-expressions-continuations.html) のアプローチに似ています。
 ただし、継続を渡すのではなく、関数が継続のリストを返し、その中から1つを選んで使うという点が異なります。
 
 ## ケイパビリティとRESTful設計 - 最高の組み合わせ

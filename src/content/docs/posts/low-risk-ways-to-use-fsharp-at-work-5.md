@@ -8,7 +8,7 @@ seriesOrder: 5
 
 ---
 
-この投稿は、[仕事でF#を低リスクかつ段階的に使う方法](../posts/low-risk-ways-to-use-fsharp-at-work.md)に関するシリーズの結論です。
+この投稿は、[仕事でF#を低リスクかつ段階的に使う方法](../posts/low-risk-ways-to-use-fsharp-at-work.html)に関するシリーズの結論です。
 
 最後に、コアや重要なコードに影響を与えることなく、F#がさまざまな開発タスクの周辺でどのように役立つかについて、いくつかの方法を見ていきます。
 
@@ -75,7 +75,7 @@ seriesOrder: 5
 F#はML由来の言語であり、簡単な正規表現から本格的なパーサーまで、あらゆる種類のパーシングタスクに理想的です。
 
 もちろん、一般的なタスクには多くの既製ライブラリがありますが、時には独自のものを書く必要があります。
-良い例は、[先ほど見た](../posts/low-risk-ways-to-use-fsharp-at-work-3.md#test-bdd)BDDフレームワークのTickSpecです。
+良い例は、[先ほど見た](../posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-bdd)BDDフレームワークのTickSpecです。
 
 TickSpecは、Given/When/Thenのいわゆる「Gherkin」形式をパースする必要があります。別のライブラリに依存するよりも、
 [Phil](http://trelford.com/blog/post/TickSpec.aspx)にとっては、数百行で独自のパーサーを書く方が簡単（そして楽しい）だったのではないかと想像します。
@@ -100,7 +100,7 @@ Martin Fowlerは[DSLに関する彼の本](https://ptgmedia.pearsoncmg.com/image
 
 何かをパースまたは分析した後、データでいっぱいの表よりも、結果を視覚的に表示できると常に良いです。
 
-たとえば、[以前の投稿](../posts/cycles-and-modularity-in-the-wild.md)で、[GraphViz](https://www.graphviz.org/)と組み合わせてF#を使い、
+たとえば、[以前の投稿](../posts/cycles-and-modularity-in-the-wild.html)で、[GraphViz](https://www.graphviz.org/)と組み合わせてF#を使い、
 依存関係のダイアグラムを作成しました。以下にサンプルを示します：
 
 ![](@assets/img/tickspec_svg.png)
@@ -219,7 +219,7 @@ data.``Arts and Entertainment``.Film.Films.IndividualsAZ.C.Casablanca.``Awards W
 
 ## Freebaseを使って現実的なテストデータを生成する
 
-FsCheckを使って[テストデータを生成する](../posts/low-risk-ways-to-use-fsharp-at-work-3.md#test-dummy)方法を見てきました。
+FsCheckを使って[テストデータを生成する](../posts/low-risk-ways-to-use-fsharp-at-work-3.html#test-dummy)方法を見てきました。
 同様に、Freebaseからデータを取得することで、より現実的なデータを得ることができます。
 
 [Kit Eason](https://x.com/kitlovesfsharp)が[ツイート](https://x.com/kitlovesfsharp/status/296240699735695360)でこの方法を示しました。

@@ -11,9 +11,9 @@ seriesOrder: 4
 
 このシリーズでは、アプリカティブパーサーとパーサーコンビネータの仕組みを見ていきます。
 
-* [最初の投稿](../posts/understanding-parser-combinators.md)では、パーシングライブラリの基礎を作りました。
-* [2番目の投稿](../posts/understanding-parser-combinators-2.md)では、他の多くの便利なコンビネータでライブラリを拡張しました。
-* [3番目の投稿](../posts/understanding-parser-combinators-3.md)では、エラーメッセージを改善しました。
+* [最初の投稿](../posts/understanding-parser-combinators.html)では、パーシングライブラリの基礎を作りました。
+* [2番目の投稿](../posts/understanding-parser-combinators-2.html)では、他の多くの便利なコンビネータでライブラリを拡張しました。
+* [3番目の投稿](../posts/understanding-parser-combinators-3.html)では、エラーメッセージを改善しました。
 * この最後の投稿では、これまでに作成したライブラリを使ってJSONパーサーを組み立てます。
 
 <hr>

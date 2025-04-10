@@ -44,8 +44,8 @@ type Direction =
 
 ## 複合型のサイズの計算
 
-ここで、複合型のサイズの計算を見ていきましょう。[「F# の型を理解する」](../series/understanding-fsharp-types.md)シリーズを思い出してほしいのですが、代数的型には2種類あります。
-[タプル](../posts/tuples.md)やレコードなどの「積」型と、F#では[判別共用体](../posts/discriminated-unions.md)と呼ばれる「和」型です。
+ここで、複合型のサイズの計算を見ていきましょう。[「F# の型を理解する」](../series/understanding-fsharp-types.html)シリーズを思い出してほしいのですが、代数的型には2種類あります。
+[タプル](../posts/tuples.html)やレコードなどの「積」型と、F#では[判別共用体](../posts/discriminated-unions.html)と呼ばれる「和」型です。
 
 たとえば、`Speed`と`Direction`があり、それらを`Velocity`というレコード型に組み合わせるとします。
 
@@ -662,7 +662,7 @@ type CustomerDTO = {
 * データベースやその他の「信頼できる」ソースから読み取るすべてのレコードを常に検証する。
 
 すべてが`Success/Failure`型でラップされていると面倒になると思うかもしれません。それは事実ですが（！）、これを簡単にする方法があります。
-たとえば、[この投稿](../posts/elevated-world-5.md#asynclist)を参照してください。
+たとえば、[この投稿](../posts/elevated-world-5.html#asynclist)を参照してください。
 
 ## さらに読むべき資料
 

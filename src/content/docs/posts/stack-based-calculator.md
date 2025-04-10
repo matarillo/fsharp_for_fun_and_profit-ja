@@ -30,13 +30,13 @@ categories: ["コンビネータ", "関数", "実践例"]
 type Stack = float list
 ```
 
-しかし、もう少しわかりやすくするために、[単一ケースのユニオン型](../posts/discriminated-unions.md#single-case)でラップしましょう。
+しかし、もう少しわかりやすくするために、[単一ケースのユニオン型](../posts/discriminated-unions.html#single-case)でラップしましょう。
 
 ```fsharp
 type Stack = StackContents of float list
 ```
 
-なぜこっちの方がいいのかについては、[この記事](../posts/discriminated-unions.md#single-case)で単一ケースのユニオン型について説明しています。
+なぜこっちの方がいいのかについては、[この記事](../posts/discriminated-unions.html#single-case)で単一ケースのユニオン型について説明しています。
 
 これで、新しいスタックを作るには `StackContents` をコンストラクタとして使います。
 
@@ -194,7 +194,7 @@ let pop (StackContents contents) =
 
 ここで、この問題をどう処理するか決める必要があります。
 
-* オプション1：「[F# を使う理由](../posts/correctness-exhaustive-pattern-matching.md)」シリーズの記事でやったように、特別な「成功」または「エラー」状態を返す。
+* オプション1：「[F# を使う理由](../posts/correctness-exhaustive-pattern-matching.html)」シリーズの記事でやったように、特別な「成功」または「エラー」状態を返す。
 * オプション2：例外を投げる。
 
 一般的に、エラーケースを使うことを好みますが、この場合は例外を使います。以下は空のケースを処理するように変えた `pop` コードです。

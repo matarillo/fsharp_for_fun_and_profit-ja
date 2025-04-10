@@ -7,7 +7,7 @@ seriesId: "コンピュテーション式"
 seriesOrder: 10
 ---
 
-[以前の記事](../posts/computation-expressions-builder-part3.md)で、ワークフロー内の式を必要になるまで評価しないようにする方法を見ました。
+[以前の記事](../posts/computation-expressions-builder-part3.html)で、ワークフロー内の式を必要になるまで評価しないようにする方法を見ました。
 
 しかし、その方法はワークフロー*内部*の式を対象としていました。では、*ワークフロー全体*を必要になるまで遅延させたい場合はどうすればよいでしょうか。
 
@@ -98,7 +98,7 @@ maybe {
 type Maybe<'a> = Maybe of (unit -> 'a option)
 ```
 
-単純な`option`をオプションを評価する関数に置き換え、その関数を[単一ケースユニオン](../posts/designing-with-types-single-case-dus.md)でラップしました。
+単純な`option`をオプションを評価する関数に置き換え、その関数を[単一ケースユニオン](../posts/designing-with-types-single-case-dus.html)でラップしました。
 
 そして、`Run`メソッドも変更する必要があります。以前は渡された遅延関数を評価していましたが、今は評価せずに新しいラッパー型でラップするだけにします。
 

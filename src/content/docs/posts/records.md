@@ -114,7 +114,7 @@ let p = {Person1.first="Alice"; last="Jones"}
 let { Person1.first=f; last=l} = p
 ```
 
-必要なら、完全修飾名（名前空間付き）を追加することもできます。以下は[モジュール](../posts/organizing-functions.md)を使った例です。
+必要なら、完全修飾名（名前空間付き）を追加することもできます。以下は[モジュール](../posts/organizing-functions.html)を使った例です。
 
 ```fsharp
 module Module1 = 
@@ -247,7 +247,7 @@ let p2 = {p1 with last="Smith"}
 
 ### レコードの表現
 
-[以前の投稿](../posts/convenience-types.md)で述べたように、レコードにはデフォルトできれいな文字列表現があり、簡単にシリアル化できます。しかし、タプルとは違い、`ToString()` の表現は役に立ちません。
+[以前の投稿](../posts/convenience-types.html)で述べたように、レコードにはデフォルトできれいな文字列表現があり、簡単にシリアル化できます。しかし、タプルとは違い、`ToString()` の表現は役に立ちません。
 
 ```fsharp
 printfn "%A" {first="Alice"; last="Jones"}   // 良い

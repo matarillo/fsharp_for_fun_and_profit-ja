@@ -7,34 +7,34 @@ categories: ["パターン"]
 
 この2部構成の大型投稿の第3部では、シンプルなタートルグラフィックスモデルを限界まで拡張し続けます。
 
-[第1回](../posts/13-ways-of-looking-at-a-turtle.md)と[第2回](../posts/13-ways-of-looking-at-a-turtle-2.md)では、
+[第1回](../posts/13-ways-of-looking-at-a-turtle.html)と[第2回](../posts/13-ways-of-looking-at-a-turtle-2.html)では、
 タートルグラフィックスの実装を13の異なる視点から説明しました。
 
 しかし、投稿後に触れ忘れた方法があったことに気づきました。
 そこで今回は、おまけとして2つの方法を紹介します。
 
-* [方法14：抽象データタートル](../posts/13-ways-of-looking-at-a-turtle-3.md#way14)。抽象データ型を使ってタートルの実装詳細をカプセル化します。
-* [方法15：ケイパビリティベースのタートル](../posts/13-ways-of-looking-at-a-turtle-3.md#way15)。タートルの現在の状態に基づいて、
+* [方法14：抽象データタートル](../posts/13-ways-of-looking-at-a-turtle-3.html#way14)。抽象データ型を使ってタートルの実装詳細をカプセル化します。
+* [方法15：ケイパビリティベースのタートル](../posts/13-ways-of-looking-at-a-turtle-3.html#way15)。タートルの現在の状態に基づいて、
   クライアントが利用できるタートル関数を制御します。
 
 前回紹介した13の方法を振り返ってみましょう。
 
-* [方法1. 基本的なオブジェクト指向アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way1)：可変状態を持つクラスを作ります。
-* [方法2. 基本的な関数型アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way2)：不変の状態を持つ関数のモジュールを作ります。
-* [方法3. オブジェクト指向のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way3)：状態を持つコアクラスを呼び出すオブジェクト指向APIを作ります。
-* [方法4. 関数型のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.md#way4)：状態を持たないコア関数を使う、状態を持つAPIを作ります。
-* [方法5. エージェントの前面にあるAPI](../posts/13-ways-of-looking-at-a-turtle.md#way5)：メッセージキューを使っててエージェントと通信するAPIを作ります。
-* [方法6. インターフェースを使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way6)：インターフェースまたは関数のレコードを使って、実装をAPIから分離します。
-* [方法7. 関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.md#way7)：関数パラメータを渡すことで、実装をAPIから分離します。
-* [方法8. Stateモナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way8)：状態を追跡する特別な「タートルワークフロー」コンピュテーション式を作ります。
-* [方法9. コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.md#way9)：タートルのコマンドを表す型を作り、コマンドのリストを一括処理します。
-* [幕間：データ型を使った意識的な分離](../posts/13-ways-of-looking-at-a-turtle.md#decoupling)。データまたはインターフェースを使った分離に関するメモ。
-* [方法10. イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.md#way10)：過去のイベントのリストから状態を構築します。
-* [方法11. 関数型リアクティブプログラミング（ストリーム処理）](../posts/13-ways-of-looking-at-a-turtle-2.md#way11)：ビジネスロジックが以前のイベントに反応することに基づいています。
-* [エピソードV：タートルの逆襲](../posts/13-ways-of-looking-at-a-turtle-2.md#strikes-back)：一部のコマンドが失敗する可能性を考慮するように、タートルAPIを変更します。
-* [方法12. モナディック制御フロー](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)：タートルワークフロー内で、以前のコマンドの結果に基づいて決定を行います。
-* [方法13. タートルインタープリター](../posts/13-ways-of-looking-at-a-turtle-2.md#way13)：タートルプログラミングとタートルの実装を完全に分離し、ほぼフリーモナドを実現します。
-* [使用したテクニックの再確認](../posts/13-ways-of-looking-at-a-turtle-2.md#review)。
+* [方法1. 基本的なオブジェクト指向アプローチ](../posts/13-ways-of-looking-at-a-turtle.html#way1)：可変状態を持つクラスを作ります。
+* [方法2. 基本的な関数型アプローチ](../posts/13-ways-of-looking-at-a-turtle.html#way2)：不変の状態を持つ関数のモジュールを作ります。
+* [方法3. オブジェクト指向のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.html#way3)：状態を持つコアクラスを呼び出すオブジェクト指向APIを作ります。
+* [方法4. 関数型のコアを持つAPI](../posts/13-ways-of-looking-at-a-turtle.html#way4)：状態を持たないコア関数を使う、状態を持つAPIを作ります。
+* [方法5. エージェントの前面にあるAPI](../posts/13-ways-of-looking-at-a-turtle.html#way5)：メッセージキューを使っててエージェントと通信するAPIを作ります。
+* [方法6. インターフェースを使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.html#way6)：インターフェースまたは関数のレコードを使って、実装をAPIから分離します。
+* [方法7. 関数を使った依存性注入](../posts/13-ways-of-looking-at-a-turtle.html#way7)：関数パラメータを渡すことで、実装をAPIから分離します。
+* [方法8. Stateモナドを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.html#way8)：状態を追跡する特別な「タートルワークフロー」コンピュテーション式を作ります。
+* [方法9. コマンドオブジェクトを使ったバッチ処理](../posts/13-ways-of-looking-at-a-turtle.html#way9)：タートルのコマンドを表す型を作り、コマンドのリストを一括処理します。
+* [幕間：データ型を使った意識的な分離](../posts/13-ways-of-looking-at-a-turtle.html#decoupling)。データまたはインターフェースを使った分離に関するメモ。
+* [方法10. イベントソーシング](../posts/13-ways-of-looking-at-a-turtle-2.html#way10)：過去のイベントのリストから状態を構築します。
+* [方法11. 関数型リアクティブプログラミング（ストリーム処理）](../posts/13-ways-of-looking-at-a-turtle-2.html#way11)：ビジネスロジックが以前のイベントに反応することに基づいています。
+* [エピソードV：タートルの逆襲](../posts/13-ways-of-looking-at-a-turtle-2.html#strikes-back)：一部のコマンドが失敗する可能性を考慮するように、タートルAPIを変更します。
+* [方法12. モナディック制御フロー](../posts/13-ways-of-looking-at-a-turtle-2.html#way12)：タートルワークフロー内で、以前のコマンドの結果に基づいて決定を行います。
+* [方法13. タートルインタープリター](../posts/13-ways-of-looking-at-a-turtle-2.html#way13)：タートルプログラミングとタートルの実装を完全に分離し、ほぼフリーモナドを実現します。
+* [使用したテクニックの再確認](../posts/13-ways-of-looking-at-a-turtle-2.html#review)。
 
 この投稿のソースコードは[GitHub](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle)で入手できます。
 
@@ -50,7 +50,7 @@ categories: ["パターン"]
 
 言い換えると、この型に対して機能する関数がいくつかありますが、型の「中身」を見ることは許されません。
 
-ある意味、これは[方法1のオブジェクト指向アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way1)と[方法2の関数型アプローチ](../posts/13-ways-of-looking-at-a-turtle.md#way2)の第3の選択肢と考えられます。
+ある意味、これは[方法1のオブジェクト指向アプローチ](../posts/13-ways-of-looking-at-a-turtle.html#way1)と[方法2の関数型アプローチ](../posts/13-ways-of-looking-at-a-turtle.html#way2)の第3の選択肢と考えられます。
 
 * オブジェクト指向の実装では、内部の詳細がうまくカプセル化され、アクセスはメソッドを介してのみ行われます。オブジェクト指向のクラスの欠点は、可変であることです。
 * 関数型の実装では、`TurtleState`は不変ですが、欠点は状態の内部が公開されていることです。
@@ -130,7 +130,7 @@ module Turtle =
     }                
 ```
 
-タートルモジュールの残りの関数は、[方法2](../posts/13-ways-of-looking-at-a-turtle.md#way2)の実装から変更ありません。
+タートルモジュールの残りの関数は、[方法2](../posts/13-ways-of-looking-at-a-turtle.html#way2)の実装から変更ありません。
 
 ### 抽象データ型のクライアント
 
@@ -202,7 +202,7 @@ F#での抽象データ型についての詳細は、Bryan Eddsによる[この�
 
 ## 15：ケイパビリティベースのタートル
 
-[方法12](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)の「モナディック制御フロー」アプローチでは、タートルが障壁に当たったことを知らせる応答を処理しました。
+[方法12](../posts/13-ways-of-looking-at-a-turtle-2.html#way12)の「モナディック制御フロー」アプローチでは、タートルが障壁に当たったことを知らせる応答を処理しました。
 
 しかし、障壁に当たったにもかかわらず、`move`操作を何度も呼び出すことを止められませんでした。
 
@@ -212,7 +212,7 @@ F#での抽象データ型についての詳細は、Bryan Eddsによる[この�
 通常、関数のリストには`move`、`turn`、`penUp`などが含まれますが、障壁に当たったときは`move`がそのリストから削除されます。シンプルですが効果的です。
 
 このテクニックは、ケイパビリティベースのセキュリティと呼ばれる認証・セキュリティ技術と密接に関連しています。
-詳細に興味がある場合は、[ケイパビリティベースのセキュリティに関する連載](../posts/capability-based-security.md)を参照してください。
+詳細に興味がある場合は、[ケイパビリティベースのセキュリティに関する連載](../posts/capability-based-security.html)を参照してください。
 
 ### ケイパビリティベースのタートルの設計
 
@@ -256,7 +256,7 @@ and SetColorFn =  unit     -> (SetColorResponse * TurtleFunctions)
 また、各関数の型エイリアスを宣言して、扱いやすくしています。どこでも`Distance -> (MoveResponse * TurtleFunctions)`と書くよりも`MoveFn`と書く方が簡単です。
 これらの定義は相互に再帰的なので、`and`キーワードを使用する必要がありました。
 
-最後に、このデザインの`MoveFn`の署名と[方法12の以前のデザイン](../posts/13-ways-of-looking-at-a-turtle-2.md#way12)の`move`の署名の違いに注目してください。
+最後に、このデザインの`MoveFn`の署名と[方法12の以前のデザイン](../posts/13-ways-of-looking-at-a-turtle-2.html#way12)の`move`の署名の違いに注目してください。
 
 以前のバージョン：
 
@@ -673,7 +673,7 @@ Move 60.0
 * クライアントのロジックが非常に複雑になります。関数が利用可能かどうかを常に確認する必要があるためです！
 * データ指向のAPIとは異なり、APIは簡単にシリアライズできません。
 
-ケイパビリティベースのセキュリティについての詳細は、[私の投稿](../posts/capability-based-security.md)を参照するか、[「エンタープライズ三目並べ」のビデオ](https://fsharpforfunandprofit.com/ettt/)をご覧ください。
+ケイパビリティベースのセキュリティについての詳細は、[私の投稿](../posts/capability-based-security.html)を参照するか、[「エンタープライズ三目並べ」のビデオ](https://fsharpforfunandprofit.com/ettt/)をご覧ください。
 
 *このバージョンのソースコードは[こちら](https://github.com/swlaschin/13-ways-of-looking-at-a-turtle/blob/master/15-CapabilityBasedTurtle.fsx)で入手できます。*
 

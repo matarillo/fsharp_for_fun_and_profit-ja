@@ -8,7 +8,7 @@ seriesOrder: 4
 
 ---
 
-この投稿は、[仕事でF#を低リスクかつ段階的に使う方法](../posts/low-risk-ways-to-use-fsharp-at-work.md)に関する前回のシリーズの続きです。
+この投稿は、[仕事でF#を低リスクかつ段階的に使う方法](../posts/low-risk-ways-to-use-fsharp-at-work.html)に関する前回のシリーズの続きです。
 
 今回は、データベース関連のタスクにおいてF#が予想外に役立つ方法を見ていきます。
 

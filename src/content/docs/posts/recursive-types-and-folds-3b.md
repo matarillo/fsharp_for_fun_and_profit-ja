@@ -9,7 +9,7 @@ categories: ["畳み込み", "パターン"]
 
 この記事はシリーズの第6弾です。
 
-[前回の記事](../posts/recursive-types-and-folds-3.md)では、ジェネリック型について簡単に見てきました。
+[前回の記事](../posts/recursive-types-and-folds-3.html)では、ジェネリック型について簡単に見てきました。
 
 この記事では、現実的な場面で木構造と畳み込みを使う例をいくつか掘り下げていきます。
 
@@ -18,41 +18,41 @@ categories: ["畳み込み", "パターン"]
 シリーズの内容は次の通りです。
 
 * **パート1: 再帰型とカタモーフィズム入門**
-  * [シンプルな再帰型](../posts/recursive-types-and-folds.md#basic-recursive-type)
-  * [すべてをパラメーター化](../posts/recursive-types-and-folds.md#parameterize)
-  * [カタモーフィズムの紹介](../posts/recursive-types-and-folds.md#catamorphisms)
-  * [カタモーフィズムの利点](../posts/recursive-types-and-folds.md#benefits)
-  * [カタモーフィズム作成のルール](../posts/recursive-types-and-folds.md#rules)
+  * [シンプルな再帰型](../posts/recursive-types-and-folds.html#basic-recursive-type)
+  * [すべてをパラメーター化](../posts/recursive-types-and-folds.html#parameterize)
+  * [カタモーフィズムの紹介](../posts/recursive-types-and-folds.html#catamorphisms)
+  * [カタモーフィズムの利点](../posts/recursive-types-and-folds.html#benefits)
+  * [カタモーフィズム作成のルール](../posts/recursive-types-and-folds.html#rules)
 * **パート2: カタモーフィズムの例**
-  * [カタモーフィズムの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-1b.md#file-system)
-  * [カタモーフィズムの例: 製品ドメイン](../posts/recursive-types-and-folds-1b.md#product)
+  * [カタモーフィズムの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-1b.html#file-system)
+  * [カタモーフィズムの例: 製品ドメイン](../posts/recursive-types-and-folds-1b.html#product)
 * **パート3: 畳み込みの紹介**
-  * [カタモーフィズム実装の欠陥](../posts/recursive-types-and-folds-2.md#flaw)
-  * [`fold` の導入](../posts/recursive-types-and-folds-2.md#fold)
-  * [foldの問題点](../posts/recursive-types-and-folds-2.md#problems)
-  * [関数をアキュムレーターとして使う](../posts/recursive-types-and-folds-2.md#functions)
-  * [`foldback` の導入](../posts/recursive-types-and-folds-2.md#foldback)
-  * [畳み込みの作成ルール](../posts/recursive-types-and-folds-2.md#rules)
+  * [カタモーフィズム実装の欠陥](../posts/recursive-types-and-folds-2.html#flaw)
+  * [`fold` の導入](../posts/recursive-types-and-folds-2.html#fold)
+  * [foldの問題点](../posts/recursive-types-and-folds-2.html#problems)
+  * [関数をアキュムレーターとして使う](../posts/recursive-types-and-folds-2.html#functions)
+  * [`foldback` の導入](../posts/recursive-types-and-folds-2.html#foldback)
+  * [畳み込みの作成ルール](../posts/recursive-types-and-folds-2.html#rules)
 * **パート4: 畳み込みを理解する**
-  * [反復 vs. 再帰](../posts/recursive-types-and-folds-2b.md#iteration)
-  * [畳み込みの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-2b.md#file-system)
-  * [「畳み込み」に関するよくある質問](../posts/recursive-types-and-folds-2b.md#questions)
+  * [反復 vs. 再帰](../posts/recursive-types-and-folds-2b.html#iteration)
+  * [畳み込みの例: ファイルシステムドメイン](../posts/recursive-types-and-folds-2b.html#file-system)
+  * [「畳み込み」に関するよくある質問](../posts/recursive-types-and-folds-2b.html#questions)
 * **パート5: ジェネリック再帰型**
-  * [ジェネリック再帰型 LinkedList](../posts/recursive-types-and-folds-3.md#linkedlist)
-  * [ギフトドメインをジェネリックにする](../posts/recursive-types-and-folds-3.md#revisiting-gift)
-  * [ジェネリックなコンテナ型の定義](../posts/recursive-types-and-folds-3.md#container)
-  * [ギフトドメインを実装する3つ目の方法](../posts/recursive-types-and-folds-3.md#another-gift)
-  * [抽象か具象か？3通りの設計の比較](../posts/recursive-types-and-folds-3.md#compare)
+  * [ジェネリック再帰型 LinkedList](../posts/recursive-types-and-folds-3.html#linkedlist)
+  * [ギフトドメインをジェネリックにする](../posts/recursive-types-and-folds-3.html#revisiting-gift)
+  * [ジェネリックなコンテナ型の定義](../posts/recursive-types-and-folds-3.html#container)
+  * [ギフトドメインを実装する3つ目の方法](../posts/recursive-types-and-folds-3.html#another-gift)
+  * [抽象か具象か？3通りの設計の比較](../posts/recursive-types-and-folds-3.html#compare)
 * **パート6: 木構造の実践的な利用**
-  * [ジェネリックな Tree 型の定義](../posts/recursive-types-and-folds-3b.md#tree)
-  * [Tree 型の実践的な利用](../posts/recursive-types-and-folds-3b.md#reuse)
-  * [Tree 型の写像](../posts/recursive-types-and-folds-3b.md#map)
-  * [例：ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.md#listing)
-  * [例：並列 grep](../posts/recursive-types-and-folds-3b.md#grep)
-  * [例：ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.md#database)
-  * [例：Tree から JSON へシリアライズ](../posts/recursive-types-and-folds-3b.md#tojson)
-  * [例：JSON から Tree へデシリアライズ](../posts/recursive-types-and-folds-3b.md#fromjson)
-  * [例：JSON から Tree へデシリアライズ - エラー処理版](../posts/recursive-types-and-folds-3b.md#json-with-error-handling)
+  * [ジェネリックな Tree 型の定義](../posts/recursive-types-and-folds-3b.html#tree)
+  * [Tree 型の実践的な利用](../posts/recursive-types-and-folds-3b.html#reuse)
+  * [Tree 型の写像](../posts/recursive-types-and-folds-3b.html#map)
+  * [例：ディレクトリ一覧の作成](../posts/recursive-types-and-folds-3b.html#listing)
+  * [例：並列 grep](../posts/recursive-types-and-folds-3b.html#grep)
+  * [例：ファイルシステムのデータベースへの保存](../posts/recursive-types-and-folds-3b.html#database)
+  * [例：Tree から JSON へシリアライズ](../posts/recursive-types-and-folds-3b.html#tojson)
+  * [例：JSON から Tree へデシリアライズ](../posts/recursive-types-and-folds-3b.html#fromjson)
+  * [例：JSON から Tree へデシリアライズ - エラー処理版](../posts/recursive-types-and-folds-3b.html#json-with-error-handling)
 
 
 <a id="tree"></a>
@@ -1351,7 +1351,7 @@ type Result<'a> =
 ```
 
 ここでは、この型がどのように機能するかは説明しません。
-このアプローチに慣れていない場合は、[私の記事](../posts/recipe-part2.md) または関数型エラー処理に関する[私の講演資料](https://fsharpforfunandprofit.com/rop/) を参照してください。
+このアプローチに慣れていない場合は、[私の記事](../posts/recipe-part2.html) または関数型エラー処理に関する[私の講演資料](https://fsharpforfunandprofit.com/rop/) を参照してください。
 
 前のセクションのすべてのステップをもう一度見直して、例外をスローする代わりに `Result` 型を使ってみましょう。
 
@@ -1411,7 +1411,7 @@ let rec dtoToTreeOfResults (treeDto:TreeDto<'Leaf,'Node>) :Tree<Result<'Leaf>,Re
 では、「 `Result` の木構造」 を 「木構造 の `Result` 」へ変換するにはどうすればよいでしょうか？
 
 答えは `sequence` 関数を使うことです。
-`sequence` 関数は、二つの型を「入れ替える」ような働きをします。`sequence` については、[持ち上げられた世界に関するシリーズ](../posts/elevated-world-4.md#sequence) で詳しく説明されています。
+`sequence` 関数は、二つの型を「入れ替える」ような働きをします。`sequence` については、[持ち上げられた世界に関するシリーズ](../posts/elevated-world-4.html#sequence) で詳しく説明されています。
 
 *注: 少し複雑な `traverse` 関数を使えば `map` と `sequence` を一度のステップで結合することもできますが、
 今回の例ではステップを分けることで理解しやすくしています。*
@@ -1419,7 +1419,7 @@ let rec dtoToTreeOfResults (treeDto:TreeDto<'Leaf,'Node>) :Tree<Result<'Leaf>,Re
 `Tree` と `Result` の組み合わせのための `sequence` 関数を作成する必要があります。
 幸い、`sequence` 関数の作成は機械的なプロセスで行えます。
 
-* 下位の型（`Result`）には `apply` と `return` 関数を定義する必要があります。 `apply` の意味は[こちら](../posts/elevated-world.md#apply)を参照してください。
+* 下位の型（`Result`）には `apply` と `return` 関数を定義する必要があります。 `apply` の意味は[こちら](../posts/elevated-world.html#apply)を参照してください。
 * 上位の型（`Tree`）には `cata` 関数が必要です。これは既にあります。
 * カタモーフィズムでは、上位型の各コンストラクタ（`LeafNode` と `InternalNode`）を `Result` 型に「持ち上げる」（例： `retn LeafNode <*> data`）ように置き換えます。
 
@@ -1498,7 +1498,7 @@ let strToCardMessage str =
 
 ケース変換メソッドは、通常の値ではなく `Result` である引数から、`Book` や `Chocolate` を構築する必要があります。
 このような場合に、`Result.lift2` のような「持ち上げ」関数が役立ちます。
-持ち上げの仕組みについては、[持ち上げに関する記事](../posts/elevated-world.md#lift)と[アプリカティブを使った検証に関する記事](../posts/elevated-world-3.md#validation) を参照してください。 
+持ち上げの仕組みについては、[持ち上げに関する記事](../posts/elevated-world.html#lift)と[アプリカティブを使った検証に関する記事](../posts/elevated-world-3.html#validation) を参照してください。 
   
 ```fsharp
 let bookFromDto (dto:GiftContentsDto) =
@@ -1580,7 +1580,7 @@ JSON 文字列を受け取って `Gift` オブジェクトを作成するパイ�
 * `fromJson` 関数は `Result<TreeDto>` を返しますが、パイプラインの次の関数 (`dtoToTree`) は通常の `TreeDto` を入力として想定しています。
 * 同様に、`dtoToTree` は `Result<Tree>` を返しますが、次の関数 (`dtoToGift`) は通常の `Tree` を入力として想定しています。
 
-どちらの場合も、`Result.bind` を使って、この出力/入力の不一致の問題を解決できます。[bindの詳細な説明はこちら](../posts/elevated-world-2.md#bind)を参照してください。
+どちらの場合も、`Result.bind` を使って、この出力/入力の不一致の問題を解決できます。[bindの詳細な説明はこちら](../posts/elevated-world-2.html#bind)を参照してください。
 
 それでは、以前作成した `goodJson` 文字列のデシリアライズを試してみましょう。
 

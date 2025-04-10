@@ -8,7 +8,7 @@ seriesOrder: 3
 ---
 
 
-[このシリーズ](../series/understanding-monoids.md)の前回の投稿では、適切なモノイドだけを扱いました。
+[このシリーズ](../series/understanding-monoids.html)の前回の投稿では、適切なモノイドだけを扱いました。
 
 でも、扱いたいものがモノイドでない場合はどうすればいいでしょうか。
 この投稿では、ほぼすべてのものをモノイドに変換するコツをお教えします。
@@ -53,7 +53,7 @@ let addMyType t1 t2 =
 `addMyType`関数は`int`フィールドに整数加算を、`list`フィールドにリスト連結を使います。
 結果として、`MyType`は`addMyType`関数を使ってクローズドになります。実際、クローズドになるだけでなく、モノイドにもなります。これで完成です！
 
-これは[前回の投稿](../posts/monoids-part2.md)で`CustomerStats`に用いたアプローチと同じです。
+これは[前回の投稿](../posts/monoids-part2.html)で`CustomerStats`に用いたアプローチと同じです。
 
 ここで最初のコツを紹介します。
 

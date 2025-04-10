@@ -51,12 +51,12 @@ C# に慣れ親しんでいる方なら、すべての CLI 型を知っている
 
 F# 固有の型には以下が含まれます。
 
-* [関数型](../posts/function-values-and-simple-values.md) (デリゲートや C# のラムダ式とは異なります)
-* [Unit 型](../posts/how-types-work-with-functions.md#unit-type)
-* [タプル](../posts/tuples.md) (現在は .NET 4.0 以降に含まれます)
-* [レコード](../posts/records.md)
-* [判別共用体](../posts/discriminated-unions.md)
-* [オプション型](../posts/the-option-type.md)
+* [関数型](../posts/function-values-and-simple-values.html) (デリゲートや C# のラムダ式とは異なります)
+* [Unit 型](../posts/how-types-work-with-functions.html#unit-type)
+* [タプル](../posts/tuples.html) (現在は .NET 4.0 以降に含まれます)
+* [レコード](../posts/records.html)
+* [判別共用体](../posts/discriminated-unions.html)
+* [オプション型](../posts/the-option-type.html)
 * リスト (.NET の List クラスとは異なります)
 
 新しい型を作るときは、クラスではなく F# 固有の型を使うことを強くお勧めします。F# 固有の型には、CLI 型に比べて以下のような利点があります。
@@ -97,7 +97,7 @@ type MyClass(initX:int) =
    member this.Method() = printf "x=%i" x
 ```
 
-[以前の記事](../posts/function-signatures.md) で述べたように、新しい型を定義するための特別な構文があり、通常の式構文とは異なります。この違いに注意してください。
+[以前の記事](../posts/function-signatures.html) で述べたように、新しい型を定義するための特別な構文があり、通常の式構文とは異なります。この違いに注意してください。
 
 型は、名前空間またはモジュール*でのみ*宣言できます。ただし、常にトップレベルで作成する必要はありません。必要に応じて、ネストされたモジュール内に型を作って隠すこともできます。
 

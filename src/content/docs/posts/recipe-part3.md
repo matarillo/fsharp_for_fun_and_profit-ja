@@ -82,7 +82,7 @@ F#初心者は、C#と同じようにクラスでコードを整理したくな�
 * 次のファイルは最初のファイルにのみ依存します。これは下から2番目の層の機能を表します。
 * 以下同様に続きます。各ファイルは前のファイルにのみ依存します。
 
-[パート1](../posts/recipe-part1.md)で議論したユースケースの例を参照すると：
+[パート1](../posts/recipe-part1.html)で議論したユースケースの例を参照すると：
 
 ![レシピのハッピーパス](@assets/img/Recipe_HappyPath.png)
 
@@ -216,7 +216,7 @@ let g () = Person.create "Alice" "Smith"
 
 コンパイラは`Person`モジュールを参照していると理解します。
 
-モジュールについての詳細は、[関数の整理](../posts/organizing-functions.md)に関する記事を参照してください。
+モジュールについての詳細は、[関数の整理](../posts/organizing-functions.html)に関する記事を参照してください。
 
 ## モジュールの整理
 
@@ -243,7 +243,7 @@ let g () = Person.create "Alice" "Smith"
 
 さらに重要なのは、*人間*が正しい順序を決定するのも簡単ではないということです。そのため、メンテナンスが必要以上に困難になってしまいます。
 
-実際には、大規模プロジェクトであっても、フォルダがないことは思ったほど問題にはなりません。F#コンパイラ自体を含め、この制限内で成功している大規模なF#プロジェクトがいくつかあります。詳細は[実世界の循環依存とモジュール性](../posts/cycles-and-modularity-in-the-wild.md)に関する記事を参照してください。
+実際には、大規模プロジェクトであっても、フォルダがないことは思ったほど問題にはなりません。F#コンパイラ自体を含め、この制限内で成功している大規模なF#プロジェクトがいくつかあります。詳細は[実世界の循環依存とモジュール性](../posts/cycles-and-modularity-in-the-wild.html)に関する記事を参照してください。
 
 ### 型間に相互依存がある場合はどうすればいいですか？
 
@@ -257,7 +257,7 @@ type Employee = {name: string; worksAt: Location}
 
 F#コンパイラを満足させるにはどうすればいいでしょうか？
 
-それほど難しくはありませんが、さらに説明が必要なので、[循環依存の対処法](../posts/cyclic-dependencies.md)について別の記事を用意しました。
+それほど難しくはありませんが、さらに説明が必要なので、[循環依存の対処法](../posts/cyclic-dependencies.html)について別の記事を用意しました。
 
 ## サンプルコード
 
@@ -436,6 +436,6 @@ module UseCases =
 
 それまでの間、循環依存についての続編をお読みください：
 
-* [循環依存は悪](../posts/cyclic-dependencies.md)
-* [循環依存を取り除くリファクタリング](../posts/removing-cyclic-dependencies.md)
-* [実世界の循環依存とモジュール性](../posts/cycles-and-modularity-in-the-wild.md)（C#とF#のプロジェクトの実際の指標を比較しています）
+* [循環依存は悪](../posts/cyclic-dependencies.html)
+* [循環依存を取り除くリファクタリング](../posts/removing-cyclic-dependencies.html)
+* [実世界の循環依存とモジュール性](../posts/cycles-and-modularity-in-the-wild.html)（C#とF#のプロジェクトの実際の指標を比較しています）

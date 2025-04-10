@@ -61,7 +61,7 @@ categories: []
 
 モナドのチュートリアルを書かないのはそのためです。関数型プログラミングを学ぶ人の役に立つとは思えません。むしろ、混乱と不安を生み出すだけです。
 
-もちろん、[多くの](../posts/recipe-part2.md)異なる[記事](../posts/computation-expressions-wrapper-types.md)でモナドの例を使いますが、ここ以外では、このサイトのどこでも「モナド」という言葉を使わないようにします。
+もちろん、[多くの](../posts/recipe-part2.html)異なる[記事](../posts/computation-expressions-wrapper-types.html)でモナドの例を使いますが、ここ以外では、このサイトのどこでも「モナド」という言葉を使わないようにします。
 実際、「モナド」は[禁止ワードリスト](https://fsharpforfunandprofit.com/about/#forbidden-words)の筆頭に挙げられています。
 
 

@@ -12,6 +12,6 @@ seriesIndexId: "モノイドを理解する"
 
 
 
-* [つらくないモノイド](../posts/monoids-without-tears.md)。一般的な関数型パターンについて、数学をほとんど使わずに説明します。
-* [実践的なモノイド](../posts/monoids-part2.md)。つらくないモノイド - パート2。
-* [モノイド以外を扱う](../posts/monoids-part3.md)。つらくないモノイド - パート3。
+* [つらくないモノイド](../posts/monoids-without-tears.html)。一般的な関数型パターンについて、数学をほとんど使わずに説明します。
+* [実践的なモノイド](../posts/monoids-part2.html)。つらくないモノイド - パート2。
+* [モノイド以外を扱う](../posts/monoids-part3.html)。つらくないモノイド - パート3。

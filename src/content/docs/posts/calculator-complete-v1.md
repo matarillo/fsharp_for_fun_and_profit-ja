@@ -9,8 +9,8 @@ seriesOrder: 3
 
 この記事では、シンプルな電卓アプリの開発を続けていきます。
 
-[最初の記事](../posts/calculator-design.md)では、型のみを使用して（UML図は使用せず！）、設計の最初のドラフトを完成させました。
-そして、[前回の記事](../posts/calculator-implementation.md)では、設計に基づいた初期実装を作成し、その過程で不足している要件を明らかにしました。
+[最初の記事](../posts/calculator-design.html)では、型のみを使用して（UML図は使用せず！）、設計の最初のドラフトを完成させました。
+そして、[前回の記事](../posts/calculator-implementation.html)では、設計に基づいた初期実装を作成し、その過程で不足している要件を明らかにしました。
 
 今回は、残りのコンポーネントを構築し、それらを組み合わせて完全なアプリケーションにする段階です。
 
@@ -328,7 +328,7 @@ type CalculatorState = {
 ```
 
 （*これは今のところ良い解決策のように思えるかもしれませんが、このようなフラグを使用することは実際には設計上の臭いです。
-次の記事では、フラグを使用しない[別のアプローチ](../posts/designing-with-types-representing-states.md#replace-flags)を使用します*）
+次の記事では、フラグを使用しない[別のアプローチ](../posts/designing-with-types-representing-states.html#replace-flags)を使用します*）
 
 ## 実装の修正
 
@@ -410,7 +410,7 @@ TDDアプローチでは、「1 + 2 = 3」を確認することは、最初に�
 残念ながら、必ずしもそうとは言えません。テスト駆動開発が効果を発揮するのは、起こりうるすべてのケースを事前に想定できる場合に限られます。
 つまり、TDDは想像力の欠如を補う魔法の杖ではないのです。
 
-そして、もし良い要件があれば、型を設計して[不正な状態を表現できないようにする](../posts/designing-with-types-making-illegal-states-unrepresentable.md)ことができ、
+そして、もし良い要件があれば、型を設計して[不正な状態を表現できないようにする](../posts/designing-with-types-making-illegal-states-unrepresentable.html)ことができ、
 テストで正当性を保証する必要はありません。
 
 私は自動テストに反対しているのではありません。実際、特定の要件を検証するために、特に統合テストや大規模なテストでは、常に自動テストを使用しています。
@@ -462,7 +462,7 @@ module CalculatorTests =
         ``when I input 1 + 2 + 3, I expect 6``() 
 ```
 
-そしてもちろん、これは[NUnitなど](../posts/low-risk-ways-to-use-fsharp-at-work-3.md)を使用して簡単に適応させることができます。
+そしてもちろん、これは[NUnitなど](../posts/low-risk-ways-to-use-fsharp-at-work-3.html)を使用して簡単に適応させることができます。
 
 ## どうすればより良い設計を開発できますか？
 
@@ -474,7 +474,7 @@ module CalculatorTests =
 1つの明白な解決策は、適切なTDDアプローチに切り替えることです。
 しかし、私は少し頑固なので、型ファースト設計を続けられるかどうか試してみます。
 
-[次の記事](../posts/calculator-complete-v2.md)では、場当たり的で自信過剰なやり方をやめ、
+[次の記事](../posts/calculator-complete-v2.html)では、場当たり的で自信過剰なやり方をやめ、
 設計段階でこのような種類のエラーを防ぐ可能性がはるかに高い、より徹底的なプロセスを使用します。
 
 *この記事のコードはGitHubの[このgist（パッチ未適用）](https://gist.github.com/swlaschin/0e954cbdc383d1f5d9d3#file-calculator_v1-fsx)と

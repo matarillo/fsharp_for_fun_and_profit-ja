@@ -9,7 +9,7 @@ image: "@assets/img/vgfp_rop_before.png"
 ---
 
 この投稿は、シリーズの3番目です。
-[前の2つの投稿](../posts/elevated-world.md)では、ジェネリックなデータ型を扱うためのコア関数について説明しました。`map`、`apply`、`bind`などです。
+[前の2つの投稿](../posts/elevated-world.html)では、ジェネリックなデータ型を扱うためのコア関数について説明しました。`map`、`apply`、`bind`などです。
 
 今回の投稿では、これらの関数を実際にどう使うか、そして「アプリカティブ」スタイルと「モナディック」スタイルの違いについて説明します。
 
@@ -18,36 +18,36 @@ image: "@assets/img/vgfp_rop_before.png"
 このシリーズで触れる様々な関数へのショートカットリストです。
 
 * **パート1：高次の世界への持ち上げ**
-  * [`map`関数](../posts/elevated-world.md#map)
-  * [`return`関数](../posts/elevated-world.md#return)
-  * [`apply`関数](../posts/elevated-world.md#apply)
-  * [`liftN`関数ファミリー](../posts/elevated-world.md#lift)
-  * [`zip`関数とZipList世界](../posts/elevated-world.md#zip)
+  * [`map`関数](../posts/elevated-world.html#map)
+  * [`return`関数](../posts/elevated-world.html#return)
+  * [`apply`関数](../posts/elevated-world.html#apply)
+  * [`liftN`関数ファミリー](../posts/elevated-world.html#lift)
+  * [`zip`関数とZipList世界](../posts/elevated-world.html#zip)
 * **パート2：世界をまたぐ関数の合成方法**    
-  * [`bind`関数](../posts/elevated-world-2.md#bind)
-  * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.md#not-a-monad)
+  * [`bind`関数](../posts/elevated-world-2.html#bind)
+  * [リストはモナドではない。オプションもモナドではない。](../posts/elevated-world-2.html#not-a-monad)
 * **パート3：コア関数の実際的な使い方**  
-  * [独立データと依存データ](../posts/elevated-world-3.md#dependent)
-  * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.md#validation)
-  * [一貫した世界への持ち上げ](../posts/elevated-world-3.md#consistent)
-  * [Kleisli世界](../posts/elevated-world-3.md#kleisli)
+  * [独立データと依存データ](../posts/elevated-world-3.html#dependent)
+  * [例：アプリカティブスタイルとモナディックスタイルを使ったバリデーション](../posts/elevated-world-3.html#validation)
+  * [一貫した世界への持ち上げ](../posts/elevated-world-3.html#consistent)
+  * [Kleisli世界](../posts/elevated-world-3.html#kleisli)
 * **パート4：リストと高次の値の混合**    
-  * [リストと高次の値の混合](../posts/elevated-world-4.md#mixing)
-  * [`traverse`/`MapM`関数](../posts/elevated-world-4.md#traverse)
-  * [`sequence`関数](../posts/elevated-world-4.md#sequence)
-  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.md#adhoc)
-  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.md#readability)
-  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.md#filter)
+  * [リストと高次の値の混合](../posts/elevated-world-4.html#mixing)
+  * [`traverse`/`MapM`関数](../posts/elevated-world-4.html#traverse)
+  * [`sequence`関数](../posts/elevated-world-4.html#sequence)
+  * [アドホックな実装のレシピとしての「シーケンス」](../posts/elevated-world-4.html#adhoc)
+  * [読みやすさ vs パフォーマンス](../posts/elevated-world-4.html#readability)
+  * [ねえ、`filter`はどこ？](../posts/elevated-world-4.html#filter)
 * **パート5：すべてのテクニックを使用する実世界の例**    
-  * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.md#asynclist)
-  * [2つの世界を1つとして扱う](../posts/elevated-world-5.md#asyncresult)
+  * [例：Webサイトのリストのダウンロードと処理](../posts/elevated-world-5.html#asynclist)
+  * [2つの世界を1つとして扱う](../posts/elevated-world-5.html#asyncresult)
 * **パート6：独自の高次の世界を設計する** 
-  * [独自の高次の世界を設計する](../posts/elevated-world-6.md#part6)
-  * [失敗のフィルタリング](../posts/elevated-world-6.md#filtering)
-  * [Readerモナド](../posts/elevated-world-6.md#readermonad)
+  * [独自の高次の世界を設計する](../posts/elevated-world-6.html#part6)
+  * [失敗のフィルタリング](../posts/elevated-world-6.html#filtering)
+  * [Readerモナド](../posts/elevated-world-6.html#readermonad)
 * **パート7：まとめ** 
-  * [言及した演算子のリスト](../posts/elevated-world-7.md#operators)
-  * [補足文献](../posts/elevated-world-7.md#further-reading)
+  * [言及した演算子のリスト](../posts/elevated-world-7.html#operators)
+  * [補足文献](../posts/elevated-world-7.html#further-reading)
 
 <a id="part2"></a>
 <hr>
@@ -94,7 +94,7 @@ image: "@assets/img/vgfp_rop_before.png"
 
 見てわかるように、アプリカティブスタイルとモナディックスタイルの選択は明確ではありません。やりたいことによって変わります。
 
-この例の実際の実装は、[このシリーズの最終投稿](../posts/elevated-world-5.md#asynclist)で見ていきます。
+この例の実際の実装は、[このシリーズの最終投稿](../posts/elevated-world-5.html#asynclist)で見ていきます。
 
 **ただし...**
 
@@ -510,7 +510,7 @@ let createCustomerResultA id name email =
 この組み合わされた関数は、`a->Result<b>`の形の別の世界をまたぐ関数であり、さらに大きな関数のコンポーネント部分として使用できます。
 
 この「全てを同じ世界に高次化する」アプローチの詳細な例については、
-[関数型エラー処理](https://fsharpforfunandprofit.com/rop/)と[状態のスレッド処理](../series/handling-state.md)に関する私の投稿を参照してください。
+[関数型エラー処理](https://fsharpforfunandprofit.com/rop/)と[状態のスレッド処理](../series/handling-state.html)に関する私の投稿を参照してください。
 
 <a id="kleisli"></a>
 <hr>
@@ -551,5 +551,5 @@ Kleisli世界には2トラック世界にはない素晴らしい特性があり
 
 また、異なる種類の値と関数を一貫した世界に持ち上げて、簡単に扱えるようにする方法も見ました。
 
-[次の投稿](../posts/elevated-world-4.md)では、高次の値のリストを扱うという一般的な問題について見ていきます。
+[次の投稿](../posts/elevated-world-4.html)では、高次の値のリストを扱うという一般的な問題について見ていきます。
 
