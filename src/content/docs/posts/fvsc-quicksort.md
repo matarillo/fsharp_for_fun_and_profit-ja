@@ -63,6 +63,7 @@ match x with
 | caseA -> something
 | caseB -> somethingElse
 ```
+
 * `[]`との"`match`"は空のリストにマッチし、空のリストを返します。
 * `firstElem::otherElements`との"`match`"は2つのことを行います。
   * まず、空でないリストにのみマッチします。

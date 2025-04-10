@@ -57,7 +57,7 @@ F# ビルド自動化システムである「[FAKE](https://github.com/fsharp/FA
 自分で試してみる方法として、次の例では、Webページをローカルファイルにダウンロードする小さなスクリプトを紹介します。
 まず、FSX スクリプト ファイルを作成し、`ShellScriptExample.fsx` という名前を付け、次のコードを貼り付けてください。
 
-```
+```fsharp
 // ================================
 // 説明:
 //   指定された URL をダウンロードし、タイムスタンプ付きのファイルとして保存します
@@ -95,7 +95,7 @@ match fsi.CommandLineArgs with
 
 このスクリプトを実行するには、同じディレクトリでコマンド プロンプトを開き、次のように入力します。
 
-```
+```shell
 fsi ShellScriptExample.fsx https://www.google.com/ google_homepage
 ```
 

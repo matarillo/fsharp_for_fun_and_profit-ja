@@ -18,7 +18,7 @@ F#には波かっこやセミコロンなどの、[コーディング上の「�
 
 また、C#と比べて、同じ問題を解決するのに[より少ないコード行数](posts/fvsc-download.html)で済みます。
 
-```
+```fsharp
 // ワンライナー
 [1..100] |> List.sum |> printfn "sum=%d"
 
@@ -48,7 +48,7 @@ F#では多くの一般的なプログラミング作業がより簡単です。
 
 また、関数が第一級オブジェクトであるため、[他の関数をパラメータとして受け取る](posts/conciseness-extracting-boilerplate.html)関数や、[既存の関数を組み合わせて](posts/conciseness-functions-as-building-blocks.html)新しい関数を作る関数を作成することで、強力で再利用可能なコードを簡単に作れます。
 
-```
+```fsharp
 // 自動的な等値判定と比較
 type Person = {First:string; Last:string}
 let person1 = {First="john"; Last="Doe"}
@@ -75,7 +75,7 @@ F#には[強力な型システム](posts/correctness-type-checking.html)があ�
 [単位の混乱](posts/units-of-measure.html)を避けられたりするため、ユニットテストの必要性が大幅に減ります。
 
 
-```
+```fsharp
 // 厳密な型チェック
 printfn "print string %s" 123 //コンパイルエラー
 
@@ -105,7 +105,7 @@ F#には組み込みの[アクターモデル](posts/concurrency-actor-model.htm
 
 そして、データ構造がデフォルトで不変なので、状態の共有やロックの回避がずっと簡単です。
 
-```
+```fsharp
 // "async" キーワードで非同期ロジックが簡単
 let! result = async {something}
 
@@ -136,7 +136,7 @@ F#は[.NETエコシステムの一部](posts/completeness-seamless-dotnet-intero
 ユニットテスト、ソース管理、その他の開発タスク用の多くのプラグインを備えた優れたIDEが使えます。
 Linuxでは、代わりにMonoDevelop IDEを使用できます。
 
-```
+```fsharp
 // 必要であれば非純粋なコードも書ける
 let mutable counter = 0
 

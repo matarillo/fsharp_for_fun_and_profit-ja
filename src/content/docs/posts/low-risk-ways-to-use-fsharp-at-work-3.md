@@ -352,9 +352,10 @@ let ``2 + 2 is bigger than 5``() =
    let result = 2 + 2
    result >? 5
 ```
-<a name="test-fscheck"></a>
 
 *上記のコードは[githubで入手可能](https://github.com/swlaschin/low-risk-ways-to-use-fsharp-at-work/blob/master/TestsInFsharp/TestWithUnquote.fs)です。*
+
+<a name="test-fscheck"></a>
 
 ## 13. FsCheckを使ってより良い単体テストを書く
 

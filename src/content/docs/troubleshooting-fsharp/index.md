@@ -24,7 +24,7 @@ C#のような命令型言語から来た場合、デバッガーに頼って不
 
 F#では、空白文字が関数パラメータの標準的な区切り文字です。かっこを使用する必要はほとんどなく、特に関数を呼び出す際にはかっこを使用しないでください。
 
-```
+```fsharp
 let add x y = x + y
 let result = add (1 2)  //間違い
     // error FS0003: この値は関数ではないため、適用できません
@@ -35,7 +35,7 @@ let result = add 1 2    //正しい
 
 カンマがある場合、それはタプルです。そして、タプルは2つのオブジェクトではなく1つのオブジェクトです。そのため、間違った型のパラメータを渡している、あるいはパラメータが少なすぎるというエラーが発生します。
 
-```
+```fsharp
 addTwoParams (1,2)  // 2つの引数の代わりに1つのタプルを渡そうとしている
    // error FS0001: この式に必要な型は 'int' ですが、
    //               ここでは次の型が指定されています 'int * int' 
@@ -45,7 +45,7 @@ addTwoParams (1,2)  // 2つの引数の代わりに1つのタプルを渡そう�
 
 *1つの*タプルを期待する関数に*2つの*引数を渡そうとすると、別の分かりにくいエラーが発生します。
 
-```
+```fsharp
 addTuple 1 2   // 1つのタプルの代わりに2つの引数を渡そうとしている
   // error FS0003: この値は関数ではないため、適用できません。
 ```
@@ -64,7 +64,7 @@ F#コンパイラは、関数に渡す引数が少なすぎても文句を言い
 
 F#が明示的な区切り文字を必要とする数少ない場所（リストやレコードなど）では、セミコロンが使用されます。カンマは決して使用されません。（繰り返しになりますが、カンマはタプル用であることを思い出してください）。
 
-```
+```fsharp
 let list1 = [1,2,3]    // 間違い！ これは3要素のタプルを含む
                        // 1要素のリストです
 let list1 = [1;2;3]    // 正しい
@@ -77,7 +77,7 @@ type Customer = {Name:string; Address: string}  // 正しい
 
 感嘆符記号は "NOT" 演算子ではありません。可変参照の参照解除演算子です。誤って使用すると、次のエラーが発生します：
 
-```
+```fsharp
 let y = true
 let z = !y
 // error FS0001: この式に必要な型は ''a ref' ですが、
@@ -88,14 +88,14 @@ let z = !y
 
 正しい構文は、 `not` キーワードを使用することです。C構文ではなく、SQLやVB構文を思い浮かべてください。
 
-```
+```fsharp
 let y = true
 let z = not y       //正しい
 ```
 
 そして、「等しくない」には、SQLやVBと同様に `<>` を使用します。
 
-```
+```fsharp
 let z = 1 <> 2      //正しい
 ```
 
@@ -103,7 +103,7 @@ let z = 1 <> 2      //正しい
 
 可変値を使用する場合、代入操作は `<-` と記述します。等号記号を使用すると、エラーが発生しないかもしれませんが、予期しない結果になる可能性があります。
 
-```
+```fsharp
 let mutable x = 1
 x = x + 1          // falseを返します。xはx+1と等しくありません
 x <- x + 1         // x+1をxに代入します
@@ -113,7 +113,7 @@ x <- x + 1         // x+1をxに代入します
 
 インデントのルールは非常に簡単で、すぐに慣れることができます。ただし、タブは使用できず、スペースのみを使用する必要があります。
 
-```
+```fsharp
 let add x y = 	
 {tab}	x + y   
 // => error FS1161: F# コードにタブを使用するには、#indent "off" オプションを使用する必要があります
@@ -127,7 +127,7 @@ let add x y =
 
 再利用可能なパラメータなしの関数が必要な場合は、明示的にunitパラメータを渡すか、ラムダとして定義する必要があります。
 
-```
+```fsharp
 let reader = new System.IO.StringReader("hello")
 let nextLineFn   =  reader.ReadLine()  //間違い
 let nextLineFn() =  reader.ReadLine()  //正しい
@@ -254,20 +254,20 @@ F#コンパイラは現在、左から右への1パスコンパイラである�
 
 C# やほとんどの命令型言語とは異なり、F# では int と float を式の中で混用できません。次のようにしようとすると、型エラーが発生します。
 
-```
+```fsharp
 1 + 2.0  //間違い
    // => error FS0001: この式に必要な型は 'float' ですが、ここでは次の型が指定されています 'int'
 ```
    
 解決方法は、まず int を `float` にキャストすることです。
 
-```
+```fsharp
 float 1 + 2.0  //正しい
 ```
 
 この問題は、ライブラリ関数や他の場所でも発生する可能性があります。たとえば、int のリストに対して `average` を適用することはできません。
 
-```
+```fsharp
 [1..10] |> List.average   // 間違い
    // => error FS0001: 型 'int' には必要な (実数または組み込み) メンバー 'DivideByInt' がないため、
    //    'List.average' ではサポートされません
@@ -275,7 +275,7 @@ float 1 + 2.0  //正しい
    
 以下のように、最初に各 int を float にキャストする必要があります。
 
-```
+```fsharp
 [1..10] |> List.map float |> List.average  //正しい 
 [1..10] |> List.averageBy float  //正しい (averageByを使う)
 ```
@@ -285,7 +285,7 @@ float 1 + 2.0  //正しい
 
 数値キャストが失敗すると、「互換性がありません」というエラーが発生します。
 
-```
+```fsharp
 printfn "hello %i" 1.0  // float ではなく int でなければならない
   // error FS0001: 型 'float' は、printf 形式の書式指定文字列の使用によって生じる型 
   //               byte,int16,int32,... のいずれとも互換性がありません
@@ -293,14 +293,14 @@ printfn "hello %i" 1.0  // float ではなく int でなければならない
 
 もし問題なければ、キャストするという方法が考えられます。
 
-```
+```fsharp
 printfn "hello %i" (int 1.0)
 ```
 
 <a id="FS0001C"></a>
 ### C. 関数に引数を渡しすぎている ###
 
-```
+```fsharp
 let add x y = x + y
 let result = add 1 2 3
 // ==> error FS0001: 型 ''a -> 'b' は型 'int' と一致しません
@@ -312,7 +312,7 @@ let result = add 1 2 3
 
 `printf` に引数を渡しすぎることでも同様のエラーが発生します。
 
-```
+```fsharp
 printfn "hello" 42
 // ==> error FS0001: この式に必要な型は ''a -> 'b' 
 //                   ですが、ここでは次の型が指定されています 'unit'
@@ -332,7 +332,7 @@ printfn "hello %i %i" 42 43 44
 関数を呼び出すときに、必要な引数が足りないと、部分適用と呼ばれる状態になります。
 この部分適用を後で使うと、単純な型ではないためエラーが発生します。
 
-```
+```fsharp
 let reader = new System.IO.StringReader("hello");
 
 let line = reader.ReadLine        //間違いだが、コンパイラーは文句を言わない
@@ -346,7 +346,7 @@ printfn "The line is %s" line     //ここでコンパイラー・エラー!
 解決方法は、正しい数の引数を渡すことです。結果の値の型が実際に単純な型であることを確認するために、型を確認してください。
 `ReadLine` の場合は、`()` という引数を渡すことで解決します。
 
-```
+```fsharp
 let line = reader.ReadLine()      //正しい
 printfn "The line is %s" line     //コンパイラー・エラーなし 
 ```
@@ -356,7 +356,7 @@ printfn "The line is %s" line     //コンパイラー・エラーなし
 
 最も単純なケースは、型が間違っているか、print のフォーマット文字列で間違った型を使っていることです。
 
-```
+```fsharp
 printfn "hello %s" 1.0
 // => error FS0001: この式に必要な型は 'string'
 //                  ですが、ここでは次の型が指定されています 'float'
@@ -367,7 +367,7 @@ printfn "hello %s" 1.0
 
 よくある間違いとして、分岐やマッチ式がある場合、各分岐は必ず同じ型を返さなければなりません。そうでないと、型エラーが発生します。
 
-```
+```fsharp
 let f x = 
   if x > 1 then "hello"
   else 42
@@ -375,7 +375,7 @@ let f x =
 //                  に暗黙的に変換可能な値を返す必要があります。このブランチの返す値の型は 'int' です。
 ```
 
-```
+```fsharp
 let g x = 
   match x with
   | 1 -> "hello"
@@ -386,7 +386,7 @@ let g x =
 
 当然、最も簡単な解決方法は、各分岐が同じ型を返すようにすることです。
 
-```
+```fsharp
 let f x = 
   if x > 1 then "hello"
   else "42"
@@ -399,7 +399,7 @@ let g x =
 
 "else" ブランチがない場合、`unit` を返すものとみなされるので、"true" ブランチも `unit` を返すようにする必要があります。
 
-```
+```fsharp
 let f x = 
   if x > 1 then "hello"
 // error FS0001: 'if' 式に 'else' ブランチがありません。'then' ブランチは型 'string' です。
@@ -409,7 +409,7 @@ let f x =
 
 両方の分岐が同じ型を返せない場合は、両方の型を保持できる新しい共用体型を作成する必要があるかもしれません。
 
-```
+```fsharp
 type StringOrInt = | S of string | I of int  // 新しい共用体型
 let f x = 
   if x > 1 then S "hello"
@@ -422,7 +422,7 @@ let f x =
 ある関数が、コード全体に波及する予期しない型推論を引き起こすことがあります。 
 たとえば、以下のコードでは、一見無害な print のフォーマット文字列によって、 `doSomething` 関数が文字列を受け取ると型推論させてしまっています。
 
-```
+```fsharp
 let doSomething x = 
    // 何らかの処理を行う
    printfn "x is %s" x
@@ -440,7 +440,7 @@ doSomething 1
 
 F# 初心者によくあるミスとして、関数引数を区切る際に、スペースやセミコロンの代わりにカンマを誤って使ってしまうことが挙げられます。
 
-```
+```fsharp
 // 2つの引数を取る関数定義
 let add x y = x + 1
 
@@ -450,7 +450,7 @@ add(x,y)   // FS0001: この式に必要な型は 'int'
 
 修正方法: カンマを使わないようにしましょう！
 
-```
+```fsharp
 add x y    // OK
 ```
 
@@ -458,7 +458,7 @@ add x y    // OK
 これらの関数はすべてタプルを引数として取るため、カンマを使う形式が正しいのです。
 実際、C# から呼び出す場合と同じ見た目になります。
 
-```
+```fsharp
 // 正しい
 System.String.Compare("a","b")
 
@@ -472,7 +472,7 @@ System.String.Compare "a" "b"
 
 異なる型のタプルは比較できません。 `int * int` 型のタプルと `int * string` 型のタプルを比較しようとすると、エラーが発生します。
 
-```
+```fsharp
 let  t1 = (0, 1)
 let  t2 = (0, "hello")
 t1 = t2
@@ -483,7 +483,7 @@ t1 = t2
 
 また、長さも同じである必要があります。
 
-```
+```fsharp
 let  t1 = (0, 1)
 let  t2 = (0, 1, "hello")
 t1 = t2
@@ -493,7 +493,7 @@ t1 = t2
 
 束縛におけるタプルのパターンマッチングでも同様の問題が発生する可能性があります。
 
-```
+```fsharp
 let x,y = 1,2,3
 // => error FS0001: 型が一致しません。型の長さ 2 のタプルが必要です 'a * 'b  
 //                  ただし、型の長さ 3 のタプルが指定された場合 int * int * int
@@ -513,7 +513,7 @@ let result = f z
 
 `!` を "not" 演算子として使用すると、 "ref" という単語を含む型エラーが発生します。
 
-```
+```fsharp
 let y = true
 let z = !y     //間違い
 // => error FS0001: この式に必要な型は ''a ref' ですが、ここでは次の型が指定されています 'bool'
@@ -522,7 +522,7 @@ let z = !y     //間違い
 
 解決策は、代わりに "not" キーワードを使用することです。
 
-```
+```fsharp
 let y = true
 let z = not y   //正しい
 ```
@@ -533,7 +533,7 @@ let z = not y   //正しい
 
 演算子の優先順位を間違えると、型エラーが発生する可能性があります。一般に、関数適用は他の演算子と比較して最も優先順位が高いため、以下のようなケースでエラーが発生します。
 
-```
+```fsharp
 String.length "hello" + "world"
    // => error FS0001:  型 'string' は型 'int' と一致しません
 
@@ -543,13 +543,13 @@ String.length "hello" + "world"
 
 解決策はかっこを使用することです。
 
-```
+```fsharp
 String.length ("hello" + "world")  // 訂正された
 ```
 
 逆に、パイプ演算子は他の演算子と比較して優先順位が低くなります。
 
-```
+```fsharp
 let result = 42 + [1..10] |> List.sum
  // => => error FS0001:  型 ''a list' は型 'int' と一致しません
 
@@ -559,7 +559,7 @@ let result = (42 + [1..10]) |> List.sum
 
 ここでも、解決策はかっこを使用することです。
 
-```
+```fsharp
 let result = 42 + ([1..10] |> List.sum)
 ```
 
@@ -569,7 +569,7 @@ let result = 42 + ([1..10] |> List.sum)
 
 以下は簡単なコンピュテーション式です。
 
-```
+```fsharp
 type Wrapper<'a> = Wrapped of 'a
 
 type wrapBuilder() = 
@@ -585,7 +585,7 @@ let wrap = new wrapBuilder()
 
 しかし、これを使用しようとするとエラーが発生します。
 
-```
+```fsharp
 wrap {
     let! x1 = Wrapped(1)   // <== ここでエラー
     let! y1 = Wrapped(2)
@@ -600,7 +600,7 @@ wrap {
 
 解決策は、 bind 関数を変更して、（単一の）パラメータとしてタプルを受け取るようにすることです。
 
-```
+```fsharp
 type wrapBuilder() = 
     member this.Bind (wrapper:Wrapper<'a>, func:'a->Wrapper<'b>) = 
         match wrapper with
@@ -612,7 +612,7 @@ type wrapBuilder() =
 
 このエラーは通常、関数に多すぎる引数を渡した時に発生します。
 
-```
+```fsharp
 let add1 x = x + 1
 let x = add1 2 3
 // ==>   error FS0003: この値は関数ではないため、適用できません。
@@ -620,7 +620,7 @@ let x = add1 2 3
 
 また、演算子のオーバーロードを行う際に、その演算子を前置または中置演算子として使用できない場合にも発生することがあります。
 
-```
+```fsharp
 let (!!) x y = x + y
 (!!) 1 2              // ok
 1 !! 2                // 失敗 !! 中置演算子として使用できない
@@ -632,7 +632,7 @@ let (!!) x y = x + y
 
 これは多くの場合、 `:?` 演算子を使用して型のマッチングを試みる際に見られます。
 
-```
+```fsharp
 let detectType v =
     match v with
         | :? int -> printfn "this is an int"
@@ -646,7 +646,7 @@ let detectType v =
 
 解決策は値を "box" 化することです。これにより参照型に強制され、その後型チェックを行うことができます。
 
-```
+```fsharp
 let detectTypeBoxed v =
     match box v with      // "box v"を使用
         | :? int -> printfn "this is an int"
@@ -662,7 +662,7 @@ detectTypeBoxed 3.14
 
 通常、ブロック内の式の整列に関する「オフサイド」ルールを破ることによって引き起こされます。
 
-```
+```fsharp
 //3456789
 let f = 
   let x=1     // オフサイドラインは列3 
@@ -681,7 +681,7 @@ let f =
 
 クラスコンストラクタからかっこが抜けている場合によく発生します。
 
-```
+```fsharp
 type Something() =
    let field = ()
 
@@ -692,7 +692,7 @@ let x2 = new Something()   // OK!
 
 演算子をかっこで囲むのを忘れた場合にも発生する可能性があります。
 
-```
+```fsharp
 // 新しい演算子を定義
 let (|+) a = -a
 
@@ -704,7 +704,7 @@ let (|+) a = -a
 
 中置演算子の一方が欠けている場合にも発生する可能性があります。
 
-```
+```fsharp
 || true  // error FS0010:
          // 予期しない シンボル '||' です
 false || true  // OK
@@ -712,7 +712,7 @@ false || true  // OK
 
 F#インタラクティブに名前空間定義を送ろうとした場合にも発生する可能性があります。インタラクティブコンソールは名前空間を許可しません。
 
-```
+```fsharp
 namespace Customer  // error FS0010:
                     // この場所またはその前にある構造化コンストラクトが不完全です
 
@@ -737,7 +737,7 @@ This is generally caused by implic
 
 ブロック内で値を返すことができるのは最後の式のみです。それ以外はすべて unit を返す必要があります。そのため、これは通常、最後の関数ではない場所に関数がある場合に発生します。
 
-```
+```fsharp
 let something = 
   2+2   // => FS0020: この式の結果の型は 'int' で、暗黙的に無視されます。
         //            'ignore' を使用してこの値を明示的に破棄してください (例: 'expr |> ignore')。
@@ -747,7 +747,7 @@ let something =
 
 簡単な修正方法は `ignore` を使用することです。しかし、なぜ関数を使用してその結果を捨てているのか自問してみてください。バグかもしれません。
 
-```
+```fsharp
 let something = 
   2+2 |> ignore     // ok
   "hello"
@@ -755,7 +755,7 @@ let something =
 
 これはまた、C#を書いていると思い込んで、誤ってセミコロンを使って式を区切ろうとした場合にも発生します。
 
-```
+```fsharp
 // 間違い
 let result = 2+2; "hello";
 
@@ -774,7 +774,7 @@ let result = 2+2 |> ignore; "hello";
 
 このエラーが発生した場合、可変値に対する代入演算子 `<-` と等価比較演算子 `=` を混同している可能性が高いです。
 
-```
+```fsharp
 // '=' と '<-'
 let add() =
     let mutable x = 1
@@ -784,7 +784,7 @@ let add() =
 
 修正方法は適切な代入演算子を使用することです。
 
-```
+```fsharp
 // 修正
 let add() =
     let mutable x = 1
@@ -799,7 +799,7 @@ let add() =
 
 たとえば、次のようなコードがあった場合、
 
-```
+```fsharp
 let id x = x
 let compose f g x = g (f x)
 let opt = None
@@ -807,7 +807,7 @@ let opt = None
 
 F# の型推論は巧妙にジェネリック型を推測してくれます。
 
-```
+```fsharp
 val id : 'a -> 'a
 val compose : ('a -> 'b) -> ('b -> 'c) -> 'a -> 'c
 val opt : 'a option
@@ -815,14 +815,14 @@ val opt : 'a option
 
 しかし、場合によっては F# コンパイラはコードが曖昧だと判断し、型を正しく推測できそうに見えても、より詳細な指定を要求することがあります。
 
-```
+```fsharp
 let idMap = List.map id             // error FS0030
 let blankConcat = String.concat ""  // error FS0030
 ```
 
 ほとんどの場合、これは部分適用関数を定義しようとしたことが原因であり、最も簡単な修正方法は、欠けている引数を明示的に追加することです。
 
-```
+```fsharp
 let idMap list = List.map id list             // OK
 let blankConcat list = String.concat "" list  // OK
 ```
@@ -834,7 +834,7 @@ let blankConcat list = String.concat "" list  // OK
 
 F# の構文はここ数年で改善されており、古い F# の書籍や Webページからのサンプルを使用していると、このエラーが発生するかもしれません。正しい構文については、Microsoft Learn ドキュメントを参照してください。
 
-```
+```fsharp
 let x = 10
 let rnd1 = System.Random x         // よい
 let rnd2 = new System.Random(x)    // よい
@@ -859,7 +859,7 @@ F#ではすべてのインターフェースが「明示的」実装であり、
 
 以下は、インターフェースを実装するクラスの例です。
 
-```
+```fsharp
 type MyResource() = 
    interface System.IDisposable with
        member this.Dispose() = printfn "disposed"
@@ -867,7 +867,7 @@ type MyResource() =
 
 これは機能しません。
 
-```
+```fsharp
 let x = new MyResource()
 x.Dispose()  // error FS0039: 型 'MyResource' は、フィールド、コンストラクター、
              // またはメンバー 'Dispose' を定義していません。
@@ -875,7 +875,7 @@ x.Dispose()  // error FS0039: 型 'MyResource' は、フィールド、コンス
 
 修正方法は、以下のようにオブジェクトをインターフェースにキャストすることです。
 
-```
+```fsharp
 // System.IDisposableにキャストすることで修正
 (x :> System.IDisposable).Dispose()   // OK
 
@@ -888,7 +888,7 @@ y.Dispose()   // OK
 
 以下は標準的なフィボナッチ実装です。
 
-```
+```fsharp
 let fib i = 
    match i with
    | 1 -> 1
@@ -904,7 +904,7 @@ let fib i =
 
 修正方法は、 `rec` キーワードを使用することです。
 
-```
+```fsharp
 let rec fib i = 
    match i with
    | 1 -> 1
@@ -914,7 +914,7 @@ let rec fib i =
 
 これは `let` 関数にのみ適用されることに注意してください。メンバー関数はこれを必要としません。なぜなら、スコープルールが少し異なるためです。
 
-```
+```fsharp
 type FibHelper() =
     member this.fib i = 
        match i with
@@ -929,7 +929,7 @@ type FibHelper() =
 
 これを示すための簡単な拡張メソッドを以下に示します。
 
-```
+```fsharp
 module IntExtensions = 
     type System.Int32 with
         member this.IsEven = this % 2 = 0
@@ -937,7 +937,7 @@ module IntExtensions =
 
 拡張メソッドを使用しようとすると、FS0039エラーが発生します。
 
-```
+```fsharp
 let i = 2
 let result = i.IsEven  
     // error FS0039: 型 'Int32' は、フィールド、コンストラクター、
@@ -946,7 +946,7 @@ let result = i.IsEven
     
 修正方法は、単に `IntExtensions` モジュールを開くことです。
     
-```
+```fsharp
 open IntExtensions // モジュールをスコープに入れる
 let i = 2
 let result = i.IsEven  // 修正された!
@@ -957,25 +957,25 @@ let result = i.IsEven  // 修正された!
 
 これは、複数のオーバーロードを持つ.NETライブラリ関数を呼び出す際に発生することがあります。
 
-```
+```fsharp
 let streamReader filename = new System.IO.StreamReader(filename) // FS0041
 ```
 
 この問題を解決するには複数の方法があります。一つの方法は、明示的な型注釈を使用することです。
 
-```
+```fsharp
 let streamReader filename = new System.IO.StreamReader(filename:string) // OK
 ```
 
 場合によっては、型注釈を避けるために名前付きパラメータを使用できます。
 
-```
+```fsharp
 let streamReader filename = new System.IO.StreamReader(path=filename) // OK
 ```
 
 または、型推論を助ける中間オブジェクトを作成することで、型注釈を必要とせずに解決できる場合もあります。
 
-```
+```fsharp
 let streamReader filename = 
     let fileInfo = System.IO.FileInfo(filename)
     new System.IO.StreamReader(fileInfo.FullName) // OK
@@ -988,7 +988,7 @@ let streamReader filename =
 
 純粋な F# の判別共用体:
 
-```
+```fsharp
 type ColorUnion = Red | Yellow 
 let redUnion = Red  
 
@@ -999,7 +999,7 @@ match redUnion with
 
 しかし、 .NET の列挙型では完全修飾名を使用する必要があります。
 
-```
+```fsharp
 type ColorEnum = Green=0 | Blue=1      // enum 
 let blueEnum = ColorEnum.Blue  
 
@@ -1010,7 +1010,7 @@ match blueEnum with
 
 修正後のバージョン:
 
-```
+```fsharp
 match blueEnum with
 | ColorEnum.Blue -> printfn "blue" 
 | _ -> printfn "something else"
@@ -1023,7 +1023,7 @@ match blueEnum with
 
 以下の例を考えてみましょう。
 
-```
+```fsharp
 let stringLength x = x.Length // Error FS0072
 ```
 
@@ -1031,13 +1031,13 @@ let stringLength x = x.Length // Error FS0072
 
 この問題を解決するには複数の方法があります。最も単純な方法は、明示的な型注釈を提供することです。
 
-```
+```fsharp
 let stringLength (x:string) = x.Length  // OK
 ```
 
 しかし、場合によっては、コードの適切な再配置が役立つこともあります。たとえば、以下の例は動作するように見えます。人間から見れば、 `List.map` 関数が文字列のリストに適用されていることは明らかですが、なぜ `x.Length` がエラーを引き起こすのでしょうか？
 
-```
+```fsharp
 List.map (fun x -> x.Length) ["hello"; "world"] // Error FS0072      
 ```
 
@@ -1045,13 +1045,13 @@ List.map (fun x -> x.Length) ["hello"; "world"] // Error FS0072
 
 もちろん、常に明示的に注釈をつけることはできます。
 
-```
+```fsharp
 List.map (fun x:string -> x.Length) ["hello"; "world"] // OK
 ```
 
 しかし、より優雅な方法として、既知の型が先に来るように配置を変更し、コンパイラが次の句に移る前にそれらを処理できるようにする方法があります。多くの場合、この方法でも問題を解決できます。
 
-```
+```fsharp
 ["hello"; "world"] |> List.map (fun x -> x.Length)   // OK
 ```
 
@@ -1062,7 +1062,7 @@ List.map (fun x:string -> x.Length) ["hello"; "world"] // OK
 
 ブロック内の式をインデント解除することで「オフサイドルール」を破った場合に発生します。
 
-```
+```fsharp
 //3456789
 let f = 
   let x=1    // オフサイドラインは列3 
