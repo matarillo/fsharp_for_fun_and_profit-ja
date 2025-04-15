@@ -1,6 +1,6 @@
 ---
 layout: series_index
-title: "'型を使って設計する'シリーズ"
+title: "「型を使って設計する」シリーズ"
 seriesIndexId: "型を使って設計する"
 ---
 
