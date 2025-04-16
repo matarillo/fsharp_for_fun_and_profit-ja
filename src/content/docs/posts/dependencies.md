@@ -22,7 +22,7 @@ seriesOrder: 1
 - **依存関係の排除**：Mark Seemann が提唱した素晴らしい用語で、コアのビジネスロジックコードからあらゆる依存関係を排除する方法です。I/O や他の不純なコードをドメインの「端」にとどめます。
 - [**依存関係のパラメータ化**](./dependencies-2.html)：すべての依存関係を関数の引数として渡す方法です。部分適用と一緒に使われることがよくあります。
 - [**依存関係の注入**と**Reader モナド**](./dependencies-3.html)：コードの構築後に依存関係を渡す方法です。オブジェクト指向スタイルではコンストラクタ注入として、関数型スタイルでは Reader モナドとして対応します。
-- [**依存関係の解釈**](./dependencies-4.html)：依存関係への呼び出しをデータ構造に置き換え、後で解釈する方法です。オブジェクト指向では [Interpreter パターン](https://en.wikipedia.org/wiki/Interpreter_pattern)、関数型では [Free モナド](https://softwaremill.com/free-monads/) などが該当します。
+- [**依存関係の解釈**](./dependencies-4.html)：依存関係への呼び出しをデータ構造に置き換え、後で解釈する方法です。オブジェクト指向では [インタープリターパターン](https://ja.wikipedia.org/wiki/Interpreter_%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3)、関数型では [Free モナド](https://softwaremill.com/free-monads/) などが該当します。
 
 各アプローチについて、実装例を見てから、それぞれの利点と欠点を検討していきます。
 また、[シリーズの最後の投稿](./dependencies-5.html)では、異なる例を取り上げて、再度6通りの実装を行います。
