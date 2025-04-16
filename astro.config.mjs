@@ -328,7 +328,12 @@ export default defineConfig({
                 { label: '関数型アプローチによる認可', link: '/posts/capability-based-security/' },
                 { label: 'IDとロールによるケイパビリティの制約', link: '/posts/capability-based-security-2/' },
                 { label: '型をアクセストークンとして使う', link: '/posts/capability-based-security-3/' },
-
+              ],
+            },
+            {
+              label: '「依存関係の注入」 シリーズ',
+              items: [
+                { label: '依存関係の注入の6つのアプローチ', link: '/posts/dependencies/' },
               ],
             },
           ],
