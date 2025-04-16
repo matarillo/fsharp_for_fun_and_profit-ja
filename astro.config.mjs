@@ -334,6 +334,7 @@ export default defineConfig({
               label: '「依存関係の注入」 シリーズ',
               items: [
                 { label: '依存関係の注入の6つのアプローチ', link: '/posts/dependencies/' },
+                { label: 'パラメータによる依存関係の注入', link: '/posts/dependencies-2/' },
               ],
             },
           ],
