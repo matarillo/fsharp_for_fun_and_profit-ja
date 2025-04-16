@@ -190,9 +190,9 @@ module Reader =
     Reader newAction
 ```
 
-### `reader` 計算式
+### `reader` コンピュテーション式
 
-`bind`関数があるということは、計算式（computation expression）も簡単に作れるということです。以下に`Reader`用の基本的な計算式を定義します。
+`bind`関数があるということは、コンピュテーション式も簡単に作れるということです。以下に`Reader`用の基本的なコンピュテーション式を定義します。
 
 ```fsharp
 type ReaderBuilder() =
@@ -204,13 +204,13 @@ type ReaderBuilder() =
 let reader = ReaderBuilder()
 ```
 
-必ずしも`reader`計算式を使う必要はありませんが、多くの場合、使った方がコードが簡潔になります。
+必ずしも`reader`コンピュテーション式を使う必要はありませんが、多くの場合、使った方がコードが簡潔になります。
 
 ## Reader を返す関数の構築
 
 では、実際にどのように使うのか見てみましょう。第1回のコードを、3つのパートに分割して再構成します： 文字列の読み取り、比較、出力の表示です。
 
-まずは、`reader` 計算式を使って書き直した `compareTwoStrings` の例です。
+まずは、`reader` コンピュテーション式を使って書き直した `compareTwoStrings` の例です。
 
 ```fsharp
 let compareTwoStrings str1 str2  =
@@ -230,7 +230,7 @@ let compareTwoStrings str1 str2  =
 
 * 全体が `reader { ... }` の中に収まっています。
 * `ILogger` パラメータは消えており、代わりに `Reader.ask` を使って環境値（この場合は `ILogger`）にアクセスしています。
-* 計算式の中では、`let!` や `do!` を使って Reader の中身を「取り出す」ことができます。
+* コンピュテーション式の中では、`let!` や `do!` を使って Reader の中身を「取り出す」ことができます。
   この場合、`let!` を使って `ask` から環境を取得しています。
 * `let! (logger:ILogger) = Reader.ask` に型注釈を付けることで、関数全体に明示的な型注釈を付けなくてもコンパイラが型推論できます。
 
@@ -323,7 +323,7 @@ type IServices =
     inherit IConsole
 ```
 
-そして、3つの関数を含む計算式を次のように記述します：
+そして、3つの関数を含むコンピュテーション式を次のように記述します：
 
 ```fsharp
 let program :Reader<IServices,_> = reader {
@@ -395,7 +395,7 @@ let writeToConsole (result:ComparisonResult) =
     }
 ```
 
-このまま3つの関数を計算式で合成しようとすると、次のように多くのエラーが出ます：
+このまま3つの関数をコンピュテーション式で合成しようとすると、次のように多くのエラーが出ます：
 
 ```fsharp
 let program_bad = reader {
@@ -447,7 +447,7 @@ let program = reader {
   }
 ```
 
-このように `withEnv` を使うことで、計算式のコードは多少複雑になりますが、サービス実装の柔軟性は格段に高まります。
+このように `withEnv` を使うことで、コンピュテーション式のコードは多少複雑になりますが、サービス実装の柔軟性は格段に高まります。
 
 この `program` もまだ実行されていません。実行するには `Services` を渡す必要があります：
 
