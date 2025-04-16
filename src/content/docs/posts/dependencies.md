@@ -20,12 +20,12 @@ seriesOrder: 1
 
 - **依存関係の保持**：依存関係の管理を気にせず、すべてをインラインでハードコードするアプローチです。
 - **依存関係の排除**：Mark Seemann が提唱した素晴らしい用語で、コアのビジネスロジックコードからあらゆる依存関係を排除する方法です。I/O や他の不純なコードをドメインの「エッジ」にとどめます。
-- [**依存関係のパラメータ化**](dependencies-2.html)：すべての依存関係を関数の引数として渡す方法です。部分適用と一緒に使われることがよくあります。
-- [**依存関係の注入**と**Reader モナド**](../posts/dependencies-3.html)：コードの構築後に依存関係を渡す方法です。オブジェクト指向スタイルではコンストラクタ注入として、関数型スタイルでは Reader モナドとして対応します。
-- [**依存関係の解釈**](../posts/dependencies-4.html)：依存関係への呼び出しをデータ構造に置き換え、後で解釈する方法です。オブジェクト指向では [Interpreter パターン](https://en.wikipedia.org/wiki/Interpreter_pattern)、関数型では [Free モナド](https://softwaremill.com/free-monads/) などが該当します。
+- [**依存関係のパラメータ化**](./dependencies-2.html)：すべての依存関係を関数の引数として渡す方法です。部分適用と一緒に使われることがよくあります。
+- [**依存関係の注入**と**Reader モナド**](./dependencies-3.html)：コードの構築後に依存関係を渡す方法です。オブジェクト指向スタイルではコンストラクタ注入として、関数型スタイルでは Reader モナドとして対応します。
+- [**依存関係の解釈**](./dependencies-4.html)：依存関係への呼び出しをデータ構造に置き換え、後で解釈する方法です。オブジェクト指向では [Interpreter パターン](https://en.wikipedia.org/wiki/Interpreter_pattern)、関数型では [Free モナド](https://softwaremill.com/free-monads/) などが該当します。
 
 各アプローチについて、実装例を見てから、それぞれの利点と欠点を検討していきます。
-また、[シリーズの最後の投稿](../posts/dependencies-5.html)では、異なる例を取り上げて、再度6通りの実装を行います。
+また、[シリーズの最後の投稿](./dependencies-5.html)では、異なる例を取り上げて、再度6通りの実装を行います。
 
 ※なお、以前に [似たような記事](https://fsharpforfunandprofit.com/posts/dependency-injection-1/) を書きましたが、今では本シリーズの内容がそれを置き換えるものとなっています。
 
@@ -229,4 +229,4 @@ module Program =
 - [DependencyRejection.fsx](https://gist.github.com/swlaschin/cbc9a5992695a88e32e3f39fbf1ecf79)
 - [DependencyRetention.fsx](https://gist.github.com/swlaschin/d35b59795a85a62723124df1a79d2388)
 
-[次回の記事](../posts/dependencies-2.html)では、「依存関係のパラメータ化」について見ていきます。つまり、依存関係を通常の関数引数として渡す方法です。
+[次回の記事](./dependencies-2.html)では、「依存関係のパラメータ化」について見ていきます。つまり、依存関係を通常の関数引数として渡す方法です。
