@@ -337,6 +337,7 @@ export default defineConfig({
                 { label: 'パラメータによる依存関係の注入', link: '/posts/dependencies-2/' },
                 { label: 'Readerモナドを使った依存関係の注入', link: '/posts/dependencies-3/' },
                 { label: '依存関係の解釈', link: '/posts/dependencies-4/' },
+                { label: '6つのアプローチの再考', link: '/posts/dependencies-5/' },
               ],
             },
           ],
