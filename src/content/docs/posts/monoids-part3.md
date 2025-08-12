@@ -895,7 +895,7 @@ module MonoidalValidationOptionTest =
 
 さて、厄介な平均のケースを扱うためのツールキットができました。
 
-以下は、ペアワイズ平均関数の簡単な実装です。
+以下は、二項平均関数の簡単な実装です。
 
 ```fsharp
 let avg i1 i2 = 
