@@ -20,6 +20,10 @@ export default defineConfig({
           tag: 'meta',
           attrs: { property: 'twitter:image', content: 'https://matarillo.github.io/fsharp_for_fun_and_profit-ja/fsharpforfunandprofit.png' },
         },
+        {
+          tag: 'meta',
+          attrs: { name: 'Hatena::Bookmark', content: 'nocomment' },
+        },
       ],
       sidebar: [
         {
