@@ -406,6 +406,9 @@ export default defineConfig({
           ],
         },
       ],
+      components: {
+        PageTitle: './src/components/PageTitle.astro',
+      },
     }),
   ],
   build: {

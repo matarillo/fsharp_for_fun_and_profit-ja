@@ -7,7 +7,6 @@ categories: []
 seriesId: "Designing Weaving Software"  
 seriesOrder: 1
 ---
-<div style="font-size: 1.2em; color: #999999; margin: 0 0 4px 0; line-height: 1.3em;">私の設計原則を、一風変わったドメインに適用してみる</div>
 
 > この記事は [2025 F# Advent Calendar](https://sergeytihon.com/2025/11/03/f-advent-calendar-in-english-2025/) の一部です。他にも素晴らしい記事がたくさんありますので、ぜひチェックしてみてください！そして、主催者の Sergey Tihon さんに感謝いたします。
 

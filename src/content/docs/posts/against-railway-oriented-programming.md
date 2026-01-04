@@ -5,7 +5,6 @@ description: "（安易に利用したとき）"
 date: 2019-12-20
 categories: []
 ---
-<div style="font-size: 1.2em; color: #999999; margin: 0 0 4px 0; line-height: 1.3em;">(安易に利用したとき)</div>
 
 この記事は、[2019年のF\#アドベントカレンダー](https://sergeytihon.com/2019/11/05/f-advent-calendar-in-english-2019/)の一部です。他の素晴らしい記事もぜひご覧ください。企画者のSergey Tihon氏に感謝します。
 

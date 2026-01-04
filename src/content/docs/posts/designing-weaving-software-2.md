@@ -7,7 +7,6 @@ categories: []
 seriesId: "Designing Weaving Software"  
 seriesOrder: 2
 ---
-<div style="font-size: 1.2em; color: #999999; margin: 0 0 4px 0; line-height: 1.3em;">ジェネリクスを使用して重複を減らす</div>
 
 これは、織り手のためのソフトウェア設計に関するシリーズの2番目の記事です。 これらの記事は、私が実際のプロジェクトを構築する際に出会った設計上の課題に基づいた、ランダムな思考や考察をまとめたものです。 [最初の記事](./designing-weaving-software.html)では、このプロジェクトの背景を説明し、初期のドメイン駆動設計のコードを提示しました。 本記事と次の記事では、次の段階である「テキスト表現とドメインモデルの間の変換」へと進みます。
 
