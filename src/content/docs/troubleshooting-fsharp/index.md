@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "F# のトラブルシューティング"
-description: "Why won't my code compile?"
+description: "なぜコードがコンパイルできないのか？"
 nav: troubleshooting-fsharp
 hasComments: 1
 ---

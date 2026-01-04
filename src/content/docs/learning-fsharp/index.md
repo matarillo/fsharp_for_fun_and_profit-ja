@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "F# を学ぶ"
-description: "Functional programming languages need a different approach"
+description: "関数型プログラミング言語には、これまでとは異なるアプローチが必要です"
 nav: learning-fsharp
 hasComments: 1
 ---

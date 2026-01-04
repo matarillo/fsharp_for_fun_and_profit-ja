@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "60 秒でわかる F# シンタックス"
-description: "A very quick overview on how to read F# code"
+description: "F#コードの読み方のざっくりとした解説"
 nav: why-use-fsharp
 seriesId: "F# を使う理由"
 seriesOrder: 2

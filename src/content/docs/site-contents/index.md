@@ -2,7 +2,7 @@
 layout: page
 title: "サイトの内容"
 nav: site-contents
-description: "A directory of useful pages"
+description: "便利なページの一覧"
 hasIcons: 1
 hasNoCode: 1
 ---

@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "F# を使う理由"
-description: "Why you should consider using F# for your next project"
+description: "次回のプロジェクトで F# の採用を検討すべき理由"
 nav: why-use-fsharp
 hasIcons: 1
 image: "@assets/img/four-concepts2.png"

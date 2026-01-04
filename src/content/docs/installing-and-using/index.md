@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "F# のインストールと使い方"
-description: "Instructions for downloading, installing and using F# with Visual Studio, SharpDevelop and MonoDevelop"
+description: "F#のダウンロードとインストール、および Visual Studio、SharpDevelop、MonoDevelop での使用方法について"
 nav: 
 hasComments: 1
 image: "@assets/img/fsharp_eval2.png"
