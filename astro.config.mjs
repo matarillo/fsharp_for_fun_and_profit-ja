@@ -387,6 +387,22 @@ export default defineConfig({
               label: '型安全と高パフォーマンスをコンパイラディレクティブで切り替える',
               link: '/posts/typesafe-performance-with-compiler-directives/'
             },
+            {
+              label: '型安全と高パフォーマンスをコンパイラディレクティブで切り替える',
+              link: '/posts/typesafe-performance-with-compiler-directives/'
+            },
+            {
+              label: '鉄道指向プログラミングに反対する',
+              link: '/posts/against-railway-oriented-programming/'
+            },
+            {
+              label: '「織物用ソフトウェアの設計」 シリーズ',
+              items: [
+                { label: 'シリーズ目次', link: '/series/designing-weaving-software/' },
+                { label: '織物用ソフトウェアの設計', link: '/posts/designing-weaving-software/' },
+                { label: '織物用ソフトウェアの設計: パート2', link: '/posts/designing-weaving-software-2/' },
+              ]
+            },
           ],
         },
       ],
